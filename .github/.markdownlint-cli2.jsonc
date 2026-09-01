@@ -1,0 +1,9 @@
+{
+  // Same rules as the repo root, minus the page-title requirement: an issue or
+  // PR template is pasted into a GitHub form, where an `# H1` would become a
+  // stray heading inside someone's issue body.
+  "extends": "../.markdownlint-cli2.jsonc",
+  "config": {
+    "MD041": false
+  }
+}

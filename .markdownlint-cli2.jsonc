@@ -1,0 +1,28 @@
+{
+  // Markdown gate for the repo's own docs, run by `pnpm lint:docs` (and the last
+  // step of ci.yml's `check` job). Biome does not lint Markdown, so before this
+  // every finding here - a broken heading level, a missing page title, a stray
+  // bare URL - was caught by hand or not at all.
+  // The glob comes from `pnpm lint:docs`: passed on argv, cli2 also picks up this
+  // file; declared here instead, a bare run finds nothing and exits 0.
+  "ignores": ["node_modules/**", ".output/**", ".playwright/**", "test-results/**", "CHANGELOG.md"],
+  "config": {
+    "default": true,
+
+    // Prose is one paragraph per line on purpose: an editor soft-wraps it, and a
+    // reflowed paragraph would otherwise show up as a whole-block diff.
+    "MD013": false,
+
+    // The README hero, the how-it-works grid and the <picture> theme switches are
+    // raw HTML - GitHub renders no Markdown equivalent for any of them.
+    "MD033": false,
+
+    // Duplicate headings are fine across sections (several docs repeat "Run"),
+    // but not as siblings under the same parent, where two anchors would collide.
+    "MD024": { "siblings_only": true },
+
+    // Emphasis-as-heading: the issue/PR templates use bold field labels inside
+    // HTML comment scaffolding, which this rule reads as an intended heading.
+    "MD036": false
+  }
+}
