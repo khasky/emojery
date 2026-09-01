@@ -1,0 +1,616 @@
+{
+  "extName": {
+    "message": "Emojery"
+  },
+  "extShortName": {
+    "message": "Emojery"
+  },
+  "extDescription": {
+    "message": "Muuda iga veebi meeldimisnupp täielikuks emoji-paletiks."
+  },
+  "extActionTitle": {
+    "message": "Emojery"
+  },
+  "popupHeading": {
+    "message": "Emojery"
+  },
+  "popupTitle": {
+    "message": "Emojery"
+  },
+  "tabSettings": {
+    "message": "Seaded"
+  },
+  "tabHistory": {
+    "message": "Ajalugu"
+  },
+  "tabAccount": {
+    "message": "Konto"
+  },
+  "tabReport": {
+    "message": "Teata"
+  },
+  "settingEnabled": {
+    "message": "Lubatud"
+  },
+  "settingEnabledHint": {
+    "message": "Põhilüliti kõigile toetatud saitidele"
+  },
+  "settingReplaceNative": {
+    "message": "Peida algupärased nupud"
+  },
+  "settingReplaceNativeHint": {
+    "message": "Peida Täht/Meeldib valija kasuks"
+  },
+  "settingAnimations": {
+    "message": "Reaktsioonianimatsioonid"
+  },
+  "settingAnimationsHint": {
+    "message": "Näita emojiefekte, kui ilmuvad loendurid või kui reageerite"
+  },
+  "settingTheme": {
+    "message": "Teema"
+  },
+  "settingThemeHint": {
+    "message": "Järgi brauserit või kasuta alati heledat või tumedat"
+  },
+  "settingDebug": {
+    "message": "Silumine"
+  },
+  "settingDebugHint": {
+    "message": "Lülita sisse silumisrežiim (arendajatele)"
+  },
+  "themeSystem": {
+    "message": "Süsteem"
+  },
+  "themeLight": {
+    "message": "Hele"
+  },
+  "themeDark": {
+    "message": "Tume"
+  },
+  "settingAutoTrigger": {
+    "message": "Algupäraste nuppude automaatne vajutamine"
+  },
+  "settingAutoTriggerHint": {
+    "message": "Peegelda oma emoji saidi Meeldib/Ei meeldi nupule"
+  },
+  "sentimentIntro": {
+    "message": "Lohista emoji loendite vahel või puuduta seda ja siis loendit."
+  },
+  "sentimentPositiveZone": {
+    "message": "Vajutab Meeldib / Upvote"
+  },
+  "sentimentNegativeZone": {
+    "message": "Vajutab Ei meeldi / Downvote"
+  },
+  "sentimentNeutralZone": {
+    "message": "Ei vajuta midagi"
+  },
+  "sentimentReset": {
+    "message": "Taasta vaikeseaded"
+  },
+  "settingAnalyticsConsent": {
+    "message": "Kogukonna ülevaated"
+  },
+  "settingAnalyticsConsentHint": {
+    "message": "Kaasa minu reaktsioonid piirkondlikesse ülevaadetesse"
+  },
+  "sectionPerSite": {
+    "message": "Ainult valitud saidid"
+  },
+  "sectionPerSiteHint": {
+    "message": "Vali, millistel saitidel valijat näidatakse"
+  },
+  "perSiteToggleAria": {
+    "message": "Näita valijat: $SITE$",
+    "placeholders": {
+      "site": {
+        "content": "$1",
+        "example": "Facebook"
+      }
+    }
+  },
+  "signInBtn": {
+    "message": "Logi sisse"
+  },
+  "signInMsgAccount": {
+    "message": "Logi sisse, et hallata oma kontot."
+  },
+  "signInMsgHistory": {
+    "message": "Logi sisse, et näha oma reaktsioonide ajalugu."
+  },
+  "signInMsgReport": {
+    "message": "Logi sisse, et saata veateavitus."
+  },
+  "signedInLabel": {
+    "message": "Sisse logitud"
+  },
+  "signOutBtn": {
+    "message": "Logi välja"
+  },
+  "deleteAccountLabel": {
+    "message": "Kustuta konto"
+  },
+  "deleteAccountHint": {
+    "message": "Eemalda oma kirje ja reaktsioonid"
+  },
+  "deleteAccountBtn": {
+    "message": "Kustuta"
+  },
+  "deleteAccountConfirm": {
+    "message": "Kustutada teie Emojery konto?\n\nSee toiming on lõplik ja seda ei saa tagasi võtta. Teie kasutaja kirje kustutatakse ja kõigi varem esitatud reaktsioonide loendureid vähendatakse."
+  },
+  "deleteAccountSlide": {
+    "message": "Lohista kustutamiseks"
+  },
+  "deleteAccountProgress": {
+    "message": "Kustutame sinu konto… ära sulge seda akent."
+  },
+  "cancelBtn": {
+    "message": "Tühista"
+  },
+  "historyEmpty": {
+    "message": "Reaktsioone veel pole. Klõpsake emojil mõnel toetatud lehel!"
+  },
+  "filterSitesPlaceholder": {
+    "message": "Filtreeri saite"
+  },
+  "historyYesterday": {
+    "message": "Eile"
+  },
+  "historyToday": {
+    "message": "Täna"
+  },
+  "historySearchPlaceholder": {
+    "message": "Otsi reaktsioone"
+  },
+  "historyNoMatches": {
+    "message": "Ükski reaktsioon ei vasta otsingule."
+  },
+  "facetAllSites": {
+    "message": "Kõik saidid"
+  },
+  "facetSiteAria": {
+    "message": "Filtreeri saidi järgi"
+  },
+  "facetRangeAria": {
+    "message": "Filtreeri aja järgi"
+  },
+  "rangeAll": {
+    "message": "Kogu aeg"
+  },
+  "rangeToday": {
+    "message": "Täna"
+  },
+  "range7d": {
+    "message": "7 päeva"
+  },
+  "range30d": {
+    "message": "30 päeva"
+  },
+  "range365d": {
+    "message": "1 aasta"
+  },
+  "exportBtn": {
+    "message": "Ekspordi"
+  },
+  "importBtn": {
+    "message": "Impordi"
+  },
+  "importDone": {
+    "message": "Imporditi $COUNT$ reaktsiooni.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "128"
+      }
+    }
+  },
+  "importError": {
+    "message": "See fail ei ole korrektne Emojery eksport."
+  },
+  "importReplaceWarn": {
+    "message": "Import asendab praeguse ajaloo selle failiga. Seda ei saa tagasi võtta."
+  },
+  "importReplaceConfirm": {
+    "message": "Asenda"
+  },
+  "importReplaceCountAria": {
+    "message": "Salvestatud reaktsioone: $STORED$. Selles failis: $INCOMING$.",
+    "placeholders": {
+      "stored": {
+        "content": "$1",
+        "example": "128"
+      },
+      "incoming": {
+        "content": "$2",
+        "example": "64"
+      }
+    }
+  },
+  "exportRowLabel": {
+    "message": "Ekspordi ajalugu"
+  },
+  "exportRowHint": {
+    "message": "Salvesta varukoopiafaili"
+  },
+  "importRowLabel": {
+    "message": "Impordi ajalugu"
+  },
+  "importRowHint": {
+    "message": "Asenda varukoopiafailist"
+  },
+  "relativeJustNow": {
+    "message": "äsja"
+  },
+  "relativeMinutes": {
+    "message": "$M$ min",
+    "placeholders": {
+      "m": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "relativeHours": {
+    "message": "$H$ t",
+    "placeholders": {
+      "h": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "relativeDays": {
+    "message": "$D$ p",
+    "placeholders": {
+      "d": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "reportUnsupportedPage": {
+    "message": "Avage leht, kus reaktsioonid ei toimi, ja avage see menüü uuesti, et sellest teatada."
+  },
+  "reportSent": {
+    "message": "Aitäh — teavitus saadetud."
+  },
+  "reportAnother": {
+    "message": "Teata teisest probleemist"
+  },
+  "reportPlaceholder": {
+    "message": "Kirjeldage probleemi lühidalt (10-500 tähemärki)"
+  },
+  "reportSendBtn": {
+    "message": "Saada teavitus"
+  },
+  "pickerSearchPlaceholder": {
+    "message": "Otsi"
+  },
+  "pickerSearchAriaLabel": {
+    "message": "Otsi emojisid"
+  },
+  "pickerNoMatches": {
+    "message": "Ükski emoji ei vasta päringule „$QUERY$\"",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "asdf"
+      }
+    }
+  },
+  "pickerRecentlyUsed": {
+    "message": "Hiljuti kasutatud"
+  },
+  "pickerPopular": {
+    "message": "Populaarsed"
+  },
+  "pickerClearRecent": {
+    "message": "Tühjenda"
+  },
+  "pickerCategoriesAria": {
+    "message": "Emoji kategooriad"
+  },
+  "pickerDialogAria": {
+    "message": "Reageeri või vaata jaotust"
+  },
+  "pickerKeyboardHint": {
+    "message": "Emojide vahel liikumiseks kasuta nooleklahve, reageerimiseks Enter, sulgemiseks Escape."
+  },
+  "pickerSearchResultsGroupAria": {
+    "message": "Otsitulemused"
+  },
+  "pickerShowMore": {
+    "message": "Näita rohkem"
+  },
+  "pickerShowLess": {
+    "message": "Näita vähem"
+  },
+  "pickerAddReaction": {
+    "message": "Lisa reaktsioon"
+  },
+  "pickerYourReaction": {
+    "message": "Teie reaktsioon: $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "pickerReactionsAria": {
+    "message": "$COUNT$ reaktsiooni — reageeri või vaata jaotust",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pickerReactWith": {
+    "message": "Reageeri: $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "categorySmileys": {
+    "message": "Naerunäod ja emotsioonid"
+  },
+  "categoryGestures": {
+    "message": "Žestid"
+  },
+  "categoryHearts": {
+    "message": "Südamed"
+  },
+  "categoryAnimals": {
+    "message": "Loomad ja loodus"
+  },
+  "categoryFood": {
+    "message": "Söök ja jook"
+  },
+  "categoryActivities": {
+    "message": "Tegevused"
+  },
+  "categoryTravel": {
+    "message": "Reisimine ja kohad"
+  },
+  "categoryObjects": {
+    "message": "Objektid"
+  },
+  "categorySymbols": {
+    "message": "Sümbolid"
+  },
+  "authPageTitle": {
+    "message": "Emojery — Logi sisse"
+  },
+  "authSignInTitle": {
+    "message": "Logi sisse, et reageerida"
+  },
+  "authSignInTagline": {
+    "message": "Saadame sulle kinnituskoodi e-postiga"
+  },
+  "authEmailLabel": {
+    "message": "E-post"
+  },
+  "authSendCodeBtn": {
+    "message": "Saada kood"
+  },
+  "authSendingBtn": {
+    "message": "Saatmine…"
+  },
+  "authAgreeIntro": {
+    "message": "Nõustun "
+  },
+  "authTermsLinkLabel": {
+    "message": "kasutustingimustega"
+  },
+  "authAgreeConjunction": {
+    "message": " ja "
+  },
+  "authPrivacyLinkLabel": {
+    "message": "privaatsuspoliitikaga"
+  },
+  "authAgreeOutro": {
+    "message": "."
+  },
+  "authCodeTitle": {
+    "message": "Sisestage oma kood"
+  },
+  "authCodeTagline": {
+    "message": "Saatsime koodi aadressile $EMAIL$. See aegub 10 minuti pärast.",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authCodeLabel": {
+    "message": "Kinnituskood"
+  },
+  "authVerifyingBtn": {
+    "message": "Kontrollimine…"
+  },
+  "authVerifyBtn": {
+    "message": "Logi sisse"
+  },
+  "authUseDifferentEmail": {
+    "message": "Kasuta teist e-posti"
+  },
+  "authDoneTitle": {
+    "message": "Olete sisse logitud"
+  },
+  "authDoneTagline": {
+    "message": "Võite selle vahelehe sulgeda ja reageerida igal toetatud lehel."
+  },
+  "dataConsentTitle": {
+    "message": "Mida Emojery saadab"
+  },
+  "dataConsentBody": {
+    "message": "Reaktsioonide loendamiseks ja jagamiseks saadab Emojery oma serverisse selle lehe aadressi, millel reageerid, koos juhuslike paigaldus- ja seansitunnustega, mis ei tulene sinust. Sisselogimisel saadetakse su e-posti aadress ühe korra, et toimetada ühekordne kood; sellest säilitatakse ainult ühesuunaline räsi sinu konto tunnusena ja sinu reaktsioonide ajalugu jääb sellesse seadmesse. Valikuline kontekst jääb selles brauseris välja lülitatuks."
+  },
+  "dataConsentContinueBtn": {
+    "message": "Jätka"
+  },
+  "authSendThrottle": {
+    "message": "Küsisite hiljuti koodi. Saate uue küsida $TIME$ pärast.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authResendCooldown": {
+    "message": "Saatsime sellele aadressile juba koodi. Saate uue küsida $TIME$ pärast.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authEnterPendingCode": {
+    "message": "Sisesta kood, mille saatsime aadressile $EMAIL$",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authResendBtn": {
+    "message": "Saada kood uuesti"
+  },
+  "authResendInBtn": {
+    "message": "Saada kood uuesti $TIME$ pärast",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authErrRateLimit": {
+    "message": "Liiga palju päringuid. Oodake mõni minut ja proovige uuesti."
+  },
+  "authErrUndeliverable": {
+    "message": "E-posti edastamine ebaõnnestus. Proovige uuesti või kontrollige aadressi."
+  },
+  "authErrEmailNotAccepted": {
+    "message": "See e-posti aadress ei saa sisselogimiskoode vastu võtta. Kasutage püsivat aadressi."
+  },
+  "authErrBadEmail": {
+    "message": "See ei tundu kehtiv e-posti aadress."
+  },
+  "authErrUnknown": {
+    "message": "Midagi läks valesti. Proovige uuesti."
+  },
+  "loadError": {
+    "message": "Midagi läks valesti. Proovige uuesti."
+  },
+  "errOffline": {
+    "message": "Tundub, et ühendus puudub. Proovi uuesti, kui ühendus taastub."
+  },
+  "errRateLimited": {
+    "message": "Liiga palju päringuid. Oota hetk ja proovi uuesti."
+  },
+  "errServerBusy": {
+    "message": "Serveril on probleem. Proovi minuti pärast uuesti."
+  },
+  "authErrTooManyTries": {
+    "message": "Liiga palju valesid koode. Proovige hiljem uuesti."
+  },
+  "authErrCodeInvalid": {
+    "message": "Kood on vale või aegunud."
+  },
+  "authErrVerifyFailed": {
+    "message": "Kontrollimine ebaõnnestus. Proovige uuesti."
+  },
+  "searchResultsCount": {
+    "message": "$COUNT$ tulemust",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "reportSendError": {
+    "message": "Raporti saatmine ebaõnnestus. Kontrolli ühendust ja proovi uuesti."
+  },
+  "onboardingTitle": {
+    "message": "Emojery on valmis"
+  },
+  "onboardingTagline": {
+    "message": "Reageeri postitustele, videotele ja toodetele mis tahes emojiga."
+  },
+  "onboardingStepPinTitle": {
+    "message": "Kinnita ikoon"
+  },
+  "onboardingStepPinBody": {
+    "message": "Klõpsa tööriistaribal pusletüki ikooni ja kinnita Emojery, et see oleks alati käepärast."
+  },
+  "onboardingStepPinDone": {
+    "message": "Kinnitatud!"
+  },
+  "onboardingStepSpotTitle": {
+    "message": "Leia nupp"
+  },
+  "onboardingStepSpotBody": {
+    "message": "Toetatud lehtedel ilmub väike emojinupp nuppude Meeldib, Star või Jaga kõrvale."
+  },
+  "onboardingStepReactTitle": {
+    "message": "Reageeri"
+  },
+  "onboardingStepReactBody": {
+    "message": "Vali ükskõik milline emoji. Loendurid on avalikud. Logi esimese reaktsiooni juures korra sisse ja seejärel lihtsalt reageeri."
+  },
+  "onboardingTryBtn": {
+    "message": "Proovi kohe"
+  },
+  "onboardingSitesHeading": {
+    "message": "Töötab saitidel"
+  },
+  "gateTitle": {
+    "message": "Jäänud on üks samm"
+  },
+  "gateBody": {
+    "message": "Logi sisse oma e-posti ja kinnituskoodiga, et su reaktsioon läheks arvesse."
+  },
+  "gateSignInBtn": {
+    "message": "Logi sisse ja reageeri"
+  },
+  "coachTitle": {
+    "message": "Uus: reageeri mis tahes emojiga"
+  },
+  "coachBody": {
+    "message": "See on Emojery — üks klõps, kogu emojipalett."
+  },
+  "coachDismissAria": {
+    "message": "Sulge"
+  },
+  "onboardingStepInstallTitle": {
+    "message": "Paigalda Emojery"
+  },
+  "onboardingProgress": {
+    "message": "$DONE$ / $TOTAL$ tehtud",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
+  },
+  "onboardingAllSet": {
+    "message": "Kõik valmis!"
+  }
+}

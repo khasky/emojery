@@ -1,0 +1,616 @@
+{
+  "extName": {
+    "message": "Emojery"
+  },
+  "extShortName": {
+    "message": "Emojery"
+  },
+  "extDescription": {
+    "message": "Muuta jokainen tykkäyspainike täydeksi emojipaletiksi."
+  },
+  "extActionTitle": {
+    "message": "Emojery"
+  },
+  "popupHeading": {
+    "message": "Emojery"
+  },
+  "popupTitle": {
+    "message": "Emojery"
+  },
+  "tabSettings": {
+    "message": "Asetukset"
+  },
+  "tabHistory": {
+    "message": "Historia"
+  },
+  "tabAccount": {
+    "message": "Tili"
+  },
+  "tabReport": {
+    "message": "Ilmoita"
+  },
+  "settingEnabled": {
+    "message": "Käytössä"
+  },
+  "settingEnabledHint": {
+    "message": "Pääkytkin kaikille tuetuille sivustoille"
+  },
+  "settingReplaceNative": {
+    "message": "Piilota alkuperäiset painikkeet"
+  },
+  "settingReplaceNativeHint": {
+    "message": "Piilota Tähti/Tykkää valitsimen sijaan"
+  },
+  "settingAnimations": {
+    "message": "Reaktioanimaatiot"
+  },
+  "settingAnimationsHint": {
+    "message": "Näytä emoji-tehosteita, kun laskurit ilmestyvät tai reagoit"
+  },
+  "settingTheme": {
+    "message": "Teema"
+  },
+  "settingThemeHint": {
+    "message": "Seuraa selainta tai käytä aina vaaleaa tai tummaa"
+  },
+  "settingDebug": {
+    "message": "Vianetsintä"
+  },
+  "settingDebugHint": {
+    "message": "Ota vianetsintätila käyttöön (kehittäjille)"
+  },
+  "themeSystem": {
+    "message": "Järjestelmä"
+  },
+  "themeLight": {
+    "message": "Vaalea"
+  },
+  "themeDark": {
+    "message": "Tumma"
+  },
+  "settingAutoTrigger": {
+    "message": "Paina alkuperäisiä painikkeita automaattisesti"
+  },
+  "settingAutoTriggerHint": {
+    "message": "Peilaa emojisi sivuston Tykkää/En tykkää -painikkeeseen"
+  },
+  "sentimentIntro": {
+    "message": "Vedä emoji listojen välillä tai napauta sitä ja sitten listaa."
+  },
+  "sentimentPositiveZone": {
+    "message": "Painaa Tykkää / Upvote"
+  },
+  "sentimentNegativeZone": {
+    "message": "Painaa En tykkää / Downvote"
+  },
+  "sentimentNeutralZone": {
+    "message": "Ei paina mitään"
+  },
+  "sentimentReset": {
+    "message": "Palauta oletukset"
+  },
+  "settingAnalyticsConsent": {
+    "message": "Yhteisönäkemykset"
+  },
+  "settingAnalyticsConsentHint": {
+    "message": "Laske reaktioni mukaan aluekohtaisiin tilastoihin"
+  },
+  "sectionPerSite": {
+    "message": "Vain valitut sivustot"
+  },
+  "sectionPerSiteHint": {
+    "message": "Valitse, millä sivustoilla valitsin näytetään"
+  },
+  "perSiteToggleAria": {
+    "message": "Näytä valitsin sivustolla $SITE$",
+    "placeholders": {
+      "site": {
+        "content": "$1",
+        "example": "Facebook"
+      }
+    }
+  },
+  "signInBtn": {
+    "message": "Kirjaudu"
+  },
+  "signInMsgAccount": {
+    "message": "Kirjaudu hallitaksesi tiliäsi."
+  },
+  "signInMsgHistory": {
+    "message": "Kirjaudu nähdäksesi reaktiohistoriasi."
+  },
+  "signInMsgReport": {
+    "message": "Kirjaudu lähettääksesi virheraportin."
+  },
+  "signedInLabel": {
+    "message": "Kirjautunut"
+  },
+  "signOutBtn": {
+    "message": "Kirjaudu ulos"
+  },
+  "deleteAccountLabel": {
+    "message": "Poista tili"
+  },
+  "deleteAccountHint": {
+    "message": "Poista tietosi ja reaktiosi"
+  },
+  "deleteAccountBtn": {
+    "message": "Poista"
+  },
+  "deleteAccountConfirm": {
+    "message": "Poistetaanko Emojery -tilisi?\n\nToiminto on pysyvä eikä sitä voi peruuttaa. Käyttäjätietueesi poistetaan ja kaikkien aiemmin lähettämiesi reaktioiden laskureita vähennetään."
+  },
+  "deleteAccountSlide": {
+    "message": "Poista liu'uttamalla"
+  },
+  "deleteAccountProgress": {
+    "message": "Poistetaan tiliäsi… älä sulje tätä ikkunaa."
+  },
+  "cancelBtn": {
+    "message": "Peruuta"
+  },
+  "historyEmpty": {
+    "message": "Ei vielä reaktioita. Klikkaa emojia millä tahansa tuetulla sivulla!"
+  },
+  "filterSitesPlaceholder": {
+    "message": "Suodata sivustoja"
+  },
+  "historyYesterday": {
+    "message": "Eilen"
+  },
+  "historyToday": {
+    "message": "Tänään"
+  },
+  "historySearchPlaceholder": {
+    "message": "Hae reaktioita"
+  },
+  "historyNoMatches": {
+    "message": "Mikään reaktio ei vastaa hakuasi."
+  },
+  "facetAllSites": {
+    "message": "Kaikki sivustot"
+  },
+  "facetSiteAria": {
+    "message": "Suodata sivuston mukaan"
+  },
+  "facetRangeAria": {
+    "message": "Suodata ajan mukaan"
+  },
+  "rangeAll": {
+    "message": "Koko aika"
+  },
+  "rangeToday": {
+    "message": "Tänään"
+  },
+  "range7d": {
+    "message": "7 päivää"
+  },
+  "range30d": {
+    "message": "30 päivää"
+  },
+  "range365d": {
+    "message": "1 vuosi"
+  },
+  "exportBtn": {
+    "message": "Vie"
+  },
+  "importBtn": {
+    "message": "Tuo"
+  },
+  "importDone": {
+    "message": "$COUNT$ reaktiota tuotu.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "128"
+      }
+    }
+  },
+  "importError": {
+    "message": "Tiedosto ei ole kelvollinen Emojery -vienti."
+  },
+  "importReplaceWarn": {
+    "message": "Tuonti korvaa nykyisen historiasi tällä tiedostolla. Tätä ei voi kumota."
+  },
+  "importReplaceConfirm": {
+    "message": "Korvaa"
+  },
+  "importReplaceCountAria": {
+    "message": "Tallennettuja reaktioita: $STORED$. Tässä tiedostossa: $INCOMING$.",
+    "placeholders": {
+      "stored": {
+        "content": "$1",
+        "example": "128"
+      },
+      "incoming": {
+        "content": "$2",
+        "example": "64"
+      }
+    }
+  },
+  "exportRowLabel": {
+    "message": "Vie historia"
+  },
+  "exportRowHint": {
+    "message": "Tallenna varmuuskopiotiedostoon"
+  },
+  "importRowLabel": {
+    "message": "Tuo historia"
+  },
+  "importRowHint": {
+    "message": "Korvaa varmuuskopiotiedostosta"
+  },
+  "relativeJustNow": {
+    "message": "juuri nyt"
+  },
+  "relativeMinutes": {
+    "message": "$M$ min",
+    "placeholders": {
+      "m": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "relativeHours": {
+    "message": "$H$ h",
+    "placeholders": {
+      "h": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "relativeDays": {
+    "message": "$D$ pv",
+    "placeholders": {
+      "d": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "reportUnsupportedPage": {
+    "message": "Avaa sivu, jolla reaktiot eivät toimi, ja avaa tämä valikko uudelleen ilmoittaaksesi siitä."
+  },
+  "reportSent": {
+    "message": "Kiitos — raportti lähetetty."
+  },
+  "reportAnother": {
+    "message": "Ilmoita toisesta ongelmasta"
+  },
+  "reportPlaceholder": {
+    "message": "Kuvaile ongelmasi lyhyesti (10-500 merkkiä)"
+  },
+  "reportSendBtn": {
+    "message": "Lähetä raportti"
+  },
+  "pickerSearchPlaceholder": {
+    "message": "Hae"
+  },
+  "pickerSearchAriaLabel": {
+    "message": "Hae emojeja"
+  },
+  "pickerNoMatches": {
+    "message": "Yksikään emoji ei vastaa hakua \"$QUERY$\"",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "asdf"
+      }
+    }
+  },
+  "pickerRecentlyUsed": {
+    "message": "Viimeksi käytetyt"
+  },
+  "pickerPopular": {
+    "message": "Suositut"
+  },
+  "pickerClearRecent": {
+    "message": "Tyhjennä"
+  },
+  "pickerCategoriesAria": {
+    "message": "Emojikategoriat"
+  },
+  "pickerDialogAria": {
+    "message": "Reagoi tai näytä erittely"
+  },
+  "pickerKeyboardHint": {
+    "message": "Siirry emojien välillä nuolinäppäimillä, reagoi Enterillä, sulje Escapella."
+  },
+  "pickerSearchResultsGroupAria": {
+    "message": "Hakutulokset"
+  },
+  "pickerShowMore": {
+    "message": "Näytä lisää"
+  },
+  "pickerShowLess": {
+    "message": "Näytä vähemmän"
+  },
+  "pickerAddReaction": {
+    "message": "Lisää reaktio"
+  },
+  "pickerYourReaction": {
+    "message": "Reaktiosi: $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "pickerReactionsAria": {
+    "message": "$COUNT$ reaktiota — reagoi tai katso erittely",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pickerReactWith": {
+    "message": "Reagoi: $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "categorySmileys": {
+    "message": "Hymiöt ja tunteet"
+  },
+  "categoryGestures": {
+    "message": "Eleet"
+  },
+  "categoryHearts": {
+    "message": "Sydämet"
+  },
+  "categoryAnimals": {
+    "message": "Eläimet ja luonto"
+  },
+  "categoryFood": {
+    "message": "Ruoka ja juoma"
+  },
+  "categoryActivities": {
+    "message": "Aktiviteetit"
+  },
+  "categoryTravel": {
+    "message": "Matkat ja paikat"
+  },
+  "categoryObjects": {
+    "message": "Objektit"
+  },
+  "categorySymbols": {
+    "message": "Symbolit"
+  },
+  "authPageTitle": {
+    "message": "Emojery — Kirjaudu"
+  },
+  "authSignInTitle": {
+    "message": "Kirjaudu reagoidaksesi"
+  },
+  "authSignInTagline": {
+    "message": "Lähetämme sinulle vahvistuskoodin sähköpostiin"
+  },
+  "authEmailLabel": {
+    "message": "Sähköposti"
+  },
+  "authSendCodeBtn": {
+    "message": "Lähetä koodi"
+  },
+  "authSendingBtn": {
+    "message": "Lähetetään…"
+  },
+  "authAgreeIntro": {
+    "message": "Hyväksyn "
+  },
+  "authTermsLinkLabel": {
+    "message": "käyttöehdot"
+  },
+  "authAgreeConjunction": {
+    "message": " ja "
+  },
+  "authPrivacyLinkLabel": {
+    "message": "tietosuojakäytännön"
+  },
+  "authAgreeOutro": {
+    "message": "."
+  },
+  "authCodeTitle": {
+    "message": "Syötä koodisi"
+  },
+  "authCodeTagline": {
+    "message": "Lähetimme koodin osoitteeseen $EMAIL$. Se vanhenee 10 minuutissa.",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authCodeLabel": {
+    "message": "Vahvistuskoodi"
+  },
+  "authVerifyingBtn": {
+    "message": "Tarkistetaan…"
+  },
+  "authVerifyBtn": {
+    "message": "Kirjaudu"
+  },
+  "authUseDifferentEmail": {
+    "message": "Käytä toista sähköpostia"
+  },
+  "authDoneTitle": {
+    "message": "Olet kirjautunut"
+  },
+  "authDoneTagline": {
+    "message": "Voit sulkea tämän välilehden ja reagoida millä tahansa tuetulla sivulla."
+  },
+  "dataConsentTitle": {
+    "message": "Mitä Emojery lähettää"
+  },
+  "dataConsentBody": {
+    "message": "Reaktioiden laskemiseksi ja jakamiseksi Emojery lähettää palvelimelleen sen sivun osoitteen, jolla reagoit, sekä satunnaiset asennus- ja istuntotunnisteet, joita ei johdeta sinusta. Kirjautuessasi sähköpostiosoitteesi lähetetään kerran kertakoodin toimittamista varten; siitä säilytetään vain yksisuuntainen tiiviste tilisi tunnisteena, ja reaktiohistoriasi pysyy tällä laitteella. Valinnainen konteksti pysyy pois päältä tässä selaimessa."
+  },
+  "dataConsentContinueBtn": {
+    "message": "Jatka"
+  },
+  "authSendThrottle": {
+    "message": "Pyysit juuri koodin. Voit pyytää toisen $TIME$ kuluttua.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authResendCooldown": {
+    "message": "Lähetimme jo koodin tähän osoitteeseen. Voit pyytää uuden $TIME$ kuluttua.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authEnterPendingCode": {
+    "message": "Anna koodi, jonka lähetimme osoitteeseen $EMAIL$",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authResendBtn": {
+    "message": "Lähetä koodi uudelleen"
+  },
+  "authResendInBtn": {
+    "message": "Lähetä koodi uudelleen $TIME$ kuluttua",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authErrRateLimit": {
+    "message": "Liian monta pyyntöä. Odota muutama minuutti ja yritä uudelleen."
+  },
+  "authErrUndeliverable": {
+    "message": "Sähköpostin toimitus epäonnistui. Yritä uudelleen tai tarkista osoite."
+  },
+  "authErrEmailNotAccepted": {
+    "message": "Tämä sähköpostiosoite ei voi vastaanottaa kirjautumiskoodeja. Käytä pysyvää osoitetta."
+  },
+  "authErrBadEmail": {
+    "message": "Tämä ei näytä kelvolliselta sähköpostiosoitteelta."
+  },
+  "authErrUnknown": {
+    "message": "Jotain meni pieleen. Yritä uudelleen."
+  },
+  "loadError": {
+    "message": "Jotain meni pieleen. Yritä uudelleen."
+  },
+  "errOffline": {
+    "message": "Näyttää siltä, että yhteyttä ei ole. Yritä uudelleen, kun yhteys palaa."
+  },
+  "errRateLimited": {
+    "message": "Liikaa pyyntöjä. Odota hetki ja yritä uudelleen."
+  },
+  "errServerBusy": {
+    "message": "Palvelimessa on ongelma. Yritä uudelleen minuutin kuluttua."
+  },
+  "authErrTooManyTries": {
+    "message": "Liian monta väärää koodia. Yritä myöhemmin uudelleen."
+  },
+  "authErrCodeInvalid": {
+    "message": "Koodi on virheellinen tai vanhentunut."
+  },
+  "authErrVerifyFailed": {
+    "message": "Vahvistus epäonnistui. Yritä uudelleen."
+  },
+  "searchResultsCount": {
+    "message": "$COUNT$ tulosta",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "reportSendError": {
+    "message": "Raportin lähettäminen epäonnistui. Tarkista yhteytesi ja yritä uudelleen."
+  },
+  "onboardingTitle": {
+    "message": "Emojery on valmis"
+  },
+  "onboardingTagline": {
+    "message": "Reagoi julkaisuihin, videoihin ja tuotteisiin millä tahansa emojilla."
+  },
+  "onboardingStepPinTitle": {
+    "message": "Kiinnitä kuvake"
+  },
+  "onboardingStepPinBody": {
+    "message": "Napsauta työkalurivin palapelikuvaketta ja kiinnitä Emojery, niin se on aina käden ulottuvilla."
+  },
+  "onboardingStepPinDone": {
+    "message": "Kiinnitetty!"
+  },
+  "onboardingStepSpotTitle": {
+    "message": "Etsi painike"
+  },
+  "onboardingStepSpotBody": {
+    "message": "Pieni emojipainike ilmestyy Tykkää-, Star- tai Jaa-painikkeen viereen tuetuilla sivuilla."
+  },
+  "onboardingStepReactTitle": {
+    "message": "Reagoi"
+  },
+  "onboardingStepReactBody": {
+    "message": "Valitse mikä tahansa emoji. Laskurit ovat julkisia. Kirjaudu kerran ensimmäisen reaktion kohdalla ja reagoi sen jälkeen vain."
+  },
+  "onboardingTryBtn": {
+    "message": "Kokeile livenä"
+  },
+  "onboardingSitesHeading": {
+    "message": "Toimii sivustoilla"
+  },
+  "gateTitle": {
+    "message": "Enää yksi askel"
+  },
+  "gateBody": {
+    "message": "Kirjaudu sisään sähköpostillasi ja vahvistuskoodilla, jotta reaktiosi lasketaan."
+  },
+  "gateSignInBtn": {
+    "message": "Kirjaudu ja reagoi"
+  },
+  "coachTitle": {
+    "message": "Uutta: reagoi millä tahansa emojilla"
+  },
+  "coachBody": {
+    "message": "Tämä on Emojery — yksi napsautus, koko emojipaletti."
+  },
+  "coachDismissAria": {
+    "message": "Sulje"
+  },
+  "onboardingStepInstallTitle": {
+    "message": "Asenna Emojery"
+  },
+  "onboardingProgress": {
+    "message": "$DONE$/$TOTAL$ valmiina",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
+  },
+  "onboardingAllSet": {
+    "message": "Kaikki valmista!"
+  }
+}

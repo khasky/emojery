@@ -1,0 +1,616 @@
+{
+  "extName": {
+    "message": "Emojery"
+  },
+  "extShortName": {
+    "message": "Emojery"
+  },
+  "extDescription": {
+    "message": "Перетворіть кожну кнопку «Подобається» на повну палітру емодзі."
+  },
+  "extActionTitle": {
+    "message": "Emojery"
+  },
+  "popupHeading": {
+    "message": "Emojery"
+  },
+  "popupTitle": {
+    "message": "Emojery"
+  },
+  "tabSettings": {
+    "message": "Налаштування"
+  },
+  "tabHistory": {
+    "message": "Історія"
+  },
+  "tabAccount": {
+    "message": "Акаунт"
+  },
+  "tabReport": {
+    "message": "Повідомити"
+  },
+  "settingEnabled": {
+    "message": "Увімкнено"
+  },
+  "settingEnabledHint": {
+    "message": "Головний перемикач для всіх підтримуваних сайтів"
+  },
+  "settingReplaceNative": {
+    "message": "Приховувати оригінальні кнопки"
+  },
+  "settingReplaceNativeHint": {
+    "message": "Приховувати «Зірку»/«Лайк» замість вбудованого вибору"
+  },
+  "settingAnimations": {
+    "message": "Анімації реакцій"
+  },
+  "settingAnimationsHint": {
+    "message": "Показувати спалахи емодзі, коли з’являються лічильники або ви реагуєте"
+  },
+  "settingTheme": {
+    "message": "Тема"
+  },
+  "settingThemeHint": {
+    "message": "Слідувати за браузером або завжди використовувати світлу чи темну"
+  },
+  "settingDebug": {
+    "message": "Налагодження"
+  },
+  "settingDebugHint": {
+    "message": "Увімкнути режим налагодження (для розробників)"
+  },
+  "themeSystem": {
+    "message": "Системна"
+  },
+  "themeLight": {
+    "message": "Світла"
+  },
+  "themeDark": {
+    "message": "Темна"
+  },
+  "settingAutoTrigger": {
+    "message": "Автонатискання оригінальних кнопок"
+  },
+  "settingAutoTriggerHint": {
+    "message": "Дублювати вашу емодзі в лайк/дизлайк сайту"
+  },
+  "sentimentIntro": {
+    "message": "Перетягніть емодзі між списками або натисніть на неї, а потім на список."
+  },
+  "sentimentPositiveZone": {
+    "message": "Натискає лайк / голос «за»"
+  },
+  "sentimentNegativeZone": {
+    "message": "Натискає дизлайк / голос «проти»"
+  },
+  "sentimentNeutralZone": {
+    "message": "Нічого не натискає"
+  },
+  "sentimentReset": {
+    "message": "Скинути до типових"
+  },
+  "settingAnalyticsConsent": {
+    "message": "Інсайти спільноти"
+  },
+  "settingAnalyticsConsentHint": {
+    "message": "Враховувати мої реакції в регіональній статистиці"
+  },
+  "sectionPerSite": {
+    "message": "Лише вибрані сайти"
+  },
+  "sectionPerSiteHint": {
+    "message": "Виберіть, на яких сайтах показувати вибір реакцій"
+  },
+  "perSiteToggleAria": {
+    "message": "Показувати вибір реакцій на $SITE$",
+    "placeholders": {
+      "site": {
+        "content": "$1",
+        "example": "Facebook"
+      }
+    }
+  },
+  "signInBtn": {
+    "message": "Увійти"
+  },
+  "signInMsgAccount": {
+    "message": "Увійдіть, щоб керувати акаунтом."
+  },
+  "signInMsgHistory": {
+    "message": "Увійдіть, щоб побачити історію реакцій."
+  },
+  "signInMsgReport": {
+    "message": "Увійдіть, щоб надіслати звіт про помилку."
+  },
+  "signedInLabel": {
+    "message": "Ви ввійшли"
+  },
+  "signOutBtn": {
+    "message": "Вийти"
+  },
+  "deleteAccountLabel": {
+    "message": "Видалити акаунт"
+  },
+  "deleteAccountHint": {
+    "message": "Видалити ваш запис і реакції"
+  },
+  "deleteAccountBtn": {
+    "message": "Видалити"
+  },
+  "deleteAccountConfirm": {
+    "message": "Видалити ваш акаунт Emojery?\n\nДію не можна скасувати. Запис користувача буде стерто, а лічильники всіх ваших минулих реакцій — зменшено."
+  },
+  "deleteAccountSlide": {
+    "message": "Проведіть, щоб видалити"
+  },
+  "deleteAccountProgress": {
+    "message": "Видаляємо ваш акаунт… не закривайте це вікно."
+  },
+  "cancelBtn": {
+    "message": "Скасувати"
+  },
+  "historyEmpty": {
+    "message": "Реакцій поки немає. Натисніть емодзі на будь-якій підтримуваній сторінці!"
+  },
+  "filterSitesPlaceholder": {
+    "message": "Фільтр сайтів"
+  },
+  "historyYesterday": {
+    "message": "Вчора"
+  },
+  "historyToday": {
+    "message": "Сьогодні"
+  },
+  "historySearchPlaceholder": {
+    "message": "Пошук реакцій"
+  },
+  "historyNoMatches": {
+    "message": "Немає реакцій за запитом."
+  },
+  "facetAllSites": {
+    "message": "Усі сайти"
+  },
+  "facetSiteAria": {
+    "message": "Фільтр за сайтом"
+  },
+  "facetRangeAria": {
+    "message": "Фільтр за часом"
+  },
+  "rangeAll": {
+    "message": "Весь час"
+  },
+  "rangeToday": {
+    "message": "Сьогодні"
+  },
+  "range7d": {
+    "message": "7 днів"
+  },
+  "range30d": {
+    "message": "30 днів"
+  },
+  "range365d": {
+    "message": "1 рік"
+  },
+  "exportBtn": {
+    "message": "Експорт"
+  },
+  "importBtn": {
+    "message": "Імпорт"
+  },
+  "importDone": {
+    "message": "Імпортовано реакцій: $COUNT$.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "128"
+      }
+    }
+  },
+  "importError": {
+    "message": "Це не схоже на файл експорту Emojery."
+  },
+  "importReplaceWarn": {
+    "message": "Імпорт замінить поточну історію даними з файлу. Цю дію не можна скасувати."
+  },
+  "importReplaceConfirm": {
+    "message": "Замінити"
+  },
+  "importReplaceCountAria": {
+    "message": "Збережених реакцій: $STORED$. У цьому файлі: $INCOMING$.",
+    "placeholders": {
+      "stored": {
+        "content": "$1",
+        "example": "128"
+      },
+      "incoming": {
+        "content": "$2",
+        "example": "64"
+      }
+    }
+  },
+  "exportRowLabel": {
+    "message": "Експорт історії"
+  },
+  "exportRowHint": {
+    "message": "Зберегти у файл резервної копії"
+  },
+  "importRowLabel": {
+    "message": "Імпорт історії"
+  },
+  "importRowHint": {
+    "message": "Замінити з файлу резервної копії"
+  },
+  "relativeJustNow": {
+    "message": "щойно"
+  },
+  "relativeMinutes": {
+    "message": "$M$ хв",
+    "placeholders": {
+      "m": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "relativeHours": {
+    "message": "$H$ год",
+    "placeholders": {
+      "h": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "relativeDays": {
+    "message": "$D$ дн",
+    "placeholders": {
+      "d": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "reportUnsupportedPage": {
+    "message": "Відкрийте сторінку, де не працюють реакції, і знову відкрийте це меню, щоб повідомити про проблему."
+  },
+  "reportSent": {
+    "message": "Дякуємо — звіт надіслано."
+  },
+  "reportAnother": {
+    "message": "Повідомити про іншу проблему"
+  },
+  "reportPlaceholder": {
+    "message": "Опишіть проблему коротко (10-500 символів)"
+  },
+  "reportSendBtn": {
+    "message": "Надіслати звіт"
+  },
+  "pickerSearchPlaceholder": {
+    "message": "Пошук"
+  },
+  "pickerSearchAriaLabel": {
+    "message": "Пошук емодзі"
+  },
+  "pickerNoMatches": {
+    "message": "Немає емодзі за запитом «$QUERY$»",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "asdf"
+      }
+    }
+  },
+  "pickerRecentlyUsed": {
+    "message": "Нещодавні"
+  },
+  "pickerPopular": {
+    "message": "Популярні"
+  },
+  "pickerClearRecent": {
+    "message": "Очистити"
+  },
+  "pickerCategoriesAria": {
+    "message": "Категорії емодзі"
+  },
+  "pickerDialogAria": {
+    "message": "Відреагувати або переглянути розподіл"
+  },
+  "pickerKeyboardHint": {
+    "message": "Стрілки — перехід між емодзі, Enter — відреагувати, Escape — закрити."
+  },
+  "pickerSearchResultsGroupAria": {
+    "message": "Результати пошуку"
+  },
+  "pickerShowMore": {
+    "message": "Показати більше"
+  },
+  "pickerShowLess": {
+    "message": "Показати менше"
+  },
+  "pickerAddReaction": {
+    "message": "Додати реакцію"
+  },
+  "pickerYourReaction": {
+    "message": "Ваша реакція: $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "pickerReactionsAria": {
+    "message": "$COUNT$ реакцій — відреагувати або переглянути розбивку",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pickerReactWith": {
+    "message": "Відреагувати: $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "categorySmileys": {
+    "message": "Смайли та емоції"
+  },
+  "categoryGestures": {
+    "message": "Жести"
+  },
+  "categoryHearts": {
+    "message": "Серця"
+  },
+  "categoryAnimals": {
+    "message": "Тварини і природа"
+  },
+  "categoryFood": {
+    "message": "Їжа і напої"
+  },
+  "categoryActivities": {
+    "message": "Активності"
+  },
+  "categoryTravel": {
+    "message": "Подорожі та місця"
+  },
+  "categoryObjects": {
+    "message": "Об’єкти"
+  },
+  "categorySymbols": {
+    "message": "Символи"
+  },
+  "authPageTitle": {
+    "message": "Emojery — вхід"
+  },
+  "authSignInTitle": {
+    "message": "Увійти, щоб відреагувати"
+  },
+  "authSignInTagline": {
+    "message": "Надішлемо вам код підтвердження на email"
+  },
+  "authEmailLabel": {
+    "message": "Email"
+  },
+  "authSendCodeBtn": {
+    "message": "Надіслати код"
+  },
+  "authSendingBtn": {
+    "message": "Надсилання…"
+  },
+  "authAgreeIntro": {
+    "message": "Я приймаю "
+  },
+  "authTermsLinkLabel": {
+    "message": "Умови використання"
+  },
+  "authAgreeConjunction": {
+    "message": " і "
+  },
+  "authPrivacyLinkLabel": {
+    "message": "Політику приватності"
+  },
+  "authAgreeOutro": {
+    "message": "."
+  },
+  "authCodeTitle": {
+    "message": "Введіть код"
+  },
+  "authCodeTagline": {
+    "message": "Ми надіслали код на $EMAIL$. Він діє 10 хвилин.",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authCodeLabel": {
+    "message": "Код підтвердження"
+  },
+  "authVerifyingBtn": {
+    "message": "Перевірка…"
+  },
+  "authVerifyBtn": {
+    "message": "Увійти"
+  },
+  "authUseDifferentEmail": {
+    "message": "Використати інший email"
+  },
+  "authDoneTitle": {
+    "message": "Ви ввійшли"
+  },
+  "authDoneTagline": {
+    "message": "Можете закрити вкладку і реагувати на будь-якій підтримуваній сторінці."
+  },
+  "dataConsentTitle": {
+    "message": "Що надсилає Emojery"
+  },
+  "dataConsentBody": {
+    "message": "Щоб рахувати реакції та показувати їх іншим, Emojery надсилає на свій сервер адресу сторінки, де ви поставили реакцію, разом із випадковими ідентифікаторами встановлення та сеансу, які не виводяться з ваших даних. Під час входу ваш email надсилається один раз — щоб доставити одноразовий код; зберігається лише його односторонній хеш як ідентифікатор вашого облікового запису, а історія реакцій лишається на цьому пристрої. Необов’язковий контекст у цьому браузері лишається вимкненим."
+  },
+  "dataConsentContinueBtn": {
+    "message": "Продовжити"
+  },
+  "authSendThrottle": {
+    "message": "Ви нещодавно запитували код. Запросити ще один можна через $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authResendCooldown": {
+    "message": "Ми вже надіслали код на цю адресу. Запросити новий можна через $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authEnterPendingCode": {
+    "message": "Ввести код, надісланий на $EMAIL$",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authResendBtn": {
+    "message": "Надіслати код повторно"
+  },
+  "authResendInBtn": {
+    "message": "Надіслати код повторно через $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authErrRateLimit": {
+    "message": "Забагато запитів. Зачекайте кілька хвилин і спробуйте знову."
+  },
+  "authErrUndeliverable": {
+    "message": "Не вдалося доставити листа. Спробуйте знову або перевірте адресу."
+  },
+  "authErrEmailNotAccepted": {
+    "message": "На цю адресу не можна надіслати коди входу. Використовуйте постійну адресу."
+  },
+  "authErrBadEmail": {
+    "message": "Це не схоже на коректну email-адресу."
+  },
+  "authErrUnknown": {
+    "message": "Щось пішло не так. Спробуйте знову."
+  },
+  "loadError": {
+    "message": "Щось пішло не так. Спробуйте знову."
+  },
+  "errOffline": {
+    "message": "Схоже, немає з'єднання. Спробуйте ще раз, коли зв'язок відновиться."
+  },
+  "errRateLimited": {
+    "message": "Забагато запитів. Зачекайте трохи й спробуйте ще раз."
+  },
+  "errServerBusy": {
+    "message": "На сервері негаразди. Спробуйте за хвилину."
+  },
+  "authErrTooManyTries": {
+    "message": "Забагато неправильних кодів. Спробуйте пізніше."
+  },
+  "authErrCodeInvalid": {
+    "message": "Код неправильний або прострочений."
+  },
+  "authErrVerifyFailed": {
+    "message": "Не вдалося підтвердити. Спробуйте знову."
+  },
+  "searchResultsCount": {
+    "message": "Результатів: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "reportSendError": {
+    "message": "Не вдалося надіслати звіт. Перевірте з'єднання та спробуйте ще раз."
+  },
+  "onboardingTitle": {
+    "message": "Emojery готовий до роботи"
+  },
+  "onboardingTagline": {
+    "message": "Реагуйте на дописи, відео й товари будь-яким емодзі."
+  },
+  "onboardingStepPinTitle": {
+    "message": "Закріпіть іконку"
+  },
+  "onboardingStepPinBody": {
+    "message": "Натисніть значок-пазл на панелі інструментів і закріпіть Emojery, щоб він був під рукою."
+  },
+  "onboardingStepPinDone": {
+    "message": "Закріплено!"
+  },
+  "onboardingStepSpotTitle": {
+    "message": "Знайдіть кнопку"
+  },
+  "onboardingStepSpotBody": {
+    "message": "Маленька кнопка з емодзі з'являється поруч із «Подобається», «Star» чи «Поділитися» на підтримуваних сторінках."
+  },
+  "onboardingStepReactTitle": {
+    "message": "Реагуйте"
+  },
+  "onboardingStepReactBody": {
+    "message": "Обирайте будь-який емодзі. Лічильники публічні. Увійдіть один раз під час першої реакції — далі просто реагуйте."
+  },
+  "onboardingTryBtn": {
+    "message": "Спробувати наживо"
+  },
+  "onboardingSitesHeading": {
+    "message": "Працює на"
+  },
+  "gateTitle": {
+    "message": "Залишився один крок"
+  },
+  "gateBody": {
+    "message": "Увійдіть за поштою та кодом підтвердження, щоб вашу реакцію зарахували."
+  },
+  "gateSignInBtn": {
+    "message": "Увійти й відреагувати"
+  },
+  "coachTitle": {
+    "message": "Нове: реагуйте будь-яким емодзі"
+  },
+  "coachBody": {
+    "message": "Це Emojery — один клік, і вся палітра емодзі."
+  },
+  "coachDismissAria": {
+    "message": "Приховати"
+  },
+  "onboardingStepInstallTitle": {
+    "message": "Встановити Emojery"
+  },
+  "onboardingProgress": {
+    "message": "$DONE$ з $TOTAL$ готово",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
+  },
+  "onboardingAllSet": {
+    "message": "Готово!"
+  }
+}

@@ -1,0 +1,784 @@
+{
+  "extName": {
+    "message": "Emojery",
+    "description": "Extension name shown in the browser's extension list and store."
+  },
+  "extShortName": {
+    "message": "Emojery",
+    "description": "Short extension name shown when space is limited (toolbar label, mobile)."
+  },
+  "extDescription": {
+    "message": "Turn every Like button on the web into a full emoji palette.",
+    "description": "One-line extension description in the browser's extension list and store."
+  },
+  "extActionTitle": {
+    "message": "Emojery",
+    "description": "Tooltip text that appears when hovering the toolbar icon."
+  },
+  "popupHeading": {
+    "message": "Emojery",
+    "description": "Heading at the top of the toolbar popup."
+  },
+  "popupTitle": {
+    "message": "Emojery",
+    "description": "<title> for the popup window."
+  },
+  "tabSettings": {
+    "message": "Settings",
+    "description": "Popup tab label — extension settings."
+  },
+  "tabHistory": {
+    "message": "History",
+    "description": "Popup tab label — history of the user's past reactions."
+  },
+  "tabAccount": {
+    "message": "Account",
+    "description": "Popup tab label — sign-in status and account actions."
+  },
+  "tabReport": {
+    "message": "Report",
+    "description": "Popup tab label — bug report form."
+  },
+  "settingEnabled": {
+    "message": "Enabled",
+    "description": "Label for the master on/off toggle."
+  },
+  "settingEnabledHint": {
+    "message": "Master switch for all supported sites",
+    "description": "Helper text below the master on/off toggle."
+  },
+  "settingReplaceNative": {
+    "message": "Hide original buttons",
+    "description": "Label for the toggle that hides the site's own Like/Star button."
+  },
+  "settingReplaceNativeHint": {
+    "message": "Hide Star/Like in favor of the picker",
+    "description": "Helper text below the 'Hide original buttons' toggle."
+  },
+  "settingAnimations": {
+    "message": "Reaction animations",
+    "description": "Label for the toggle that controls emoji-burst animations."
+  },
+  "settingAnimationsHint": {
+    "message": "Show emoji bursts when counts appear or you react",
+    "description": "Helper text below the animations toggle."
+  },
+  "settingTheme": {
+    "message": "Theme",
+    "description": "Label for the dropdown that picks the extension's colour theme."
+  },
+  "settingThemeHint": {
+    "message": "Follow the browser, or always use light or dark",
+    "description": "Helper text below the theme dropdown."
+  },
+  "settingDebug": {
+    "message": "Debug",
+    "description": "Label for the toggle that reveals the Debug tab, and the label of that tab itself."
+  },
+  "settingDebugHint": {
+    "message": "Turn on debug mode (for developers)",
+    "description": "Helper text below the Debug toggle."
+  },
+  "themeSystem": {
+    "message": "System",
+    "description": "Theme option: follow the browser/OS preference. The default."
+  },
+  "themeLight": {
+    "message": "Light",
+    "description": "Theme option: always use the light palette."
+  },
+  "themeDark": {
+    "message": "Dark",
+    "description": "Theme option: always use the dark palette."
+  },
+  "settingAutoTrigger": {
+    "message": "Auto-press original buttons",
+    "description": "Label for the toggle that mirrors a picked emoji to the site's own Like/Dislike button."
+  },
+  "settingAutoTriggerHint": {
+    "message": "Mirror your emoji to the site's Like/Dislike",
+    "description": "Helper text below the auto-press toggle."
+  },
+  "sentimentIntro": {
+    "message": "Drag an emoji between lists, or tap it and then tap a list.",
+    "description": "How-to line above the sentiment list editor."
+  },
+  "sentimentPositiveZone": {
+    "message": "Presses Like / Upvote",
+    "description": "Title of the positive-emoji list."
+  },
+  "sentimentNegativeZone": {
+    "message": "Presses Dislike / Downvote",
+    "description": "Title of the negative-emoji list."
+  },
+  "sentimentNeutralZone": {
+    "message": "Presses nothing",
+    "description": "Title of the neutral-emoji list."
+  },
+  "sentimentReset": {
+    "message": "Reset to defaults",
+    "description": "Button restoring the default sentiment lists."
+  },
+  "settingAnalyticsConsent": {
+    "message": "Community insights",
+    "description": "Label for the popup toggle controlling whether reactions carry coarse context (country, language) for aggregate community views."
+  },
+  "settingAnalyticsConsentHint": {
+    "message": "Let my reactions count in regional breakdowns",
+    "description": "Helper text below the community-insights toggle; the exact fields are listed in the privacy policy."
+  },
+  "sectionPerSite": {
+    "message": "Only selected sites",
+    "description": "Label for the toggle that limits the picker to the sites the user selects."
+  },
+  "sectionPerSiteHint": {
+    "message": "Choose which sites show the picker",
+    "description": "Helper text below the per-site master toggle."
+  },
+  "perSiteToggleAria": {
+    "message": "Show the picker on $SITE$",
+    "description": "Accessible name for a per-site toggle. $SITE$ is the site name, e.g. Facebook.",
+    "placeholders": {
+      "site": {
+        "content": "$1",
+        "example": "Facebook"
+      }
+    }
+  },
+  "signInBtn": {
+    "message": "Sign in",
+    "description": "Generic 'Sign in' button label."
+  },
+  "signInMsgAccount": {
+    "message": "Sign in to manage your account.",
+    "description": "Empty-state message on the Account tab when the user is signed out."
+  },
+  "signInMsgHistory": {
+    "message": "Sign in to view your reactions history.",
+    "description": "Empty-state message on the History tab when the user is signed out."
+  },
+  "signInMsgReport": {
+    "message": "Sign in to submit a bug report.",
+    "description": "Empty-state message on the Report tab when the user is signed out."
+  },
+  "signedInLabel": {
+    "message": "Signed in",
+    "description": "Label on the Account tab indicating the user is currently signed in."
+  },
+  "signOutBtn": {
+    "message": "Sign out",
+    "description": "Button that ends the current session."
+  },
+  "deleteAccountLabel": {
+    "message": "Delete account",
+    "description": "Label for the destructive delete-account row."
+  },
+  "deleteAccountHint": {
+    "message": "Remove your record & reactions",
+    "description": "Helper text below the Delete account row."
+  },
+  "deleteAccountBtn": {
+    "message": "Delete",
+    "description": "Button that triggers account deletion (after a confirm dialog)."
+  },
+  "deleteAccountConfirm": {
+    "message": "Delete your Emojery account?\n\nThis action is permanent and cannot be undone. Your user record will be erased and the counters for every reaction you previously submitted will be decremented.",
+    "description": "Browser confirm() dialog text shown before deleting the account."
+  },
+  "deleteAccountSlide": {
+    "message": "Slide to delete",
+    "description": "Label inside the slide-to-confirm track the user drags to delete their account."
+  },
+  "deleteAccountProgress": {
+    "message": "Deleting your account… please don't close this window.",
+    "description": "Non-dismissable notice shown while the account-deletion request is in flight."
+  },
+  "cancelBtn": {
+    "message": "Cancel",
+    "description": "Backs out of the armed delete-account confirmation."
+  },
+  "historyEmpty": {
+    "message": "No reactions yet. Click an emoji on any supported page!",
+    "description": "Empty-state message on the History tab when the user has no past reactions."
+  },
+  "filterSitesPlaceholder": {
+    "message": "Filter sites",
+    "description": "Placeholder for the filter field above the Settings per-site list."
+  },
+  "historyYesterday": {
+    "message": "Yesterday",
+    "description": "Day-group header in the History list for the previous calendar day."
+  },
+  "historyToday": {
+    "message": "Today",
+    "description": "Day-group header in the History list for the current calendar day."
+  },
+  "historySearchPlaceholder": {
+    "message": "Search reactions",
+    "description": "Placeholder text for the search box at the top of the History tab."
+  },
+  "historyNoMatches": {
+    "message": "No reactions match your search.",
+    "description": "Empty state on the History tab when the search query filters out every reaction."
+  },
+  "facetAllSites": {
+    "message": "All sites",
+    "description": "Default option of the History site filter — no site restriction."
+  },
+  "facetSiteAria": {
+    "message": "Filter by site",
+    "description": "Accessible label for the History site-filter dropdown."
+  },
+  "facetRangeAria": {
+    "message": "Filter by time",
+    "description": "Accessible label for the History time-range dropdown."
+  },
+  "rangeAll": {
+    "message": "All time",
+    "description": "History time-range option — no time limit."
+  },
+  "rangeToday": {
+    "message": "Today",
+    "description": "History time-range option — only today's reactions."
+  },
+  "range7d": {
+    "message": "7 days",
+    "description": "History time-range option — the last 7 days."
+  },
+  "range30d": {
+    "message": "30 days",
+    "description": "History time-range option — the last 30 days."
+  },
+  "range365d": {
+    "message": "1 year",
+    "description": "History time-range option — the last year."
+  },
+  "exportBtn": {
+    "message": "Export",
+    "description": "Button on the History tab that downloads the user's reaction history as a JSON file."
+  },
+  "importBtn": {
+    "message": "Import",
+    "description": "Button on the History tab that restores reaction history from a previously exported JSON file."
+  },
+  "importDone": {
+    "message": "Imported $COUNT$ reactions.",
+    "description": "Confirmation after an import; $COUNT$ is how many new reactions were added (duplicates are skipped).",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "128"
+      }
+    }
+  },
+  "importError": {
+    "message": "That file isn't a valid Emojery export.",
+    "description": "Shown when an imported file can't be read as an Emojery history export."
+  },
+  "importReplaceWarn": {
+    "message": "Importing replaces your current history with this file. This can't be undone.",
+    "description": "Warning shown before an import; import overwrites the whole local history."
+  },
+  "importReplaceConfirm": {
+    "message": "Replace",
+    "description": "Confirm button that overwrites the local history with the imported file."
+  },
+  "importReplaceCountAria": {
+    "message": "Saved reactions: $STORED$. In this file: $INCOMING$.",
+    "description": "Screen-reader copy for the import confirm's count line, which renders visually as \"5 → 2\". $STORED$ is how many reactions are saved now (\"?\" when that read failed), $INCOMING$ how many the picked file holds.",
+    "placeholders": {
+      "stored": {
+        "content": "$1",
+        "example": "128"
+      },
+      "incoming": {
+        "content": "$2",
+        "example": "64"
+      }
+    }
+  },
+  "exportRowLabel": {
+    "message": "Export history",
+    "description": "Account-tab row label for the export action."
+  },
+  "exportRowHint": {
+    "message": "Save to a backup file",
+    "description": "Helper text under the Export history row."
+  },
+  "importRowLabel": {
+    "message": "Import history",
+    "description": "Account-tab row label for the import action."
+  },
+  "importRowHint": {
+    "message": "Replace from a backup file",
+    "description": "Helper text under the Import history row."
+  },
+  "relativeJustNow": {
+    "message": "just now",
+    "description": "Relative time shown when an event happened less than a minute ago."
+  },
+  "relativeMinutes": {
+    "message": "$M$m",
+    "description": "Compact relative time in minutes, e.g. '5m'.",
+    "placeholders": {
+      "m": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "relativeHours": {
+    "message": "$H$h",
+    "description": "Compact relative time in hours, e.g. '3h'.",
+    "placeholders": {
+      "h": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "relativeDays": {
+    "message": "$D$d",
+    "description": "Compact relative time in days, e.g. '2d'.",
+    "placeholders": {
+      "d": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "reportUnsupportedPage": {
+    "message": "Please open the page where reactions aren't working, then open this menu again to report it.",
+    "description": "Shown on the Report tab when the active tab is not a supported site."
+  },
+  "reportSent": {
+    "message": "Thanks — report sent.",
+    "description": "Confirmation shown after a bug report is submitted."
+  },
+  "reportAnother": {
+    "message": "Report another issue",
+    "description": "Link on the report-sent screen to start a new bug report."
+  },
+  "reportPlaceholder": {
+    "message": "Describe your issue (10-500 chars)",
+    "description": "Placeholder text inside the bug report textarea."
+  },
+  "reportSendBtn": {
+    "message": "Send report",
+    "description": "Button that submits the bug report."
+  },
+  "pickerSearchPlaceholder": {
+    "message": "Search",
+    "description": "Placeholder in the emoji search input."
+  },
+  "pickerSearchAriaLabel": {
+    "message": "Search emojis",
+    "description": "Accessible name for the emoji search input."
+  },
+  "pickerNoMatches": {
+    "message": "No emojis match \"$QUERY$\"",
+    "description": "Shown when an emoji search returns no results. $QUERY$ is the user's query.",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "asdf"
+      }
+    }
+  },
+  "pickerRecentlyUsed": {
+    "message": "Recently Used",
+    "description": "Section heading above recently used emojis in the picker."
+  },
+  "pickerPopular": {
+    "message": "Popular",
+    "description": "Section heading above the popular/trending emojis in the picker."
+  },
+  "pickerClearRecent": {
+    "message": "Clear",
+    "description": "Button next to the Recently Used heading that empties the recently used emoji list."
+  },
+  "pickerCategoriesAria": {
+    "message": "Emoji categories",
+    "description": "Accessible name for the row of category shortcut buttons in the picker."
+  },
+  "pickerDialogAria": {
+    "message": "React or view breakdown",
+    "description": "Accessible name for the reaction picker popover dialog."
+  },
+  "pickerKeyboardHint": {
+    "message": "Use the arrow keys to move between emoji, Enter to react, Escape to close.",
+    "description": "Screen-reader-only description of the picker's keyboard model. The emoji grid is a single Tab stop, so the arrow-key navigation has to be stated."
+  },
+  "pickerSearchResultsGroupAria": {
+    "message": "Search results",
+    "description": "Accessible name for the emoji grid shown while searching."
+  },
+  "pickerShowMore": {
+    "message": "Show more",
+    "description": "Button that expands the reaction breakdown list."
+  },
+  "pickerShowLess": {
+    "message": "Show less",
+    "description": "Button that collapses the reaction breakdown list."
+  },
+  "pickerAddReaction": {
+    "message": "Add reaction",
+    "description": "Accessible name for the picker trigger when the user has not reacted."
+  },
+  "pickerYourReaction": {
+    "message": "Your reaction: $LABEL$",
+    "description": "Accessible name for the picker trigger when the user has a reaction. $LABEL$ is the emoji name.",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "pickerReactionsAria": {
+    "message": "$COUNT$ reactions — react or view breakdown",
+    "description": "Accessible name for the picker trigger when reactions exist. $COUNT$ is the total count.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pickerReactWith": {
+    "message": "React with $LABEL$",
+    "description": "Accessible name for a row in the reaction breakdown. $LABEL$ is the emoji name.",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "categorySmileys": {
+    "message": "Smileys & Emotion",
+    "description": "Emoji picker category — smileys and emotions."
+  },
+  "categoryGestures": {
+    "message": "Gestures",
+    "description": "Emoji picker category — hand gestures."
+  },
+  "categoryHearts": {
+    "message": "Hearts",
+    "description": "Emoji picker category — heart symbols."
+  },
+  "categoryAnimals": {
+    "message": "Animals & Nature",
+    "description": "Emoji picker category — animals and nature."
+  },
+  "categoryFood": {
+    "message": "Food & Drink",
+    "description": "Emoji picker category — food and drink."
+  },
+  "categoryActivities": {
+    "message": "Activities",
+    "description": "Emoji picker category — sports and activities."
+  },
+  "categoryTravel": {
+    "message": "Travel & Places",
+    "description": "Emoji picker category — travel and places."
+  },
+  "categoryObjects": {
+    "message": "Objects",
+    "description": "Emoji picker category — household objects."
+  },
+  "categorySymbols": {
+    "message": "Symbols",
+    "description": "Emoji picker category — abstract symbols."
+  },
+  "authPageTitle": {
+    "message": "Emojery — Sign in",
+    "description": "<title> for the auth page."
+  },
+  "authSignInTitle": {
+    "message": "Sign in to react",
+    "description": "Heading on the auth page, email step."
+  },
+  "authSignInTagline": {
+    "message": "We will email you a verification code",
+    "description": "Subheading on the auth page, email step."
+  },
+  "authEmailLabel": {
+    "message": "Email",
+    "description": "Label for the email input field on the auth page."
+  },
+  "authSendCodeBtn": {
+    "message": "Send code",
+    "description": "Submit button on the email step of the auth page."
+  },
+  "authSendingBtn": {
+    "message": "Sending…",
+    "description": "Submit button label while the OTP request is in flight."
+  },
+  "authAgreeIntro": {
+    "message": "I agree to the ",
+    "description": "Start of the consent checkbox label, before the Terms of Service link."
+  },
+  "authTermsLinkLabel": {
+    "message": "Terms of Service",
+    "description": "Text inside the inline Terms of Service link in the consent checkbox."
+  },
+  "authAgreeConjunction": {
+    "message": " and ",
+    "description": "Connector between the Terms of Service and Privacy Policy links in the consent checkbox."
+  },
+  "authPrivacyLinkLabel": {
+    "message": "Privacy Policy",
+    "description": "Text inside the inline Privacy Policy link in the consent checkbox."
+  },
+  "authAgreeOutro": {
+    "message": ".",
+    "description": "End of the consent checkbox label, after the Privacy Policy link."
+  },
+  "authCodeTitle": {
+    "message": "Enter your code",
+    "description": "Heading on the auth page, code step."
+  },
+  "authCodeTagline": {
+    "message": "We sent a code to $EMAIL$. It expires in 10 minutes.",
+    "description": "Subheading on the auth page after the OTP email is sent. $EMAIL$ is the user's address.",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authCodeLabel": {
+    "message": "Verification code",
+    "description": "Label for the 6-digit OTP input."
+  },
+  "authVerifyingBtn": {
+    "message": "Verifying…",
+    "description": "Submit button label while the OTP verification is in flight."
+  },
+  "authVerifyBtn": {
+    "message": "Sign in",
+    "description": "Submit button on the code step of the auth page."
+  },
+  "authUseDifferentEmail": {
+    "message": "Use a different email",
+    "description": "Secondary action on the code step — go back to the email step."
+  },
+  "authDoneTitle": {
+    "message": "You're signed in",
+    "description": "Heading shown after sign-in completes."
+  },
+  "authDoneTagline": {
+    "message": "You can close this tab and react on any supported page.",
+    "description": "Subheading shown after sign-in completes."
+  },
+  "dataConsentTitle": {
+    "message": "What Emojery sends",
+    "description": "Heading of the data-collection disclosure shown on first install in browsers without Firefox's built-in consent screen."
+  },
+  "dataConsentBody": {
+    "message": "To count and share reactions, Emojery sends the address of the page you react on to its server, together with random install and session identifiers that are not derived from you. Signing in sends your email once to deliver a one-time code; only a one-way hash of it is kept as your account identifier, and your reaction history stays on this device. Optional context stays off in this browser.",
+    "description": "Body of the data-collection disclosure shown on first install in browsers without Firefox's built-in consent screen."
+  },
+  "dataConsentContinueBtn": {
+    "message": "Continue",
+    "description": "Button that dismisses the data-collection disclosure and reveals the sign-in form."
+  },
+  "authSendThrottle": {
+    "message": "You recently requested a code. You can request another in $TIME$.",
+    "description": "Auth notice shown when another code was requested recently. $TIME$ is mm:ss.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authResendCooldown": {
+    "message": "We already sent a code to this address. You can request a new one in $TIME$.",
+    "description": "Auth notice: a code was already sent to this address; resend is on a short cooldown. $TIME$ is mm:ss.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authEnterPendingCode": {
+    "message": "Enter the code we sent to $EMAIL$",
+    "description": "Auth: link back to the code step from the email step while a code is still outstanding. $EMAIL$ is the address it was sent to.",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authResendBtn": {
+    "message": "Resend code",
+    "description": "Auth: code-step button to email a fresh code."
+  },
+  "authResendInBtn": {
+    "message": "Resend code in $TIME$",
+    "description": "Auth: code-step resend button while on cooldown. $TIME$ is mm:ss.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authErrRateLimit": {
+    "message": "Too many requests. Please wait a few minutes and try again.",
+    "description": "Auth error: HTTP 429 from the server."
+  },
+  "authErrUndeliverable": {
+    "message": "Could not deliver the email. Try again or check the address.",
+    "description": "Auth error: HTTP 502 (email delivery failed) from the server."
+  },
+  "authErrEmailNotAccepted": {
+    "message": "Disposable / temporary email providers are not accepted. Please use a permanent address.",
+    "description": "Auth error: HTTP 422 — the email address was not accepted."
+  },
+  "authErrBadEmail": {
+    "message": "That doesn't look like a valid email address.",
+    "description": "Auth error: HTTP 400 (server rejected the email format)."
+  },
+  "authErrUnknown": {
+    "message": "Something went wrong. Please try again.",
+    "description": "Auth error: generic fallback when no specific status applies."
+  },
+  "loadError": {
+    "message": "Something went wrong. Please try again.",
+    "description": "Shown when the popup could not read locally stored data (history, stats, export)."
+  },
+  "errOffline": {
+    "message": "You appear to be offline. Try again once you reconnect.",
+    "description": "Error copy for RuntimeErrorCode 'network': the request never reached the server."
+  },
+  "errRateLimited": {
+    "message": "Too many requests. Wait a moment and try again.",
+    "description": "Error copy for RuntimeErrorCode 'rate_limited' (HTTP 429)."
+  },
+  "errServerBusy": {
+    "message": "The server is having trouble. Try again in a minute.",
+    "description": "Error copy for RuntimeErrorCode 'server' (HTTP 5xx)."
+  },
+  "authErrTooManyTries": {
+    "message": "Too many wrong codes. Try again later.",
+    "description": "Auth error: HTTP 423, shown as the too-many-wrong-codes message."
+  },
+  "authErrCodeInvalid": {
+    "message": "That code is incorrect or has expired.",
+    "description": "Auth error: HTTP 401 (wrong or expired OTP code)."
+  },
+  "authErrVerifyFailed": {
+    "message": "Verification failed. Please try again.",
+    "description": "Auth error: generic fallback for OTP verification failures."
+  },
+  "searchResultsCount": {
+    "message": "$COUNT$ results",
+    "description": "Screen-reader announcement after a search/filter updates a list. $COUNT$ is the number of results.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "reportSendError": {
+    "message": "Could not send the report. Check your connection and try again.",
+    "description": "Error shown when submitting a bug report fails."
+  },
+  "onboardingTitle": {
+    "message": "Emojery is ready",
+    "description": "Heading and <title> of the post-install onboarding page."
+  },
+  "onboardingTagline": {
+    "message": "React to posts, videos and products with any emoji.",
+    "description": "Onboarding-page subheading."
+  },
+  "onboardingStepPinTitle": {
+    "message": "Pin it",
+    "description": "Onboarding page, step 1 title — pin the extension to the toolbar."
+  },
+  "onboardingStepPinBody": {
+    "message": "Click the puzzle-piece icon in the toolbar and pin Emojery so it stays in reach.",
+    "description": "Onboarding page, step 1 body — how to pin via the browser's puzzle-piece extensions menu."
+  },
+  "onboardingStepPinDone": {
+    "message": "Pinned!",
+    "description": "Replaces the step-1 body once the extension is detected as pinned."
+  },
+  "onboardingStepSpotTitle": {
+    "message": "Spot the button",
+    "description": "Onboarding page, step 2 title — where the injected button appears."
+  },
+  "onboardingStepSpotBody": {
+    "message": "A small emoji button appears next to Like, Star or Share on supported pages.",
+    "description": "Onboarding page, step 2 body."
+  },
+  "onboardingStepReactTitle": {
+    "message": "React",
+    "description": "Onboarding page, step 3 title — pick an emoji."
+  },
+  "onboardingStepReactBody": {
+    "message": "Pick any emoji you like. Counts are public. Sign in once at your first reaction, then just react.",
+    "description": "Onboarding page, step 3 body."
+  },
+  "onboardingTryBtn": {
+    "message": "Try it live",
+    "description": "Onboarding-page primary button; opens a live supported page with the picker auto-opened."
+  },
+  "onboardingSitesHeading": {
+    "message": "Works on",
+    "description": "Onboarding-page heading above the list of supported site names."
+  },
+  "gateTitle": {
+    "message": "One step left",
+    "description": "Title of the sign-in gate shown after a signed-out user picks a reaction."
+  },
+  "gateBody": {
+    "message": "Sign in with your email and a verification code to make your reaction count.",
+    "description": "Body of the sign-in gate: what signing in takes and why it matters."
+  },
+  "gateSignInBtn": {
+    "message": "Sign in & react",
+    "description": "Primary button of the sign-in gate; opens the extension's auth tab."
+  },
+  "coachTitle": {
+    "message": "New: react with any emoji",
+    "description": "Title of the one-time tooltip shown next to the first injected trigger."
+  },
+  "coachBody": {
+    "message": "That's Emojery — one click for the full emoji palette.",
+    "description": "Body of the one-time tooltip."
+  },
+  "coachDismissAria": {
+    "message": "Dismiss",
+    "description": "Accessible label of the tooltip's close button."
+  },
+  "onboardingStepInstallTitle": {
+    "message": "Install Emojery",
+    "description": "Onboarding page, checklist step 0 — already done by the time the page opens."
+  },
+  "onboardingProgress": {
+    "message": "$DONE$ of $TOTAL$ done",
+    "description": "Onboarding-page progress label under the checklist. $DONE$ and $TOTAL$ are step counts.",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
+  },
+  "onboardingAllSet": {
+    "message": "All set!",
+    "description": "Replaces the progress label once every checklist step is ticked."
+  }
+}

@@ -1,0 +1,616 @@
+{
+  "extName": {
+    "message": "Emojery"
+  },
+  "extShortName": {
+    "message": "Emojery"
+  },
+  "extDescription": {
+    "message": "Tukar setiap butang Suka jadi palet emoji penuh."
+  },
+  "extActionTitle": {
+    "message": "Emojery"
+  },
+  "popupHeading": {
+    "message": "Emojery"
+  },
+  "popupTitle": {
+    "message": "Emojery"
+  },
+  "tabSettings": {
+    "message": "Tetapan"
+  },
+  "tabHistory": {
+    "message": "Sejarah"
+  },
+  "tabAccount": {
+    "message": "Akaun"
+  },
+  "tabReport": {
+    "message": "Laporan"
+  },
+  "settingEnabled": {
+    "message": "Didayakan"
+  },
+  "settingEnabledHint": {
+    "message": "Suis utama untuk semua tapak yang disokong"
+  },
+  "settingReplaceNative": {
+    "message": "Sembunyikan butang asal"
+  },
+  "settingReplaceNativeHint": {
+    "message": "Sembunyikan Bintang/Suka dan gunakan pemilih"
+  },
+  "settingAnimations": {
+    "message": "Animasi reaksi"
+  },
+  "settingAnimationsHint": {
+    "message": "Tunjukkan kesan emoji apabila kiraan muncul atau anda bertindak balas"
+  },
+  "settingTheme": {
+    "message": "Tema"
+  },
+  "settingThemeHint": {
+    "message": "Ikut pelayar, atau sentiasa guna tema cerah atau gelap"
+  },
+  "settingDebug": {
+    "message": "Nyahpepijat"
+  },
+  "settingDebugHint": {
+    "message": "Hidupkan mod nyahpepijat (untuk pembangun)"
+  },
+  "themeSystem": {
+    "message": "Sistem"
+  },
+  "themeLight": {
+    "message": "Cerah"
+  },
+  "themeDark": {
+    "message": "Gelap"
+  },
+  "settingAutoTrigger": {
+    "message": "Tekan butang asal secara automatik"
+  },
+  "settingAutoTriggerHint": {
+    "message": "Cerminkan emoji anda pada butang Suka/Tidak suka laman"
+  },
+  "sentimentIntro": {
+    "message": "Seret emoji antara senarai, atau ketik emoji kemudian ketik senarai."
+  },
+  "sentimentPositiveZone": {
+    "message": "Menekan Suka / Undi naik"
+  },
+  "sentimentNegativeZone": {
+    "message": "Menekan Tidak suka / Undi turun"
+  },
+  "sentimentNeutralZone": {
+    "message": "Tidak menekan apa-apa"
+  },
+  "sentimentReset": {
+    "message": "Tetapkan semula kepada lalai"
+  },
+  "settingAnalyticsConsent": {
+    "message": "Pandangan komuniti"
+  },
+  "settingAnalyticsConsentHint": {
+    "message": "Masukkan tindak balas saya dalam statistik wilayah"
+  },
+  "sectionPerSite": {
+    "message": "Hanya tapak terpilih"
+  },
+  "sectionPerSiteHint": {
+    "message": "Pilih tapak mana yang menunjukkan pemilih"
+  },
+  "perSiteToggleAria": {
+    "message": "Tunjukkan pemilih di $SITE$",
+    "placeholders": {
+      "site": {
+        "content": "$1",
+        "example": "Facebook"
+      }
+    }
+  },
+  "signInBtn": {
+    "message": "Log masuk"
+  },
+  "signInMsgAccount": {
+    "message": "Log masuk untuk mengurus akaun anda."
+  },
+  "signInMsgHistory": {
+    "message": "Log masuk untuk melihat sejarah reaksi anda."
+  },
+  "signInMsgReport": {
+    "message": "Log masuk untuk menghantar laporan pepijat."
+  },
+  "signedInLabel": {
+    "message": "Log masuk"
+  },
+  "signOutBtn": {
+    "message": "Log keluar"
+  },
+  "deleteAccountLabel": {
+    "message": "Padam akaun"
+  },
+  "deleteAccountHint": {
+    "message": "Alih keluar rekod & reaksi anda"
+  },
+  "deleteAccountBtn": {
+    "message": "Padam"
+  },
+  "deleteAccountConfirm": {
+    "message": "Padam akaun Emojery anda?\n\nTindakan ini kekal dan tidak boleh dibatalkan. Rekod pengguna anda akan dipadam dan kiraan untuk setiap reaksi yang anda hantar sebelum ini akan dikurangkan."
+  },
+  "deleteAccountSlide": {
+    "message": "Leret untuk padam"
+  },
+  "deleteAccountProgress": {
+    "message": "Memadamkan akaun anda… jangan tutup tetingkap ini."
+  },
+  "cancelBtn": {
+    "message": "Batal"
+  },
+  "historyEmpty": {
+    "message": "Belum ada reaksi. Klik emoji pada mana-mana halaman yang disokong!"
+  },
+  "filterSitesPlaceholder": {
+    "message": "Tapis tapak"
+  },
+  "historyYesterday": {
+    "message": "Semalam"
+  },
+  "historyToday": {
+    "message": "Hari ini"
+  },
+  "historySearchPlaceholder": {
+    "message": "Cari reaksi"
+  },
+  "historyNoMatches": {
+    "message": "Tiada reaksi sepadan dengan carian anda."
+  },
+  "facetAllSites": {
+    "message": "Semua tapak"
+  },
+  "facetSiteAria": {
+    "message": "Tapis mengikut tapak"
+  },
+  "facetRangeAria": {
+    "message": "Tapis mengikut masa"
+  },
+  "rangeAll": {
+    "message": "Sepanjang masa"
+  },
+  "rangeToday": {
+    "message": "Hari ini"
+  },
+  "range7d": {
+    "message": "7 hari"
+  },
+  "range30d": {
+    "message": "30 hari"
+  },
+  "range365d": {
+    "message": "1 tahun"
+  },
+  "exportBtn": {
+    "message": "Eksport"
+  },
+  "importBtn": {
+    "message": "Import"
+  },
+  "importDone": {
+    "message": "$COUNT$ reaksi diimport.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "128"
+      }
+    }
+  },
+  "importError": {
+    "message": "Fail itu bukan eksport Emojery yang sah."
+  },
+  "importReplaceWarn": {
+    "message": "Import akan menggantikan sejarah semasa anda dengan fail ini. Tindakan ini tidak boleh dibuat asal."
+  },
+  "importReplaceConfirm": {
+    "message": "Ganti"
+  },
+  "importReplaceCountAria": {
+    "message": "Reaksi tersimpan: $STORED$. Dalam fail ini: $INCOMING$.",
+    "placeholders": {
+      "stored": {
+        "content": "$1",
+        "example": "128"
+      },
+      "incoming": {
+        "content": "$2",
+        "example": "64"
+      }
+    }
+  },
+  "exportRowLabel": {
+    "message": "Eksport sejarah"
+  },
+  "exportRowHint": {
+    "message": "Simpan ke fail sandaran"
+  },
+  "importRowLabel": {
+    "message": "Import sejarah"
+  },
+  "importRowHint": {
+    "message": "Ganti daripada fail sandaran"
+  },
+  "relativeJustNow": {
+    "message": "baru sahaja"
+  },
+  "relativeMinutes": {
+    "message": "$M$ min",
+    "placeholders": {
+      "m": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "relativeHours": {
+    "message": "$H$ j",
+    "placeholders": {
+      "h": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "relativeDays": {
+    "message": "$D$ h",
+    "placeholders": {
+      "d": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "reportUnsupportedPage": {
+    "message": "Sila buka halaman di mana reaksi tidak berfungsi, kemudian buka menu ini sekali lagi untuk melaporkannya."
+  },
+  "reportSent": {
+    "message": "Terima kasih — laporan dihantar."
+  },
+  "reportAnother": {
+    "message": "Laporkan isu lain"
+  },
+  "reportPlaceholder": {
+    "message": "Terangkan masalah anda secara ringkas (10-500 aksara)"
+  },
+  "reportSendBtn": {
+    "message": "Hantar laporan"
+  },
+  "pickerSearchPlaceholder": {
+    "message": "Cari"
+  },
+  "pickerSearchAriaLabel": {
+    "message": "Cari emoji"
+  },
+  "pickerNoMatches": {
+    "message": "Tiada emoji sepadan dengan \"$QUERY$\"",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "asdf"
+      }
+    }
+  },
+  "pickerRecentlyUsed": {
+    "message": "Digunakan baru-baru ini"
+  },
+  "pickerPopular": {
+    "message": "Popular"
+  },
+  "pickerClearRecent": {
+    "message": "Kosongkan"
+  },
+  "pickerCategoriesAria": {
+    "message": "Kategori emoji"
+  },
+  "pickerDialogAria": {
+    "message": "Beri reaksi atau lihat pecahan"
+  },
+  "pickerKeyboardHint": {
+    "message": "Gunakan kekunci anak panah untuk bergerak antara emoji, Enter untuk bereaksi, Escape untuk menutup."
+  },
+  "pickerSearchResultsGroupAria": {
+    "message": "Hasil carian"
+  },
+  "pickerShowMore": {
+    "message": "Tunjuk lagi"
+  },
+  "pickerShowLess": {
+    "message": "Tunjuk kurang"
+  },
+  "pickerAddReaction": {
+    "message": "Tambah reaksi"
+  },
+  "pickerYourReaction": {
+    "message": "Reaksi anda: $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "pickerReactionsAria": {
+    "message": "$COUNT$ reaksi — bertindak balas atau lihat pecahan",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pickerReactWith": {
+    "message": "Bertindak balas dengan $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "categorySmileys": {
+    "message": "Smiley & Emosi"
+  },
+  "categoryGestures": {
+    "message": "Gerak isyarat"
+  },
+  "categoryHearts": {
+    "message": "Hati"
+  },
+  "categoryAnimals": {
+    "message": "Haiwan & alam semula jadi"
+  },
+  "categoryFood": {
+    "message": "Makanan & minuman"
+  },
+  "categoryActivities": {
+    "message": "Aktiviti"
+  },
+  "categoryTravel": {
+    "message": "Perjalanan & tempat"
+  },
+  "categoryObjects": {
+    "message": "Objek"
+  },
+  "categorySymbols": {
+    "message": "Simbol"
+  },
+  "authPageTitle": {
+    "message": "Emojery — Log masuk"
+  },
+  "authSignInTitle": {
+    "message": "Log masuk untuk bertindak balas"
+  },
+  "authSignInTagline": {
+    "message": "Kami akan menghantar kod pengesahan melalui e-mel"
+  },
+  "authEmailLabel": {
+    "message": "E-mel"
+  },
+  "authSendCodeBtn": {
+    "message": "Hantar kod"
+  },
+  "authSendingBtn": {
+    "message": "Menghantar…"
+  },
+  "authAgreeIntro": {
+    "message": "Saya bersetuju dengan "
+  },
+  "authTermsLinkLabel": {
+    "message": "Syarat Perkhidmatan"
+  },
+  "authAgreeConjunction": {
+    "message": " dan "
+  },
+  "authPrivacyLinkLabel": {
+    "message": "Dasar Privasi"
+  },
+  "authAgreeOutro": {
+    "message": "."
+  },
+  "authCodeTitle": {
+    "message": "Masukkan kod anda"
+  },
+  "authCodeTagline": {
+    "message": "Kami menghantar kod ke $EMAIL$. Ia akan tamat dalam 10 minit.",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authCodeLabel": {
+    "message": "Kod pengesahan"
+  },
+  "authVerifyingBtn": {
+    "message": "Mengesahkan…"
+  },
+  "authVerifyBtn": {
+    "message": "Log masuk"
+  },
+  "authUseDifferentEmail": {
+    "message": "Gunakan e-mel lain"
+  },
+  "authDoneTitle": {
+    "message": "Anda telah log masuk"
+  },
+  "authDoneTagline": {
+    "message": "Anda boleh menutup tab ini dan bertindak balas pada mana-mana halaman yang disokong."
+  },
+  "dataConsentTitle": {
+    "message": "Apa yang Emojery hantar"
+  },
+  "dataConsentBody": {
+    "message": "Untuk mengira dan berkongsi tindak balas, Emojery menghantar alamat halaman yang anda beri tindak balas ke pelayannya, bersama pengecam pemasangan dan sesi rawak yang tidak diterbitkan daripada anda. Semasa log masuk, e-mel anda dihantar sekali sahaja untuk menyampaikan kod sekali guna; hanya cincangan sehala bagi e-mel itu disimpan sebagai pengenal akaun anda, dan sejarah tindak balas anda kekal pada peranti ini. Konteks pilihan kekal dimatikan dalam pelayar ini."
+  },
+  "dataConsentContinueBtn": {
+    "message": "Teruskan"
+  },
+  "authSendThrottle": {
+    "message": "Anda baru sahaja meminta kod. Anda boleh meminta yang lain dalam $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authResendCooldown": {
+    "message": "Kami telah menghantar kod ke alamat ini. Anda boleh meminta yang baharu dalam $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authEnterPendingCode": {
+    "message": "Masukkan kod yang kami hantar ke $EMAIL$",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authResendBtn": {
+    "message": "Hantar semula kod"
+  },
+  "authResendInBtn": {
+    "message": "Hantar semula kod dalam $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authErrRateLimit": {
+    "message": "Terlalu banyak permintaan. Sila tunggu beberapa minit dan cuba lagi."
+  },
+  "authErrUndeliverable": {
+    "message": "Tidak dapat menghantar e-mel. Cuba lagi atau semak alamat."
+  },
+  "authErrEmailNotAccepted": {
+    "message": "Alamat e-mel ini tidak boleh menerima kod log masuk. Sila gunakan alamat tetap."
+  },
+  "authErrBadEmail": {
+    "message": "Ini tidak kelihatan seperti alamat e-mel yang sah."
+  },
+  "authErrUnknown": {
+    "message": "Sesuatu yang tidak kena. Sila cuba lagi."
+  },
+  "loadError": {
+    "message": "Sesuatu yang tidak kena. Sila cuba lagi."
+  },
+  "errOffline": {
+    "message": "Nampaknya anda di luar talian. Cuba lagi apabila sambungan pulih."
+  },
+  "errRateLimited": {
+    "message": "Terlalu banyak permintaan. Tunggu sebentar dan cuba lagi."
+  },
+  "errServerBusy": {
+    "message": "Pelayan menghadapi masalah. Cuba lagi dalam seminit."
+  },
+  "authErrTooManyTries": {
+    "message": "Terlalu banyak kod salah. Cuba lagi kemudian."
+  },
+  "authErrCodeInvalid": {
+    "message": "Kod itu tidak betul atau telah tamat tempoh."
+  },
+  "authErrVerifyFailed": {
+    "message": "Pengesahan gagal. Sila cuba lagi."
+  },
+  "searchResultsCount": {
+    "message": "$COUNT$ hasil",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "reportSendError": {
+    "message": "Laporan tidak dapat dihantar. Semak sambungan anda dan cuba lagi."
+  },
+  "onboardingTitle": {
+    "message": "Emojery sedia digunakan"
+  },
+  "onboardingTagline": {
+    "message": "Bertindak balas pada siaran, video dan produk dengan sebarang emoji."
+  },
+  "onboardingStepPinTitle": {
+    "message": "Pinkan ikon"
+  },
+  "onboardingStepPinBody": {
+    "message": "Klik ikon teka-teki pada bar alat dan pinkan Emojery supaya sentiasa mudah dicapai."
+  },
+  "onboardingStepPinDone": {
+    "message": "Telah dipin!"
+  },
+  "onboardingStepSpotTitle": {
+    "message": "Cari butang"
+  },
+  "onboardingStepSpotBody": {
+    "message": "Butang emoji kecil muncul di sebelah Suka, Star atau Kongsi pada halaman yang disokong."
+  },
+  "onboardingStepReactTitle": {
+    "message": "Bertindak balas"
+  },
+  "onboardingStepReactBody": {
+    "message": "Pilih mana-mana emoji. Kiraan adalah umum. Log masuk sekali pada reaksi pertama, selepas itu bertindak balas sahaja."
+  },
+  "onboardingTryBtn": {
+    "message": "Cuba secara langsung"
+  },
+  "onboardingSitesHeading": {
+    "message": "Berfungsi di"
+  },
+  "gateTitle": {
+    "message": "Tinggal satu langkah"
+  },
+  "gateBody": {
+    "message": "Log masuk dengan e-mel anda dan kod pengesahan supaya reaksi anda dikira."
+  },
+  "gateSignInBtn": {
+    "message": "Log masuk & bertindak balas"
+  },
+  "coachTitle": {
+    "message": "Baharu: bertindak balas dengan sebarang emoji"
+  },
+  "coachBody": {
+    "message": "Inilah Emojery — satu klik, seluruh palet emoji."
+  },
+  "coachDismissAria": {
+    "message": "Tutup"
+  },
+  "onboardingStepInstallTitle": {
+    "message": "Pasang Emojery"
+  },
+  "onboardingProgress": {
+    "message": "$DONE$ daripada $TOTAL$ selesai",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
+  },
+  "onboardingAllSet": {
+    "message": "Semua sedia!"
+  }
+}

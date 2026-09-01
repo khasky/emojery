@@ -1,0 +1,616 @@
+{
+  "extName": {
+    "message": "Emojery"
+  },
+  "extShortName": {
+    "message": "Emojery"
+  },
+  "extDescription": {
+    "message": "Alakíts minden tetszik gombot teljes emoji-palettává."
+  },
+  "extActionTitle": {
+    "message": "Emojery"
+  },
+  "popupHeading": {
+    "message": "Emojery"
+  },
+  "popupTitle": {
+    "message": "Emojery"
+  },
+  "tabSettings": {
+    "message": "Beállítások"
+  },
+  "tabHistory": {
+    "message": "Előzmények"
+  },
+  "tabAccount": {
+    "message": "Fiók"
+  },
+  "tabReport": {
+    "message": "Jelentés"
+  },
+  "settingEnabled": {
+    "message": "Engedélyezve"
+  },
+  "settingEnabledHint": {
+    "message": "Főkapcsoló az összes támogatott webhelyhez"
+  },
+  "settingReplaceNative": {
+    "message": "Eredeti gombok elrejtése"
+  },
+  "settingReplaceNativeHint": {
+    "message": "Csillag/Tetszik elrejtése a választó javára"
+  },
+  "settingAnimations": {
+    "message": "Reakcióanimációk"
+  },
+  "settingAnimationsHint": {
+    "message": "Emoji-effektek mutatása, amikor megjelennek a számlálók vagy reagál"
+  },
+  "settingTheme": {
+    "message": "Téma"
+  },
+  "settingThemeHint": {
+    "message": "Kövesse a böngészőt, vagy mindig világos vagy sötét legyen"
+  },
+  "settingDebug": {
+    "message": "Hibakeresés"
+  },
+  "settingDebugHint": {
+    "message": "Hibakeresési mód bekapcsolása (fejlesztőknek)"
+  },
+  "themeSystem": {
+    "message": "Rendszer"
+  },
+  "themeLight": {
+    "message": "Világos"
+  },
+  "themeDark": {
+    "message": "Sötét"
+  },
+  "settingAutoTrigger": {
+    "message": "Eredeti gombok automatikus megnyomása"
+  },
+  "settingAutoTriggerHint": {
+    "message": "Emoji tükrözése az oldal Tetszik/Nem tetszik gombjára"
+  },
+  "sentimentIntro": {
+    "message": "Húzz egy emojit a listák között, vagy koppints rá, majd egy listára."
+  },
+  "sentimentPositiveZone": {
+    "message": "Megnyomja a Tetszik / Felszavazás gombot"
+  },
+  "sentimentNegativeZone": {
+    "message": "Megnyomja a Nem tetszik / Leszavazás gombot"
+  },
+  "sentimentNeutralZone": {
+    "message": "Semmit sem nyom meg"
+  },
+  "sentimentReset": {
+    "message": "Alapértelmezés visszaállítása"
+  },
+  "settingAnalyticsConsent": {
+    "message": "Közösségi betekintés"
+  },
+  "settingAnalyticsConsentHint": {
+    "message": "Reakcióim beszámítása a regionális kimutatásokba"
+  },
+  "sectionPerSite": {
+    "message": "Csak a kiválasztott webhelyek"
+  },
+  "sectionPerSiteHint": {
+    "message": "Válaszd ki, mely webhelyeken jelenjen meg a választó"
+  },
+  "perSiteToggleAria": {
+    "message": "Választó megjelenítése: $SITE$",
+    "placeholders": {
+      "site": {
+        "content": "$1",
+        "example": "Facebook"
+      }
+    }
+  },
+  "signInBtn": {
+    "message": "Bejelentkezés"
+  },
+  "signInMsgAccount": {
+    "message": "Jelentkezzen be a fiók kezeléséhez."
+  },
+  "signInMsgHistory": {
+    "message": "Jelentkezzen be a reakcióelőzmények megtekintéséhez."
+  },
+  "signInMsgReport": {
+    "message": "Jelentkezzen be hibabejelentés küldéséhez."
+  },
+  "signedInLabel": {
+    "message": "Bejelentkezve"
+  },
+  "signOutBtn": {
+    "message": "Kijelentkezés"
+  },
+  "deleteAccountLabel": {
+    "message": "Fiók törlése"
+  },
+  "deleteAccountHint": {
+    "message": "Rekordod és reakcióid eltávolítása"
+  },
+  "deleteAccountBtn": {
+    "message": "Törlés"
+  },
+  "deleteAccountConfirm": {
+    "message": "Emojery fiók törlése?\n\nEz a művelet végleges és nem vonható vissza. A felhasználói rekordja törlődik, és az összes korábban beküldött reakció számlálója csökken."
+  },
+  "deleteAccountSlide": {
+    "message": "Húzd a törléshez"
+  },
+  "deleteAccountProgress": {
+    "message": "Fiókod törlése folyamatban… ne zárd be ezt az ablakot."
+  },
+  "cancelBtn": {
+    "message": "Mégse"
+  },
+  "historyEmpty": {
+    "message": "Még nincsenek reakciók. Kattintson egy emojira bármely támogatott oldalon!"
+  },
+  "filterSitesPlaceholder": {
+    "message": "Webhelyek szűrése"
+  },
+  "historyYesterday": {
+    "message": "Tegnap"
+  },
+  "historyToday": {
+    "message": "Ma"
+  },
+  "historySearchPlaceholder": {
+    "message": "Reakciók keresése"
+  },
+  "historyNoMatches": {
+    "message": "Nincs a keresésnek megfelelő reakció."
+  },
+  "facetAllSites": {
+    "message": "Összes webhely"
+  },
+  "facetSiteAria": {
+    "message": "Szűrés webhely szerint"
+  },
+  "facetRangeAria": {
+    "message": "Szűrés idő szerint"
+  },
+  "rangeAll": {
+    "message": "Teljes időszak"
+  },
+  "rangeToday": {
+    "message": "Ma"
+  },
+  "range7d": {
+    "message": "7 nap"
+  },
+  "range30d": {
+    "message": "30 nap"
+  },
+  "range365d": {
+    "message": "1 év"
+  },
+  "exportBtn": {
+    "message": "Exportálás"
+  },
+  "importBtn": {
+    "message": "Importálás"
+  },
+  "importDone": {
+    "message": "$COUNT$ reakció importálva.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "128"
+      }
+    }
+  },
+  "importError": {
+    "message": "Ez nem érvényes Emojery exportfájl."
+  },
+  "importReplaceWarn": {
+    "message": "Az importálás lecseréli a jelenlegi előzményeidet erre a fájlra. Ez nem vonható vissza."
+  },
+  "importReplaceConfirm": {
+    "message": "Csere"
+  },
+  "importReplaceCountAria": {
+    "message": "Mentett reakciók: $STORED$. Ebben a fájlban: $INCOMING$.",
+    "placeholders": {
+      "stored": {
+        "content": "$1",
+        "example": "128"
+      },
+      "incoming": {
+        "content": "$2",
+        "example": "64"
+      }
+    }
+  },
+  "exportRowLabel": {
+    "message": "Előzmények exportálása"
+  },
+  "exportRowHint": {
+    "message": "Mentés biztonsági mentési fájlba"
+  },
+  "importRowLabel": {
+    "message": "Előzmények importálása"
+  },
+  "importRowHint": {
+    "message": "Csere biztonsági mentési fájlból"
+  },
+  "relativeJustNow": {
+    "message": "épp most"
+  },
+  "relativeMinutes": {
+    "message": "$M$ p",
+    "placeholders": {
+      "m": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "relativeHours": {
+    "message": "$H$ ó",
+    "placeholders": {
+      "h": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "relativeDays": {
+    "message": "$D$ n",
+    "placeholders": {
+      "d": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "reportUnsupportedPage": {
+    "message": "Nyissa meg azt az oldalt, ahol a reakciók nem működnek, majd nyissa meg újra ezt a menüt a jelentéshez."
+  },
+  "reportSent": {
+    "message": "Köszönjük — jelentés elküldve."
+  },
+  "reportAnother": {
+    "message": "Másik probléma jelentése"
+  },
+  "reportPlaceholder": {
+    "message": "Írja le röviden a problémát (10-500 karakter)"
+  },
+  "reportSendBtn": {
+    "message": "Jelentés küldése"
+  },
+  "pickerSearchPlaceholder": {
+    "message": "Keresés"
+  },
+  "pickerSearchAriaLabel": {
+    "message": "Emojik keresése"
+  },
+  "pickerNoMatches": {
+    "message": "Nincs találat erre: „$QUERY$\"",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "asdf"
+      }
+    }
+  },
+  "pickerRecentlyUsed": {
+    "message": "Nemrég használtak"
+  },
+  "pickerPopular": {
+    "message": "Népszerű"
+  },
+  "pickerClearRecent": {
+    "message": "Törlés"
+  },
+  "pickerCategoriesAria": {
+    "message": "Emoji kategóriák"
+  },
+  "pickerDialogAria": {
+    "message": "Reagálj vagy nézd meg a megoszlást"
+  },
+  "pickerKeyboardHint": {
+    "message": "A nyílbillentyűkkel válthatsz az emojik között, az Enter reagál, az Escape bezár."
+  },
+  "pickerSearchResultsGroupAria": {
+    "message": "Találatok"
+  },
+  "pickerShowMore": {
+    "message": "Több megjelenítése"
+  },
+  "pickerShowLess": {
+    "message": "Kevesebb megjelenítése"
+  },
+  "pickerAddReaction": {
+    "message": "Reakció hozzáadása"
+  },
+  "pickerYourReaction": {
+    "message": "Az Ön reakciója: $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "pickerReactionsAria": {
+    "message": "$COUNT$ reakció — reagáljon vagy nézze meg a részletes bontást",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pickerReactWith": {
+    "message": "Reagálás: $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "categorySmileys": {
+    "message": "Mosolygók és érzelmek"
+  },
+  "categoryGestures": {
+    "message": "Gesztusok"
+  },
+  "categoryHearts": {
+    "message": "Szívek"
+  },
+  "categoryAnimals": {
+    "message": "Állatok és természet"
+  },
+  "categoryFood": {
+    "message": "Étel és ital"
+  },
+  "categoryActivities": {
+    "message": "Tevékenységek"
+  },
+  "categoryTravel": {
+    "message": "Utazás és helyek"
+  },
+  "categoryObjects": {
+    "message": "Tárgyak"
+  },
+  "categorySymbols": {
+    "message": "Szimbólumok"
+  },
+  "authPageTitle": {
+    "message": "Emojery — Bejelentkezés"
+  },
+  "authSignInTitle": {
+    "message": "Jelentkezzen be a reagáláshoz"
+  },
+  "authSignInTagline": {
+    "message": "Ellenőrző kódot küldünk e-mailben"
+  },
+  "authEmailLabel": {
+    "message": "E-mail"
+  },
+  "authSendCodeBtn": {
+    "message": "Kód küldése"
+  },
+  "authSendingBtn": {
+    "message": "Küldés…"
+  },
+  "authAgreeIntro": {
+    "message": "Elfogadom a "
+  },
+  "authTermsLinkLabel": {
+    "message": "Szolgáltatási feltételeket"
+  },
+  "authAgreeConjunction": {
+    "message": " és az "
+  },
+  "authPrivacyLinkLabel": {
+    "message": "Adatvédelmi szabályzatot"
+  },
+  "authAgreeOutro": {
+    "message": "."
+  },
+  "authCodeTitle": {
+    "message": "Adja meg a kódját"
+  },
+  "authCodeTagline": {
+    "message": "Kódot küldtünk a $EMAIL$ címre. 10 perc múlva lejár.",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authCodeLabel": {
+    "message": "Ellenőrző kód"
+  },
+  "authVerifyingBtn": {
+    "message": "Ellenőrzés…"
+  },
+  "authVerifyBtn": {
+    "message": "Bejelentkezés"
+  },
+  "authUseDifferentEmail": {
+    "message": "Másik e-mail használata"
+  },
+  "authDoneTitle": {
+    "message": "Bejelentkezett"
+  },
+  "authDoneTagline": {
+    "message": "Bezárhatja ezt a lapot és reagálhat bármely támogatott oldalon."
+  },
+  "dataConsentTitle": {
+    "message": "Mit küld az Emojery"
+  },
+  "dataConsentBody": {
+    "message": "A reakciók számlálásához és megosztásához az Emojery elküldi a szerverének annak az oldalnak a címét, amelyen reagál, valamint véletlenszerű telepítési és munkamenet-azonosítókat, amelyek nem az Ön adataiból származnak. Bejelentkezéskor az e-mail-címe egyszer kerül elküldésre az egyszeri kód kézbesítéséhez; csak annak egyirányú kivonatát tároljuk fiókazonosítóként, a reakcióelőzményei pedig ezen az eszközön maradnak. A választható környezeti adat ebben a böngészőben kikapcsolva marad."
+  },
+  "dataConsentContinueBtn": {
+    "message": "Tovább"
+  },
+  "authSendThrottle": {
+    "message": "Nemrég kért egy kódot. $TIME$ múlva kérhet másikat.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authResendCooldown": {
+    "message": "Már küldtünk egy kódot erre a címre. $TIME$ múlva kérhet újat.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authEnterPendingCode": {
+    "message": "Adja meg a(z) $EMAIL$ címre küldött kódot",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authResendBtn": {
+    "message": "Kód újraküldése"
+  },
+  "authResendInBtn": {
+    "message": "Kód újraküldése $TIME$ múlva",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authErrRateLimit": {
+    "message": "Túl sok kérés. Várjon néhány percet, és próbálja újra."
+  },
+  "authErrUndeliverable": {
+    "message": "Nem sikerült kézbesíteni az e-mailt. Próbálja újra, vagy ellenőrizze a címet."
+  },
+  "authErrEmailNotAccepted": {
+    "message": "Erre az e-mail címre nem küldhetők bejelentkezési kódok. Használjon állandó címet."
+  },
+  "authErrBadEmail": {
+    "message": "Ez nem tűnik érvényes e-mail címnek."
+  },
+  "authErrUnknown": {
+    "message": "Valami elromlott. Próbálja újra."
+  },
+  "loadError": {
+    "message": "Valami elromlott. Próbálja újra."
+  },
+  "errOffline": {
+    "message": "Úgy tűnik, nincs kapcsolat. Próbáld újra, ha helyreállt."
+  },
+  "errRateLimited": {
+    "message": "Túl sok kérés. Várj egy kicsit, és próbáld újra."
+  },
+  "errServerBusy": {
+    "message": "A kiszolgálón hiba történt. Próbáld újra egy perc múlva."
+  },
+  "authErrTooManyTries": {
+    "message": "Túl sok hibás kód. Próbálja újra később."
+  },
+  "authErrCodeInvalid": {
+    "message": "A kód hibás vagy lejárt."
+  },
+  "authErrVerifyFailed": {
+    "message": "Az ellenőrzés sikertelen. Próbálja újra."
+  },
+  "searchResultsCount": {
+    "message": "$COUNT$ találat",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "reportSendError": {
+    "message": "A jelentést nem sikerült elküldeni. Ellenőrizd a kapcsolatot, és próbáld újra."
+  },
+  "onboardingTitle": {
+    "message": "Az Emojery készen áll"
+  },
+  "onboardingTagline": {
+    "message": "Reagálj bejegyzésekre, videókra és termékekre bármilyen emojival."
+  },
+  "onboardingStepPinTitle": {
+    "message": "Rögzítsd az ikont"
+  },
+  "onboardingStepPinBody": {
+    "message": "Kattints a puzzle ikonra az eszköztáron, és rögzítsd az Emojeryt, hogy mindig kéznél legyen."
+  },
+  "onboardingStepPinDone": {
+    "message": "Rögzítve!"
+  },
+  "onboardingStepSpotTitle": {
+    "message": "Találd meg a gombot"
+  },
+  "onboardingStepSpotBody": {
+    "message": "A támogatott oldalakon a Tetszik, a Star vagy a Megosztás mellett megjelenik egy kis emoji gomb."
+  },
+  "onboardingStepReactTitle": {
+    "message": "Reagálj"
+  },
+  "onboardingStepReactBody": {
+    "message": "Válassz bármilyen emojit. A számlálók nyilvánosak. Jelentkezz be egyszer az első reakciódnál, utána már csak reagálj."
+  },
+  "onboardingTryBtn": {
+    "message": "Próbáld ki élőben"
+  },
+  "onboardingSitesHeading": {
+    "message": "Ezeken működik"
+  },
+  "gateTitle": {
+    "message": "Már csak egy lépés"
+  },
+  "gateBody": {
+    "message": "Jelentkezz be az e-mail-címeddel és egy megerősítő kóddal, hogy a reakciód számítson."
+  },
+  "gateSignInBtn": {
+    "message": "Bejelentkezés és reagálás"
+  },
+  "coachTitle": {
+    "message": "Újdonság: reagálj bármilyen emojival"
+  },
+  "coachBody": {
+    "message": "Ez az Emojery — egy kattintás, a teljes emoji-paletta."
+  },
+  "coachDismissAria": {
+    "message": "Bezárás"
+  },
+  "onboardingStepInstallTitle": {
+    "message": "Emojery telepítése"
+  },
+  "onboardingProgress": {
+    "message": "$TOTAL$-ból $DONE$ kész",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
+  },
+  "onboardingAllSet": {
+    "message": "Minden kész!"
+  }
+}

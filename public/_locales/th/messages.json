@@ -1,0 +1,616 @@
+{
+  "extName": {
+    "message": "Emojery"
+  },
+  "extShortName": {
+    "message": "Emojery"
+  },
+  "extDescription": {
+    "message": "เปลี่ยนทุกปุ่มถูกใจบนเว็บให้เป็นชุดอีโมจิเต็มรูปแบบ"
+  },
+  "extActionTitle": {
+    "message": "Emojery"
+  },
+  "popupHeading": {
+    "message": "Emojery"
+  },
+  "popupTitle": {
+    "message": "Emojery"
+  },
+  "tabSettings": {
+    "message": "การตั้งค่า"
+  },
+  "tabHistory": {
+    "message": "ประวัติ"
+  },
+  "tabAccount": {
+    "message": "บัญชี"
+  },
+  "tabReport": {
+    "message": "รายงาน"
+  },
+  "settingEnabled": {
+    "message": "เปิดใช้งาน"
+  },
+  "settingEnabledHint": {
+    "message": "สวิตช์หลักสำหรับเว็บไซต์ที่รองรับทั้งหมด"
+  },
+  "settingReplaceNative": {
+    "message": "ซ่อนปุ่มต้นฉบับ"
+  },
+  "settingReplaceNativeHint": {
+    "message": "ซ่อนดาว/ถูกใจและใช้ตัวเลือกแทน"
+  },
+  "settingAnimations": {
+    "message": "แอนิเมชันรีแอ็กชัน"
+  },
+  "settingAnimationsHint": {
+    "message": "แสดงเอฟเฟกต์อีโมจิเมื่อตัวนับปรากฏหรือคุณรีแอ็ก"
+  },
+  "settingTheme": {
+    "message": "ธีม"
+  },
+  "settingThemeHint": {
+    "message": "ตามเบราว์เซอร์ หรือใช้โหมดสว่างหรือมืดเสมอ"
+  },
+  "settingDebug": {
+    "message": "ดีบัก"
+  },
+  "settingDebugHint": {
+    "message": "เปิดโหมดดีบัก (สำหรับนักพัฒนา)"
+  },
+  "themeSystem": {
+    "message": "ระบบ"
+  },
+  "themeLight": {
+    "message": "สว่าง"
+  },
+  "themeDark": {
+    "message": "มืด"
+  },
+  "settingAutoTrigger": {
+    "message": "กดปุ่มต้นฉบับโดยอัตโนมัติ"
+  },
+  "settingAutoTriggerHint": {
+    "message": "สะท้อนอิโมจิของคุณไปยังปุ่มถูกใจ/ไม่ถูกใจของเว็บไซต์"
+  },
+  "sentimentIntro": {
+    "message": "ลากอิโมจิระหว่างรายการ หรือแตะอิโมจิแล้วแตะรายการ"
+  },
+  "sentimentPositiveZone": {
+    "message": "กดถูกใจ / โหวตขึ้น"
+  },
+  "sentimentNegativeZone": {
+    "message": "กดไม่ถูกใจ / โหวตลง"
+  },
+  "sentimentNeutralZone": {
+    "message": "ไม่กดอะไรเลย"
+  },
+  "sentimentReset": {
+    "message": "รีเซ็ตเป็นค่าเริ่มต้น"
+  },
+  "settingAnalyticsConsent": {
+    "message": "ข้อมูลเชิงลึกของชุมชน"
+  },
+  "settingAnalyticsConsentHint": {
+    "message": "นับรีแอ็กของฉันในสถิติรายภูมิภาค"
+  },
+  "sectionPerSite": {
+    "message": "เฉพาะเว็บไซต์ที่เลือก"
+  },
+  "sectionPerSiteHint": {
+    "message": "เลือกเว็บไซต์ที่จะแสดงตัวเลือก"
+  },
+  "perSiteToggleAria": {
+    "message": "แสดงตัวเลือกบน $SITE$",
+    "placeholders": {
+      "site": {
+        "content": "$1",
+        "example": "Facebook"
+      }
+    }
+  },
+  "signInBtn": {
+    "message": "เข้าสู่ระบบ"
+  },
+  "signInMsgAccount": {
+    "message": "เข้าสู่ระบบเพื่อจัดการบัญชีของคุณ"
+  },
+  "signInMsgHistory": {
+    "message": "เข้าสู่ระบบเพื่อดูประวัติรีแอ็กชันของคุณ"
+  },
+  "signInMsgReport": {
+    "message": "เข้าสู่ระบบเพื่อส่งรายงานข้อผิดพลาด"
+  },
+  "signedInLabel": {
+    "message": "เข้าสู่ระบบแล้ว"
+  },
+  "signOutBtn": {
+    "message": "ออกจากระบบ"
+  },
+  "deleteAccountLabel": {
+    "message": "ลบบัญชี"
+  },
+  "deleteAccountHint": {
+    "message": "ลบบันทึกและรีแอ็กชันของคุณ"
+  },
+  "deleteAccountBtn": {
+    "message": "ลบ"
+  },
+  "deleteAccountConfirm": {
+    "message": "ลบบัญชี Emojery ของคุณหรือไม่?\n\nการกระทำนี้ถาวรและไม่สามารถยกเลิกได้ บันทึกผู้ใช้ของคุณจะถูกลบและตัวนับสำหรับทุกรีแอ็กชันที่คุณส่งมาก่อนหน้านี้จะลดลง"
+  },
+  "deleteAccountSlide": {
+    "message": "เลื่อนเพื่อลบ"
+  },
+  "deleteAccountProgress": {
+    "message": "กำลังลบบัญชีของคุณ… อย่าปิดหน้าต่างนี้"
+  },
+  "cancelBtn": {
+    "message": "ยกเลิก"
+  },
+  "historyEmpty": {
+    "message": "ยังไม่มีรีแอ็กชัน คลิกอีโมจิบนหน้าที่รองรับ!"
+  },
+  "filterSitesPlaceholder": {
+    "message": "กรองเว็บไซต์"
+  },
+  "historyYesterday": {
+    "message": "เมื่อวาน"
+  },
+  "historyToday": {
+    "message": "วันนี้"
+  },
+  "historySearchPlaceholder": {
+    "message": "ค้นหารีแอ็กชัน"
+  },
+  "historyNoMatches": {
+    "message": "ไม่มีรีแอ็กชันที่ตรงกับการค้นหาของคุณ"
+  },
+  "facetAllSites": {
+    "message": "ทุกเว็บไซต์"
+  },
+  "facetSiteAria": {
+    "message": "กรองตามเว็บไซต์"
+  },
+  "facetRangeAria": {
+    "message": "กรองตามเวลา"
+  },
+  "rangeAll": {
+    "message": "ตลอดเวลา"
+  },
+  "rangeToday": {
+    "message": "วันนี้"
+  },
+  "range7d": {
+    "message": "7 วัน"
+  },
+  "range30d": {
+    "message": "30 วัน"
+  },
+  "range365d": {
+    "message": "1 ปี"
+  },
+  "exportBtn": {
+    "message": "ส่งออก"
+  },
+  "importBtn": {
+    "message": "นำเข้า"
+  },
+  "importDone": {
+    "message": "นำเข้ารีแอ็กชัน $COUNT$ รายการแล้ว",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "128"
+      }
+    }
+  },
+  "importError": {
+    "message": "ไฟล์นี้ไม่ใช่ไฟล์ส่งออกของ Emojery ที่ถูกต้อง"
+  },
+  "importReplaceWarn": {
+    "message": "การนำเข้าจะแทนที่ประวัติปัจจุบันของคุณด้วยไฟล์นี้ การกระทำนี้ไม่สามารถย้อนกลับได้"
+  },
+  "importReplaceConfirm": {
+    "message": "แทนที่"
+  },
+  "importReplaceCountAria": {
+    "message": "รีแอ็กชันที่บันทึกไว้: $STORED$ รายการ ในไฟล์นี้: $INCOMING$ รายการ",
+    "placeholders": {
+      "stored": {
+        "content": "$1",
+        "example": "128"
+      },
+      "incoming": {
+        "content": "$2",
+        "example": "64"
+      }
+    }
+  },
+  "exportRowLabel": {
+    "message": "ส่งออกประวัติ"
+  },
+  "exportRowHint": {
+    "message": "บันทึกเป็นไฟล์สำรอง"
+  },
+  "importRowLabel": {
+    "message": "นำเข้าประวัติ"
+  },
+  "importRowHint": {
+    "message": "แทนที่จากไฟล์สำรอง"
+  },
+  "relativeJustNow": {
+    "message": "เมื่อสักครู่"
+  },
+  "relativeMinutes": {
+    "message": "$M$ น.",
+    "placeholders": {
+      "m": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "relativeHours": {
+    "message": "$H$ ชม.",
+    "placeholders": {
+      "h": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "relativeDays": {
+    "message": "$D$ ว.",
+    "placeholders": {
+      "d": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "reportUnsupportedPage": {
+    "message": "โปรดเปิดหน้าที่รีแอ็กชันไม่ทำงาน แล้วเปิดเมนูนี้อีกครั้งเพื่อรายงาน"
+  },
+  "reportSent": {
+    "message": "ขอบคุณ — ส่งรายงานแล้ว"
+  },
+  "reportAnother": {
+    "message": "รายงานปัญหาอื่น"
+  },
+  "reportPlaceholder": {
+    "message": "อธิบายปัญหาของคุณสั้น ๆ (10-500 อักขระ)"
+  },
+  "reportSendBtn": {
+    "message": "ส่งรายงาน"
+  },
+  "pickerSearchPlaceholder": {
+    "message": "ค้นหา"
+  },
+  "pickerSearchAriaLabel": {
+    "message": "ค้นหาอีโมจิ"
+  },
+  "pickerNoMatches": {
+    "message": "ไม่มีอีโมจิที่ตรงกับ \"$QUERY$\"",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "asdf"
+      }
+    }
+  },
+  "pickerRecentlyUsed": {
+    "message": "ใช้ล่าสุด"
+  },
+  "pickerPopular": {
+    "message": "ยอดนิยม"
+  },
+  "pickerClearRecent": {
+    "message": "ล้าง"
+  },
+  "pickerCategoriesAria": {
+    "message": "หมวดหมู่อิโมจิ"
+  },
+  "pickerDialogAria": {
+    "message": "แสดงความรู้สึกหรือดูรายละเอียด"
+  },
+  "pickerKeyboardHint": {
+    "message": "ใช้ปุ่มลูกศรเพื่อเลื่อนระหว่างอิโมจิ Enter เพื่อรีแอ็กชัน Escape เพื่อปิด"
+  },
+  "pickerSearchResultsGroupAria": {
+    "message": "ผลการค้นหา"
+  },
+  "pickerShowMore": {
+    "message": "แสดงเพิ่ม"
+  },
+  "pickerShowLess": {
+    "message": "แสดงน้อยลง"
+  },
+  "pickerAddReaction": {
+    "message": "เพิ่มรีแอ็กชัน"
+  },
+  "pickerYourReaction": {
+    "message": "รีแอ็กชันของคุณ: $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "pickerReactionsAria": {
+    "message": "$COUNT$ รีแอ็กชัน — รีแอ็กหรือดูรายละเอียด",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pickerReactWith": {
+    "message": "รีแอ็กด้วย $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "categorySmileys": {
+    "message": "หน้ายิ้มและอารมณ์"
+  },
+  "categoryGestures": {
+    "message": "ท่าทาง"
+  },
+  "categoryHearts": {
+    "message": "หัวใจ"
+  },
+  "categoryAnimals": {
+    "message": "สัตว์และธรรมชาติ"
+  },
+  "categoryFood": {
+    "message": "อาหารและเครื่องดื่ม"
+  },
+  "categoryActivities": {
+    "message": "กิจกรรม"
+  },
+  "categoryTravel": {
+    "message": "การเดินทางและสถานที่"
+  },
+  "categoryObjects": {
+    "message": "วัตถุ"
+  },
+  "categorySymbols": {
+    "message": "สัญลักษณ์"
+  },
+  "authPageTitle": {
+    "message": "Emojery — เข้าสู่ระบบ"
+  },
+  "authSignInTitle": {
+    "message": "เข้าสู่ระบบเพื่อแสดงความรู้สึก"
+  },
+  "authSignInTagline": {
+    "message": "เราจะส่งรหัสยืนยันไปยังอีเมลของคุณ"
+  },
+  "authEmailLabel": {
+    "message": "อีเมล"
+  },
+  "authSendCodeBtn": {
+    "message": "ส่งรหัส"
+  },
+  "authSendingBtn": {
+    "message": "กำลังส่ง…"
+  },
+  "authAgreeIntro": {
+    "message": "ฉันยอมรับ"
+  },
+  "authTermsLinkLabel": {
+    "message": "ข้อกำหนดการให้บริการ"
+  },
+  "authAgreeConjunction": {
+    "message": "และ"
+  },
+  "authPrivacyLinkLabel": {
+    "message": "นโยบายความเป็นส่วนตัว"
+  },
+  "authAgreeOutro": {
+    "message": "."
+  },
+  "authCodeTitle": {
+    "message": "ป้อนรหัสของคุณ"
+  },
+  "authCodeTagline": {
+    "message": "เราได้ส่งรหัสไปที่ $EMAIL$ จะหมดอายุใน 10 นาที",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authCodeLabel": {
+    "message": "รหัสยืนยัน"
+  },
+  "authVerifyingBtn": {
+    "message": "กำลังตรวจสอบ…"
+  },
+  "authVerifyBtn": {
+    "message": "เข้าสู่ระบบ"
+  },
+  "authUseDifferentEmail": {
+    "message": "ใช้อีเมลอื่น"
+  },
+  "authDoneTitle": {
+    "message": "คุณเข้าสู่ระบบแล้ว"
+  },
+  "authDoneTagline": {
+    "message": "คุณสามารถปิดแท็บนี้และรีแอ็กบนหน้าที่รองรับใดก็ได้"
+  },
+  "dataConsentTitle": {
+    "message": "ข้อมูลที่ Emojery ส่ง"
+  },
+  "dataConsentBody": {
+    "message": "เพื่อนับและแบ่งปันรีแอ็ก Emojery จะส่งที่อยู่ของหน้าที่คุณรีแอ็ก พร้อมกับตัวระบุการติดตั้งและเซสชันแบบสุ่มที่ไม่ได้มาจากตัวคุณ ไปยังเซิร์ฟเวอร์ เมื่อลงชื่อเข้าใช้ อีเมลของคุณจะถูกส่งเพียงครั้งเดียวเพื่อส่งรหัสแบบใช้ครั้งเดียว โดยเก็บไว้เพียงแฮชทางเดียวเพื่อใช้เป็นตัวระบุบัญชีของคุณ และประวัติรีแอ็กของคุณจะอยู่บนอุปกรณ์นี้ ข้อมูลบริบทที่ไม่บังคับจะยังคงปิดอยู่ในเบราว์เซอร์นี้"
+  },
+  "dataConsentContinueBtn": {
+    "message": "ดำเนินการต่อ"
+  },
+  "authSendThrottle": {
+    "message": "คุณเพิ่งขอรหัสไป คุณสามารถขออีกครั้งได้ใน $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authResendCooldown": {
+    "message": "เราได้ส่งรหัสไปยังที่อยู่นี้แล้ว คุณสามารถขอรหัสใหม่ได้ใน $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authEnterPendingCode": {
+    "message": "ป้อนรหัสที่เราส่งไปยัง $EMAIL$",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authResendBtn": {
+    "message": "ส่งรหัสอีกครั้ง"
+  },
+  "authResendInBtn": {
+    "message": "ส่งรหัสอีกครั้งใน $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authErrRateLimit": {
+    "message": "คำขอมากเกินไป โปรดรอสักครู่แล้วลองอีกครั้ง"
+  },
+  "authErrUndeliverable": {
+    "message": "ไม่สามารถส่งอีเมลได้ ลองอีกครั้งหรือตรวจสอบที่อยู่"
+  },
+  "authErrEmailNotAccepted": {
+    "message": "ที่อยู่อีเมลนี้ไม่สามารถรับรหัสเข้าสู่ระบบได้ โปรดใช้ที่อยู่ถาวร"
+  },
+  "authErrBadEmail": {
+    "message": "นี่ไม่ใช่ที่อยู่อีเมลที่ถูกต้อง"
+  },
+  "authErrUnknown": {
+    "message": "เกิดข้อผิดพลาดบางอย่าง โปรดลองอีกครั้ง"
+  },
+  "loadError": {
+    "message": "เกิดข้อผิดพลาดบางอย่าง โปรดลองอีกครั้ง"
+  },
+  "errOffline": {
+    "message": "ดูเหมือนคุณออฟไลน์อยู่ ลองอีกครั้งเมื่อเชื่อมต่อได้"
+  },
+  "errRateLimited": {
+    "message": "คำขอมากเกินไป รอสักครู่แล้วลองใหม่"
+  },
+  "errServerBusy": {
+    "message": "เซิร์ฟเวอร์มีปัญหา ลองใหม่ในอีกสักครู่"
+  },
+  "authErrTooManyTries": {
+    "message": "รหัสผิดมากเกินไป โปรดลองอีกครั้งในภายหลัง"
+  },
+  "authErrCodeInvalid": {
+    "message": "รหัสไม่ถูกต้องหรือหมดอายุแล้ว"
+  },
+  "authErrVerifyFailed": {
+    "message": "การตรวจสอบล้มเหลว โปรดลองอีกครั้ง"
+  },
+  "searchResultsCount": {
+    "message": "ผลลัพธ์ $COUNT$ รายการ",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "reportSendError": {
+    "message": "ส่งรายงานไม่สำเร็จ โปรดตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง"
+  },
+  "onboardingTitle": {
+    "message": "Emojery พร้อมใช้งานแล้ว"
+  },
+  "onboardingTagline": {
+    "message": "แสดงความรู้สึกต่อโพสต์ วิดีโอ และสินค้าด้วยอิโมจิใดก็ได้"
+  },
+  "onboardingStepPinTitle": {
+    "message": "ปักหมุดไอคอน"
+  },
+  "onboardingStepPinBody": {
+    "message": "คลิกไอคอนจิ๊กซอว์บนแถบเครื่องมือแล้วปักหมุด Emojery ให้อยู่ใกล้มือเสมอ"
+  },
+  "onboardingStepPinDone": {
+    "message": "ปักหมุดแล้ว!"
+  },
+  "onboardingStepSpotTitle": {
+    "message": "หาปุ่มให้เจอ"
+  },
+  "onboardingStepSpotBody": {
+    "message": "ปุ่มอิโมจิเล็ก ๆ จะปรากฏข้างปุ่มถูกใจ Star หรือแชร์บนหน้าที่รองรับ"
+  },
+  "onboardingStepReactTitle": {
+    "message": "แสดงความรู้สึก"
+  },
+  "onboardingStepReactBody": {
+    "message": "เลือกอิโมจิใดก็ได้ ตัวนับเป็นสาธารณะ ลงชื่อเข้าใช้ครั้งเดียวตอนแสดงความรู้สึกครั้งแรก จากนั้นก็แสดงความรู้สึกได้เลย"
+  },
+  "onboardingTryBtn": {
+    "message": "ลองใช้จริง"
+  },
+  "onboardingSitesHeading": {
+    "message": "ใช้ได้บน"
+  },
+  "gateTitle": {
+    "message": "เหลืออีกขั้นตอนเดียว"
+  },
+  "gateBody": {
+    "message": "ลงชื่อเข้าใช้ด้วยอีเมลและรหัสยืนยัน เพื่อให้ความรู้สึกของคุณถูกนับ"
+  },
+  "gateSignInBtn": {
+    "message": "ลงชื่อเข้าใช้แล้วแสดงความรู้สึก"
+  },
+  "coachTitle": {
+    "message": "ใหม่: แสดงความรู้สึกด้วยอิโมจิใดก็ได้"
+  },
+  "coachBody": {
+    "message": "นี่คือ Emojery — คลิกเดียวได้อิโมจิครบทั้งชุด"
+  },
+  "coachDismissAria": {
+    "message": "ปิด"
+  },
+  "onboardingStepInstallTitle": {
+    "message": "ติดตั้ง Emojery"
+  },
+  "onboardingProgress": {
+    "message": "เสร็จแล้ว $DONE$ จาก $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
+  },
+  "onboardingAllSet": {
+    "message": "พร้อมใช้งานแล้ว!"
+  }
+}

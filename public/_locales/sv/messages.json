@@ -1,0 +1,616 @@
+{
+  "extName": {
+    "message": "Emojery"
+  },
+  "extShortName": {
+    "message": "Emojery"
+  },
+  "extDescription": {
+    "message": "Gör varje gilla-knapp till en full emoji-palett."
+  },
+  "extActionTitle": {
+    "message": "Emojery"
+  },
+  "popupHeading": {
+    "message": "Emojery"
+  },
+  "popupTitle": {
+    "message": "Emojery"
+  },
+  "tabSettings": {
+    "message": "Inställningar"
+  },
+  "tabHistory": {
+    "message": "Historik"
+  },
+  "tabAccount": {
+    "message": "Konto"
+  },
+  "tabReport": {
+    "message": "Rapportera"
+  },
+  "settingEnabled": {
+    "message": "Aktiverad"
+  },
+  "settingEnabledHint": {
+    "message": "Huvudbrytare för alla webbplatser som stöds"
+  },
+  "settingReplaceNative": {
+    "message": "Dölj ursprungliga knappar"
+  },
+  "settingReplaceNativeHint": {
+    "message": "Dölj Stjärna/Gilla till förmån för väljaren"
+  },
+  "settingAnimations": {
+    "message": "Reaktionsanimationer"
+  },
+  "settingAnimationsHint": {
+    "message": "Visa emoji-effekter när räknare visas eller du reagerar"
+  },
+  "settingTheme": {
+    "message": "Tema"
+  },
+  "settingThemeHint": {
+    "message": "Följ webbläsaren eller använd alltid ljust eller mörkt"
+  },
+  "settingDebug": {
+    "message": "Felsökning"
+  },
+  "settingDebugHint": {
+    "message": "Slå på felsökningsläge (för utvecklare)"
+  },
+  "themeSystem": {
+    "message": "System"
+  },
+  "themeLight": {
+    "message": "Ljust"
+  },
+  "themeDark": {
+    "message": "Mörkt"
+  },
+  "settingAutoTrigger": {
+    "message": "Tryck automatiskt på ursprungliga knappar"
+  },
+  "settingAutoTriggerHint": {
+    "message": "Spegla din emoji till sidans Gilla/Ogilla"
+  },
+  "sentimentIntro": {
+    "message": "Dra en emoji mellan listorna, eller tryck på den och sedan på en lista."
+  },
+  "sentimentPositiveZone": {
+    "message": "Trycker på Gilla / Upvote"
+  },
+  "sentimentNegativeZone": {
+    "message": "Trycker på Ogilla / Downvote"
+  },
+  "sentimentNeutralZone": {
+    "message": "Trycker inte på något"
+  },
+  "sentimentReset": {
+    "message": "Återställ till standard"
+  },
+  "settingAnalyticsConsent": {
+    "message": "Communityinsikter"
+  },
+  "settingAnalyticsConsentHint": {
+    "message": "Låt mina reaktioner räknas i regionala översikter"
+  },
+  "sectionPerSite": {
+    "message": "Endast valda webbplatser"
+  },
+  "sectionPerSiteHint": {
+    "message": "Välj vilka webbplatser som visar väljaren"
+  },
+  "perSiteToggleAria": {
+    "message": "Visa väljaren på $SITE$",
+    "placeholders": {
+      "site": {
+        "content": "$1",
+        "example": "Facebook"
+      }
+    }
+  },
+  "signInBtn": {
+    "message": "Logga in"
+  },
+  "signInMsgAccount": {
+    "message": "Logga in för att hantera ditt konto."
+  },
+  "signInMsgHistory": {
+    "message": "Logga in för att se din reaktionshistorik."
+  },
+  "signInMsgReport": {
+    "message": "Logga in för att skicka en felrapport."
+  },
+  "signedInLabel": {
+    "message": "Inloggad"
+  },
+  "signOutBtn": {
+    "message": "Logga ut"
+  },
+  "deleteAccountLabel": {
+    "message": "Ta bort konto"
+  },
+  "deleteAccountHint": {
+    "message": "Ta bort din post och dina reaktioner"
+  },
+  "deleteAccountBtn": {
+    "message": "Ta bort"
+  },
+  "deleteAccountConfirm": {
+    "message": "Ta bort ditt Emojery-konto?\n\nDenna åtgärd är permanent och kan inte ångras. Din användarpost kommer att raderas och räknarna för varje reaktion du tidigare skickat kommer att minskas."
+  },
+  "deleteAccountSlide": {
+    "message": "Dra för att radera"
+  },
+  "deleteAccountProgress": {
+    "message": "Ditt konto tas bort… stäng inte det här fönstret."
+  },
+  "cancelBtn": {
+    "message": "Avbryt"
+  },
+  "historyEmpty": {
+    "message": "Inga reaktioner ännu. Klicka på en emoji på en sida som stöds!"
+  },
+  "filterSitesPlaceholder": {
+    "message": "Filtrera webbplatser"
+  },
+  "historyYesterday": {
+    "message": "I går"
+  },
+  "historyToday": {
+    "message": "I dag"
+  },
+  "historySearchPlaceholder": {
+    "message": "Sök reaktioner"
+  },
+  "historyNoMatches": {
+    "message": "Inga reaktioner matchar din sökning."
+  },
+  "facetAllSites": {
+    "message": "Alla webbplatser"
+  },
+  "facetSiteAria": {
+    "message": "Filtrera efter webbplats"
+  },
+  "facetRangeAria": {
+    "message": "Filtrera efter tid"
+  },
+  "rangeAll": {
+    "message": "Hela tiden"
+  },
+  "rangeToday": {
+    "message": "I dag"
+  },
+  "range7d": {
+    "message": "7 dagar"
+  },
+  "range30d": {
+    "message": "30 dagar"
+  },
+  "range365d": {
+    "message": "1 år"
+  },
+  "exportBtn": {
+    "message": "Exportera"
+  },
+  "importBtn": {
+    "message": "Importera"
+  },
+  "importDone": {
+    "message": "$COUNT$ reaktioner importerades.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "128"
+      }
+    }
+  },
+  "importError": {
+    "message": "Filen är inte en giltig Emojery-export."
+  },
+  "importReplaceWarn": {
+    "message": "Import ersätter din nuvarande historik med den här filen. Detta kan inte ångras."
+  },
+  "importReplaceConfirm": {
+    "message": "Ersätt"
+  },
+  "importReplaceCountAria": {
+    "message": "Sparade reaktioner: $STORED$. I den här filen: $INCOMING$.",
+    "placeholders": {
+      "stored": {
+        "content": "$1",
+        "example": "128"
+      },
+      "incoming": {
+        "content": "$2",
+        "example": "64"
+      }
+    }
+  },
+  "exportRowLabel": {
+    "message": "Exportera historik"
+  },
+  "exportRowHint": {
+    "message": "Spara till en säkerhetskopia"
+  },
+  "importRowLabel": {
+    "message": "Importera historik"
+  },
+  "importRowHint": {
+    "message": "Ersätt från en säkerhetskopia"
+  },
+  "relativeJustNow": {
+    "message": "just nu"
+  },
+  "relativeMinutes": {
+    "message": "$M$ min",
+    "placeholders": {
+      "m": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "relativeHours": {
+    "message": "$H$ tim",
+    "placeholders": {
+      "h": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "relativeDays": {
+    "message": "$D$ d",
+    "placeholders": {
+      "d": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "reportUnsupportedPage": {
+    "message": "Öppna sidan där reaktionerna inte fungerar och öppna sedan denna meny igen för att rapportera den."
+  },
+  "reportSent": {
+    "message": "Tack — rapport skickad."
+  },
+  "reportAnother": {
+    "message": "Rapportera ett annat problem"
+  },
+  "reportPlaceholder": {
+    "message": "Beskriv ditt problem kort (10-500 tecken)"
+  },
+  "reportSendBtn": {
+    "message": "Skicka rapport"
+  },
+  "pickerSearchPlaceholder": {
+    "message": "Sök"
+  },
+  "pickerSearchAriaLabel": {
+    "message": "Sök emojis"
+  },
+  "pickerNoMatches": {
+    "message": "Inga emojis matchar \"$QUERY$\"",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "asdf"
+      }
+    }
+  },
+  "pickerRecentlyUsed": {
+    "message": "Nyligen använda"
+  },
+  "pickerPopular": {
+    "message": "Populära"
+  },
+  "pickerClearRecent": {
+    "message": "Rensa"
+  },
+  "pickerCategoriesAria": {
+    "message": "Emoji-kategorier"
+  },
+  "pickerDialogAria": {
+    "message": "Reagera eller visa fördelning"
+  },
+  "pickerKeyboardHint": {
+    "message": "Använd piltangenterna för att flytta mellan emojier, Enter för att reagera, Escape för att stänga."
+  },
+  "pickerSearchResultsGroupAria": {
+    "message": "Sökresultat"
+  },
+  "pickerShowMore": {
+    "message": "Visa fler"
+  },
+  "pickerShowLess": {
+    "message": "Visa färre"
+  },
+  "pickerAddReaction": {
+    "message": "Lägg till reaktion"
+  },
+  "pickerYourReaction": {
+    "message": "Din reaktion: $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "pickerReactionsAria": {
+    "message": "$COUNT$ reaktioner — reagera eller se fördelning",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pickerReactWith": {
+    "message": "Reagera med $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "categorySmileys": {
+    "message": "Smileys och känslor"
+  },
+  "categoryGestures": {
+    "message": "Gester"
+  },
+  "categoryHearts": {
+    "message": "Hjärtan"
+  },
+  "categoryAnimals": {
+    "message": "Djur och natur"
+  },
+  "categoryFood": {
+    "message": "Mat och dryck"
+  },
+  "categoryActivities": {
+    "message": "Aktiviteter"
+  },
+  "categoryTravel": {
+    "message": "Resor och platser"
+  },
+  "categoryObjects": {
+    "message": "Objekt"
+  },
+  "categorySymbols": {
+    "message": "Symboler"
+  },
+  "authPageTitle": {
+    "message": "Emojery — Logga in"
+  },
+  "authSignInTitle": {
+    "message": "Logga in för att reagera"
+  },
+  "authSignInTagline": {
+    "message": "Vi skickar dig en verifieringskod via e-post"
+  },
+  "authEmailLabel": {
+    "message": "E-post"
+  },
+  "authSendCodeBtn": {
+    "message": "Skicka kod"
+  },
+  "authSendingBtn": {
+    "message": "Skickar…"
+  },
+  "authAgreeIntro": {
+    "message": "Jag godkänner "
+  },
+  "authTermsLinkLabel": {
+    "message": "Användarvillkoren"
+  },
+  "authAgreeConjunction": {
+    "message": " och "
+  },
+  "authPrivacyLinkLabel": {
+    "message": "Integritetspolicyn"
+  },
+  "authAgreeOutro": {
+    "message": "."
+  },
+  "authCodeTitle": {
+    "message": "Ange din kod"
+  },
+  "authCodeTagline": {
+    "message": "Vi skickade en kod till $EMAIL$. Den går ut om 10 minuter.",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authCodeLabel": {
+    "message": "Verifieringskod"
+  },
+  "authVerifyingBtn": {
+    "message": "Verifierar…"
+  },
+  "authVerifyBtn": {
+    "message": "Logga in"
+  },
+  "authUseDifferentEmail": {
+    "message": "Använd en annan e-post"
+  },
+  "authDoneTitle": {
+    "message": "Du är inloggad"
+  },
+  "authDoneTagline": {
+    "message": "Du kan stänga den här fliken och reagera på alla sidor som stöds."
+  },
+  "dataConsentTitle": {
+    "message": "Vad Emojery skickar"
+  },
+  "dataConsentBody": {
+    "message": "För att räkna och dela reaktioner skickar Emojery adressen till sidan du reagerar på till sin server, tillsammans med slumpmässiga installations- och sessionsidentifierare som inte härleds från dig. Vid inloggning skickas din e-postadress en gång för att leverera en engångskod; bara en enkelriktad hash av den sparas som din kontoidentifierare, och din reaktionshistorik stannar på den här enheten. Valfri kontext förblir avstängd i den här webbläsaren."
+  },
+  "dataConsentContinueBtn": {
+    "message": "Fortsätt"
+  },
+  "authSendThrottle": {
+    "message": "Du begärde nyss en kod. Du kan begära en ny om $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authResendCooldown": {
+    "message": "Vi har redan skickat en kod till den här adressen. Du kan begära en ny om $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authEnterPendingCode": {
+    "message": "Ange koden vi skickade till $EMAIL$",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authResendBtn": {
+    "message": "Skicka koden igen"
+  },
+  "authResendInBtn": {
+    "message": "Skicka koden igen om $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authErrRateLimit": {
+    "message": "För många förfrågningar. Vänta några minuter och försök igen."
+  },
+  "authErrUndeliverable": {
+    "message": "Kunde inte leverera e-postmeddelandet. Försök igen eller kontrollera adressen."
+  },
+  "authErrEmailNotAccepted": {
+    "message": "Den här e-postadressen kan inte ta emot inloggningskoder. Använd en permanent adress."
+  },
+  "authErrBadEmail": {
+    "message": "Detta ser inte ut som en giltig e-postadress."
+  },
+  "authErrUnknown": {
+    "message": "Något gick fel. Försök igen."
+  },
+  "loadError": {
+    "message": "Något gick fel. Försök igen."
+  },
+  "errOffline": {
+    "message": "Du verkar vara offline. Försök igen när anslutningen är tillbaka."
+  },
+  "errRateLimited": {
+    "message": "För många förfrågningar. Vänta en stund och försök igen."
+  },
+  "errServerBusy": {
+    "message": "Servern har problem. Försök igen om en minut."
+  },
+  "authErrTooManyTries": {
+    "message": "För många felaktiga koder. Försök igen senare."
+  },
+  "authErrCodeInvalid": {
+    "message": "Koden är felaktig eller har gått ut."
+  },
+  "authErrVerifyFailed": {
+    "message": "Verifieringen misslyckades. Försök igen."
+  },
+  "searchResultsCount": {
+    "message": "$COUNT$ resultat",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "reportSendError": {
+    "message": "Rapporten kunde inte skickas. Kontrollera din anslutning och försök igen."
+  },
+  "onboardingTitle": {
+    "message": "Emojery är redo"
+  },
+  "onboardingTagline": {
+    "message": "Reagera på inlägg, videor och produkter med valfri emoji."
+  },
+  "onboardingStepPinTitle": {
+    "message": "Fäst ikonen"
+  },
+  "onboardingStepPinBody": {
+    "message": "Klicka på pusselikonen i verktygsfältet och fäst Emojery så att det alltid finns till hands."
+  },
+  "onboardingStepPinDone": {
+    "message": "Fäst!"
+  },
+  "onboardingStepSpotTitle": {
+    "message": "Hitta knappen"
+  },
+  "onboardingStepSpotBody": {
+    "message": "En liten emoji-knapp visas bredvid Gilla, Star eller Dela på sidor som stöds."
+  },
+  "onboardingStepReactTitle": {
+    "message": "Reagera"
+  },
+  "onboardingStepReactBody": {
+    "message": "Välj valfri emoji. Räknarna är offentliga. Logga in en gång vid din första reaktion och reagera sedan bara."
+  },
+  "onboardingTryBtn": {
+    "message": "Prova live"
+  },
+  "onboardingSitesHeading": {
+    "message": "Fungerar på"
+  },
+  "gateTitle": {
+    "message": "Ett steg kvar"
+  },
+  "gateBody": {
+    "message": "Logga in med din e-post och en verifieringskod så räknas din reaktion."
+  },
+  "gateSignInBtn": {
+    "message": "Logga in & reagera"
+  },
+  "coachTitle": {
+    "message": "Nytt: reagera med valfri emoji"
+  },
+  "coachBody": {
+    "message": "Det är Emojery — ett klick, hela emoji-paletten."
+  },
+  "coachDismissAria": {
+    "message": "Stäng"
+  },
+  "onboardingStepInstallTitle": {
+    "message": "Installera Emojery"
+  },
+  "onboardingProgress": {
+    "message": "$DONE$ av $TOTAL$ klara",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
+  },
+  "onboardingAllSet": {
+    "message": "Allt klart!"
+  }
+}

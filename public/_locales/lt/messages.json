@@ -1,0 +1,616 @@
+{
+  "extName": {
+    "message": "Emojery"
+  },
+  "extShortName": {
+    "message": "Emojery"
+  },
+  "extDescription": {
+    "message": "Paverskite kiekvieną patiktuko mygtuką visa jaustukų palete."
+  },
+  "extActionTitle": {
+    "message": "Emojery"
+  },
+  "popupHeading": {
+    "message": "Emojery"
+  },
+  "popupTitle": {
+    "message": "Emojery"
+  },
+  "tabSettings": {
+    "message": "Nustatymai"
+  },
+  "tabHistory": {
+    "message": "Istorija"
+  },
+  "tabAccount": {
+    "message": "Paskyra"
+  },
+  "tabReport": {
+    "message": "Pranešti"
+  },
+  "settingEnabled": {
+    "message": "Įjungta"
+  },
+  "settingEnabledHint": {
+    "message": "Pagrindinis jungiklis visoms palaikomoms svetainėms"
+  },
+  "settingReplaceNative": {
+    "message": "Slėpti originalius mygtukus"
+  },
+  "settingReplaceNativeHint": {
+    "message": "Slėpti Žvaigždutę/Patinka pasirinkimo įrankio naudai"
+  },
+  "settingAnimations": {
+    "message": "Reakcijų animacijos"
+  },
+  "settingAnimationsHint": {
+    "message": "Rodyti emoji efektus, kai pasirodo skaitliukai arba kai reaguojate"
+  },
+  "settingTheme": {
+    "message": "Tema"
+  },
+  "settingThemeHint": {
+    "message": "Sekti naršyklę arba visada naudoti šviesią ar tamsią"
+  },
+  "settingDebug": {
+    "message": "Derinimas"
+  },
+  "settingDebugHint": {
+    "message": "Įjungti derinimo režimą (kūrėjams)"
+  },
+  "themeSystem": {
+    "message": "Sistemos"
+  },
+  "themeLight": {
+    "message": "Šviesi"
+  },
+  "themeDark": {
+    "message": "Tamsi"
+  },
+  "settingAutoTrigger": {
+    "message": "Automatiškai spausti originalius mygtukus"
+  },
+  "settingAutoTriggerHint": {
+    "message": "Atspindėti jūsų emoji svetainės Patinka/Nepatinka"
+  },
+  "sentimentIntro": {
+    "message": "Vilkite emoji tarp sąrašų arba bakstelėkite jį, tada sąrašą."
+  },
+  "sentimentPositiveZone": {
+    "message": "Paspaudžia Patinka / Balsą už"
+  },
+  "sentimentNegativeZone": {
+    "message": "Paspaudžia Nepatinka / Balsą prieš"
+  },
+  "sentimentNeutralZone": {
+    "message": "Nieko nespaudžia"
+  },
+  "sentimentReset": {
+    "message": "Atkurti numatytuosius"
+  },
+  "settingAnalyticsConsent": {
+    "message": "Bendruomenės įžvalgos"
+  },
+  "settingAnalyticsConsentHint": {
+    "message": "Įtraukti mano reakcijas į regionines suvestines"
+  },
+  "sectionPerSite": {
+    "message": "Tik pasirinktos svetainės"
+  },
+  "sectionPerSiteHint": {
+    "message": "Pasirinkite, kuriose svetainėse rodyti pasirinkimo įrankį"
+  },
+  "perSiteToggleAria": {
+    "message": "Rodyti pasirinkimo įrankį svetainėje $SITE$",
+    "placeholders": {
+      "site": {
+        "content": "$1",
+        "example": "Facebook"
+      }
+    }
+  },
+  "signInBtn": {
+    "message": "Prisijungti"
+  },
+  "signInMsgAccount": {
+    "message": "Prisijunkite, kad galėtumėte tvarkyti paskyrą."
+  },
+  "signInMsgHistory": {
+    "message": "Prisijunkite, kad pamatytumėte reakcijų istoriją."
+  },
+  "signInMsgReport": {
+    "message": "Prisijunkite, kad galėtumėte išsiųsti klaidos pranešimą."
+  },
+  "signedInLabel": {
+    "message": "Prisijungta"
+  },
+  "signOutBtn": {
+    "message": "Atsijungti"
+  },
+  "deleteAccountLabel": {
+    "message": "Ištrinti paskyrą"
+  },
+  "deleteAccountHint": {
+    "message": "Pašalinti savo įrašą ir reakcijas"
+  },
+  "deleteAccountBtn": {
+    "message": "Ištrinti"
+  },
+  "deleteAccountConfirm": {
+    "message": "Ištrinti jūsų Emojery paskyrą?\n\nŠis veiksmas yra negrįžtamas. Jūsų vartotojo įrašas bus ištrintas, o visų anksčiau pateiktų reakcijų skaitliukai bus sumažinti."
+  },
+  "deleteAccountSlide": {
+    "message": "Braukite, kad ištrintumėte"
+  },
+  "deleteAccountProgress": {
+    "message": "Jūsų paskyra šalinama… neuždarykite šio lango."
+  },
+  "cancelBtn": {
+    "message": "Atšaukti"
+  },
+  "historyEmpty": {
+    "message": "Reakcijų dar nėra. Spustelėkite emoji bet kuriame palaikomame puslapyje!"
+  },
+  "filterSitesPlaceholder": {
+    "message": "Filtruoti svetaines"
+  },
+  "historyYesterday": {
+    "message": "Vakar"
+  },
+  "historyToday": {
+    "message": "Šiandien"
+  },
+  "historySearchPlaceholder": {
+    "message": "Ieškoti reakcijų"
+  },
+  "historyNoMatches": {
+    "message": "Pagal jūsų paiešką reakcijų nerasta."
+  },
+  "facetAllSites": {
+    "message": "Visos svetainės"
+  },
+  "facetSiteAria": {
+    "message": "Filtruoti pagal svetainę"
+  },
+  "facetRangeAria": {
+    "message": "Filtruoti pagal laiką"
+  },
+  "rangeAll": {
+    "message": "Visą laiką"
+  },
+  "rangeToday": {
+    "message": "Šiandien"
+  },
+  "range7d": {
+    "message": "7 dienos"
+  },
+  "range30d": {
+    "message": "30 dienų"
+  },
+  "range365d": {
+    "message": "1 metai"
+  },
+  "exportBtn": {
+    "message": "Eksportuoti"
+  },
+  "importBtn": {
+    "message": "Importuoti"
+  },
+  "importDone": {
+    "message": "Importuota reakcijų: $COUNT$.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "128"
+      }
+    }
+  },
+  "importError": {
+    "message": "Tai nėra tinkamas Emojery eksporto failas."
+  },
+  "importReplaceWarn": {
+    "message": "Importas pakeis dabartinę istoriją šiuo failu. Šio veiksmo anuliuoti nepavyks."
+  },
+  "importReplaceConfirm": {
+    "message": "Pakeisti"
+  },
+  "importReplaceCountAria": {
+    "message": "Išsaugotos reakcijos: $STORED$. Šiame faile: $INCOMING$.",
+    "placeholders": {
+      "stored": {
+        "content": "$1",
+        "example": "128"
+      },
+      "incoming": {
+        "content": "$2",
+        "example": "64"
+      }
+    }
+  },
+  "exportRowLabel": {
+    "message": "Eksportuoti istoriją"
+  },
+  "exportRowHint": {
+    "message": "Įrašyti į atsarginės kopijos failą"
+  },
+  "importRowLabel": {
+    "message": "Importuoti istoriją"
+  },
+  "importRowHint": {
+    "message": "Pakeisti iš atsarginės kopijos failo"
+  },
+  "relativeJustNow": {
+    "message": "ką tik"
+  },
+  "relativeMinutes": {
+    "message": "$M$ min",
+    "placeholders": {
+      "m": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "relativeHours": {
+    "message": "$H$ val",
+    "placeholders": {
+      "h": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "relativeDays": {
+    "message": "$D$ d",
+    "placeholders": {
+      "d": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "reportUnsupportedPage": {
+    "message": "Atidarykite puslapį, kuriame reakcijos neveikia, tada vėl atidarykite šį meniu, kad praneštumėte."
+  },
+  "reportSent": {
+    "message": "Ačiū — pranešimas išsiųstas."
+  },
+  "reportAnother": {
+    "message": "Pranešti apie kitą problemą"
+  },
+  "reportPlaceholder": {
+    "message": "Trumpai aprašykite problemą (10-500 simbolių)"
+  },
+  "reportSendBtn": {
+    "message": "Siųsti pranešimą"
+  },
+  "pickerSearchPlaceholder": {
+    "message": "Ieškoti"
+  },
+  "pickerSearchAriaLabel": {
+    "message": "Ieškoti emoji"
+  },
+  "pickerNoMatches": {
+    "message": "Pagal užklausą „$QUERY$\" nieko nerasta",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "asdf"
+      }
+    }
+  },
+  "pickerRecentlyUsed": {
+    "message": "Neseniai naudoti"
+  },
+  "pickerPopular": {
+    "message": "Populiarūs"
+  },
+  "pickerClearRecent": {
+    "message": "Išvalyti"
+  },
+  "pickerCategoriesAria": {
+    "message": "Emoji kategorijos"
+  },
+  "pickerDialogAria": {
+    "message": "Reaguokite arba peržiūrėkite pasiskirstymą"
+  },
+  "pickerKeyboardHint": {
+    "message": "Rodyklių klavišais judėkite tarp jaustukų, Enter – reaguoti, Escape – uždaryti."
+  },
+  "pickerSearchResultsGroupAria": {
+    "message": "Paieškos rezultatai"
+  },
+  "pickerShowMore": {
+    "message": "Rodyti daugiau"
+  },
+  "pickerShowLess": {
+    "message": "Rodyti mažiau"
+  },
+  "pickerAddReaction": {
+    "message": "Pridėti reakciją"
+  },
+  "pickerYourReaction": {
+    "message": "Jūsų reakcija: $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "pickerReactionsAria": {
+    "message": "$COUNT$ reakcijų — reaguokite arba peržiūrėkite suvestinę",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pickerReactWith": {
+    "message": "Reaguoti: $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "categorySmileys": {
+    "message": "Šypsenėlės ir emocijos"
+  },
+  "categoryGestures": {
+    "message": "Gestai"
+  },
+  "categoryHearts": {
+    "message": "Širdys"
+  },
+  "categoryAnimals": {
+    "message": "Gyvūnai ir gamta"
+  },
+  "categoryFood": {
+    "message": "Maistas ir gėrimai"
+  },
+  "categoryActivities": {
+    "message": "Veikla"
+  },
+  "categoryTravel": {
+    "message": "Kelionės ir vietos"
+  },
+  "categoryObjects": {
+    "message": "Objektai"
+  },
+  "categorySymbols": {
+    "message": "Simboliai"
+  },
+  "authPageTitle": {
+    "message": "Emojery — Prisijungti"
+  },
+  "authSignInTitle": {
+    "message": "Prisijunkite, kad reaguotumėte"
+  },
+  "authSignInTagline": {
+    "message": "Atsiųsime jums patvirtinimo kodą el. paštu"
+  },
+  "authEmailLabel": {
+    "message": "El. paštas"
+  },
+  "authSendCodeBtn": {
+    "message": "Siųsti kodą"
+  },
+  "authSendingBtn": {
+    "message": "Siunčiama…"
+  },
+  "authAgreeIntro": {
+    "message": "Sutinku su "
+  },
+  "authTermsLinkLabel": {
+    "message": "Paslaugų teikimo sąlygomis"
+  },
+  "authAgreeConjunction": {
+    "message": " ir "
+  },
+  "authPrivacyLinkLabel": {
+    "message": "Privatumo politika"
+  },
+  "authAgreeOutro": {
+    "message": "."
+  },
+  "authCodeTitle": {
+    "message": "Įveskite savo kodą"
+  },
+  "authCodeTagline": {
+    "message": "Išsiuntėme kodą į $EMAIL$. Jis galioja 10 minučių.",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authCodeLabel": {
+    "message": "Patvirtinimo kodas"
+  },
+  "authVerifyingBtn": {
+    "message": "Tikrinama…"
+  },
+  "authVerifyBtn": {
+    "message": "Prisijungti"
+  },
+  "authUseDifferentEmail": {
+    "message": "Naudoti kitą el. paštą"
+  },
+  "authDoneTitle": {
+    "message": "Esate prisijungę"
+  },
+  "authDoneTagline": {
+    "message": "Galite uždaryti šią kortelę ir reaguoti bet kuriame palaikomame puslapyje."
+  },
+  "dataConsentTitle": {
+    "message": "Ką siunčia „Emojery“"
+  },
+  "dataConsentBody": {
+    "message": "Kad galėtų skaičiuoti ir bendrinti reakcijas, „Emojery“ siunčia į savo serverį puslapio, kuriame reaguojate, adresą kartu su atsitiktiniais diegimo ir seanso identifikatoriais, kurie nėra sudaryti iš jūsų duomenų. Prisijungiant jūsų el. pašto adresas išsiunčiamas vieną kartą, kad būtų pristatytas vienkartinis kodas; saugoma tik vienkryptė jo maiša kaip jūsų paskyros identifikatorius, o reakcijų istorija lieka šiame įrenginyje. Pasirenkamas kontekstas šioje naršyklėje lieka išjungtas."
+  },
+  "dataConsentContinueBtn": {
+    "message": "Tęsti"
+  },
+  "authSendThrottle": {
+    "message": "Neseniai užsisakėte kodą. Kitą galėsite užsisakyti po $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authResendCooldown": {
+    "message": "Jau išsiuntėme kodą šiuo adresu. Naują galėsite užsisakyti po $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authEnterPendingCode": {
+    "message": "Įveskite kodą, kurį išsiuntėme adresu $EMAIL$",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authResendBtn": {
+    "message": "Siųsti kodą iš naujo"
+  },
+  "authResendInBtn": {
+    "message": "Siųsti kodą iš naujo po $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authErrRateLimit": {
+    "message": "Per daug užklausų. Palaukite kelias minutes ir bandykite dar kartą."
+  },
+  "authErrUndeliverable": {
+    "message": "Nepavyko pristatyti laiško. Bandykite dar kartą arba patikrinkite adresą."
+  },
+  "authErrEmailNotAccepted": {
+    "message": "Šis el. pašto adresas negali gauti prisijungimo kodų. Naudokite nuolatinį adresą."
+  },
+  "authErrBadEmail": {
+    "message": "Tai neatrodo kaip galiojantis el. pašto adresas."
+  },
+  "authErrUnknown": {
+    "message": "Kažkas nepavyko. Bandykite dar kartą."
+  },
+  "loadError": {
+    "message": "Kažkas nepavyko. Bandykite dar kartą."
+  },
+  "errOffline": {
+    "message": "Panašu, kad nėra ryšio. Pabandykite dar kartą, kai ryšys atsinaujins."
+  },
+  "errRateLimited": {
+    "message": "Per daug užklausų. Palaukite akimirką ir bandykite dar kartą."
+  },
+  "errServerBusy": {
+    "message": "Serveryje kilo problema. Pabandykite po minutės."
+  },
+  "authErrTooManyTries": {
+    "message": "Per daug neteisingų kodų. Bandykite vėliau."
+  },
+  "authErrCodeInvalid": {
+    "message": "Kodas neteisingas arba pasibaigęs."
+  },
+  "authErrVerifyFailed": {
+    "message": "Patikrinimas nepavyko. Bandykite dar kartą."
+  },
+  "searchResultsCount": {
+    "message": "Rezultatų: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "reportSendError": {
+    "message": "Nepavyko išsiųsti ataskaitos. Patikrinkite ryšį ir bandykite dar kartą."
+  },
+  "onboardingTitle": {
+    "message": "Emojery paruošta"
+  },
+  "onboardingTagline": {
+    "message": "Reaguokite į įrašus, vaizdo įrašus ir prekes bet kuriuo jaustuku."
+  },
+  "onboardingStepPinTitle": {
+    "message": "Prisekite piktogramą"
+  },
+  "onboardingStepPinBody": {
+    "message": "Spustelėkite dėlionės piktogramą įrankių juostoje ir prisekite Emojery, kad visada būtų po ranka."
+  },
+  "onboardingStepPinDone": {
+    "message": "Prisegta!"
+  },
+  "onboardingStepSpotTitle": {
+    "message": "Raskite mygtuką"
+  },
+  "onboardingStepSpotBody": {
+    "message": "Palaikomuose puslapiuose šalia Patinka, Star ar Bendrinti atsiranda mažas jaustukų mygtukas."
+  },
+  "onboardingStepReactTitle": {
+    "message": "Reaguokite"
+  },
+  "onboardingStepReactBody": {
+    "message": "Rinkitės bet kurį jaustuką. Skaitikliai vieši. Prisijunkite kartą prie pirmosios reakcijos, o paskui tiesiog reaguokite."
+  },
+  "onboardingTryBtn": {
+    "message": "Išbandykite gyvai"
+  },
+  "onboardingSitesHeading": {
+    "message": "Veikia svetainėse"
+  },
+  "gateTitle": {
+    "message": "Liko vienas žingsnis"
+  },
+  "gateBody": {
+    "message": "Prisijunkite su savo el. paštu ir patvirtinimo kodu, kad jūsų reakcija būtų įskaityta."
+  },
+  "gateSignInBtn": {
+    "message": "Prisijungti ir reaguoti"
+  },
+  "coachTitle": {
+    "message": "Nauja: reaguokite bet kuriuo jaustuku"
+  },
+  "coachBody": {
+    "message": "Tai Emojery — vienas spustelėjimas ir visa jaustukų paletė."
+  },
+  "coachDismissAria": {
+    "message": "Uždaryti"
+  },
+  "onboardingStepInstallTitle": {
+    "message": "Įdiegti Emojery"
+  },
+  "onboardingProgress": {
+    "message": "Atlikta $DONE$ iš $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
+  },
+  "onboardingAllSet": {
+    "message": "Viskas paruošta!"
+  }
+}

@@ -1,0 +1,616 @@
+{
+  "extName": {
+    "message": "Emojery"
+  },
+  "extShortName": {
+    "message": "Emojery"
+  },
+  "extDescription": {
+    "message": "ওয়েবের প্রতিটি লাইক বোতামকে পূর্ণ ইমোজি প্যালেটে পরিণত করুন।"
+  },
+  "extActionTitle": {
+    "message": "Emojery"
+  },
+  "popupHeading": {
+    "message": "Emojery"
+  },
+  "popupTitle": {
+    "message": "Emojery"
+  },
+  "tabSettings": {
+    "message": "সেটিংস"
+  },
+  "tabHistory": {
+    "message": "ইতিহাস"
+  },
+  "tabAccount": {
+    "message": "অ্যাকাউন্ট"
+  },
+  "tabReport": {
+    "message": "রিপোর্ট"
+  },
+  "settingEnabled": {
+    "message": "সক্ষম"
+  },
+  "settingEnabledHint": {
+    "message": "সমস্ত সমর্থিত সাইটের জন্য মাস্টার সুইচ"
+  },
+  "settingReplaceNative": {
+    "message": "মূল বোতাম লুকান"
+  },
+  "settingReplaceNativeHint": {
+    "message": "পিকারের পক্ষে স্টার/লাইক লুকান"
+  },
+  "settingAnimations": {
+    "message": "প্রতিক্রিয়া অ্যানিমেশন"
+  },
+  "settingAnimationsHint": {
+    "message": "গণনা প্রদর্শিত হলে বা আপনি প্রতিক্রিয়া করলে ইমোজি প্রভাব দেখান"
+  },
+  "settingTheme": {
+    "message": "থিম"
+  },
+  "settingThemeHint": {
+    "message": "ব্রাউজার অনুসরণ করুন, বা সবসময় লাইট বা ডার্ক ব্যবহার করুন"
+  },
+  "settingDebug": {
+    "message": "ডিবাগ"
+  },
+  "settingDebugHint": {
+    "message": "ডিবাগ মোড চালু করুন (ডেভেলপারদের জন্য)"
+  },
+  "themeSystem": {
+    "message": "সিস্টেম"
+  },
+  "themeLight": {
+    "message": "লাইট"
+  },
+  "themeDark": {
+    "message": "ডার্ক"
+  },
+  "settingAutoTrigger": {
+    "message": "মূল বোতাম স্বয়ংক্রিয়ভাবে চাপুন"
+  },
+  "settingAutoTriggerHint": {
+    "message": "আপনার ইমোজি সাইটের লাইক/ডিসলাইকে প্রতিফলিত করুন"
+  },
+  "sentimentIntro": {
+    "message": "ইমোজি তালিকার মধ্যে টেনে আনুন, বা ইমোজিতে ট্যাপ করে তারপর তালিকায় ট্যাপ করুন।"
+  },
+  "sentimentPositiveZone": {
+    "message": "লাইক / আপভোট চাপে"
+  },
+  "sentimentNegativeZone": {
+    "message": "ডিসলাইক / ডাউনভোট চাপে"
+  },
+  "sentimentNeutralZone": {
+    "message": "কিছুই চাপে না"
+  },
+  "sentimentReset": {
+    "message": "ডিফল্টে রিসেট করুন"
+  },
+  "settingAnalyticsConsent": {
+    "message": "কমিউনিটি অন্তর্দৃষ্টি"
+  },
+  "settingAnalyticsConsentHint": {
+    "message": "আমার প্রতিক্রিয়া আঞ্চলিক পরিসংখ্যানে অন্তর্ভুক্ত করুন"
+  },
+  "sectionPerSite": {
+    "message": "শুধু নির্বাচিত সাইট"
+  },
+  "sectionPerSiteHint": {
+    "message": "কোন সাইটে পিকার দেখানো হবে তা বেছে নিন"
+  },
+  "perSiteToggleAria": {
+    "message": "$SITE$-এ পিকার দেখান",
+    "placeholders": {
+      "site": {
+        "content": "$1",
+        "example": "Facebook"
+      }
+    }
+  },
+  "signInBtn": {
+    "message": "সাইন ইন"
+  },
+  "signInMsgAccount": {
+    "message": "আপনার অ্যাকাউন্ট পরিচালনা করতে সাইন ইন করুন।"
+  },
+  "signInMsgHistory": {
+    "message": "আপনার প্রতিক্রিয়া ইতিহাস দেখতে সাইন ইন করুন।"
+  },
+  "signInMsgReport": {
+    "message": "বাগ রিপোর্ট জমা দিতে সাইন ইন করুন।"
+  },
+  "signedInLabel": {
+    "message": "সাইন ইন করেছেন"
+  },
+  "signOutBtn": {
+    "message": "সাইন আউট"
+  },
+  "deleteAccountLabel": {
+    "message": "অ্যাকাউন্ট মুছুন"
+  },
+  "deleteAccountHint": {
+    "message": "আপনার রেকর্ড ও প্রতিক্রিয়া সরান"
+  },
+  "deleteAccountBtn": {
+    "message": "মুছুন"
+  },
+  "deleteAccountConfirm": {
+    "message": "আপনার Emojery অ্যাকাউন্ট মুছবেন?\n\nএই ক্রিয়াটি স্থায়ী এবং পূর্বাবস্থায় ফেরানো যাবে না। আপনার ব্যবহারকারী রেকর্ড মুছে যাবে এবং পূর্বে জমা দেওয়া প্রতিটি প্রতিক্রিয়ার কাউন্টার হ্রাস পাবে।"
+  },
+  "deleteAccountSlide": {
+    "message": "মুছতে স্লাইড করুন"
+  },
+  "deleteAccountProgress": {
+    "message": "আপনার অ্যাকাউন্ট মুছে ফেলা হচ্ছে… এই উইন্ডোটি বন্ধ করবেন না।"
+  },
+  "cancelBtn": {
+    "message": "বাতিল"
+  },
+  "historyEmpty": {
+    "message": "এখনো কোনো প্রতিক্রিয়া নেই। যেকোনো সমর্থিত পৃষ্ঠায় একটি ইমোজিতে ক্লিক করুন!"
+  },
+  "filterSitesPlaceholder": {
+    "message": "সাইট ফিল্টার করুন"
+  },
+  "historyYesterday": {
+    "message": "গতকাল"
+  },
+  "historyToday": {
+    "message": "আজ"
+  },
+  "historySearchPlaceholder": {
+    "message": "রিঅ্যাকশন খুঁজুন"
+  },
+  "historyNoMatches": {
+    "message": "আপনার অনুসন্ধানের সঙ্গে মেলে এমন কোনও রিঅ্যাকশন নেই।"
+  },
+  "facetAllSites": {
+    "message": "সব সাইট"
+  },
+  "facetSiteAria": {
+    "message": "সাইট অনুযায়ী ফিল্টার"
+  },
+  "facetRangeAria": {
+    "message": "সময় অনুযায়ী ফিল্টার"
+  },
+  "rangeAll": {
+    "message": "সব সময়"
+  },
+  "rangeToday": {
+    "message": "আজ"
+  },
+  "range7d": {
+    "message": "7 দিন"
+  },
+  "range30d": {
+    "message": "30 দিন"
+  },
+  "range365d": {
+    "message": "1 বছর"
+  },
+  "exportBtn": {
+    "message": "এক্সপোর্ট"
+  },
+  "importBtn": {
+    "message": "ইমপোর্ট"
+  },
+  "importDone": {
+    "message": "$COUNT$টি প্রতিক্রিয়া ইমপোর্ট করা হয়েছে।",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "128"
+      }
+    }
+  },
+  "importError": {
+    "message": "এটি একটি বৈধ Emojery এক্সপোর্ট ফাইল নয়।"
+  },
+  "importReplaceWarn": {
+    "message": "ইমপোর্ট করলে আপনার বর্তমান ইতিহাস এই ফাইল দিয়ে প্রতিস্থাপিত হবে। এটি আর ফেরানো যাবে না।"
+  },
+  "importReplaceConfirm": {
+    "message": "প্রতিস্থাপন"
+  },
+  "importReplaceCountAria": {
+    "message": "সংরক্ষিত প্রতিক্রিয়া: $STORED$টি। এই ফাইলে: $INCOMING$টি।",
+    "placeholders": {
+      "stored": {
+        "content": "$1",
+        "example": "128"
+      },
+      "incoming": {
+        "content": "$2",
+        "example": "64"
+      }
+    }
+  },
+  "exportRowLabel": {
+    "message": "ইতিহাস এক্সপোর্ট করুন"
+  },
+  "exportRowHint": {
+    "message": "ব্যাকআপ ফাইলে সংরক্ষণ করুন"
+  },
+  "importRowLabel": {
+    "message": "ইতিহাস ইমপোর্ট করুন"
+  },
+  "importRowHint": {
+    "message": "ব্যাকআপ ফাইল থেকে প্রতিস্থাপন করুন"
+  },
+  "relativeJustNow": {
+    "message": "এই মুহূর্তে"
+  },
+  "relativeMinutes": {
+    "message": "$M$ মি",
+    "placeholders": {
+      "m": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "relativeHours": {
+    "message": "$H$ ঘ",
+    "placeholders": {
+      "h": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "relativeDays": {
+    "message": "$D$ দি",
+    "placeholders": {
+      "d": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "reportUnsupportedPage": {
+    "message": "অনুগ্রহ করে সেই পৃষ্ঠাটি খুলুন যেখানে প্রতিক্রিয়াগুলি কাজ করছে না, তারপর এটি রিপোর্ট করতে এই মেনুটি আবার খুলুন।"
+  },
+  "reportSent": {
+    "message": "ধন্যবাদ — রিপোর্ট পাঠানো হয়েছে।"
+  },
+  "reportAnother": {
+    "message": "আরেকটি সমস্যা রিপোর্ট করুন"
+  },
+  "reportPlaceholder": {
+    "message": "আপনার সমস্যাটি সংক্ষেপে বর্ণনা করুন (10-500 অক্ষর)"
+  },
+  "reportSendBtn": {
+    "message": "রিপোর্ট পাঠান"
+  },
+  "pickerSearchPlaceholder": {
+    "message": "অনুসন্ধান"
+  },
+  "pickerSearchAriaLabel": {
+    "message": "ইমোজি অনুসন্ধান"
+  },
+  "pickerNoMatches": {
+    "message": "\"$QUERY$\"-এর সাথে মেলে এমন কোনো ইমোজি নেই",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "asdf"
+      }
+    }
+  },
+  "pickerRecentlyUsed": {
+    "message": "সম্প্রতি ব্যবহৃত"
+  },
+  "pickerPopular": {
+    "message": "জনপ্রিয়"
+  },
+  "pickerClearRecent": {
+    "message": "মুছুন"
+  },
+  "pickerCategoriesAria": {
+    "message": "ইমোজি বিভাগ"
+  },
+  "pickerDialogAria": {
+    "message": "প্রতিক্রিয়া জানান বা বিভাজন দেখুন"
+  },
+  "pickerKeyboardHint": {
+    "message": "ইমোজির মধ্যে যেতে তিরচিহ্ন কী, রিঅ্যাক্ট করতে Enter, বন্ধ করতে Escape ব্যবহার করুন।"
+  },
+  "pickerSearchResultsGroupAria": {
+    "message": "অনুসন্ধানের ফলাফল"
+  },
+  "pickerShowMore": {
+    "message": "আরও দেখান"
+  },
+  "pickerShowLess": {
+    "message": "কম দেখান"
+  },
+  "pickerAddReaction": {
+    "message": "প্রতিক্রিয়া যোগ করুন"
+  },
+  "pickerYourReaction": {
+    "message": "আপনার প্রতিক্রিয়া: $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "pickerReactionsAria": {
+    "message": "$COUNT$টি প্রতিক্রিয়া — প্রতিক্রিয়া দিন বা বিশদ দেখুন",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pickerReactWith": {
+    "message": "$LABEL$ দিয়ে প্রতিক্রিয়া দিন",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "categorySmileys": {
+    "message": "স্মাইলি ও আবেগ"
+  },
+  "categoryGestures": {
+    "message": "অঙ্গভঙ্গি"
+  },
+  "categoryHearts": {
+    "message": "হৃদয়"
+  },
+  "categoryAnimals": {
+    "message": "প্রাণী ও প্রকৃতি"
+  },
+  "categoryFood": {
+    "message": "খাদ্য ও পানীয়"
+  },
+  "categoryActivities": {
+    "message": "কার্যক্রম"
+  },
+  "categoryTravel": {
+    "message": "ভ্রমণ ও স্থান"
+  },
+  "categoryObjects": {
+    "message": "বস্তু"
+  },
+  "categorySymbols": {
+    "message": "প্রতীক"
+  },
+  "authPageTitle": {
+    "message": "Emojery — সাইন ইন"
+  },
+  "authSignInTitle": {
+    "message": "প্রতিক্রিয়া জানাতে সাইন ইন করুন"
+  },
+  "authSignInTagline": {
+    "message": "আমরা আপনাকে ইমেইলে একটি যাচাইকরণ কোড পাঠাব"
+  },
+  "authEmailLabel": {
+    "message": "ইমেইল"
+  },
+  "authSendCodeBtn": {
+    "message": "কোড পাঠান"
+  },
+  "authSendingBtn": {
+    "message": "পাঠানো হচ্ছে…"
+  },
+  "authAgreeIntro": {
+    "message": "আমি "
+  },
+  "authTermsLinkLabel": {
+    "message": "পরিষেবার শর্তাবলী"
+  },
+  "authAgreeConjunction": {
+    "message": " এবং "
+  },
+  "authPrivacyLinkLabel": {
+    "message": "গোপনীয়তা নীতি"
+  },
+  "authAgreeOutro": {
+    "message": " মেনে নিচ্ছি।"
+  },
+  "authCodeTitle": {
+    "message": "আপনার কোড লিখুন"
+  },
+  "authCodeTagline": {
+    "message": "আমরা $EMAIL$-এ একটি কোড পাঠিয়েছি। এটি 10 মিনিটে মেয়াদ শেষ হয়।",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authCodeLabel": {
+    "message": "যাচাইকরণ কোড"
+  },
+  "authVerifyingBtn": {
+    "message": "যাচাই করা হচ্ছে…"
+  },
+  "authVerifyBtn": {
+    "message": "সাইন ইন"
+  },
+  "authUseDifferentEmail": {
+    "message": "অন্য ইমেইল ব্যবহার করুন"
+  },
+  "authDoneTitle": {
+    "message": "আপনি সাইন ইন হয়েছেন"
+  },
+  "authDoneTagline": {
+    "message": "আপনি এই ট্যাবটি বন্ধ করতে পারেন এবং যেকোনো সমর্থিত পৃষ্ঠায় প্রতিক্রিয়া দিতে পারেন।"
+  },
+  "dataConsentTitle": {
+    "message": "Emojery কী পাঠায়"
+  },
+  "dataConsentBody": {
+    "message": "প্রতিক্রিয়া গণনা ও ভাগ করার জন্য Emojery আপনি যে পৃষ্ঠায় প্রতিক্রিয়া দেন তার ঠিকানা তার সার্ভারে পাঠায়, সঙ্গে ইনস্টল ও সেশনের র্যান্ডম শনাক্তকারীও, যেগুলি আপনার তথ্য থেকে তৈরি নয়। সাইন ইন করার সময় এককালীন কোড পাঠাতে আপনার ইমেইল একবার পাঠানো হয়; শুধু সেটির একটি একমুখী হ্যাশ আপনার অ্যাকাউন্ট শনাক্তকারী হিসেবে রাখা হয়, আর আপনার প্রতিক্রিয়ার ইতিহাস এই ডিভাইসেই থাকে। ঐচ্ছিক প্রসঙ্গ এই ব্রাউজারে বন্ধ থাকে।"
+  },
+  "dataConsentContinueBtn": {
+    "message": "চালিয়ে যান"
+  },
+  "authSendThrottle": {
+    "message": "আপনি সম্প্রতি একটি কোড অনুরোধ করেছেন। আপনি $TIME$ পরে আরেকটি অনুরোধ করতে পারবেন।",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authResendCooldown": {
+    "message": "আমরা ইতিমধ্যে এই ঠিকানায় একটি কোড পাঠিয়েছি। আপনি $TIME$ পরে নতুন কোড অনুরোধ করতে পারবেন।",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authEnterPendingCode": {
+    "message": "আমরা $EMAIL$-এ যে কোড পাঠিয়েছি তা লিখুন",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authResendBtn": {
+    "message": "কোড পুনরায় পাঠান"
+  },
+  "authResendInBtn": {
+    "message": "$TIME$ পরে কোড পুনরায় পাঠান",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authErrRateLimit": {
+    "message": "অনেক বেশি অনুরোধ। অনুগ্রহ করে কিছুক্ষণ অপেক্ষা করুন এবং আবার চেষ্টা করুন।"
+  },
+  "authErrUndeliverable": {
+    "message": "ইমেইল পৌঁছানো যায়নি। আবার চেষ্টা করুন বা ঠিকানা যাচাই করুন।"
+  },
+  "authErrEmailNotAccepted": {
+    "message": "এই ইমেইল ঠিকানা সাইন-ইন কোড গ্রহণ করতে পারে না। অনুগ্রহ করে স্থায়ী ঠিকানা ব্যবহার করুন।"
+  },
+  "authErrBadEmail": {
+    "message": "এটি একটি বৈধ ইমেইল ঠিকানার মতো দেখাচ্ছে না।"
+  },
+  "authErrUnknown": {
+    "message": "কিছু একটা ভুল হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।"
+  },
+  "loadError": {
+    "message": "কিছু একটা ভুল হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।"
+  },
+  "errOffline": {
+    "message": "মনে হচ্ছে আপনি অফলাইনে আছেন। সংযোগ ফিরে এলে আবার চেষ্টা করুন।"
+  },
+  "errRateLimited": {
+    "message": "অনেক বেশি অনুরোধ। একটু অপেক্ষা করে আবার চেষ্টা করুন।"
+  },
+  "errServerBusy": {
+    "message": "সার্ভারে সমস্যা হচ্ছে। এক মিনিট পরে আবার চেষ্টা করুন।"
+  },
+  "authErrTooManyTries": {
+    "message": "অনেক বেশি ভুল কোড। পরে আবার চেষ্টা করুন।"
+  },
+  "authErrCodeInvalid": {
+    "message": "সেই কোডটি ভুল বা মেয়াদ শেষ হয়েছে।"
+  },
+  "authErrVerifyFailed": {
+    "message": "যাচাইকরণ ব্যর্থ। অনুগ্রহ করে আবার চেষ্টা করুন।"
+  },
+  "searchResultsCount": {
+    "message": "$COUNT$টি ফলাফল",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "reportSendError": {
+    "message": "রিপোর্ট পাঠানো যায়নি। আপনার সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।"
+  },
+  "onboardingTitle": {
+    "message": "Emojery প্রস্তুত"
+  },
+  "onboardingTagline": {
+    "message": "পোস্ট, ভিডিও ও পণ্যে যেকোনো ইমোজি দিয়ে প্রতিক্রিয়া জানান।"
+  },
+  "onboardingStepPinTitle": {
+    "message": "পিন করুন"
+  },
+  "onboardingStepPinBody": {
+    "message": "টুলবারের পাজল আইকনে ক্লিক করে Emojery পিন করুন, যাতে এটি হাতের কাছে থাকে।"
+  },
+  "onboardingStepPinDone": {
+    "message": "পিন করা হয়েছে!"
+  },
+  "onboardingStepSpotTitle": {
+    "message": "বোতামটি খুঁজুন"
+  },
+  "onboardingStepSpotBody": {
+    "message": "সমর্থিত পৃষ্ঠায় Like, Star বা Share-এর পাশে একটি ছোট ইমোজি বোতাম দেখা যায়।"
+  },
+  "onboardingStepReactTitle": {
+    "message": "প্রতিক্রিয়া জানান"
+  },
+  "onboardingStepReactBody": {
+    "message": "পছন্দের যেকোনো ইমোজি বেছে নিন। গণনা প্রকাশ্য। প্রথম প্রতিক্রিয়ার সময় একবার সাইন ইন করুন, তারপর শুধু প্রতিক্রিয়া জানান।"
+  },
+  "onboardingTryBtn": {
+    "message": "সরাসরি চেষ্টা করুন"
+  },
+  "onboardingSitesHeading": {
+    "message": "যেসব সাইটে চলে"
+  },
+  "gateTitle": {
+    "message": "আর মাত্র এক ধাপ"
+  },
+  "gateBody": {
+    "message": "আপনার প্রতিক্রিয়া গণনায় আনতে ইমেল ও যাচাইকরণ কোড দিয়ে সাইন ইন করুন।"
+  },
+  "gateSignInBtn": {
+    "message": "সাইন ইন করে প্রতিক্রিয়া জানান"
+  },
+  "coachTitle": {
+    "message": "নতুন: যেকোনো ইমোজি দিয়ে প্রতিক্রিয়া"
+  },
+  "coachBody": {
+    "message": "এটিই Emojery — এক ক্লিকে পুরো ইমোজি প্যালেট।"
+  },
+  "coachDismissAria": {
+    "message": "বন্ধ করুন"
+  },
+  "onboardingStepInstallTitle": {
+    "message": "Emojery ইনস্টল করুন"
+  },
+  "onboardingProgress": {
+    "message": "$TOTAL$-এর মধ্যে $DONE$টি সম্পন্ন",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
+  },
+  "onboardingAllSet": {
+    "message": "সব প্রস্তুত!"
+  }
+}

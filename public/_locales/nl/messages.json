@@ -1,0 +1,616 @@
+{
+  "extName": {
+    "message": "Emojery"
+  },
+  "extShortName": {
+    "message": "Emojery"
+  },
+  "extDescription": {
+    "message": "Maak van elke Like-knop een volledig emoji-palet."
+  },
+  "extActionTitle": {
+    "message": "Emojery"
+  },
+  "popupHeading": {
+    "message": "Emojery"
+  },
+  "popupTitle": {
+    "message": "Emojery"
+  },
+  "tabSettings": {
+    "message": "Instellingen"
+  },
+  "tabHistory": {
+    "message": "Geschiedenis"
+  },
+  "tabAccount": {
+    "message": "Account"
+  },
+  "tabReport": {
+    "message": "Melden"
+  },
+  "settingEnabled": {
+    "message": "Ingeschakeld"
+  },
+  "settingEnabledHint": {
+    "message": "Hoofdschakelaar voor alle ondersteunde sites"
+  },
+  "settingReplaceNative": {
+    "message": "Originele knoppen verbergen"
+  },
+  "settingReplaceNativeHint": {
+    "message": "Verberg Ster/Like ten gunste van de picker"
+  },
+  "settingAnimations": {
+    "message": "Reactie-animaties"
+  },
+  "settingAnimationsHint": {
+    "message": "Toon emoji-effecten wanneer tellers verschijnen of je reageert"
+  },
+  "settingTheme": {
+    "message": "Thema"
+  },
+  "settingThemeHint": {
+    "message": "Volg de browser of gebruik altijd licht of donker"
+  },
+  "settingDebug": {
+    "message": "Foutopsporing"
+  },
+  "settingDebugHint": {
+    "message": "Foutopsporingsmodus inschakelen (voor ontwikkelaars)"
+  },
+  "themeSystem": {
+    "message": "Systeem"
+  },
+  "themeLight": {
+    "message": "Licht"
+  },
+  "themeDark": {
+    "message": "Donker"
+  },
+  "settingAutoTrigger": {
+    "message": "Originele knoppen automatisch indrukken"
+  },
+  "settingAutoTriggerHint": {
+    "message": "Spiegel je emoji naar de Like/Dislike van de site"
+  },
+  "sentimentIntro": {
+    "message": "Sleep een emoji tussen de lijsten, of tik erop en daarna op een lijst."
+  },
+  "sentimentPositiveZone": {
+    "message": "Drukt op Like / Upvote"
+  },
+  "sentimentNegativeZone": {
+    "message": "Drukt op Dislike / Downvote"
+  },
+  "sentimentNeutralZone": {
+    "message": "Drukt nergens op"
+  },
+  "sentimentReset": {
+    "message": "Standaardwaarden herstellen"
+  },
+  "settingAnalyticsConsent": {
+    "message": "Community-inzichten"
+  },
+  "settingAnalyticsConsentHint": {
+    "message": "Mijn reacties meetellen in regionale overzichten"
+  },
+  "sectionPerSite": {
+    "message": "Alleen geselecteerde sites"
+  },
+  "sectionPerSiteHint": {
+    "message": "Kies op welke sites de picker verschijnt"
+  },
+  "perSiteToggleAria": {
+    "message": "Toon de picker op $SITE$",
+    "placeholders": {
+      "site": {
+        "content": "$1",
+        "example": "Facebook"
+      }
+    }
+  },
+  "signInBtn": {
+    "message": "Inloggen"
+  },
+  "signInMsgAccount": {
+    "message": "Log in om je account te beheren."
+  },
+  "signInMsgHistory": {
+    "message": "Log in om je reactiegeschiedenis te zien."
+  },
+  "signInMsgReport": {
+    "message": "Log in om een foutmelding te versturen."
+  },
+  "signedInLabel": {
+    "message": "Ingelogd"
+  },
+  "signOutBtn": {
+    "message": "Uitloggen"
+  },
+  "deleteAccountLabel": {
+    "message": "Account verwijderen"
+  },
+  "deleteAccountHint": {
+    "message": "Je record en reacties verwijderen"
+  },
+  "deleteAccountBtn": {
+    "message": "Verwijderen"
+  },
+  "deleteAccountConfirm": {
+    "message": "Je Emojery-account verwijderen?\n\nDeze actie is definitief en kan niet ongedaan worden gemaakt. Je gebruikersrecord wordt gewist en de tellers van elke reactie die je eerder hebt geplaatst worden verlaagd."
+  },
+  "deleteAccountSlide": {
+    "message": "Veeg om te verwijderen"
+  },
+  "deleteAccountProgress": {
+    "message": "Je account wordt verwijderd… sluit dit venster niet."
+  },
+  "cancelBtn": {
+    "message": "Annuleren"
+  },
+  "historyEmpty": {
+    "message": "Nog geen reacties. Klik op een emoji op een ondersteunde pagina!"
+  },
+  "filterSitesPlaceholder": {
+    "message": "Sites filteren"
+  },
+  "historyYesterday": {
+    "message": "Gisteren"
+  },
+  "historyToday": {
+    "message": "Vandaag"
+  },
+  "historySearchPlaceholder": {
+    "message": "Reacties zoeken"
+  },
+  "historyNoMatches": {
+    "message": "Geen reacties komen overeen met je zoekopdracht."
+  },
+  "facetAllSites": {
+    "message": "Alle sites"
+  },
+  "facetSiteAria": {
+    "message": "Filter op site"
+  },
+  "facetRangeAria": {
+    "message": "Filter op tijd"
+  },
+  "rangeAll": {
+    "message": "Hele periode"
+  },
+  "rangeToday": {
+    "message": "Vandaag"
+  },
+  "range7d": {
+    "message": "7 dagen"
+  },
+  "range30d": {
+    "message": "30 dagen"
+  },
+  "range365d": {
+    "message": "1 jaar"
+  },
+  "exportBtn": {
+    "message": "Exporteren"
+  },
+  "importBtn": {
+    "message": "Importeren"
+  },
+  "importDone": {
+    "message": "$COUNT$ reacties geïmporteerd.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "128"
+      }
+    }
+  },
+  "importError": {
+    "message": "Dat is geen geldig Emojery-exportbestand."
+  },
+  "importReplaceWarn": {
+    "message": "Importeren vervangt je huidige geschiedenis door dit bestand. Dit kan niet ongedaan worden gemaakt."
+  },
+  "importReplaceConfirm": {
+    "message": "Vervangen"
+  },
+  "importReplaceCountAria": {
+    "message": "Opgeslagen reacties: $STORED$. In dit bestand: $INCOMING$.",
+    "placeholders": {
+      "stored": {
+        "content": "$1",
+        "example": "128"
+      },
+      "incoming": {
+        "content": "$2",
+        "example": "64"
+      }
+    }
+  },
+  "exportRowLabel": {
+    "message": "Geschiedenis exporteren"
+  },
+  "exportRowHint": {
+    "message": "Opslaan in een back-upbestand"
+  },
+  "importRowLabel": {
+    "message": "Geschiedenis importeren"
+  },
+  "importRowHint": {
+    "message": "Vervangen vanuit een back-upbestand"
+  },
+  "relativeJustNow": {
+    "message": "zojuist"
+  },
+  "relativeMinutes": {
+    "message": "$M$ min",
+    "placeholders": {
+      "m": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "relativeHours": {
+    "message": "$H$ u",
+    "placeholders": {
+      "h": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "relativeDays": {
+    "message": "$D$ d",
+    "placeholders": {
+      "d": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "reportUnsupportedPage": {
+    "message": "Open de pagina waar reacties niet werken en open dit menu opnieuw om deze te melden."
+  },
+  "reportSent": {
+    "message": "Bedankt — melding verzonden."
+  },
+  "reportAnother": {
+    "message": "Nog een probleem melden"
+  },
+  "reportPlaceholder": {
+    "message": "Beschrijf je probleem kort (10-500 tekens)"
+  },
+  "reportSendBtn": {
+    "message": "Melding verzenden"
+  },
+  "pickerSearchPlaceholder": {
+    "message": "Zoeken"
+  },
+  "pickerSearchAriaLabel": {
+    "message": "Emoji's zoeken"
+  },
+  "pickerNoMatches": {
+    "message": "Geen emoji's komen overeen met „$QUERY$\"",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "asdf"
+      }
+    }
+  },
+  "pickerRecentlyUsed": {
+    "message": "Recent gebruikt"
+  },
+  "pickerPopular": {
+    "message": "Populair"
+  },
+  "pickerClearRecent": {
+    "message": "Wissen"
+  },
+  "pickerCategoriesAria": {
+    "message": "Emoji-categorieën"
+  },
+  "pickerDialogAria": {
+    "message": "Reageren of verdeling bekijken"
+  },
+  "pickerKeyboardHint": {
+    "message": "Gebruik de pijltoetsen om tussen emoji's te bewegen, Enter om te reageren, Escape om te sluiten."
+  },
+  "pickerSearchResultsGroupAria": {
+    "message": "Zoekresultaten"
+  },
+  "pickerShowMore": {
+    "message": "Meer tonen"
+  },
+  "pickerShowLess": {
+    "message": "Minder tonen"
+  },
+  "pickerAddReaction": {
+    "message": "Reactie toevoegen"
+  },
+  "pickerYourReaction": {
+    "message": "Jouw reactie: $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "pickerReactionsAria": {
+    "message": "$COUNT$ reacties — reageer of bekijk de verdeling",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pickerReactWith": {
+    "message": "Reageer met $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "categorySmileys": {
+    "message": "Smileys en emoties"
+  },
+  "categoryGestures": {
+    "message": "Gebaren"
+  },
+  "categoryHearts": {
+    "message": "Harten"
+  },
+  "categoryAnimals": {
+    "message": "Dieren en natuur"
+  },
+  "categoryFood": {
+    "message": "Eten en drinken"
+  },
+  "categoryActivities": {
+    "message": "Activiteiten"
+  },
+  "categoryTravel": {
+    "message": "Reizen en plaatsen"
+  },
+  "categoryObjects": {
+    "message": "Objecten"
+  },
+  "categorySymbols": {
+    "message": "Symbolen"
+  },
+  "authPageTitle": {
+    "message": "Emojery — Inloggen"
+  },
+  "authSignInTitle": {
+    "message": "Log in om te reageren"
+  },
+  "authSignInTagline": {
+    "message": "We sturen je een verificatiecode per e-mail"
+  },
+  "authEmailLabel": {
+    "message": "E-mail"
+  },
+  "authSendCodeBtn": {
+    "message": "Code verzenden"
+  },
+  "authSendingBtn": {
+    "message": "Verzenden…"
+  },
+  "authAgreeIntro": {
+    "message": "Ik ga akkoord met de "
+  },
+  "authTermsLinkLabel": {
+    "message": "Servicevoorwaarden"
+  },
+  "authAgreeConjunction": {
+    "message": " en het "
+  },
+  "authPrivacyLinkLabel": {
+    "message": "Privacybeleid"
+  },
+  "authAgreeOutro": {
+    "message": "."
+  },
+  "authCodeTitle": {
+    "message": "Voer je code in"
+  },
+  "authCodeTagline": {
+    "message": "We hebben een code verstuurd naar $EMAIL$. Deze verloopt over 10 minuten.",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authCodeLabel": {
+    "message": "Verificatiecode"
+  },
+  "authVerifyingBtn": {
+    "message": "Verifiëren…"
+  },
+  "authVerifyBtn": {
+    "message": "Inloggen"
+  },
+  "authUseDifferentEmail": {
+    "message": "Andere e-mail gebruiken"
+  },
+  "authDoneTitle": {
+    "message": "Je bent ingelogd"
+  },
+  "authDoneTagline": {
+    "message": "Je kunt dit tabblad sluiten en reageren op elke ondersteunde pagina."
+  },
+  "dataConsentTitle": {
+    "message": "Wat Emojery verstuurt"
+  },
+  "dataConsentBody": {
+    "message": "Om reacties te tellen en te delen stuurt Emojery het adres van de pagina waarop je reageert naar zijn server, samen met willekeurige installatie- en sessie-identificatiegegevens die niet van jou zijn afgeleid. Bij het inloggen wordt je e-mailadres één keer verstuurd om een eenmalige code te bezorgen; alleen een eenwegshash ervan wordt bewaard als je accountidentificatie, en je reactiegeschiedenis blijft op dit apparaat. Optionele context blijft uitgeschakeld in deze browser."
+  },
+  "dataConsentContinueBtn": {
+    "message": "Doorgaan"
+  },
+  "authSendThrottle": {
+    "message": "Je hebt onlangs een code aangevraagd. Je kunt over $TIME$ een nieuwe aanvragen.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authResendCooldown": {
+    "message": "We hebben al een code naar dit adres gestuurd. Je kunt over $TIME$ een nieuwe aanvragen.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authEnterPendingCode": {
+    "message": "Voer de code in die we naar $EMAIL$ stuurden",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authResendBtn": {
+    "message": "Code opnieuw versturen"
+  },
+  "authResendInBtn": {
+    "message": "Code opnieuw versturen over $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authErrRateLimit": {
+    "message": "Te veel verzoeken. Wacht een paar minuten en probeer het opnieuw."
+  },
+  "authErrUndeliverable": {
+    "message": "Kon de e-mail niet afleveren. Probeer het opnieuw of controleer het adres."
+  },
+  "authErrEmailNotAccepted": {
+    "message": "Dit e-mailadres kan geen inlogcodes ontvangen. Gebruik een permanent adres."
+  },
+  "authErrBadEmail": {
+    "message": "Dat ziet er niet uit als een geldig e-mailadres."
+  },
+  "authErrUnknown": {
+    "message": "Er is iets misgegaan. Probeer het opnieuw."
+  },
+  "loadError": {
+    "message": "Er is iets misgegaan. Probeer het opnieuw."
+  },
+  "errOffline": {
+    "message": "Je lijkt offline te zijn. Probeer het opnieuw zodra je weer verbinding hebt."
+  },
+  "errRateLimited": {
+    "message": "Te veel verzoeken. Wacht even en probeer het opnieuw."
+  },
+  "errServerBusy": {
+    "message": "De server heeft een probleem. Probeer het over een minuut opnieuw."
+  },
+  "authErrTooManyTries": {
+    "message": "Te veel verkeerde codes. Probeer het later opnieuw."
+  },
+  "authErrCodeInvalid": {
+    "message": "Die code is onjuist of verlopen."
+  },
+  "authErrVerifyFailed": {
+    "message": "Verificatie mislukt. Probeer het opnieuw."
+  },
+  "searchResultsCount": {
+    "message": "$COUNT$ resultaten",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "reportSendError": {
+    "message": "Kan de melding niet verzenden. Controleer je verbinding en probeer het opnieuw."
+  },
+  "onboardingTitle": {
+    "message": "Emojery is klaar voor gebruik"
+  },
+  "onboardingTagline": {
+    "message": "Reageer op posts, video's en producten met elke emoji."
+  },
+  "onboardingStepPinTitle": {
+    "message": "Zet het vast"
+  },
+  "onboardingStepPinBody": {
+    "message": "Klik op het puzzelpictogram in de werkbalk en zet Emojery vast zodat het binnen handbereik blijft."
+  },
+  "onboardingStepPinDone": {
+    "message": "Vastgezet!"
+  },
+  "onboardingStepSpotTitle": {
+    "message": "Vind de knop"
+  },
+  "onboardingStepSpotBody": {
+    "message": "Naast Vind ik leuk, Star of Delen verschijnt op ondersteunde pagina's een kleine emoji-knop."
+  },
+  "onboardingStepReactTitle": {
+    "message": "Reageer"
+  },
+  "onboardingStepReactBody": {
+    "message": "Kies een emoji naar keuze. Tellers zijn openbaar. Log één keer in bij je eerste reactie en reageer daarna gewoon."
+  },
+  "onboardingTryBtn": {
+    "message": "Probeer het live"
+  },
+  "onboardingSitesHeading": {
+    "message": "Werkt op"
+  },
+  "gateTitle": {
+    "message": "Nog één stap"
+  },
+  "gateBody": {
+    "message": "Log in met je e-mail en een verificatiecode om je reactie te laten meetellen."
+  },
+  "gateSignInBtn": {
+    "message": "Inloggen & reageren"
+  },
+  "coachTitle": {
+    "message": "Nieuw: reageer met elke emoji"
+  },
+  "coachBody": {
+    "message": "Dat is Emojery — één klik, het hele emoji-palet."
+  },
+  "coachDismissAria": {
+    "message": "Sluiten"
+  },
+  "onboardingStepInstallTitle": {
+    "message": "Emojery installeren"
+  },
+  "onboardingProgress": {
+    "message": "$DONE$ van $TOTAL$ klaar",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
+  },
+  "onboardingAllSet": {
+    "message": "Helemaal klaar!"
+  }
+}

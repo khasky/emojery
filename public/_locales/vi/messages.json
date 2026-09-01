@@ -1,0 +1,616 @@
+{
+  "extName": {
+    "message": "Emojery"
+  },
+  "extShortName": {
+    "message": "Emojery"
+  },
+  "extDescription": {
+    "message": "Biến mọi nút Thích trên web thành bảng emoji đầy đủ."
+  },
+  "extActionTitle": {
+    "message": "Emojery"
+  },
+  "popupHeading": {
+    "message": "Emojery"
+  },
+  "popupTitle": {
+    "message": "Emojery"
+  },
+  "tabSettings": {
+    "message": "Cài đặt"
+  },
+  "tabHistory": {
+    "message": "Lịch sử"
+  },
+  "tabAccount": {
+    "message": "Tài khoản"
+  },
+  "tabReport": {
+    "message": "Báo cáo"
+  },
+  "settingEnabled": {
+    "message": "Đã bật"
+  },
+  "settingEnabledHint": {
+    "message": "Công tắc chính cho tất cả các trang được hỗ trợ"
+  },
+  "settingReplaceNative": {
+    "message": "Ẩn các nút gốc"
+  },
+  "settingReplaceNativeHint": {
+    "message": "Ẩn Sao/Thích để sử dụng bộ chọn"
+  },
+  "settingAnimations": {
+    "message": "Hoạt ảnh phản ứng"
+  },
+  "settingAnimationsHint": {
+    "message": "Hiển thị hiệu ứng emoji khi số đếm xuất hiện hoặc bạn phản ứng"
+  },
+  "settingTheme": {
+    "message": "Giao diện"
+  },
+  "settingThemeHint": {
+    "message": "Theo trình duyệt hoặc luôn dùng giao diện sáng hoặc tối"
+  },
+  "settingDebug": {
+    "message": "Gỡ lỗi"
+  },
+  "settingDebugHint": {
+    "message": "Bật chế độ gỡ lỗi (dành cho nhà phát triển)"
+  },
+  "themeSystem": {
+    "message": "Hệ thống"
+  },
+  "themeLight": {
+    "message": "Sáng"
+  },
+  "themeDark": {
+    "message": "Tối"
+  },
+  "settingAutoTrigger": {
+    "message": "Tự động nhấn các nút gốc"
+  },
+  "settingAutoTriggerHint": {
+    "message": "Phản chiếu emoji của bạn vào nút Thích/Không thích của trang"
+  },
+  "sentimentIntro": {
+    "message": "Kéo emoji giữa các danh sách, hoặc chạm vào emoji rồi chạm vào danh sách."
+  },
+  "sentimentPositiveZone": {
+    "message": "Nhấn Thích / Upvote"
+  },
+  "sentimentNegativeZone": {
+    "message": "Nhấn Không thích / Downvote"
+  },
+  "sentimentNeutralZone": {
+    "message": "Không nhấn gì"
+  },
+  "sentimentReset": {
+    "message": "Đặt lại mặc định"
+  },
+  "settingAnalyticsConsent": {
+    "message": "Thông tin chi tiết cộng đồng"
+  },
+  "settingAnalyticsConsentHint": {
+    "message": "Tính phản ứng của tôi vào thống kê theo khu vực"
+  },
+  "sectionPerSite": {
+    "message": "Chỉ các trang đã chọn"
+  },
+  "sectionPerSiteHint": {
+    "message": "Chọn những trang hiển thị bộ chọn"
+  },
+  "perSiteToggleAria": {
+    "message": "Hiển thị bộ chọn trên $SITE$",
+    "placeholders": {
+      "site": {
+        "content": "$1",
+        "example": "Facebook"
+      }
+    }
+  },
+  "signInBtn": {
+    "message": "Đăng nhập"
+  },
+  "signInMsgAccount": {
+    "message": "Đăng nhập để quản lý tài khoản của bạn."
+  },
+  "signInMsgHistory": {
+    "message": "Đăng nhập để xem lịch sử phản ứng của bạn."
+  },
+  "signInMsgReport": {
+    "message": "Đăng nhập để gửi báo cáo lỗi."
+  },
+  "signedInLabel": {
+    "message": "Đã đăng nhập"
+  },
+  "signOutBtn": {
+    "message": "Đăng xuất"
+  },
+  "deleteAccountLabel": {
+    "message": "Xóa tài khoản"
+  },
+  "deleteAccountHint": {
+    "message": "Xóa hồ sơ và cảm xúc của bạn"
+  },
+  "deleteAccountBtn": {
+    "message": "Xóa"
+  },
+  "deleteAccountConfirm": {
+    "message": "Xóa tài khoản Emojery của bạn?\n\nHành động này là vĩnh viễn và không thể hoàn tác. Bản ghi người dùng của bạn sẽ bị xóa và bộ đếm cho mọi phản ứng bạn đã gửi trước đó sẽ bị giảm."
+  },
+  "deleteAccountSlide": {
+    "message": "Trượt để xóa"
+  },
+  "deleteAccountProgress": {
+    "message": "Đang xóa tài khoản của bạn… đừng đóng cửa sổ này."
+  },
+  "cancelBtn": {
+    "message": "Hủy"
+  },
+  "historyEmpty": {
+    "message": "Chưa có phản ứng nào. Nhấp vào một emoji trên bất kỳ trang được hỗ trợ nào!"
+  },
+  "filterSitesPlaceholder": {
+    "message": "Lọc trang web"
+  },
+  "historyYesterday": {
+    "message": "Hôm qua"
+  },
+  "historyToday": {
+    "message": "Hôm nay"
+  },
+  "historySearchPlaceholder": {
+    "message": "Tìm biểu cảm"
+  },
+  "historyNoMatches": {
+    "message": "Không có biểu cảm nào khớp với tìm kiếm của bạn."
+  },
+  "facetAllSites": {
+    "message": "Tất cả trang web"
+  },
+  "facetSiteAria": {
+    "message": "Lọc theo trang web"
+  },
+  "facetRangeAria": {
+    "message": "Lọc theo thời gian"
+  },
+  "rangeAll": {
+    "message": "Toàn thời gian"
+  },
+  "rangeToday": {
+    "message": "Hôm nay"
+  },
+  "range7d": {
+    "message": "7 ngày"
+  },
+  "range30d": {
+    "message": "30 ngày"
+  },
+  "range365d": {
+    "message": "1 năm"
+  },
+  "exportBtn": {
+    "message": "Xuất"
+  },
+  "importBtn": {
+    "message": "Nhập"
+  },
+  "importDone": {
+    "message": "Đã nhập $COUNT$ phản ứng.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "128"
+      }
+    }
+  },
+  "importError": {
+    "message": "Tệp này không phải là bản xuất Emojery hợp lệ."
+  },
+  "importReplaceWarn": {
+    "message": "Nhập sẽ thay thế lịch sử hiện tại của bạn bằng tệp này. Không thể hoàn tác."
+  },
+  "importReplaceConfirm": {
+    "message": "Thay thế"
+  },
+  "importReplaceCountAria": {
+    "message": "Phản ứng đã lưu: $STORED$. Trong tệp này: $INCOMING$.",
+    "placeholders": {
+      "stored": {
+        "content": "$1",
+        "example": "128"
+      },
+      "incoming": {
+        "content": "$2",
+        "example": "64"
+      }
+    }
+  },
+  "exportRowLabel": {
+    "message": "Xuất lịch sử"
+  },
+  "exportRowHint": {
+    "message": "Lưu vào tệp sao lưu"
+  },
+  "importRowLabel": {
+    "message": "Nhập lịch sử"
+  },
+  "importRowHint": {
+    "message": "Thay thế từ tệp sao lưu"
+  },
+  "relativeJustNow": {
+    "message": "vừa xong"
+  },
+  "relativeMinutes": {
+    "message": "$M$ p",
+    "placeholders": {
+      "m": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "relativeHours": {
+    "message": "$H$ g",
+    "placeholders": {
+      "h": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "relativeDays": {
+    "message": "$D$ ng",
+    "placeholders": {
+      "d": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "reportUnsupportedPage": {
+    "message": "Vui lòng mở trang mà phản ứng không hoạt động, sau đó mở lại menu này để báo cáo."
+  },
+  "reportSent": {
+    "message": "Cảm ơn — báo cáo đã được gửi."
+  },
+  "reportAnother": {
+    "message": "Báo cáo sự cố khác"
+  },
+  "reportPlaceholder": {
+    "message": "Mô tả ngắn gọn vấn đề của bạn (10-500 ký tự)"
+  },
+  "reportSendBtn": {
+    "message": "Gửi báo cáo"
+  },
+  "pickerSearchPlaceholder": {
+    "message": "Tìm kiếm"
+  },
+  "pickerSearchAriaLabel": {
+    "message": "Tìm kiếm emoji"
+  },
+  "pickerNoMatches": {
+    "message": "Không có emoji nào khớp với \"$QUERY$\"",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "asdf"
+      }
+    }
+  },
+  "pickerRecentlyUsed": {
+    "message": "Đã dùng gần đây"
+  },
+  "pickerPopular": {
+    "message": "Phổ biến"
+  },
+  "pickerClearRecent": {
+    "message": "Xóa"
+  },
+  "pickerCategoriesAria": {
+    "message": "Danh mục biểu tượng cảm xúc"
+  },
+  "pickerDialogAria": {
+    "message": "Bày tỏ cảm xúc hoặc xem phân tích"
+  },
+  "pickerKeyboardHint": {
+    "message": "Dùng phím mũi tên để di chuyển giữa các emoji, Enter để bày tỏ cảm xúc, Escape để đóng."
+  },
+  "pickerSearchResultsGroupAria": {
+    "message": "Kết quả tìm kiếm"
+  },
+  "pickerShowMore": {
+    "message": "Hiển thị thêm"
+  },
+  "pickerShowLess": {
+    "message": "Hiển thị ít hơn"
+  },
+  "pickerAddReaction": {
+    "message": "Thêm phản ứng"
+  },
+  "pickerYourReaction": {
+    "message": "Phản ứng của bạn: $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "pickerReactionsAria": {
+    "message": "$COUNT$ phản ứng — phản ứng hoặc xem chi tiết",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pickerReactWith": {
+    "message": "Phản ứng với $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "categorySmileys": {
+    "message": "Mặt cười và cảm xúc"
+  },
+  "categoryGestures": {
+    "message": "Cử chỉ"
+  },
+  "categoryHearts": {
+    "message": "Trái tim"
+  },
+  "categoryAnimals": {
+    "message": "Động vật và thiên nhiên"
+  },
+  "categoryFood": {
+    "message": "Đồ ăn và thức uống"
+  },
+  "categoryActivities": {
+    "message": "Hoạt động"
+  },
+  "categoryTravel": {
+    "message": "Du lịch và địa điểm"
+  },
+  "categoryObjects": {
+    "message": "Đồ vật"
+  },
+  "categorySymbols": {
+    "message": "Ký hiệu"
+  },
+  "authPageTitle": {
+    "message": "Emojery — Đăng nhập"
+  },
+  "authSignInTitle": {
+    "message": "Đăng nhập để bày tỏ cảm xúc"
+  },
+  "authSignInTagline": {
+    "message": "Chúng tôi sẽ gửi cho bạn mã xác minh qua email"
+  },
+  "authEmailLabel": {
+    "message": "Email"
+  },
+  "authSendCodeBtn": {
+    "message": "Gửi mã"
+  },
+  "authSendingBtn": {
+    "message": "Đang gửi…"
+  },
+  "authAgreeIntro": {
+    "message": "Tôi đồng ý với "
+  },
+  "authTermsLinkLabel": {
+    "message": "Điều khoản dịch vụ"
+  },
+  "authAgreeConjunction": {
+    "message": " và "
+  },
+  "authPrivacyLinkLabel": {
+    "message": "Chính sách quyền riêng tư"
+  },
+  "authAgreeOutro": {
+    "message": "."
+  },
+  "authCodeTitle": {
+    "message": "Nhập mã của bạn"
+  },
+  "authCodeTagline": {
+    "message": "Chúng tôi đã gửi mã đến $EMAIL$. Mã sẽ hết hạn sau 10 phút.",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authCodeLabel": {
+    "message": "Mã xác minh"
+  },
+  "authVerifyingBtn": {
+    "message": "Đang xác minh…"
+  },
+  "authVerifyBtn": {
+    "message": "Đăng nhập"
+  },
+  "authUseDifferentEmail": {
+    "message": "Dùng email khác"
+  },
+  "authDoneTitle": {
+    "message": "Bạn đã đăng nhập"
+  },
+  "authDoneTagline": {
+    "message": "Bạn có thể đóng tab này và phản ứng trên bất kỳ trang được hỗ trợ nào."
+  },
+  "dataConsentTitle": {
+    "message": "Emojery gửi những gì"
+  },
+  "dataConsentBody": {
+    "message": "Để đếm và chia sẻ phản ứng, Emojery gửi địa chỉ trang mà bạn phản ứng đến máy chủ của mình, cùng với các mã định danh cài đặt và phiên ngẫu nhiên không được tạo ra từ bạn. Khi đăng nhập, email của bạn được gửi một lần để chuyển mã dùng một lần; chỉ một mã băm một chiều của email được giữ làm mã định danh tài khoản của bạn, và lịch sử phản ứng của bạn ở lại trên thiết bị này. Ngữ cảnh tùy chọn vẫn tắt trong trình duyệt này."
+  },
+  "dataConsentContinueBtn": {
+    "message": "Tiếp tục"
+  },
+  "authSendThrottle": {
+    "message": "Bạn vừa yêu cầu một mã. Bạn có thể yêu cầu mã khác sau $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authResendCooldown": {
+    "message": "Chúng tôi đã gửi mã đến địa chỉ này. Bạn có thể yêu cầu mã mới sau $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authEnterPendingCode": {
+    "message": "Nhập mã chúng tôi đã gửi đến $EMAIL$",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authResendBtn": {
+    "message": "Gửi lại mã"
+  },
+  "authResendInBtn": {
+    "message": "Gửi lại mã sau $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authErrRateLimit": {
+    "message": "Quá nhiều yêu cầu. Vui lòng đợi vài phút và thử lại."
+  },
+  "authErrUndeliverable": {
+    "message": "Không thể gửi email. Vui lòng thử lại hoặc kiểm tra địa chỉ."
+  },
+  "authErrEmailNotAccepted": {
+    "message": "Địa chỉ email này không thể nhận mã đăng nhập. Vui lòng sử dụng địa chỉ vĩnh viễn."
+  },
+  "authErrBadEmail": {
+    "message": "Đây không giống một địa chỉ email hợp lệ."
+  },
+  "authErrUnknown": {
+    "message": "Đã có lỗi xảy ra. Vui lòng thử lại."
+  },
+  "loadError": {
+    "message": "Đã có lỗi xảy ra. Vui lòng thử lại."
+  },
+  "errOffline": {
+    "message": "Có vẻ bạn đang ngoại tuyến. Hãy thử lại khi có kết nối."
+  },
+  "errRateLimited": {
+    "message": "Quá nhiều yêu cầu. Hãy đợi một lát rồi thử lại."
+  },
+  "errServerBusy": {
+    "message": "Máy chủ đang gặp sự cố. Hãy thử lại sau một phút."
+  },
+  "authErrTooManyTries": {
+    "message": "Quá nhiều mã sai. Vui lòng thử lại sau."
+  },
+  "authErrCodeInvalid": {
+    "message": "Mã đó không chính xác hoặc đã hết hạn."
+  },
+  "authErrVerifyFailed": {
+    "message": "Xác minh thất bại. Vui lòng thử lại."
+  },
+  "searchResultsCount": {
+    "message": "$COUNT$ kết quả",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "reportSendError": {
+    "message": "Không thể gửi báo cáo. Hãy kiểm tra kết nối và thử lại."
+  },
+  "onboardingTitle": {
+    "message": "Emojery đã sẵn sàng"
+  },
+  "onboardingTagline": {
+    "message": "Bày tỏ cảm xúc với bài viết, video và sản phẩm bằng bất kỳ emoji nào."
+  },
+  "onboardingStepPinTitle": {
+    "message": "Ghim biểu tượng"
+  },
+  "onboardingStepPinBody": {
+    "message": "Nhấp vào biểu tượng ghép hình trên thanh công cụ và ghim Emojery để luôn trong tầm tay."
+  },
+  "onboardingStepPinDone": {
+    "message": "Đã ghim!"
+  },
+  "onboardingStepSpotTitle": {
+    "message": "Tìm nút bấm"
+  },
+  "onboardingStepSpotBody": {
+    "message": "Một nút emoji nhỏ xuất hiện cạnh Thích, Star hoặc Chia sẻ trên các trang được hỗ trợ."
+  },
+  "onboardingStepReactTitle": {
+    "message": "Bày tỏ cảm xúc"
+  },
+  "onboardingStepReactBody": {
+    "message": "Chọn bất kỳ emoji nào. Số đếm là công khai. Đăng nhập một lần ở lần bày tỏ cảm xúc đầu tiên, sau đó cứ thoải mái bày tỏ."
+  },
+  "onboardingTryBtn": {
+    "message": "Dùng thử ngay"
+  },
+  "onboardingSitesHeading": {
+    "message": "Hoạt động trên"
+  },
+  "gateTitle": {
+    "message": "Chỉ còn một bước"
+  },
+  "gateBody": {
+    "message": "Đăng nhập bằng email và mã xác minh để cảm xúc của bạn được ghi nhận."
+  },
+  "gateSignInBtn": {
+    "message": "Đăng nhập & bày tỏ cảm xúc"
+  },
+  "coachTitle": {
+    "message": "Mới: bày tỏ cảm xúc bằng bất kỳ emoji nào"
+  },
+  "coachBody": {
+    "message": "Đó là Emojery — một cú nhấp, cả bảng emoji."
+  },
+  "coachDismissAria": {
+    "message": "Đóng"
+  },
+  "onboardingStepInstallTitle": {
+    "message": "Cài đặt Emojery"
+  },
+  "onboardingProgress": {
+    "message": "Đã xong $DONE$/$TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
+  },
+  "onboardingAllSet": {
+    "message": "Xong hết rồi!"
+  }
+}

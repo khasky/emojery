@@ -1,0 +1,616 @@
+{
+  "extName": {
+    "message": "Emojery"
+  },
+  "extShortName": {
+    "message": "Emojery"
+  },
+  "extDescription": {
+    "message": "ウェブのあらゆる「いいね」を絵文字の全パレットに。"
+  },
+  "extActionTitle": {
+    "message": "Emojery"
+  },
+  "popupHeading": {
+    "message": "Emojery"
+  },
+  "popupTitle": {
+    "message": "Emojery"
+  },
+  "tabSettings": {
+    "message": "設定"
+  },
+  "tabHistory": {
+    "message": "履歴"
+  },
+  "tabAccount": {
+    "message": "アカウント"
+  },
+  "tabReport": {
+    "message": "報告"
+  },
+  "settingEnabled": {
+    "message": "有効"
+  },
+  "settingEnabledHint": {
+    "message": "対応サイト全体のメインスイッチ"
+  },
+  "settingReplaceNative": {
+    "message": "元のボタンを隠す"
+  },
+  "settingReplaceNativeHint": {
+    "message": "スター/いいねを隠してピッカーに置き換えます"
+  },
+  "settingAnimations": {
+    "message": "リアクションアニメーション"
+  },
+  "settingAnimationsHint": {
+    "message": "カウントが表示されたりリアクションした際に絵文字エフェクトを表示します"
+  },
+  "settingTheme": {
+    "message": "テーマ"
+  },
+  "settingThemeHint": {
+    "message": "ブラウザーに合わせる、またはライトかダークに固定します"
+  },
+  "settingDebug": {
+    "message": "デバッグ"
+  },
+  "settingDebugHint": {
+    "message": "デバッグモードを有効にする（開発者向け）"
+  },
+  "themeSystem": {
+    "message": "システム"
+  },
+  "themeLight": {
+    "message": "ライト"
+  },
+  "themeDark": {
+    "message": "ダーク"
+  },
+  "settingAutoTrigger": {
+    "message": "元のボタンを自動で押す"
+  },
+  "settingAutoTriggerHint": {
+    "message": "選んだ絵文字をサイトのいいね/低評価に反映"
+  },
+  "sentimentIntro": {
+    "message": "絵文字をリスト間でドラッグするか、タップしてからリストをタップします。"
+  },
+  "sentimentPositiveZone": {
+    "message": "いいね/アップボートを押す"
+  },
+  "sentimentNegativeZone": {
+    "message": "低評価/ダウンボートを押す"
+  },
+  "sentimentNeutralZone": {
+    "message": "何も押さない"
+  },
+  "sentimentReset": {
+    "message": "デフォルトに戻す"
+  },
+  "settingAnalyticsConsent": {
+    "message": "コミュニティの傾向"
+  },
+  "settingAnalyticsConsentHint": {
+    "message": "リアクションを地域別の集計に含める"
+  },
+  "sectionPerSite": {
+    "message": "選択したサイトのみ"
+  },
+  "sectionPerSiteHint": {
+    "message": "ピッカーを表示するサイトを選択"
+  },
+  "perSiteToggleAria": {
+    "message": "$SITE$ でピッカーを表示",
+    "placeholders": {
+      "site": {
+        "content": "$1",
+        "example": "Facebook"
+      }
+    }
+  },
+  "signInBtn": {
+    "message": "サインイン"
+  },
+  "signInMsgAccount": {
+    "message": "アカウントを管理するにはサインインしてください。"
+  },
+  "signInMsgHistory": {
+    "message": "リアクション履歴を見るにはサインインしてください。"
+  },
+  "signInMsgReport": {
+    "message": "バグレポートを送信するにはサインインしてください。"
+  },
+  "signedInLabel": {
+    "message": "サインイン中"
+  },
+  "signOutBtn": {
+    "message": "サインアウト"
+  },
+  "deleteAccountLabel": {
+    "message": "アカウントを削除"
+  },
+  "deleteAccountHint": {
+    "message": "あなたの記録とリアクションを削除"
+  },
+  "deleteAccountBtn": {
+    "message": "削除"
+  },
+  "deleteAccountConfirm": {
+    "message": "Emojery アカウントを削除しますか?\n\nこの操作は永続的で取り消せません。ユーザー記録は削除され、過去に送信したすべてのリアクションのカウンタが減算されます。"
+  },
+  "deleteAccountSlide": {
+    "message": "スライドして削除"
+  },
+  "deleteAccountProgress": {
+    "message": "アカウントを削除しています… このウィンドウを閉じないでください。"
+  },
+  "cancelBtn": {
+    "message": "キャンセル"
+  },
+  "historyEmpty": {
+    "message": "まだリアクションはありません。対応ページの絵文字をクリックしてください!"
+  },
+  "filterSitesPlaceholder": {
+    "message": "サイトを絞り込む"
+  },
+  "historyYesterday": {
+    "message": "昨日"
+  },
+  "historyToday": {
+    "message": "今日"
+  },
+  "historySearchPlaceholder": {
+    "message": "リアクションを検索"
+  },
+  "historyNoMatches": {
+    "message": "検索条件に一致するリアクションはありません。"
+  },
+  "facetAllSites": {
+    "message": "すべてのサイト"
+  },
+  "facetSiteAria": {
+    "message": "サイトで絞り込む"
+  },
+  "facetRangeAria": {
+    "message": "期間で絞り込む"
+  },
+  "rangeAll": {
+    "message": "全期間"
+  },
+  "rangeToday": {
+    "message": "今日"
+  },
+  "range7d": {
+    "message": "7日間"
+  },
+  "range30d": {
+    "message": "30日間"
+  },
+  "range365d": {
+    "message": "1年"
+  },
+  "exportBtn": {
+    "message": "エクスポート"
+  },
+  "importBtn": {
+    "message": "インポート"
+  },
+  "importDone": {
+    "message": "$COUNT$ 件のリアクションをインポートしました。",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "128"
+      }
+    }
+  },
+  "importError": {
+    "message": "有効な Emojery のエクスポートファイルではありません。"
+  },
+  "importReplaceWarn": {
+    "message": "インポートすると、現在の履歴がこのファイルで置き換えられます。この操作は元に戻せません。"
+  },
+  "importReplaceConfirm": {
+    "message": "置き換える"
+  },
+  "importReplaceCountAria": {
+    "message": "保存済みのリアクション: $STORED$ 件。このファイル: $INCOMING$ 件。",
+    "placeholders": {
+      "stored": {
+        "content": "$1",
+        "example": "128"
+      },
+      "incoming": {
+        "content": "$2",
+        "example": "64"
+      }
+    }
+  },
+  "exportRowLabel": {
+    "message": "履歴をエクスポート"
+  },
+  "exportRowHint": {
+    "message": "バックアップファイルに保存"
+  },
+  "importRowLabel": {
+    "message": "履歴をインポート"
+  },
+  "importRowHint": {
+    "message": "バックアップファイルから置き換え"
+  },
+  "relativeJustNow": {
+    "message": "たった今"
+  },
+  "relativeMinutes": {
+    "message": "$M$分",
+    "placeholders": {
+      "m": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "relativeHours": {
+    "message": "$H$時間",
+    "placeholders": {
+      "h": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "relativeDays": {
+    "message": "$D$日",
+    "placeholders": {
+      "d": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "reportUnsupportedPage": {
+    "message": "リアクションが動作しないページを開き、このメニューを再度開いて報告してください。"
+  },
+  "reportSent": {
+    "message": "ありがとうございます — レポートを送信しました。"
+  },
+  "reportAnother": {
+    "message": "別の問題を報告"
+  },
+  "reportPlaceholder": {
+    "message": "問題を簡潔に説明してください (10〜500文字)"
+  },
+  "reportSendBtn": {
+    "message": "レポートを送信"
+  },
+  "pickerSearchPlaceholder": {
+    "message": "検索"
+  },
+  "pickerSearchAriaLabel": {
+    "message": "絵文字を検索"
+  },
+  "pickerNoMatches": {
+    "message": "「$QUERY$」に一致する絵文字はありません",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "asdf"
+      }
+    }
+  },
+  "pickerRecentlyUsed": {
+    "message": "最近使った絵文字"
+  },
+  "pickerPopular": {
+    "message": "人気"
+  },
+  "pickerClearRecent": {
+    "message": "クリア"
+  },
+  "pickerCategoriesAria": {
+    "message": "絵文字のカテゴリ"
+  },
+  "pickerDialogAria": {
+    "message": "リアクションするか内訳を見る"
+  },
+  "pickerKeyboardHint": {
+    "message": "矢印キーで絵文字を移動し、Enter でリアクション、Escape で閉じます。"
+  },
+  "pickerSearchResultsGroupAria": {
+    "message": "検索結果"
+  },
+  "pickerShowMore": {
+    "message": "もっと見る"
+  },
+  "pickerShowLess": {
+    "message": "少なく表示"
+  },
+  "pickerAddReaction": {
+    "message": "リアクションを追加"
+  },
+  "pickerYourReaction": {
+    "message": "あなたのリアクション: $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "pickerReactionsAria": {
+    "message": "$COUNT$ 件のリアクション — リアクションするか内訳を表示",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pickerReactWith": {
+    "message": "$LABEL$ でリアクション",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "categorySmileys": {
+    "message": "スマイリーと感情"
+  },
+  "categoryGestures": {
+    "message": "ジェスチャー"
+  },
+  "categoryHearts": {
+    "message": "ハート"
+  },
+  "categoryAnimals": {
+    "message": "動物と自然"
+  },
+  "categoryFood": {
+    "message": "食べ物と飲み物"
+  },
+  "categoryActivities": {
+    "message": "アクティビティ"
+  },
+  "categoryTravel": {
+    "message": "旅行と場所"
+  },
+  "categoryObjects": {
+    "message": "オブジェクト"
+  },
+  "categorySymbols": {
+    "message": "記号"
+  },
+  "authPageTitle": {
+    "message": "Emojery — サインイン"
+  },
+  "authSignInTitle": {
+    "message": "サインインしてリアクション"
+  },
+  "authSignInTagline": {
+    "message": "確認コードをメールで送信します"
+  },
+  "authEmailLabel": {
+    "message": "メール"
+  },
+  "authSendCodeBtn": {
+    "message": "コードを送信"
+  },
+  "authSendingBtn": {
+    "message": "送信中…"
+  },
+  "authAgreeIntro": {
+    "message": "私は"
+  },
+  "authTermsLinkLabel": {
+    "message": "利用規約"
+  },
+  "authAgreeConjunction": {
+    "message": "と"
+  },
+  "authPrivacyLinkLabel": {
+    "message": "プライバシーポリシー"
+  },
+  "authAgreeOutro": {
+    "message": "に同意します。"
+  },
+  "authCodeTitle": {
+    "message": "コードを入力"
+  },
+  "authCodeTagline": {
+    "message": "$EMAIL$ にコードを送信しました。10 分で期限切れになります。",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authCodeLabel": {
+    "message": "確認コード"
+  },
+  "authVerifyingBtn": {
+    "message": "確認中…"
+  },
+  "authVerifyBtn": {
+    "message": "サインイン"
+  },
+  "authUseDifferentEmail": {
+    "message": "別のメールを使用"
+  },
+  "authDoneTitle": {
+    "message": "サインインしました"
+  },
+  "authDoneTagline": {
+    "message": "このタブを閉じて、対応ページでリアクションできます。"
+  },
+  "dataConsentTitle": {
+    "message": "Emojery が送信する情報"
+  },
+  "dataConsentBody": {
+    "message": "リアクションを集計・共有するため、Emojery はリアクションしたページのアドレスと、あなたに由来しないランダムなインストール識別子・セッション識別子をサーバーに送信します。サインイン時にはワンタイムコードを届けるためにメールアドレスを一度だけ送信しますが、保存されるのはアカウント識別子としての一方向ハッシュのみで、リアクション履歴はこの端末に残ります。任意の付加情報はこのブラウザーでは無効のままです。"
+  },
+  "dataConsentContinueBtn": {
+    "message": "続行"
+  },
+  "authSendThrottle": {
+    "message": "最近コードをリクエストしました。$TIME$後に別のコードをリクエストできます。",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authResendCooldown": {
+    "message": "このアドレスにはすでにコードを送信しました。$TIME$後に新しいコードをリクエストできます。",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authEnterPendingCode": {
+    "message": "$EMAIL$ に送信したコードを入力",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authResendBtn": {
+    "message": "コードを再送信"
+  },
+  "authResendInBtn": {
+    "message": "$TIME$後にコードを再送信",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authErrRateLimit": {
+    "message": "リクエストが多すぎます。数分待ってからもう一度お試しください。"
+  },
+  "authErrUndeliverable": {
+    "message": "メールを配信できませんでした。もう一度試すかアドレスを確認してください。"
+  },
+  "authErrEmailNotAccepted": {
+    "message": "このメールアドレスはサインインコードを受信できません。永続的なアドレスをご使用ください。"
+  },
+  "authErrBadEmail": {
+    "message": "有効なメールアドレスではないようです。"
+  },
+  "authErrUnknown": {
+    "message": "問題が発生しました。もう一度お試しください。"
+  },
+  "loadError": {
+    "message": "問題が発生しました。もう一度お試しください。"
+  },
+  "errOffline": {
+    "message": "オフラインのようです。接続が戻ったら再試行してください。"
+  },
+  "errRateLimited": {
+    "message": "リクエストが多すぎます。しばらく待ってから再試行してください。"
+  },
+  "errServerBusy": {
+    "message": "サーバーで問題が発生しています。1 分ほどしてから再試行してください。"
+  },
+  "authErrTooManyTries": {
+    "message": "誤ったコードが多すぎます。後でもう一度お試しください。"
+  },
+  "authErrCodeInvalid": {
+    "message": "そのコードは正しくないか期限切れです。"
+  },
+  "authErrVerifyFailed": {
+    "message": "確認に失敗しました。もう一度お試しください。"
+  },
+  "searchResultsCount": {
+    "message": "$COUNT$件の結果",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "reportSendError": {
+    "message": "レポートを送信できませんでした。接続を確認してもう一度お試しください。"
+  },
+  "onboardingTitle": {
+    "message": "Emojery の準備ができました"
+  },
+  "onboardingTagline": {
+    "message": "投稿・動画・商品に好きな絵文字でリアクション。"
+  },
+  "onboardingStepPinTitle": {
+    "message": "ピン留めする"
+  },
+  "onboardingStepPinBody": {
+    "message": "ツールバーのパズルアイコンをクリックして Emojery をピン留めすると、いつでも使えます。"
+  },
+  "onboardingStepPinDone": {
+    "message": "ピン留め完了!"
+  },
+  "onboardingStepSpotTitle": {
+    "message": "ボタンを見つける"
+  },
+  "onboardingStepSpotBody": {
+    "message": "対応ページでは「いいね」「Star」「共有」の横に小さな絵文字ボタンが表示されます。"
+  },
+  "onboardingStepReactTitle": {
+    "message": "リアクションする"
+  },
+  "onboardingStepReactBody": {
+    "message": "好きな絵文字を選ぶだけ。カウントは公開されます。最初のリアクションのときに一度サインインすれば、あとはリアクションするだけです。"
+  },
+  "onboardingTryBtn": {
+    "message": "実際に試す"
+  },
+  "onboardingSitesHeading": {
+    "message": "対応サイト"
+  },
+  "gateTitle": {
+    "message": "あと1ステップ"
+  },
+  "gateBody": {
+    "message": "メールアドレスと確認コードでサインインすると、リアクションが反映されます。"
+  },
+  "gateSignInBtn": {
+    "message": "サインインしてリアクション"
+  },
+  "coachTitle": {
+    "message": "新機能: 好きな絵文字でリアクション"
+  },
+  "coachBody": {
+    "message": "これが Emojery — ワンクリックで絵文字パレット全体が使えます。"
+  },
+  "coachDismissAria": {
+    "message": "閉じる"
+  },
+  "onboardingStepInstallTitle": {
+    "message": "Emojery をインストール"
+  },
+  "onboardingProgress": {
+    "message": "$TOTAL$ 件中 $DONE$ 件完了",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
+  },
+  "onboardingAllSet": {
+    "message": "準備完了です!"
+  }
+}

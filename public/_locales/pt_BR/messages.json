@@ -1,0 +1,616 @@
+{
+  "extName": {
+    "message": "Emojery"
+  },
+  "extShortName": {
+    "message": "Emojery"
+  },
+  "extDescription": {
+    "message": "Transforme cada botão Curtir numa paleta de emojis completa."
+  },
+  "extActionTitle": {
+    "message": "Emojery"
+  },
+  "popupHeading": {
+    "message": "Emojery"
+  },
+  "popupTitle": {
+    "message": "Emojery"
+  },
+  "tabSettings": {
+    "message": "Configurações"
+  },
+  "tabHistory": {
+    "message": "Histórico"
+  },
+  "tabAccount": {
+    "message": "Conta"
+  },
+  "tabReport": {
+    "message": "Relatar"
+  },
+  "settingEnabled": {
+    "message": "Ativado"
+  },
+  "settingEnabledHint": {
+    "message": "Chave geral para todos os sites suportados"
+  },
+  "settingReplaceNative": {
+    "message": "Ocultar botões originais"
+  },
+  "settingReplaceNativeHint": {
+    "message": "Ocultar Estrela/Curtir em favor do seletor"
+  },
+  "settingAnimations": {
+    "message": "Animações de reação"
+  },
+  "settingAnimationsHint": {
+    "message": "Mostrar efeitos de emoji quando os contadores aparecem ou você reage"
+  },
+  "settingTheme": {
+    "message": "Tema"
+  },
+  "settingThemeHint": {
+    "message": "Seguir o navegador ou usar sempre o tema claro ou escuro"
+  },
+  "settingDebug": {
+    "message": "Depuração"
+  },
+  "settingDebugHint": {
+    "message": "Ativar o modo de depuração (para desenvolvedores)"
+  },
+  "themeSystem": {
+    "message": "Sistema"
+  },
+  "themeLight": {
+    "message": "Claro"
+  },
+  "themeDark": {
+    "message": "Escuro"
+  },
+  "settingAutoTrigger": {
+    "message": "Pressionar botões originais automaticamente"
+  },
+  "settingAutoTriggerHint": {
+    "message": "Refletir seu emoji no Curtir/Não curtir do site"
+  },
+  "sentimentIntro": {
+    "message": "Arraste um emoji entre as listas, ou toque nele e depois em uma lista."
+  },
+  "sentimentPositiveZone": {
+    "message": "Pressiona Curtir / Voto positivo"
+  },
+  "sentimentNegativeZone": {
+    "message": "Pressiona Não curtir / Voto negativo"
+  },
+  "sentimentNeutralZone": {
+    "message": "Não pressiona nada"
+  },
+  "sentimentReset": {
+    "message": "Restaurar padrões"
+  },
+  "settingAnalyticsConsent": {
+    "message": "Insights da comunidade"
+  },
+  "settingAnalyticsConsentHint": {
+    "message": "Incluir minhas reações nas estatísticas regionais"
+  },
+  "sectionPerSite": {
+    "message": "Somente sites selecionados"
+  },
+  "sectionPerSiteHint": {
+    "message": "Escolha em quais sites mostrar o seletor"
+  },
+  "perSiteToggleAria": {
+    "message": "Mostrar o seletor em $SITE$",
+    "placeholders": {
+      "site": {
+        "content": "$1",
+        "example": "Facebook"
+      }
+    }
+  },
+  "signInBtn": {
+    "message": "Entrar"
+  },
+  "signInMsgAccount": {
+    "message": "Entre para gerenciar sua conta."
+  },
+  "signInMsgHistory": {
+    "message": "Entre para ver seu histórico de reações."
+  },
+  "signInMsgReport": {
+    "message": "Entre para enviar um relato de bug."
+  },
+  "signedInLabel": {
+    "message": "Conectado"
+  },
+  "signOutBtn": {
+    "message": "Sair"
+  },
+  "deleteAccountLabel": {
+    "message": "Excluir conta"
+  },
+  "deleteAccountHint": {
+    "message": "Remover seu registro e reações"
+  },
+  "deleteAccountBtn": {
+    "message": "Excluir"
+  },
+  "deleteAccountConfirm": {
+    "message": "Excluir sua conta do Emojery?\n\nEsta ação é permanente e não pode ser desfeita. Seu registro de usuário será apagado e os contadores de todas as reações que você enviou serão decrementados."
+  },
+  "deleteAccountSlide": {
+    "message": "Deslize para excluir"
+  },
+  "deleteAccountProgress": {
+    "message": "Excluindo sua conta… não feche esta janela."
+  },
+  "cancelBtn": {
+    "message": "Cancelar"
+  },
+  "historyEmpty": {
+    "message": "Ainda sem reações. Clique em um emoji em qualquer página suportada!"
+  },
+  "filterSitesPlaceholder": {
+    "message": "Filtrar sites"
+  },
+  "historyYesterday": {
+    "message": "Ontem"
+  },
+  "historyToday": {
+    "message": "Hoje"
+  },
+  "historySearchPlaceholder": {
+    "message": "Buscar reações"
+  },
+  "historyNoMatches": {
+    "message": "Nenhuma reação corresponde à sua busca."
+  },
+  "facetAllSites": {
+    "message": "Todos os sites"
+  },
+  "facetSiteAria": {
+    "message": "Filtrar por site"
+  },
+  "facetRangeAria": {
+    "message": "Filtrar por tempo"
+  },
+  "rangeAll": {
+    "message": "Todo o período"
+  },
+  "rangeToday": {
+    "message": "Hoje"
+  },
+  "range7d": {
+    "message": "7 dias"
+  },
+  "range30d": {
+    "message": "30 dias"
+  },
+  "range365d": {
+    "message": "1 ano"
+  },
+  "exportBtn": {
+    "message": "Exportar"
+  },
+  "importBtn": {
+    "message": "Importar"
+  },
+  "importDone": {
+    "message": "$COUNT$ reações importadas.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "128"
+      }
+    }
+  },
+  "importError": {
+    "message": "Esse arquivo não é uma exportação válida do Emojery."
+  },
+  "importReplaceWarn": {
+    "message": "A importação substitui seu histórico atual por este arquivo. Isso não pode ser desfeito."
+  },
+  "importReplaceConfirm": {
+    "message": "Substituir"
+  },
+  "importReplaceCountAria": {
+    "message": "Reações salvas: $STORED$. Neste arquivo: $INCOMING$.",
+    "placeholders": {
+      "stored": {
+        "content": "$1",
+        "example": "128"
+      },
+      "incoming": {
+        "content": "$2",
+        "example": "64"
+      }
+    }
+  },
+  "exportRowLabel": {
+    "message": "Exportar histórico"
+  },
+  "exportRowHint": {
+    "message": "Salvar em um arquivo de backup"
+  },
+  "importRowLabel": {
+    "message": "Importar histórico"
+  },
+  "importRowHint": {
+    "message": "Substituir de um arquivo de backup"
+  },
+  "relativeJustNow": {
+    "message": "agora"
+  },
+  "relativeMinutes": {
+    "message": "$M$ min",
+    "placeholders": {
+      "m": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "relativeHours": {
+    "message": "$H$ h",
+    "placeholders": {
+      "h": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "relativeDays": {
+    "message": "$D$ d",
+    "placeholders": {
+      "d": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "reportUnsupportedPage": {
+    "message": "Abra a página onde as reações não funcionam e abra este menu novamente para relatá-la."
+  },
+  "reportSent": {
+    "message": "Obrigado — relato enviado."
+  },
+  "reportAnother": {
+    "message": "Relatar outro problema"
+  },
+  "reportPlaceholder": {
+    "message": "Descreva brevemente seu problema (10-500 caracteres)"
+  },
+  "reportSendBtn": {
+    "message": "Enviar relato"
+  },
+  "pickerSearchPlaceholder": {
+    "message": "Buscar"
+  },
+  "pickerSearchAriaLabel": {
+    "message": "Buscar emojis"
+  },
+  "pickerNoMatches": {
+    "message": "Nenhum emoji corresponde a «$QUERY$»",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "asdf"
+      }
+    }
+  },
+  "pickerRecentlyUsed": {
+    "message": "Usados recentemente"
+  },
+  "pickerPopular": {
+    "message": "Populares"
+  },
+  "pickerClearRecent": {
+    "message": "Limpar"
+  },
+  "pickerCategoriesAria": {
+    "message": "Categorias de emoji"
+  },
+  "pickerDialogAria": {
+    "message": "Reagir ou ver o detalhamento"
+  },
+  "pickerKeyboardHint": {
+    "message": "Use as setas para navegar entre os emojis, Enter para reagir e Esc para fechar."
+  },
+  "pickerSearchResultsGroupAria": {
+    "message": "Resultados da busca"
+  },
+  "pickerShowMore": {
+    "message": "Mostrar mais"
+  },
+  "pickerShowLess": {
+    "message": "Mostrar menos"
+  },
+  "pickerAddReaction": {
+    "message": "Adicionar reação"
+  },
+  "pickerYourReaction": {
+    "message": "Sua reação: $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "pickerReactionsAria": {
+    "message": "$COUNT$ reações — reaja ou veja o detalhamento",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pickerReactWith": {
+    "message": "Reagir com $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "categorySmileys": {
+    "message": "Carinhas e emoções"
+  },
+  "categoryGestures": {
+    "message": "Gestos"
+  },
+  "categoryHearts": {
+    "message": "Corações"
+  },
+  "categoryAnimals": {
+    "message": "Animais e natureza"
+  },
+  "categoryFood": {
+    "message": "Comida e bebida"
+  },
+  "categoryActivities": {
+    "message": "Atividades"
+  },
+  "categoryTravel": {
+    "message": "Viagens e lugares"
+  },
+  "categoryObjects": {
+    "message": "Objetos"
+  },
+  "categorySymbols": {
+    "message": "Símbolos"
+  },
+  "authPageTitle": {
+    "message": "Emojery — Entrar"
+  },
+  "authSignInTitle": {
+    "message": "Entre para reagir"
+  },
+  "authSignInTagline": {
+    "message": "Enviaremos um código de verificação por e-mail"
+  },
+  "authEmailLabel": {
+    "message": "E-mail"
+  },
+  "authSendCodeBtn": {
+    "message": "Enviar código"
+  },
+  "authSendingBtn": {
+    "message": "Enviando…"
+  },
+  "authAgreeIntro": {
+    "message": "Concordo com os "
+  },
+  "authTermsLinkLabel": {
+    "message": "Termos de Serviço"
+  },
+  "authAgreeConjunction": {
+    "message": " e a "
+  },
+  "authPrivacyLinkLabel": {
+    "message": "Política de Privacidade"
+  },
+  "authAgreeOutro": {
+    "message": "."
+  },
+  "authCodeTitle": {
+    "message": "Digite seu código"
+  },
+  "authCodeTagline": {
+    "message": "Enviamos um código para $EMAIL$. Ele expira em 10 minutos.",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authCodeLabel": {
+    "message": "Código de verificação"
+  },
+  "authVerifyingBtn": {
+    "message": "Verificando…"
+  },
+  "authVerifyBtn": {
+    "message": "Entrar"
+  },
+  "authUseDifferentEmail": {
+    "message": "Usar outro e-mail"
+  },
+  "authDoneTitle": {
+    "message": "Você entrou"
+  },
+  "authDoneTagline": {
+    "message": "Você pode fechar esta aba e reagir em qualquer página suportada."
+  },
+  "dataConsentTitle": {
+    "message": "O que o Emojery envia"
+  },
+  "dataConsentBody": {
+    "message": "Para contar e compartilhar reações, o Emojery envia ao seu servidor o endereço da página em que você reage, junto com identificadores aleatórios de instalação e sessão que não derivam de você. Ao entrar na conta, seu e-mail é enviado uma única vez para entregar um código de uso único; apenas um hash unidirecional dele é mantido como identificador da sua conta, e seu histórico de reações fica neste dispositivo. O contexto opcional permanece desativado neste navegador."
+  },
+  "dataConsentContinueBtn": {
+    "message": "Continuar"
+  },
+  "authSendThrottle": {
+    "message": "Você solicitou um código recentemente. Você pode solicitar outro em $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authResendCooldown": {
+    "message": "Já enviamos um código para este endereço. Você pode solicitar um novo em $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authEnterPendingCode": {
+    "message": "Insira o código que enviamos para $EMAIL$",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authResendBtn": {
+    "message": "Reenviar código"
+  },
+  "authResendInBtn": {
+    "message": "Reenviar código em $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authErrRateLimit": {
+    "message": "Muitas solicitações. Aguarde alguns minutos e tente novamente."
+  },
+  "authErrUndeliverable": {
+    "message": "Não foi possível entregar o e-mail. Tente novamente ou verifique o endereço."
+  },
+  "authErrEmailNotAccepted": {
+    "message": "Este endereço de e-mail não pode receber códigos de entrada. Use um endereço permanente."
+  },
+  "authErrBadEmail": {
+    "message": "Isso não parece um endereço de e-mail válido."
+  },
+  "authErrUnknown": {
+    "message": "Algo deu errado. Tente novamente."
+  },
+  "loadError": {
+    "message": "Algo deu errado. Tente novamente."
+  },
+  "errOffline": {
+    "message": "Você parece estar off-line. Tente novamente quando reconectar."
+  },
+  "errRateLimited": {
+    "message": "Muitas solicitações. Aguarde um momento e tente de novo."
+  },
+  "errServerBusy": {
+    "message": "O servidor está com problemas. Tente de novo em um minuto."
+  },
+  "authErrTooManyTries": {
+    "message": "Muitos códigos errados. Tente novamente mais tarde."
+  },
+  "authErrCodeInvalid": {
+    "message": "Este código está incorreto ou expirou."
+  },
+  "authErrVerifyFailed": {
+    "message": "Falha na verificação. Tente novamente."
+  },
+  "searchResultsCount": {
+    "message": "$COUNT$ resultados",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "reportSendError": {
+    "message": "Não foi possível enviar o relatório. Verifique sua conexão e tente novamente."
+  },
+  "onboardingTitle": {
+    "message": "O Emojery está pronto"
+  },
+  "onboardingTagline": {
+    "message": "Reaja a posts, vídeos e produtos com qualquer emoji."
+  },
+  "onboardingStepPinTitle": {
+    "message": "Fixe o ícone"
+  },
+  "onboardingStepPinBody": {
+    "message": "Clique no ícone de quebra-cabeça na barra de ferramentas e fixe o Emojery para deixá-lo sempre à mão."
+  },
+  "onboardingStepPinDone": {
+    "message": "Fixado!"
+  },
+  "onboardingStepSpotTitle": {
+    "message": "Encontre o botão"
+  },
+  "onboardingStepSpotBody": {
+    "message": "Um pequeno botão de emoji aparece ao lado de Curtir, Star ou Compartilhar nas páginas compatíveis."
+  },
+  "onboardingStepReactTitle": {
+    "message": "Reaja"
+  },
+  "onboardingStepReactBody": {
+    "message": "Escolha qualquer emoji. Os contadores são públicos. Entre uma vez na sua primeira reação e depois é só reagir."
+  },
+  "onboardingTryBtn": {
+    "message": "Experimentar ao vivo"
+  },
+  "onboardingSitesHeading": {
+    "message": "Funciona em"
+  },
+  "gateTitle": {
+    "message": "Falta um passo"
+  },
+  "gateBody": {
+    "message": "Entre com seu e-mail e um código de verificação para sua reação valer."
+  },
+  "gateSignInBtn": {
+    "message": "Entrar e reagir"
+  },
+  "coachTitle": {
+    "message": "Novidade: reaja com qualquer emoji"
+  },
+  "coachBody": {
+    "message": "Isso é o Emojery — um clique, toda a paleta de emojis."
+  },
+  "coachDismissAria": {
+    "message": "Fechar"
+  },
+  "onboardingStepInstallTitle": {
+    "message": "Instalar o Emojery"
+  },
+  "onboardingProgress": {
+    "message": "$DONE$ de $TOTAL$ concluído",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
+  },
+  "onboardingAllSet": {
+    "message": "Tudo pronto!"
+  }
+}

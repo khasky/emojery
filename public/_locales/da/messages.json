@@ -1,0 +1,616 @@
+{
+  "extName": {
+    "message": "Emojery"
+  },
+  "extShortName": {
+    "message": "Emojery"
+  },
+  "extDescription": {
+    "message": "Forvandl enhver Like-knap til en fuld emoji-palet."
+  },
+  "extActionTitle": {
+    "message": "Emojery"
+  },
+  "popupHeading": {
+    "message": "Emojery"
+  },
+  "popupTitle": {
+    "message": "Emojery"
+  },
+  "tabSettings": {
+    "message": "Indstillinger"
+  },
+  "tabHistory": {
+    "message": "Historik"
+  },
+  "tabAccount": {
+    "message": "Konto"
+  },
+  "tabReport": {
+    "message": "Rapportér"
+  },
+  "settingEnabled": {
+    "message": "Aktiveret"
+  },
+  "settingEnabledHint": {
+    "message": "Hovedkontakt for alle understøttede websteder"
+  },
+  "settingReplaceNative": {
+    "message": "Skjul originale knapper"
+  },
+  "settingReplaceNativeHint": {
+    "message": "Skjul Stjerne/Like til fordel for vælgeren"
+  },
+  "settingAnimations": {
+    "message": "Reaktionsanimationer"
+  },
+  "settingAnimationsHint": {
+    "message": "Vis emoji-effekter når tællere vises, eller du reagerer"
+  },
+  "settingTheme": {
+    "message": "Tema"
+  },
+  "settingThemeHint": {
+    "message": "Følg browseren, eller brug altid lyst eller mørkt"
+  },
+  "settingDebug": {
+    "message": "Fejlfinding"
+  },
+  "settingDebugHint": {
+    "message": "Slå fejlfindingstilstand til (for udviklere)"
+  },
+  "themeSystem": {
+    "message": "System"
+  },
+  "themeLight": {
+    "message": "Lyst"
+  },
+  "themeDark": {
+    "message": "Mørkt"
+  },
+  "settingAutoTrigger": {
+    "message": "Tryk automatisk på originale knapper"
+  },
+  "settingAutoTriggerHint": {
+    "message": "Spejl din emoji til sidens Synes godt om/Synes ikke om"
+  },
+  "sentimentIntro": {
+    "message": "Træk en emoji mellem listerne, eller tryk på den og derefter på en liste."
+  },
+  "sentimentPositiveZone": {
+    "message": "Trykker på Synes godt om / Upvote"
+  },
+  "sentimentNegativeZone": {
+    "message": "Trykker på Synes ikke om / Downvote"
+  },
+  "sentimentNeutralZone": {
+    "message": "Trykker ikke på noget"
+  },
+  "sentimentReset": {
+    "message": "Nulstil til standard"
+  },
+  "settingAnalyticsConsent": {
+    "message": "Community-indsigter"
+  },
+  "settingAnalyticsConsentHint": {
+    "message": "Lad mine reaktioner tælle med i regionale opgørelser"
+  },
+  "sectionPerSite": {
+    "message": "Kun valgte websteder"
+  },
+  "sectionPerSiteHint": {
+    "message": "Vælg hvilke websteder der viser vælgeren"
+  },
+  "perSiteToggleAria": {
+    "message": "Vis vælgeren på $SITE$",
+    "placeholders": {
+      "site": {
+        "content": "$1",
+        "example": "Facebook"
+      }
+    }
+  },
+  "signInBtn": {
+    "message": "Log ind"
+  },
+  "signInMsgAccount": {
+    "message": "Log ind for at administrere din konto."
+  },
+  "signInMsgHistory": {
+    "message": "Log ind for at se din reaktionshistorik."
+  },
+  "signInMsgReport": {
+    "message": "Log ind for at indsende en fejlrapport."
+  },
+  "signedInLabel": {
+    "message": "Logget ind"
+  },
+  "signOutBtn": {
+    "message": "Log ud"
+  },
+  "deleteAccountLabel": {
+    "message": "Slet konto"
+  },
+  "deleteAccountHint": {
+    "message": "Fjern din post og dine reaktioner"
+  },
+  "deleteAccountBtn": {
+    "message": "Slet"
+  },
+  "deleteAccountConfirm": {
+    "message": "Slet din Emojery-konto?\n\nDenne handling er permanent og kan ikke fortrydes. Din brugerpost slettes, og tællerne for hver reaktion, du tidligere har sendt, reduceres."
+  },
+  "deleteAccountSlide": {
+    "message": "Træk for at slette"
+  },
+  "deleteAccountProgress": {
+    "message": "Sletter din konto… luk ikke dette vindue."
+  },
+  "cancelBtn": {
+    "message": "Annuller"
+  },
+  "historyEmpty": {
+    "message": "Ingen reaktioner endnu. Klik på en emoji på en understøttet side!"
+  },
+  "filterSitesPlaceholder": {
+    "message": "Filtrer websteder"
+  },
+  "historyYesterday": {
+    "message": "I går"
+  },
+  "historyToday": {
+    "message": "I dag"
+  },
+  "historySearchPlaceholder": {
+    "message": "Søg i reaktioner"
+  },
+  "historyNoMatches": {
+    "message": "Ingen reaktioner matcher din søgning."
+  },
+  "facetAllSites": {
+    "message": "Alle websteder"
+  },
+  "facetSiteAria": {
+    "message": "Filtrer efter websted"
+  },
+  "facetRangeAria": {
+    "message": "Filtrer efter tid"
+  },
+  "rangeAll": {
+    "message": "Hele tiden"
+  },
+  "rangeToday": {
+    "message": "I dag"
+  },
+  "range7d": {
+    "message": "7 dage"
+  },
+  "range30d": {
+    "message": "30 dage"
+  },
+  "range365d": {
+    "message": "1 år"
+  },
+  "exportBtn": {
+    "message": "Eksportér"
+  },
+  "importBtn": {
+    "message": "Importér"
+  },
+  "importDone": {
+    "message": "$COUNT$ reaktioner importeret.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "128"
+      }
+    }
+  },
+  "importError": {
+    "message": "Filen er ikke en gyldig Emojery-eksport."
+  },
+  "importReplaceWarn": {
+    "message": "Import erstatter din nuværende historik med denne fil. Dette kan ikke fortrydes."
+  },
+  "importReplaceConfirm": {
+    "message": "Erstat"
+  },
+  "importReplaceCountAria": {
+    "message": "Gemte reaktioner: $STORED$. I denne fil: $INCOMING$.",
+    "placeholders": {
+      "stored": {
+        "content": "$1",
+        "example": "128"
+      },
+      "incoming": {
+        "content": "$2",
+        "example": "64"
+      }
+    }
+  },
+  "exportRowLabel": {
+    "message": "Eksportér historik"
+  },
+  "exportRowHint": {
+    "message": "Gem i en sikkerhedskopi"
+  },
+  "importRowLabel": {
+    "message": "Importér historik"
+  },
+  "importRowHint": {
+    "message": "Erstat fra en sikkerhedskopi"
+  },
+  "relativeJustNow": {
+    "message": "lige nu"
+  },
+  "relativeMinutes": {
+    "message": "$M$ min",
+    "placeholders": {
+      "m": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "relativeHours": {
+    "message": "$H$ t",
+    "placeholders": {
+      "h": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "relativeDays": {
+    "message": "$D$ d",
+    "placeholders": {
+      "d": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "reportUnsupportedPage": {
+    "message": "Åbn siden, hvor reaktioner ikke virker, og åbn så denne menu igen for at rapportere den."
+  },
+  "reportSent": {
+    "message": "Tak — rapport sendt."
+  },
+  "reportAnother": {
+    "message": "Rapportér et andet problem"
+  },
+  "reportPlaceholder": {
+    "message": "Beskriv dit problem kort (10-500 tegn)"
+  },
+  "reportSendBtn": {
+    "message": "Send rapport"
+  },
+  "pickerSearchPlaceholder": {
+    "message": "Søg"
+  },
+  "pickerSearchAriaLabel": {
+    "message": "Søg emojis"
+  },
+  "pickerNoMatches": {
+    "message": "Ingen emojis matcher \"$QUERY$\"",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "asdf"
+      }
+    }
+  },
+  "pickerRecentlyUsed": {
+    "message": "Nyligt brugte"
+  },
+  "pickerPopular": {
+    "message": "Populære"
+  },
+  "pickerClearRecent": {
+    "message": "Ryd"
+  },
+  "pickerCategoriesAria": {
+    "message": "Emoji-kategorier"
+  },
+  "pickerDialogAria": {
+    "message": "Reager eller se fordelingen"
+  },
+  "pickerKeyboardHint": {
+    "message": "Brug piletasterne til at flytte mellem emojier, Enter for at reagere, Escape for at lukke."
+  },
+  "pickerSearchResultsGroupAria": {
+    "message": "Søgeresultater"
+  },
+  "pickerShowMore": {
+    "message": "Vis flere"
+  },
+  "pickerShowLess": {
+    "message": "Vis færre"
+  },
+  "pickerAddReaction": {
+    "message": "Tilføj reaktion"
+  },
+  "pickerYourReaction": {
+    "message": "Din reaktion: $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "pickerReactionsAria": {
+    "message": "$COUNT$ reaktioner — reagér eller se opdeling",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pickerReactWith": {
+    "message": "Reagér med $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "categorySmileys": {
+    "message": "Smileys og følelser"
+  },
+  "categoryGestures": {
+    "message": "Gestus"
+  },
+  "categoryHearts": {
+    "message": "Hjerter"
+  },
+  "categoryAnimals": {
+    "message": "Dyr og natur"
+  },
+  "categoryFood": {
+    "message": "Mad og drikke"
+  },
+  "categoryActivities": {
+    "message": "Aktiviteter"
+  },
+  "categoryTravel": {
+    "message": "Rejser og steder"
+  },
+  "categoryObjects": {
+    "message": "Objekter"
+  },
+  "categorySymbols": {
+    "message": "Symboler"
+  },
+  "authPageTitle": {
+    "message": "Emojery — Log ind"
+  },
+  "authSignInTitle": {
+    "message": "Log ind for at reagere"
+  },
+  "authSignInTagline": {
+    "message": "Vi sender dig en bekræftelseskode på e-mail"
+  },
+  "authEmailLabel": {
+    "message": "E-mail"
+  },
+  "authSendCodeBtn": {
+    "message": "Send kode"
+  },
+  "authSendingBtn": {
+    "message": "Sender…"
+  },
+  "authAgreeIntro": {
+    "message": "Jeg accepterer "
+  },
+  "authTermsLinkLabel": {
+    "message": "Servicevilkårene"
+  },
+  "authAgreeConjunction": {
+    "message": " og "
+  },
+  "authPrivacyLinkLabel": {
+    "message": "Privatlivspolitikken"
+  },
+  "authAgreeOutro": {
+    "message": "."
+  },
+  "authCodeTitle": {
+    "message": "Indtast din kode"
+  },
+  "authCodeTagline": {
+    "message": "Vi har sendt en kode til $EMAIL$. Den udløber om 10 minutter.",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authCodeLabel": {
+    "message": "Bekræftelseskode"
+  },
+  "authVerifyingBtn": {
+    "message": "Verificerer…"
+  },
+  "authVerifyBtn": {
+    "message": "Log ind"
+  },
+  "authUseDifferentEmail": {
+    "message": "Brug en anden e-mail"
+  },
+  "authDoneTitle": {
+    "message": "Du er logget ind"
+  },
+  "authDoneTagline": {
+    "message": "Du kan lukke denne fane og reagere på enhver understøttet side."
+  },
+  "dataConsentTitle": {
+    "message": "Hvad Emojery sender"
+  },
+  "dataConsentBody": {
+    "message": "For at tælle og dele reaktioner sender Emojery adressen på den side, du reagerer på, til sin server sammen med tilfældige installations- og sessionsidentifikatorer, der ikke er udledt af dig. Når du logger ind, sendes din e-mailadresse én gang for at levere en engangskode; kun en envejs-hash af den gemmes som din kontoidentifikator, og din reaktionshistorik bliver på denne enhed. Valgfri kontekst er slået fra i denne browser."
+  },
+  "dataConsentContinueBtn": {
+    "message": "Fortsæt"
+  },
+  "authSendThrottle": {
+    "message": "Du har lige anmodet om en kode. Du kan anmode om en ny om $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authResendCooldown": {
+    "message": "Vi har allerede sendt en kode til denne adresse. Du kan anmode om en ny om $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authEnterPendingCode": {
+    "message": "Indtast koden, vi sendte til $EMAIL$",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authResendBtn": {
+    "message": "Send kode igen"
+  },
+  "authResendInBtn": {
+    "message": "Send kode igen om $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authErrRateLimit": {
+    "message": "For mange anmodninger. Vent et par minutter og prøv igen."
+  },
+  "authErrUndeliverable": {
+    "message": "Kunne ikke levere e-mailen. Prøv igen eller tjek adressen."
+  },
+  "authErrEmailNotAccepted": {
+    "message": "Denne e-mail-adresse kan ikke modtage login-koder. Brug en permanent adresse."
+  },
+  "authErrBadEmail": {
+    "message": "Det ligner ikke en gyldig e-mail-adresse."
+  },
+  "authErrUnknown": {
+    "message": "Noget gik galt. Prøv igen."
+  },
+  "loadError": {
+    "message": "Noget gik galt. Prøv igen."
+  },
+  "errOffline": {
+    "message": "Du ser ud til at være offline. Prøv igen, når forbindelsen er tilbage."
+  },
+  "errRateLimited": {
+    "message": "For mange anmodninger. Vent et øjeblik, og prøv igen."
+  },
+  "errServerBusy": {
+    "message": "Serveren har problemer. Prøv igen om et minut."
+  },
+  "authErrTooManyTries": {
+    "message": "For mange forkerte koder. Prøv igen senere."
+  },
+  "authErrCodeInvalid": {
+    "message": "Koden er forkert eller udløbet."
+  },
+  "authErrVerifyFailed": {
+    "message": "Verifikation mislykkedes. Prøv igen."
+  },
+  "searchResultsCount": {
+    "message": "$COUNT$ resultater",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "reportSendError": {
+    "message": "Rapporten kunne ikke sendes. Tjek din forbindelse, og prøv igen."
+  },
+  "onboardingTitle": {
+    "message": "Emojery er klar"
+  },
+  "onboardingTagline": {
+    "message": "Reager på opslag, videoer og produkter med en hvilken som helst emoji."
+  },
+  "onboardingStepPinTitle": {
+    "message": "Fastgør ikonet"
+  },
+  "onboardingStepPinBody": {
+    "message": "Klik på puslespilsikonet i værktøjslinjen, og fastgør Emojery, så det altid er ved hånden."
+  },
+  "onboardingStepPinDone": {
+    "message": "Fastgjort!"
+  },
+  "onboardingStepSpotTitle": {
+    "message": "Find knappen"
+  },
+  "onboardingStepSpotBody": {
+    "message": "En lille emoji-knap vises ved siden af Synes godt om, Star eller Del på understøttede sider."
+  },
+  "onboardingStepReactTitle": {
+    "message": "Reager"
+  },
+  "onboardingStepReactBody": {
+    "message": "Vælg en hvilken som helst emoji. Tællerne er offentlige. Log ind én gang ved din første reaktion, og reager derefter bare."
+  },
+  "onboardingTryBtn": {
+    "message": "Prøv det live"
+  },
+  "onboardingSitesHeading": {
+    "message": "Virker på"
+  },
+  "gateTitle": {
+    "message": "Ét skridt tilbage"
+  },
+  "gateBody": {
+    "message": "Log ind med din e-mail og en bekræftelseskode, så din reaktion tæller."
+  },
+  "gateSignInBtn": {
+    "message": "Log ind & reager"
+  },
+  "coachTitle": {
+    "message": "Nyt: reager med enhver emoji"
+  },
+  "coachBody": {
+    "message": "Det er Emojery — ét klik, hele emoji-paletten."
+  },
+  "coachDismissAria": {
+    "message": "Luk"
+  },
+  "onboardingStepInstallTitle": {
+    "message": "Installer Emojery"
+  },
+  "onboardingProgress": {
+    "message": "$DONE$ af $TOTAL$ færdig",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
+  },
+  "onboardingAllSet": {
+    "message": "Så er du klar!"
+  }
+}

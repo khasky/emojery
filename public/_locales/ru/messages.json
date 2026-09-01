@@ -1,0 +1,616 @@
+{
+  "extName": {
+    "message": "Emojery"
+  },
+  "extShortName": {
+    "message": "Emojery"
+  },
+  "extDescription": {
+    "message": "Превратите любую кнопку «Нравится» в полную палитру эмодзи."
+  },
+  "extActionTitle": {
+    "message": "Emojery"
+  },
+  "popupHeading": {
+    "message": "Emojery"
+  },
+  "popupTitle": {
+    "message": "Emojery"
+  },
+  "tabSettings": {
+    "message": "Настройки"
+  },
+  "tabHistory": {
+    "message": "История"
+  },
+  "tabAccount": {
+    "message": "Аккаунт"
+  },
+  "tabReport": {
+    "message": "Помощь"
+  },
+  "settingEnabled": {
+    "message": "Активно"
+  },
+  "settingEnabledHint": {
+    "message": "Главный переключатель для всех поддерживаемых сайтов"
+  },
+  "settingReplaceNative": {
+    "message": "Скрывать оригинальные кнопки"
+  },
+  "settingReplaceNativeHint": {
+    "message": "Прячет оригинальные кнопки и отображает только реакции расширения"
+  },
+  "settingAnimations": {
+    "message": "Анимации реакций"
+  },
+  "settingAnimationsHint": {
+    "message": "Показывать анимированные эмодзи, когда появляются счётчики или вы оставляете реакции"
+  },
+  "settingTheme": {
+    "message": "Тема"
+  },
+  "settingThemeHint": {
+    "message": "Следовать браузеру или всегда использовать светлую либо тёмную"
+  },
+  "settingDebug": {
+    "message": "Отладка"
+  },
+  "settingDebugHint": {
+    "message": "Включить режим отладки (для разработчиков)"
+  },
+  "themeSystem": {
+    "message": "Системная"
+  },
+  "themeLight": {
+    "message": "Светлая"
+  },
+  "themeDark": {
+    "message": "Тёмная"
+  },
+  "settingAutoTrigger": {
+    "message": "Автонажатие оригинальных кнопок"
+  },
+  "settingAutoTriggerHint": {
+    "message": "Дублировать вашу эмодзи в лайк/дизлайк сайта"
+  },
+  "sentimentIntro": {
+    "message": "Перетащите эмодзи между списками или нажмите на неё, а затем на список."
+  },
+  "sentimentPositiveZone": {
+    "message": "Нажимает лайк / голос «за»"
+  },
+  "sentimentNegativeZone": {
+    "message": "Нажимает дизлайк / голос «против»"
+  },
+  "sentimentNeutralZone": {
+    "message": "Ничего не нажимает"
+  },
+  "sentimentReset": {
+    "message": "Сбросить по умолчанию"
+  },
+  "settingAnalyticsConsent": {
+    "message": "Активность сообщества"
+  },
+  "settingAnalyticsConsentHint": {
+    "message": "Учитывать мои реакции в региональной статистике"
+  },
+  "sectionPerSite": {
+    "message": "Только выбранные сайты"
+  },
+  "sectionPerSiteHint": {
+    "message": "Выберите, на каких сайтах показывать выбор реакций"
+  },
+  "perSiteToggleAria": {
+    "message": "Показывать выбор реакций на $SITE$",
+    "placeholders": {
+      "site": {
+        "content": "$1",
+        "example": "Facebook"
+      }
+    }
+  },
+  "signInBtn": {
+    "message": "Войти"
+  },
+  "signInMsgAccount": {
+    "message": "Войдите, чтобы управлять аккаунтом."
+  },
+  "signInMsgHistory": {
+    "message": "Войдите, чтобы посмотреть историю реакций."
+  },
+  "signInMsgReport": {
+    "message": "Войдите, чтобы отправить отчёт об ошибке."
+  },
+  "signedInLabel": {
+    "message": "Вы вошли как"
+  },
+  "signOutBtn": {
+    "message": "Выйти"
+  },
+  "deleteAccountLabel": {
+    "message": "Удалить аккаунт"
+  },
+  "deleteAccountHint": {
+    "message": "Полностью удалить ваш аккаунт и все ваши реакции"
+  },
+  "deleteAccountBtn": {
+    "message": "Удалить"
+  },
+  "deleteAccountConfirm": {
+    "message": "Удалить ваш аккаунт Emojery?\n\nДействие необратимо. Запись пользователя будет удалена, а счётчики всех ваших прошлых реакций — уменьшены."
+  },
+  "deleteAccountSlide": {
+    "message": "Проведите, чтобы удалить"
+  },
+  "deleteAccountProgress": {
+    "message": "Удаляем ваш аккаунт… не закрывайте это окно."
+  },
+  "cancelBtn": {
+    "message": "Отмена"
+  },
+  "historyEmpty": {
+    "message": "Реакций пока нет. Нажмите на эмодзи на любой поддерживаемой странице!"
+  },
+  "filterSitesPlaceholder": {
+    "message": "Фильтр сайтов"
+  },
+  "historyYesterday": {
+    "message": "Вчера"
+  },
+  "historyToday": {
+    "message": "Сегодня"
+  },
+  "historySearchPlaceholder": {
+    "message": "Поиск реакций"
+  },
+  "historyNoMatches": {
+    "message": "Нет реакций по запросу."
+  },
+  "facetAllSites": {
+    "message": "Все сайты"
+  },
+  "facetSiteAria": {
+    "message": "Фильтр по сайту"
+  },
+  "facetRangeAria": {
+    "message": "Фильтр по времени"
+  },
+  "rangeAll": {
+    "message": "Всё время"
+  },
+  "rangeToday": {
+    "message": "Сегодня"
+  },
+  "range7d": {
+    "message": "7 дней"
+  },
+  "range30d": {
+    "message": "30 дней"
+  },
+  "range365d": {
+    "message": "1 год"
+  },
+  "exportBtn": {
+    "message": "Экспорт"
+  },
+  "importBtn": {
+    "message": "Импорт"
+  },
+  "importDone": {
+    "message": "Импортировано реакций: $COUNT$.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "128"
+      }
+    }
+  },
+  "importError": {
+    "message": "Это не похоже на файл экспорта Emojery."
+  },
+  "importReplaceWarn": {
+    "message": "Импорт заменит текущую историю данными из файла. Это действие необратимо."
+  },
+  "importReplaceConfirm": {
+    "message": "Заменить"
+  },
+  "importReplaceCountAria": {
+    "message": "Сохранённых реакций: $STORED$. В этом файле: $INCOMING$.",
+    "placeholders": {
+      "stored": {
+        "content": "$1",
+        "example": "128"
+      },
+      "incoming": {
+        "content": "$2",
+        "example": "64"
+      }
+    }
+  },
+  "exportRowLabel": {
+    "message": "Экспорт истории"
+  },
+  "exportRowHint": {
+    "message": "Сохранить в файл резервной копии"
+  },
+  "importRowLabel": {
+    "message": "Импорт истории"
+  },
+  "importRowHint": {
+    "message": "Заменить из файла резервной копии"
+  },
+  "relativeJustNow": {
+    "message": "только что"
+  },
+  "relativeMinutes": {
+    "message": "$M$ мин",
+    "placeholders": {
+      "m": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "relativeHours": {
+    "message": "$H$ ч",
+    "placeholders": {
+      "h": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "relativeDays": {
+    "message": "$D$ д",
+    "placeholders": {
+      "d": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "reportUnsupportedPage": {
+    "message": "Откройте страницу, где не работают реакции, и затем сообщите в этом меню о проблеме."
+  },
+  "reportSent": {
+    "message": "Спасибо! Отчёт отправлен."
+  },
+  "reportAnother": {
+    "message": "Сообщить о другой проблеме"
+  },
+  "reportPlaceholder": {
+    "message": "Опишите проблему (10-500 символов)"
+  },
+  "reportSendBtn": {
+    "message": "Отправить отчёт"
+  },
+  "pickerSearchPlaceholder": {
+    "message": "Поиск"
+  },
+  "pickerSearchAriaLabel": {
+    "message": "Поиск эмодзи"
+  },
+  "pickerNoMatches": {
+    "message": "Нет эмодзи по запросу «$QUERY$»",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "asdf"
+      }
+    }
+  },
+  "pickerRecentlyUsed": {
+    "message": "Недавние"
+  },
+  "pickerPopular": {
+    "message": "Популярные"
+  },
+  "pickerClearRecent": {
+    "message": "Очистить"
+  },
+  "pickerCategoriesAria": {
+    "message": "Категории эмодзи"
+  },
+  "pickerDialogAria": {
+    "message": "Отреагировать или посмотреть разбивку"
+  },
+  "pickerKeyboardHint": {
+    "message": "Стрелки — переход между эмодзи, Enter — отреагировать, Escape — закрыть."
+  },
+  "pickerSearchResultsGroupAria": {
+    "message": "Результаты поиска"
+  },
+  "pickerShowMore": {
+    "message": "Показать больше"
+  },
+  "pickerShowLess": {
+    "message": "Показать меньше"
+  },
+  "pickerAddReaction": {
+    "message": "Добавить реакцию"
+  },
+  "pickerYourReaction": {
+    "message": "Ваша реакция: $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "pickerReactionsAria": {
+    "message": "$COUNT$ реакций — отреагировать или посмотреть разбивку",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pickerReactWith": {
+    "message": "Отреагировать: $LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "categorySmileys": {
+    "message": "Смайлы и эмоции"
+  },
+  "categoryGestures": {
+    "message": "Жесты"
+  },
+  "categoryHearts": {
+    "message": "Сердца"
+  },
+  "categoryAnimals": {
+    "message": "Животные и природа"
+  },
+  "categoryFood": {
+    "message": "Еда и напитки"
+  },
+  "categoryActivities": {
+    "message": "Активности"
+  },
+  "categoryTravel": {
+    "message": "Путешествия и места"
+  },
+  "categoryObjects": {
+    "message": "Объекты"
+  },
+  "categorySymbols": {
+    "message": "Символы"
+  },
+  "authPageTitle": {
+    "message": "Emojery — вход"
+  },
+  "authSignInTitle": {
+    "message": "Войдите чтобы оставить реакцию"
+  },
+  "authSignInTagline": {
+    "message": "Мы отправим вам код подтверждения на email"
+  },
+  "authEmailLabel": {
+    "message": "Email"
+  },
+  "authSendCodeBtn": {
+    "message": "Отправить код"
+  },
+  "authSendingBtn": {
+    "message": "Отправка…"
+  },
+  "authAgreeIntro": {
+    "message": "Я принимаю "
+  },
+  "authTermsLinkLabel": {
+    "message": "Условия использования"
+  },
+  "authAgreeConjunction": {
+    "message": " и "
+  },
+  "authPrivacyLinkLabel": {
+    "message": "Политику приватности"
+  },
+  "authAgreeOutro": {
+    "message": "."
+  },
+  "authCodeTitle": {
+    "message": "Введите код"
+  },
+  "authCodeTagline": {
+    "message": "Мы отправили код на $EMAIL$. Он действует 10 минут.",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authCodeLabel": {
+    "message": "Код подтверждения"
+  },
+  "authVerifyingBtn": {
+    "message": "Проверка…"
+  },
+  "authVerifyBtn": {
+    "message": "Войти"
+  },
+  "authUseDifferentEmail": {
+    "message": "Использовать другой email"
+  },
+  "authDoneTitle": {
+    "message": "Успешный вход"
+  },
+  "authDoneTagline": {
+    "message": "Теперь вы можете оставлять реакции на любом поддерживаемом сайте."
+  },
+  "dataConsentTitle": {
+    "message": "Что отправляет Emojery"
+  },
+  "dataConsentBody": {
+    "message": "Чтобы считать реакции и показывать их другим, Emojery отправляет на свой сервер адрес страницы, где вы поставили реакцию, вместе со случайными идентификаторами установки и сессии, которые не выводятся из ваших данных. При входе ваш email отправляется один раз — чтобы доставить одноразовый код; сохраняется только его односторонний хеш как идентификатор вашей учётной записи, а история реакций остаётся на этом устройстве. Необязательный контекст в этом браузере остаётся выключенным."
+  },
+  "dataConsentContinueBtn": {
+    "message": "Продолжить"
+  },
+  "authSendThrottle": {
+    "message": "Вы недавно запрашивали код. Запросить ещё один можно через $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authResendCooldown": {
+    "message": "Мы уже отправили код на этот адрес. Запросить новый можно через $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authEnterPendingCode": {
+    "message": "Ввести код, отправленный на $EMAIL$",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authResendBtn": {
+    "message": "Отправить код повторно"
+  },
+  "authResendInBtn": {
+    "message": "Отправить код повторно через $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authErrRateLimit": {
+    "message": "Слишком много запросов. Подождите несколько минут и попробуйте снова."
+  },
+  "authErrUndeliverable": {
+    "message": "Не удалось доставить письмо. Попробуйте снова или проверьте адрес."
+  },
+  "authErrEmailNotAccepted": {
+    "message": "Одноразовые/временные email-провайдеры не принимаются. Используйте постоянный адрес."
+  },
+  "authErrBadEmail": {
+    "message": "Введите корректный email-адрес."
+  },
+  "authErrUnknown": {
+    "message": "Неизвестная ошибка. Попробуйте снова."
+  },
+  "loadError": {
+    "message": "Неизвестная ошибка. Попробуйте снова."
+  },
+  "errOffline": {
+    "message": "Похоже, нет подключения. Попробуйте ещё раз, когда связь восстановится."
+  },
+  "errRateLimited": {
+    "message": "Слишком много запросов. Подождите немного и попробуйте снова."
+  },
+  "errServerBusy": {
+    "message": "На сервере неполадки. Попробуйте через минуту."
+  },
+  "authErrTooManyTries": {
+    "message": "Слишком много неверных кодов. Попробуйте позже."
+  },
+  "authErrCodeInvalid": {
+    "message": "Код неверен или истёк."
+  },
+  "authErrVerifyFailed": {
+    "message": "Не удалось подтвердить. Попробуйте снова."
+  },
+  "searchResultsCount": {
+    "message": "Результатов: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "reportSendError": {
+    "message": "Не удалось отправить отчёт. Проверьте соединение и попробуйте ещё раз."
+  },
+  "onboardingTitle": {
+    "message": "Emojery готов к работе"
+  },
+  "onboardingTagline": {
+    "message": "Оставляйте реакции на постах, видео и товарах любым эмодзи."
+  },
+  "onboardingStepPinTitle": {
+    "message": "Закрепите иконку"
+  },
+  "onboardingStepPinBody": {
+    "message": "Нажмите значок-пазл на панели инструментов и закрепите Emojery, чтобы он был под рукой."
+  },
+  "onboardingStepPinDone": {
+    "message": "Закреплено!"
+  },
+  "onboardingStepSpotTitle": {
+    "message": "Найдите кнопку"
+  },
+  "onboardingStepSpotBody": {
+    "message": "Кнопка с эмодзи появляется рядом с «Нравится», «Star» или «Поделиться» на поддерживаемых страницах."
+  },
+  "onboardingStepReactTitle": {
+    "message": "Оставляйте реакции"
+  },
+  "onboardingStepReactBody": {
+    "message": "Выбирайте любой эмодзи. Счётчики публичны. Войдите один раз при первой реакции — дальше просто реагируйте."
+  },
+  "onboardingTryBtn": {
+    "message": "Попробовать вживую"
+  },
+  "onboardingSitesHeading": {
+    "message": "Работает на"
+  },
+  "gateTitle": {
+    "message": "Остался один шаг"
+  },
+  "gateBody": {
+    "message": "Войдите по почте и коду подтверждения, чтобы ваша реакция засчиталась."
+  },
+  "gateSignInBtn": {
+    "message": "Войти и отреагировать"
+  },
+  "coachTitle": {
+    "message": "Новое: реагируйте любым эмодзи"
+  },
+  "coachBody": {
+    "message": "Это Emojery — один клик, и вся палитра эмодзи."
+  },
+  "coachDismissAria": {
+    "message": "Скрыть"
+  },
+  "onboardingStepInstallTitle": {
+    "message": "Установить Emojery"
+  },
+  "onboardingProgress": {
+    "message": "$DONE$ из $TOTAL$ готово",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
+  },
+  "onboardingAllSet": {
+    "message": "Готово!"
+  }
+}

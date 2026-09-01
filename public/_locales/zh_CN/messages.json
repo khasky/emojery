@@ -1,0 +1,616 @@
+{
+  "extName": {
+    "message": "Emojery"
+  },
+  "extShortName": {
+    "message": "Emojery"
+  },
+  "extDescription": {
+    "message": "把网页上的每个点赞按钮变成完整的表情符号面板。"
+  },
+  "extActionTitle": {
+    "message": "Emojery"
+  },
+  "popupHeading": {
+    "message": "Emojery"
+  },
+  "popupTitle": {
+    "message": "Emojery"
+  },
+  "tabSettings": {
+    "message": "设置"
+  },
+  "tabHistory": {
+    "message": "历史"
+  },
+  "tabAccount": {
+    "message": "账户"
+  },
+  "tabReport": {
+    "message": "报告"
+  },
+  "settingEnabled": {
+    "message": "已启用"
+  },
+  "settingEnabledHint": {
+    "message": "所有支持网站的总开关"
+  },
+  "settingReplaceNative": {
+    "message": "隐藏原始按钮"
+  },
+  "settingReplaceNativeHint": {
+    "message": "隐藏星标/点赞,改用选择器"
+  },
+  "settingAnimations": {
+    "message": "反应动画"
+  },
+  "settingAnimationsHint": {
+    "message": "在计数出现或您反应时显示表情符号效果"
+  },
+  "settingTheme": {
+    "message": "主题"
+  },
+  "settingThemeHint": {
+    "message": "跟随浏览器，或始终使用浅色或深色"
+  },
+  "settingDebug": {
+    "message": "调试"
+  },
+  "settingDebugHint": {
+    "message": "开启调试模式（面向开发者）"
+  },
+  "themeSystem": {
+    "message": "跟随系统"
+  },
+  "themeLight": {
+    "message": "浅色"
+  },
+  "themeDark": {
+    "message": "深色"
+  },
+  "settingAutoTrigger": {
+    "message": "自动按下原始按钮"
+  },
+  "settingAutoTriggerHint": {
+    "message": "把你的表情同步到网站的赞/踩按钮"
+  },
+  "sentimentIntro": {
+    "message": "在列表之间拖动表情，或先点按表情，再点按列表。"
+  },
+  "sentimentPositiveZone": {
+    "message": "按下赞或顶"
+  },
+  "sentimentNegativeZone": {
+    "message": "按下踩或反对"
+  },
+  "sentimentNeutralZone": {
+    "message": "不按任何按钮"
+  },
+  "sentimentReset": {
+    "message": "恢复默认设置"
+  },
+  "settingAnalyticsConsent": {
+    "message": "社区洞察"
+  },
+  "settingAnalyticsConsentHint": {
+    "message": "让我的反应计入地区统计"
+  },
+  "sectionPerSite": {
+    "message": "仅选定的网站"
+  },
+  "sectionPerSiteHint": {
+    "message": "选择在哪些网站显示选择器"
+  },
+  "perSiteToggleAria": {
+    "message": "在 $SITE$ 显示选择器",
+    "placeholders": {
+      "site": {
+        "content": "$1",
+        "example": "Facebook"
+      }
+    }
+  },
+  "signInBtn": {
+    "message": "登录"
+  },
+  "signInMsgAccount": {
+    "message": "登录以管理您的账户。"
+  },
+  "signInMsgHistory": {
+    "message": "登录以查看您的反应历史。"
+  },
+  "signInMsgReport": {
+    "message": "登录以提交错误报告。"
+  },
+  "signedInLabel": {
+    "message": "已登录"
+  },
+  "signOutBtn": {
+    "message": "登出"
+  },
+  "deleteAccountLabel": {
+    "message": "删除账户"
+  },
+  "deleteAccountHint": {
+    "message": "移除你的记录和反应"
+  },
+  "deleteAccountBtn": {
+    "message": "删除"
+  },
+  "deleteAccountConfirm": {
+    "message": "删除您的 Emojery 账户?\n\n此操作永久且无法撤消。您的用户记录将被删除,您之前提交的每个反应的计数器都将减少。"
+  },
+  "deleteAccountSlide": {
+    "message": "滑动以删除"
+  },
+  "deleteAccountProgress": {
+    "message": "正在删除你的账号……请不要关闭此窗口。"
+  },
+  "cancelBtn": {
+    "message": "取消"
+  },
+  "historyEmpty": {
+    "message": "暂无反应。在任何支持的页面上点击表情符号!"
+  },
+  "filterSitesPlaceholder": {
+    "message": "筛选网站"
+  },
+  "historyYesterday": {
+    "message": "昨天"
+  },
+  "historyToday": {
+    "message": "今天"
+  },
+  "historySearchPlaceholder": {
+    "message": "搜索回应"
+  },
+  "historyNoMatches": {
+    "message": "没有符合搜索条件的回应。"
+  },
+  "facetAllSites": {
+    "message": "所有网站"
+  },
+  "facetSiteAria": {
+    "message": "按网站筛选"
+  },
+  "facetRangeAria": {
+    "message": "按时间筛选"
+  },
+  "rangeAll": {
+    "message": "全部时间"
+  },
+  "rangeToday": {
+    "message": "今天"
+  },
+  "range7d": {
+    "message": "7 天"
+  },
+  "range30d": {
+    "message": "30 天"
+  },
+  "range365d": {
+    "message": "1 年"
+  },
+  "exportBtn": {
+    "message": "导出"
+  },
+  "importBtn": {
+    "message": "导入"
+  },
+  "importDone": {
+    "message": "已导入 $COUNT$ 个反应。",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "128"
+      }
+    }
+  },
+  "importError": {
+    "message": "该文件不是有效的 Emojery 导出文件。"
+  },
+  "importReplaceWarn": {
+    "message": "导入将用此文件替换你当前的历史记录。此操作无法撤销。"
+  },
+  "importReplaceConfirm": {
+    "message": "替换"
+  },
+  "importReplaceCountAria": {
+    "message": "已保存的反应：$STORED$ 个。此文件中：$INCOMING$ 个。",
+    "placeholders": {
+      "stored": {
+        "content": "$1",
+        "example": "128"
+      },
+      "incoming": {
+        "content": "$2",
+        "example": "64"
+      }
+    }
+  },
+  "exportRowLabel": {
+    "message": "导出历史"
+  },
+  "exportRowHint": {
+    "message": "保存到备份文件"
+  },
+  "importRowLabel": {
+    "message": "导入历史"
+  },
+  "importRowHint": {
+    "message": "从备份文件替换"
+  },
+  "relativeJustNow": {
+    "message": "刚刚"
+  },
+  "relativeMinutes": {
+    "message": "$M$ 分钟",
+    "placeholders": {
+      "m": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "relativeHours": {
+    "message": "$H$ 小时",
+    "placeholders": {
+      "h": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "relativeDays": {
+    "message": "$D$ 天",
+    "placeholders": {
+      "d": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "reportUnsupportedPage": {
+    "message": "请打开反应无法工作的页面,然后再次打开此菜单进行报告。"
+  },
+  "reportSent": {
+    "message": "谢谢 — 报告已发送。"
+  },
+  "reportAnother": {
+    "message": "报告其他问题"
+  },
+  "reportPlaceholder": {
+    "message": "简要描述您的问题(10-500 字符)"
+  },
+  "reportSendBtn": {
+    "message": "发送报告"
+  },
+  "pickerSearchPlaceholder": {
+    "message": "搜索"
+  },
+  "pickerSearchAriaLabel": {
+    "message": "搜索表情符号"
+  },
+  "pickerNoMatches": {
+    "message": "没有匹配「$QUERY$」的表情符号",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "asdf"
+      }
+    }
+  },
+  "pickerRecentlyUsed": {
+    "message": "最近使用"
+  },
+  "pickerPopular": {
+    "message": "热门"
+  },
+  "pickerClearRecent": {
+    "message": "清除"
+  },
+  "pickerCategoriesAria": {
+    "message": "表情符号类别"
+  },
+  "pickerDialogAria": {
+    "message": "做出反应或查看明细"
+  },
+  "pickerKeyboardHint": {
+    "message": "使用方向键在表情之间移动，回车键回应，Esc 键关闭。"
+  },
+  "pickerSearchResultsGroupAria": {
+    "message": "搜索结果"
+  },
+  "pickerShowMore": {
+    "message": "显示更多"
+  },
+  "pickerShowLess": {
+    "message": "显示更少"
+  },
+  "pickerAddReaction": {
+    "message": "添加反应"
+  },
+  "pickerYourReaction": {
+    "message": "您的反应:$LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "pickerReactionsAria": {
+    "message": "$COUNT$ 个反应 — 反应或查看分布",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pickerReactWith": {
+    "message": "用 $LABEL$ 反应",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "categorySmileys": {
+    "message": "笑脸和情感"
+  },
+  "categoryGestures": {
+    "message": "手势"
+  },
+  "categoryHearts": {
+    "message": "爱心"
+  },
+  "categoryAnimals": {
+    "message": "动物和自然"
+  },
+  "categoryFood": {
+    "message": "食物和饮料"
+  },
+  "categoryActivities": {
+    "message": "活动"
+  },
+  "categoryTravel": {
+    "message": "旅行和地点"
+  },
+  "categoryObjects": {
+    "message": "物品"
+  },
+  "categorySymbols": {
+    "message": "符号"
+  },
+  "authPageTitle": {
+    "message": "Emojery — 登录"
+  },
+  "authSignInTitle": {
+    "message": "登录以添加反应"
+  },
+  "authSignInTagline": {
+    "message": "我们会通过邮件给您发送验证码"
+  },
+  "authEmailLabel": {
+    "message": "邮箱"
+  },
+  "authSendCodeBtn": {
+    "message": "发送代码"
+  },
+  "authSendingBtn": {
+    "message": "发送中…"
+  },
+  "authAgreeIntro": {
+    "message": "我同意"
+  },
+  "authTermsLinkLabel": {
+    "message": "服务条款"
+  },
+  "authAgreeConjunction": {
+    "message": "和"
+  },
+  "authPrivacyLinkLabel": {
+    "message": "隐私政策"
+  },
+  "authAgreeOutro": {
+    "message": "。"
+  },
+  "authCodeTitle": {
+    "message": "输入验证码"
+  },
+  "authCodeTagline": {
+    "message": "我们已将代码发送到 $EMAIL$。它将在 10 分钟后过期。",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authCodeLabel": {
+    "message": "验证码"
+  },
+  "authVerifyingBtn": {
+    "message": "验证中…"
+  },
+  "authVerifyBtn": {
+    "message": "登录"
+  },
+  "authUseDifferentEmail": {
+    "message": "使用其他邮箱"
+  },
+  "authDoneTitle": {
+    "message": "您已登录"
+  },
+  "authDoneTagline": {
+    "message": "您可以关闭此标签并在任何支持的页面上反应。"
+  },
+  "dataConsentTitle": {
+    "message": "Emojery 会发送什么"
+  },
+  "dataConsentBody": {
+    "message": "为了统计和分享反应，Emojery 会将您反应所在页面的地址，以及与您无关的随机安装标识和会话标识发送到其服务器。登录时会发送一次您的电子邮件地址以投递一次性验证码；仅保留其单向哈希作为您的账号标识，您的反应历史也留在本设备上。可选的附加信息在此浏览器中保持关闭。"
+  },
+  "dataConsentContinueBtn": {
+    "message": "继续"
+  },
+  "authSendThrottle": {
+    "message": "您最近请求过验证码。$TIME$后可再次请求。",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authResendCooldown": {
+    "message": "我们已向该地址发送了验证码。$TIME$后可申请新的验证码。",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authEnterPendingCode": {
+    "message": "输入我们发送到 $EMAIL$ 的验证码",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authResendBtn": {
+    "message": "重新发送验证码"
+  },
+  "authResendInBtn": {
+    "message": "$TIME$后重新发送验证码",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authErrRateLimit": {
+    "message": "请求过多。请等待几分钟后重试。"
+  },
+  "authErrUndeliverable": {
+    "message": "无法投递邮件。请重试或检查地址。"
+  },
+  "authErrEmailNotAccepted": {
+    "message": "该邮箱地址无法接收登录代码。请使用永久地址。"
+  },
+  "authErrBadEmail": {
+    "message": "这看起来不是有效的邮箱地址。"
+  },
+  "authErrUnknown": {
+    "message": "出错了。请重试。"
+  },
+  "loadError": {
+    "message": "出错了。请重试。"
+  },
+  "errOffline": {
+    "message": "您似乎处于离线状态。恢复连接后再试。"
+  },
+  "errRateLimited": {
+    "message": "请求过于频繁。请稍候再试。"
+  },
+  "errServerBusy": {
+    "message": "服务器出现问题。请一分钟后再试。"
+  },
+  "authErrTooManyTries": {
+    "message": "错误代码过多。请稍后重试。"
+  },
+  "authErrCodeInvalid": {
+    "message": "代码错误或已过期。"
+  },
+  "authErrVerifyFailed": {
+    "message": "验证失败。请重试。"
+  },
+  "searchResultsCount": {
+    "message": "$COUNT$ 个结果",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "reportSendError": {
+    "message": "无法发送报告。请检查网络连接后重试。"
+  },
+  "onboardingTitle": {
+    "message": "Emojery 已就绪"
+  },
+  "onboardingTagline": {
+    "message": "用任意表情符号对帖子、视频和商品做出反应。"
+  },
+  "onboardingStepPinTitle": {
+    "message": "固定图标"
+  },
+  "onboardingStepPinBody": {
+    "message": "点击工具栏中的拼图图标并固定 Emojery,方便随时使用。"
+  },
+  "onboardingStepPinDone": {
+    "message": "已固定!"
+  },
+  "onboardingStepSpotTitle": {
+    "message": "找到按钮"
+  },
+  "onboardingStepSpotBody": {
+    "message": "在受支持的页面上,点赞、Star 或分享旁会出现一个小小的表情按钮。"
+  },
+  "onboardingStepReactTitle": {
+    "message": "做出反应"
+  },
+  "onboardingStepReactBody": {
+    "message": "任选一个表情符号。计数是公开的。第一次反应时登录一次,之后直接反应就好。"
+  },
+  "onboardingTryBtn": {
+    "message": "立即体验"
+  },
+  "onboardingSitesHeading": {
+    "message": "支持的网站"
+  },
+  "gateTitle": {
+    "message": "只差一步"
+  },
+  "gateBody": {
+    "message": "使用邮箱和验证码登录，让你的反应生效。"
+  },
+  "gateSignInBtn": {
+    "message": "登录并反应"
+  },
+  "coachTitle": {
+    "message": "新功能:用任意表情符号反应"
+  },
+  "coachBody": {
+    "message": "这就是 Emojery — 一次点击,完整的表情面板。"
+  },
+  "coachDismissAria": {
+    "message": "关闭"
+  },
+  "onboardingStepInstallTitle": {
+    "message": "安装 Emojery"
+  },
+  "onboardingProgress": {
+    "message": "已完成 $DONE$/$TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
+  },
+  "onboardingAllSet": {
+    "message": "全部就绪!"
+  }
+}

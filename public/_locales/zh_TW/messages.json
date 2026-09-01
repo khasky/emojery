@@ -1,0 +1,616 @@
+{
+  "extName": {
+    "message": "Emojery"
+  },
+  "extShortName": {
+    "message": "Emojery"
+  },
+  "extDescription": {
+    "message": "把網頁上的每個讚按鈕變成完整的表情符號面板。"
+  },
+  "extActionTitle": {
+    "message": "Emojery"
+  },
+  "popupHeading": {
+    "message": "Emojery"
+  },
+  "popupTitle": {
+    "message": "Emojery"
+  },
+  "tabSettings": {
+    "message": "設定"
+  },
+  "tabHistory": {
+    "message": "歷史"
+  },
+  "tabAccount": {
+    "message": "帳戶"
+  },
+  "tabReport": {
+    "message": "回報"
+  },
+  "settingEnabled": {
+    "message": "已啟用"
+  },
+  "settingEnabledHint": {
+    "message": "所有支援網站的總開關"
+  },
+  "settingReplaceNative": {
+    "message": "隱藏原始按鈕"
+  },
+  "settingReplaceNativeHint": {
+    "message": "隱藏星號/讚,改用選擇器"
+  },
+  "settingAnimations": {
+    "message": "反應動畫"
+  },
+  "settingAnimationsHint": {
+    "message": "在計數出現或您反應時顯示表情符號效果"
+  },
+  "settingTheme": {
+    "message": "主題"
+  },
+  "settingThemeHint": {
+    "message": "跟隨瀏覽器，或一律使用淺色或深色"
+  },
+  "settingDebug": {
+    "message": "偵錯"
+  },
+  "settingDebugHint": {
+    "message": "開啟偵錯模式（供開發者使用）"
+  },
+  "themeSystem": {
+    "message": "跟隨系統"
+  },
+  "themeLight": {
+    "message": "淺色"
+  },
+  "themeDark": {
+    "message": "深色"
+  },
+  "settingAutoTrigger": {
+    "message": "自動按下原始按鈕"
+  },
+  "settingAutoTriggerHint": {
+    "message": "將你的表情符號同步到網站的讚/倒讚按鈕"
+  },
+  "sentimentIntro": {
+    "message": "在清單之間拖曳表情符號，或先點選表情符號，再點選清單。"
+  },
+  "sentimentPositiveZone": {
+    "message": "按下讚或推"
+  },
+  "sentimentNegativeZone": {
+    "message": "按下倒讚或噓"
+  },
+  "sentimentNeutralZone": {
+    "message": "不按任何按鈕"
+  },
+  "sentimentReset": {
+    "message": "還原預設值"
+  },
+  "settingAnalyticsConsent": {
+    "message": "社群洞察"
+  },
+  "settingAnalyticsConsentHint": {
+    "message": "讓我的反應計入地區統計"
+  },
+  "sectionPerSite": {
+    "message": "僅選取的網站"
+  },
+  "sectionPerSiteHint": {
+    "message": "選擇在哪些網站顯示選擇器"
+  },
+  "perSiteToggleAria": {
+    "message": "在 $SITE$ 顯示選擇器",
+    "placeholders": {
+      "site": {
+        "content": "$1",
+        "example": "Facebook"
+      }
+    }
+  },
+  "signInBtn": {
+    "message": "登入"
+  },
+  "signInMsgAccount": {
+    "message": "登入以管理您的帳戶。"
+  },
+  "signInMsgHistory": {
+    "message": "登入以查看您的反應歷史。"
+  },
+  "signInMsgReport": {
+    "message": "登入以提交錯誤回報。"
+  },
+  "signedInLabel": {
+    "message": "已登入"
+  },
+  "signOutBtn": {
+    "message": "登出"
+  },
+  "deleteAccountLabel": {
+    "message": "刪除帳戶"
+  },
+  "deleteAccountHint": {
+    "message": "移除你的記錄和反應"
+  },
+  "deleteAccountBtn": {
+    "message": "刪除"
+  },
+  "deleteAccountConfirm": {
+    "message": "刪除您的 Emojery 帳戶?\n\n此操作為永久且無法復原。您的使用者記錄將被刪除,先前提交的每個反應計數器都將減少。"
+  },
+  "deleteAccountSlide": {
+    "message": "滑動以刪除"
+  },
+  "deleteAccountProgress": {
+    "message": "正在刪除你的帳號……請不要關閉這個視窗。"
+  },
+  "cancelBtn": {
+    "message": "取消"
+  },
+  "historyEmpty": {
+    "message": "尚無反應。在任何支援的頁面上點擊表情符號!"
+  },
+  "filterSitesPlaceholder": {
+    "message": "篩選網站"
+  },
+  "historyYesterday": {
+    "message": "昨天"
+  },
+  "historyToday": {
+    "message": "今天"
+  },
+  "historySearchPlaceholder": {
+    "message": "搜尋回應"
+  },
+  "historyNoMatches": {
+    "message": "沒有符合搜尋條件的回應。"
+  },
+  "facetAllSites": {
+    "message": "所有網站"
+  },
+  "facetSiteAria": {
+    "message": "依網站篩選"
+  },
+  "facetRangeAria": {
+    "message": "依時間篩選"
+  },
+  "rangeAll": {
+    "message": "全部時間"
+  },
+  "rangeToday": {
+    "message": "今天"
+  },
+  "range7d": {
+    "message": "7 天"
+  },
+  "range30d": {
+    "message": "30 天"
+  },
+  "range365d": {
+    "message": "1 年"
+  },
+  "exportBtn": {
+    "message": "匯出"
+  },
+  "importBtn": {
+    "message": "匯入"
+  },
+  "importDone": {
+    "message": "已匯入 $COUNT$ 個反應。",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "128"
+      }
+    }
+  },
+  "importError": {
+    "message": "這不是有效的 Emojery 匯出檔案。"
+  },
+  "importReplaceWarn": {
+    "message": "匯入會以此檔案取代你目前的歷史記錄。此操作無法復原。"
+  },
+  "importReplaceConfirm": {
+    "message": "取代"
+  },
+  "importReplaceCountAria": {
+    "message": "已儲存的反應：$STORED$ 個。此檔案中：$INCOMING$ 個。",
+    "placeholders": {
+      "stored": {
+        "content": "$1",
+        "example": "128"
+      },
+      "incoming": {
+        "content": "$2",
+        "example": "64"
+      }
+    }
+  },
+  "exportRowLabel": {
+    "message": "匯出歷史"
+  },
+  "exportRowHint": {
+    "message": "儲存為備份檔案"
+  },
+  "importRowLabel": {
+    "message": "匯入歷史"
+  },
+  "importRowHint": {
+    "message": "從備份檔案取代"
+  },
+  "relativeJustNow": {
+    "message": "剛剛"
+  },
+  "relativeMinutes": {
+    "message": "$M$ 分鐘",
+    "placeholders": {
+      "m": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "relativeHours": {
+    "message": "$H$ 小時",
+    "placeholders": {
+      "h": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "relativeDays": {
+    "message": "$D$ 天",
+    "placeholders": {
+      "d": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "reportUnsupportedPage": {
+    "message": "請打開反應無法工作的頁面,然後再次打開此選單進行回報。"
+  },
+  "reportSent": {
+    "message": "謝謝 — 回報已送出。"
+  },
+  "reportAnother": {
+    "message": "回報其他問題"
+  },
+  "reportPlaceholder": {
+    "message": "簡要描述您的問題(10-500 字元)"
+  },
+  "reportSendBtn": {
+    "message": "送出回報"
+  },
+  "pickerSearchPlaceholder": {
+    "message": "搜尋"
+  },
+  "pickerSearchAriaLabel": {
+    "message": "搜尋表情符號"
+  },
+  "pickerNoMatches": {
+    "message": "沒有符合「$QUERY$」的表情符號",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "asdf"
+      }
+    }
+  },
+  "pickerRecentlyUsed": {
+    "message": "最近使用"
+  },
+  "pickerPopular": {
+    "message": "熱門"
+  },
+  "pickerClearRecent": {
+    "message": "清除"
+  },
+  "pickerCategoriesAria": {
+    "message": "表情符號類別"
+  },
+  "pickerDialogAria": {
+    "message": "做出反應或查看明細"
+  },
+  "pickerKeyboardHint": {
+    "message": "使用方向鍵在表情符號之間移動，Enter 鍵回應，Esc 鍵關閉。"
+  },
+  "pickerSearchResultsGroupAria": {
+    "message": "搜尋結果"
+  },
+  "pickerShowMore": {
+    "message": "顯示更多"
+  },
+  "pickerShowLess": {
+    "message": "顯示較少"
+  },
+  "pickerAddReaction": {
+    "message": "新增反應"
+  },
+  "pickerYourReaction": {
+    "message": "您的反應:$LABEL$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "pickerReactionsAria": {
+    "message": "$COUNT$ 個反應 — 反應或查看分布",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pickerReactWith": {
+    "message": "用 $LABEL$ 反應",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "red heart"
+      }
+    }
+  },
+  "categorySmileys": {
+    "message": "笑臉與情感"
+  },
+  "categoryGestures": {
+    "message": "手勢"
+  },
+  "categoryHearts": {
+    "message": "愛心"
+  },
+  "categoryAnimals": {
+    "message": "動物與自然"
+  },
+  "categoryFood": {
+    "message": "食物與飲料"
+  },
+  "categoryActivities": {
+    "message": "活動"
+  },
+  "categoryTravel": {
+    "message": "旅行與地點"
+  },
+  "categoryObjects": {
+    "message": "物品"
+  },
+  "categorySymbols": {
+    "message": "符號"
+  },
+  "authPageTitle": {
+    "message": "Emojery — 登入"
+  },
+  "authSignInTitle": {
+    "message": "登入以新增反應"
+  },
+  "authSignInTagline": {
+    "message": "我們會透過電子郵件寄送驗證碼給您"
+  },
+  "authEmailLabel": {
+    "message": "電子郵件"
+  },
+  "authSendCodeBtn": {
+    "message": "寄送代碼"
+  },
+  "authSendingBtn": {
+    "message": "寄送中…"
+  },
+  "authAgreeIntro": {
+    "message": "我同意"
+  },
+  "authTermsLinkLabel": {
+    "message": "服務條款"
+  },
+  "authAgreeConjunction": {
+    "message": "和"
+  },
+  "authPrivacyLinkLabel": {
+    "message": "隱私政策"
+  },
+  "authAgreeOutro": {
+    "message": "。"
+  },
+  "authCodeTitle": {
+    "message": "輸入驗證碼"
+  },
+  "authCodeTagline": {
+    "message": "我們已將代碼寄送到 $EMAIL$。它將在 10 分鐘後到期。",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authCodeLabel": {
+    "message": "驗證碼"
+  },
+  "authVerifyingBtn": {
+    "message": "驗證中…"
+  },
+  "authVerifyBtn": {
+    "message": "登入"
+  },
+  "authUseDifferentEmail": {
+    "message": "使用其他電子郵件"
+  },
+  "authDoneTitle": {
+    "message": "您已登入"
+  },
+  "authDoneTagline": {
+    "message": "您可以關閉此分頁並在任何支援的頁面上反應。"
+  },
+  "dataConsentTitle": {
+    "message": "Emojery 會傳送什麼"
+  },
+  "dataConsentBody": {
+    "message": "為了統計並分享反應，Emojery 會將您反應所在頁面的網址，以及與您無關的隨機安裝識別碼和工作階段識別碼傳送至其伺服器。登入時會傳送一次您的電子郵件地址以投遞一次性驗證碼；僅保留其單向雜湊作為您的帳號識別碼，您的反應紀錄也留在本裝置上。選用的附加資訊在此瀏覽器中維持關閉。"
+  },
+  "dataConsentContinueBtn": {
+    "message": "繼續"
+  },
+  "authSendThrottle": {
+    "message": "您最近請求過驗證碼。$TIME$後可再次請求。",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authResendCooldown": {
+    "message": "我們已向此地址發送驗證碼。$TIME$後可申請新的驗證碼。",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authEnterPendingCode": {
+    "message": "輸入我們發送到 $EMAIL$ 的驗證碼",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "alex@example.com"
+      }
+    }
+  },
+  "authResendBtn": {
+    "message": "重新傳送驗證碼"
+  },
+  "authResendInBtn": {
+    "message": "$TIME$後重新傳送驗證碼",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "authErrRateLimit": {
+    "message": "請求過多。請稍候幾分鐘後重試。"
+  },
+  "authErrUndeliverable": {
+    "message": "無法投遞電子郵件。請重試或檢查地址。"
+  },
+  "authErrEmailNotAccepted": {
+    "message": "此電子郵件地址無法接收登入代碼。請使用永久地址。"
+  },
+  "authErrBadEmail": {
+    "message": "這看起來不是有效的電子郵件地址。"
+  },
+  "authErrUnknown": {
+    "message": "出現問題。請重試。"
+  },
+  "loadError": {
+    "message": "出現問題。請重試。"
+  },
+  "errOffline": {
+    "message": "您似乎處於離線狀態。恢復連線後再試。"
+  },
+  "errRateLimited": {
+    "message": "請求過於頻繁。請稍候再試。"
+  },
+  "errServerBusy": {
+    "message": "伺服器發生問題。請一分鐘後再試。"
+  },
+  "authErrTooManyTries": {
+    "message": "錯誤代碼過多。請稍後再試。"
+  },
+  "authErrCodeInvalid": {
+    "message": "代碼錯誤或已過期。"
+  },
+  "authErrVerifyFailed": {
+    "message": "驗證失敗。請重試。"
+  },
+  "searchResultsCount": {
+    "message": "$COUNT$ 個結果",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "reportSendError": {
+    "message": "無法傳送回報。請檢查網路連線後再試一次。"
+  },
+  "onboardingTitle": {
+    "message": "Emojery 已就緒"
+  },
+  "onboardingTagline": {
+    "message": "用任意表情符號對貼文、影片和商品做出反應。"
+  },
+  "onboardingStepPinTitle": {
+    "message": "釘選圖示"
+  },
+  "onboardingStepPinBody": {
+    "message": "點選工具列中的拼圖圖示並釘選 Emojery,方便隨時使用。"
+  },
+  "onboardingStepPinDone": {
+    "message": "已釘選!"
+  },
+  "onboardingStepSpotTitle": {
+    "message": "找到按鈕"
+  },
+  "onboardingStepSpotBody": {
+    "message": "在受支援的頁面上,讚、Star 或分享旁會出現一個小小的表情按鈕。"
+  },
+  "onboardingStepReactTitle": {
+    "message": "做出反應"
+  },
+  "onboardingStepReactBody": {
+    "message": "任選一個表情符號。計數是公開的。第一次反應時登入一次,之後直接反應就好。"
+  },
+  "onboardingTryBtn": {
+    "message": "立即體驗"
+  },
+  "onboardingSitesHeading": {
+    "message": "支援的網站"
+  },
+  "gateTitle": {
+    "message": "只差一步"
+  },
+  "gateBody": {
+    "message": "使用電子郵件和驗證碼登入，讓你的反應生效。"
+  },
+  "gateSignInBtn": {
+    "message": "登入並反應"
+  },
+  "coachTitle": {
+    "message": "新功能:用任意表情符號反應"
+  },
+  "coachBody": {
+    "message": "這就是 Emojery — 一次點擊,完整的表情面板。"
+  },
+  "coachDismissAria": {
+    "message": "關閉"
+  },
+  "onboardingStepInstallTitle": {
+    "message": "安裝 Emojery"
+  },
+  "onboardingProgress": {
+    "message": "已完成 $DONE$/$TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
+  },
+  "onboardingAllSet": {
+    "message": "全部就緒!"
+  }
+}
