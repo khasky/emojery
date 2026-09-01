@@ -1,0 +1,31 @@
+{
+  "//": "Typecheck for the build scripts, run by `pnpm compile:scripts` (part of `pnpm check`",
+  "//2": "and CI). It lives in this folder rather than at the repo root so an editor resolves",
+  "//3": "the scripts against THESE options - the root tsconfig covers src/ only, and a script",
+  "//4": "checked against it reported errors the gate never would.",
+  "compilerOptions": {
+    "target": "ES2022",
+    // build-emoji-sprite.mjs drives a browser through Playwright and runs page
+    // code inside `page.evaluate`, so it needs the DOM lib as well as Node's.
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": ["node"],
+    "strict": true,
+    // The build scripts are plain Node ESM typed by inference + `// @ts-check`, not
+    // by JSDoc on every signature: annotating ~200 parameters would be the only way
+    // to satisfy noImplicitAny, and it buys nothing these scripts don't already get
+    // from inference. Everything else in `strict` stays on - null safety is what
+    // actually catches bugs here.
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    // checkJs is what keeps `// @ts-check` honest - without it the pragma would be
+    // decoration and the scripts would stay the only unchecked code in the repo.
+    "allowJs": true,
+    "checkJs": true
+  },
+  "include": ["**/*.mjs"]
+}
