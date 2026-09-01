@@ -1,0 +1,6 @@
+{
+  "//": "Editor-only: makes VS Code's TS server apply node types to the e2e specs.",
+  "//2": "Flags, include and exclude all come from tsconfig.check.json, which",
+  "//3": "`pnpm compile:e2e` runs - the editor and the gate see one file set.",
+  "extends": "./tsconfig.check.json"
+}

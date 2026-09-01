@@ -1,0 +1,25 @@
+{
+  "//": "Typecheck for the e2e specs and their shared lib, run by `pnpm compile:e2e`",
+  "//2": "(part of `pnpm check` and CI). Playwright transpiles the specs with esbuild,",
+  "//3": "which type-checks nothing - without this they would drift silently.",
+  "//4": "`include` is a glob, not a list: a new spec is type-checked the moment it lands.",
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "exactOptionalPropertyTypes": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": ["node", "chrome"],
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["**/*.ts"],
+  "//5": "site-auth/ keeps its own tsconfig (relaxed exactOptionalPropertyTypes for the MCP SDK types); `pnpm compile:e2e` runs that one too.",
+  "exclude": ["site-auth/**"]
+}
