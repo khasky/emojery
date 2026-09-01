@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Read the FAQ first
+    url: https://emojery.app/faq
+    about: Supported sites, how counts work, privacy, and how to request a site.
+  - name: Check the roadmap
+    url: https://emojery.app/roadmap
+    about: Upcoming site support and planned features — your idea may already be scheduled.
+  - name: Report a security vulnerability
+    url: https://github.com/khasky/emojery/security/advisories/new
+    about: Please report security issues privately, not as public issues.
+  - name: Support the project
+    url: https://github.com/sponsors/khasky
+    about: If Emojery is useful to you, you can support its development.
