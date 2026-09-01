@@ -1,0 +1,57 @@
+{
+  "//": "The URL->targetId wire contract, as DATA. Two independent implementations serialize this key - this client, and the backend that recomputes it before storing a vote - and a build in either one pins nothing about the other. So the vectors live here, in one machine-readable file, rather than as a table inside a test file that only one side can run: the client reads it through adapters/lockstep.test.ts, the backend reads the same file (pinned by commit) instead of keeping a second copy that drifts silently. Same arrangement as shared/__data__/emoji-categories.json, which the runtime and the build script both read.",
+  "//rules": "urlDerivable[].url must derive targetId; the canonical URL that derivation emits must re-derive to the same id (idempotence); every variantUrls entry - another live surface of the SAME item - must converge on that id; every noTargetUrls entry must derive nothing. notUrlDerivable sites have no URL-only derivation at all, so neither side may invent one.",
+  "urlDerivable": [
+    {
+      "site": "x",
+      "url": "https://x.com/Pirat_Nation/status/2058156237737295928",
+      "targetId": "2058156237737295928",
+      "variantUrls": ["https://x.com/Pirat_Nation/status/2058156237737295928/photo/1", "https://x.com/Pirat_Nation/status/2058156237737295928/analytics"],
+      "noTargetUrls": ["https://x.com/Pirat_Nation"]
+    },
+    {
+      "site": "youtube",
+      "url": "https://www.youtube.com/watch?v=Pjb7tRmjwag",
+      "targetId": "Pjb7tRmjwag",
+      "variantUrls": ["https://youtube.com/shorts/Pjb7tRmjwag?feature=share", "https://m.youtube.com/watch?v=Pjb7tRmjwag"]
+    },
+    {
+      "site": "reddit",
+      "url": "https://www.reddit.com/r/coolgithubprojects/comments/1tezfl7/open_source_palantir_on_git/",
+      "targetId": "t3_1tezfl7",
+      "variantUrls": ["https://www.reddit.com/gallery/1tezfl7"]
+    },
+    {
+      "site": "instagram",
+      "url": "https://www.instagram.com/p/DYUhRl8OWQU/",
+      "targetId": "DYUhRl8OWQU",
+      "variantUrls": ["https://instagram.com/p/DYUhRl8OWQU/?utm_source=ig_web_copy_link", "https://www.instagram.com/ikkywatari/p/DYUhRl8OWQU/"],
+      "noTargetUrls": ["https://www.instagram.com/reels/audio/123456/"]
+    },
+    {
+      "site": "instagram",
+      "url": "https://www.instagram.com/reel/CzOsYYsu9jP/",
+      "targetId": "CzOsYYsu9jP",
+      "variantUrls": ["https://www.instagram.com/reels/CzOsYYsu9jP/"]
+    },
+    {
+      "site": "threads",
+      "url": "https://www.threads.com/@theromero/post/DYpmDeHjE1L",
+      "targetId": "DYpmDeHjE1L"
+    },
+    {
+      "site": "github",
+      "url": "https://github.com/facebook/react",
+      "targetId": "facebook/react",
+      "noTargetUrls": ["https://github.com/facebook/react/issues", "https://github.com/settings/profile"]
+    },
+    {
+      "site": "amazon",
+      "url": "https://www.amazon.com/dp/B00ZV9RDKK",
+      "targetId": "B00ZV9RDKK",
+      "variantUrls": ["https://www.amazon.co.uk/gp/product/B00ZV9RDKK"],
+      "noTargetUrls": ["https://evil.example/dp/B00ZV9RDKK"]
+    }
+  ],
+  "notUrlDerivable": [{ "site": "gitlab", "why": "the canonical id is GitLab's numeric project id, read from the page" }, { "site": "facebook", "why": "photo and lazy-permalink identities are resolved from the DOM" }]
+}
