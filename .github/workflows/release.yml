@@ -1,0 +1,265 @@
+name: Release Extension Builds
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag to package, for example v0.1.0"
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-extension-${{ github.event.inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build and attach browser zips
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    # Only this job publishes - `gh release create/upload` needs write access to releases.
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+          # Shallow on purpose: nothing here reads history. `release-notes.mjs`
+          # parses CHANGELOG.md, and the only git call is the `git rev-parse
+          # --verify` tag check below - which needs the tag ref, not its
+          # ancestry, hence `fetch-tags` instead of a full clone. The release
+          # assets make a full fetch expensive, and it grows with every release.
+          fetch-depth: 1
+          fetch-tags: true
+          persist-credentials: false
+
+      # Runs before `pnpm install` below on purpose: the dispatch input picks the
+      # checked-out ref, and install would execute that ref's dependency lifecycle
+      # scripts. Gating the tag first (shape, package.json match, ref exists) means an
+      # unvalidated ref never reaches an install. Reading package.json and the git ref
+      # here needs only the checkout above, not the toolchain.
+      - name: Validate release version
+        id: release
+        shell: bash
+        # The dispatch input is attacker-controlled, so it reaches this script
+        # through the environment, never through `${{ }}` interpolation - the
+        # expansion happens before bash parses the line, so a crafted tag would
+        # run as shell. Later steps interpolate `steps.release.outputs.version`
+        # instead, which the regex gate below has already validated.
+        env:
+          DISPATCH_TAG: ${{ github.event.inputs.tag }}
+        run: |
+          set -euo pipefail
+
+          tag="${GITHUB_REF_NAME}"
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            tag="$DISPATCH_TAG"
+          fi
+
+          if ! [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::release tag must look like v1.2.3, got '$tag'"
+            exit 1
+          fi
+
+          version="${tag#v}"
+          package_version="$(node -p "require('./package.json').version")"
+          if [ "$package_version" != "$version" ]; then
+            echo "::error::tag $tag does not match package.json version $package_version"
+            exit 1
+          fi
+
+          git rev-parse --verify --quiet "$tag" >/dev/null
+
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      # After the tag gate above, so only a validated ref reaches `pnpm install` and
+      # its dependency lifecycle scripts.
+      - name: Setup Node and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+
+      # What follows is ci.yml's gate minus 3 steps, deliberately: `pnpm test:browser`
+      # (downloading WebKit and Gecko costs more than this whole job, and a tag is cut
+      # from main, where ci.yml already ran it), `pnpm lint:docs` (Markdown cannot
+      # change a shipped artifact) and `pnpm build:all` (`zip:all` below builds what it
+      # would). Everything that can still differ at a tag is repeated here.
+      - name: Typecheck
+        run: pnpm compile
+
+      # Playwright transpiles the e2e specs with esbuild and the build scripts are
+      # plain node, so neither is checked by `pnpm compile` - a tag must not be the
+      # first place that drift shows up.
+      - name: Typecheck e2e specs
+        run: pnpm compile:e2e
+
+      - name: Typecheck build scripts
+        run: pnpm compile:scripts
+
+      - name: Lint
+        run: pnpm lint
+
+      # Coverage report only - no thresholds, so it never blocks a tag.
+      - name: Unit tests with coverage report
+        run: pnpm test:coverage
+
+      - name: E2E hermetic self-check
+        run: pnpm test:e2e:hermetic
+
+      - name: Build browser packages
+        run: pnpm zip:all
+
+      # Its own step, not folded into `zip:all`: that script is what ci.yml runs on
+      # every PR, and Safari is release-only. Which also means a tag is the first
+      # place a Safari-specific build break can surface - fold it into `zip:all` the
+      # day Safari stops being a side target.
+      - name: Build Safari package
+        run: pnpm zip:safari
+
+      # The shipped bundles carry no `sourceMappingURL` (scan-extension-artifact.sh
+      # enforces that) and wxt.config.ts's `build:done` hook lifts the maps out of
+      # each artifact before it is weighed, scanned or zipped - so this archive is
+      # the only route from a minified stack trace in a bug report back to a source
+      # line, and it has to be the one for that exact version. It rides on the
+      # release instead of a `source-maps` branch: tens of megabytes of maps per
+      # release would otherwise land in the git history permanently, growing with
+      # every release, and mirror.yml re-clones the whole repository per mirror.
+      - name: Archive source maps
+        shell: bash
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          test -d .output/sourcemaps
+          (cd .output/sourcemaps && zip -rq "../emojery-v${VERSION}-sourcemaps.zip" .)
+
+      # Same gate ci.yml runs: a tag is the last chance to catch a content script over
+      # the weight budget, and a workflow_dispatch on an older tag never saw main's CI.
+      - name: Content-script weight budget
+        run: pnpm check:bundle
+
+      # The AMO credentials are scoped to THIS step, not the job: at job level every
+      # step sees them, including `pnpm install`, whose dependency lifecycle scripts
+      # would then run with the signing keys in their environment. `secrets` is not
+      # available to a step-level `if:`, so the skip is a check inside the script.
+      - name: Sign Firefox xpi (unlisted, self-distribution)
+        shell: bash
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+          WEB_EXT_API_KEY: ${{ secrets.AMO_JWT_ISSUER }}
+          WEB_EXT_API_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${WEB_EXT_API_KEY}" ] || [ -z "${WEB_EXT_API_SECRET}" ]; then
+            echo "AMO signing credentials unset - skipping the Firefox xpi signature."
+            exit 0
+          fi
+          # `pnpm exec` (not dlx): dlx resolved web-ext's dependency tree fresh at
+          # release time, outside the lockfile and the workspace supply-chain
+          # policies - with the signing keys in env. The devDependency is frozen
+          # by the lockfile the `pnpm install` above already verified.
+          pnpm exec web-ext sign --channel=unlisted \
+            --source-dir=.output/firefox-mv2 --artifacts-dir=.output
+          # web-ext names it after the manifest (emojery-<version>-an+fx.xpi); rename to the repo scheme.
+          mv .output/*.xpi ".output/emojery-v${VERSION}-firefox-mv2.xpi"
+
+      - name: Verify release artifacts
+        shell: bash
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          for target in chrome-mv3 firefox-mv2 safari-mv2; do
+            test -d ".output/$target"
+            TARGET="$target" node -e "const fs = require('fs'); const m = JSON.parse(fs.readFileSync('.output/' + process.env.TARGET + '/manifest.json', 'utf8')); if (m.version !== process.env.VERSION) { throw new Error(process.env.TARGET + ' manifest version ' + m.version + ' !== ' + process.env.VERSION); }"
+          done
+
+          expected=(
+            ".output/emojery-v$VERSION-chrome-mv3.zip"
+            ".output/emojery-v$VERSION-firefox-mv2.zip"
+            ".output/emojery-v$VERSION-safari-mv2.zip"
+            ".output/emojery-v$VERSION-sources.zip"
+            ".output/emojery-v$VERSION-sourcemaps.zip"
+          )
+
+          for artifact in "${expected[@]}"; do
+            test -f "$artifact"
+          done
+
+      - name: Scan generated Chrome extension files
+        shell: bash
+        run: bash scripts/scan-extension-artifact.sh .output/chrome-mv3
+
+      # The MV2 bundle is zipped, signed into the .xpi above and attached to the
+      # release below, so it gates on exactly the same rules as the MV3 one.
+      - name: Scan generated Firefox extension files
+        shell: bash
+        run: bash scripts/scan-extension-artifact.sh .output/firefox-mv2
+
+      # Attached to the release like the other two, so it gates on the same rules.
+      - name: Scan generated Safari extension files
+        shell: bash
+        run: bash scripts/scan-extension-artifact.sh .output/safari-mv2
+
+      - name: Scan AMO source archive
+        shell: bash
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: bash scripts/scan-source-archive.sh ".output/emojery-v${VERSION}-sources.zip"
+
+      - name: Generate release notes
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: node scripts/release-notes.mjs "${VERSION}" release-notes.md
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: emojery-${{ steps.release.outputs.version }}-extension-builds
+          path: |
+            .output/emojery-v${{ steps.release.outputs.version }}-*.zip
+            release-notes.md
+          if-no-files-found: error
+
+      - name: Create or update draft GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" .output/emojery-v"$VERSION"-*.zip --clobber
+            gh release edit "$TAG" --title "$VERSION" --notes-file release-notes.md
+            exit 0
+          fi
+
+          gh release create "$TAG" .output/emojery-v"$VERSION"-*.zip \
+            --draft \
+            --title "$VERSION" \
+            --notes-file release-notes.md \
+            --verify-tag
+
+      # Gated on the artifact, not on the credentials - the signing step above is the
+      # single place in this job that sees them.
+      - name: Attach signed Firefox xpi to release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          xpi=(.output/emojery-v*-firefox-mv2.xpi)
+          if [ ${#xpi[@]} -eq 0 ]; then
+            echo "No signed xpi was produced - nothing to attach."
+            exit 0
+          fi
+          gh release upload "$TAG" "${xpi[@]}" --clobber
