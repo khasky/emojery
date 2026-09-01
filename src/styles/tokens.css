@@ -1,0 +1,93 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * Design tokens shared by the extension's own pages (popup, auth, onboarding).
+ *
+ * Only custom properties and named `@keyframes` are hoisted here - they carry no
+ * cascade order. Plain RULES are not: `.sr-only`, the `a` pair and the two
+ * `.primary` state rules stay byte-identical in auth.css and popup.css on purpose,
+ * because hoisting would move them ahead of each page's own rules.
+ *
+ * The in-page picker cannot import this file - it renders in a shadow root on a
+ * foreign page and carries its own palette on `:host` (ui/picker.css) - so the two
+ * share the `--khasky-emojery-*` prefix, not a stylesheet.
+ *
+ * `main.tsx` stamps `data-theme` on <html> from the Theme setting, so the
+ * `[data-theme="dark"]` blocks here and in each page sheet are what switch the
+ * palette - a `prefers-color-scheme` query could not be forced by the setting.
+ *
+ * Primary-button blue: white 14px text needs 4.5:1 and the brand #1877f2 reaches
+ * only 4.25:1 (axe), so the button paints #1670e8 at 4.65:1, theme-fixed.
+ */
+
+:root {
+  color-scheme: light dark;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+
+  --khasky-emojery-fg: #1c1e21;
+  --khasky-emojery-muted: #65676b;
+  --khasky-emojery-link: #1461c9;
+
+  --khasky-emojery-field-bg: transparent;
+  --khasky-emojery-field-border: rgba(0, 0, 0, 0.15);
+  /* Focus border and glows keep the un-lightened brand blue in BOTH themes (the
+     dark block never overrode them - likely an oversight, every other dark
+     affordance lightens). Two strengths: auth's 3px field ring, popup's 2px select ring. */
+  --khasky-emojery-field-focus: #1877f2;
+  --khasky-emojery-field-focus-glow: rgba(24, 119, 242, 0.18);
+  --khasky-emojery-field-focus-glow-strong: rgba(24, 119, 242, 0.4);
+
+  --khasky-emojery-fixed-primary: #1670e8;
+  --khasky-emojery-fixed-primary-hover: #1665d8;
+
+  /* The logo mark's own yellow, so the brand sparkles read as part of the mark
+     in both themes (same value on the landing site). */
+  --khasky-emojery-fixed-mark: #fec206;
+
+  /* Four-point star behind the brand sparkles, applied as a `mask` so the colour
+     stays in CSS. A native ✨ was rejected: its glyph and metrics differ per
+     platform, which moved the sparkles off their marks. */
+  --khasky-emojery-sparkle-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 0c1 6.5 5.5 11 12 12-6.5 1-11 5.5-12 12-1-6.5-5.5-11-12-12C6.5 11 11 6.5 12 0z'/%3E%3C/svg%3E");
+
+  --khasky-emojery-error-text: #c1303f;
+
+  /* Dark needs full opacity - its muted fill already carries the disabled signal. */
+  --khasky-emojery-primary-disabled-bg: #b0c4e4;
+  --khasky-emojery-primary-disabled-fg: #f0f3f8;
+  --khasky-emojery-primary-disabled-opacity: 0.7;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --khasky-emojery-fg: #e4e6eb;
+  --khasky-emojery-muted: #b0b3b8;
+  --khasky-emojery-link: #8ab4f8;
+
+  --khasky-emojery-field-bg: #242526;
+  --khasky-emojery-field-border: rgba(255, 255, 255, 0.22);
+
+  --khasky-emojery-error-text: #ff9aa4;
+
+  --khasky-emojery-primary-disabled-bg: #33486a;
+  --khasky-emojery-primary-disabled-fg: #c7d5ea;
+  --khasky-emojery-primary-disabled-opacity: 1;
+}
+
+/* Only the curve is shared: the pseudo-elements that run it stay in each page's
+   sheet, their offsets tied to that page's mark size. */
+@keyframes khasky-emojery-brand-sparkle {
+  0%,
+  100% {
+    transform: scale(0.4) rotate(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1) rotate(90deg);
+    opacity: 1;
+  }
+}

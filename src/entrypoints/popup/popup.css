@@ -1,0 +1,1273 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+
+/* Below: only what is the popup's own. */
+@import "../../styles/tokens.css";
+
+:root {
+  /* Every themed colour goes through a token except the `.history-*` row tints
+     (see their own note), so the dark block at the bottom re-points tokens
+     instead of restating rules. Theme-FIXED values sit in the `-fixed-` group at
+     the end of this block. */
+
+  /* Surfaces */
+  --khasky-emojery-bg: #fff;
+  --khasky-emojery-raised: #fff;
+
+  /* Text */
+  --khasky-emojery-heading: #050505;
+  --khasky-emojery-faint: #6f7276;
+
+  /* Interactive blue. `accent` paints nav/chip affordances, `accent-strong` the
+     sentiment editor, `toggle-on` the switch - they coincide in light and
+     diverge in dark, so they are separate tokens. */
+  --khasky-emojery-accent: #1877f2;
+  --khasky-emojery-accent-fill: rgba(24, 119, 242, 0.1);
+  --khasky-emojery-accent-strong: #1877f2;
+  --khasky-emojery-accent-strong-fill: rgba(24, 119, 242, 0.12);
+  /* The sentiment editor's TEXT affordances sit on the link blue in light mode
+     but join the borders on one brighter blue in dark - hence a separate token. */
+  --khasky-emojery-accent-strong-text: #1461c9;
+  --khasky-emojery-toggle-on: #1877f2;
+  --khasky-emojery-toggle-track: #ccd0d5;
+
+  /* Status. The danger surface comes in two strengths: the slide-to-confirm
+     track (`-fill` / `-border`) and the fainter import-confirm panel (`-subtle` /
+     `-strong`, a lighter fill inside a firmer outline). */
+  --khasky-emojery-danger: #d93025;
+  --khasky-emojery-danger-fill: rgba(217, 48, 37, 0.1);
+  --khasky-emojery-danger-fill-subtle: rgba(217, 48, 37, 0.06);
+  --khasky-emojery-danger-border: rgba(217, 48, 37, 0.25);
+  --khasky-emojery-danger-border-strong: rgba(217, 48, 37, 0.35);
+  --khasky-emojery-success: #24a35a;
+  --khasky-emojery-success-fill: rgba(36, 163, 90, 0.15);
+  --khasky-emojery-slide-thumb-bg: #fff;
+  --khasky-emojery-slide-label: #c0271d;
+  --khasky-emojery-slide-done: #1a7f37;
+
+  /* Lines and fills */
+  --khasky-emojery-border-soft: rgba(0, 0, 0, 0.08);
+  --khasky-emojery-divider: rgba(0, 0, 0, 0.06);
+  --khasky-emojery-zone-border: rgba(0, 0, 0, 0.15);
+  --khasky-emojery-chip-border: rgba(0, 0, 0, 0.14);
+  --khasky-emojery-chip-border-hover: rgba(0, 0, 0, 0.28);
+  --khasky-emojery-raised-border: rgba(0, 0, 0, 0.12);
+  --khasky-emojery-raised-shadow: rgba(0, 0, 0, 0.18);
+  --khasky-emojery-thumb-shadow: rgba(0, 0, 0, 0.3);
+  --khasky-emojery-row-hover: rgba(0, 0, 0, 0.045);
+  --khasky-emojery-chip-hover: rgba(0, 0, 0, 0.06);
+  --khasky-emojery-scroll-thumb: rgba(0, 0, 0, 0.2);
+  --khasky-emojery-scroll-thumb-hover: rgba(0, 0, 0, 0.35);
+
+  /* URL tooltip syntax palette. */
+  --khasky-emojery-url-dim: #65676b;
+  --khasky-emojery-url-p0: #0e7490;
+  --khasky-emojery-url-p1: #b45309;
+  --khasky-emojery-url-p2: #be123c;
+  --khasky-emojery-url-key: #8839ef;
+  --khasky-emojery-url-val: #1a7f37;
+
+  /* appearance:none drops the native select arrow; the chevron is drawn as an
+     inline SVG whose stroke has to follow the theme, so the whole url() is the
+     token rather than just a colour. */
+  --khasky-emojery-select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2365676b' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+
+  /* Theme-FIXED, and named apart from the themed `-accent` / `-danger` precisely
+     so a later dark-mode pass cannot re-point one by reflex: white text rides on
+     the blues and the slide-to-confirm label rides on this red, so contrast maths
+     fixes the value, not a light-mode preference. It stays this darker red in both
+     themes so the lighter dark-mode label (#f28b82) keeps its contrast as the fill
+     grows under it. The `-fixed-primary` and brand-sparkle tokens come from
+     styles/tokens.css. */
+  --khasky-emojery-fixed-danger: #d93025;
+  --khasky-emojery-fixed-danger-hover: #c5221f;
+}
+
+/* Chrome popup quirk: an unpainted transparent strip can appear on the right edge (the
+   window ends up wider than <html>'s declared width). Three defenses:
+   (1) html/body stretch to 100vw/100vh;
+   (2) body's oversized outline paints any sub-pixel gap without affecting layout;
+   (3) scrolling lives on `.tab-panel`, so no scrollbar gutter sits in body's painted area. */
+html,
+body {
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+  min-width: 360px;
+  min-height: 480px;
+  overflow: hidden;
+  /* Pin the base size explicitly so a control's `font: inherit` can't
+     resolve below it (the 12px floor applies to inherited text too). */
+  font-size: 14px;
+  background: var(--khasky-emojery-bg);
+}
+
+body {
+  outline: 200px solid var(--khasky-emojery-bg);
+  color: var(--khasky-emojery-fg);
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: var(--khasky-emojery-bg);
+}
+
+.popup {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background: var(--khasky-emojery-bg);
+}
+
+.popup-header {
+  flex: 0 0 auto;
+  padding: 16px 16px 0;
+  background: var(--khasky-emojery-bg);
+}
+
+.tab-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  box-sizing: border-box;
+  padding: 0 16px 16px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--khasky-emojery-scroll-thumb) var(--khasky-emojery-bg);
+}
+
+.tab-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tab-panel::-webkit-scrollbar-track {
+  background: var(--khasky-emojery-bg);
+}
+
+.tab-panel::-webkit-scrollbar-thumb {
+  background: var(--khasky-emojery-scroll-thumb);
+  border-radius: 4px;
+}
+
+.tab-panel::-webkit-scrollbar-thumb:hover {
+  background: var(--khasky-emojery-scroll-thumb-hover);
+}
+
+/* `overflow-y: auto` makes the panel programmatically focusable, and Chrome would paint a
+   focus ring around the whole content area on mouse interaction; suppress that, but keep a
+   visible inset ring for keyboard focus - the panel is a deliberate Tab stop (role=tabpanel,
+   tabIndex 0 per the ARIA tabs pattern), so its focus must stay visible (WCAG 2.4.7). */
+.tab-panel:focus {
+  outline: none;
+}
+.tab-panel:focus-visible {
+  outline: 2px solid var(--khasky-emojery-accent);
+  outline-offset: -2px;
+}
+
+/* Visually hidden, still read by screen readers (live-region announcements). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin: 8px 0 12px;
+  border-bottom: 1px solid var(--khasky-emojery-border-soft);
+}
+/* Basis `auto`, not `0`: equal quarters give every tab the same slice of the popup's
+   minimum width, and the longer translations overrun it - "Налаштування"/"Geschiedenis"/
+   "Einstellungen" then spilled across the neighbouring tab. Content-sized bases share
+   the leftover space instead, so the widest shipped locale still fits the strip.
+   Ellipsis is the last-resort guard for a translation longer than any shipped today. */
+.tab {
+  appearance: none;
+  flex: 1 1 auto;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  /* Carried by every tab, painted only on the active one: sized on .tab-active alone it
+     left the strip 2px shorter whenever no tab was selected (the Debug panel), which moved
+     the panel under it up and back down on every switch. */
+  border-bottom: 2px solid transparent;
+  padding: 6px;
+  border-radius: 6px 6px 0 0;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 14px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  color: var(--khasky-emojery-muted);
+}
+.tab-active {
+  color: var(--khasky-emojery-link);
+  border-bottom-color: var(--khasky-emojery-accent);
+}
+
+.primary {
+  appearance: none;
+  background: var(--khasky-emojery-fixed-primary);
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 12px;
+  transition:
+    background 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--khasky-emojery-fixed-primary-hover);
+}
+
+.primary:disabled {
+  background: var(--khasky-emojery-primary-disabled-bg);
+  color: var(--khasky-emojery-primary-disabled-fg);
+  cursor: not-allowed;
+  opacity: var(--khasky-emojery-primary-disabled-opacity);
+}
+
+/* The SignInPrompt component (popup-shared.tsx). */
+.signin-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px 16px;
+  gap: 4px;
+}
+.signin-prompt-msg {
+  margin: 0;
+  color: var(--khasky-emojery-muted);
+  font-size: 12px;
+  line-height: 1.4;
+  max-width: 28ch;
+}
+
+.history {
+  padding: 4px 0;
+}
+/* Shared empty-tab copy (History first run, Report on an unsupported page):
+   centred and one step dimmer than the regular muted text, still >=4.5:1 on white. */
+.history.empty,
+.empty-note {
+  text-align: center;
+  color: var(--khasky-emojery-faint);
+  padding: 16px;
+}
+.history ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.history li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 4px;
+  border-top: 1px solid var(--khasky-emojery-divider);
+  font-size: 13px;
+}
+
+.history-day {
+  padding: 10px 2px 4px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--khasky-emojery-muted);
+}
+.history-day + ul li:first-child {
+  border-top: 0;
+}
+
+/* Per-row tint keyed to what the click did - low-alpha enough to read on both themes,
+   so these are the one group that skips the token pass. The horizontal padding keeps
+   emoji/timestamp off the tint's edges; legacy untinted rows stay flush. */
+.history-add,
+.history-remove,
+.history-change {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+.history-add {
+  background: rgba(46, 160, 88, 0.03);
+}
+.history-remove {
+  background: rgba(220, 76, 70, 0.03);
+}
+.history-change {
+  background: rgba(224, 168, 40, 0.03);
+}
+
+.history-emoji {
+  font-size: 17px;
+  flex: none;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.history-mid {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.history-title {
+  font-size: 11.5px;
+  color: var(--khasky-emojery-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* Hand-mirror of emojiSpriteCss() in src/ui/emoji-sprite.ts, hung off #app's
+   `data-khasky-emojery-emoji` (the picker scopes the same rules to its shadow
+   host instead), so History shows the same emoji with the same OS-font fallback.
+   Keep the `:has()` guards in step with the source: an emoji rendered before the
+   sheet URL resolved carries no <img> and must keep its glyph rather than clip an
+   empty box. */
+.khasky-emojery-emoji {
+  display: inline;
+}
+.khasky-emojery-emoji-img {
+  display: none;
+}
+[data-khasky-emojery-emoji="sprite"] .khasky-emojery-emoji:has(> .khasky-emojery-emoji-img) {
+  display: inline-block;
+  position: relative;
+  width: 1em;
+  height: 1em;
+  overflow: hidden;
+  vertical-align: middle;
+}
+[data-khasky-emojery-emoji="sprite"] .khasky-emojery-emoji-img {
+  display: block;
+  position: absolute;
+  left: calc(var(--khasky-emojery-col) * -1em);
+  top: calc(var(--khasky-emojery-row) * -1em);
+  width: calc(var(--khasky-emojery-sprite-cols) * 1em);
+  height: calc(var(--khasky-emojery-sprite-rows) * 1em);
+  max-width: none;
+  pointer-events: none;
+}
+[data-khasky-emojery-emoji="sprite"] .khasky-emojery-emoji:has(> .khasky-emojery-emoji-img) > .khasky-emojery-emoji-char {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.history-link {
+  /* `block` so the clipped URL forms the first line of the two-line middle column. */
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.history-time {
+  flex: none;
+  font-size: 11.5px;
+  color: var(--khasky-emojery-muted);
+  font-variant-numeric: tabular-nums;
+  /* The relative label is the hover target for the date tooltip; hint it. */
+  cursor: default;
+}
+
+/* Account tab rows: `.arow` re-asserts the divider so it wins over the global
+   `.row:first-of-type`, which would otherwise also drop the first toggle <label>'s border. */
+.acct-list .row.arow {
+  border-top: 1px solid var(--khasky-emojery-divider);
+}
+.acct-list .row.arow:first-child {
+  border-top: 0;
+}
+.row-icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  color: var(--khasky-emojery-muted);
+}
+.row-icon-danger {
+  color: var(--khasky-emojery-danger);
+}
+/* Per-site vendor logo. Colour only drives the monochrome marks (filled with
+   currentColor); brand-coloured marks set their own fill inline. */
+.site-icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  color: var(--khasky-emojery-fg);
+}
+/* Search-field shell (call sites: see SearchField in popup-shared.tsx). */
+.history-search,
+.settings-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  padding: 8px 11px;
+  border: 1px solid var(--khasky-emojery-field-border);
+  border-radius: 9px;
+  margin: 6px 0 8px;
+}
+.history-search:focus-within,
+.settings-filter:focus-within {
+  border-color: var(--khasky-emojery-field-focus);
+}
+.field-search-icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  color: var(--khasky-emojery-muted);
+}
+.history-search-input,
+.settings-filter-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  font: inherit;
+  font-size: 13.5px;
+  outline: none;
+}
+.data-file {
+  display: none;
+}
+.data-status {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--khasky-emojery-muted);
+}
+.import-confirm {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--khasky-emojery-danger-border-strong);
+  border-radius: 8px;
+  background: var(--khasky-emojery-danger-fill-subtle);
+}
+.import-confirm-warn {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.import-confirm-count {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.import-confirm-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.import-confirm-actions .primary {
+  margin-top: 0;
+}
+.primary.danger {
+  background: var(--khasky-emojery-fixed-danger);
+}
+.primary.danger:hover:not(:disabled) {
+  background: var(--khasky-emojery-fixed-danger-hover);
+}
+
+/* Facet bar - emoji quick-chips over a site + time-range dropdown pair. */
+.history-facets {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 0 6px;
+}
+.facet-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.facet-chip {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: 1px solid var(--khasky-emojery-chip-border);
+  border-radius: 999px;
+  background: transparent;
+  font: inherit;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: inherit;
+  cursor: pointer;
+}
+.facet-chip:hover {
+  border-color: var(--khasky-emojery-chip-border-hover);
+}
+.facet-chip-active {
+  border-color: var(--khasky-emojery-accent);
+  background: var(--khasky-emojery-accent-fill);
+  color: var(--khasky-emojery-link);
+}
+.facet-chip-emoji {
+  display: inline-flex;
+  font-size: 14px;
+}
+.facet-chip-count {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+/* Expands the emoji strip to every emoji in the account's history. Kept as a link
+   rather than a chip so it can't be mistaken for one more filter to press. */
+.facet-chips .linkish {
+  align-self: center;
+  /* Horizontal breathing room only - the longhands leave `.linkish`'s vertical
+     padding (its hit target) alone, which the `padding` shorthand would replace. */
+  padding-left: 4px;
+  padding-right: 4px;
+  font-size: 12.5px;
+}
+.facet-selects {
+  display: flex;
+  gap: 6px;
+}
+/* Dropdowns: the history facets stretch across their strip, the settings-row one
+   sits at its natural width beside the label - everything else is shared. */
+.facet-select,
+.row-select {
+  appearance: none;
+  box-sizing: border-box;
+  border: 1px solid var(--khasky-emojery-field-border);
+  border-radius: 8px;
+  /* background-color, not the shorthand, so the chevron image survives. */
+  background-color: var(--khasky-emojery-field-bg);
+  background-image: var(--khasky-emojery-select-chevron);
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  color: inherit;
+  padding: 8px 30px 8px 10px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.facet-select {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.row-select {
+  /* Same reason as `.toggle`: a long hint must not squeeze the control. */
+  flex-shrink: 0;
+  padding: 6px 28px 6px 10px;
+  background-position: right 8px center;
+}
+.facet-select:focus-visible,
+.row-select:focus-visible {
+  outline: none;
+  border-color: var(--khasky-emojery-field-focus);
+  box-shadow: 0 0 0 2px var(--khasky-emojery-field-focus-glow-strong);
+}
+
+.history-nomatch {
+  text-align: center;
+  color: var(--khasky-emojery-faint);
+  font-size: 12px;
+  padding: 16px 8px;
+}
+
+/* "Show more" pager - reuses the `.linkish` button look, so it needs only its own layout. */
+.history-more {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 4px;
+}
+.history-more .linkish {
+  font-size: 13px;
+}
+
+/* Floating tooltip: fixed-positioned (escapes the scroll panel's clipping); spans the
+   popup width minus a gutter and flips above/below via inline `top`/`bottom`. */
+.tt-pop {
+  position: fixed;
+  left: 8px;
+  right: 8px;
+  z-index: 50;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--khasky-emojery-raised);
+  border: 1px solid var(--khasky-emojery-raised-border);
+  box-shadow: 0 6px 20px var(--khasky-emojery-raised-shadow);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: normal;
+  word-break: break-all;
+}
+.tt-url {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+.tt-proto,
+.tt-sep {
+  /* #9aa0a6 was 2.6:1 on white; this matches the popup's secondary text (5.7:1). */
+  color: var(--khasky-emojery-url-dim);
+}
+.tt-host {
+  color: var(--khasky-emojery-link);
+  font-weight: 600;
+}
+.tt-path {
+  color: var(--khasky-emojery-fg);
+}
+/* Cycling palette for consecutive path segments (kept clear of the host /
+   key / value hues) so query-less paths read as distinct parts. */
+.tt-p0 {
+  color: var(--khasky-emojery-url-p0);
+}
+.tt-p1 {
+  color: var(--khasky-emojery-url-p1);
+}
+.tt-p2 {
+  color: var(--khasky-emojery-url-p2);
+}
+.tt-key {
+  color: var(--khasky-emojery-url-key);
+}
+.tt-val {
+  color: var(--khasky-emojery-url-val);
+}
+.tt-date {
+  color: var(--khasky-emojery-fg);
+  white-space: nowrap;
+  word-break: normal;
+}
+
+.report p {
+  /* Long unbroken tokens in error/empty copy must wrap rather than force a horizontal scrollbar. */
+  overflow-wrap: anywhere;
+}
+
+.report-head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 8px;
+  margin: 2px 0 8px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+.report-head:hover {
+  background: var(--khasky-emojery-row-hover);
+}
+.report-head-txt {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+.report-head-txt b {
+  font-size: 14px;
+  font-weight: 600;
+}
+.report-head-txt span {
+  font-size: 12px;
+  color: var(--khasky-emojery-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.report-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 30px 12px;
+}
+.report-success-ring {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--khasky-emojery-success-fill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.check-icon {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  color: var(--khasky-emojery-success);
+}
+.report-success b {
+  font-size: 15px;
+}
+
+.report-error {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--khasky-emojery-error-text);
+}
+
+/* The length rule lives in the textarea placeholder, which is gone once typing starts - this
+   repeats it under the field while the note is still too short to send. */
+.report-hint {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--khasky-emojery-muted);
+}
+
+.report-send {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 8px;
+}
+.send-glyph {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  color: #fff;
+}
+
+.report textarea {
+  width: 100%;
+  min-height: 80px;
+  /* Grow with content between min-height and max-height, then scroll.
+     Unsupported browsers (older Safari) fall back to the fixed min-height. */
+  field-sizing: content;
+  max-height: 240px;
+  border: 1px solid var(--khasky-emojery-field-border);
+  border-radius: 6px;
+  background: var(--khasky-emojery-field-bg);
+  color: inherit;
+  padding: 6px 8px;
+  font: inherit;
+  font-size: 14px;
+  /* No manual resize: a dragged inline height would override field-sizing
+     and freeze auto-grow. */
+  resize: none;
+  box-sizing: border-box;
+}
+
+/* Auto-press sentiment list editor (Settings) */
+.sentiment-editor {
+  margin: 4px 0 10px;
+}
+.sentiment-intro {
+  margin: 4px 0 8px;
+  font-size: 12px;
+  color: var(--khasky-emojery-muted);
+}
+.sentiment-zone {
+  border: 1px solid var(--khasky-emojery-zone-border);
+  border-radius: 9px;
+  padding: 6px 8px 8px;
+  margin: 0 0 8px;
+}
+.sentiment-zone-droppable {
+  border-style: dashed;
+  border-color: var(--khasky-emojery-accent-strong);
+  cursor: pointer;
+}
+.sentiment-zone-title {
+  display: block;
+  border: 0;
+  background: none;
+  padding: 2px 0 4px;
+  margin: 0;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--khasky-emojery-heading);
+  text-align: left;
+  width: 100%;
+}
+.sentiment-zone-title:not(:disabled) {
+  color: var(--khasky-emojery-accent-strong-text);
+  cursor: pointer;
+}
+.sentiment-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+.sentiment-chip {
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: none;
+  padding: 3px;
+  font-size: 17px;
+  line-height: 1;
+  cursor: grab;
+}
+.sentiment-chip:hover {
+  background: var(--khasky-emojery-chip-hover);
+}
+.sentiment-chip-selected {
+  border-color: var(--khasky-emojery-accent-strong);
+  background: var(--khasky-emojery-accent-strong-fill);
+}
+.sentiment-neutral {
+  width: 100%;
+}
+.sentiment-show-more,
+.sentiment-reset {
+  border: 0;
+  background: none;
+  padding: 4px 0;
+  font: inherit;
+  font-size: 12px;
+  color: var(--khasky-emojery-accent-strong-text);
+  cursor: pointer;
+}
+.sentiment-show-more:hover,
+.sentiment-reset:hover {
+  text-decoration: underline;
+}
+
+h1 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+
+.brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.brand-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  line-height: 1.25;
+  /* Positioning context for the two sparkles below. */
+  position: relative;
+}
+
+/* Two sparkles twinkling out of phase around the mark. They hang off
+   `.brand-title`, not `.brand-logo`, because an <img> is a replaced element and
+   carries no pseudo-elements - so the offsets are tied to the 24px mark sitting
+   first in the flex row. Empty `content` keeps them out of the a11y tree. */
+.brand-title::before,
+.brand-title::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: var(--khasky-emojery-fixed-mark);
+  -webkit-mask: var(--khasky-emojery-sparkle-glyph) center / contain no-repeat;
+  mask: var(--khasky-emojery-sparkle-glyph) center / contain no-repeat;
+  pointer-events: none;
+  opacity: 0;
+  animation: khasky-emojery-brand-sparkle 2.8s ease-in-out infinite;
+}
+
+.brand-title::before {
+  left: 18px;
+  top: -5px;
+}
+
+.brand-title::after {
+  left: -5px;
+  bottom: -2px;
+  width: 8px;
+  height: 8px;
+  animation-delay: 1.4s;
+}
+
+/* Rest visible rather than frozen mid-fade. */
+@media (prefers-reduced-motion: reduce) {
+  .brand-title::before,
+  .brand-title::after {
+    animation: none;
+    opacity: 0.9;
+  }
+}
+
+.build-info {
+  flex: 0 0 auto;
+  font-size: 11px;
+  line-height: 1.25;
+  white-space: nowrap;
+  color: var(--khasky-emojery-muted);
+}
+
+.build-version {
+  font-weight: 600;
+}
+
+.build-stamp {
+  font-variant-numeric: tabular-nums;
+  /* No opacity mute: 0.85 dropped the 11px stamp below 4.5:1 on white (axe). */
+}
+
+.brand-logo {
+  display: block;
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+/* Opens the Debug panel. Icon-only and in the header rather than a fifth tab - see
+   popup-view-state.ts's TAB_VIEWS for why; the accessible name comes from aria-label.
+   Square at the logo's 24px so the row keeps its height whether or not Debug is on. */
+.debug-toggle {
+  appearance: none;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--khasky-emojery-border-soft);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--khasky-emojery-muted);
+}
+
+/* Out of the flow while switched off, so the header stays a plain two-end row: title left,
+   build stamp hard right. Switching Debug on makes it a three-end row, which slides the
+   stamp inward; nothing moves vertically, since the button is the logo's own height. */
+.debug-toggle-off {
+  display: none;
+}
+
+.debug-toggle-active {
+  border-color: var(--khasky-emojery-accent);
+  color: var(--khasky-emojery-link);
+}
+
+.debug-toggle-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--khasky-emojery-divider);
+}
+
+.row:first-of-type {
+  border-top: 0;
+}
+
+.row-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  /* `min-width: 0` (over the flex default `auto`) lets the column shrink so long
+     hint text wraps instead of compressing the neighbouring toggle. */
+  min-width: 0;
+  flex: 1;
+}
+
+.row-hint {
+  /* 12px floor - the unified minimum across the popup and the auth page. */
+  font-size: 12px;
+  color: var(--khasky-emojery-muted);
+}
+
+.toggle {
+  appearance: none;
+  /* Without `flex-shrink: 0` a long hint compresses the track while the absolutely-
+     positioned thumb stays 16px, so the oval looks squished. */
+  flex-shrink: 0;
+  width: 36px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--khasky-emojery-toggle-track);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.toggle::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s ease;
+}
+
+.toggle:checked {
+  background: var(--khasky-emojery-toggle-on);
+}
+
+.toggle:checked::after {
+  transform: translateX(16px);
+}
+
+/* Slide-to-confirm, revealed below the Delete row once armed. */
+.delete-confirm {
+  padding: 4px 0 10px;
+}
+.delete-confirm-warn {
+  margin: 0 0 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--khasky-emojery-muted);
+  /* Preserve the paragraph break baked into the confirm copy. */
+  white-space: pre-line;
+}
+/* Replaces the warning in place while the delete runs - same type treatment, so the
+   panel doesn't resize under the user at exactly that moment. */
+.delete-confirm-progress {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--khasky-emojery-muted);
+}
+.delete-confirm-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.delete-cancel {
+  appearance: none;
+  flex: 0 0 auto;
+  background: transparent;
+  border: 0;
+  padding: 6px 4px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--khasky-emojery-muted);
+  cursor: pointer;
+}
+.delete-cancel:hover:not(:disabled) {
+  color: var(--khasky-emojery-fg);
+}
+.delete-cancel:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.slide-confirm {
+  position: relative;
+  flex: 1 1 auto;
+  height: 38px;
+  border-radius: 999px;
+  background: var(--khasky-emojery-danger-fill);
+  border: 1px solid var(--khasky-emojery-danger-border);
+  overflow: hidden;
+  user-select: none;
+  /* Claim the gesture so dragging the thumb never scrolls the panel. */
+  touch-action: none;
+}
+.slide-confirm-fill {
+  position: absolute;
+  /* Inset by SLIDE_PAD; the width starts at the thumb's diameter, which is this height,
+     so border-radius:999px never degenerates into a lopsided oval. */
+  top: 3px;
+  left: 3px;
+  bottom: 3px;
+  border-radius: 999px;
+  /* Solid saturated bar, theme-fixed - see the token's declaration. */
+  background: var(--khasky-emojery-fixed-danger);
+  transition: width 0.25s ease;
+}
+.slide-confirm-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Clear the resting thumb so the text sits visually centred. */
+  padding-left: 26px;
+  font-size: 12px;
+  font-weight: 600;
+  /* Darker than the fixed danger red: 12px text on the pale red track needs 4.5:1
+     and #d93025 only reaches 4.1:1 (axe); #c0271d clears it at 5.1:1. */
+  color: var(--khasky-emojery-slide-label);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.slide-confirm-thumb {
+  position: absolute;
+  top: 3px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--khasky-emojery-slide-thumb-bg);
+  color: var(--khasky-emojery-fixed-danger);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  box-shadow: 0 1px 3px var(--khasky-emojery-thumb-shadow);
+  transition: left 0.25s ease;
+  touch-action: none;
+}
+.slide-confirm-thumb:active {
+  cursor: grabbing;
+}
+.slide-confirm-thumb svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+.slide-confirm-thumb:focus-visible {
+  outline: 2px solid var(--khasky-emojery-fixed-danger);
+  outline-offset: 2px;
+}
+/* Disable the spring transition during an active drag for 1:1 tracking. */
+.slide-confirm.dragging .slide-confirm-fill,
+.slide-confirm.dragging .slide-confirm-thumb {
+  transition: none;
+}
+.slide-confirm.done .slide-confirm-thumb {
+  color: var(--khasky-emojery-slide-done);
+  cursor: default;
+}
+
+a {
+  color: var(--khasky-emojery-link);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* <button>s that must read as the inline links used elsewhere - same blue, hover
+   underline, dark-mode lightening. `.danger` swaps blue for red. */
+/* biome-ignore lint/style/noDescendingSpecificity: the cascade order is deliberate - .linkish re-uses the `a` styling defined around it */
+.linkish {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  /* Vertical padding cancelled by the negative margin: ~24px hit target
+     (WCAG 2.5.8) with zero layout shift. */
+  padding: 4px 0;
+  margin: -4px 0;
+  color: var(--khasky-emojery-link);
+  cursor: pointer;
+  font: inherit;
+}
+
+.linkish:hover {
+  text-decoration: underline;
+}
+
+.linkish.danger {
+  color: var(--khasky-emojery-danger);
+}
+
+/* Re-points tokens only; the placeholder rules at the end are the one exception. */
+:root[data-theme="dark"] {
+  /* Surfaces */
+  --khasky-emojery-bg: #18191a;
+  --khasky-emojery-raised: #242526;
+
+  /* Text */
+  --khasky-emojery-heading: #e4e6eb;
+  --khasky-emojery-faint: #8a8d91;
+
+  /* The light theme's single blue splits in three here: nav/chip affordances
+       stay on the muted #8ab4f8, while the sentiment editor and the toggle need
+       more saturation to read against the darker surfaces. */
+  --khasky-emojery-accent: #8ab4f8;
+  --khasky-emojery-accent-fill: rgba(138, 180, 248, 0.16);
+  --khasky-emojery-accent-strong: #4599ff;
+  --khasky-emojery-accent-strong-fill: rgba(69, 153, 255, 0.18);
+  --khasky-emojery-accent-strong-text: #4599ff;
+  --khasky-emojery-toggle-on: #2d88ff;
+  --khasky-emojery-toggle-track: #4e4f50;
+
+  /* Status */
+  --khasky-emojery-danger: #f28b82;
+  --khasky-emojery-danger-fill: rgba(242, 139, 130, 0.14);
+  --khasky-emojery-danger-fill-subtle: rgba(242, 139, 130, 0.08);
+  --khasky-emojery-danger-border: rgba(242, 139, 130, 0.3);
+  --khasky-emojery-danger-border-strong: rgba(242, 139, 130, 0.42);
+  --khasky-emojery-success: #4ac47e;
+  --khasky-emojery-success-fill: rgba(74, 196, 126, 0.16);
+  --khasky-emojery-slide-thumb-bg: #e4e6eb;
+  --khasky-emojery-slide-label: #f28b82;
+  --khasky-emojery-slide-done: #2ea043;
+
+  /* Lines and fills */
+  --khasky-emojery-border-soft: rgba(255, 255, 255, 0.12);
+  --khasky-emojery-divider: rgba(255, 255, 255, 0.1);
+  --khasky-emojery-zone-border: rgba(255, 255, 255, 0.18);
+  --khasky-emojery-chip-border: rgba(255, 255, 255, 0.16);
+  --khasky-emojery-chip-border-hover: rgba(255, 255, 255, 0.34);
+  --khasky-emojery-raised-border: rgba(255, 255, 255, 0.14);
+  --khasky-emojery-raised-shadow: rgba(0, 0, 0, 0.5);
+  --khasky-emojery-thumb-shadow: rgba(0, 0, 0, 0.6);
+  --khasky-emojery-row-hover: rgba(255, 255, 255, 0.06);
+  --khasky-emojery-chip-hover: rgba(255, 255, 255, 0.1);
+  --khasky-emojery-scroll-thumb: rgba(255, 255, 255, 0.2);
+  --khasky-emojery-scroll-thumb-hover: rgba(255, 255, 255, 0.35);
+
+  --khasky-emojery-url-dim: #8a8d91;
+  --khasky-emojery-url-p0: #22d3ee;
+  --khasky-emojery-url-p1: #fbbf24;
+  --khasky-emojery-url-p2: #fb7185;
+  --khasky-emojery-url-key: #c9a3ff;
+  --khasky-emojery-url-val: #7ee787;
+
+  --khasky-emojery-select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23b0b3b8' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+}
+
+/* Light mode leaves placeholders to the engine default, so there is no rule
+   to re-point - these exist only under dark. */
+:root[data-theme="dark"] .report textarea::placeholder,
+:root[data-theme="dark"] .history-search-input::placeholder,
+:root[data-theme="dark"] .settings-filter-input::placeholder {
+  color: var(--khasky-emojery-faint);
+  opacity: 1;
+}
