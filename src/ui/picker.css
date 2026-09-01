@@ -1,0 +1,878 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * The picker lives inside a shadow root attached to one of two hosts: inline triggers
+ * (one `<span class="khasky-emojery-host">` per target) and a single shared
+ * `<div class="khasky-emojery-overlay-host">` on <body> owning the floating popover.
+ *
+ * Both hosts inherit `font-family`/`font-size`/`color` from their DOM context (we
+ * deliberately do NOT use `all: initial`, so inheritable values flow through the shadow
+ * boundary); the picker sizes in `em`, with a `clamp` on `:host` guarding extreme bases.
+ *
+ * `data-theme="light|dark"` is stamped on the host from the page's detected mode. Accent
+ * stays a fixed brand blue so the picker still reads as "ours".
+ */
+
+:host {
+  display: inline-block;
+  margin-inline: 0.15em;
+  vertical-align: middle;
+  font: inherit;
+  color: inherit;
+  /* Guardrail: render between these bounds whatever the page's base; descendants use
+     em-relative units off the resolved value. mount-style.ts stamps the page's MEASURED
+     size into --khasky-emojery-page-font and never clamps it itself, so these two
+     declarations are the only font bounds in the codebase. */
+  --khasky-emojery-font-min: 14px;
+  --khasky-emojery-font-max: 18px;
+  font-size: clamp(var(--khasky-emojery-font-min), var(--khasky-emojery-page-font, 1em), var(--khasky-emojery-font-max));
+  line-height: 1.4;
+
+  /* Light palette (default - overrides via [data-theme="dark"] below) */
+  --khasky-emojery-bg: #fff;
+  --khasky-emojery-fg: #1c1e21;
+  --khasky-emojery-muted: #65676b;
+  --khasky-emojery-border-soft: rgba(0, 0, 0, 0.08);
+  --khasky-emojery-border-strong: rgba(0, 0, 0, 0.1);
+  --khasky-emojery-hover: rgba(0, 0, 0, 0.06);
+  --khasky-emojery-row-hover: rgba(0, 0, 0, 0.05);
+  --khasky-emojery-search-bg: rgba(0, 0, 0, 0.05);
+  --khasky-emojery-selected-bg: rgba(24, 119, 242, 0.14);
+  --khasky-emojery-accent: #1877f2;
+  --khasky-emojery-accent-soft: rgba(24, 119, 242, 0.08);
+  --khasky-emojery-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+
+  /* RGB ring colour stops, shared by the row trigger and the icon-column circle. */
+  --khasky-emojery-ring-stops: #f00, #f80, #ff0, #0f0, #0ff, #08f, #80f, #f08, #f00;
+
+  /* One focus indicator for every focusable control in the picker. Each use site keeps
+     its own `outline-offset` - the popover's is inset on purpose (see the note there). */
+  --khasky-emojery-focus-ring: 2px solid var(--khasky-emojery-accent);
+
+  /* The counter trio renders slightly under the trigger's glyph so the stack stays compact
+     (0.87 ~ 1.15/1.32, the old em ratio). Used twice - the width floor below and the rendered
+     font-size - and the two MUST move together or the two trigger states shift the row. */
+  --khasky-emojery-trio-scale: 0.87;
+}
+
+/* Pending the first glyph measurement (mount-style.ts SIZING_ATTR): the trigger must first
+   paint at its exact size, never visibly resize - hold the slot, hide the pixels. Removed
+   on the first successful measure (then cached per site) or at mount.ts's bounded deadline. */
+:host([data-khasky-emojery-sizing]) {
+  visibility: hidden;
+}
+
+:host([data-theme="dark"]) {
+  --khasky-emojery-bg: #242526;
+  --khasky-emojery-fg: #e4e6eb;
+  --khasky-emojery-muted: #b0b3b8;
+  --khasky-emojery-border-soft: rgba(255, 255, 255, 0.08);
+  --khasky-emojery-border-strong: rgba(255, 255, 255, 0.12);
+  --khasky-emojery-hover: rgba(255, 255, 255, 0.08);
+  --khasky-emojery-row-hover: rgba(255, 255, 255, 0.06);
+  --khasky-emojery-search-bg: rgba(255, 255, 255, 0.06);
+  --khasky-emojery-selected-bg: rgba(45, 136, 255, 0.22);
+  --khasky-emojery-accent: #4f9bff;
+  --khasky-emojery-accent-soft: rgba(79, 155, 255, 0.12);
+  --khasky-emojery-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.khasky-emojery-root {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+/* Visually hidden, still read by screen readers (live-region announcements). */
+.khasky-emojery-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.khasky-emojery-trigger,
+.khasky-emojery-counter {
+  all: unset;
+  /* `position: relative` + `isolation` anchor the animated gradient ring
+     (`.khasky-emojery-ring`; all: unset resets position, so set it again). */
+  position: relative;
+  isolation: isolate;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3em;
+  /* `--khasky-emojery-glyph-h` is the measured height of the native control's VISIBLE icon, not
+     its hit-box (see the hit-box note on the filled-pill rule below; mount-style.ts applyHostRowHeight
+     sets it). Our emoji copies that size so the trigger reads as one more icon in the row;
+     unmeasurable rows fall back to the em default. */
+  --khasky-emojery-glyph: var(--khasky-emojery-glyph-h, 1.32em);
+  /* Readability floor for the RENDERED emoji in both states (small native glyphs - e.g.
+     GitHub's 16px - would shrink the counter trio to ~14px, unreadable). Applied at the
+     font-size sites, not to the glyph var itself, so --khasky-emojery-base-h and
+     min-width keep following the measured row. */
+  --khasky-emojery-emoji-min: 18px;
+  /* ONE box for BOTH states (empty trigger / counter) so reacting causes no layout shift:
+     height floors to the tallest inner content - text line (1.4em) or emoji glyph - plus the
+     0.3em of padding top and bottom; width floors to the one-emoji-plus-one-digit counter footprint
+     (emoji + 0.3em gap + 1ch + horizontal padding), so only extra emojis / longer counts grow
+     the button. 40px keeps a comfortable tap target when a site's padding runs tiny. */
+  --khasky-emojery-base-h: calc(max(1.4em, var(--khasky-emojery-glyph)) + 0.6em);
+  min-height: var(--khasky-emojery-base-h);
+  min-width: max(40px, calc(var(--khasky-emojery-trio-scale) * var(--khasky-emojery-glyph) + 0.3em + 1ch + 2 * var(--khasky-emojery-site-pad-x, 0.75em)));
+  padding-block: 0.3em;
+  /* `--khasky-emojery-site-*` are stamped on the host by mount-style.ts's
+     applySiteButtonStyle from the page's own action buttons so the trigger blends into each
+     site; fall back to our defaults. clampRadius already floors a simple px radius at 6px. */
+  border-radius: var(--khasky-emojery-site-radius, 6px);
+  background-color: var(--khasky-emojery-site-bg, transparent);
+  color: var(--khasky-emojery-site-fg, inherit);
+  font: inherit;
+  /* The native button's own horizontal padding, mirrored by mount-style.ts's applySitePadding -
+     most sites space a flush action row by button padding, not margins. */
+  padding-inline: var(--khasky-emojery-site-pad-x, 0.75em);
+  line-height: 1.4;
+  user-select: none;
+  /* border-box so our padding and the height floors above resolve to one visual height. */
+  box-sizing: border-box;
+  transition: background-color 0.12s ease;
+}
+
+/* Grow to the native control's measured BOX height only when that control is a real filled
+   pill (e.g. YouTube's like/dislike): there the box IS the visible surface, so matching it
+   blends in. A transparent icon button (X, Facebook, Instagram, Reddit) reports a tap-target
+   box far taller than its visible icon, so flooring our bordered pill to that box would span
+   it across the whole row (the X detail-page overlap bug) - those rows size by glyph instead
+   (see --khasky-emojery-glyph above). max() keeps the two-state base floor so a filled
+   row with a failed measurement still gets no layout shift. */
+:host([data-khasky-emojery-filled]) .khasky-emojery-trigger,
+:host([data-khasky-emojery-filled]) .khasky-emojery-counter {
+  min-height: max(var(--khasky-emojery-row-h, 0px), var(--khasky-emojery-base-h));
+}
+
+/* Spinning conic-gradient masked to the 2px border band (content-box masked out,
+   then XOR/exclude), so it reads as a glowing border over an opaque or a
+   transparent `--khasky-emojery-site-bg`.
+
+   A real element (picker-parts.tsx's GradientRing), not a pseudo-element: the spin
+   has to run on a layer INSIDE the masked frame, so the mask and corner clip stay
+   on the static `.ring` box while only its `::before` rotates. `rotate` is
+   compositor-only - the prior `@property` gradient-angle spin forced a style recalc
+   on every animation frame. The masked box is still GPU-re-rastered every frame, so
+   the spin is time-boxed in ring-spin.ts (ring-spin.test.ts pins that window and its
+   re-arm) and gated twice below. */
+.khasky-emojery-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  /* Clips the rotating square to the button's rounded box; the mask alone is corner-blind. */
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+/* The rotating layer. A square at least twice the box's longest side still covers every
+   corner at any angle (its inscribed circle spans the full diagonal). Centred first, then
+   rotated about its own centre - `translate`/`rotate` compose in that order. */
+.khasky-emojery-ring::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 200%;
+  min-height: 200%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: conic-gradient(var(--khasky-emojery-ring-stops));
+}
+
+/* Exactly one of the two rings per button is live: the button's own in the default
+   horizontal form, the icon's in the icon-column (reel/shorts rail) form. */
+.khasky-emojery-trigger-icon > .khasky-emojery-ring,
+.khasky-emojery-counter-emojis > .khasky-emojery-ring,
+:host([data-khasky-emojery-layout="icon-column"]) .khasky-emojery-trigger > .khasky-emojery-ring,
+:host([data-khasky-emojery-layout="icon-column"]) .khasky-emojery-counter > .khasky-emojery-ring {
+  display: none;
+}
+:host([data-khasky-emojery-layout="icon-column"]) .khasky-emojery-trigger-icon > .khasky-emojery-ring,
+:host([data-khasky-emojery-layout="icon-column"]) .khasky-emojery-counter-emojis > .khasky-emojery-ring {
+  display: block;
+}
+
+/* Spin only while Reaction animations is on AND the OS isn't set to reduce motion; without
+   the attribute the gradient border still renders, just static. */
+@media (prefers-reduced-motion: no-preference) {
+  :host([data-khasky-emojery-animate]) .khasky-emojery-ring::before {
+    animation: khasky-emojery-rgb-spin 4s linear infinite;
+  }
+}
+
+@keyframes khasky-emojery-rgb-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+.khasky-emojery-trigger:focus-visible,
+.khasky-emojery-counter:focus-visible,
+.khasky-emojery-grid-item:focus-visible {
+  outline: var(--khasky-emojery-focus-ring);
+  outline-offset: 2px;
+}
+
+.khasky-emojery-trigger:hover,
+.khasky-emojery-counter:hover {
+  background-color: var(--khasky-emojery-hover);
+}
+
+.khasky-emojery-trigger[data-active="true"] {
+  font-weight: 600;
+}
+
+.khasky-emojery-trigger-icon {
+  font-size: max(var(--khasky-emojery-emoji-min), var(--khasky-emojery-glyph));
+  /* Center the sprite cell against the label: flex + line-height:1 so the
+     button's 1.4 line-height doesn't push the emoji below center. */
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.khasky-emojery-counter-emojis {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.khasky-emojery-counter-emojis > span {
+  /* Scales with the measured native glyph like the empty state, one notch smaller
+     (--khasky-emojery-trio-scale, which also floors the width above). */
+  font-size: max(var(--khasky-emojery-emoji-min), calc(var(--khasky-emojery-trio-scale) * var(--khasky-emojery-glyph)));
+  margin-left: -0.15em;
+  /* Center the sprite cell vertically against the count: flex +
+     line-height:1 cancels the button's 1.4 line-height. */
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.khasky-emojery-counter-emojis > span:first-child {
+  margin-left: 0;
+}
+
+/* Marks the user's own reaction in the counter trio. Background + box-shadow ring
+   rather than a sized box: box-shadow adds NO layout size, so marking "mine" never
+   changes the button's height (an explicit 1.4em box outgrew the base floor and
+   shifted the row). */
+.khasky-emojery-counter-emojis > span[data-mine="true"] {
+  border-radius: 50%;
+  background: var(--khasky-emojery-selected-bg);
+  box-shadow: 0 0 0 0.12em var(--khasky-emojery-selected-bg);
+}
+
+/* Icon-column variant (reels / shorts rails): a VERTICAL rail of round icon
+ * buttons with a count beneath each. The adapter opts in via `triggerLayout:
+ * "icon-column"`; mount-style.ts then stamps `data-khasky-emojery-layout` plus
+ * `--khasky-emojery-icon-size`, measured from the native icon. */
+:host([data-khasky-emojery-layout="icon-column"]) .khasky-emojery-trigger,
+:host([data-khasky-emojery-layout="icon-column"]) .khasky-emojery-counter {
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25em;
+  padding: 0;
+  /* Drop the row trigger's 40px width floor - the rail sizes its circle from
+     --khasky-emojery-icon-size, so the column can be as narrow as its cells. */
+  min-width: 0;
+  /* The round icon carries the fill + ring; the button itself is bare so
+     the count below sits on the rail's own background like native counts. */
+  background: transparent;
+  border-radius: 0;
+  /* `--khasky-emojery-row-h` as a FLOOR, not a fixed height: where it measures the
+     whole cell (YouTube ~78px) the floor sets the slot; where it measures only the icon
+     (Instagram ~24px) the box grows to fit icon+count and the copied per-cell margin
+     (applyHostSpacing) carries the spacing. */
+  min-height: var(--khasky-emojery-row-h, auto);
+}
+
+/* The emoji cluster / default icon becomes the round button. */
+:host([data-khasky-emojery-layout="icon-column"]) .khasky-emojery-counter-emojis,
+:host([data-khasky-emojery-layout="icon-column"]) .khasky-emojery-trigger-icon {
+  box-sizing: border-box;
+  width: var(--khasky-emojery-icon-size, 2.6em);
+  height: var(--khasky-emojery-icon-size, 2.6em);
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--khasky-emojery-site-bg, var(--khasky-emojery-hover));
+  /* Anchor the ring element rendered inside. */
+  position: relative;
+  isolation: isolate;
+}
+
+/* Show only the top reaction inside the circle (the full breakdown lives in
+   the popover); a 3-emoji stack is too cramped at icon size. */
+:host([data-khasky-emojery-layout="icon-column"]) .khasky-emojery-counter-emojis > span:nth-child(n + 2) {
+  display: none;
+}
+/* The "mine" pill highlight is redundant once the whole thing is a circle. */
+:host([data-khasky-emojery-layout="icon-column"]) .khasky-emojery-counter-emojis > span[data-mine="true"] {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Count beneath the circle, in the rail's text colour - like native counts.
+   The text label is dropped: an icon rail shows just the glyph, and the label
+   would overflow the narrow column. */
+:host([data-khasky-emojery-layout="icon-column"]) .khasky-emojery-counter-total {
+  font-size: 0.78em;
+  line-height: 1;
+  color: var(--khasky-emojery-site-fg, inherit);
+}
+
+/* Hover tint belongs on the circle, not the bare button. */
+:host([data-khasky-emojery-layout="icon-column"]) .khasky-emojery-trigger:hover,
+:host([data-khasky-emojery-layout="icon-column"]) .khasky-emojery-counter:hover {
+  background: transparent;
+}
+:host([data-khasky-emojery-layout="icon-column"]) .khasky-emojery-trigger:hover .khasky-emojery-trigger-icon,
+:host([data-khasky-emojery-layout="icon-column"]) .khasky-emojery-counter:hover .khasky-emojery-counter-emojis {
+  background: var(--khasky-emojery-hover);
+}
+
+/* Merged popover */
+
+.khasky-emojery-popover {
+  position: fixed;
+  /* 18em ~ 252-324px depending on inherited base - wide enough for the breakdown
+     labels without dominating the viewport on big-font pages.
+     The floor keeps the category bar on ONE row: its targets are pinned at 24 CSS px
+     (WCAG 2.5.8) while everything around them scales with the font, so at the 14px
+     font floor 18em is ~15px too narrow and the last category wraps to a row of its
+     own. Terms, outside-in: the popover's 2 x 0.6em padding, the scroller's 0.15em
+     padding-right, a 17px classic scrollbar (the Windows worst case; slack, not
+     breakage, where the scrollbar overlays), the bar's 2 x 0.15em padding, then the
+     targets and their 0.1em gaps. Category count comes from picker.tsx, so a 10th
+     category widens the popover instead of wrapping. */
+  width: max(18em, calc(var(--khasky-emojery-cat-count, 9) * 24px + (var(--khasky-emojery-cat-count, 9) - 1) * 0.1em + 1.65em + 17px));
+  max-height: 28em;
+  background: var(--khasky-emojery-bg);
+  border: 1px solid var(--khasky-emojery-border-strong);
+  border-radius: 0.75em;
+  box-shadow: var(--khasky-emojery-shadow);
+  padding: 0.6em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+  z-index: 2147483646;
+  font: inherit;
+  /* Portalled into the shared overlay root, so it carries its own picker's page font
+     (stamped by Picker) through the same clamp as :host instead of inheriting it.
+     Must stay after `font: inherit`, which would otherwise reset it. */
+  font-size: clamp(var(--khasky-emojery-font-min), var(--khasky-emojery-page-font, 1em), var(--khasky-emojery-font-max));
+  color: var(--khasky-emojery-fg);
+  box-sizing: border-box;
+}
+
+.khasky-emojery-search-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.45em 0.75em;
+  background: var(--khasky-emojery-search-bg);
+  border-radius: 0.6em;
+  flex-shrink: 0;
+  /* Lives inside the scroll container, just above the emoji grid; the small bottom
+     margin separates the input from the category bar. */
+  margin-bottom: 0.4em;
+}
+
+/* One focus ring for every control inside the popover's scroll container, inset so it stays
+   within that container's `overflow-x: hidden` (a positive offset clips unevenly against the
+   scrollbar gutter). The search <input> itself carries `outline: none`, so its ring surfaces on
+   the row wrapper instead - the first-focused control in the popover still gets an indicator. */
+.khasky-emojery-search-row:focus-within,
+.khasky-emojery-cat-btn:focus-visible,
+.khasky-emojery-breakdown-row:focus-visible,
+.khasky-emojery-breakdown-more:focus-visible {
+  outline: var(--khasky-emojery-focus-ring);
+  outline-offset: -2px;
+}
+
+.khasky-emojery-search-icon {
+  font-size: 0.95em;
+  opacity: 0.6;
+  line-height: 1;
+}
+
+.khasky-emojery-search {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  padding: 0;
+}
+
+.khasky-emojery-search::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+
+/* Sticky header (search + category nav) */
+
+/* Pinned to the scroll container so search + category nav stay in reach while the grid
+   scrolls; the opaque background hides rows sliding underneath. Pins to the top by
+   default; when the popover opens above the trigger it pins to the bottom (--bottom)
+   so the search box stays beside the button. */
+.khasky-emojery-sticky-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--khasky-emojery-bg);
+}
+
+.khasky-emojery-sticky-head--bottom {
+  top: auto;
+  bottom: 0;
+  padding-top: 0.4em;
+}
+
+.khasky-emojery-cat-bar {
+  display: flex;
+  align-items: stretch;
+  gap: 0.1em;
+  padding: 0 0.15em 0.3em;
+  /* Last resort for the `min-width` floor below: the popover's width floor sizes the
+     bar so every target fits on one row, and this only engages if that floor is ever
+     out of step with the category count. Wrapping to a second row costs a taller head
+     (measured, see picker.tsx) - shrinking the targets costs reachability. */
+  flex-wrap: wrap;
+}
+
+/* The cat bar's 0.3em bottom padding is breathing room before the grid in the top layout;
+   in --bottom the bar is last in the popover, so it would stack with the popover's own
+   bottom padding and read as a gap under the icons. */
+.khasky-emojery-sticky-head--bottom .khasky-emojery-cat-bar {
+  padding-bottom: 0;
+}
+
+.khasky-emojery-cat-btn {
+  all: unset;
+  cursor: pointer;
+  position: relative;
+  flex: 1 1 0;
+  /* WCAG 2.5.8 target size. `flex: 1 1 0` divides the bar by the category count, so the
+     floor is what stops a future category from shrinking every button below 24 CSS px;
+     the popover's width floor is derived from it, which is what keeps the bar one row
+     at the 14px font floor. Pinned at that font floor by picker.browser.test.tsx. */
+  min-width: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.32em 0;
+  border-radius: 0.4em;
+  /* `filter: grayscale(...)` is set inline per-scroll; a short transition
+     smooths the click-to-jump case without lagging live scroll (which
+     updates every frame anyway). */
+  transition: background 0.12s ease;
+}
+
+.khasky-emojery-cat-btn:hover {
+  background: var(--khasky-emojery-hover);
+}
+
+.khasky-emojery-cat-icon {
+  font-size: 1.15em;
+  line-height: 1;
+  display: inline-flex;
+}
+
+/* Accent underline marking the in-view category; its opacity is set inline
+   from the same scroll intensity so it fades in together with the colour. */
+.khasky-emojery-cat-underline {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--khasky-emojery-accent);
+  pointer-events: none;
+}
+
+.khasky-emojery-popover-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* WCAG 2.4.11: the sticky head below is opaque and sits INSIDE this scroller, so a
+     focused emoji scrolled to the container edge lands underneath it. The variable is
+     the head's measured height, written by picker.tsx; 0 until it is measured. */
+  scroll-padding-top: var(--khasky-emojery-head-h, 0px);
+  padding-right: 0.15em;
+  /* Room for the grid emoji's `:hover` scale (1.15, on the glyph inside the cell) - without
+     it, hovering a bottom-row emoji overflows the scroll edge and spawns a scrollbar on a short list.
+     Only needed when the grid is the last scrollable child (see --reversed below). */
+  padding-bottom: 0.3em;
+  min-height: 0;
+}
+
+/* Mirrors the DOM order flip in picker.tsx: opened above the trigger, the sticky head is
+   the last scrollable child, pinned via `bottom: 0`. Sticky respects this container's own
+   padding-bottom, so the 0.3em hover-room would show as a gap under the pinned bar. */
+.khasky-emojery-popover-scroll--reversed {
+  padding-bottom: 0;
+  /* Head pinned to the BOTTOM here (see --bottom above), so the obscured edge flips with
+     it: arrowing down is what would otherwise put the focused emoji under the search box. */
+  scroll-padding-top: 0;
+  scroll-padding-bottom: var(--khasky-emojery-head-h, 0px);
+}
+
+.khasky-emojery-popover-divider {
+  height: 1px;
+  background: var(--khasky-emojery-border-soft);
+  margin: 0.3em 0.15em 0.45em;
+  flex-shrink: 0;
+}
+
+/* Breakdown list (top of popover) */
+
+.khasky-emojery-breakdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15em;
+}
+
+.khasky-emojery-breakdown-row {
+  all: unset;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 1.7em 1fr auto;
+  gap: 0.6em;
+  align-items: center;
+  padding: 0.45em 0.45em;
+  font: inherit;
+  border-radius: 0.45em;
+  box-sizing: border-box;
+}
+
+.khasky-emojery-breakdown-row > span[aria-hidden="true"] {
+  font-size: 1.3em;
+  line-height: 1;
+}
+
+.khasky-emojery-breakdown-row:hover,
+.khasky-emojery-breakdown-row:focus-visible {
+  background: var(--khasky-emojery-row-hover);
+}
+
+.khasky-emojery-breakdown-row[data-selected="true"] {
+  background: var(--khasky-emojery-selected-bg);
+}
+
+.khasky-emojery-breakdown-label {
+  color: var(--khasky-emojery-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: capitalize;
+}
+
+.khasky-emojery-breakdown-count {
+  font-variant-numeric: tabular-nums;
+  color: var(--khasky-emojery-fg);
+}
+
+.khasky-emojery-breakdown-more {
+  all: unset;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  margin: 0.3em 0 0.15em;
+  padding: 0.55em 0.45em;
+  text-align: center;
+  font: inherit;
+  font-weight: 600;
+  color: var(--khasky-emojery-accent);
+  border-radius: 0.45em;
+  box-sizing: border-box;
+}
+
+.khasky-emojery-breakdown-more:hover,
+.khasky-emojery-breakdown-more:focus-visible {
+  background: var(--khasky-emojery-accent-soft);
+}
+
+/* Emoji grid (bottom of popover; shown signed out too, until a pick swaps in the gate) */
+
+.khasky-emojery-section-h {
+  font-size: 0.8em;
+  font-weight: 600;
+  color: var(--khasky-emojery-muted);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 0.3em 0.3em 0.15em;
+}
+
+.khasky-emojery-section-h--row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5em;
+}
+
+/* `all: unset` lets the <button> inherit the section header's small uppercase
+   treatment; only the accent colour marks it as an action. */
+.khasky-emojery-section-clear {
+  all: unset;
+  cursor: pointer;
+  color: var(--khasky-emojery-accent);
+  border-radius: 0.35em;
+}
+
+.khasky-emojery-section-clear:hover {
+  text-decoration: underline;
+}
+
+.khasky-emojery-section-clear:focus-visible {
+  outline: var(--khasky-emojery-focus-ring);
+  outline-offset: 1px;
+}
+
+.khasky-emojery-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1px;
+}
+
+.khasky-emojery-grid-item {
+  all: unset;
+  cursor: pointer;
+  /* The square cell stays sized by the 6-col grid, so a larger glyph just fills more
+     of it (hover scale still fits). */
+  font-size: 1.5em;
+  line-height: 1;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  /* Skip layout/paint for the glyph of every cell the user has not scrolled to.
+     The popover renders the whole palette at once, each emoji a span + sprite <img>
+     sized to the whole sheet; laying all of them out cost hundreds of milliseconds
+     of layout per open. The cell's own box is unaffected - width comes from the grid
+     track and height from aspect-ratio, both resolvable under size containment -
+     so the scroll height and the scroll-spy offsets stay exact. The accessible
+     name is the button's own aria-label, not the skipped glyph. */
+  content-visibility: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.55em;
+  user-select: none;
+  text-align: center;
+  transition: background 0.08s ease;
+}
+
+.khasky-emojery-grid-item:hover {
+  background: var(--khasky-emojery-hover);
+}
+
+.khasky-emojery-grid-item[data-selected="true"] {
+  background: var(--khasky-emojery-selected-bg);
+}
+
+.khasky-emojery-empty {
+  padding: 1.6em 0.85em;
+  text-align: center;
+  color: var(--khasky-emojery-muted);
+  font-size: 0.95em;
+}
+
+/* Emoji sprite */
+
+/* The default (OS-font) and sprite-crop rules are NOT here: `emojiSpriteCss` in
+   emoji-sprite.ts emits them for this scope and for the animation layer, and
+   mount-shadow.ts appends them to this sheet. */
+
+/* Palette hover grows only the glyph, not the cell's hover background box. The
+   grid emoji is inline-block so the transform applies in both sprite and
+   OS-font modes (transform is a no-op on a non-replaced inline element). */
+.khasky-emojery-grid-item .khasky-emojery-emoji {
+  display: inline-block;
+  transition: transform 0.08s ease;
+}
+.khasky-emojery-grid-item:hover .khasky-emojery-emoji {
+  transform: scale(1.15);
+}
+
+/* One-time coach-mark (ui/coach-mark.ts) */
+
+/* The pulse rides box-shadow, which follows the trigger's own border-radius. */
+@keyframes khasky-emojery-coach-pulse {
+  from {
+    box-shadow: 0 0 0 0 rgba(24, 119, 242, 0.45);
+  }
+  to {
+    box-shadow: 0 0 0 0.7em rgba(24, 119, 242, 0);
+  }
+}
+
+:host([data-khasky-emojery-coach="1"]) .khasky-emojery-trigger,
+:host([data-khasky-emojery-coach="1"]) .khasky-emojery-counter {
+  animation: khasky-emojery-coach-pulse 1.6s ease-out infinite;
+}
+
+/* Reduced motion keeps the attention cue, just static. */
+@media (prefers-reduced-motion: reduce) {
+  :host([data-khasky-emojery-coach="1"]) .khasky-emojery-trigger,
+  :host([data-khasky-emojery-coach="1"]) .khasky-emojery-counter {
+    animation: none;
+    box-shadow: 0 0 0 2px var(--khasky-emojery-accent);
+  }
+}
+
+/* Lives in the overlay root's shadow (same sheet as the popover), positioned
+   by coach-mark.ts. Fixed px font on purpose: no page font is stamped here. */
+.khasky-emojery-coach-tip {
+  position: fixed;
+  background: var(--khasky-emojery-bg);
+  color: var(--khasky-emojery-fg);
+  border: 1px solid var(--khasky-emojery-accent);
+  border-radius: 10px;
+  box-shadow: var(--khasky-emojery-shadow);
+  padding: 10px 32px 10px 14px;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+  z-index: 2147483646;
+  box-sizing: border-box;
+}
+
+.khasky-emojery-coach-title {
+  margin: 0 0 2px;
+  font-weight: 600;
+}
+
+.khasky-emojery-coach-body {
+  margin: 0;
+  color: var(--khasky-emojery-muted);
+}
+
+.khasky-emojery-coach-close {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  border: 0;
+  background: none;
+  color: var(--khasky-emojery-muted);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1;
+  padding: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.khasky-emojery-coach-close:hover {
+  background: var(--khasky-emojery-hover);
+}
+
+.khasky-emojery-coach-close:focus-visible {
+  outline: var(--khasky-emojery-focus-ring);
+}
+
+/* Sign-in gate (popover content after a signed-out pick) */
+
+.khasky-emojery-gate {
+  display: flex;
+  flex-direction: column;
+  /* Stretch, not center: the buttons below are full-width by design. */
+  align-items: stretch;
+  text-align: center;
+  gap: 0.45em;
+  padding: 0.6em 0.4em 0.3em;
+}
+
+/* Hugs the glyph (rather than stretching) so the wiggle pivots on the emoji itself. */
+.khasky-emojery-gate-emoji {
+  align-self: center;
+  font-size: 2em;
+  line-height: 1;
+}
+
+/* The chosen reaction, alive rather than decorative - it is the thing the sign-in is for. */
+@keyframes khasky-emojery-gate-wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(-7deg) scale(1.08);
+  }
+  75% {
+    transform: rotate(7deg) scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .khasky-emojery-gate-emoji {
+    animation: khasky-emojery-gate-wiggle 1.6s ease-in-out infinite;
+  }
+}
+
+.khasky-emojery-gate-title {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1.05em;
+}
+
+.khasky-emojery-gate-body {
+  margin: 0 0 0.35em;
+  color: var(--khasky-emojery-muted);
+  font-size: 0.92em;
+}
+
+/* One button shape for both actions - only the fill differs, so "Cancel" reads as the
+   same control at lower weight instead of a differently sized afterthought. */
+.khasky-emojery-gate-btn {
+  width: 100%;
+  border: 0;
+  font: inherit;
+  font-weight: 600;
+  border-radius: 0.5em;
+  padding: 0.55em 1.2em;
+  cursor: pointer;
+}
+
+.khasky-emojery-gate-btn:focus-visible {
+  outline: var(--khasky-emojery-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Same fixed blue as the extension pages' primary button: white text needs
+   4.5:1, which the brand #1877f2 misses - see styles/tokens.css. */
+.khasky-emojery-gate-signin {
+  background: #1670e8;
+  color: #fff;
+}
+
+.khasky-emojery-gate-signin:hover {
+  background: #1665d8;
+}
+
+.khasky-emojery-gate-cancel {
+  background: none;
+  color: var(--khasky-emojery-muted);
+}
+
+.khasky-emojery-gate-cancel:hover {
+  background: var(--khasky-emojery-hover);
+}

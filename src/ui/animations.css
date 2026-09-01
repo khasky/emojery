@@ -1,0 +1,137 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/* Reaction animations for the shared fixed layer ui/animations.ts injects on the
+   host page. The ids/classes and the drop duration are mirrored by constants
+   there - change them together. */
+
+#khasky-emojery-reaction-animations {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 2147483647;
+  contain: layout style paint;
+}
+
+.khasky-emojery-reaction-intro-particle,
+.khasky-emojery-reaction-click-float {
+  position: fixed;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.22));
+  will-change: transform, opacity;
+  user-select: none;
+}
+
+.khasky-emojery-reaction-intro-particle {
+  transform: translate(-50%, -50%);
+  animation: khasky-emojery-reaction-intro-float 1500ms cubic-bezier(0.16, 0.8, 0.32, 1) forwards;
+}
+
+.khasky-emojery-reaction-click-float {
+  font-size: 52px;
+  transform: translate(-50%, -50%) scale(0.72);
+  animation: khasky-emojery-reaction-click-float 600ms cubic-bezier(0.18, 0.82, 0.25, 1) forwards;
+}
+
+@keyframes khasky-emojery-reaction-intro-float {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 24px) scale(0.78) rotate(var(--khasky-emojery-intro-start-rot));
+  }
+  14% {
+    opacity: 0.96;
+  }
+  72% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--khasky-emojery-intro-x)), var(--khasky-emojery-intro-y)) scale(1.08) rotate(var(--khasky-emojery-intro-rot));
+  }
+}
+
+@keyframes khasky-emojery-reaction-click-float {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.68) rotate(var(--khasky-emojery-float-start-rot));
+  }
+  18% {
+    opacity: 1;
+    transform: translate(calc(-50% + var(--khasky-emojery-float-x-early)), calc(-50% - 18px)) scale(1.28) rotate(0deg);
+  }
+  74% {
+    opacity: 0.92;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--khasky-emojery-float-x)), calc(-50% - 116px)) scale(0.96) rotate(var(--khasky-emojery-float-rot));
+  }
+}
+
+/* Every keyframe below lists its transform functions in the same order, so each
+   interpolates independently instead of falling back to a matrix. */
+.khasky-emojery-button-drop {
+  transform-origin: center bottom;
+  will-change: transform;
+  animation: khasky-emojery-button-drop 360ms ease both;
+}
+
+@keyframes khasky-emojery-button-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-40px) translateX(0) rotate(0deg) scaleX(0.88) scaleY(1.16);
+    animation-timing-function: cubic-bezier(0.45, 0, 0.9, 0.45);
+  }
+  12% {
+    opacity: 1;
+  }
+  55% {
+    transform: translateY(0) translateX(0) rotate(0deg) scaleX(1.2) scaleY(0.7);
+    animation-timing-function: cubic-bezier(0.2, 0.9, 0.35, 1);
+  }
+  68% {
+    transform: translateY(-9px) translateX(0) rotate(0deg) scaleX(0.96) scaleY(1.08);
+    animation-timing-function: cubic-bezier(0.5, 0, 0.6, 1);
+  }
+  79% {
+    transform: translateY(0) translateX(0) rotate(0deg) scaleX(1.07) scaleY(0.95);
+    animation-timing-function: ease-out;
+  }
+  86% {
+    transform: translateY(0) translateX(2px) rotate(0.7deg) scaleX(1) scaleY(1);
+  }
+  92% {
+    transform: translateY(0) translateX(-1.5px) rotate(-0.5deg) scaleX(1) scaleY(1);
+  }
+  100% {
+    transform: translateY(0) translateX(0) rotate(0deg) scaleX(1) scaleY(1);
+  }
+}
+
+/* Dust puffs kicked up by the drop. */
+.khasky-emojery-button-dust {
+  position: fixed;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 45%, rgba(202, 194, 180, 0.85), rgba(168, 158, 144, 0.32) 60%, rgba(168, 158, 144, 0) 72%);
+  transform: translate(-50%, -50%) scale(0.4);
+  opacity: 0;
+  filter: blur(0.4px);
+  will-change: transform, opacity;
+  animation: khasky-emojery-button-dust 560ms cubic-bezier(0.22, 0.68, 0.3, 1) forwards;
+}
+
+@keyframes khasky-emojery-button-dust {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate(0, 0) scale(0.35);
+  }
+  18% {
+    opacity: var(--khasky-emojery-dust-opacity, 0.45);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate(var(--khasky-emojery-dust-x, 0px), var(--khasky-emojery-dust-y, 0px)) scale(var(--khasky-emojery-dust-scale, 2));
+  }
+}
