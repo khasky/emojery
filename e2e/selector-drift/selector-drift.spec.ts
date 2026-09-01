@@ -35,6 +35,25 @@ function countSelectorsDeep(selectors: string[]): Array<{ sel: string; n: number
   return selectors.map((sel) => ({ sel, n: countOne(sel) }));
 }
 
+// Controls named by TEXT, not aria-label - Facebook's logged-out action row, which
+// the adapter reads the same way (facebook-post-row.ts matchesActionLabel).
+function countTextLabelsDeep(labels: string[]): Array<{ sel: string; n: number }> {
+  const countOne = (label: string): number => {
+    let n = 0;
+    const visit = (root: ParentNode): void => {
+      for (const el of Array.from(root.querySelectorAll('[role="button"], button'))) {
+        if ((el.textContent ?? "").trim() === label) n++;
+      }
+      for (const el of Array.from(root.querySelectorAll("*"))) {
+        if (el.shadowRoot) visit(el.shadowRoot);
+      }
+    };
+    visit(document);
+    return n;
+  };
+  return labels.map((label) => ({ sel: `text=${label}`, n: countOne(label) }));
+}
+
 for (const site of SUPPORTED_SITE_SCENARIOS) {
   test(`${site.site}: ${site.label} scenario selectors alive`, async ({ page }) => {
     await page.addInitScript(dismissInterstitialsInitScript, { exposeUnwallHook: false, keepDialogsWithReactionHost: false });
@@ -65,7 +84,7 @@ for (const site of SUPPORTED_SITE_SCENARIOS) {
     // the real post underneath. Skipping on the URL alone therefore threw away
     // a perfectly good page - the selectors ARE the ground truth, so a wall only
     // explains their absence, it never overrides their presence.
-    const native = await page.evaluate(countSelectorsDeep, site.nativeSelectors);
+    const native = [...(await page.evaluate(countSelectorsDeep, site.nativeSelectors)), ...(site.nativeTextLabels?.length ? await page.evaluate(countTextLabelsDeep, site.nativeTextLabels) : [])];
     const containers = await page.evaluate(countSelectorsDeep, site.containerSelectors);
     if (!native.some((c) => c.n > 0)) {
       // An interstitial serves its own markup, so every scenario selector is

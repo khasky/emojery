@@ -19,6 +19,9 @@ export interface SiteScenarioSpec {
   urlKey: string;
   mountKeyPattern: string;
   nativeSelectors: string[];
+  /** Exact visible labels of the same native controls, for a surface that names them
+   *  by TEXT with no aria-label (Facebook logged out). OR'd with `nativeSelectors`. */
+  nativeTextLabels?: string[];
   containerSelectors: string[];
   requiredHostAncestorSelectors?: string[];
   maxHosts?: number;
@@ -187,6 +190,7 @@ export const SUPPORTED_SITE_SCENARIOS: SiteScenarioSpec[] = [
     urlKey: "FACEBOOK_PAGE",
     mountKeyPattern: "^facebook:",
     nativeSelectors: ['[role="button"][aria-label*="Like" i]', '[role="button"][aria-label*="Comment" i]', '[role="button"][aria-label*="Share" i]'],
+    nativeTextLabels: ["Like", "Comment", "Share"],
     containerSelectors: ['[role="article"]', '[data-pagelet^="FeedUnit"]'],
     scrollSteps: [0, 450, 800, 1200, 1600, 2200],
     settleMs: 4_000,
@@ -208,6 +212,7 @@ export const SUPPORTED_SITE_SCENARIOS: SiteScenarioSpec[] = [
     // pattern from a real mount regression.
     mountKeyPattern: "^facebook:(photo:\\d|pfbid|\\d)",
     nativeSelectors: ['[role="button"][aria-label*="Like" i]', '[role="button"][aria-label*="Comment" i]', '[role="button"][aria-label*="Share" i]'],
+    nativeTextLabels: ["Like", "Comment", "Share"],
     containerSelectors: ['[role="article"]', '[data-pagelet^="FeedUnit"]'],
     scrollSteps: [0, 450, 800, 1200],
     settleMs: 4_000,
@@ -221,6 +226,7 @@ export const SUPPORTED_SITE_SCENARIOS: SiteScenarioSpec[] = [
     urlKey: "FACEBOOK_REEL",
     mountKeyPattern: "^facebook:",
     nativeSelectors: ['[role="button"][aria-label*="Like" i]', '[role="button"][aria-label*="Comment" i]', '[role="button"][aria-label*="Share" i]'],
+    nativeTextLabels: ["Like", "Comment", "Share"],
     containerSelectors: ['[role="article"]', '[role="main"]', "[data-video-id]", '[data-pagelet*="Reel" i]'],
     scrollSteps: [0, 450],
     settleMs: 4_000,
