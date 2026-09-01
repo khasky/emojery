@@ -103,7 +103,7 @@
     "@preact/preset-vite": "^2.10.6",
     "@types/chrome": "^0.2.7",
     "@types/firefox-webext-browser": "^143.0.0",
-    "@types/node": "^26.2.0",
+    "@types/node": "^26.3.0",
     "@vitest/browser": "^4.1.11",
     "@vitest/browser-playwright": "^4.1.11",
     "@vitest/coverage-v8": "^4.1.11",
