@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "preserve",
+    // The MCP SDK transport types aren't authored for exactOptionalPropertyTypes
+    // (e.g. `StreamableHTTPClientTransport.sessionId?: string`), which trips the
+    // product-strict flag. This is test tooling consuming third-party types, so
+    // relax just this knob here; product code under `src/**` keeps it on.
+    "exactOptionalPropertyTypes": false
+  },
+  "include": ["**/*.ts"]
+}
