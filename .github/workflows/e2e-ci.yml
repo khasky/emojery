@@ -1,0 +1,209 @@
+name: E2E (CI)
+
+# CI-minute budget: the placement sweep is the most expensive job here
+# (~35 min), so it runs on odd days plus the Sunday slot rather than
+# nightly - the daily selector-drift probe (selector-drift.yml, ~5 min, no
+# build) is what catches a site's DOM drift in between. The Sunday slot also
+# runs the weekly jobs below: replace-native, theme + contrast, and the perf
+# budget.
+on:
+  schedule:
+    # Odd days of the month - cron has no true "every 48h".
+    - cron: "23 4 */2 * *"
+    - cron: "23 5 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e-ci:
+    name: E2E (CI)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup e2e environment
+        uses: ./.github/actions/setup-e2e
+
+      # The extension loads only in a headed Chromium, so the suite runs under a
+      # virtual display (xvfb, pulled in by `playwright install --with-deps`).
+      - name: Run e2e (signed-out subset)
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/e2e.json
+        # Through the npm script, not a second copy of its `-g`: the title filter has to
+        # match site-injection.spec.ts, and a stale duplicate here runs zero tests. No `--`
+        # before the flag - pnpm forwards it verbatim, and playwright then reads
+        # `--reporter=...` as a positional file filter instead (verified).
+        run: xvfb-run -a pnpm test:e2e:ci --reporter=list,json
+
+      # Two spec files that need NO test account and no anti-bot exposure, so
+      # they ride the same build and browser the sweep already paid for:
+      #   - the private-page gate (a false negative would mount the button on a
+      #     private repo, which the unit suite cannot exercise);
+      #   - the message boundary (no web page may reach the service worker).
+      # `if: always()` so a walled placement sweep doesn't hide their result.
+      # `--output` is load-bearing: playwright wipes its output dir at startup,
+      # and the default one is the same `test-results/` the step above wrote its
+      # JSON report and traces into - without an own dir this run deletes them.
+      - name: Run e2e (private-page gate + message boundary)
+        if: always()
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/e2e-gates.json
+        run: xvfb-run -a pnpm exec playwright test -c e2e/playwright.config.ts --output=test-results/gates --reporter=list,json -g "private-page gate|never reaches the service worker|externally_connectable"
+
+      # Skips are per-test legitimate (anti-bot walls vary), but a run where most
+      # scenarios skipped verified nothing and must not read as green. Both runs
+      # are gated - a fully-skipped privacy run must not read as green either.
+      - name: Gate on skip ratio
+        if: always()
+        run: |
+          node scripts/check-e2e-skips.mjs test-results/e2e.json
+          node scripts/check-e2e-skips.mjs test-results/e2e-gates.json
+
+      # Failure only: this repo is public, so a green run must not publish a
+      # trace tree (request headers, run config) to anonymous downloaders.
+      # Accepted risk, reviewed: a RED run still publishes one. Every scenario
+      # here runs SIGNED OUT against public pages, so a trace carries no account
+      # state or token - and a red sweep is unreadable without it. Re-open this
+      # decision the day any scheduled sweep runs authenticated.
+      - name: Upload e2e report
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: e2e-report
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  replace-native:
+    name: E2E (replace-native sweep)
+    # Weekly: the replace-native loop re-runs every scenario with the popup
+    # toggle on (~as expensive as the placement sweep), and its breakage class -
+    # a site's native-control markup drifting under the hide logic - arrives
+    # slowly. Sunday slot + manual dispatch.
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '23 5 * * 0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup e2e environment
+        uses: ./.github/actions/setup-e2e
+
+      - name: Run e2e (replace-native sweep)
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/e2e.json
+        run: xvfb-run -a pnpm exec playwright test -c e2e/playwright.config.ts --reporter=list,json -g "replaces native buttons"
+
+      - name: Gate on skip ratio
+        if: always()
+        run: node scripts/check-e2e-skips.mjs test-results/e2e.json
+
+      # Failure only, and the same accepted risk as the placement sweep above.
+      - name: Upload replace-native report
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: replace-native-report
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  theme-contrast:
+    name: E2E (theme + contrast sweep)
+    # Weekly, in its OWN job rather than a step on the sweep above: it re-runs
+    # every scenario in light and dark, so appending it would push that job past
+    # its timeout, while a parallel job costs only its own build. Its breakage
+    # class - a site restyling its action row until the trigger stops blending
+    # or drops below the WCAG floor - arrives slowly. Sunday slot + dispatch.
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '23 5 * * 0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup e2e environment
+        uses: ./.github/actions/setup-e2e
+
+      - name: Run theme + contrast sweep
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/e2e-theme.json
+        run: xvfb-run -a pnpm exec playwright test -c e2e/playwright.config.ts --reporter=list,json theme-contrast.spec.ts
+
+      - name: Gate on skip ratio
+        if: always()
+        run: node scripts/check-e2e-skips.mjs test-results/e2e-theme.json
+
+      # Failure only, and the same accepted risk as the placement sweep above.
+      - name: Upload theme-contrast report
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: theme-contrast-report
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  perf:
+    name: Perf budget (deep feed scroll)
+    # Weekly: only a commit can introduce a heap regression, and the run is
+    # expensive. Sunday slot + any manual dispatch.
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '23 5 * * 0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup e2e environment
+        uses: ./.github/actions/setup-e2e
+
+      - name: Run perf budget
+        env:
+          E2E_PERF: "1"
+          # Persist the heap/long-task metrics on GREEN runs too - the budget is
+          # tuned from this artifact's history, and testInfo.attach alone only
+          # survives failures.
+          E2E_PERF_METRICS_FILE: test-results/perf-metrics.json
+          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/e2e-perf.json
+        run: xvfb-run -a pnpm exec playwright test -c e2e/playwright.config.ts --reporter=list,json -g "heap budget"
+
+      - name: Gate on skip ratio
+        if: always()
+        run: node scripts/check-e2e-skips.mjs test-results/e2e-perf.json
+
+      # TODO: test this later, then re-enable.
+      # Green runs included: the heap budget is tuned from this file's history,
+      # and it is a metrics blob, not a trace tree - the failure-only policy
+      # below covers the traces.
+      # - name: Upload perf metrics
+      #   if: always()
+      #   uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      #   with:
+      #     name: perf-metrics
+      #     path: test-results/perf-metrics.json
+      #     if-no-files-found: ignore
+      #     retention-days: 90
+
+      # Failure only, and the same accepted risk as the placement sweep above.
+      - name: Upload perf report
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: perf-report
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 30

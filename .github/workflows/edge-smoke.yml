@@ -1,0 +1,62 @@
+name: Edge smoke
+
+# Cross-browser smoke: the two most stable placement scenarios run in real
+# Microsoft Edge (E2E_CHROME_CHANNEL=msedge). The extension loads there via
+# --load-extension + DisableLoadExtensionCommandLineSwitch (verified: the
+# service worker comes up); a red run means Edge dropped that path or the
+# extension broke on Edge specifically.
+
+on:
+  schedule:
+    # Odd days of the month - cron has no true "every 48h".
+    - cron: "23 6 */2 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: edge-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  edge-smoke:
+    name: Edge smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # msedge installs system-wide via apt, so the Playwright browser cache
+      # is disabled - the full install runs every time.
+      - name: Setup e2e environment
+        uses: ./.github/actions/setup-e2e
+        with:
+          browser: msedge
+          cache: "false"
+
+      - name: Run placement smoke in Edge
+        env:
+          E2E_CHROME_CHANNEL: msedge
+          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/e2e-edge.json
+        run: xvfb-run -a pnpm exec playwright test -c e2e/playwright.config.ts --reporter=list,json -g "(github|youtube):.*default unauth placement"
+
+      # Two scenarios only: if both skip on a bot wall the smoke verified nothing
+      # about Edge, which must not read as a green cross-browser signal.
+      - name: Gate on skip ratio
+        if: always()
+        run: node scripts/check-e2e-skips.mjs test-results/e2e-edge.json
+
+      # Failure only: this repo is public, so a green run must not publish a trace
+      # tree. Accepted risk, reviewed: a RED run still does. The smoke runs SIGNED
+      # OUT against public pages, so the trace carries no account state or token.
+      - name: Upload Edge report
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: edge-smoke-report
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 14

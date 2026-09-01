@@ -1,0 +1,45 @@
+name: A11y
+
+# Accessibility gate over the extension's own pages (popup + auth): axe, aria
+# snapshots, keyboard walk, reflow/text-spacing. It needs a full staging build
+# plus a headed Chromium, which is too much to pay on every PR, so it runs
+# every other day - and on demand before a release via workflow_dispatch.
+on:
+  schedule:
+    # Odd days of the month - cron has no true "every 48h".
+    - cron: "23 3 */2 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: a11y-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  a11y:
+    name: A11y (popup + auth)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup e2e environment
+        uses: ./.github/actions/setup-e2e
+
+      # The extension loads only in a headed Chromium, so the suite runs under
+      # a virtual display (same constraint as e2e-ci.yml).
+      - name: Run a11y suite
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/a11y.json
+        run: xvfb-run -a pnpm test:a11y --reporter=list,json
+
+      # Same gate as every e2e-ci.yml run, for the same reason: half this suite skips itself
+      # when the OTP credentials are absent, and a job that skipped its way to green reads
+      # exactly like one that checked the popup and the auth page.
+      - name: Gate on skip ratio
+        if: always()
+        run: node scripts/check-e2e-skips.mjs test-results/a11y.json

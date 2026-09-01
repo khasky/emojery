@@ -1,0 +1,100 @@
+name: Selector drift
+
+# Extension-less daily probe: does every scenario URL still serve the native
+# controls/containers the adapters anchor on? Catches a site's DOM drift hours
+# before the placement sweep (e2e-ci.yml) and names the dead selector group
+# (the input a selector hot-patch needs). No build, no auth, ~5 minutes.
+
+on:
+  schedule:
+    - cron: "47 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: selector-drift-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  selector-drift:
+    name: Selector drift
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # No staging build: the probe runs extension-less.
+      - name: Setup e2e environment
+        uses: ./.github/actions/setup-e2e
+        with:
+          build: "false"
+
+      # Cross-run skip counters: a scenario that walls the probe EVERY day has
+      # gone silently blind, and only a persisted counter can see that.
+      # (The setup action's Playwright browser cache is keyed strictly on the
+      # lockfile; this cache deliberately prefix-matches instead.)
+      #
+      # The `restore-keys` prefix match means ANY cache on this branch can seed the
+      # counter that gates the job, so a `pull_request` trigger would let a fork PR
+      # write the cache that decides whether this job passes. The `if:` below is the
+      # control for that, not the trigger list above: adding a trigger no longer
+      # silently opens the hole, it just skips the restore and starts the counters
+      # from zero (track-selector-drift-skips.mjs treats a missing state file as a
+      # first run).
+      - name: Restore drift skip counters
+        if: github.event_name != 'pull_request'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .selector-drift-state
+          key: selector-drift-state-${{ github.run_id }}
+          restore-keys: |
+            selector-drift-state-
+
+      # Headed under xvfb, mirroring the main suite: the probe must see the
+      # page a real visitor gets, not a bot wall.
+      - name: Run selector drift probe
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/selector-drift.json
+        run: xvfb-run -a pnpm exec playwright test -c e2e/selector-drift/playwright.config.ts --reporter=list,json
+
+      # Reddit answers every GitHub-hosted runner with its hard IP block ("You've
+      # been blocked by network security"), so all 3 of its scenarios skip on
+      # every single run - no fixture URL or probe tweak reaches it from here, and
+      # failing daily on an unfixable block just teaches everyone to ignore this
+      # job. Declared instead: the tracker reports them as an uncovered gap and
+      # tells us the day the block lifts. Their selectors are still checked, off a
+      # CI IP - see "Reddit is not covered here" in e2e/README.md.
+      - name: Track consecutive skips
+        if: always()
+        env:
+          E2E_DRIFT_KNOWN_BLOCKED: "reddit:"
+        run: node scripts/track-selector-drift-skips.mjs test-results/selector-drift.json .selector-drift-state/counters.json
+
+      # Saved even when the job fails: the gate itself is what fails it, and a
+      # cache that only writes on green freezes the counters at their last green
+      # value - every later run would then re-read a stale count, so the tracker
+      # could neither advance nor reset one.
+      - name: Save drift skip counters
+        if: always() && github.event_name != 'pull_request'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .selector-drift-state
+          key: selector-drift-state-${{ github.run_id }}
+
+      # Failure only: this repo is public, so a green run must not publish a trace
+      # tree. Accepted risk, reviewed: a RED run still does. The probe runs without
+      # the extension and signed out, so the trace carries no account state or token.
+      - name: Upload selector drift report
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: selector-drift-report
+          path: |
+            test-results/
+            e2e/test-results/
+          if-no-files-found: ignore
+          retention-days: 14
