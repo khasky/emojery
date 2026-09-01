@@ -1,0 +1,68 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.10/schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": {
+    "includes": ["**", "!**/*.min.js", "!public", "!assets", "!src/shared/__generated__", "!src/ui/__generated__"]
+  },
+  "formatter": { "enabled": true, "indentStyle": "space", "indentWidth": 2, "lineWidth": 320 },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "correctness": {
+        "noUnusedVariables": "warn",
+        "noUnusedFunctionParameters": "warn",
+        "noUnusedImports": "warn",
+
+        // Component/hook rules, enabled by name.
+        // Biome gates these behind its `react` domain, which auto-activates only when
+        // a `react` dependency is present. This is Preact, so the whole group had
+        // never run once. `"domains": { "react": ... }` is not the fix: "recommended"
+        // is a no-op without that dependency (verified - a nested-component probe
+        // stayed green), and "all" drags in ~250 diagnostics that are wrong here,
+        // mostly `noUnknownAttribute` on Preact's `class=`, then `noJsxPropsBind`.
+        // Listing the ones that hold for Preact keeps the gate meaningful AND
+        // green; all of them are clean today, so each is a guard against a future
+        // regression rather than a backlog.
+        "noNestedComponentDefinitions": "error",
+        "useHookAtTopLevel": "error",
+        "noChildrenProp": "error",
+        "noRenderReturnValue": "error",
+        "noVoidElementsWithChildren": "error",
+
+        // Deliberately NOT enabled, both reviewed hit by hit:
+        // `useExhaustiveDependencies` - no hit is a real missing dependency. The rule is
+        //   syntactic, so a `useRef` result or a `useState` setter passed INTO a custom
+        //   hook (ui/picker-hooks.ts's usePopoverPosition, useFocusTrap,
+        //   useCategoryScrollSpy) reads as a plain value it wants in the deps. The
+        //   remaining omissions and extras already carry their reason at the hook.
+        //   No count here on purpose: it drifts with every hook added, and the argument
+        //   is about the rule's shape, not about how many times it fires. Re-derive with
+        //   `biome lint --only=correctness/useExhaustiveDependencies --max-diagnostics=200 src`
+        //   before re-reviewing, and mind that biome caps the report at 20 without that flag.
+        // `useJsxKeyInIterable` - every hit is in the popup files, and they come in two
+        //   shapes. Nearly all are static module-level SVG child arrays
+        //   (`const ICON_TRASH: ComponentChild[] = [<path/>, <path/>]`), which are never
+        //   reordered, so a key would mean nothing. The rest are popup-tooltip.tsx's
+        //   `renderUrlParts`, a function-local ComponentChild[] built by `.forEach` pushes:
+        //   variable-length, but rebuilt wholesale for each URL, so there is no identity to
+        //   preserve across renders either. No counts here, for the same reason as above -
+        //   re-derive with `biome lint --only=correctness/useJsxKeyInIterable
+        //   --max-diagnostics=200 src` before re-reviewing.
+        // Left on, every one of those hits would fail the build: `pnpm lint` runs
+        // `biome check --error-on-warnings`, so a warning is not advisory.
+        "useExhaustiveDependencies": "off",
+        "useJsxKeyInIterable": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "warn",
+        "noDuplicateJsxProps": "error",
+        "noDuplicatedSpreadProps": "error"
+      },
+      "security": { "noDangerouslySetInnerHtmlWithChildren": "error" },
+      "style": { "noNonNullAssertion": "off" }
+    }
+  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "css": { "formatter": { "enabled": true }, "linter": { "enabled": true } }
+}
