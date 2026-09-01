@@ -1,0 +1,133 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # PRs land as a squash merge, so the message that reaches `main` - the one the
+  # version bump and CHANGELOG.md are derived from - is the PR title, and no
+  # hook can see it: `commit-msg` only runs on the commits inside the branch.
+  # This validates the title's shape; the full rule set (scope-enum, the revert
+  # and breaking footers) stays in commitlint.config.js, where a title with no
+  # body could never satisfy it.
+  pr-title:
+    name: Validate PR title
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: read # read the title; the action reports through its own check run
+    steps:
+      # Default type list is conventional-commit-types, the same set commitlint
+      # enforces here - see CONTRIBUTING.md -> Commit messages.
+      - uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # A branch's own commits are already gated by the hook, and they are
+          # squashed away on merge - only the title survives.
+          validateSingleCommit: false
+
+  check:
+    name: Typecheck, lint, test, build, docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+
+      - name: Typecheck
+        run: pnpm compile
+
+      # Playwright transpiles the e2e specs with esbuild, which type-checks
+      # nothing - without this they drift silently.
+      - name: Typecheck e2e specs
+        run: pnpm compile:e2e
+
+      - name: Typecheck build scripts
+        run: pnpm compile:scripts
+
+      - name: Lint
+        run: pnpm lint
+
+      # The one e2e spec that needs neither a browser nor the network (a pure
+      # self-check of lib/coext-source). It already has its own zero-retry
+      # Playwright project so it can gate a PR; verified to run with an empty
+      # PLAYWRIGHT_BROWSERS_PATH, so no `playwright install` is needed here.
+      # Everything else in e2e/ drives live sites and stays on the sweep
+      # schedules (e2e-ci.yml).
+      - name: E2E hermetic self-check
+        run: pnpm test:e2e:hermetic
+
+      # Same suite as `pnpm test`, with the coverage report printed for the log.
+      # No thresholds - coverage never fails this step.
+      - name: Unit tests with coverage report
+        run: pnpm test:coverage
+
+      # Mirrors .github/actions/setup-e2e (which takes one browser; this needs two) -
+      # keep the pins and the cache/install pattern in lockstep with it.
+      # Keyed on the lockfile because that is what moves the pinned playwright
+      # version - an unrelated bump costs a miss.
+      # The browser list is part of the key: a webkit-only cache would hit,
+      # skip the install step and leave firefox missing.
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-webkit-firefox-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright WebKit + Firefox
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps webkit firefox
+
+      - name: Install WebKit + Firefox system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps webkit firefox
+
+      - name: Browser-mode tests (WebKit + Firefox)
+        run: pnpm test:browser
+
+      - name: Build unpacked extensions (chrome + firefox)
+        run: pnpm build:all
+
+      - name: Content-script weight budget
+        run: pnpm check:bundle
+
+      - name: Package browser zips (chrome + firefox)
+        run: pnpm zip:all
+
+      - name: Scan generated Chrome extension files
+        shell: bash
+        run: bash scripts/scan-extension-artifact.sh .output/chrome-mv3
+
+      # The MV2 bundle is signed into an .xpi and shipped to AMO by release.yml,
+      # so it gates on exactly the same rules as the MV3 one.
+      - name: Scan generated Firefox extension files
+        shell: bash
+        run: bash scripts/scan-extension-artifact.sh .output/firefox-mv2
+
+      - name: Scan AMO source archive
+        shell: bash
+        run: bash scripts/scan-source-archive.sh
+
+      # `!cancelled()`: a red test above must not swallow the Markdown result.
+      # Rule set + rationale for each disabled rule: .markdownlint-cli2.jsonc
+      - name: Lint Markdown
+        if: ${{ !cancelled() }}
+        run: pnpm lint:docs

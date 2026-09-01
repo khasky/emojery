@@ -1,0 +1,58 @@
+name: Setup e2e environment
+description: >-
+  Shared setup for the browser-suite workflows: the setup-node-pnpm triad, a cached
+  Playwright browser, and (by default) the staging extension build. Checkout stays in
+  the calling job - a local action can only run from an already checked-out tree.
+
+inputs:
+  browser:
+    description: Playwright browser or channel to install (chromium, msedge, ...)
+    required: false
+    default: chromium
+  cache:
+    description: >-
+      Cache ~/.cache/ms-playwright ("true"/"false"). msedge installs
+      system-wide via apt, so nothing lands there and the cache buys nothing -
+      pass "false" and the full install below runs unconditionally.
+    required: false
+    default: "true"
+  build:
+    description: Run `pnpm build:staging` after setup ("true"/"false")
+    required: false
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node and pnpm
+      uses: ./.github/actions/setup-node-pnpm
+
+    # Cache covers the download half only; apt still runs on a hit.
+    - name: Cache Playwright browsers
+      if: inputs.cache == 'true'
+      id: playwright-cache
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ inputs.browser }}-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+    # With the cache step skipped above, `cache-hit` is empty and this full
+    # install (download + apt) runs unconditionally.
+    - name: Install Playwright browser
+      if: steps.playwright-cache.outputs.cache-hit != 'true'
+      env:
+        BROWSER: ${{ inputs.browser }}
+      run: pnpm exec playwright install --with-deps "$BROWSER"
+      shell: bash
+
+    - name: Install browser system dependencies
+      if: steps.playwright-cache.outputs.cache-hit == 'true'
+      env:
+        BROWSER: ${{ inputs.browser }}
+      run: pnpm exec playwright install-deps "$BROWSER"
+      shell: bash
+
+    - name: Build extension for e2e (staging)
+      if: inputs.build == 'true'
+      run: pnpm build:staging
+      shell: bash

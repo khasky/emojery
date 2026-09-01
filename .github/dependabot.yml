@@ -1,0 +1,54 @@
+version: 2
+
+updates:
+  # Cooldown mirrors `minimumReleaseAge` in pnpm-workspace.yaml: a compromised
+  # publish is normally yanked inside a week, so nothing lands here sooner.
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+    # Routine noise arrives as two PRs; majors stay separate so they get read.
+    groups:
+      prod-minor-patch:
+        dependency-type: production
+        update-types: [minor, patch]
+      dev-minor-patch:
+        dependency-type: development
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "ci"
+    groups:
+      actions:
+        patterns: ["*"]
+        update-types: [minor, patch]
+
+  # A composite action is its own directory: the entry above only scans
+  # .github/workflows, so a pin under .github/actions/ never gets a PR. That is
+  # how setup-node sat a major behind ci.yml here while 6 jobs used it.
+  - package-ecosystem: github-actions
+    directories:
+      - "/.github/actions/setup-e2e"
+      - "/.github/actions/setup-node-pnpm"
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "ci"
+    groups:
+      actions:
+        patterns: ["*"]
+        update-types: [minor, patch]
