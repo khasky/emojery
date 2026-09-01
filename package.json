@@ -1,0 +1,123 @@
+{
+  "name": "emojery",
+  "private": true,
+  "version": "1.0.0",
+  "license": "GPL-3.0-or-later",
+  "author": {
+    "name": "Khasky",
+    "url": "https://github.com/khasky"
+  },
+  "description": "Turn every Like button on the web into a full emoji palette.",
+  "keywords": [
+    "emojery",
+    "browser-extension",
+    "chrome-extension",
+    "firefox-addon",
+    "edge-extension",
+    "safari-extension",
+    "webextension",
+    "emoji",
+    "like-button"
+  ],
+  "homepage": "https://emojery.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khasky/emojery.git"
+  },
+  "bugs": {
+    "url": "https://github.com/khasky/emojery/issues"
+  },
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/khasky"
+    },
+    {
+      "type": "patreon",
+      "url": "https://www.patreon.com/khasky"
+    },
+    {
+      "type": "ko-fi",
+      "url": "https://ko-fi.com/khasky"
+    }
+  ],
+  "type": "module",
+  "packageManager": "pnpm@11.22.0+sha512.1ff870c4c6133dfd88fb2afc46dd13d47f09c9794b438c6fdb47ca98caf3bc16381ee0be93a091b8e3824cf01f889f46d7d9e20910fb0be1ab0fb5baa80dd621",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "pnpm run prepare:assets && wxt",
+    "dev:firefox": "pnpm run prepare:assets && wxt -b firefox",
+    "build": "pnpm run prepare:assets && wxt build",
+    "build:staging": "pnpm run prepare:assets && wxt build -b chrome --mode staging",
+    "build:staging:firefox": "pnpm run prepare:assets && wxt build -b firefox --mode staging",
+    "build:firefox": "pnpm run prepare:assets && wxt build -b firefox",
+    "build:edge": "pnpm run prepare:assets && wxt build -b edge",
+    "build:safari": "pnpm run prepare:assets && wxt build -b safari",
+    "build:all": "pnpm run prepare:assets && wxt build && wxt build -b firefox",
+    "release": "commit-and-tag-version && pnpm run zip:all",
+    "zip": "pnpm run prepare:assets && wxt zip",
+    "zip:firefox": "pnpm run prepare:assets && wxt zip -b firefox",
+    "zip:edge": "pnpm run prepare:assets && wxt zip -b edge",
+    "zip:safari": "pnpm run prepare:assets && wxt zip -b safari",
+    "zip:all": "pnpm run prepare:assets && wxt zip && wxt zip -b firefox",
+    "compile": "tsc --noEmit",
+    "compile:e2e": "tsc -p e2e/tsconfig.check.json && tsc -p e2e/site-auth/tsconfig.json",
+    "compile:scripts": "tsc --noEmit -p scripts/tsconfig.json",
+    "test": "vitest run",
+    "test:browser": "vitest run -c vitest.browser.config.ts",
+    "test:e2e": "playwright test -c e2e/playwright.config.ts",
+    "test:a11y": "playwright test -c e2e/playwright.config.ts a11y.spec.ts",
+    "test:e2e:ci": "playwright test -c e2e/playwright.config.ts -g \"default unauth placement and auth-click\"",
+    "test:e2e:hermetic": "playwright test -c e2e/playwright.config.ts --project=hermetic",
+    "test:e2e:siteauth": "vitest run -c e2e/site-auth/vitest.config.ts --exclude \"**/auto-press.test.ts\"",
+    "test:e2e:siteauth:autopress": "vitest run -c e2e/site-auth/vitest.config.ts auto-press",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "lint": "biome check --error-on-warnings .",
+    "lint:docs": "markdownlint-cli2 \"**/*.md\"",
+    "format": "biome format --write .",
+    "check": "pnpm compile && pnpm compile:e2e && pnpm compile:scripts && pnpm lint && pnpm lint:docs && pnpm test:coverage && pnpm test:e2e:hermetic && pnpm test:browser && pnpm build:all && pnpm check:bundle && pnpm zip:all",
+    "check:bundle": "node scripts/check-bundle-budget.mjs",
+    "copy:emoji-data": "node scripts/copy-emoji-locales.mjs",
+    "gen:emoji-sprite": "node scripts/build-emoji-sprite.mjs",
+    "verify:locales": "node scripts/verify-locale-placeholders.mjs",
+    "prepare:assets": "pnpm run copy:emoji-data && pnpm run verify:locales",
+    "prerelease": "pnpm check",
+    "prepare": "husky",
+    "postinstall": "wxt prepare && pnpm run copy:emoji-data"
+  },
+  "dependencies": {
+    "emojibase-data": "^17.0.0",
+    "preact": "^10.29.8"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.10",
+    "@commitlint/cli": "^21.2.1",
+    "@commitlint/config-conventional": "^21.2.0",
+    "@guidepup/virtual-screen-reader": "0.32.1",
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@playwright/mcp": "^0.0.79",
+    "@playwright/test": "^1.62.1",
+    "@preact/preset-vite": "^2.10.6",
+    "@types/chrome": "^0.2.7",
+    "@types/firefox-webext-browser": "^143.0.0",
+    "@types/node": "^26.2.0",
+    "@vitest/browser": "^4.1.11",
+    "@vitest/browser-playwright": "^4.1.11",
+    "@vitest/coverage-v8": "^4.1.11",
+    "axe-core": "4.13.0",
+    "commit-and-tag-version": "12.7.3",
+    "dotenv": "^17.4.2",
+    "fast-check": "4.9.0",
+    "husky": "9.1.7",
+    "jsdom": "^30.0.1",
+    "markdownlint-cli2": "0.23.2",
+    "playwright": "^1.62.1",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11",
+    "web-ext": "10.6.0",
+    "wxt": "^0.21.3"
+  }
+}

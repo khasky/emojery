@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output & WXT cache
+.output/
+.wxt/
+dist/
+coverage/
+
+# Emoji sprite generator download cache (scripts/build-emoji-sprite.mjs)
+scripts/.cache/
+
+# Environment / secrets
+.env*
+!.env*.example
+
+# Test artifacts
+.playwright/
+.playwright-mcp/
+test-results/
+playwright-report/
+e2e/test-results/
+.vitest-attachments/
+.e2e*.json
+.e2e*.out
+
+# Failure screenshots vitest browser mode drops next to a red component test
+src/**/__screenshots__/**/*.png
+
+# Logs & OS / editor noise
+*.log
+.DS_Store
+.vscode/

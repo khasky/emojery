@@ -1,0 +1,71 @@
+packages:
+  - .
+
+# Transitive-only floors for published advisories. All of them are dev/build
+# toolchain: the shipped extension depends on preact + emojibase-data only.
+# Ranges (not exact pins) so later patch releases still flow in; the lockfile
+# is what freezes the resolved version. Drop a line once the parent's own range
+# no longer resolves below the floor (`pnpm why <pkg>`), then re-run
+# `pnpm audit` to confirm nothing came back.
+overrides:
+  "@hono/node-server": ^2.0.11 # GHSA-9mqv-5hh9-4cgg, patched in 2.0.10
+  adm-zip: ^0.6.0 # GHSA-xcpc-8h2w-3j85
+  brace-expansion: ^5.0.9 # GHSA-mh99-v99m-4gvg, GHSA-rgw5-rvv9-x895
+  fast-uri: ^3.1.5 # GHSA-v2hh-gcrm-f6hx, GHSA-7p8r-x3mc-p8w7
+  fast-xml-parser: ^5.10.1 # GHSA-8r6m-32jq-jx6q
+  hono: ^4.12.34 # GHSA-hvrm-45r6-mjfj, GHSA-w62v-xxxg-mg59, GHSA-xgm2-5f3f-mvvc, GHSA-8j4g-w8fx-2239
+  ip-address: ^10.3.1 # GHSA-22jq-vg5j-6vgg, GHSA-4xrf-jv44-h6hh, GHSA-mwp4-54f8-5fhr
+  "js-yaml@4": ^4.3.1 # GHSA-52cp-r559-cp3m, GHSA-5p4m-2wfm-xmqj
+  nanoid: ^3.3.18 # GHSA-2v37-7h3g-55p8
+  postcss: ^8.5.23 # GHSA-r28c-9q8g-f849, GHSA-fxqj-rqcc-2cmp
+  shell-quote: ^1.9.0 # GHSA-395f-4hp3-45gv
+  tmp: ^0.2.7 # GHSA-7c78-jf6q-g5cm
+  uuid: ^11.1.1 # GHSA-w5hq-g745-h8pq
+  # GHSA-67mh-4wv8-2f99 is fixed in 0.25.0, and 0.27.2 also stays below the
+  # 0.27.3-0.28.0 window of GHSA-g7r4-m6w7-qqqr. Exact on purpose: raise to
+  # ^0.28.1 only together with a wxt bump verified against that esbuild line.
+  wxt>esbuild: 0.27.2
+
+allowBuilds:
+  esbuild: true
+  spawn-sync: false
+
+# Risk-accepted advisories, mirrored in osv-scanner.toml for the OSV CI job.
+# image-size <=2.0.2 (via web-ext>addons-linter): DoS via crafted ICNS/JXL/HEIF.
+# Dev-only - addons-linter parses this repo's own icon assets during
+# `web-ext sign`, so there is no attacker-controlled input. The advisories name
+# >=2.0.3 as patched but no such version exists on npm; drop both entries (and
+# the osv-scanner.toml ones) once a fixed release ships and resolves here.
+auditConfig:
+  ignoreGhsas:
+    - GHSA-w3rx-r6r6-pgpr # accepted 2026-08-07
+    - GHSA-5p2g-fcmc-qvqq # accepted 2026-08-07
+
+# A transitive dependency may only come from the registry - never a git, http
+# or local reference a compromised publish slipped into someone's manifest.
+blockExoticSubdeps: true
+
+# A dependency update can no longer relax the trust settings above; loosening
+# them has to happen here, in a reviewed diff.
+trustPolicy: no-downgrade
+
+# Entries that predate npm trusted publishing, so their missing attestation is
+# an age artefact rather than the takeover signal the policy looks for. Each is
+# a dev-only transitive pinned by its parent. Drop a line once the parent's
+# range resolves to a version published with provenance.
+trustPolicyExclude:
+  - '@webext-core/isolated-element@1.1.5'
+  - semver@5.7.2
+  - semver@6.3.1
+
+# Hold freshly published versions for 7 days before they are installable. A
+# compromised publish (npm account takeover, malicious postinstall) is normally
+# yanked well inside that window, so the cooldown is the main defence the
+# lockfile alone does not give.
+minimumReleaseAge: 10080
+
+# No `minimumReleaseAgeExclude` right now, and that is the resting state: an entry
+# here is a bypass of the cooldown above for one exact version, so it is added only to
+# adopt a fix that cannot wait, and removed as soon as that version is older than
+# minimumReleaseAge (the lockfile has it pinned by then, so the removal changes nothing
+# for existing installs). An empty list is therefore the normal state, not a gap.

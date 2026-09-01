@@ -1,0 +1,4 @@
+# Biome formats to LF, and CI runs on Linux, so a Windows checkout with
+# core.autocrlf=true would fail `pnpm lint` on files git rewrote - a red gate
+# nobody introduced. Pin the working tree to LF on every platform instead.
+* text=auto eol=lf
