@@ -1,0 +1,10 @@
+# Commit-time half of the secret gate. The full-history scan runs in CI
+# (.github/workflows/security.yml); this only keeps a staged secret from
+# becoming a public commit in the first place - rotating beats rewriting.
+#
+# Absent gitleaks skips instead of blocking: this hook is a local filter, not
+# the gate, and a missing binary must not make the repo uncommittable. Install
+# it (https://github.com/gitleaks/gitleaks) to get the local half.
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks git --pre-commit --staged --redact
+fi
