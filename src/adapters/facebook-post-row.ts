@@ -131,7 +131,7 @@ export const FB_REACTION_MENU_ARIA = /\breaction\b|реакц/iu;
 // BOTH states (captured live, idle and reacted).
 const REACTION_CHEVRON_ICON_PATH = "M4.708 6c-1.114 0-1.672 1.346";
 
-export function isReactionChevron(el: Element): boolean {
+function isReactionChevron(el: Element): boolean {
   const path = el.querySelector("svg path[d]")?.getAttribute("d");
   return path != null && collapseWhitespace(path).startsWith(REACTION_CHEVRON_ICON_PATH);
 }
@@ -144,8 +144,9 @@ export function isReactionChevron(el: Element): boolean {
 const CHEVRON_PAIR_WALK_DEPTH = 2;
 const CHEVRON_PAIR_MAX_CHILDREN = 4;
 
+// Its one caller rejects the chevron itself before reaching here, so `el` is
+// only ever the control standing next to one.
 function isChevronPairedLike(el: Element): boolean {
-  if (isReactionChevron(el)) return false;
   let node: Element | null = el;
   for (let up = 0; up < CHEVRON_PAIR_WALK_DEPTH && node; up++) {
     const parent: Element | null = node.parentElement;
@@ -382,7 +383,8 @@ function hasBackgroundFill(el: HTMLElement): boolean {
 }
 
 export function isNonPostActionRow(row: HTMLElement): boolean {
-  if (hasProfileHeaderCta(row)) return true;
+  // Route-based, so it holds in every FB UI language (see PROFILE_HEADER_CTA_SELECTOR).
+  if (row.querySelector(PROFILE_HEADER_CTA_SELECTOR)) return true;
   if (row.querySelector(OWNER_TOOLS_SELECTOR)) return true;
   const rowText = localizedActionText(row) || textOf(row);
   if (FEED_PROMPT_STEM.test(rowText) || AI_PROMPT_CHIP_STEM.test(rowText)) return true;
@@ -408,11 +410,6 @@ export function isNonPostActionRow(row: HTMLElement): boolean {
   if (!labels.has("Like")) return true;
   for (const label of labels) if (ROW_SIBLING_LABELS_SET.has(label)) return false;
   return true;
-}
-
-// Route-based, so it holds in every FB UI language (see PROFILE_HEADER_CTA_SELECTOR).
-function hasProfileHeaderCta(root: HTMLElement): boolean {
-  return root.querySelector(PROFILE_HEADER_CTA_SELECTOR) !== null;
 }
 
 // One dialog vocabulary for all three readers: the container walk bound, the shared-photo

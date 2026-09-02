@@ -166,8 +166,7 @@ export function renderUrlParts(raw: string): ComponentChild {
       parts.push(<span class="tt-sep">/</span>);
       parts.push(<span class={`tt-path tt-p${i % 3}`}>{safe(seg)}</span>);
     });
-  const entries = [...parsed.searchParams.entries()];
-  entries.forEach(([key, value], i) => {
+  [...parsed.searchParams.entries()].forEach(([key, value], i) => {
     parts.push(<span class="tt-sep">{i === 0 ? "?" : "&"}</span>);
     parts.push(<span class="tt-key">{key}</span>);
     if (value !== "") {

@@ -2,7 +2,7 @@
 import type { ComponentChild } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import type { SupportedSite } from "../../shared/adapter";
-import { errorCopyKey } from "../../shared/error-copy";
+import { errorCopyKey, failureCode } from "../../shared/error-copy";
 import { t } from "../../shared/i18n";
 import { NOTE_MAX, type RuntimeErrorCode } from "../../shared/messages";
 import { reportPageUrl } from "../../shared/report-url";
@@ -130,7 +130,7 @@ const ReportView = () => {
         // classification decides HOW it explains it; anything that is not an error
         // response falls back to the generic report wording.
         if (resp?.type === "ok") setSent(true);
-        else setSendError(resp?.type === "error" ? resp.code : "unavailable");
+        else setSendError(failureCode(resp) ?? "unavailable");
       })
       .catch(() => setSendError("unavailable"));
   };

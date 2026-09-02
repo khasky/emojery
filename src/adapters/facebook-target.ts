@@ -93,16 +93,18 @@ function reactPostHref(el: Element): string | null {
 function reactHrefCandidates(el: Element): string[] {
   const out: string[] = [];
   const record = el as unknown as Record<string, unknown>;
-  // The anchor's own last-rendered props. Own keys only - `for...in`
-  // would walk the prototype chain and surface inherited DOM properties.
-  for (const key of Object.getOwnPropertyNames(record)) {
+  // Own keys only - `for...in` would walk the prototype chain and surface
+  // inherited DOM properties. Listed once: this runs per permalink candidate.
+  const keys = Object.getOwnPropertyNames(record);
+  // The anchor's own last-rendered props.
+  for (const key of keys) {
     if (!key.startsWith("__reactProps")) continue;
     const href = (record[key] as { href?: unknown } | null)?.href;
     if (typeof href === "string" && href.length > 0) out.push(href);
   }
   // Walk the fiber `return` chain; the canonical permalink lives in an
   // ancestor component's props even when the leaf href is the placeholder.
-  const fiberKey = Object.getOwnPropertyNames(record).find((name) => name.startsWith("__reactFiber"));
+  const fiberKey = keys.find((name) => name.startsWith("__reactFiber"));
   let fiber = fiberKey ? (record[fiberKey] as ReactFiberLike | null) : null;
   for (let depth = 0; fiber && depth < REACT_FIBER_WALK_DEPTH; depth++) {
     const props = fiber.memoizedProps;
@@ -203,7 +205,9 @@ function resolvePhotoTarget(article: HTMLElement, actionRow: HTMLElement | null,
 // "Suggested for you" card without its own permalink doesn't inherit the page's
 // main-post permalink.
 function resolveOwnPermalinkTarget(article: HTMLElement, actionRow: HTMLElement | null): TargetRef | null {
-  const ownPermalink = (actionRow ? findPermalinkNear(article, actionRow) : null) ?? findPermalink(article);
+  // findPermalinkNear ends in the same full-article sweep findPermalink does, so a
+  // null from it leaves nothing for a second sweep to find.
+  const ownPermalink = actionRow ? findPermalinkNear(article, actionRow) : findPermalink(article);
   return ownPermalink ? targetFromPostUrl(ownPermalink) : null;
 }
 

@@ -126,16 +126,6 @@ export function resetMountRegistryForTests(): void {
   refreshTargets.clear();
 }
 
-const PRUNE_INTERVAL_MS = 5_000;
-let lastPruneAt = 0;
-
-export function maybePrune(): void {
-  const now = Date.now();
-  if (now - lastPruneAt < PRUNE_INTERVAL_MS) return;
-  lastPruneAt = now;
-  pruneDisconnected();
-}
-
 // Deleting from a Map/Set while iterating it is well-defined in JS, so these
 // loops iterate the live collections instead of copying each one first.
 export function pruneDisconnected(): void {

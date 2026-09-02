@@ -64,10 +64,6 @@ function App() {
     await setSettings(patch);
   };
 
-  // Rendered from TAB_VIEWS, not from a second hand-ordered list: the arrow walk in
-  // nextViewForKey steps through the same array, so a tab bar in any other order would
-  // move the selection somewhere other than the neighbouring button.
-  const tabDefs = TAB_VIEWS.map((id) => ({ id, label: t(VIEW_LABEL_KEYS[id]) }));
   // Debug is remembered like any other view but lives outside the strip, so it falls back
   // for THIS render only when it is switched off - leaving the stored value alone means
   // turning Debug back on returns to it.
@@ -103,8 +99,11 @@ function App() {
         </div>
         {/* biome-ignore lint/a11y/noNoninteractiveElementToInteractiveRole: the WAI-ARIA tabs pattern puts role="tablist" on the tab container, and <nav> is the right landmark for it */}
         <nav class="tabs" role="tablist" aria-label={t("popupHeading")} onKeyDown={onTabKeyDown}>
-          {tabDefs.map((tb) => (
-            <TabBtn key={tb.id} id={tb.id} active={shown === tb.id} anchor={tabAnchor === tb.id} onClick={() => setView(tb.id)} label={tb.label} />
+          {/* Rendered from TAB_VIEWS, not from a second hand-ordered list: the arrow walk in
+              nextViewForKey steps through the same array, so a tab bar in any other order would
+              move the selection somewhere other than the neighbouring button. */}
+          {TAB_VIEWS.map((id) => (
+            <TabBtn key={id} id={id} active={shown === id} anchor={tabAnchor === id} onClick={() => setView(id)} label={t(VIEW_LABEL_KEYS[id])} />
           ))}
         </nav>
       </header>

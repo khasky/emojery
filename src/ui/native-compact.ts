@@ -81,7 +81,8 @@ const OVERFLOW_EPSILON_PX = 2;
 // identical neighbours kept "24 540". Overflow that persists without the host
 // is the site's own layout and never ours to fix.
 export function compactNativeCountsOnOverflow(host: HTMLElement, point: PickerInsertionPoint): void {
-  if (!rowOverflows(host) && !nativeOverflows(point)) return;
+  const overflows = () => rowOverflows(host) || nativeOverflows(point);
+  if (!overflows()) return;
   // Out-of-flow, NOT display:none: the probe reruns on every reblend pass, and
   // display:none cancels-and-restarts the host's own CSS animations - on rows
   // with a structural overflow (X) the drop-in replayed on each pass (verified
@@ -96,7 +97,7 @@ export function compactNativeCountsOnOverflow(host: HTMLElement, point: PickerIn
   host.style.position = "absolute";
   host.style.left = "0";
   host.style.top = "0";
-  const structural = rowOverflows(host) || nativeOverflows(point);
+  const structural = overflows();
   host.style.position = prevPosition;
   host.style.left = prevLeft;
   host.style.top = prevTop;

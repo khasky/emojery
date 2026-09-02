@@ -55,7 +55,7 @@ export const SlideToConfirm = ({ label, autoFocus, onConfirm }: { label: string;
   );
 
   const setSlideProgress = (next: number) => {
-    const clamped = next < 0 ? 0 : next > 1 ? 1 : next;
+    const clamped = Math.min(1, Math.max(0, next));
     progressRef.current = clamped;
     setProgress(clamped);
   };

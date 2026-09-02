@@ -13,19 +13,15 @@
 import type { PickerInsertionPoint } from "../shared/adapter";
 import type { TargetKey } from "../shared/storage";
 
-const pendingMounts = new Map<TargetKey, { point: PickerInsertionPoint }>();
+const pendingMounts = new Map<TargetKey, PickerInsertionPoint>();
 
 export function pendingMountPoint(key: TargetKey): PickerInsertionPoint | undefined {
-  return pendingMounts.get(key)?.point;
+  return pendingMounts.get(key);
 }
 
-/** Records or re-points a deferred mount. Re-pointing MUTATES the existing record
- *  rather than replacing it, so a `cancelPendingMount` racing this still sees one
- *  entry to unobserve. */
+/** Records or re-points a deferred mount. */
 export function setPendingMount(key: TargetKey, point: PickerInsertionPoint): void {
-  const pending = pendingMounts.get(key);
-  if (pending) pending.point = point;
-  else pendingMounts.set(key, { point });
+  pendingMounts.set(key, point);
 }
 
 // How far ahead of the viewport a deferred mount fires - the observer's rootMargin
@@ -110,8 +106,8 @@ export function cancelPendingMount(key: TargetKey): void {
 /** Deleting from a Map while iterating it is well-defined in JS, so the sweeps below
  *  iterate the live map instead of copying it first. */
 export function cancelDisconnectedPendingMounts(): void {
-  for (const [key, pending] of pendingMounts) {
-    if (pending.point.anchor.isConnected) continue;
+  for (const [key, point] of pendingMounts) {
+    if (point.anchor.isConnected) continue;
     cancelPendingMount(key);
   }
 }
@@ -135,7 +131,7 @@ export function cancelAllPendingMounts(): void {
  *  cannot both believe they own the slot. Only when it is the SAME anchor - a
  *  pending mount elsewhere on the page is none of this point's business. */
 export function cancelPendingMountOnAnchor(key: TargetKey, anchor: HTMLElement): void {
-  if (pendingMounts.get(key)?.point.anchor === anchor) cancelPendingMount(key);
+  if (pendingMounts.get(key)?.anchor === anchor) cancelPendingMount(key);
 }
 
 /** Test seam. The shared observer and its anchor maps are deliberately left standing,

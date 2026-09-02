@@ -149,7 +149,7 @@ export async function removeHistoryEntry(historyId: string): Promise<void> {
     lookup.onsuccess = () => {
       const row = lookup.result as ReactionHistoryItem | undefined;
       if (row?.id !== undefined) {
-        removedRow = { ...row, id: row.id };
+        removedRow = row as ReactionHistoryItem & { id: number };
         store.delete(row.id);
       }
     };
@@ -196,7 +196,7 @@ export const SEARCH_BATCH = 1_000;
 // popup session turns paging from O(pages x rows) into O(rows), and the stats scan reruns only
 // after a history write. Freshness is checked per request via index.count(), so an equal-count
 // replacement needs an explicit invalidate (see importHistory).
-let idListCache: { userId: string; ids: number[]; count: number } | null = null;
+let idListCache: { userId: string; ids: number[] } | null = null;
 let statsCache: { userId: string; stats: HistoryStats; count: number } | null = null;
 
 function invalidateHistoryCaches(): void {
@@ -215,7 +215,6 @@ function noteRowAdded(userId: string, id: number, reaction: Reaction, site: Supp
     return;
   }
   ids.ids.push(id);
-  ids.count = ids.ids.length;
   bumpStats(userId, ids.ids.length, reaction, site, 1);
 }
 
@@ -227,7 +226,6 @@ function noteRowRemoved(userId: string, id: number, reaction: Reaction, site: Su
     return;
   }
   ids.ids.splice(at, 1);
-  ids.count = ids.ids.length;
   bumpStats(userId, ids.ids.length, reaction, site, -1);
 }
 
@@ -263,11 +261,11 @@ function userKeyRange(userId: string): IDBKeyRange {
 async function getUserIdList(index: IDBIndex, userId: string): Promise<number[]> {
   const range = userKeyRange(userId);
   const count = await requestAsPromise(index.count(range));
-  if (idListCache && idListCache.userId === userId && idListCache.count === count) {
+  if (idListCache && idListCache.userId === userId && idListCache.ids.length === count) {
     return idListCache.ids;
   }
   const ids = (await requestAsPromise(index.getAllKeys(range))) as number[];
-  idListCache = { userId, ids, count };
+  idListCache = { userId, ids };
   return ids;
 }
 

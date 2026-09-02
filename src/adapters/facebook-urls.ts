@@ -4,6 +4,7 @@
 // No DOM element access (only `location` + the pure site registry), so this is a
 // near-leaf the rest of the adapter builds on.
 import { urlHostBelongsToSite } from "../shared/sites";
+import { parseSiteHref } from "./url-target";
 
 const POST_URL_RE = /\/posts\/|\/permalink\/|story_fbid=|\/videos\/|\/reel\/|\/story\.php\b/;
 // Facebook's numeric ids - a photo `fbid`, a watch `v`, a reel id - are all bare
@@ -12,7 +13,9 @@ export const FB_NUMERIC_ID_RE = /^\d{6,}$/;
 
 // Parse-hosts (superset of the run-hosts www/m.facebook.com: bare `facebook.com`
 // appears in DOM links the extension doesn't itself run on) - centralized in the
-// registry's `urlHosts`. See sites.ts urlHostBelongsToSite.
+// registry's `urlHosts`. See sites.ts urlHostBelongsToSite. The named form of the
+// gate every `parseSiteHref(href, "facebook", ...)` below applies, pinned by its
+// own test so a registry change can't widen it unnoticed.
 export function isFacebookHost(host: string): boolean {
   return urlHostBelongsToSite(host, "facebook");
 }
@@ -33,14 +36,10 @@ export function currentPageWatchUrl(): string | null {
 // ships no post permalink in the DOM (only a `/reel/?s=tab` nav link) - so the
 // reel id must come from the page URL (or, per-reel, the player's data-video-id).
 export function currentPageReelUrl(): string | null {
-  try {
-    const url = new URL(location.href);
-    if (!isFacebookHost(url.hostname)) return null;
+  return parseSiteHref(location.href, "facebook", (url) => {
     const reelMatch = url.pathname.match(/^\/reel\/(\d{6,})\/?$/);
     return reelMatch ? `https://www.facebook.com/reel/${reelMatch[1]}` : null;
-  } catch {
-    return null;
-  }
+  });
 }
 
 export function isStandalonePhotoViewerPage(): boolean {
@@ -52,34 +51,22 @@ export function isStandaloneReelViewerPage(): boolean {
 }
 
 function normalizeWatchHref(href: string): string | null {
-  try {
-    const url = new URL(href, location.href);
-    if (!isFacebookHost(url.hostname)) return null;
+  return parseSiteHref(href, "facebook", (url) => {
     if (url.pathname !== "/watch" && url.pathname !== "/watch/") return null;
     const videoId = url.searchParams.get("v");
     if (!videoId || !FB_NUMERIC_ID_RE.test(videoId)) return null;
     return `https://www.facebook.com/watch/?v=${videoId}`;
-  } catch {
-    return null;
-  }
+  });
 }
 
+// Host-gated before the href is used as a target URL, like every parser here.
 export function normalizePostHref(href: string): string | null {
   if (!POST_URL_RE.test(href)) return null;
-  try {
-    const url = new URL(href, location.href);
-    // Host-gate page-sourced hrefs before using them as target URLs.
-    if (!isFacebookHost(url.hostname)) return null;
-    return url.toString();
-  } catch {
-    return null;
-  }
+  return parseSiteHref(href, "facebook", (url) => url.toString());
 }
 
 export function normalizePhotoHref(href: string): string | null {
-  try {
-    const url = new URL(href, location.href);
-    if (!isFacebookHost(url.hostname)) return null;
+  return parseSiteHref(href, "facebook", (url) => {
     if (url.pathname !== "/photo" && url.pathname !== "/photo/" && url.pathname !== "/photo.php") {
       return null;
     }
@@ -96,9 +83,7 @@ export function normalizePhotoHref(href: string): string | null {
     if (set && /^gm\.\d{6,}$/.test(set) && group) identitySet = `&set=${set}&idorvanity=${encodeURIComponent(group)}`;
     else if (set && /^pcb\.\d{6,}$/.test(set)) identitySet = `&set=${set}`;
     return `https://www.facebook.com/photo/?fbid=${fbid}${identitySet}`;
-  } catch {
-    return null;
-  }
+  });
 }
 
 // A group photo URL carries the post's group-story id in `set=gm.<storyId>` -
@@ -155,15 +140,11 @@ export function extractPhotoFbid(url: string): string | null {
 }
 
 export function normalizeCftHref(href: string): string | null {
-  try {
-    const url = new URL(href, location.href);
-    if (!isFacebookHost(url.hostname)) return null;
+  return parseSiteHref(href, "facebook", (url) => {
     const cft = url.searchParams.get("__cft__[0]");
     if (!cft) return null;
     return `https://www.facebook.com${location.pathname}?__cft__[0]=${encodeURIComponent(cft)}`;
-  } catch {
-    return null;
-  }
+  });
 }
 
 // Two ID shapes Facebook serves today:
@@ -185,13 +166,9 @@ export function extractFbId(href: string): string | null {
 
 // Four decorrelated 32-bit FNV-1a lanes (distinct seed AND multiplier each,
 // murmur3's fmix32 avalanche on the way out) concatenated as base36 - ~128 bits
-// of output. Width is the point: the previous single 32-bit lane put the
-// birthday bound at ~77k keys, and `url:<hash>` is a GLOBAL identity shared by
-// every user, so two unrelated Facebook posts merged their public reaction
-// counts well inside one site's tail (measured: a collision after 38,489
-// distinct permalinks). Deliberately not cryptographic - `resolveTarget` is
-// synchronous so Web Crypto is out, and only ACCIDENTAL collisions are in
-// scope here.
+// of output. Width is the point: a single 32-bit lane puts the birthday bound
+// at ~77k keys, well inside one site's key volume. Deliberately not
+// cryptographic - `resolveTarget` is synchronous, so Web Crypto is out.
 const HASH_LANES = [
   { seed: 0x811c9dc5, mul: 0x01000193 },
   { seed: 0x9e3779b9, mul: 0x85ebca77 },

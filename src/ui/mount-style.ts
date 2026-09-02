@@ -530,11 +530,10 @@ export function applyHostRowHeight(host: HTMLElement, point: PickerInsertionPoin
   const site = point.target.site;
   const measured = nativeGlyphHeight(ref);
   const glyph = glyphPxOrRemembered(site, measured);
-  const hasIcons = hasGlyphCandidates(ref);
   if (glyph) {
     host.style.setProperty("--khasky-emojery-glyph-h", `${glyph}px`);
     revealHost(host);
-  } else if (!revealedHosts.has(host) && hasIcons) {
+  } else if (!revealedHosts.has(host) && hasGlyphCandidates(ref)) {
     // An icon row whose glyph isn't measurable yet (0x0 mid-hydration): hold the host
     // hidden - the reblend schedule re-measures shortly.
     host.setAttribute(SIZING_ATTR, "");

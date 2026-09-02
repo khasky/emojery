@@ -5,7 +5,7 @@ import { defineLabelRegistry } from "./action-labels";
 import { isPaintedFill } from "./css-alpha";
 import { type Binding, defineSiteAdapter, type ScanContext } from "./framework";
 import { urlChangeRescan } from "./observer-plugins";
-import { ancestors, directChildSlot, precedes } from "./runtime";
+import { ancestors, compactElements, directChildSlot, precedes } from "./runtime";
 import { parseSiteHref } from "./url-target";
 import { findVisualActionSlot, isStructuralRoot, pageHasLayout } from "./visual-action-row";
 
@@ -36,18 +36,15 @@ const TARGET_WALK_DEPTH = 12;
 const threadsAdapter = defineSiteAdapter({
   site: "threads",
   findCandidates: ({ root }) => {
-    const buttons: HTMLElement[] = [];
-    for (const icon of queryAll<SVGElement>(root, LIKE_ICON_SELECTORS)) {
-      const button = closestActionButton(icon);
-      if (button && !buttons.includes(button)) buttons.push(button);
-    }
+    const buttons = compactElements(...queryAll<SVGElement>(root, LIKE_ICON_SELECTORS).map((icon) => closestActionButton(icon)));
     return dropFeedReplyButtons(dropNestedQuotedButtons(buttons));
   },
   dedupeContainer: (likeButton, ctx) => actionRowFor(likeButton, ctx)?.row ?? null,
   resolveTarget: (likeButton, ctx) => {
     const actionRow = actionRowFor(likeButton, ctx);
     if (!actionRow) return null;
-    const currentPost = parseThreadsPostUrl(location.href);
+    // Loop-invariant for the scan: keyed on the scan root, so one parse serves every candidate.
+    const currentPost = ctx.memo(ctx.root, () => parseThreadsPostUrl(location.href));
     const target = extractTarget(actionRow.row, currentPost);
     if (!target) return null;
     // On a rendered detail/reply page, only mount the post the URL points at -
@@ -217,9 +214,9 @@ function findActionRow(candidate: HTMLElement): ActionRow | null {
 // again. Share has no such state-dependent glyph, so either action proves the
 // row. (Anchoring on the Reply slot is resolveBinding's story, above.)
 function buildActionRow(row: HTMLElement, slots: HTMLElement[]): ActionRow | null {
-  const replyIdx = slots.findIndex(isReplySlot);
+  const replyIdx = slots.findIndex((slot) => threadsLabels.matchAction(slot, "reply"));
   if (replyIdx < 0) return null;
-  if (!slots.some(isRepostSlot) && !slots.some(isShareSlot)) return null;
+  if (!slots.some((slot) => threadsLabels.matchAction(slot, "repost") || threadsLabels.matchAction(slot, "share"))) return null;
   const actionRow: ActionRow = { row, replySlot: slots[replyIdx]! };
   const likeSlot = replyIdx > 0 ? slots[replyIdx - 1] : undefined;
   if (likeSlot) {
@@ -287,18 +284,6 @@ const threadsLabels = defineLabelRegistry(
   },
   { useTextFallback: false },
 );
-
-function isReplySlot(slot: HTMLElement): boolean {
-  return threadsLabels.matchAction(slot, "reply");
-}
-
-function isRepostSlot(slot: HTMLElement): boolean {
-  return threadsLabels.matchAction(slot, "repost");
-}
-
-function isShareSlot(slot: HTMLElement): boolean {
-  return threadsLabels.matchAction(slot, "share");
-}
 
 function containsKnownLikeIcon(root: Element): boolean {
   return Array.from(root.querySelectorAll<SVGElement>("svg[aria-label]")).some((icon) => threadsLabels.classify(icon) === "like");

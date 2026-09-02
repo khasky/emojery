@@ -87,14 +87,16 @@ export async function loadInitial(
   myReaction: Reaction | null;
   isLoading: boolean;
 }> {
-  // The user's own reaction is a durable local fact: it fills a null own-reaction from the
-  // (TTL-expiring) cache or a lagging server read, so a re-mount can't drop it - a definite
-  // cached value still wins. Scoped to the signed-in account, skipped when signed out.
-  const own = auth.authed && auth.userId ? await getOwnReaction(point.target, auth.userId).catch(() => null) : null;
-
-  // An unreadable cache is a miss, not a failed mount: the trigger renders its
-  // empty state and the deferred server fetch below fills the counts in.
-  const cached = await readCachedCounts(point.target);
+  // `own` - the user's own reaction, a durable local fact: it fills a null own-reaction
+  // from the (TTL-expiring) cache or a lagging server read, so a re-mount can't drop it -
+  // a definite cached value still wins. Scoped to the signed-in account, skipped when
+  // signed out. `cached` - an unreadable cache is a miss, not a failed mount: the trigger
+  // renders its empty state and the deferred server fetch below fills the counts in.
+  //
+  // Both storage reads go out together: neither feeds the other, and the trigger's shadow
+  // root stays empty until the slower one lands.
+  const userId = auth.authed ? auth.userId : null;
+  const [own, cached] = await Promise.all([userId ? getOwnReaction(point.target, userId).catch(() => null) : null, readCachedCounts(point.target)]);
   if (cached) {
     return {
       value: pickAggregateCounts(cached),
@@ -134,5 +136,5 @@ export async function hydrateDeferredCounts(point: PickerInsertionPoint, key: Ta
   // finds no callback. One short retry closes the gap (a no-op if the mount was
   // torn down meanwhile).
   if (!apply()) window.setTimeout(apply, REFRESH_CB_RETRY_MS);
-  if (animations) maybePlayPublicReactionIntro(pickAggregateCounts(serverCounts));
+  if (animations) maybePlayPublicReactionIntro(next.value);
 }

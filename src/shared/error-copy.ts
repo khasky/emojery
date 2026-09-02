@@ -10,7 +10,7 @@
 // went wrong".
 
 import type { I18nKey } from "./i18n";
-import type { RuntimeErrorCode } from "./messages";
+import type { RuntimeErrorCode, RuntimeResponse } from "./messages";
 
 const COPY: Record<RuntimeErrorCode, I18nKey | null> = {
   network: "errOffline",
@@ -22,4 +22,11 @@ const COPY: Record<RuntimeErrorCode, I18nKey | null> = {
 /** The message key for a failed runtime response, or `fallback` when the code adds nothing. */
 export function errorCopyKey(code: RuntimeErrorCode | null | undefined, fallback: I18nKey): I18nKey {
   return (code && COPY[code]) || fallback;
+}
+
+/** The background's classification, when the answer was an error response at all: a
+ *  wrong-shaped answer (signed out, an empty payload) carries no code, so the caller's
+ *  own fallback stands. */
+export function failureCode(response: RuntimeResponse | null | undefined): RuntimeErrorCode | null {
+  return response?.type === "error" ? response.code : null;
 }

@@ -26,7 +26,6 @@ import {
   forEachMountedHost,
   hostElementOfMount,
   isCurrentMountPoint,
-  maybePrune,
   mountedNode,
   pruneDisconnected,
   reconcileScanMounts,
@@ -152,7 +151,6 @@ export function watchSettings(adapter: SiteAdapter): void {
 
 export async function mountAt(rawPoint: PickerInsertionPoint): Promise<void> {
   const point = resolveResponsivePlacement(rawPoint);
-  maybePrune();
   const key = targetKey(point.target);
   clearStaleAnchorMount(point, key);
   const mounted = mountedNode(key);
@@ -186,12 +184,18 @@ function tryReuseMount(mounted: Node | undefined, point: PickerInsertionPoint, k
   return false;
 }
 
-// Fired by the shared pending-anchor observer (mount-registry).
+// Give up the deferral and mount: the entry must leave `pendingMounts` through
+// cancelPendingMount, or its anchor stays observed for the life of the tab.
+function mountNow(key: TargetKey, point: PickerInsertionPoint): void {
+  cancelPendingMount(key);
+  runDetached("doMount", doMount(point));
+}
+
+// Fired by the shared pending-anchor observer (mount-anchors).
 function onPendingAnchorVisible(key: TargetKey): void {
   const point = pendingMountPoint(key);
   if (!point) return;
-  cancelPendingMount(key);
-  runDetached("doMount", doMount(point));
+  mountNow(key, point);
 }
 
 setPendingAnchorHandler(onPendingAnchorVisible);
@@ -203,8 +207,7 @@ async function schedulePendingMount(point: PickerInsertionPoint, key: TargetKey)
     claimMountAnchor(point.anchor, key);
     setPendingMount(key, point);
     if (point.mountImmediately || shouldMountNow(point.anchor)) {
-      cancelPendingMount(key);
-      runDetached("doMount", doMount(point));
+      mountNow(key, point);
       return;
     }
     reobservePendingAnchor(key, point.anchor);
@@ -230,8 +233,7 @@ async function schedulePendingMount(point: PickerInsertionPoint, key: TargetKey)
   if (!activePoint) return;
 
   if (activePoint.mountImmediately || shouldMountNow(activePoint.anchor)) {
-    cancelPendingMount(key);
-    runDetached("doMount", doMount(activePoint));
+    mountNow(key, activePoint);
     return;
   }
 

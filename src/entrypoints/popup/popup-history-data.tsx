@@ -1,21 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { type ComponentChild, Fragment } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
-import { errorCopyKey } from "../../shared/error-copy";
+import { errorCopyKey, failureCode } from "../../shared/error-copy";
 import { t } from "../../shared/i18n";
-import { HISTORY_EXPORT_SCHEMA_VERSION, HISTORY_IMPORT_MAX, type HistoryExportFile, type PortableHistoryRow, type RuntimeResponse } from "../../shared/messages";
+import { HISTORY_EXPORT_SCHEMA_VERSION, HISTORY_IMPORT_MAX, type HistoryExportFile, type PortableHistoryRow } from "../../shared/messages";
 import { sendRuntimeMessage } from "../../shared/webext";
 import { BUILD_VERSION, IconRow } from "./popup-shared";
 
 const ICON_EXPORT: ComponentChild[] = [<path d="M12 3.5v9m0 0l-3.4-3.4M12 12.5l3.4-3.4M4.5 16v2.5a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V16" />];
 const ICON_IMPORT: ComponentChild[] = [<path d="M12 13.5v-9m0 0L8.6 7.9M12 4.5l3.4 3.4M4.5 16v2.5a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V16" />];
-
-// The background's classification, when the answer was an error response at all: a
-// wrong-shaped answer (signed out, an empty payload) carries no code and keeps the
-// caller's generic wording. See shared/error-copy.ts.
-function failureCode(response: RuntimeResponse | null | undefined) {
-  return response?.type === "error" ? response.code : null;
-}
 
 function exportDateStamp(): string {
   const now = new Date();
@@ -100,7 +93,7 @@ export const HistoryDataSection = () => {
     wasPending.current = pendingImportRows !== null;
   }, [pendingImportRows]);
 
-  // A failed export must say so - it used to end in no file and no message.
+  // A failed export must say so, not end in no file and no message.
   const onExport = () => {
     setStatus(null);
     setBusy(true);

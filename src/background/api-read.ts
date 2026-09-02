@@ -168,7 +168,7 @@ async function sendMineRequest(token: string, targets: readonly TargetRef[]): Pr
     const raw = isRecord(body) && isRecord(body.reactions) ? body.reactions : {};
     const reactions: Record<string, string> = {};
     for (const target of targets) {
-      const key = `${target.site}:${target.targetId}`;
+      const key = targetKey(target);
       const value = normalizeReaction(raw[key]);
       if (value !== null) reactions[key] = value;
     }
@@ -224,7 +224,7 @@ async function fetchTargetCountsAndOwnReaction(target: TargetRef, limit: number)
   const countsRes = await countsP;
   const base = parseTargetCounts(await countsRes.json(), limit);
 
-  const myReaction = mineP ? ((await mineP)[`${target.site}:${target.targetId}`] ?? null) : null;
+  const myReaction = mineP ? ((await mineP)[targetKey(target)] ?? null) : null;
   return { ...base, myReaction };
 }
 

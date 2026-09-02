@@ -2,7 +2,7 @@
 import { Fragment } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import type { SupportedSite } from "../../shared/adapter";
-import { errorCopyKey } from "../../shared/error-copy";
+import { errorCopyKey, failureCode } from "../../shared/error-copy";
 import { t } from "../../shared/i18n";
 import type { HistoryStats, ReactionHistoryItem, RuntimeErrorCode } from "../../shared/messages";
 import { SITE_LABELS } from "../../shared/sites";
@@ -65,10 +65,6 @@ function rangeLabel(range: HistoryRange): string {
   }
 }
 
-function historySiteLabel(site: string): string {
-  return SITE_LABELS[site as SupportedSite] ?? site;
-}
-
 function facetEntries(distribution: Record<string, number>): [string, number][] {
   return Object.entries(distribution).sort((a, b) => b[1] - a[1]);
 }
@@ -94,7 +90,7 @@ const FacetBar = ({ stats, emoji, site, range, onEmoji, onSite, onRange }: { sta
         >
           <option value="">{t("facetAllSites")}</option>
           {siteOptions.map(([s, count]) => (
-            <option key={s} value={s}>{`${historySiteLabel(s)} (${count})`}</option>
+            <option key={s} value={s}>{`${SITE_LABELS[s as SupportedSite] ?? s} (${count})`}</option>
           ))}
         </select>
         <select class="facet-select" aria-label={t("facetRangeAria")} value={range} onChange={(e: Event) => onRange((e.currentTarget as HTMLSelectElement).value as HistoryRange)}>
@@ -218,7 +214,7 @@ const HistoryView = () => {
           setItems((prev) => (opts.reset ? resp.items : [...prev, ...resp.items]));
           setCursor(resp.cursor);
         } else {
-          setFailed(resp?.type === "error" ? resp.code : "unavailable");
+          setFailed(failureCode(resp) ?? "unavailable");
         }
         setLoading(false);
       })
@@ -229,11 +225,8 @@ const HistoryView = () => {
       });
   };
 
-  // Two derived forms, computed once so the request path and the empty-state checks
-  // can never disagree: `trimmedQuery` answers "is a filter active", `normalizedQuery`
-  // is what the background matches against (it trims + lowercases again anyway).
-  const trimmedQuery = query.trim();
-  const normalizedQuery = trimmedQuery.toLowerCase();
+  // What the background matches against; it trims + lowercases again anyway.
+  const normalizedQuery = query.trim().toLowerCase();
 
   // Stats are fetched once per HistoryView mount. main.tsx renders the view conditionally, so
   // switching tabs unmounts it and coming back re-sends history:stats.
@@ -247,7 +240,8 @@ const HistoryView = () => {
       .catch(() => {});
   }, []);
 
-  // Only free-text typing is debounced; facet toggles apply immediately.
+  // Debounced while the search box has text (every keystroke is an IndexedDB scan);
+  // with it empty, a facet toggle applies on the next tick.
   useEffect(() => {
     const run = () => loadPage({ reset: true, cursor: null, query: normalizedQuery, emoji, site, since: rangeSince(range) });
     const timer = setTimeout(run, normalizedQuery ? HISTORY_SEARCH_DEBOUNCE_MS : 0);
@@ -266,7 +260,7 @@ const HistoryView = () => {
   }
   if (authed === null) return null;
 
-  const hasFilter = !!(trimmedQuery || emoji || site || range !== "all");
+  const hasFilter = !!(normalizedQuery || emoji || site || range !== "all");
 
   // First-run empty state: no reactions and nothing filtered away, so no search box or facets.
   if (!hasFilter && items.length === 0 && !loading) {

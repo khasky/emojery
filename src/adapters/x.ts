@@ -35,14 +35,17 @@ const xAdapter = defineSiteAdapter({
   site: "x",
   findCandidates: (ctx) => queryAll<HTMLElement>(ctx.root, TWEET_SELECTORS).filter((tweet) => memoTweetActionRow(ctx, tweet) !== null),
   resolveTarget: (tweet, ctx) => {
-    const currentStatus = parseXStatusUrl(location.href);
-    // Only the ROOT tweet (first in the document, over ALL tweets) may fall back to the page
-    // URL; memo keyed on the scan root - per candidate this was 3 document-wide queries per
-    // tweet, O(N^2) per scan.
-    const rootTweet = currentStatus ? ctx.memo(ctx.root, () => queryAll<HTMLElement>(ctx.root, TWEET_SELECTORS)[0] ?? null) : null;
+    // Both are loop-invariant for the scan, so they share one entry memoized on the scan
+    // root - per candidate the root-tweet lookup alone was 3 document-wide queries per
+    // tweet, O(N^2) per scan. Only the ROOT tweet (first in the document, over ALL tweets)
+    // may fall back to the page URL.
+    const scan = ctx.memo(ctx.root, () => {
+      const currentStatus = parseXStatusUrl(location.href);
+      return { currentStatus, rootTweet: currentStatus ? (queryAll<HTMLElement>(ctx.root, TWEET_SELECTORS)[0] ?? null) : null };
+    });
     return extractTarget(tweet, {
-      currentStatus,
-      allowCurrentPageFallback: tweet === rootTweet,
+      currentStatus: scan.currentStatus,
+      allowCurrentPageFallback: tweet === scan.rootTweet,
     });
   },
   resolveBinding: (tweet, ctx) => {
@@ -93,11 +96,7 @@ function findActionRow(likeButton: HTMLElement, tweet: HTMLElement): HTMLElement
 // slots). Fall back to the lowest ancestor of the Like holding >=3 DISTINCT
 // action controls - specific enough that the tweet body can't match.
 function findActionClusterRow(likeButton: HTMLElement, tweet: HTMLElement): HTMLElement | null {
-  return firstAncestor(likeButton, ROW_WALK_DEPTH, (node) => distinctActionCount(node) >= 3, tweet);
-}
-
-function distinctActionCount(el: HTMLElement): number {
-  return xLabels.presentKinds(el).size;
+  return firstAncestor(likeButton, ROW_WALK_DEPTH, (node) => xLabels.presentKinds(node).size >= 3, tweet);
 }
 
 // LANGUAGE-INDEPENDENT action recognition for logged-out X, which drops every

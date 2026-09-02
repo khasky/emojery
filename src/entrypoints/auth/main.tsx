@@ -89,11 +89,8 @@ function CodeStep({ email, code, error, busy, remainingSec, cooldown, onVerify, 
         <div class="code-actions">
           {/* Resend lives on the code screen so getting a new code never requires leaving it. */}
           <button class="linkish" type="button" disabled={busy || remainingSec > 0} onClick={onResend}>
-            {remainingSec > 0
-              ? cooldown?.reason === "rateLimit"
-                ? t("authResendBtn") // disabled; no countdown for a rate-limit hit
-                : t("authResendInBtn", formatCountdown(remainingSec))
-              : t("authResendBtn")}
+            {/* A rate-limit hit stays disabled without a countdown. */}
+            {remainingSec > 0 && cooldown?.reason !== "rateLimit" ? t("authResendInBtn", formatCountdown(remainingSec)) : t("authResendBtn")}
           </button>
           <button
             class="linkish"

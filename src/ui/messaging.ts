@@ -14,6 +14,9 @@ export function sendMessage(msg: RuntimeMessage): Promise<RuntimeResponse> {
 // record: `storage.local.get` cannot project fields, so reading it would pull the bearer
 // token into a hostile page's content-script heap for a value the background already hands
 // out (and whose expiry it checks). Signed out on a failed trip or any other reply shape.
+// One trip per caller on purpose. Sharing an in-flight answer would save a feed
+// burst's worth of messages, but mount.ts's auth-change listener asks the moment
+// the record flips - and a trip started before that flip still carries the old value.
 export function authStatus(): Promise<{ authed: boolean; userId: string | null }> {
   return sendMessage({ type: "auth:status" })
     .then((response) => (response.type === "auth:status" ? { authed: response.authed, userId: response.userId } : { authed: false, userId: null }))

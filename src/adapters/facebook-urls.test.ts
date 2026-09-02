@@ -156,8 +156,8 @@ describe("canonicalizeFbUrl / fbUrlFallbackId", () => {
     expect(hashUrl("https://www.facebook.com/groups/1/permalink/2")).toHaveLength(28);
   });
 
-  // `url:<hash>` is a GLOBAL identity, so a birthday collision merges two unrelated posts'
-  // public counts. See hashUrl in facebook-urls.ts for the measured bound this sweep guards.
+  // A birthday collision merges two unrelated posts under one key, so the digest has to
+  // stay collision-free far past the volume a single 32-bit lane could carry.
   it("survives a birthday sweep that the 32-bit digest could not", () => {
     const seen = new Set<string>();
     let generated = 0;

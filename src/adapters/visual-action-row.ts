@@ -37,8 +37,9 @@ const DEFAULT_CONTROL_SELECTOR = 'button, [role="button"], a[href]';
 
 export function pageHasLayout(): boolean {
   const bodyRect = document.body?.getBoundingClientRect();
+  if (bodyRect && (bodyRect.width > 0 || bodyRect.height > 0)) return true;
   const rootRect = document.documentElement?.getBoundingClientRect();
-  return !!((bodyRect && (bodyRect.width > 0 || bodyRect.height > 0)) || (rootRect && (rootRect.width > 0 || rootRect.height > 0)));
+  return !!(rootRect && (rootRect.width > 0 || rootRect.height > 0));
 }
 
 export function hasRenderableBox(el: HTMLElement): boolean {
@@ -53,9 +54,12 @@ export function isStructuralRoot(el: HTMLElement): boolean {
   return el === document.body || el.tagName === "HTML" || el.tagName === "MAIN";
 }
 
-function hasVisibleStyle(el: HTMLElement): boolean {
+// Walks up to (not including) `stopAt`. The row's own chain to <html> is the same for
+// every control in it, so collectVisualActionSlots reads that segment once and passes
+// the row as the stop for the per-control walks.
+function hasVisibleStyle(el: HTMLElement, stopAt: HTMLElement | null = document.documentElement): boolean {
   let node: HTMLElement | null = el;
-  while (node && node !== document.documentElement) {
+  while (node && node !== stopAt) {
     const style = getComputedStyle(node);
     const opacity = style.opacity.trim();
     if (style.display === "none" || style.visibility === "hidden" || (opacity !== "" && Number(opacity) === 0)) {
@@ -121,6 +125,7 @@ function collectVisualActionSlots(row: HTMLElement, options: VisualActionRowOpti
     width: number;
     hidden: boolean;
   }> = [];
+  const rowVisible = hasVisibleStyle(row);
   for (const child of Array.from(row.children)) {
     if (!(child instanceof HTMLElement)) continue;
     const control = findControlInSlot(child, options);
@@ -134,7 +139,7 @@ function collectVisualActionSlots(row: HTMLElement, options: VisualActionRowOpti
       out.push({ slot: child, control, width: 0, hidden: true });
       continue;
     }
-    if (!hasRenderableBox(control) || !hasVisibleStyle(control)) continue;
+    if (!hasRenderableBox(control) || !rowVisible || !hasVisibleStyle(control, row)) continue;
 
     const slotRect = child.getBoundingClientRect();
     const controlRect = control.getBoundingClientRect();

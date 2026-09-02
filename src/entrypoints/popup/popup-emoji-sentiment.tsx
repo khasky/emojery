@@ -31,8 +31,10 @@ export const EmojiSentimentEditor = ({ settings, update }: { settings: Settings;
   const [localeGen, setLocaleGen] = useState(0);
   useEffect(() => onLocalesChanged(() => setLocaleGen((n) => n + 1)), []);
 
-  const assigned = useMemo(() => new Set([...positive, ...negative]), [positive, negative]);
-  const neutralAll = useMemo(() => REACTIONS.filter((e) => !assigned.has(e)), [assigned]);
+  const neutralAll = useMemo(() => {
+    const assigned = new Set([...positive, ...negative]);
+    return REACTIONS.filter((e) => !assigned.has(e));
+  }, [positive, negative]);
   const trimmedQuery = query.trim();
   // `localeGen` is a real input: searchEmojis reads the module-level locale maps, so a map
   // landing mid-query has to re-run the match, not replay the memoized one.

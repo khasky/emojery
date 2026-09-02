@@ -4,7 +4,7 @@
 // loop per adapter (mutation / nav / event triggers, own-mutation suppression,
 // plugin attach + teardown). Built by `framework.ts`'s `observe()`.
 import type { PickerInsertionPoint } from "../shared/adapter";
-import { HOST_CLASS, OVERLAY_HOST_CLASS, OWN_NODES_SELECTOR } from "../shared/dom";
+import { OWN_NODES_SELECTOR } from "../shared/dom";
 import { closestAny } from "./runtime";
 
 export interface ObserverPluginContext {
@@ -36,7 +36,8 @@ export interface ScanObserverOptions {
 
 function isOwnMutationNode(node: Node): boolean {
   if (!(node instanceof HTMLElement)) return false;
-  return node.classList.contains(HOST_CLASS) || node.classList.contains(OVERLAY_HOST_CLASS) || node.closest(OWN_NODES_SELECTOR) !== null || node.querySelector(OWN_NODES_SELECTOR) !== null;
+  // `closest` matches the node itself first, so it also covers "the node IS one of ours".
+  return node.closest(OWN_NODES_SELECTOR) !== null || node.querySelector(OWN_NODES_SELECTOR) !== null;
 }
 
 // A mutation batch is "ours" only when every record is caused by our own trigger
@@ -123,14 +124,17 @@ export function createScanObserver(opts: ScanObserverOptions): () => void {
   };
 
   const onNav = (): void => {
-    if (navKey) {
-      const current = location[navKey];
-      if (current !== lastNav) {
-        lastNav = current;
-        if (!navAlwaysTrigger) trigger();
-      }
+    // `navAlwaysTrigger` skips the compare entirely, so `lastNav` is only ever read
+    // on the path that also writes it.
+    if (navAlwaysTrigger) {
+      trigger();
+      return;
     }
-    if (navAlwaysTrigger) trigger();
+    if (!navKey) return;
+    const current = location[navKey];
+    if (current === lastNav) return;
+    lastNav = current;
+    trigger();
   };
 
   const onLinkClick = (event: Event): void => {

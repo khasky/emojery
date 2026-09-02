@@ -6,7 +6,7 @@
 // (Threads). This module owns the matching engine and stem vocabulary; each site
 // declares its own small registry of the signals it exposes.
 // Matching precedence per control: exact label -> data-icon -> icon-path -> stems.
-import { collapseWhitespace } from "./runtime";
+import { collapseWhitespace, textOf } from "./runtime";
 
 export type ActionKind = "like" | "comment" | "reply" | "share" | "send" | "repost" | "bookmark";
 
@@ -111,6 +111,11 @@ export function defineLabelRegistry(registry: ActionRegistry, options: LabelRegi
   const readDescendantSvgLabels = options.readDescendantSvgLabels !== false;
   const controlSelector = options.controlSelector ?? DEFAULT_CONTROL_SELECTOR;
   const entries = Object.entries(registry) as Array<[ActionKind, ActionMatcher]>;
+  // Which icon sweeps this registry can act on at all. `classify` runs per button on
+  // every scan, and a registry declaring neither signal (Facebook) would otherwise pay
+  // both DOM walks per call for a result nothing reads.
+  const usesDataIcon = entries.some(([, m]) => m.dataIcon !== undefined);
+  const usesIconPath = entries.some(([, m]) => m.iconPathPrefix !== undefined);
 
   // A count-summary aria-label ("Like: 68") yields NO label and does not fall
   // through to visible text - the element is a count.
@@ -120,7 +125,7 @@ export function defineLabelRegistry(registry: ActionRegistry, options: LabelRegi
     if (ownAria != null) {
       if (!(rejectCountSummary && isCountSummary(ownAria))) out.push(ownAria);
     } else if (useTextFallback) {
-      const text = collapseWhitespace(el.textContent ?? "");
+      const text = textOf(el);
       if (text) out.push(text);
     }
     if (readDescendantSvgLabels) {
@@ -169,14 +174,18 @@ export function defineLabelRegistry(registry: ActionRegistry, options: LabelRegi
     for (const [kind, m] of entries) {
       if (m.exact && matchExact(labels, m.exact)) return kind;
     }
-    const icons = dataIcons(el);
-    for (const [kind, m] of entries) {
-      const dataIcon = m.dataIcon;
-      if (dataIcon && icons.some((i) => dataIcon.test(i))) return kind;
+    if (usesDataIcon) {
+      const icons = dataIcons(el);
+      for (const [kind, m] of entries) {
+        const dataIcon = m.dataIcon;
+        if (dataIcon && icons.some((i) => dataIcon.test(i))) return kind;
+      }
     }
-    const paths = iconPaths(el);
-    for (const [kind, m] of entries) {
-      if (m.iconPathPrefix && matchPathPrefix(paths, m.iconPathPrefix)) return kind;
+    if (usesIconPath) {
+      const paths = iconPaths(el);
+      for (const [kind, m] of entries) {
+        if (m.iconPathPrefix && matchPathPrefix(paths, m.iconPathPrefix)) return kind;
+      }
     }
     for (const [kind, m] of entries) {
       const stems = m.stems;

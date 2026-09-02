@@ -221,7 +221,13 @@ const instagramAdapter = defineSiteAdapter({
     // trigger (verified live). The rail lives outside any <article> while feed
     // posts are inside one, so on a reel page try non-article candidates first -
     // the mounted feed host then follows its target into the rail.
-    const ordered = isOnReelViewerPage() ? [...buttons.filter((b) => !b.closest("article")), ...buttons.filter((b) => b.closest("article"))] : buttons;
+    let ordered = buttons;
+    if (isOnReelViewerPage()) {
+      const outsideArticle: HTMLElement[] = [];
+      const insideArticle: HTMLElement[] = [];
+      for (const button of buttons) (button.closest("article") ? insideArticle : outsideArticle).push(button);
+      ordered = [...outsideArticle, ...insideArticle];
+    }
     return orderModalFirst(ordered);
   },
   dedupeContainer: (likeButton, ctx) => actionRowFor(likeButton, ctx)?.row ?? null,
@@ -386,7 +392,7 @@ function findReelRail(likeButton: HTMLElement): ActionRow | null {
 // We're on a single reel's page (immersive viewer or permalink), i.e. the path
 // is `/reel(s)/<shortcode>/` - not the reels home, a profile reels tab, or audio.
 function isOnReelViewerPage(): boolean {
-  return /^\/reels?\//.test(location.pathname) && currentPagePostUrl() !== null;
+  return /^\/reels?\//.test(location.pathname) && currentPagePostRef() !== null;
 }
 
 // A vertical action rail is a NARROW column of icon buttons: taller than it is
@@ -543,10 +549,8 @@ function findLikeCountAfter(anchor: HTMLElement, container: HTMLElement | null):
 }
 
 function findCounterElement(root: HTMLElement, predicate: (text: string) => boolean): HTMLElement | null {
-  if (!root.querySelector("svg") && isUsableCounter(root) && predicate(textOf(root))) {
-    return root;
-  }
-  for (const el of Array.from(root.querySelectorAll<HTMLElement>('[role="button"], span, a, div'))) {
+  // The root itself first, then its descendants in document order - one rule for both.
+  for (const el of [root, ...root.querySelectorAll<HTMLElement>('[role="button"], span, a, div')]) {
     if (el.querySelector("svg")) continue;
     if (!isUsableCounter(el)) continue;
     if (predicate(textOf(el))) return el;
@@ -566,37 +570,38 @@ function findPostContainer(el: HTMLElement): HTMLElement | null {
 }
 
 function extractTarget(container: HTMLElement): TargetRef | null {
-  const permalink = findPermalink(container) ?? currentPagePostUrl();
-  if (!permalink) return null;
-  const parsed = parseInstagramUrl(permalink);
-  if (!parsed) return null;
-  return instagramTargetFromRef(parsed);
+  const ref = findPostRef(container) ?? currentPagePostRef();
+  return ref ? instagramTargetFromRef(ref) : null;
 }
 
 export function instagramTargetFromRef(ref: { shortcode: string; url: string }): TargetRef {
   return { site: "instagram", targetId: ref.shortcode, url: ref.url };
 }
 
-function findPermalink(root: ParentNode): string | null {
+// The parsed ref, not its `url`: re-parsing the canonical URL downstream yields
+// exactly this object back.
+function findPostRef(root: ParentNode): InstagramPostRef | null {
   for (const link of queryAll<HTMLAnchorElement>(root, POST_LINK_SELECTORS)) {
     const parsed = parseInstagramUrl(link.getAttribute("href") || link.href);
-    if (parsed) return parsed.url;
+    if (parsed) return parsed;
   }
   return null;
 }
 
-function currentPagePostUrl(): string | null {
-  return parseInstagramUrl(location.href)?.url ?? null;
+function currentPagePostRef(): InstagramPostRef | null {
+  return parseInstagramUrl(location.href);
 }
 
 // Carries the canonical `url` alongside the parsed parts: `target-contract.ts`
 // pairs it with `instagramTargetFromRef`, so the canonical URL has ONE
 // construction site (parseInstagramUrl) rather than a second copy per caller.
-export function extractInstagramShortcode(href: string): { kind: string; shortcode: string; url: string } | null {
+type InstagramPostRef = { kind: string; shortcode: string; url: string };
+
+export function extractInstagramShortcode(href: string): InstagramPostRef | null {
   return parseInstagramUrl(href);
 }
 
-function parseInstagramUrl(href: string): { kind: string; shortcode: string; url: string } | null {
+function parseInstagramUrl(href: string): InstagramPostRef | null {
   return parseSiteHref(href, "instagram", (url) => {
     const match = url.pathname.match(TARGET_PATH_RE);
     const kindRaw = match?.[1];
