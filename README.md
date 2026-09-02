@@ -39,7 +39,7 @@ Watch a video, read a post, browse a product — anywhere Emojery already works.
 
 **Find it next to the site's own buttons**
 
-A small pill sits right beside the buttons you already know, showing the top 3 emoji and the total so far.
+A reaction button sits right beside the native controls you already know, showing the top 3 emoji and the total so far.
 
 </td>
 <td width="50%" valign="middle">
