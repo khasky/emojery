@@ -1,22 +1,19 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Bridge to a REAL, human-launched Chrome via the Playwright Extension. We act
-// as an MCP client to `@playwright/mcp` running in `--extension` mode - the
-// browser is started normally by the user (no automation launch fingerprint, no
-// `navigator.webdriver`; only `chrome.debugger` attaches, like DevTools), which
-// is why bot-sensitive platforms don't flag it. See the site-auth README.
+// Bridge to a REAL, human-launched Chrome: an MCP client to @playwright/mcp in
+// --extension mode. The user starts the browser normally, so there is no automation
+// launch fingerprint and no navigator.webdriver - only chrome.debugger attaches,
+// like DevTools - which is why bot-sensitive platforms don't flag it. See the
+// site-auth README.
 //
-// Two connection modes:
-//   - default: in-process `createConnection({ extension: true })` linked to our
-//     client over an in-memory transport (single command, no port);
-//   - `E2E_MCP_URL`: connect to an already-running `@playwright/mcp
-//     --extension --port <p>` over streamable HTTP (`http://host:p/mcp`).
+// Two connection modes: in-process createConnection({ extension: true }) over an
+// in-memory transport by default, or E2E_MCP_URL to reach an already-running server
+// over streamable HTTP.
 //
-// All page interaction goes through `browser_run_code_unsafe`, which hands a
-// full Playwright `page`. Playwright's CSS engine pierces the open shadow roots
-// the trigger/picker live in, so selector clicks/reads are reliable (the
-// snapshot-ref tools can't address shadow content as robustly). Returned values
-// are sentinel-wrapped JSON so we can parse them out of the MCP text envelope.
+// All page interaction goes through browser_run_code_unsafe, which hands over a full
+// Playwright page whose CSS engine pierces the open shadow roots the trigger/picker
+// live in. Returned values are sentinel-wrapped JSON, parsed out of the MCP text
+// envelope.
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
@@ -25,34 +22,33 @@ import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 const SENTINEL = "<<SE>>";
 const ERR_SENTINEL = "<<SE_ERR>>";
 
-// Per-call ceiling for one `browser_run_code_unsafe`. No body here legitimately
-// runs this long (the longest are a bounded goto and a few 8s Playwright
-// clicks), while the MCP SDK's own default is 60s - and since a stalled call is
-// retried once, a single stall cost 121s and blew straight past vitest's 120s
-// hook budget instead of self-healing. Kept well under that budget.
+// Per-call ceiling. No body here legitimately runs this long, while the MCP SDK's
+// own default is 60s - and since a stalled call is retried once, one stall cost 121s
+// and blew straight past vitest's 120s hook budget.
 const CALL_TIMEOUT_MS = 30_000;
-// Navigation gets its own, lower ceiling (Playwright's default is 30s, i.e. the
-// whole call budget) - callers already treat a failed goto as non-fatal and poll
-// for the host afterwards.
+// Lower than Playwright's 30s default, which would eat the whole call budget. Callers
+// treat a failed goto as non-fatal and poll for the host afterwards.
 const NAV_TIMEOUT_MS = 20_000;
-// Navigation waits for `commit` (the response landed), never for a load event: a
-// heavy logged-in permalink can stay `readyState === "loading"` for a minute
-// (measured on a Facebook /posts/ permalink: DOM complete only ~66s in), and
-// while it streams, EVERY bridge call inflates - so a `domcontentloaded` goto
-// blew the whole per-call budget and its -32001 retry doubled the loss. The
-// hydrate wait below is a SEPARATE call, so a page that never settles costs one
-// bounded call instead of the navigation one; readiness is then established the
-// way callers already do it, by polling for a mounted host.
+// Navigation waits for commit alone, because a heavy logged-in permalink
+// can stay readyState === "loading" for a minute (a Facebook /posts/ permalink: DOM
+// complete only ~66s in), and every bridge call inflates while it streams, so a
+// domcontentloaded goto blew the per-call budget and its -32001 retry doubled the
+// loss. The hydrate wait below is a SEPARATE call, so a page that never settles costs
+// one bounded call. Readiness comes from polling for a mounted host.
 const HYDRATE_WAIT_MS = 10_000;
 const HYDRATE_WAIT = `await page.waitForLoadState('domcontentloaded', { timeout: ${HYDRATE_WAIT_MS} }).catch(() => {});`;
 
+// Rides at the head of every navigation (see Bridge.focusTab for why). A window the OS
+// keeps minimized or fully covered stays hidden, and the harness diagnoses that when it
+// happens.
+const FOCUS_TAB_SRC = `await page.bringToFront().catch(() => {});`;
+
 /**
- * Every failure this bridge produces, and nothing else. A test asserts about the
- * PAGE; a bridge that stalled, lost its relay or lost its tab has said nothing
- * about the page, and a helper that turns one into a zero hands the reader
- * "log into <site>" for an account that was signed in - the single most expensive
- * wrong message this suite can print. Helpers that observe rethrow these; only
- * best-effort side effects (dismiss a modal, mute a video) may swallow one.
+ * Every failure this bridge produces, and nothing else. A bridge that stalled, lost
+ * its relay or lost its tab has said nothing about the PAGE, and a helper that turns
+ * one into a zero hands the reader "log into <site>" for an account that was signed
+ * in. Helpers that observe rethrow these. Only side effects allowed to fail may
+ * swallow one.
  */
 export class BridgeError extends Error {
   readonly bridge = true;
@@ -66,28 +62,25 @@ export function isBridgeError(error: unknown): error is BridgeError {
   return error instanceof BridgeError || (typeof error === "object" && error !== null && (error as { bridge?: unknown }).bridge === true);
 }
 
-// No generic body ceiling on purpose: the only long-runner, page.mouse.wheel, is
-// bounded at its call site (wheelBySrc in harness.ts), and a global one would risk
-// a body that legitimately runs long.
+// No generic body ceiling: the only long-runner, page.mouse.wheel, is bounded at its
+// call site (wheelBySrc in harness.ts).
 
 interface ToolResult {
   content?: Array<{ type: string; text?: string }>;
   isError?: boolean;
 }
 
-// Pull the sentinel-wrapped JSON payload back out of the MCP text envelope.
-// The page returns `"<<SE>>" + json + "<<SE>>"`; the envelope may print that
-// string raw or escaped, so we try a direct parse then an unescape-once parse.
+// The page returns the sentinel, the json and the sentinel again. The envelope may
+// print that raw or escaped, so try a direct parse then an unescape-once parse.
 function parseSentinel<T>(text: string): T {
   const errAt = text.indexOf(ERR_SENTINEL);
   if (errAt >= 0) {
     throw new Error(`probe threw in page: ${text.slice(errAt + ERR_SENTINEL.length).slice(0, 300)}`);
   }
-  // Newer @playwright/mcp renders the return value inside a "### Result\n<json>\n###"
-  // block where the value is JSON-stringified - so a returned string arrives with
-  // its quotes escaped, which the raw sentinel scan below can't parse. Recover the
-  // original returned string first. Older builds inlined the value, so fall back to
-  // the full text when there is no Result block.
+  // Newer @playwright/mcp renders the return value inside a "### Result" block where
+  // the value is JSON-stringified, so a returned string arrives with its quotes
+  // escaped and the raw sentinel scan below cannot parse it. Older builds inlined the
+  // value, hence the fall back to the full text.
   let payload = text;
   const result = text.match(/###\s*Result\s*\n([\s\S]*?)\n###\s/);
   if (result?.[1]) {
@@ -106,99 +99,94 @@ function parseSentinel<T>(text: string): T {
   try {
     return JSON.parse(raw) as T;
   } catch {
-    // Envelope escaped the string one level (\" etc.) - unescape then parse.
-    // `raw` already carries those escapes, so it goes between the quotes as-is:
-    // re-escaping its own quotes turned every \" into \\" and made this branch
-    // throw on the exact shape it exists for.
+    // The envelope escaped the string one level. raw already carries those escapes
+    // and goes between the quotes as-is: re-escaping its own quotes turned every \"
+    // into \\" and made this branch throw on the exact shape it exists for.
     return JSON.parse(JSON.parse(`"${raw}"`)) as T;
   }
 }
 
 export interface Bridge {
-  /** Navigate the active tab; commits, then makes ONE bounded best-effort
-   *  domcontentloaded attempt. Readiness comes from polling for a host, not from
-   *  this (see the header). */
+  /** Commits, then makes ONE bounded domcontentloaded attempt whose failure is
+   *  ignored. Readiness comes from polling for a host (see the header). Activates the
+   *  tab first, as focusTab explains. */
   goto(url: string): Promise<void>;
   reload(): Promise<void>;
+  /** Make the driven tab the ACTIVE one in its window. Emojery runs no scan while
+   *  document.hidden and catches up on the next visibilitychange, so a backgrounded
+   *  tab mounts nothing on any site - proven: reloading a background tab leaves 0
+   *  hosts and 0 anchors, activating it mounts within a beat. goto/reload call this,
+   *  so a run never measures a tab the user clicked away from. */
+  focusTab(): Promise<void>;
   waitMs(ms: number): Promise<void>;
-  /**
-   * Poll `predicateSource` (a function body returning truthy when satisfied)
-   * in-page until it holds or `timeoutMs` lapses; resolves with whether it
-   * held. Prefer this over `waitMs`: the wait ends the moment the condition is
-   * met instead of always paying the full budget.
-   */
+  /** Poll a predicate function body in-page until it holds or timeoutMs lapses.
+   *  Prefer this over waitMs: the wait ends the moment the condition is met. */
   waitFor(predicateSource: string, timeoutMs: number): Promise<boolean>;
-  /** `page.evaluate` of a probe source string (a `function` body with `return`). */
+  /** page.evaluate of a probe source string (a function body with return). */
   evaluate<T>(probeSource: string): Promise<T>;
   press(key: string): Promise<void>;
   /** URLs of all open tabs - used to confirm we attached to the real browser. */
   tabUrls(): Promise<string[]>;
-  /** Open a second tab on `url`. Callers address it as the LAST page (see close()). */
+  /** Open a second tab. Callers address it as the LAST page (see close()). */
   openTab(url: string): Promise<void>;
-  /** Escape hatch: run a custom `async (page) => {...}` body that returns a value. */
+  /** Escape hatch: a custom async (page) body that returns a value. */
   run<T>(returnExpr: string): Promise<T>;
-  /** Escape hatch: run a custom `async (page) => {...}` action body (no return). */
+  /** Escape hatch: a custom async (page) action body (no return). */
   act(body: string): Promise<void>;
   close(): Promise<void>;
 }
 
-// Our MCP client name, and the ONLY thing that identifies the browser tab a
-// connection leaves behind. Establishing an extension bridge spawns Chrome on
-// `chrome-extension://<playwright-extension>/connect.html?...&client={"name":<this>}`
-// - a NEW tab per connection, i.e. one per test file - and nothing on the
-// Playwright side ever closes it. close() closes it, matching on this name so a
-// connect page belonging to another Playwright client in the same browser (an
-// agent's live bridge) is never touched.
+// Our MCP client name, and the ONLY thing identifying the browser tab a connection
+// leaves behind: establishing a bridge opens a connect.html tab carrying
+// client={"name":<this>}, one per test file, and nothing on the Playwright side ever
+// closes it. close() matches on this name so a connect page belonging to another
+// Playwright client in the same browser is never touched.
 const CLIENT_NAME = "emojery-siteauth";
 
-// Closing our OWN connect page drops the relay mid-command, so that reply may
-// never arrive. Cap the wait instead of paying the 30s call timeout (twice, with
-// the retry) on every file's teardown.
+// Closing our OWN connect page drops the relay mid-command, so that reply may never
+// arrive. The wait is capped so a teardown never pays CALL_TIMEOUT_MS twice, once for
+// the call and once for its retry.
 const CONNECT_TAB_CLOSE_MS = 4_000;
 
-// Bridge-side source that closes the connect.html tabs THIS client's relays left
-// in the browser. `keepNewest` spares the last one - ours - so a fresh connection
-// can clear what a killed run or a died teardown left behind without cutting its
-// own relay; teardown passes false and closes ours too, last.
-// THE invariant every close in this file obeys: Chrome closes its window with the
-// last tab, and the window taking the browser with it is how a run ended up telling
-// the next test file "saw only about:blank" and then "Target page, context or
-// browser has been closed" for everything after. A tab is worth closing; the
-// browser the whole suite is driving is not. Defined once, used by every sweep.
-const CLOSE_SAFE_SRC = `const closeSafe = async (p) => { if (page.context().pages().length <= 1) return; try { await p.close(); } catch {} };`;
+// page.context().pages() lists ONLY the tabs of THIS bridge session - the relay's own
+// connect.html page plus the tabs we opened - never the user's other tabs, and never
+// another session's relay. Measured: 1 page right after connecting, 2 after opening the
+// working tab. So:
+//  - a leftover relay from a killed run is INVISIBLE here and can only be closed by hand.
+//  - a "don't close the last tab" guard (pages().length <= 1) reads 1 exactly when
+//    teardown reaches the relay - which is why every run left one connect.html tab per
+//    test file standing.
+// Only pages this bridge opened or matched by URL are ever passed to closeSafe, and the
+// user's own tabs keep the window alive, so the close is unconditional.
+const CLOSE_SAFE_SRC = `const closeSafe = async (p) => { try { await p.close(); } catch {} };`;
 
-const RELAY_TAB_SWEEP_SRC = (keepNewest: boolean): string =>
-  `const relays = page.context().pages().filter((p) => { const u = p.url(); return u.startsWith('chrome-extension://') && u.includes('/connect.html?') && u.includes(${JSON.stringify(CLIENT_NAME)}); });
-   for (const p of ${keepNewest ? "relays.slice(0, -1)" : "relays"}) { await closeSafe(p); }`;
+// Our relay tab(s), closed LAST on teardown: closing one drops the connection this
+// call is riding on. Reads ctx because the working tab is already closed by then.
+const RELAY_TAB_SWEEP_SRC = `const relays = ctx.pages().filter((p) => { const u = p.url(); return u.startsWith('chrome-extension://') && u.includes('/connect.html?') && u.includes(${JSON.stringify(CLIENT_NAME)}); });
+   for (const p of relays) { await closeSafe(p); }`;
 
-// What @playwright/mcp does around EVERY tool call by default, and what neither
-// half is worth to this bridge:
-//  - `timeouts.settle` (500ms) holds each reply until the page's triggered work
-//    quiets down. This bridge times its own waits (waitFor / waitMs / the explicit
-//    page.waitForTimeout inside its bodies), so that hold is pure latency - and on
-//    a feed that never stops fetching it is not a floor but an open ceiling.
-//  - `snapshot.mode` builds an accessibility snapshot of the page for the reply.
-//    parseSentinel reads the sentinel payload and nothing else, so every snapshot
-//    is thrown away, and its cost grows with the DOM it walks.
-// Measured over 12 sequential no-op evaluates per site, median round-trip:
-// defaults 545ms (github) / 523ms (x) / 1003ms (facebook); with both off, 8 / 8 /
-// 7ms. The suite makes thousands of calls, which is the difference between a run
-// that finishes and one that does not. Settle is tunable per run for a page that
-// turns out to need the quiet.
+// Two @playwright/mcp defaults this bridge turns off:
+//  - timeouts.settle (500ms) holds each reply until the page's triggered work quiets
+//    down. This bridge times its own waits, so on a feed that never stops fetching
+//    that hold becomes an open ceiling.
+//  - snapshot.mode builds an accessibility snapshot for the reply, which
+//    parseSentinel throws away, at a cost that grows with the DOM it walks.
+// Median round-trip over 12 sequential no-op evaluates per site: defaults 545ms
+// (github) / 523ms (x) / 1003ms (facebook); with both off, 8 / 8 / 7ms. The suite
+// makes thousands of calls. Settle stays tunable per run.
 const MCP_SPEED = {
   snapshot: { mode: "none" },
   timeouts: { settle: Number(process.env.E2E_MCP_SETTLE_MS ?? 0) },
 } as const;
 
 export async function connectBridge(): Promise<Bridge> {
-  // URLs of the tabs THIS bridge opened via openTab() in the user's real Chrome,
-  // closed on teardown so a run never leaves stray tabs behind. Recorded by URL
-  // and matched by URL, never by position: this drives the USER's browser, and a
-  // tab they open mid-run would otherwise be the one teardown closes.
+  // URLs of the tabs THIS bridge opened, closed on teardown so a run leaves no
+  // strays. Matched by URL, because this drives the USER's browser and a tab they open
+  // mid-run would otherwise be the one teardown closes by position.
   let openedTabUrls: string[] = [];
   const client = new Client({ name: CLIENT_NAME, version: "1.0.0" });
 
-  // Set: connect to an already-running server instead of spawning in-process.
+  // When set, the bridge connects to an already-running server and spawns nothing.
   const url = process.env.E2E_MCP_URL;
   let dispose: () => Promise<void>;
 
@@ -210,8 +198,7 @@ export async function connectBridge(): Promise<Bridge> {
     };
   } else {
     // In-process server attached to the running Chrome via the extension.
-    // The extension token is read from PLAYWRIGHT_MCP_EXTENSION_TOKEN by
-    // @playwright/mcp itself.
+    // @playwright/mcp reads PLAYWRIGHT_MCP_EXTENSION_TOKEN itself.
     const { createConnection } = (await import("@playwright/mcp")) as {
       createConnection: (config: unknown) => Promise<{
         connect(transport: unknown): Promise<void>;
@@ -237,17 +224,15 @@ export async function connectBridge(): Promise<Bridge> {
 
   const callRaw = (code: string): Promise<string> => callTool("browser_run_code_unsafe", { code });
 
-  // Transient by nature, and the reason a call gets a second attempt:
-  //  - an SPA route change destroys the JS execution context mid-call;
-  //  - the relay answers past the MCP client's request timeout (-32001), which a
-  //    renderer busy with its own work causes routinely on a live feed.
+  // Why a call gets a second attempt: an SPA route change destroys the JS execution
+  // context mid-call, or the relay answers past the MCP client's request timeout
+  // (-32001), which a renderer busy with its own work causes routinely on a live feed.
   const isTransient = (e: unknown): boolean => /context was destroyed|Execution context|-32001|Request timed out/i.test(String(e));
   const ATTEMPTS = 2;
   const RETRY_PAUSE_MS = 1_500;
 
-  // The ONE place a bridge failure is minted, so no caller anywhere - today's or a
-  // test written next year - can receive a raw McpError and mistake it for
-  // something the page said. Everything that leaves here is a BridgeError.
+  // The ONE place a bridge failure is minted, so no caller can receive a raw McpError
+  // and mistake it for something the page said.
   const call = async (code: string): Promise<string> => {
     let last: unknown;
     for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
@@ -274,31 +259,22 @@ export async function connectBridge(): Promise<Bridge> {
     try {
       return parseSentinel<T>(text);
     } catch (e) {
-      // A probe that threw is the PAGE talking, and stays a plain error; an
-      // envelope with no payload in it is the bridge failing to answer.
+      // A probe that threw is the PAGE talking and stays a plain error. An envelope
+      // with no payload in it is the bridge failing to answer.
       if (String(e).includes("probe threw in page")) throw e;
       throw new BridgeError(`Site-auth bridge returned no readable payload: ${String(e).slice(0, 200)}`, { cause: e });
     }
   };
 
-  // The extension opens a connect.html tab per connection and closes none of them,
-  // so a killed run (or a file whose teardown died) leaves its relay tab standing
-  // and the next run stacks another on top. Clear the leftovers, keeping the newest
-  // - ours. Best-effort: a browser we cannot sweep is not a reason to fail.
-  await runAction(`${CLOSE_SAFE_SRC} ${RELAY_TAB_SWEEP_SRC(true)}`).catch(() => {});
-
   // THE relay tab must never be the tab under test. With nothing selected in the
-  // Playwright Extension the relay hands us its own connect.html page as `page`,
-  // and navigating that page tears the relay down with it: every later call then
-  // stalls into the 30s ceiling, for the whole run, on every site (measured: a run
-  // where even github and amazon stalled). It hid during development because a
-  // second Playwright client's connect tab was present and got driven instead.
+  // Playwright Extension, the relay hands its own connect.html page over as the page
+  // under test, and navigating that page tears the relay down with it: every later
+  // call then stalls into the per-call ceiling, for the whole run, on every site.
   //
-  // So: open a tab of our own and work there. `browser_tabs` makes the new tab the
-  // current one, which is what moves `page` off the relay page. Recorded, because
-  // teardown closes it - a tab we opened is the only tab we may close blind, and
-  // closing it is what keeps a run tab-neutral. A relay bound to a tab the USER
-  // picked reads as a site URL: left alone, worked in, never closed.
+  // So open a tab of our own and work there - browser_tabs makes the new tab the
+  // current one, which is what moves the handle off the relay page. Recorded because
+  // teardown closes it: a tab we opened is the only tab we may close blind. A relay
+  // bound to a tab the user picked reads as a site URL - left alone, never closed.
   const ownWorkingTab = await runData<string>(`return page.url();`)
     .then(async (current) => {
       if (!/^chrome-extension:\/\/.*\/connect\.html\?/.test(current)) return false;
@@ -309,12 +285,15 @@ export async function connectBridge(): Promise<Bridge> {
 
   return {
     async goto(u) {
-      await runAction(`await page.goto(${JSON.stringify(u)}, { waitUntil: 'commit', timeout: ${NAV_TIMEOUT_MS} }).catch(() => {});`);
+      await runAction(`${FOCUS_TAB_SRC} await page.goto(${JSON.stringify(u)}, { waitUntil: 'commit', timeout: ${NAV_TIMEOUT_MS} }).catch(() => {});`);
       await runAction(HYDRATE_WAIT);
     },
     async reload() {
-      await runAction(`await page.reload({ waitUntil: 'commit', timeout: ${NAV_TIMEOUT_MS} }).catch(() => {});`);
+      await runAction(`${FOCUS_TAB_SRC} await page.reload({ waitUntil: 'commit', timeout: ${NAV_TIMEOUT_MS} }).catch(() => {});`);
       await runAction(HYDRATE_WAIT);
+    },
+    async focusTab() {
+      await runAction(FOCUS_TAB_SRC);
     },
     async waitMs(ms) {
       await runAction(`await page.waitForTimeout(${Math.max(0, Math.floor(ms))});`);
@@ -342,25 +321,20 @@ export async function connectBridge(): Promise<Bridge> {
       await runAction(body);
     },
     async close() {
-      // ONE call for every sweep, straight through callRaw: no retry and no stall
-      // accounting on the way out - a teardown that stands a replacement relay up
-      // only to drop it again is worse than a teardown that gives up. The race
-      // below is the only budget it gets.
+      // ONE call, straight through callRaw: no retry and no stall accounting on the
+      // way out. The race below is the only budget it gets.
       //
-      // First the tabs THIS bridge opened, each matched by the URL it was opened
-      // on (newest first), so a tab the user opened meanwhile is never closed. A
-      // tab that navigated away no longer matches and is left open - the safe
-      // failure in someone else's browser.
-      //
-      // Then the tab we opened to work in (see ownWorkingTab), and finally the
-      // connect.html tab(s) our relays opened (see CLIENT_NAME) - including any
-      // left by an earlier file whose teardown died. Oldest first, so ours (the
-      // newest, and the one whose closing drops this relay) goes last.
+      // First the tabs THIS bridge opened, matched by the URL they were opened on
+      // (newest first), so a tab the user opened meanwhile is never closed. A tab that
+      // navigated away no longer matches and is left open, which is the safe failure
+      // in someone else's browser. Then the tab we opened to work in, and last our own
+      // connect.html relay tab, whose closing drops the connection this call rides on.
       const sweep = callRaw(
         `async (page) => {
+           const ctx = page.context();
            ${CLOSE_SAFE_SRC}
            const wanted = ${JSON.stringify(openedTabUrls)};
-           const ps = page.context().pages();
+           const ps = ctx.pages();
            for (const url of wanted) {
              for (let i = ps.length - 1; i >= 0; i--) {
                const p = ps[i];
@@ -371,7 +345,7 @@ export async function connectBridge(): Promise<Bridge> {
              }
            }
            ${ownWorkingTab ? "await closeSafe(page);" : ""}
-           ${RELAY_TAB_SWEEP_SRC(false)}
+           ${RELAY_TAB_SWEEP_SRC}
          }`,
       ).catch(() => {});
       openedTabUrls = [];

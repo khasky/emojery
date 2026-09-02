@@ -22,6 +22,19 @@ Every other scenario is passive: navigate, click the Emojery trigger, read the D
 4. Copy the token from the Playwright Extension popup (per browser profile).
 
 > **Fail-fast:** the suite does not silently skip when a login is missing. If the bridge can't attach, Emojery is signed out, or a site being exercised isn't logged in, the run fails immediately with an actionable message telling you what to log into.
+>
+> **Leave the driven tab in front.** Emojery runs no scan while `document.hidden` and catches up on the next `visibilitychange`, so a tab Chrome considers hidden mounts nothing — on every site at once. The run opens its own tab and re-activates it before each navigation; what still backgrounds it, measured on Windows 10 / Chrome 152:
+>
+> | Window state | `document.hidden` |
+> | --- | --- |
+> | Unfocused, another app or monitor in front, window visible | `false` — the run is fine |
+> | Fully covered by another window, Chrome started with `--disable-backgrounding-occluded-windows` | `false` — the run is fine |
+> | **Minimized** | `true` — every check goes zero-host |
+> | **Another tab active in the same window** | `true` — same |
+>
+> So launch that Chrome as `chrome.exe --disable-backgrounding-occluded-windows` (all its windows closed first, else the switch is ignored), then just don't minimize the window or click another tab in it. Without the switch, a window another window fully covers is hidden too — Windows occlusion tracking marks its tabs hidden, and the `chrome://flags` entry that used to disable it is gone. A check that lands on a hidden tab now says so instead of blaming the site login.
+>
+> The run also leaves one `connect.html` relay tab per interrupted run — the bridge can only see its own tabs, so a killed run's tab has to be closed by hand.
 
 ## Run
 

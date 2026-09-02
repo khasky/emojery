@@ -1,27 +1,27 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Self-check of the two discriminations waitForHost has to get right: a page it
-// cannot READ AT ALL is a broken bridge, and a readable page serving a
-// recognized anti-bot wall is an environment failure - neither is a missing
-// site login. Returning 0 for either made eight tests report "log into <site>"
-// and sent the reader after a login that was never the problem.
+// Self-check of the three discriminations waitForHost has to get right: a page it
+// cannot READ AT ALL is a broken bridge, a readable page serving a recognized anti-bot
+// wall is the environment, and a readable page in a BACKGROUND tab is the environment
+// too (Emojery scans nothing while document.hidden) - none of them is a missing site
+// login. Returning 0 for any of them made whole files report "log into <site>".
 //
-// No browser and no bridge - the fakes below fail (or answer) every probe the
-// way a dead tab, a -32001 storm, or a healthy hostless page does.
+// No browser and no bridge: the fakes below fail (or answer) every probe the way a
+// dead tab, a -32001 storm, or a healthy hostless page does.
 import { describe, expect, it } from "vitest";
 import { BLOCK_URL_RE, WALL_SENTENCES_RE } from "../lib/site-walls";
 import { type Bridge, BridgeError } from "./bridge";
 import { waitForHost } from "./harness";
 
-// Only the methods waitForHost touches (a no-op `reload` included - its one-shot
-// re-inject recovery runs on a hostless page); a full stub would be noise. `run`
-// (the wall probe) stays ABSENT unless a test provides it - the probe must
-// survive a bridge without it.
-function fakeBridge(evaluate: () => Promise<unknown>, run?: () => Promise<unknown>, acts?: string[]): Bridge {
+// Only the methods waitForHost touches, including a no-op reload for its one-shot
+// re-inject recovery. run (the wall probe) is present ONLY when a test passes one -
+// the probe must survive a bridge that lacks it.
+function fakeBridge(evaluate: (source: string) => Promise<unknown>, run?: () => Promise<unknown>, acts?: string[]): Bridge {
   return {
     evaluate,
     ...(run ? { run } : {}),
     reload: async () => {},
+    focusTab: async () => {},
     act: async (body: string) => {
       acts?.push(body);
     },
@@ -31,10 +31,9 @@ function fakeBridge(evaluate: () => Promise<unknown>, run?: () => Promise<unknow
   } as unknown as Bridge;
 }
 
-// What a real failed call now hands a caller: bridge.ts mints every one of them as
-// a BridgeError, precisely so a helper can tell "the bridge said nothing" from "the
-// page said no". A plain Error here would be a probe that threw in the page, which
-// these helpers must NOT swallow - see the last case in this describe.
+// bridge.ts mints every failed call as a BridgeError, so a helper can tell "the
+// bridge said nothing" from "the page said no". A plain Error here would be a probe
+// that threw in the page, which these helpers must never swallow.
 const BRIDGE_FAILURE = "MCP error -32001: Request timed out";
 const bridgeFailure = (): BridgeError => new BridgeError(BRIDGE_FAILURE);
 
@@ -73,7 +72,7 @@ describe("waitForHost", () => {
   it("gives up on the SECOND lost read in a row instead of riding out the ceiling", async () => {
     // Each real stall costs ~61s (the call ceiling plus its retry) and the loop
     // refunds that time, so without this the wait holds a dead relay open for its
-    // whole hard ceiling - and scrollAndCountHosts pays it once per scroll step.
+    // whole hard ceiling - once per scroll step in scrollAndCountHosts.
     let reads = 0;
     const bridge = fakeBridge(async () => {
       reads += 1;
@@ -99,10 +98,10 @@ describe("waitForHost", () => {
   });
 
   it("blames the bridge when stalled probes, not the page, consumed the budget", async () => {
-    // One good read then nothing but stalls: the old loop refunded nothing, so
-    // the very first stall closed the window and returned 0 - "log into <site>"
-    // for a wedged bridge. Stall length is well under the 30s the real bridge
-    // pays, and still has to outlast the budget.
+    // One good read then nothing but stalls: the old loop refunded nothing, so the
+    // very first stall closed the window and returned 0 - "log into <site>" for a
+    // wedged bridge. The stall is far under the 30s the real bridge pays and still
+    // has to outlast the budget.
     let first = true;
     const bridge = fakeBridge(async () => {
       if (first) {
@@ -116,9 +115,9 @@ describe("waitForHost", () => {
   });
 
   it("sweeps back up, so a long wait cannot walk off a single-target page", async () => {
-    // The nudge used to only ever wheel DOWN: over a 60s detail-page budget that
-    // walks ~12000px past the action row whose IntersectionObserver mount the
-    // wait is there to catch, and no later read can recover.
+    // The nudge used to only ever wheel DOWN: over a long detail-page budget that
+    // walks thousands of pixels past the action row whose IntersectionObserver mount
+    // the wait exists to catch, and no later read recovers.
     const acts: string[] = [];
     const bridge = fakeBridge(async () => ({ visibleHostCount: 0, hostCount: 0, siteKeyCount: 0 }), undefined, acts);
     await waitForHost(bridge, "github", 300);
@@ -138,10 +137,9 @@ describe("waitForHost", () => {
   });
 
   it("charges a stalled NUDGE to the bridge, never to the page", async () => {
-    // The live failure this exists for: the nudge is a bridge call like any other,
-    // but it was the one nobody caught - so a stall in it ran the budget out while
-    // the reads kept answering 0, and the caller printed "log into Facebook" at an
-    // account that was signed in (both wall audits and the threads round-trip).
+    // The nudge is a bridge call like any other, but it was the one nobody caught -
+    // so a stall in it ran the budget out while the reads kept answering 0, and the
+    // caller printed "log into Facebook" at an account that was signed in.
     const bridge = fakeBridge(async () => ({ visibleHostCount: 0, hostCount: 0, siteKeyCount: 0 }));
     (bridge as unknown as { act: () => Promise<void> }).act = () => Promise.reject(bridgeFailure());
     const error = await waitForHost(bridge, "facebook", 40).then(
@@ -150,6 +148,24 @@ describe("waitForHost", () => {
     );
     expect(error?.message, "a nudge the bridge could not run is not a missing login").toMatch(/bridge/i);
     expect(error?.message).not.toMatch(/log into/i);
+  });
+
+  it("names the background tab, not the login, when the driven tab is hidden", async () => {
+    // The whole-file failure this exists for: a tab the user clicked away from (or a
+    // window another window covers) mounts nothing on ANY site, so 23 tests reported
+    // "log into <site>" for 9 accounts that were all signed in.
+    let refocused = 0;
+    const bridge = fakeBridge(async (source) => (source.includes("document.hidden") ? true : { visibleHostCount: 0 }));
+    (bridge as unknown as { focusTab: () => Promise<void> }).focusTab = async () => {
+      refocused += 1;
+    };
+    const error = await waitForHost(bridge, "facebook", 40).then(
+      () => null,
+      (err: unknown) => err as Error,
+    );
+    expect(error?.message).toMatch(/BACKGROUND/);
+    expect(error?.message).not.toMatch(/log into/i);
+    expect(refocused, "the tab is re-activated so a retry measures the real page").toBe(1);
   });
 
   it("keeps reporting 0 when the wall probe itself fails", async () => {
@@ -161,16 +177,14 @@ describe("waitForHost", () => {
   });
 });
 
-// Pins the shared wall fixtures to the two walls Reddit actually served this
-// suite's own fixture URLs (captured live): the js_challenge redirect into the
-// network-security block, and the "Prove your humanity" reCAPTCHA on a CLEAN
-// URL - which is why the text set must exist at all.
+// Pins the shared wall fixtures to the two walls Reddit served this suite's own
+// fixture URLs: the js_challenge redirect into the network-security block, and the
+// "Prove your humanity" reCAPTCHA on a CLEAN URL - which is why the text set exists.
 describe("wall fixtures", () => {
   it("recognizes both Reddit walls by sentence and the challenge redirect by URL", () => {
     expect(WALL_SENTENCES_RE.test("You've been blocked by network security.")).toBe(true);
     expect(WALL_SENTENCES_RE.test("Prove your humanity")).toBe(true);
-    // Synthetic permalink of the real shape (obviously-fictional ids) - the
-    // assertion is about the URL form, not any live post.
+    // Synthetic permalink of the real shape: the assertion is about the URL form.
     expect(BLOCK_URL_RE.test("https://www.reddit.com/r/emojery_e2e_fixture/comments/0abc123/fixture_post/?solution=abc&js_challenge=1&token=t")).toBe(true);
     expect(BLOCK_URL_RE.test("https://www.reddit.com/r/emojery_e2e_fixture/comments/0abc123/fixture_post/")).toBe(false);
   });

@@ -1,19 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Driving the injected picker from a live page: finding the trigger for a given
-// target key, opening it with a trusted user action, and reading back what the
-// shadow DOM shows. Every helper here takes a Page and plain values - none read
-// suite state - so the spec can compose them per scenario.
+// Driving the injected picker from a live page: finding the trigger for a target
+// key, opening it with a trusted user action, and reading back what the shadow DOM
+// shows. Every helper takes a Page and plain values and reads no suite state.
 import { type ElementHandle, expect, type Page } from "@playwright/test";
 import { collectMountEvidence, debugEvidence, handleKnownInterstitials, scrollPassUntil, settlePage } from "./page-settle";
 import { ACTIVE_IN_ROOT_SRC, DEEP_QUERY_ALL_SRC, IS_VISIBLE_RECT_SRC, MOUNTED_KEY_OF_SRC } from "./probe-src";
+import { GRID_ITEM_SELECTOR, TRIGGER_SELECTOR } from "./selectors";
 import { DEFAULT_SCROLL_STEPS, type MountEvidence, type PickedReaction, type SupportedSiteScenario } from "./site-evidence";
 import { dismissLoginWalls } from "./site-walls";
 
 // evaluateHandle always resolves to a handle, even for a null result: asElement()
-// is what tells the two apart, and the empty handle has to be disposed or it
-// leaks. One shape for every element-returning source-string probe (reaction-
-// surface.ts reuses it too).
+// tells the two apart, and the empty handle leaks unless it is disposed.
 export async function firstElementHandle(page: Page, probeSource: string): Promise<ElementHandle<HTMLElement> | null> {
   const handle = await page.evaluateHandle<HTMLElement | null>(probeSource);
   const element = handle.asElement() as ElementHandle<HTMLElement> | null;
@@ -51,9 +49,7 @@ export async function findMatchingEmojeryTrigger(page: Page, site: SupportedSite
 
 // Scroll-and-wait for ANY visible trigger (optionally for one target key).
 // E2E_HISTORY_TARGET_TIMEOUT_MS is named for the history-URL wait it was written
-// for, but it budgets EVERY visible-trigger wait in the suite - the reaction
-// picks (clickReactionBySearchOnTarget, selectedReactionViaPicker) and the
-// keyboard test go through here too. The name is an env var, so it stays as it is.
+// for, but it budgets EVERY visible-trigger wait in the suite.
 export async function waitForVisibleEmojeryTrigger(page: Page, site: SupportedSiteScenario, targetKey?: string): Promise<ElementHandle<HTMLElement> | null> {
   const trigger = await scrollPassUntil(
     page,
@@ -62,8 +58,8 @@ export async function waitForVisibleEmojeryTrigger(page: Page, site: SupportedSi
     async (p) => {
       await handleKnownInterstitials(p, site);
       await dismissLoginWalls(p);
-      // Dismissing an interstitial re-renders the feed; give it a beat before the next
-      // probe so the retry reads the settled page rather than the teardown.
+      // Dismissing an interstitial re-renders the feed, so a beat here keeps the next
+      // probe off the teardown.
       await p.waitForTimeout(750);
     },
     () => findAnyVisibleEmojeryTrigger(page, targetKey),
@@ -97,20 +93,27 @@ async function findAnyVisibleEmojeryTrigger(page: Page, targetKey?: string): Pro
   );
 }
 
-// Re-resolving a handle the page may have replaced under us, WAITING for the
-// repaint instead of reading once. Both callers' fallback is the handle they
-// already know is detached, so a single read that lands mid-render turns a
-// recoverable re-render into "elementHandle.focus: Element is not attached to
-// the DOM" (seen live on the YouTube watch page, both for the trigger and for
-// the reaction grid).
-function pollForLiveHandle(find: () => Promise<ElementHandle<HTMLElement> | null>, timeoutMs: number): Promise<ElementHandle<HTMLElement> | null> {
-  return pollForValue(find, (el) => el !== null, timeoutMs);
+// Keyboard activation goes through a LOCATOR. The picker replaces its own nodes -
+// PickerTrigger swaps the trigger for a counter when the counts land, and the grid
+// re-renders under a click the site's overlay ate - so an ElementHandle taken before
+// that is detached by the time it is focused, which throws "elementHandle.focus:
+// Element is not attached to the DOM" (a YouTube watch run died there). A locator
+// re-resolves at action time, so the re-render costs one retry inside Playwright's own
+// actionability loop and the test never sees it.
+//
+// Budget: openPickerWithVisibleUserAction runs on every expectOpenPickerGrid poll, so
+// this must stay short enough not to stack up behind that poll's own timeout.
+const KEYBOARD_FOCUS_TIMEOUT_MS = 5_000;
+
+async function focusAndPress(page: Page, selector: string, key: string, hasText?: string | null): Promise<void> {
+  const visible = page.locator(selector).filter({ visible: true });
+  await (hasText ? visible.filter({ hasText }) : visible).first().focus({ timeout: KEYBOARD_FOCUS_TIMEOUT_MS });
+  await page.keyboard.press(key);
 }
 
-// Neutral bounded wait: poll `read` until `until` accepts its value or the
-// timeout lapses, returning the LAST read either way. For wait stages whose
-// real assertion lives downstream - never wrap these in `expect.poll(...).catch()`,
-// which reads as an assertion but can't fail.
+// Bounded wait returning the LAST read either way, for wait stages whose real
+// assertion lives downstream. Never wrap these in expect.poll(...).catch(), which
+// reads as an assertion but cannot fail.
 export async function pollForValue<T>(read: () => Promise<T>, until: (value: T) => boolean, timeoutMs: number, intervalMs = 500): Promise<T> {
   const deadline = Date.now() + timeoutMs;
   let value = await read();
@@ -121,11 +124,10 @@ export async function pollForValue<T>(read: () => Promise<T>, until: (value: T) 
   return value;
 }
 
-// The picker closes itself whenever its trigger moves under it (usePopoverPosition's
-// scroll guard). A live page still settling after a load scrolls on its own within a
-// few hundred ms of the click - measured on a freshly reloaded github.com/torvalds/linux -
-// so the grid can vanish right after it opened. Reopen while polling instead of watching
-// a closed picker for the whole window; a picker that never opens still fails here.
+// The picker closes itself whenever its trigger moves under it (the scroll guard in
+// usePopoverPosition), and a page still settling after a load scrolls on its own within a
+// few hundred ms of the click - so the grid can vanish right after it opened.
+// Reopen while polling. A picker that never opens still fails here.
 async function expectOpenPickerGrid(page: Page, trigger: ElementHandle<HTMLElement>, message: string): Promise<void> {
   await expect
     .poll(
@@ -145,8 +147,8 @@ export async function openVisiblePickerAndReadSelectedReaction(page: Page, trigg
     await openPickerWithVisibleUserAction(page, trigger);
     await expectOpenPickerGrid(page, trigger, "History URL picker should open its visible reaction choices");
 
-    // Wait stage only: the caller asserts the returned reaction, so a slow
-    // hydrate falls through to that assertion instead of dying here.
+    // Wait stage only: the caller asserts the returned reaction, so a slow hydrate
+    // falls through to that assertion.
     return pollForValue(
       () => selectedReactionInOpenPicker(page),
       (r) => r === expectedReaction,
@@ -163,23 +165,11 @@ export async function openPickerWithVisibleUserAction(page: Page, trigger: Eleme
   await trigger.click({ timeout: 3_000 }).catch(() => {});
   if (await pickerIsOpen()) return;
 
-  // Re-resolved before the keyboard ladder: the trigger element is REPLACED when
-  // the counts land (PickerTrigger renders the counter as a different button than
-  // the plain trigger), and on a slow page that lands after the handle was taken -
-  // `focus` then throws "Element is not attached to the DOM" and the ladder never
-  // reaches the mounted button (seen live on a YouTube watch page). Short budget:
-  // expectOpenPickerGrid calls this on every poll iteration.
-  const live = (await pollForLiveHandle(() => findAnyVisibleEmojeryTrigger(page), 2_000)) ?? trigger;
-  try {
-    await live.focus();
-    await page.keyboard.press("Enter");
-    if (await pickerIsOpen()) return;
-
-    await live.focus();
-    await page.keyboard.press(" ");
-  } finally {
-    if (live !== trigger) await live.dispose().catch(() => {});
-  }
+  // The keyboard ladder re-resolves the trigger itself (see focusAndPress): the handle
+  // above is the one the failed click already proved unreliable.
+  await focusAndPress(page, TRIGGER_SELECTOR, "Enter");
+  if (await pickerIsOpen()) return;
+  await focusAndPress(page, TRIGGER_SELECTOR, " ");
 }
 
 export async function selectedReactionInOpenPicker(page: Page): Promise<string | null> {
@@ -206,12 +196,10 @@ export async function pickReactionOnMatchingHost(page: Page, site: SupportedSite
     expect(targetKey, debugEvidence(evidence)).not.toBeNull();
     if (!targetKey) throw new Error("Missing target key for matching trigger");
 
-    // Two attempts: on a layout that keeps moving the popover (a YouTube watch
-    // page re-lays its action row as the player and the metadata fill in), the
-    // option click can time out on actionability and the keyboard fallback can
-    // land while the grid is re-rendering - the pick then registers nowhere, and
-    // one attempt turns that into a red "reaction never settled". A second open
-    // and pick either lands or proves the pick itself is broken.
+    // Two attempts: on a layout that keeps moving the popover (a YouTube watch page
+    // re-lays its action row as the player and metadata fill in) the option click
+    // times out on actionability and the keyboard fallback can land mid-re-render,
+    // so the pick registers nowhere. A second pick either lands or proves it broken.
     let reaction: string | null = null;
     let observed: string | null = null;
     for (let attempt = 0; attempt < 2; attempt++) {
@@ -219,11 +207,10 @@ export async function pickReactionOnMatchingHost(page: Page, site: SupportedSite
         await trigger.click({ timeout: 10_000 });
       } catch {
         // A platform dialog can drop over the feed after evidence collection
-        // (seen live: Threads' login sheet intercepts pointer events over the
-        // whole post) - dismiss it, then go through the keyboard ladder rather
-        // than a second pointer click: an overlay the unwall sweep does not
-        // recognize keeps intercepting the click for the full retry window, while
-        // focus + Enter/Space reaches the trigger regardless of what covers it.
+        // (Threads' login sheet intercepts pointer events over the whole post) -
+        // dismiss it, then go through the keyboard ladder: an overlay the unwall sweep
+        // does not recognize keeps intercepting pointer clicks for the full retry
+        // window, while focus + Enter/Space reaches the trigger regardless.
         await page.keyboard.press("Escape").catch(() => {});
         await dismissLoginWalls(page);
         await page.waitForTimeout(1_000);
@@ -234,12 +221,10 @@ export async function pickReactionOnMatchingHost(page: Page, site: SupportedSite
       reaction = await clickFirstUnselectedReactionOption(page);
       expect(reaction, "A reaction option should be clicked").not.toBeNull();
       if (!reaction) throw new Error("Missing reaction option");
-      // The optimistic UI is extension-owned, so the pick MUST settle - but the
-      // counter-form trigger only ever shows the top-3 emoji trio, so on a
-      // well-reacted target a fresh account's pick may legitimately never surface
-      // on the button itself (data-active flips, the trio stays). Read the button
-      // first; when it cannot carry the emoji, reopen the picker and read the
-      // selected option there - same fallback the history leg uses.
+      // The pick MUST settle, but the counter-form trigger only shows the top emoji
+      // trio, so on a well-reacted target a fresh account's pick may never surface on
+      // the button (data-active flips, the trio stays). Read the button first. When it
+      // cannot carry the emoji, reopen the picker and read there.
       observed = await pollForValue(
         () => selectedReactionOnMatchingHost(page, targetKey),
         (r) => r === reaction,
@@ -269,8 +254,8 @@ export function firstMatchingEvidenceTargetKey(site: SupportedSiteScenario, evid
   return evidence.hostSamples.find((host) => host.visible && host.mountKey && pattern.test(host.mountKey))?.mountKey ?? evidence.matchingAnchorKeys.find((key) => pattern.test(key)) ?? null;
 }
 
-// Source-string form so the anchor walk stays the ONE definition in
-// probe-src.ts: a typed copy here silently drifted from it before.
+// Source-string form so the anchor walk stays the ONE definition in probe-src.ts:
+// a typed copy here silently drifted from it before.
 async function mountedKeyForTrigger(trigger: ElementHandle<HTMLElement>): Promise<string | null> {
   return trigger.evaluate<string | null>(`(el) => {
     ${MOUNTED_KEY_OF_SRC}
@@ -463,25 +448,13 @@ export async function clickFirstUnselectedReactionOption(page: Page): Promise<st
     try {
       await option.click({ timeout: 5_000 });
     } catch {
-      // A site overlay behind the popover (seen live: a YouTube video ad) can
-      // make Playwright's pointer hit-target check spin until timeout even
-      // though the option paints on top. Synthetic el.click() is a dead end -
-      // handlePick is isTrusted-gated - so activate via keyboard, which
-      // dispatches a trusted click. Re-resolve the option first: when the click
-      // failed because the picker re-rendered under it (counts landing mid-open),
-      // this handle is detached and focusing it throws instead of picking - and
-      // the re-render is not instant, so wait for the repainted option rather
-      // than reading once mid-render (that read came back null and fell straight
-      // back to the dead handle: "elementHandle.focus: Element is not attached to
-      // the DOM", live on the YouTube authed loop).
-      const repainted = reaction ? await pollForLiveHandle(() => findVisibleEmojiGridOption(page, reaction), 5_000) : null;
-      const live = repainted ?? option;
-      try {
-        await live.focus();
-        await page.keyboard.press(" ");
-      } finally {
-        if (live !== option) await live.dispose().catch(() => {});
-      }
+      // A site overlay behind the popover (a YouTube video ad) makes Playwright's
+      // pointer hit-target check spin until timeout even though the option paints on
+      // top. Synthetic el.click() is a dead end, since handlePick is isTrusted-gated,
+      // so activate via keyboard for a trusted click. The option is addressed by its
+      // own glyph across the two surfaces findVisibleEmojiGridOption picks from, so a
+      // re-render under the failed click re-resolves at action time.
+      await focusAndPress(page, `${GRID_ITEM_SELECTOR}, .khasky-emojery-breakdown-row`, " ", reaction);
     }
     return reaction;
   } finally {
