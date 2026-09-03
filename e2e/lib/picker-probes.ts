@@ -105,9 +105,16 @@ async function findAnyVisibleEmojeryTrigger(page: Page, targetKey?: string): Pro
 // this must stay short enough not to stack up behind that poll's own timeout.
 const KEYBOARD_FOCUS_TIMEOUT_MS = 5_000;
 
-async function focusAndPress(page: Page, selector: string, key: string, hasText?: string | null): Promise<void> {
+// The picked OPTION gets twice that. It is addressed by its own glyph and waits for one
+// specific node rather than any trigger, and a YouTube watch page re-laying its action row
+// under the popover has taken past 5s to settle it - the pick then failed outright and the
+// run only survived on a retry. This path costs the poll above nothing: it runs once per
+// pick attempt, outside expectOpenPickerGrid.
+const OPTION_FOCUS_TIMEOUT_MS = 10_000;
+
+async function focusAndPress(page: Page, selector: string, key: string, hasText?: string | null, timeoutMs = KEYBOARD_FOCUS_TIMEOUT_MS): Promise<void> {
   const visible = page.locator(selector).filter({ visible: true });
-  await (hasText ? visible.filter({ hasText }) : visible).first().focus({ timeout: KEYBOARD_FOCUS_TIMEOUT_MS });
+  await (hasText ? visible.filter({ hasText }) : visible).first().focus({ timeout: timeoutMs });
   await page.keyboard.press(key);
 }
 
@@ -454,7 +461,7 @@ export async function clickFirstUnselectedReactionOption(page: Page): Promise<st
       // so activate via keyboard for a trusted click. The option is addressed by its
       // own glyph across the two surfaces findVisibleEmojiGridOption picks from, so a
       // re-render under the failed click re-resolves at action time.
-      await focusAndPress(page, `${GRID_ITEM_SELECTOR}, .khasky-emojery-breakdown-row`, " ", reaction);
+      await focusAndPress(page, `${GRID_ITEM_SELECTOR}, .khasky-emojery-breakdown-row`, " ", reaction, OPTION_FOCUS_TIMEOUT_MS);
     }
     return reaction;
   } finally {
