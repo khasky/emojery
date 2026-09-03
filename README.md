@@ -8,7 +8,7 @@ A free, open source browser extension that turns Likes, Stars and upvotes into t
 
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-green.svg)](LICENSE) [![Version](https://img.shields.io/github/package-json/v/khasky/emojery?color=blue)](./package.json) [![GitHub issues](https://img.shields.io/github/issues/khasky/emojery)](https://github.com/khasky/emojery/issues) [![Downloads](https://img.shields.io/github/downloads/khasky/emojery/total)](https://github.com/khasky/emojery/releases) [![CI](https://github.com/khasky/emojery/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/khasky/emojery/actions/workflows/ci.yml) [![Security](https://github.com/khasky/emojery/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/khasky/emojery/actions/workflows/security.yml) [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-coming%20soon-lightgrey.svg?logo=googlechrome&logoColor=white)](#install) [![Firefox Add-ons](https://img.shields.io/badge/Firefox%20Add--ons-coming%20soon-lightgrey.svg?logo=firefoxbrowser&logoColor=white)](#install) [![Edge Add-ons](https://img.shields.io/badge/Edge%20Add--ons-coming%20soon-lightgrey.svg?logo=microsoftedge&logoColor=white)](#install) [![Sponsor](https://img.shields.io/badge/sponsor-%E2%9D%A4-ea4aaa.svg?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/khasky) [![Emojery](https://api.emojery.app/badge/github/khasky/emojery.svg)](https://emojery.app/react?t=github/khasky/emojery)
 
-[What it looks like](#what-using-emojery-looks-like) · [Features](#features) · [Supported sites](#supported-sites) · [Install](#install) · [Build from source](#build-from-source-and-development) · [Contributing](#contributing) · [Security](#security) · [Support](#support) · [Credits](#credits) · [License](#license)
+[What it looks like](#what-using-emojery-looks-like) · [Features](#features) · [Supported sites](#supported-sites) · [Install](#install) · [Build from source](#build-from-source-and-development) · [Contributing](#contributing) · [Security](#security) · [Support](#support) · [Sponsors](#sponsors) · [Credits](#credits) · [License](#license)
 
 </div>
 
@@ -340,6 +340,10 @@ If **Emojery** is useful to you, you can support development:
 - [Patreon](https://www.patreon.com/khasky)
 - [Ko-Fi](https://ko-fi.com/khasky)
 - [Crypto](https://emojery.app/donate?utm_source=github&utm_medium=readme&utm_campaign=emojery&utm_content=support#crypto)
+
+## Sponsors
+
+No sponsors yet — [the first spot is open](https://github.com/sponsors/khasky). Sponsoring pays for the servers that keep public reaction counts online; where each tier appears, what artwork I need, and what won't be accepted are in [SPONSORS.md](./SPONSORS.md).
 
 ## Credits
 
