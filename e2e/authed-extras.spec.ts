@@ -12,8 +12,8 @@ import { reloadAndSettle } from "./lib/reload-settle";
 
 const REQUIRES_OTP = ext.otpSkipReason("authed extras");
 
-// Between reads of a public counter. Each read reloads the page, and the server-side count
-// cache is what the wait is really for - polling faster only reloads more.
+// Between reads of a public counter. Each read reloads the page, and an updated public
+// total is not readable immediately - polling faster only reloads more.
 const COUNT_SETTLE_POLL_MS = 12_000;
 
 // Whole file signs in through auth.html and drives the popup, which Playwright Firefox cannot

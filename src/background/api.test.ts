@@ -655,7 +655,8 @@ describe("fetchCount", () => {
 
   it("does not re-fetch a target whose read just failed (negative cache)", async () => {
     // Outage behavior: feed rescans re-request every visible target; a failed
-    // read must short-circuit for its TTL instead of hammering a shedding server.
+    // read must short-circuit for its TTL instead of re-issuing the same failing
+    // request once per rebuilt mount.
     vi.mocked(getAuth).mockResolvedValue(null);
     const fetchMock = vi.fn(async () => new Response("nope", { status: 404 }));
     vi.stubGlobal("fetch", fetchMock);

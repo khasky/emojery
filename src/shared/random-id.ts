@@ -20,11 +20,9 @@ export function randomId(): string {
       return out;
     }
   }
-  // No CSPRNG: throw rather than fall back to Date.now() + Math.random(). This
-  // function also mints the install and session ids that travel to the API as
-  // client-security headers, so a guessable id here is worth more to an attacker
-  // than a missing one - and `jsonApiHeaders` already absorbs the throw by sending
-  // the request without those headers. Unreachable in a browser; failing loud is
-  // what keeps it that way.
+  // No CSPRNG: throw rather than fall back to Date.now() + Math.random() - a
+  // predictable id would be worse than none, and `jsonApiHeaders` already absorbs
+  // the throw by sending the request without those headers. Unreachable in a
+  // browser; failing loud is what keeps it that way.
   throw new Error("randomId: no Web Crypto (crypto.randomUUID / crypto.getRandomValues) in this context");
 }

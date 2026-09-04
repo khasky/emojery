@@ -46,8 +46,6 @@ describe("randomId", () => {
 
   it("throws rather than mint a guessable id when there is no Web Crypto at all", () => {
     vi.stubGlobal("crypto", undefined);
-    // This id also becomes the install/session header the API reads, so a
-    // predictable one is worth more to an attacker than a missing one.
     expect(() => randomId()).toThrow(/no Web Crypto/);
   });
 
@@ -58,7 +56,7 @@ describe("randomId", () => {
     expect(() => randomId()).toThrow(/no Web Crypto/);
   });
 
-  it("lets the API layer send a request without the client-security headers instead of a guessable one", async () => {
+  it("lets the API layer send a request without the client-security headers rather than fail", async () => {
     // The one caller that must not become a hard failure: jsonApiHeaders absorbs it.
     vi.stubGlobal("crypto", undefined);
     const { jsonApiHeaders } = await import("../background/identity");

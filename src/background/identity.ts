@@ -157,10 +157,9 @@ export async function verifyOtp(email: string, code: string): Promise<VerifyOtpR
     body: JSON.stringify({ email, code }),
   });
   if (res.ok) {
-    // The wire field is `expiresAtSec`: the API spells the unit out because
-    // other timestamps on the same surface are milliseconds. The stored
-    // AuthState keeps its own `expiresAt` name (documented as seconds), so no
-    // migration of a saved `auth_v1` record is needed.
+    // The wire field is `expiresAtSec` (seconds). The stored AuthState keeps its
+    // own `expiresAt` name (documented as seconds), so no migration of a saved
+    // `auth_v1` record is needed.
     const session = (await res.json().catch(() => null)) as { userId?: unknown; token?: unknown; expiresAtSec?: unknown } | null;
     if (!session || typeof session.userId !== "string" || !session.userId || typeof session.token !== "string" || !session.token || typeof session.expiresAtSec !== "number" || !Number.isFinite(session.expiresAtSec)) {
       return { ok: false, status: res.status, error: "invalid_session" };
