@@ -5,7 +5,7 @@
   // bare URL - was caught by hand or not at all.
   // The glob comes from `pnpm lint:docs`: passed on argv, cli2 also picks up this
   // file; declared here instead, a bare run finds nothing and exits 0.
-  "ignores": ["node_modules/**", ".output/**", ".playwright/**", "test-results/**", "CHANGELOG.md"],
+  "ignores": ["node_modules/**", ".output/**", ".playwright/**", "**/test-results/**", "CHANGELOG.md"],
   "config": {
     "default": true,
 
