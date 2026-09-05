@@ -142,31 +142,11 @@ jobs:
       - name: Content-script weight budget
         run: pnpm check:bundle
 
-      # The AMO credentials are scoped to THIS step, not the job: at job level every
-      # step sees them, including `pnpm install`, whose dependency lifecycle scripts
-      # would then run with the signing keys in their environment. `secrets` is not
-      # available to a step-level `if:`, so the skip is a check inside the script.
-      - name: Sign Firefox xpi (unlisted, self-distribution)
-        shell: bash
-        env:
-          VERSION: ${{ steps.release.outputs.version }}
-          WEB_EXT_API_KEY: ${{ secrets.AMO_JWT_ISSUER }}
-          WEB_EXT_API_SECRET: ${{ secrets.AMO_JWT_SECRET }}
-        run: |
-          set -euo pipefail
-          if [ -z "${WEB_EXT_API_KEY}" ] || [ -z "${WEB_EXT_API_SECRET}" ]; then
-            echo "AMO signing credentials unset - skipping the Firefox xpi signature."
-            exit 0
-          fi
-          # `pnpm exec` (not dlx): dlx resolved web-ext's dependency tree fresh at
-          # release time, outside the lockfile and the workspace supply-chain
-          # policies - with the signing keys in env. The devDependency is frozen
-          # by the lockfile the `pnpm install` above already verified.
-          pnpm exec web-ext sign --channel=unlisted \
-            --source-dir=.output/firefox-mv2 --artifacts-dir=.output
-          # web-ext names it after the manifest (emojery-<version>-an+fx.xpi); rename to the repo scheme.
-          mv .output/*.xpi ".output/emojery-v${VERSION}-firefox-mv2.xpi"
-
+      # Every gate that reads the shipped bytes runs HERE, ahead of the signing step
+      # below - the order is the gate. `web-ext sign` uploads the MV2 bundle to AMO and
+      # gets it signed, so a scan placed after it can only redden the job: the artifact
+      # has already left the runner, and nothing in this workflow can unsign it. That is
+      # exactly the staging-origin build scan-extension-artifact.sh exists to stop.
       - name: Verify release artifacts
         shell: bash
         env:
@@ -195,8 +175,8 @@ jobs:
         shell: bash
         run: bash scripts/scan-extension-artifact.sh .output/chrome-mv3
 
-      # The MV2 bundle is zipped, signed into the .xpi above and attached to the
-      # release below, so it gates on exactly the same rules as the MV3 one.
+      # The MV2 bundle is zipped, signed into the .xpi below and attached to the
+      # release, so it gates on exactly the same rules as the MV3 one.
       - name: Scan generated Firefox extension files
         shell: bash
         run: bash scripts/scan-extension-artifact.sh .output/firefox-mv2
@@ -211,6 +191,31 @@ jobs:
         env:
           VERSION: ${{ steps.release.outputs.version }}
         run: bash scripts/scan-source-archive.sh ".output/emojery-v${VERSION}-sources.zip"
+
+      # The AMO credentials are scoped to THIS step, not the job: at job level every
+      # step sees them, including `pnpm install`, whose dependency lifecycle scripts
+      # would then run with the signing keys in their environment. `secrets` is not
+      # available to a step-level `if:`, so the skip is a check inside the script.
+      - name: Sign Firefox xpi (unlisted, self-distribution)
+        shell: bash
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+          WEB_EXT_API_KEY: ${{ secrets.AMO_JWT_ISSUER }}
+          WEB_EXT_API_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${WEB_EXT_API_KEY}" ] || [ -z "${WEB_EXT_API_SECRET}" ]; then
+            echo "AMO signing credentials unset - skipping the Firefox xpi signature."
+            exit 0
+          fi
+          # `pnpm exec` (not dlx): dlx resolved web-ext's dependency tree fresh at
+          # release time, outside the lockfile and the workspace supply-chain
+          # policies - with the signing keys in env. The devDependency is frozen
+          # by the lockfile the `pnpm install` above already verified.
+          pnpm exec web-ext sign --channel=unlisted \
+            --source-dir=.output/firefox-mv2 --artifacts-dir=.output
+          # web-ext names it after the manifest (emojery-<version>-an+fx.xpi); rename to the repo scheme.
+          mv .output/*.xpi ".output/emojery-v${VERSION}-firefox-mv2.xpi"
 
       - name: Generate release notes
         env:
