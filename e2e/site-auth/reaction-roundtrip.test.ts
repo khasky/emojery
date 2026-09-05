@@ -63,7 +63,10 @@ async function ensureLiveTrigger(b: Bridge, site: SiteId) {
         const picker = await openPickerState(b);
         expect(picker.gridVisible, `${site}: the Emojery picker grid did not open (extension signed out?).`).toBe(true);
         await pickFirstEmoji(b);
-        await b.press("Escape");
+        // No Escape after a pick: selecting an emoji already closes the popover, so the
+        // keystroke would reach the SITE instead - and a Facebook permalink (the post in
+        // a dialog over the profile) closes that dialog on Escape and lands on the home
+        // feed, where the target's counter no longer exists.
         // The counter here is still the optimistic UI.
         await b.waitFor(`const hosts = Array.from(document.querySelectorAll('.khasky-emojery-host')); return hosts.some((h) => { const r = h.getBoundingClientRect(); return r.width > 0 && r.height > 0 && !!(h.shadowRoot && h.shadowRoot.querySelector('button.khasky-emojery-counter')); });`, 8_000);
 
@@ -131,7 +134,6 @@ async function ensureLiveTrigger(b: Bridge, site: SiteId) {
       const picker = await openPickerState(b);
       expect(picker.gridVisible, "youtube: the Emojery picker grid did not open").toBe(true);
       await pickFirstEmoji(b);
-      await b.press("Escape");
       // Long enough for a pause or a stall to show up: the failure this guards
       // against is the player reacting to our overlay, which it would do within a
       // frame or two of the pick, not seconds later.
