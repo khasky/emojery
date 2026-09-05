@@ -23,7 +23,12 @@ function resolveBuildMode(): string {
   if (next) return next;
   const inline = argv.find((a) => a.startsWith("--mode="));
   if (inline) return inline.slice("--mode=".length);
-  return process.env.NODE_ENV === "development" ? "development" : "production";
+  // Never from NODE_ENV. The mode below decides which WXT_API_BASE is accepted and whether
+  // the debug channel folds away, so an ambient env var must not be able to turn `wxt build`
+  // into a development build. The subcommand is what the operator typed: `wxt` on its own
+  // (or with only flags) is the dev server, anything else builds.
+  const subcommand = argv[2];
+  return subcommand === undefined || subcommand.startsWith("-") ? "development" : "production";
 }
 const BUILD_MODE = resolveBuildMode();
 
