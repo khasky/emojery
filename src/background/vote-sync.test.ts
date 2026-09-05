@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { matchPatternsForSite } from "../shared/sites";
 import { broadcastVoteDelta } from "./vote-sync";
 
 const target = {
@@ -52,14 +53,18 @@ describe("broadcastVoteDelta - cross-tab fan-out (SW broker)", () => {
     }
   });
 
-  it("scopes the tab query to supported-site match patterns (not every tab)", async () => {
+  // The delta names one target, and only a tab on that target's site can hold a mount for
+  // it. Querying every supported host instead would hand the reacted-to URL to content
+  // scripts with no listener for it - asserted as an exact set, since a superset passes any
+  // "contains the right patterns" check.
+  it("scopes the tab query to the target site's match patterns alone", async () => {
     chromeStub.tabs.query.mockImplementation((_q: unknown, cb: (tabs: chrome.tabs.Tab[]) => void) => cb([]));
 
     await broadcastVoteDelta(undefined, delta);
 
     const queryInfo = chromeStub.tabs.query.mock.calls[0]![0] as chrome.tabs.QueryInfo;
-    expect(Array.isArray(queryInfo.url)).toBe(true);
-    expect((queryInfo.url as string[]).length).toBeGreaterThan(0);
+    expect(queryInfo.url).toEqual(matchPatternsForSite(target.site));
+    expect(queryInfo.url).not.toEqual(expect.arrayContaining(matchPatternsForSite("github")));
   });
 
   it("swallows a per-tab sendMessage failure (tab without our content script)", async () => {
