@@ -10,6 +10,7 @@ import { virtual } from "@guidepup/virtual-screen-reader";
 import { h, render } from "preact";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { userEvent } from "vitest/browser";
+import { SEARCH_SELECTOR, TRIGGER_CLASS } from "../shared/dom";
 import { getEmojiLabel } from "../shared/emoji-meta";
 import { t } from "../shared/i18n";
 import { CATEGORIES } from "../shared/reactions";
@@ -39,7 +40,7 @@ function mountPicker(): void {
 }
 
 async function openPopover(): Promise<void> {
-  await userEvent.click(container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!);
+  await userEvent.click(container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!);
   await expect.poll(() => portalRoot.querySelector('[role="dialog"]')).not.toBeNull();
 }
 
@@ -92,7 +93,7 @@ describe("Picker - virtual screen reader", () => {
     mountPicker();
     await openPopover();
     await virtual.start({ container: portalRoot });
-    const search = portalRoot.querySelector<HTMLInputElement>(".khasky-emojery-search")!;
+    const search = portalRoot.querySelector<HTMLInputElement>(SEARCH_SELECTOR)!;
     await userEvent.fill(search, "zzzzzz");
     // The sr-only role="status" region must announce the no-match state without
     // the user leaving the search box.

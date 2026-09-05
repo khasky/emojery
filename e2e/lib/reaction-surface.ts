@@ -14,7 +14,7 @@ import { isFirefoxRun } from "./browser-session";
 import { signIn } from "./extension-pages";
 import { firstElementHandle, pollForValue } from "./picker-probes";
 import { DEEP_QUERY_ALL_SRC, FIRST_VISIBLE_TRIGGER_SRC } from "./probe-src";
-import { GRID_ITEM_SELECTOR, SEARCH_INPUT_SELECTOR, TRIGGER_SELECTOR } from "./selectors";
+import { COUNTER_CLASS, GRID_ITEM_SELECTOR, HIDDEN_SELECTOR, HOST_SELECTOR, MOUNT_ATTR, MOUNTED_SELECTOR, POPOVER_CLASS, SEARCH_INPUT_SELECTOR, TRIGGER_BUTTON_SELECTOR, TRIGGER_SELECTOR } from "./selectors";
 import { githubUrl, searchTermFor } from "./test-config";
 
 // Open `url` and wait for an Emojery host to actually mount, retrying the
@@ -35,20 +35,20 @@ export async function openSite(context: BrowserContext, url: string, opts: { req
       await page.goto(url, { waitUntil: "domcontentloaded" }).catch(() => {});
       await page.waitForLoadState("load", { timeout: 30_000 }).catch(() => {});
       // Click-ready = visible box AND a trigger rendered in the shadow root.
-      // Plain `querySelectorAll` on purpose: the host sits in the LIGHT DOM, and
-      // a serialized typed callback cannot close over an interpolated source
-      // helper anyway.
+      // Plain `querySelectorAll` on purpose: the host sits in the LIGHT DOM. A
+      // serialized typed callback cannot close over the shared selectors either,
+      // so they are handed in as the evaluate argument.
       const ready = await page
         .waitForFunction(
-          () => {
-            const hosts = Array.from(document.querySelectorAll<HTMLElement>(".khasky-emojery-host"));
+          ({ hostSelector, triggerSelector }) => {
+            const hosts = Array.from(document.querySelectorAll<HTMLElement>(hostSelector));
             return hosts.some((h) => {
               const r = h.getBoundingClientRect();
               if (r.width <= 0 || r.height <= 0) return false;
-              return h.shadowRoot?.querySelector("button.khasky-emojery-trigger, button.khasky-emojery-counter") != null;
+              return h.shadowRoot?.querySelector(triggerSelector) != null;
             });
           },
-          undefined,
+          { hostSelector: HOST_SELECTOR, triggerSelector: TRIGGER_BUTTON_SELECTOR },
           { timeout: 15_000 },
         )
         .then(
@@ -79,15 +79,18 @@ export async function openSite(context: BrowserContext, url: string, opts: { req
 // Same light-DOM reasoning as the wait above: a plain query in a typed callback.
 async function hostStateSummary(page: Page): Promise<string> {
   return page
-    .evaluate(() => {
-      const hosts = Array.from(document.querySelectorAll<HTMLElement>(".khasky-emojery-host"));
-      const sized = hosts.filter((host) => {
-        const rect = host.getBoundingClientRect();
-        return rect.width > 0 && rect.height > 0;
-      });
-      const withTrigger = sized.filter((host) => host.shadowRoot?.querySelector("button.khasky-emojery-trigger, button.khasky-emojery-counter") != null);
-      return `url=${location.href} hosts=${hosts.length} sized=${sized.length} withTrigger=${withTrigger.length}`;
-    })
+    .evaluate(
+      ({ hostSelector, triggerSelector }) => {
+        const hosts = Array.from(document.querySelectorAll<HTMLElement>(hostSelector));
+        const sized = hosts.filter((host) => {
+          const rect = host.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0;
+        });
+        const withTrigger = sized.filter((host) => host.shadowRoot?.querySelector(triggerSelector) != null);
+        return `url=${location.href} hosts=${hosts.length} sized=${sized.length} withTrigger=${withTrigger.length}`;
+      },
+      { hostSelector: HOST_SELECTOR, triggerSelector: TRIGGER_BUTTON_SELECTOR },
+    )
     .catch((err: unknown) => `page unreadable (${String(err).slice(0, 120)})`);
 }
 
@@ -113,9 +116,9 @@ export async function firstMountedKey(page: Page, sitePrefix = "github:"): Promi
   return page.evaluate<string | null>(`(() => {
     const prefix = ${JSON.stringify(sitePrefix)};
     ${DEEP_QUERY_ALL_SRC}
-    for (const a of deepQueryAll("[data-khasky-emojery-mounted]")) {
+    for (const a of deepQueryAll("${MOUNTED_SELECTOR}")) {
       if (!a.isConnected) continue;
-      const key = a.getAttribute("data-khasky-emojery-mounted");
+      const key = a.getAttribute("${MOUNT_ATTR}");
       if (key?.startsWith(prefix)) return key;
     }
     return null;
@@ -140,7 +143,7 @@ export async function readCounter(page: Page): Promise<CounterReading> {
     if (!found) return { text: "", isCounter: false, total: null };
     const trigger = found.trigger;
     const text = (trigger.textContent || "").replace(/\\s+/g, " ").trim();
-    const isCounter = trigger.classList.contains("khasky-emojery-counter");
+    const isCounter = trigger.classList.contains("${COUNTER_CLASS}");
     const label = trigger.getAttribute("aria-label") || "";
     const m = label.match(/(\\d+)/);
     return { text, isCounter, total: m ? Number(m[1]) : null };
@@ -265,7 +268,7 @@ async function findEmojiOption(page: Page, emoji: string) {
     `(() => {
     const expected = ${JSON.stringify(emoji)};
     ${DEEP_QUERY_ALL_SRC}
-    return deepQueryAll(".khasky-emojery-grid-item").find((el) => (el.textContent ?? "").trim() === expected && el.getBoundingClientRect().width > 0) ?? null;
+    return deepQueryAll("${GRID_ITEM_SELECTOR}").find((el) => (el.textContent ?? "").trim() === expected && el.getBoundingClientRect().width > 0) ?? null;
   })()`,
   );
 }
@@ -376,7 +379,7 @@ function stillActiveAfter(page: Page, timeoutMs: number): Promise<boolean> {
 export async function visibleHostCount(page: Page): Promise<number> {
   return page.evaluate<number>(`(() => {
     ${DEEP_QUERY_ALL_SRC}
-    return deepQueryAll(".khasky-emojery-host").filter((h) => {
+    return deepQueryAll("${HOST_SELECTOR}").filter((h) => {
       const r = h.getBoundingClientRect();
       return r.width > 0 && r.height > 0;
     }).length;
@@ -387,7 +390,7 @@ export async function visibleHostCount(page: Page): Promise<number> {
 // (`data-khasky-emojery-hidden="1"`). The marker sits on the SITE's own
 // control in the light DOM, so a plain query is enough.
 export async function hiddenNativeCount(page: Page): Promise<number> {
-  return page.evaluate(() => document.querySelectorAll('[data-khasky-emojery-hidden="1"]').length);
+  return page.evaluate((hiddenSelector) => document.querySelectorAll(hiddenSelector).length, HIDDEN_SELECTOR);
 }
 
 // Whether the picker marks `emoji` as the user's selected reaction. Side effect:
@@ -428,7 +431,7 @@ export async function openPickerViewportFit(page: Page): Promise<{
     ${DEEP_QUERY_ALL_SRC}
     const deadline = Date.now() + 8000;
     while (Date.now() < deadline) {
-      const pop = deepQueryAll(".khasky-emojery-popover").find((el) => {
+      const pop = deepQueryAll(".${POPOVER_CLASS}").find((el) => {
         const r = el.getBoundingClientRect();
         return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== "hidden";
       });

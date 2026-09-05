@@ -5,6 +5,7 @@
 // never mounts is a wall (skip), not a regression.
 import { expect, type Page, test } from "@playwright/test";
 import { DEEP_QUERY_ALL_SRC } from "./probe-src";
+import { MOUNTED_SELECTOR } from "./selectors";
 import { isBlockUrl } from "./site-walls";
 
 export async function requireFacebookPostMount(page: Page, timeoutMs: number): Promise<void> {
@@ -14,7 +15,7 @@ export async function requireFacebookPostMount(page: Page, timeoutMs: number): P
     mounted = await page
       .evaluate<boolean>(`(() => {
         ${DEEP_QUERY_ALL_SRC}
-        return deepQueryAll("[data-khasky-emojery-mounted]").some((el) => el.getBoundingClientRect().width > 0);
+        return deepQueryAll("${MOUNTED_SELECTOR}").some((el) => el.getBoundingClientRect().width > 0);
       })()`)
       .catch(() => false);
     // Poll interval, bounded by the loop above: the mount is IntersectionObserver-driven,

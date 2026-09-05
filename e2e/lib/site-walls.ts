@@ -7,6 +7,7 @@
 // before editing the phrase sets.
 
 import type { Page } from "@playwright/test";
+import { HOST_SELECTOR } from "./selectors";
 
 // The final URL is a GATE page rather than the requested post. A gate URL skips
 // even when a host mounted - the shell can render enough of the post to mount on
@@ -250,10 +251,10 @@ function waitForDialogGone(page: Page, match: string): Promise<void> {
 
 async function scrollFacebookPageToFirstPost(page: Page): Promise<void> {
   await page
-    .evaluate(() => {
+    .evaluate((hostSelector) => {
       const host = location.hostname;
       if (host !== "facebook.com" && !host.endsWith(".facebook.com")) return;
-      const existingHost = document.querySelector<HTMLElement>(".khasky-emojery-host");
+      const existingHost = document.querySelector<HTMLElement>(hostSelector);
       if (existingHost) {
         existingHost.scrollIntoView({
           block: "center",
@@ -269,7 +270,7 @@ async function scrollFacebookPageToFirstPost(page: Page): Promise<void> {
           return /\bLike\b/i.test(text) && /\bComment\b/i.test(text);
         }) ?? articles[0];
       post?.scrollIntoView({ block: "center", inline: "center", behavior: "auto" });
-    })
+    }, HOST_SELECTOR)
     .catch(() => {});
 }
 
@@ -289,6 +290,9 @@ interface InterstitialOptions {
   /** Leave a dialog alone once it carries an Emojery host - the contrast
    *  suite measures the trigger inside such a dialog and must not hide it. */
   keepDialogsWithReactionHost: boolean;
+  /** `OWN_NODES_SELECTOR`, handed in rather than imported: the body below is
+   *  stringified into the page and can reach nothing but this object. */
+  ownNodesSelector: string;
 }
 
 // DOM-only dismissal of the sign-in prompts layered over public content (no
@@ -345,7 +349,7 @@ export function dismissInterstitialsInitScript(options: InterstitialOptions): vo
   };
 
   const hideElement = (el: HTMLElement): void => {
-    if (el.closest(".khasky-emojery-host, .khasky-emojery-overlay-host")) return;
+    if (el.closest(options.ownNodesSelector)) return;
     el.setAttribute("data-em-e2e-hidden", "1");
     el.style.setProperty("display", "none", "important");
     el.style.setProperty("visibility", "hidden", "important");
@@ -356,7 +360,7 @@ export function dismissInterstitialsInitScript(options: InterstitialOptions): vo
     for (const el of Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"], [aria-modal="true"], [data-testid="sheetDialog"]'))) {
       const rect = visibleRect(el);
       if (!rect) continue;
-      if (options.keepDialogsWithReactionHost && el.querySelector(".khasky-emojery-host, .khasky-emojery-overlay-host")) continue;
+      if (options.keepDialogsWithReactionHost && el.querySelector(options.ownNodesSelector)) continue;
       if (WALL_TEXT_RE.test(el.textContent || "")) {
         hideElement(el);
       }
@@ -372,7 +376,7 @@ export function dismissInterstitialsInitScript(options: InterstitialOptions): vo
       return;
     }
     for (const el of Array.from(document.body.querySelectorAll<HTMLElement>("*"))) {
-      if (el.closest(".khasky-emojery-host, .khasky-emojery-overlay-host")) continue;
+      if (el.closest(options.ownNodesSelector)) continue;
       if (el.id === "scrollview" || el.id === "barcelona-page-layout" || el.querySelector('[data-pagelet^="threads_"], #barcelona-page-layout')) {
         continue;
       }

@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { ANIMATION_LAYER_ID, EMOJI_CLASS, EMOJI_IMG_CLASS, SPRITE_COL_VAR, SPRITE_ROW_VAR } from "../shared/dom";
 import { allowColdModuleReset } from "../test/cold-module-reset";
+import { EMOJI_SPRITE_MODE_ATTR } from "./emoji-sprite";
 
 allowColdModuleReset();
-
-const LAYER_ID = "khasky-emojery-reaction-animations";
-const SPRITE_ATTR = "data-khasky-emojery-emoji";
 
 async function loadAnimations() {
   vi.resetModules();
@@ -28,13 +27,13 @@ async function loadAnimations() {
 }
 
 function expectSpriteEmoji(root: ParentNode, emoji: string): void {
-  const rendered = root.querySelector<HTMLElement>(".khasky-emojery-emoji");
+  const rendered = root.querySelector<HTMLElement>(`.${EMOJI_CLASS}`);
   expect(rendered).not.toBeNull();
   expect(rendered?.textContent).toBe(emoji);
-  expect(rendered?.style.getPropertyValue("--khasky-emojery-col")).not.toBe("");
-  expect(rendered?.style.getPropertyValue("--khasky-emojery-row")).not.toBe("");
+  expect(rendered?.style.getPropertyValue(SPRITE_COL_VAR)).not.toBe("");
+  expect(rendered?.style.getPropertyValue(SPRITE_ROW_VAR)).not.toBe("");
 
-  const img = rendered?.querySelector<HTMLImageElement>(".khasky-emojery-emoji-img");
+  const img = rendered?.querySelector<HTMLImageElement>(`.${EMOJI_IMG_CLASS}`);
   expect(img?.getAttribute("src")).toBe("chrome-extension://emojery/emoji-sprite/emoji-sprite.webp");
 }
 
@@ -50,8 +49,8 @@ describe("reaction animation emoji rendering", () => {
 
     playReactionClickFloat("❤️", { x: 20, y: 30 });
 
-    const layer = document.getElementById(LAYER_ID);
-    expect(layer?.getAttribute(SPRITE_ATTR)).toBe("sprite");
+    const layer = document.getElementById(ANIMATION_LAYER_ID);
+    expect(layer?.getAttribute(EMOJI_SPRITE_MODE_ATTR)).toBe("sprite");
     expectSpriteEmoji(document, "❤️");
   });
 
@@ -69,8 +68,8 @@ describe("reaction animation emoji rendering", () => {
     });
     vi.advanceTimersByTime(1);
 
-    const layer = document.getElementById(LAYER_ID);
-    expect(layer?.getAttribute(SPRITE_ATTR)).toBe("sprite");
+    const layer = document.getElementById(ANIMATION_LAYER_ID);
+    expect(layer?.getAttribute(EMOJI_SPRITE_MODE_ATTR)).toBe("sprite");
     expectSpriteEmoji(document, "👍");
   });
 });

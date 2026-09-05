@@ -4,7 +4,28 @@
 // holds the state machine and layout composition rather than every button's
 // markup. Each part here takes plain data plus callbacks.
 import type { ComponentChild, ComponentChildren, Ref } from "preact";
-import { COUNTER_CLASS, RING_CLASS, TRIGGER_CLASS } from "../shared/dom";
+import {
+  BREAKDOWN_COUNT_CLASS,
+  BREAKDOWN_LABEL_CLASS,
+  BREAKDOWN_LIST_CLASS,
+  BREAKDOWN_MORE_CLASS,
+  BREAKDOWN_ROW_CLASS,
+  CAT_BAR_CLASS,
+  CAT_BTN_CLASS,
+  CAT_ICON_CLASS,
+  CAT_UNDERLINE_CLASS,
+  CATEGORY_ATTR,
+  COUNTER_CLASS,
+  COUNTER_EMOJIS_CLASS,
+  COUNTER_TOTAL_CLASS,
+  GRID_CLASS,
+  GRID_ITEM_CLASS,
+  RING_CLASS,
+  SECTION_HEAD_CLASS,
+  SECTION_HEAD_ROW_CLASS,
+  TRIGGER_CLASS,
+  TRIGGER_ICON_CLASS,
+} from "../shared/dom";
 import { getEmojiLabel } from "../shared/emoji-meta";
 import { t } from "../shared/i18n";
 import type { Reaction } from "../shared/reactions";
@@ -17,7 +38,7 @@ import { formatCount } from "./picker-counts";
 export const EmojiButton = ({ emoji, selected, onPick, onKeyDown }: { emoji: string; selected: boolean; onPick: (emoji: Reaction, ev?: MouseEvent) => void; onKeyDown: (e: KeyboardEvent) => void }) => {
   const label = getEmojiLabel(emoji);
   return (
-    <button class="khasky-emojery-grid-item" type="button" tabIndex={-1} aria-pressed={selected} data-selected={selected} title={label} aria-label={label} onClick={(ev: MouseEvent) => onPick(emoji, ev)} onKeyDown={onKeyDown}>
+    <button class={GRID_ITEM_CLASS} type="button" tabIndex={-1} aria-pressed={selected} data-selected={selected} title={label} aria-label={label} onClick={(ev: MouseEvent) => onPick(emoji, ev)} onKeyDown={onKeyDown}>
       <EmojiImg emoji={emoji} />
     </button>
   );
@@ -48,12 +69,12 @@ export const EmojiSection = ({
   children: ComponentChildren;
 }) => (
   // biome-ignore lint/a11y/useSemanticElements: a fieldset would drag form semantics/styling into the shadow-DOM picker; role="group" on a section is intentional (and keeps it off the landmark list)
-  <section role="group" aria-labelledby={headingId} {...(categoryIndex === undefined ? {} : { "data-khasky-emojery-cat": categoryIndex })}>
-    <div class={`khasky-emojery-section-h${action ? " khasky-emojery-section-h--row" : ""}`} id={headingId}>
+  <section role="group" aria-labelledby={headingId} {...(categoryIndex === undefined ? {} : { [CATEGORY_ATTR]: categoryIndex })}>
+    <div class={`${SECTION_HEAD_CLASS}${action ? ` ${SECTION_HEAD_ROW_CLASS}` : ""}`} id={headingId}>
       {action ? <span>{heading}</span> : heading}
       {action}
     </div>
-    <div class="khasky-emojery-grid">{children}</div>
+    <div class={GRID_CLASS}>{children}</div>
   </section>
 );
 
@@ -92,7 +113,7 @@ export const PickerTrigger = ({
   if (total > 0) {
     return (
       <button {...shared} class={COUNTER_CLASS} aria-label={t("pickerReactionsAria", String(total))}>
-        <span class="khasky-emojery-counter-emojis" aria-hidden="true">
+        <span class={COUNTER_EMOJIS_CLASS} aria-hidden="true">
           {topReactions.map((r) => (
             <span key={r} data-mine={mine === r}>
               <EmojiImg emoji={r} />
@@ -100,7 +121,7 @@ export const PickerTrigger = ({
           ))}
           <GradientRing />
         </span>
-        <span class="khasky-emojery-counter-total" aria-live="polite">
+        <span class={COUNTER_TOTAL_CLASS} aria-live="polite">
           {formatCount(total)}
         </span>
         <GradientRing />
@@ -109,7 +130,7 @@ export const PickerTrigger = ({
   }
   return (
     <button {...shared} class={TRIGGER_CLASS} aria-label={mine ? t("pickerYourReaction", getEmojiLabel(mine)) : t("pickerAddReaction")}>
-      <span class="khasky-emojery-trigger-icon" aria-hidden="true">
+      <span class={TRIGGER_ICON_CLASS} aria-hidden="true">
         <EmojiImg emoji={mine ?? "🙂"} />
         <GradientRing />
       </span>
@@ -129,25 +150,25 @@ const GradientRing = () => <i class={RING_CLASS} aria-hidden="true" />;
 // Per-reaction totals above the grid, so users land on existing social signal
 // before the act of contributing. Paginated by the caller (see BREAKDOWN_INITIAL).
 export const ReactionBreakdown = ({ entries, mine, showToggle, expanded, onToggle, onPick }: { entries: [string, number | undefined][]; mine: Reaction | null; showToggle: boolean; expanded: boolean; onToggle: () => void; onPick: (emoji: Reaction, ev?: MouseEvent) => void }) => (
-  <div class="khasky-emojery-breakdown-list">
+  <div class={BREAKDOWN_LIST_CLASS}>
     {entries.map(([r, n]) => {
       const label = getEmojiLabel(r);
       return (
         // The label includes the visible count - an aria-label alone would hide
         // the per-reaction totals from screen readers entirely.
-        <button class="khasky-emojery-breakdown-row" key={r} type="button" data-selected={mine === r} aria-label={`${t("pickerReactWith", label)}, ${formatCount(n ?? 0)}`} onClick={(ev: MouseEvent) => onPick(r, ev)}>
+        <button class={BREAKDOWN_ROW_CLASS} key={r} type="button" data-selected={mine === r} aria-label={`${t("pickerReactWith", label)}, ${formatCount(n ?? 0)}`} onClick={(ev: MouseEvent) => onPick(r, ev)}>
           <span aria-hidden="true">
             <EmojiImg emoji={r} />
           </span>
-          <span class="khasky-emojery-breakdown-label" title={label}>
+          <span class={BREAKDOWN_LABEL_CLASS} title={label}>
             {label}
           </span>
-          <span class="khasky-emojery-breakdown-count">{formatCount(n ?? 0)}</span>
+          <span class={BREAKDOWN_COUNT_CLASS}>{formatCount(n ?? 0)}</span>
         </button>
       );
     })}
     {showToggle && (
-      <button class="khasky-emojery-breakdown-more" type="button" onClick={onToggle}>
+      <button class={BREAKDOWN_MORE_CLASS} type="button" onClick={onToggle}>
         {expanded ? t("pickerShowLess") : t("pickerShowMore")}
       </button>
     )}
@@ -159,16 +180,16 @@ export const ReactionBreakdown = ({ entries, mine, showToggle, expanded, onToggl
 // from the picker's scroll-spy); an accent underline fades in on the same signal.
 export const CategoryBar = ({ intensity, onSelect }: { intensity: number[]; onSelect: (index: number) => void }) => (
   // biome-ignore lint/a11y/useSemanticElements: a fieldset would drag form semantics/styling into the shadow-DOM picker; role="group" on a div is intentional
-  <div class="khasky-emojery-cat-bar" role="group" aria-label={t("pickerCategoriesAria")}>
+  <div class={CAT_BAR_CLASS} role="group" aria-label={t("pickerCategoriesAria")}>
     {CATEGORIES.map((cat, i) => {
       const on = intensity[i] ?? 0;
       const label = t(cat.nameKey);
       return (
-        <button key={cat.nameKey} type="button" class="khasky-emojery-cat-btn" title={label} aria-label={label} onClick={() => onSelect(i)} style={{ filter: `grayscale(${1 - on})` }}>
-          <span class="khasky-emojery-cat-icon" aria-hidden="true">
+        <button key={cat.nameKey} type="button" class={CAT_BTN_CLASS} title={label} aria-label={label} onClick={() => onSelect(i)} style={{ filter: `grayscale(${1 - on})` }}>
+          <span class={CAT_ICON_CLASS} aria-hidden="true">
             <EmojiImg emoji={cat.icon} />
           </span>
-          <span class="khasky-emojery-cat-underline" aria-hidden="true" style={{ opacity: on }} />
+          <span class={CAT_UNDERLINE_CLASS} aria-hidden="true" style={{ opacity: on }} />
         </button>
       );
     })}

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { HOST_CLASS } from "../shared/dom";
-import { RING_SPIN_WINDOW_MS, setRingAnimation } from "./ring-spin";
+import { ANIMATE_ATTR, RING_SPIN_WINDOW_MS, setRingAnimation } from "./ring-spin";
 
 // The ring's spin is the extension's single most expensive idle cost: a masked, clipped box the
 // GPU re-rasters every frame - eight visible triggers on an otherwise idle tab measured 17.5%
@@ -10,8 +10,6 @@ import { RING_SPIN_WINDOW_MS, setRingAnimation } from "./ring-spin";
 // IntersectionObserver, so setRingAnimation takes its spin-straight-away branch; the observer
 // path runs the same startRingSpin call.
 describe("ring spin window", () => {
-  const ANIMATE_ATTR = "data-khasky-emojery-animate";
-
   afterEach(() => {
     vi.useRealTimers();
   });

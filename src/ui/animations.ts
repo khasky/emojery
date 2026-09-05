@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+import { ANIMATION_LAYER_ID, ANIMATION_STYLE_ID, BUTTON_DROP_CLASS, BUTTON_DUST_CLASS, CLICK_FLOAT_CLASS, INTRO_PARTICLE_CLASS } from "../shared/dom";
 import type { Reaction, ReactionCounts, TargetCounts } from "../shared/reactions";
 import animationsCss from "./animations.css?raw";
 import { applyEmojiSpriteHost, createEmojiSpriteElement, EMOJI_SPRITE_MODE_ATTR, emojiSpriteCss } from "./emoji-sprite";
@@ -8,9 +9,8 @@ export interface ReactionAnimationOrigin {
   y: number;
 }
 
-const STYLE_ID = "khasky-emojery-reaction-animations-style";
-// Also the sprite scope below, and the `#khasky-emojery-reaction-animations` rule in animations.css.
-const LAYER_ID = "khasky-emojery-reaction-animations";
+// The layer id is also the sprite scope below, and the `#khasky-emojery-reaction-animations`
+// rule in animations.css.
 const MAX_INTRO_PARTICLES = 10;
 // Intro stagger: each emoji's group starts a beat after the previous one, each particle
 // within a group a shorter beat after the last, plus a random spread so the launches
@@ -25,10 +25,6 @@ const INTRO_PARTICLES_PER_EMOJI = 3;
 // Facebook disables CSS animations for descendants that do not carry this
 // escape class when its reduced-motion wrapper is active.
 const PAGE_ANIMATION_ESCAPE_CLASS = "always-enable-animations";
-// Carried by the host only while the drop-in plays; mount-style.ts reads it to skip
-// its flank probe (detaching the host would restart the animation). Styled in
-// animations.css, which spells the class and its 360ms duration out literally.
-export const BUTTON_DROP_CLASS = "khasky-emojery-button-drop";
 // When the button hits the ground and the dust puffs: the 55% impact keyframe of
 // animations.css's khasky-emojery-button-drop.
 const BUTTON_DROP_IMPACT_MS = 200;
@@ -81,7 +77,7 @@ export function playReactionClickFloat(emoji: Reaction, origin?: ReactionAnimati
   if (!layer) return;
 
   const el = document.createElement("span");
-  el.className = `khasky-emojery-reaction-click-float ${PAGE_ANIMATION_ESCAPE_CLASS}`;
+  el.className = `${CLICK_FLOAT_CLASS} ${PAGE_ANIMATION_ESCAPE_CLASS}`;
   el.appendChild(createEmojiSpriteElement(emoji));
 
   const x = origin?.x ?? window.innerWidth / 2;
@@ -121,8 +117,8 @@ export function playButtonPlacement(host: HTMLElement): void {
 
 export function resetReactionAnimationStateForTests(): void {
   introPlayedForUrl = null;
-  document.getElementById(LAYER_ID)?.remove();
-  document.getElementById(STYLE_ID)?.remove();
+  document.getElementById(ANIMATION_LAYER_ID)?.remove();
+  document.getElementById(ANIMATION_STYLE_ID)?.remove();
 }
 
 function spawnIntroParticle(emoji: Reaction, emojiIndex: number): void {
@@ -130,7 +126,7 @@ function spawnIntroParticle(emoji: Reaction, emojiIndex: number): void {
   if (!layer) return;
 
   const el = document.createElement("span");
-  el.className = `khasky-emojery-reaction-intro-particle ${PAGE_ANIMATION_ESCAPE_CLASS}`;
+  el.className = `${INTRO_PARTICLE_CLASS} ${PAGE_ANIMATION_ESCAPE_CLASS}`;
   el.appendChild(createEmojiSpriteElement(emoji));
 
   const baseSize = emojiIndex === 0 ? 42 : emojiIndex === 1 ? 34 : 28;
@@ -166,7 +162,7 @@ function spawnDustCloud(host: HTMLElement): void {
 
   for (let i = 0; i < DUST_PARTICLE_COUNT; i += 1) {
     const el = document.createElement("span");
-    el.className = `khasky-emojery-button-dust ${PAGE_ANIMATION_ESCAPE_CLASS}`;
+    el.className = `${BUTTON_DUST_CLASS} ${PAGE_ANIMATION_ESCAPE_CLASS}`;
 
     // Biased outward from the landing point, with a small upward billow.
     const side = i / (DUST_PARTICLE_COUNT - 1) - 0.5;
@@ -192,14 +188,14 @@ function spawnDustCloud(host: HTMLElement): void {
 function ensureAnimationLayer(): HTMLElement | null {
   if (!document.body) return null;
   ensureAnimationStyle();
-  const existing = document.getElementById(LAYER_ID);
+  const existing = document.getElementById(ANIMATION_LAYER_ID);
   if (existing) {
     applyEmojiSpriteHost(existing);
     return existing;
   }
 
   const layer = document.createElement("div");
-  layer.id = LAYER_ID;
+  layer.id = ANIMATION_LAYER_ID;
   layer.className = PAGE_ANIMATION_ESCAPE_CLASS;
   layer.setAttribute("aria-hidden", "true");
   document.body.appendChild(layer);
@@ -208,14 +204,14 @@ function ensureAnimationLayer(): HTMLElement | null {
 }
 
 function ensureAnimationStyle(): void {
-  if (document.getElementById(STYLE_ID)) return;
+  if (document.getElementById(ANIMATION_STYLE_ID)) return;
   const style = document.createElement("style");
-  style.id = STYLE_ID;
+  style.id = ANIMATION_STYLE_ID;
   // The sprite rules are scoped to the layer at runtime (they depend on the layer
   // id and the mode attribute), so they are appended rather than authored in
   // animations.css. They style only .khasky-emojery-emoji* elements, which the
   // stylesheet above never touches, so order between the two does not matter.
-  style.textContent = animationsCss + emojiSpriteCss({ base: `#${LAYER_ID}`, sprite: `#${LAYER_ID}[${EMOJI_SPRITE_MODE_ATTR}="sprite"]` });
+  style.textContent = animationsCss + emojiSpriteCss({ base: `#${ANIMATION_LAYER_ID}`, sprite: `#${ANIMATION_LAYER_ID}[${EMOJI_SPRITE_MODE_ATTR}="sprite"]` });
   document.head.appendChild(style);
 }
 

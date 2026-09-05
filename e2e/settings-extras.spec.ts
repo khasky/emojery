@@ -12,6 +12,7 @@
 import { expect, type Page, test } from "@playwright/test";
 import * as ext from "./lib/extension";
 import { reloadAndSettle } from "./lib/reload-settle";
+import { CLICK_FLOAT_CLASS, INTRO_PARTICLE_CLASS } from "./lib/selectors";
 
 const REQUIRES_OTP = ext.otpSkipReason("the animations-toggle e2e check");
 
@@ -21,14 +22,14 @@ test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
 // Arm a page-wide watcher for the click-burst element BEFORE reacting; the burst
 // lives only ~600ms, so a post-hoc query would race its removal.
 async function armClickBurstWatcher(page: Page): Promise<void> {
-  await page.evaluate(() => {
+  await page.evaluate((clickFloatClass) => {
     const w = window as unknown as { __emSawClickBurst?: boolean; __emBurstObserver?: MutationObserver };
     w.__emSawClickBurst = false;
     w.__emBurstObserver?.disconnect();
     const observer = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
         for (const node of Array.from(mutation.addedNodes)) {
-          if (node instanceof HTMLElement && node.classList.contains("khasky-emojery-reaction-click-float")) {
+          if (node instanceof HTMLElement && node.classList.contains(clickFloatClass)) {
             w.__emSawClickBurst = true;
           }
         }
@@ -36,7 +37,7 @@ async function armClickBurstWatcher(page: Page): Promise<void> {
     });
     observer.observe(document.body, { subtree: true, childList: true });
     w.__emBurstObserver = observer;
-  });
+  }, CLICK_FLOAT_CLASS);
 }
 
 async function sawClickBurst(page: Page): Promise<boolean> {
@@ -187,13 +188,13 @@ test("replace-native + per-site off restores the native control", async () => {
 // Install a page-init watcher (BEFORE the site's scripts run, re-armed on every
 // navigation) that flags when the page-load intro burst spawns a particle.
 async function armIntroWatcher(page: Page): Promise<void> {
-  await page.addInitScript(() => {
+  await page.addInitScript((introParticleClass: string) => {
     const flagHolder = window as unknown as { __emSawIntro?: boolean };
     flagHolder.__emSawIntro = false;
     const observer = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
         for (const node of Array.from(mutation.addedNodes)) {
-          if (node instanceof HTMLElement && (node.classList.contains("khasky-emojery-reaction-intro-particle") || node.querySelector?.(".khasky-emojery-reaction-intro-particle"))) {
+          if (node instanceof HTMLElement && (node.classList.contains(introParticleClass) || node.querySelector?.(`.${introParticleClass}`))) {
             flagHolder.__emSawIntro = true;
           }
         }
@@ -202,7 +203,7 @@ async function armIntroWatcher(page: Page): Promise<void> {
     const start = () => observer.observe(document.documentElement, { subtree: true, childList: true });
     if (document.documentElement) start();
     else addEventListener("DOMContentLoaded", start);
-  });
+  }, INTRO_PARTICLE_CLASS);
 }
 
 async function sawIntro(page: Page): Promise<boolean> {

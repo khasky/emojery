@@ -23,6 +23,7 @@ import {
 import { authPageFromUserAction, expectHistoryRowCount, expectHistorySearchFiltersReaction, expectHistorySignedOut, expectLatestHistoryReactions, openLatestHistoryReactionPage, setReplaceNativeFromPopup, setSiteEnabledFromPopup, signInTestAccount, waitForReactionOnHistoryPage } from "./lib/popup-probes";
 import { DEEP_QUERY_ALL_SRC } from "./lib/probe-src";
 import { clearReactionOnTarget, clickReactionBySearchOnTarget, expectPickerClosed, expectReactionOptionSelected, expectSelectedReaction, expectVisibleReactionOptions, pickReactionBySearchOnTarget } from "./lib/reaction-actions";
+import { GATE_SIGNIN_CLASS, HIDDEN_SELECTOR } from "./lib/selectors";
 import type { MountEvidence, SupportedSiteScenario } from "./lib/site-evidence";
 import { keyMatchDiagnostic, launchE2eBrowserSession, settleAndRequireMount, skipWithShot } from "./lib/site-session";
 import { isBlockUrl } from "./lib/site-walls";
@@ -578,7 +579,7 @@ async function verifySupportedSiteInjection(browserContext: BrowserContext, site
           .waitForFunction(
             `(() => {
               ${DEEP_QUERY_ALL_SRC}
-              return deepQueryAll('[data-khasky-emojery-hidden="1"]').length === 0;
+              return deepQueryAll('${HIDDEN_SELECTOR}').length === 0;
             })()`,
             undefined,
             { timeout: 15_000 },
@@ -698,7 +699,7 @@ async function verifyUnauthClickOpensAuthTab(browserContext: BrowserContext, pag
       authPage = await authPageFromUserAction(browserContext, loadedExtensionId, async () => {
         await attempt(trigger);
         await clickFirstUnselectedReactionOption(page);
-        await page.locator(".khasky-emojery-gate-signin").click({ timeout: 10_000 });
+        await page.locator(`.${GATE_SIGNIN_CLASS}`).click({ timeout: 10_000 });
       });
     } finally {
       await trigger.dispose().catch(() => {});

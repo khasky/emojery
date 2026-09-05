@@ -2,7 +2,31 @@
 
 import { createPortal } from "preact/compat";
 import { useEffect, useId, useMemo, useRef, useState } from "preact/hooks";
-import { PAGE_FONT_VAR } from "../shared/dom";
+import {
+  CATEGORY_ATTR,
+  EMPTY_CLASS,
+  GATE_BODY_CLASS,
+  GATE_BTN_CLASS,
+  GATE_CANCEL_CLASS,
+  GATE_CLASS,
+  GATE_EMOJI_CLASS,
+  GATE_SIGNIN_CLASS,
+  GATE_TITLE_CLASS,
+  GRID_CLASS,
+  PAGE_FONT_VAR,
+  PICKER_ROOT_CLASS,
+  POPOVER_CLASS,
+  POPOVER_DIVIDER_CLASS,
+  POPOVER_SCROLL_CLASS,
+  POPOVER_SCROLL_REVERSED_CLASS,
+  SEARCH_CLASS,
+  SEARCH_ICON_CLASS,
+  SEARCH_ROW_CLASS,
+  SECTION_CLEAR_CLASS,
+  SR_ONLY_CLASS,
+  STICKY_HEAD_BOTTOM_CLASS,
+  STICKY_HEAD_CLASS,
+} from "../shared/dom";
 import { ensureLocaleLoaded, onLocalesChanged, searchEmojis } from "../shared/emoji-meta";
 import { t } from "../shared/i18n";
 import type { VoteBroadcast } from "../shared/messages";
@@ -271,7 +295,7 @@ export function Picker({ initial, typography, onPick, onSignIn, portalRoot, bind
   const scrollToCategory = (index: number) => {
     const scrollEl = scrollRef.current;
     if (!scrollEl) return;
-    const sec = scrollEl.querySelector<HTMLElement>(`[data-khasky-emojery-cat="${index}"]`);
+    const sec = scrollEl.querySelector<HTMLElement>(`[${CATEGORY_ATTR}="${index}"]`);
     if (!sec) return;
     // Offset by the sticky head only when it pins the top; when it sits at the
     // bottom (popover above the trigger) the container top is unobstructed.
@@ -396,15 +420,15 @@ export function Picker({ initial, typography, onPick, onSignIn, portalRoot, bind
     <>
       {/* Search-result announcement for screen readers; empty text while not searching
           so plain browsing stays quiet. The visible list itself is not live. */}
-      <div class="khasky-emojery-sr-only" role="status">
+      <div class={SR_ONLY_CLASS} role="status">
         {filteredEmojis ? (filteredEmojis.length === 0 ? t("pickerNoMatches", query) : t("searchResultsCount", String(filteredEmojis.length))) : ""}
       </div>
       {filteredEmojis ? (
         filteredEmojis.length === 0 ? (
-          <div class="khasky-emojery-empty">{t("pickerNoMatches", query)}</div>
+          <div class={EMPTY_CLASS}>{t("pickerNoMatches", query)}</div>
         ) : (
           // biome-ignore lint/a11y/useSemanticElements: a fieldset would drag form semantics/styling into the shadow-DOM picker; role="group" on a div is intentional
-          <div class="khasky-emojery-grid" role="group" aria-label={t("pickerSearchResultsGroupAria")}>
+          <div class={GRID_CLASS} role="group" aria-label={t("pickerSearchResultsGroupAria")}>
             {filteredEmojis.map(renderEmoji)}
           </div>
         )
@@ -415,7 +439,7 @@ export function Picker({ initial, typography, onPick, onSignIn, portalRoot, bind
               headingId={`${sectionIdPrefix}-recent`}
               heading={t("pickerRecentlyUsed")}
               action={
-                <button type="button" class="khasky-emojery-section-clear" onClick={handleClearRecent}>
+                <button type="button" class={SECTION_CLEAR_CLASS} onClick={handleClearRecent}>
                   {t("pickerClearRecent")}
                 </button>
               }
@@ -448,16 +472,16 @@ export function Picker({ initial, typography, onPick, onSignIn, portalRoot, bind
   };
 
   const renderGate = (reaction: Reaction) => (
-    <div class="khasky-emojery-gate">
-      <span class="khasky-emojery-gate-emoji" aria-hidden="true">
+    <div class={GATE_CLASS}>
+      <span class={GATE_EMOJI_CLASS} aria-hidden="true">
         <EmojiImg emoji={reaction} />
       </span>
-      <p class="khasky-emojery-gate-title">{t("gateTitle")}</p>
-      <p class="khasky-emojery-gate-body">{t("gateBody")}</p>
-      <button ref={gateSignInRef} type="button" class="khasky-emojery-gate-btn khasky-emojery-gate-signin" onClick={handleGateSignIn}>
+      <p class={GATE_TITLE_CLASS}>{t("gateTitle")}</p>
+      <p class={GATE_BODY_CLASS}>{t("gateBody")}</p>
+      <button ref={gateSignInRef} type="button" class={`${GATE_BTN_CLASS} ${GATE_SIGNIN_CLASS}`} onClick={handleGateSignIn}>
         {t("gateSignInBtn")}
       </button>
-      <button type="button" class="khasky-emojery-gate-btn khasky-emojery-gate-cancel" onClick={closePopover}>
+      <button type="button" class={`${GATE_BTN_CLASS} ${GATE_CANCEL_CLASS}`} onClick={closePopover}>
         {t("cancelBtn")}
       </button>
     </div>
@@ -467,15 +491,15 @@ export function Picker({ initial, typography, onPick, onSignIn, portalRoot, bind
   // the grid scrolls. The nav hides while searching - flat results have no sections to
   // navigate.
   const renderStickyHead = () => (
-    <div class={`khasky-emojery-sticky-head${placedAbove ? " khasky-emojery-sticky-head--bottom" : ""}`} ref={stickyHeadRef}>
-      <div class="khasky-emojery-search-row">
-        <span class="khasky-emojery-search-icon" aria-hidden="true">
+    <div class={`${STICKY_HEAD_CLASS}${placedAbove ? ` ${STICKY_HEAD_BOTTOM_CLASS}` : ""}`} ref={stickyHeadRef}>
+      <div class={SEARCH_ROW_CLASS}>
+        <span class={SEARCH_ICON_CLASS} aria-hidden="true">
           <EmojiImg emoji="🔍" />
         </span>
         <input
           ref={searchRef}
           type="search"
-          class="khasky-emojery-search"
+          class={SEARCH_CLASS}
           placeholder={t("pickerSearchPlaceholder")}
           value={query}
           onInput={(e) => setQuery((e.currentTarget as HTMLInputElement).value)}
@@ -510,13 +534,13 @@ export function Picker({ initial, typography, onPick, onSignIn, portalRoot, bind
       : undefined;
 
   return (
-    <div class="khasky-emojery-root">
+    <div class={PICKER_ROOT_CLASS}>
       <PickerTrigger triggerRef={triggerRef} mine={mine} total={displayTotal} topReactions={sortedEntries.slice(0, COUNTER_TRIO_LIMIT).map(([r]) => r)} open={open} onPointer={onTriggerPointer} onClick={onTriggerClick} onKeyDown={onTriggerKey} />
 
       {open &&
         createPortal(
           <div
-            class="khasky-emojery-popover"
+            class={POPOVER_CLASS}
             role="dialog"
             // Focus is trapped inside (usePopoverDismiss) and an outside click closes it, so
             // the popover really is modal - without this, AT still offers the page behind it.
@@ -541,14 +565,14 @@ export function Picker({ initial, typography, onPick, onSignIn, portalRoot, bind
               renderGate(pendingReaction)
             ) : (
               <>
-                <p class="khasky-emojery-sr-only" id={`${sectionIdPrefix}-hint`}>
+                <p class={SR_ONLY_CLASS} id={`${sectionIdPrefix}-hint`}>
                   {t("pickerKeyboardHint")}
                 </p>
-                <div class={`khasky-emojery-popover-scroll${placedAbove ? " khasky-emojery-popover-scroll--reversed" : ""}`} ref={scrollRef}>
+                <div class={`${POPOVER_SCROLL_CLASS}${placedAbove ? ` ${POPOVER_SCROLL_REVERSED_CLASS}` : ""}`} ref={scrollRef}>
                   {/* Hide the breakdown while searching - it's noise then and
                       pushes the grid off-screen. */}
                   {!query.trim() && renderBreakdown()}
-                  {!query.trim() && hasReactions && <div class="khasky-emojery-popover-divider" aria-hidden="true" />}
+                  {!query.trim() && hasReactions && <div class={POPOVER_DIVIDER_CLASS} aria-hidden="true" />}
                   {/* When the popover opens above the trigger, the sticky head moves below
                       the grid so the search box stays next to the button. */}
                   {placedAbove ? (

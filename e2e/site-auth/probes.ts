@@ -12,6 +12,8 @@
 // them with a sentinel + JSON.stringify (see bridge.ts) and parses the result;
 // the Node-side helpers here read only that parsed evidence.
 
+import { BREAKDOWN_ROW_SELECTOR, COUNTER_CLASS, GRID_ITEM_SELECTOR, HIDDEN_SELECTOR, HOST_SELECTOR, MOUNT_ATTR, MOUNTED_SELECTOR, TRIGGER_SELECTOR } from "../lib/selectors";
+
 // Shadow-piercing deep query - `document.querySelector` does NOT cross the open
 // shadow roots the trigger/picker live in.
 export const DQ_SRC = `
@@ -27,7 +29,7 @@ const dq = (sel, root = document) => {
 };
 const triggerIn = (host) => {
   const root = host.shadowRoot || host;
-  return root.querySelector('.khasky-emojery-trigger, .khasky-emojery-counter');
+  return root.querySelector('${TRIGGER_SELECTOR}');
 };
 `;
 
@@ -71,13 +73,13 @@ export interface MountEvidence {
 export function evidenceProbe(mountKeyPattern: string): string {
   return `${DQ_SRC}
 const re = new RegExp(${JSON.stringify(mountKeyPattern)});
-const hosts = dq('.khasky-emojery-host');
+const hosts = dq('${HOST_SELECTOR}');
 const info = hosts.map((h) => {
   const r = h.getBoundingClientRect();
   const t = triggerIn(h);
   const label = t && t.getAttribute ? (t.getAttribute('aria-label') || null) : null;
   const text = t ? (t.textContent || '').replace(/\\s+/g, ' ').trim() : '';
-  const isCounter = !!(t && t.classList && t.classList.contains('khasky-emojery-counter'));
+  const isCounter = !!(t && t.classList && t.classList.contains('${COUNTER_CLASS}'));
   return {
     visible: r.width > 0 && r.height > 0,
     top: Math.round(r.top),
@@ -88,8 +90,8 @@ const info = hosts.map((h) => {
   };
 });
 const visible = info.filter((x) => x.visible);
-const anchors = dq('[data-khasky-emojery-mounted]').filter((a) => a.isConnected);
-const keys = anchors.map((a) => a.getAttribute('data-khasky-emojery-mounted')).filter(Boolean);
+const anchors = dq('${MOUNTED_SELECTOR}').filter((a) => a.isConnected);
+const keys = anchors.map((a) => a.getAttribute('${MOUNT_ATTR}')).filter(Boolean);
 const keyCount = {};
 for (const k of keys) keyCount[k] = (keyCount[k] || 0) + 1;
 const duplicateKeys = Object.keys(keyCount).filter((k) => keyCount[k] > 1);
@@ -110,7 +112,7 @@ return {
   duplicateKeys,
   multiAnchorPostCount,
   roleTooltipCount: dq('[role="tooltip"]').filter((e) => e.getBoundingClientRect().width > 0).length,
-  hiddenNativeCount: dq('[data-khasky-emojery-hidden="1"]').length,
+  hiddenNativeCount: dq('${HIDDEN_SELECTOR}').length,
   hosts: info,
 };`;
 }
@@ -138,7 +140,7 @@ export interface PickerState {
 // signed in). Run AFTER clicking a trigger.
 export function pickerStateProbe(): string {
   return `${DQ_SRC}
-const grid = dq('.khasky-emojery-grid-item').filter((e) => e.getBoundingClientRect().width > 0);
+const grid = dq('${GRID_ITEM_SELECTOR}').filter((e) => e.getBoundingClientRect().width > 0);
 return { gridVisible: grid.length > 0, authTabHint: false };`;
 }
 
@@ -147,7 +149,7 @@ return { gridVisible: grid.length > 0, authTabHint: false };`;
 // opened grid - only turns false once the clear actually landed.
 export function ownReactionProbe(): string {
   return `${DQ_SRC}
-const t = dq('.khasky-emojery-host')
+const t = dq('${HOST_SELECTOR}')
   .filter((h) => { const r = h.getBoundingClientRect(); return r.width > 0 && r.height > 0; })
   .map(triggerIn)
   .find(Boolean);
@@ -163,7 +165,7 @@ export interface SelectedReaction {
 // the black-box proof that a reaction persisted (e.g. after a reload).
 export function selectedReactionProbe(): string {
   return `${DQ_SRC}
-const sel = dq('.khasky-emojery-grid-item[aria-pressed="true"], [data-mine="true"], .khasky-emojery-breakdown-row[data-selected="true"]')
+const sel = dq('${GRID_ITEM_SELECTOR}[aria-pressed="true"], [data-mine="true"], ${BREAKDOWN_ROW_SELECTOR}[data-selected="true"]')
   .filter((e) => e.getBoundingClientRect().width > 0);
 const first = sel[0];
 return {

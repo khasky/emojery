@@ -7,7 +7,7 @@
 // deliberately tight: one shot, quiet animation (none under reduced-motion),
 // and it yields to a click, Escape, a scroll, or a timeout.
 
-import { COACH_ATTR, COUNTER_CLASS, TRIGGER_CLASS } from "../shared/dom";
+import { COACH_ATTR, COACH_BODY_CLASS, COACH_CLOSE_CLASS, COACH_TIP_CLASS, COACH_TITLE_CLASS, COUNTER_CLASS, TRIGGER_CLASS } from "../shared/dom";
 import { t } from "../shared/i18n";
 import { claimCoachMark } from "../shared/onboarding";
 import { getOverlayRoot } from "./mount-shadow";
@@ -115,18 +115,18 @@ function showCoachMark(host: HTMLElement, rect: DOMRect): void {
 // page keeps keyboard focus.
 function buildTip(): HTMLElement {
   const tip = document.createElement("div");
-  tip.className = "khasky-emojery-coach-tip";
+  tip.className = COACH_TIP_CLASS;
   tip.setAttribute("role", "status");
   const close = document.createElement("button");
   close.type = "button";
-  close.className = "khasky-emojery-coach-close";
+  close.className = COACH_CLOSE_CLASS;
   close.setAttribute("aria-label", t("coachDismissAria"));
   close.textContent = "✕";
   const title = document.createElement("p");
-  title.className = "khasky-emojery-coach-title";
+  title.className = COACH_TITLE_CLASS;
   title.textContent = t("coachTitle");
   const body = document.createElement("p");
-  body.className = "khasky-emojery-coach-body";
+  body.className = COACH_BODY_CLASS;
   body.textContent = t("coachBody");
   tip.append(close, title, body);
   return tip;

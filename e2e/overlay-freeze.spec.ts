@@ -17,6 +17,7 @@ import { envUrl } from "./lib/extension";
 import { gotoSettled } from "./lib/page-settle";
 import { pollForValue } from "./lib/picker-probes";
 import { DEEP_QUERY_ALL_SRC } from "./lib/probe-src";
+import { MOUNT_ATTR, MOUNTED_SELECTOR } from "./lib/selectors";
 import { sharedSession } from "./lib/shared-session";
 import { isBlockUrl } from "./lib/site-walls";
 
@@ -32,9 +33,9 @@ const session = sharedSession();
 async function visibleMountKeys(page: Page): Promise<string[]> {
   return page.evaluate<string[]>(`(() => {
     ${DEEP_QUERY_ALL_SRC}
-    return deepQueryAll("[data-khasky-emojery-mounted]")
+    return deepQueryAll("${MOUNTED_SELECTOR}")
       .filter((el) => el.getBoundingClientRect().width > 0)
-      .map((el) => el.getAttribute("data-khasky-emojery-mounted"))
+      .map((el) => el.getAttribute("${MOUNT_ATTR}"))
       .sort();
   })()`);
 }

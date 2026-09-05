@@ -17,7 +17,7 @@ import { authConfigured, clearReaction, envUrl, extensionLaunchArgs, isFirefoxRu
 import { gotoSettled } from "./lib/page-settle";
 import { pollForValue } from "./lib/picker-probes";
 import { DEEP_QUERY_ALL_SRC } from "./lib/probe-src";
-import { GRID_ITEM_SELECTOR } from "./lib/selectors";
+import { GRID_ITEM_SELECTOR, HOST_SELECTOR, OVERLAY_HOST_SELECTOR, OWN_NODES_SELECTOR, SITE_FG_VAR, TRIGGER_SELECTOR } from "./lib/selectors";
 import { clickAmazonContinueShopping, dismissInterstitialsInitScript, interstitialTextRe, wallReason } from "./lib/site-walls";
 
 type Scheme = "light" | "dark";
@@ -140,7 +140,7 @@ test.beforeAll(async () => {
   }
   // Hide login/signup walls (DOM-only) so the action row underneath is reachable
   // on Instagram/Threads. Does not log in or touch accounts.
-  await context.addInitScript(dismissInterstitialsInitScript, { exposeUnwallHook: false, keepDialogsWithReactionHost: true });
+  await context.addInitScript(dismissInterstitialsInitScript, { exposeUnwallHook: false, keepDialogsWithReactionHost: true, ownNodesSelector: OWN_NODES_SELECTOR });
 
   // The active-phase check needs a reaction to stick, and only a signed-in
   // Emojery user gets an active trigger - sign in when the test account is
@@ -341,8 +341,8 @@ async function waitForVisibleTrigger(page: Page, scenario: ThemeScenario): Promi
 // differing only in what they returned.
 const PAINTED_TRIGGERS_SRC = `const paintedTriggers = () => {
   const out = [];
-  for (const host of deepQueryAll(".khasky-emojery-host")) {
-    const trigger = host.shadowRoot?.querySelector(".khasky-emojery-trigger, .khasky-emojery-counter");
+  for (const host of deepQueryAll("${HOST_SELECTOR}")) {
+    const trigger = host.shadowRoot?.querySelector("${TRIGGER_SELECTOR}");
     if (!trigger) continue;
     const r = trigger.getBoundingClientRect();
     if (r.width > 0 && r.height > 0) out.push({ host, trigger });
@@ -387,85 +387,88 @@ async function measureTrigger(page: Page): Promise<TriggerMeasurement> {
 }
 
 function measureTriggerHost(page: Page, hostHandle: ElementHandle<HTMLElement>): Promise<TriggerMeasurement> {
-  return page.evaluate((host) => {
-    type Rgba = [number, number, number, number];
-    const parse = (raw: string | null): Rgba | null => {
-      if (!raw) return null;
-      const s = raw.trim();
-      if (s.startsWith("#")) {
-        let h = s.slice(1);
-        if (h.length === 3)
-          h = h
-            .split("")
-            .map((c) => c + c)
-            .join("");
-        if (h.length < 6) return null;
-        return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16), 1];
-      }
-      const m = s.match(/rgba?\(([^)]+)\)/i);
-      if (!m) return null;
-      const p = m[1]!
-        .split(/[,/\s]+/)
-        .filter(Boolean)
-        .map((x) => parseFloat(x));
-      if (p.length < 3) return null;
-      return [p[0]!, p[1]!, p[2]!, p.length > 3 ? p[3]! : 1];
-    };
-    const over = (top: Rgba, bottom: number[]): number[] => {
-      const a = top[3];
-      return [Math.round(top[0] * a + bottom[0]! * (1 - a)), Math.round(top[1] * a + bottom[1]! * (1 - a)), Math.round(top[2] * a + bottom[2]! * (1 - a))];
-    };
-    const luminance = (c: number[]): number => {
-      const f = (v: number): number => {
-        const x = v / 255;
-        return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
-      };
-      return 0.2126 * f(c[0]!) + 0.7152 * f(c[1]!) + 0.0722 * f(c[2]!);
-    };
-    const contrast = (a: number[], b: number[]): number => {
-      const l1 = luminance(a);
-      const l2 = luminance(b);
-      const hi = Math.max(l1, l2);
-      const lo = Math.min(l1, l2);
-      return (hi + 0.05) / (lo + 0.05);
-    };
-    const effectiveBg = (el: Element): number[] => {
-      const layers: Rgba[] = [];
-      let node: Element | null = el;
-      while (node) {
-        const c = parse(getComputedStyle(node).backgroundColor);
-        if (c && c[3] > 0) {
-          layers.push(c);
-          if (c[3] >= 1) break;
+  return page.evaluate(
+    ({ host, triggerSelector, siteFgVar }) => {
+      type Rgba = [number, number, number, number];
+      const parse = (raw: string | null): Rgba | null => {
+        if (!raw) return null;
+        const s = raw.trim();
+        if (s.startsWith("#")) {
+          let h = s.slice(1);
+          if (h.length === 3)
+            h = h
+              .split("")
+              .map((c) => c + c)
+              .join("");
+          if (h.length < 6) return null;
+          return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16), 1];
         }
-        const root = node.getRootNode();
-        node = node.parentElement ?? (root instanceof ShadowRoot ? (root.host as Element) : null);
-      }
-      // Match the extension's own canvas fallback: when nothing opaque is found
-      // up the chain, the page's effective canvas is dark in dark mode, not white.
-      const darkCanvas = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      let base: number[] = darkCanvas ? [24, 25, 26] : [255, 255, 255];
-      for (let i = layers.length - 1; i >= 0; i--) base = over(layers[i]!, base);
-      return base;
-    };
+        const m = s.match(/rgba?\(([^)]+)\)/i);
+        if (!m) return null;
+        const p = m[1]!
+          .split(/[,/\s]+/)
+          .filter(Boolean)
+          .map((x) => parseFloat(x));
+        if (p.length < 3) return null;
+        return [p[0]!, p[1]!, p[2]!, p.length > 3 ? p[3]! : 1];
+      };
+      const over = (top: Rgba, bottom: number[]): number[] => {
+        const a = top[3];
+        return [Math.round(top[0] * a + bottom[0]! * (1 - a)), Math.round(top[1] * a + bottom[1]! * (1 - a)), Math.round(top[2] * a + bottom[2]! * (1 - a))];
+      };
+      const luminance = (c: number[]): number => {
+        const f = (v: number): number => {
+          const x = v / 255;
+          return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
+        };
+        return 0.2126 * f(c[0]!) + 0.7152 * f(c[1]!) + 0.0722 * f(c[2]!);
+      };
+      const contrast = (a: number[], b: number[]): number => {
+        const l1 = luminance(a);
+        const l2 = luminance(b);
+        const hi = Math.max(l1, l2);
+        const lo = Math.min(l1, l2);
+        return (hi + 0.05) / (lo + 0.05);
+      };
+      const effectiveBg = (el: Element): number[] => {
+        const layers: Rgba[] = [];
+        let node: Element | null = el;
+        while (node) {
+          const c = parse(getComputedStyle(node).backgroundColor);
+          if (c && c[3] > 0) {
+            layers.push(c);
+            if (c[3] >= 1) break;
+          }
+          const root = node.getRootNode();
+          node = node.parentElement ?? (root instanceof ShadowRoot ? (root.host as Element) : null);
+        }
+        // Match the extension's own canvas fallback: when nothing opaque is found
+        // up the chain, the page's effective canvas is dark in dark mode, not white.
+        const darkCanvas = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        let base: number[] = darkCanvas ? [24, 25, 26] : [255, 255, 255];
+        for (let i = layers.length - 1; i >= 0; i--) base = over(layers[i]!, base);
+        return base;
+      };
 
-    const trigger = host.shadowRoot?.querySelector<HTMLElement>(".khasky-emojery-trigger, .khasky-emojery-counter");
-    if (!trigger) throw new Error("no visible Emojery trigger");
+      const trigger = host.shadowRoot?.querySelector<HTMLElement>(triggerSelector);
+      if (!trigger) throw new Error("no visible Emojery trigger");
 
-    const cs = getComputedStyle(trigger);
-    const color = parse(cs.color) ?? [0, 0, 0, 1];
-    const eff = effectiveBg(trigger);
-    const siteFg = parse(host.style.getPropertyValue("--khasky-emojery-site-fg"));
+      const cs = getComputedStyle(trigger);
+      const color = parse(cs.color) ?? [0, 0, 0, 1];
+      const eff = effectiveBg(trigger);
+      const siteFg = parse(host.style.getPropertyValue(siteFgVar));
 
-    return {
-      siteFg: siteFg ? [siteFg[0], siteFg[1], siteFg[2]] : null,
-      triggerColor: [color[0], color[1], color[2]],
-      triggerColorText: cs.color,
-      effectiveBg: eff,
-      contrast: contrast([color[0], color[1], color[2]], eff),
-      active: trigger.getAttribute("data-active"),
-    } as TriggerMeasurement;
-  }, hostHandle);
+      return {
+        siteFg: siteFg ? [siteFg[0], siteFg[1], siteFg[2]] : null,
+        triggerColor: [color[0], color[1], color[2]],
+        triggerColorText: cs.color,
+        effectiveBg: eff,
+        contrast: contrast([color[0], color[1], color[2]], eff),
+        active: trigger.getAttribute("data-active"),
+      } as TriggerMeasurement;
+    },
+    { host: hostHandle, triggerSelector: TRIGGER_SELECTOR, siteFgVar: SITE_FG_VAR },
+  );
 }
 
 // `null` means a reaction is now on the trigger; a string names the stage that
@@ -498,11 +501,11 @@ async function pickFirstReaction(page: Page): Promise<string | null> {
 
   const findOverlay = `(() => {
     ${DEEP_QUERY_ALL_SRC}
-    return deepQueryAll('.khasky-emojery-overlay-host')[0] ?? null;
+    return deepQueryAll('${OVERLAY_HOST_SELECTOR}')[0] ?? null;
   })()`;
 
   const opened = await page
-    .waitForFunction(`!!(${findOverlay})?.shadowRoot?.querySelector('.khasky-emojery-grid-item')`, undefined, { timeout: 8_000 })
+    .waitForFunction(`!!(${findOverlay})?.shadowRoot?.querySelector('${GRID_ITEM_SELECTOR}')`, undefined, { timeout: 8_000 })
     .then(() => true)
     .catch(() => false);
   if (!opened) return "the picker grid never rendered";

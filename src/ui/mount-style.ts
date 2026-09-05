@@ -9,9 +9,8 @@
 // the two module-level caches below (spacingBaselines, revealedHosts) are host-keyed weak
 // collections that die with their element.
 import { elementsToArray, type PickerInsertionPoint } from "../shared/adapter";
-import { HIDDEN_ATTR, HOST_CLASS, HOST_SELECTOR, LAYOUT_ATTR, PAGE_FONT_VAR } from "../shared/dom";
+import { BUTTON_DROP_CLASS, GLYPH_H_VAR, HIDDEN_ATTR, HOST_CLASS, HOST_SELECTOR, ICON_SIZE_VAR, LAYOUT_ATTR, PAGE_FONT_VAR, ROW_H_VAR, SITE_BG_VAR, SITE_FG_VAR, SITE_PAD_X_VAR, SITE_RADIUS_VAR } from "../shared/dom";
 import { getCurrentTheme } from "../shared/theme";
-import { BUTTON_DROP_CLASS } from "./animations";
 import { composite, isSolidFill, parseRgba, type RgbaColor, rgbaToRgbString } from "./mount-color";
 import { clampRadius, largestCornerPx, marginPx, normalizeReadableColor, pickRepresentativeRadius, readPaddingInline } from "./mount-style-math";
 import { glyphPxOrRemembered, preferRememberedRadius, rememberedSiteStyle, rememberSiteStyle, type SiteButtonStyle } from "./mount-style-memory";
@@ -135,14 +134,14 @@ export function applyActionLayout(host: HTMLElement, point: PickerInsertionPoint
   if (layout.iconColumn) {
     host.setAttribute(LAYOUT_ATTR, "icon-column");
     if (layout.iconSize) {
-      host.style.setProperty("--khasky-emojery-icon-size", `${layout.iconSize}px`);
+      host.style.setProperty(ICON_SIZE_VAR, `${layout.iconSize}px`);
     }
   } else {
     // A host can switch form in place: surfaces share one target key (FB `/watch/?v=<id>`
     // row <-> `/reel/<id>` rail), so the same host moves between them and must drop the
     // icon-column form when it lands back on a horizontal row.
     host.removeAttribute(LAYOUT_ATTR);
-    host.style.removeProperty("--khasky-emojery-icon-size");
+    host.style.removeProperty(ICON_SIZE_VAR);
   }
 }
 
@@ -281,15 +280,15 @@ export function applySiteButtonStyle(host: HTMLElement, style: SiteButtonStyle):
   // Custom properties on the host inherit through the shadow boundary; the shadow
   // trigger/counter read them via `var(--khasky-emojery-site-*, fallback)`.
   if (style.borderRadius) {
-    host.style.setProperty("--khasky-emojery-site-radius", clampRadius(style.borderRadius));
+    host.style.setProperty(SITE_RADIUS_VAR, clampRadius(style.borderRadius));
   }
   if (style.backgroundColor) {
-    host.style.setProperty("--khasky-emojery-site-bg", style.backgroundColor);
+    host.style.setProperty(SITE_BG_VAR, style.backgroundColor);
   }
   // Gate the row-height match (picker.css) on a real painted surface: a transparent icon
   // button's tap-target box is not its visible size, so the trigger must not stretch to it.
   host.toggleAttribute("data-khasky-emojery-filled", isSolidFill(style.backgroundColor));
-  if (style.color) host.style.setProperty("--khasky-emojery-site-fg", style.color);
+  if (style.color) host.style.setProperty(SITE_FG_VAR, style.color);
   applySitePadding(host, style);
 }
 
@@ -298,9 +297,9 @@ export function applySiteButtonStyle(host: HTMLElement, style: SiteButtonStyle):
 // sized differently from the rest of the site.
 function applySitePadding(host: HTMLElement, style: SiteButtonStyle): void {
   if (style.paddingInline) {
-    host.style.setProperty("--khasky-emojery-site-pad-x", style.paddingInline);
+    host.style.setProperty(SITE_PAD_X_VAR, style.paddingInline);
   } else {
-    host.style.removeProperty("--khasky-emojery-site-pad-x");
+    host.style.removeProperty(SITE_PAD_X_VAR);
   }
 }
 
@@ -471,7 +470,7 @@ export function reapplyHostShape(host: HTMLElement, point: PickerInsertionPoint)
 
   applyPageTypography(host, typography);
   if (style.borderRadius) {
-    host.style.setProperty("--khasky-emojery-site-radius", clampRadius(style.borderRadius));
+    host.style.setProperty(SITE_RADIUS_VAR, clampRadius(style.borderRadius));
   }
   applySitePadding(host, style);
   const glyphMeasured = applyHostRowHeight(host, point);
@@ -492,11 +491,11 @@ export function hostShapeSignature(host: HTMLElement): string {
     s.marginTop,
     s.marginBottom,
     s.getPropertyValue(PAGE_FONT_VAR),
-    s.getPropertyValue("--khasky-emojery-site-radius"),
-    s.getPropertyValue("--khasky-emojery-site-pad-x"),
-    s.getPropertyValue("--khasky-emojery-row-h"),
-    s.getPropertyValue("--khasky-emojery-glyph-h"),
-    s.getPropertyValue("--khasky-emojery-icon-size"),
+    s.getPropertyValue(SITE_RADIUS_VAR),
+    s.getPropertyValue(SITE_PAD_X_VAR),
+    s.getPropertyValue(ROW_H_VAR),
+    s.getPropertyValue(GLYPH_H_VAR),
+    s.getPropertyValue(ICON_SIZE_VAR),
     host.getAttribute(LAYOUT_ATTR) ?? "",
   ].join("|");
 }
@@ -525,13 +524,13 @@ export function applyHostRowHeight(host: HTMLElement, point: PickerInsertionPoin
   const ref = elementsToArray(point.nativeElement)[0];
   if (!ref?.isConnected) return false;
   const boxHeight = ref.getBoundingClientRect().height;
-  if (boxHeight > 0) host.style.setProperty("--khasky-emojery-row-h", `${Math.round(boxHeight)}px`);
+  if (boxHeight > 0) host.style.setProperty(ROW_H_VAR, `${Math.round(boxHeight)}px`);
 
   const site = point.target.site;
   const measured = nativeGlyphHeight(ref);
   const glyph = glyphPxOrRemembered(site, measured);
   if (glyph) {
-    host.style.setProperty("--khasky-emojery-glyph-h", `${glyph}px`);
+    host.style.setProperty(GLYPH_H_VAR, `${glyph}px`);
     revealHost(host);
   } else if (!revealedHosts.has(host) && hasGlyphCandidates(ref)) {
     // An icon row whose glyph isn't measurable yet (0x0 mid-hydration): hold the host

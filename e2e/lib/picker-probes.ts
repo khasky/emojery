@@ -6,7 +6,7 @@
 import { type ElementHandle, expect, type Page } from "@playwright/test";
 import { collectMountEvidence, debugEvidence, handleKnownInterstitials, scrollPassUntil, settlePage } from "./page-settle";
 import { ACTIVE_IN_ROOT_SRC, DEEP_QUERY_ALL_SRC, IS_VISIBLE_RECT_SRC, MOUNTED_KEY_OF_SRC } from "./probe-src";
-import { GRID_ITEM_SELECTOR, TRIGGER_SELECTOR } from "./selectors";
+import { BREAKDOWN_ROW_SELECTOR, COUNTER_CLASS, GRID_ITEM_CLASS, GRID_ITEM_SELECTOR, HOST_CLASS, HOST_SELECTOR, MOUNT_ATTR, MOUNTED_SELECTOR, SEARCH_INPUT_SELECTOR, TRIGGER_BUTTON_SELECTOR, TRIGGER_CLASS, TRIGGER_ICON_CLASS, TRIGGER_SELECTOR } from "./selectors";
 import { DEFAULT_SCROLL_STEPS, type MountEvidence, type PickedReaction, type SupportedSiteScenario } from "./site-evidence";
 import { dismissLoginWalls } from "./site-walls";
 
@@ -29,11 +29,11 @@ export async function findMatchingEmojeryTrigger(page: Page, site: SupportedSite
     ${DEEP_QUERY_ALL_SRC}
     ${IS_VISIBLE_RECT_SRC}
     ${MOUNTED_KEY_OF_SRC}
-    const hosts = deepQueryAll(".khasky-emojery-host");
+    const hosts = deepQueryAll("${HOST_SELECTOR}");
     for (const host of hosts) {
       const mountKey = mountedKeyOf(host);
       if (!mountKey || !pattern.test(mountKey)) continue;
-      const trigger = host.shadowRoot?.querySelector("button.khasky-emojery-trigger, button.khasky-emojery-counter");
+      const trigger = host.shadowRoot?.querySelector("${TRIGGER_BUTTON_SELECTOR}");
       if (!trigger) continue;
       trigger.scrollIntoView({
         block: "center",
@@ -77,9 +77,9 @@ async function findAnyVisibleEmojeryTrigger(page: Page, targetKey?: string): Pro
     ${DEEP_QUERY_ALL_SRC}
     ${IS_VISIBLE_RECT_SRC}
     ${MOUNTED_KEY_OF_SRC}
-    for (const host of deepQueryAll(".khasky-emojery-host")) {
+    for (const host of deepQueryAll("${HOST_SELECTOR}")) {
       if (expectedTargetKey && mountedKeyOf(host) !== expectedTargetKey) continue;
-      const trigger = host.shadowRoot?.querySelector("button.khasky-emojery-trigger, button.khasky-emojery-counter");
+      const trigger = host.shadowRoot?.querySelector("${TRIGGER_BUTTON_SELECTOR}");
       if (!trigger) continue;
       trigger.scrollIntoView({
         block: "center",
@@ -188,7 +188,7 @@ export async function selectedReactionInOpenPicker(page: Page): Promise<string |
       return emoji.trim() || null;
     };
 
-    const selected = deepQueryAll('.khasky-emojery-breakdown-row[data-selected="true"], .khasky-emojery-grid-item[aria-pressed="true"], [data-mine="true"]').find((el) => isVisibleRect(el.getBoundingClientRect()));
+    const selected = deepQueryAll('${BREAKDOWN_ROW_SELECTOR}[data-selected="true"], ${GRID_ITEM_SELECTOR}[aria-pressed="true"], [data-mine="true"]').find((el) => isVisibleRect(el.getBoundingClientRect()));
     return selected ? reactionTextOf(selected) : null;
   })()`);
 }
@@ -267,7 +267,7 @@ async function mountedKeyForTrigger(trigger: ElementHandle<HTMLElement>): Promis
   return trigger.evaluate<string | null>(`(el) => {
     ${MOUNTED_KEY_OF_SRC}
     const root = el.getRootNode();
-    const host = el.closest(".khasky-emojery-host") ?? (root instanceof ShadowRoot && root.host instanceof HTMLElement && root.host.classList.contains("khasky-emojery-host") ? root.host : null);
+    const host = el.closest("${HOST_SELECTOR}") ?? (root instanceof ShadowRoot && root.host instanceof HTMLElement && root.host.classList.contains("${HOST_CLASS}") ? root.host : null);
     return host ? mountedKeyOf(host) : null;
   }`);
 }
@@ -276,7 +276,7 @@ export async function visibleReactionOptionCount(page: Page): Promise<number> {
   return page.evaluate<number>(`(() => {
     ${DEEP_QUERY_ALL_SRC}
     ${IS_VISIBLE_RECT_SRC}
-    return deepQueryAll(".khasky-emojery-grid-item, .khasky-emojery-breakdown-row").filter((el) => isVisibleRect(el.getBoundingClientRect())).length;
+    return deepQueryAll("${GRID_ITEM_SELECTOR}, ${BREAKDOWN_ROW_SELECTOR}").filter((el) => isVisibleRect(el.getBoundingClientRect())).length;
   })()`);
 }
 
@@ -298,7 +298,7 @@ export async function expectVisibleSearchFocused(page: Page): Promise<void> {
         page.evaluate<boolean>(`(() => {
           ${DEEP_QUERY_ALL_SRC}
           ${IS_VISIBLE_RECT_SRC}
-          const input = deepQueryAll(".khasky-emojery-search").find((el) => isVisibleRect(el.getBoundingClientRect()));
+          const input = deepQueryAll("${SEARCH_INPUT_SELECTOR}").find((el) => isVisibleRect(el.getBoundingClientRect()));
           if (!input) return false;
           const root = input.getRootNode();
           return root instanceof ShadowRoot ? root.activeElement === input : document.activeElement === input;
@@ -326,7 +326,7 @@ export async function expectFocusedEmojiGridOption(page: Page, reaction: string)
           ${IS_VISIBLE_RECT_SRC}
           const active = activeInRoot(document);
           if (!(active instanceof HTMLElement)) return null;
-          if (!active.classList.contains("khasky-emojery-grid-item")) return null;
+          if (!active.classList.contains("${GRID_ITEM_CLASS}")) return null;
           if (!isVisibleRect(active.getBoundingClientRect())) return null;
           return (active.textContent ?? "").trim() || null;
         })()`),
@@ -364,13 +364,13 @@ export async function expectFocusedEmojeryTrigger(page: Page, targetKey: string)
           ${MOUNTED_KEY_OF_SRC}
           const active = activeInRoot(document);
           if (!(active instanceof HTMLElement)) return false;
-          if (!active.classList.contains("khasky-emojery-trigger") && !active.classList.contains("khasky-emojery-counter")) {
+          if (!active.classList.contains("${TRIGGER_CLASS}") && !active.classList.contains("${COUNTER_CLASS}")) {
             return false;
           }
           if (!isVisibleRect(active.getBoundingClientRect())) return false;
 
           const root = active.getRootNode();
-          const host = root instanceof ShadowRoot && root.host instanceof HTMLElement && root.host.classList.contains("khasky-emojery-host") ? root.host : active.closest(".khasky-emojery-host");
+          const host = root instanceof ShadowRoot && root.host instanceof HTMLElement && root.host.classList.contains("${HOST_CLASS}") ? root.host : active.closest("${HOST_SELECTOR}");
           return host ? mountedKeyOf(host) === expectedTargetKey : false;
         })()`),
       { message: "Closing the picker with keyboard should return focus to trigger" },
@@ -395,14 +395,14 @@ async function visibleEmojiGridOptionCount(page: Page, reaction: string): Promis
     const expectedReaction = ${JSON.stringify(reaction)};
     ${DEEP_QUERY_ALL_SRC}
     ${IS_VISIBLE_RECT_SRC}
-    return deepQueryAll(".khasky-emojery-grid-item").filter((el) => isVisibleRect(el.getBoundingClientRect()) && (el.textContent ?? "").trim() === expectedReaction).length;
+    return deepQueryAll("${GRID_ITEM_SELECTOR}").filter((el) => isVisibleRect(el.getBoundingClientRect()) && (el.textContent ?? "").trim() === expectedReaction).length;
   })()`);
 }
 
 export async function emojiGridOptionTexts(page: Page): Promise<string[]> {
   return page.evaluate<string[]>(`(() => {
     ${DEEP_QUERY_ALL_SRC}
-    return deepQueryAll(".khasky-emojery-grid-item").map((el) => (el.textContent ?? "").trim()).filter((text) => text.length > 0);
+    return deepQueryAll("${GRID_ITEM_SELECTOR}").map((el) => (el.textContent ?? "").trim()).filter((text) => text.length > 0);
   })()`);
 }
 
@@ -412,7 +412,7 @@ async function findVisibleEmojiSearchInput(page: Page): Promise<ElementHandle<HT
     `(() => {
     ${DEEP_QUERY_ALL_SRC}
     ${IS_VISIBLE_RECT_SRC}
-    return deepQueryAll(".khasky-emojery-search").find((el) => isVisibleRect(el.getBoundingClientRect())) ?? null;
+    return deepQueryAll("${SEARCH_INPUT_SELECTOR}").find((el) => isVisibleRect(el.getBoundingClientRect())) ?? null;
   })()`,
   );
   return input as ElementHandle<HTMLInputElement> | null;
@@ -425,7 +425,7 @@ async function findVisibleEmojiGridOption(page: Page, reaction: string): Promise
     const expectedReaction = ${JSON.stringify(reaction)};
     ${DEEP_QUERY_ALL_SRC}
     ${IS_VISIBLE_RECT_SRC}
-    return deepQueryAll(".khasky-emojery-grid-item").find((el) => isVisibleRect(el.getBoundingClientRect()) && (el.textContent ?? "").trim() === expectedReaction) ?? null;
+    return deepQueryAll("${GRID_ITEM_SELECTOR}").find((el) => isVisibleRect(el.getBoundingClientRect()) && (el.textContent ?? "").trim() === expectedReaction) ?? null;
   })()`,
   );
 }
@@ -436,12 +436,12 @@ export async function clickFirstUnselectedReactionOption(page: Page): Promise<st
     `(() => {
     ${DEEP_QUERY_ALL_SRC}
     ${IS_VISIBLE_RECT_SRC}
-    const gridItems = deepQueryAll(".khasky-emojery-grid-item");
+    const gridItems = deepQueryAll("${GRID_ITEM_SELECTOR}");
     const visibleGridItems = gridItems.filter((el) => isVisibleRect(el.getBoundingClientRect()) && !!el.textContent?.trim());
     const gridItem = visibleGridItems.find((el) => el.getAttribute("aria-pressed") !== "true" && el.getAttribute("data-selected") !== "true") ?? visibleGridItems[0] ?? null;
     if (gridItem) return gridItem;
 
-    const breakdownRows = deepQueryAll(".khasky-emojery-breakdown-row");
+    const breakdownRows = deepQueryAll("${BREAKDOWN_ROW_SELECTOR}");
     const visibleBreakdownRows = breakdownRows.filter((el) => isVisibleRect(el.getBoundingClientRect()) && !!el.textContent?.trim());
     return visibleBreakdownRows.find((el) => el.getAttribute("data-selected") !== "true") ?? visibleBreakdownRows[0] ?? null;
   })()`,
@@ -461,7 +461,7 @@ export async function clickFirstUnselectedReactionOption(page: Page): Promise<st
       // so activate via keyboard for a trusted click. The option is addressed by its
       // own glyph across the two surfaces findVisibleEmojiGridOption picks from, so a
       // re-render under the failed click re-resolves at action time.
-      await focusAndPress(page, `${GRID_ITEM_SELECTOR}, .khasky-emojery-breakdown-row`, " ", reaction, OPTION_FOCUS_TIMEOUT_MS);
+      await focusAndPress(page, `${GRID_ITEM_SELECTOR}, ${BREAKDOWN_ROW_SELECTOR}`, " ", reaction, OPTION_FOCUS_TIMEOUT_MS);
     }
     return reaction;
   } finally {
@@ -474,7 +474,7 @@ export async function selectedReactionOnMatchingHost(page: Page, targetKey: stri
     const expectedTargetKey = ${JSON.stringify(targetKey)};
     ${DEEP_QUERY_ALL_SRC}
     ${MOUNTED_KEY_OF_SRC}
-    for (const host of deepQueryAll(".khasky-emojery-host")) {
+    for (const host of deepQueryAll("${HOST_SELECTOR}")) {
       const key = mountedKeyOf(host);
       if (key !== expectedTargetKey) continue;
 
@@ -482,7 +482,7 @@ export async function selectedReactionOnMatchingHost(page: Page, targetKey: stri
       const selectedText = selected?.textContent?.trim();
       if (selectedText) return selectedText;
 
-      const activeIcon = host.shadowRoot?.querySelector('button[data-active="true"] .khasky-emojery-trigger-icon');
+      const activeIcon = host.shadowRoot?.querySelector('button[data-active="true"] .${TRIGGER_ICON_CLASS}');
       const activeText = activeIcon?.textContent?.trim();
       if (activeText) return activeText;
     }
@@ -504,7 +504,7 @@ export async function waitForMountedTargetKey(page: Page, targetKey: string, sit
         const expectedTargetKey = ${JSON.stringify(targetKey)};
         ${DEEP_QUERY_ALL_SRC}
         ${MOUNTED_KEY_OF_SRC}
-        for (const host of deepQueryAll(".khasky-emojery-host")) {
+        for (const host of deepQueryAll("${HOST_SELECTOR}")) {
           if (mountedKeyOf(host) !== expectedTargetKey) continue;
           host.scrollIntoView({
             block: "center",
@@ -528,15 +528,18 @@ export async function waitForMountedTargetKey(page: Page, targetKey: string, sit
 }
 
 async function scrollMountedAnchorIntoView(page: Page, targetKey: string): Promise<boolean> {
-  return page.evaluate((expectedTargetKey) => {
-    const anchors = Array.from(document.querySelectorAll<HTMLElement>("[data-khasky-emojery-mounted]"));
-    const anchor = anchors.find((el) => el.getAttribute("data-khasky-emojery-mounted") === expectedTargetKey);
-    if (!anchor) return false;
-    anchor.scrollIntoView({
-      block: "center",
-      inline: "center",
-      behavior: "auto",
-    });
-    return true;
-  }, targetKey);
+  return page.evaluate(
+    ({ expectedTargetKey, mountedSelector, mountAttr }) => {
+      const anchors = Array.from(document.querySelectorAll<HTMLElement>(mountedSelector));
+      const anchor = anchors.find((el) => el.getAttribute(mountAttr) === expectedTargetKey);
+      if (!anchor) return false;
+      anchor.scrollIntoView({
+        block: "center",
+        inline: "center",
+        behavior: "auto",
+      });
+      return true;
+    },
+    { expectedTargetKey: targetKey, mountedSelector: MOUNTED_SELECTOR, mountAttr: MOUNT_ATTR },
+  );
 }

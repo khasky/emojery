@@ -4,6 +4,7 @@
 // These are the invariants the recent logged-in bug classes violated; they are
 // chosen to be robustly checkable black-box (no fragile per-post targeting).
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { HOST_SELECTOR, MOUNTED_SELECTOR } from "../lib/selectors";
 import { bridgeFixture, gotoSettled, noHostMounted, PERMALINK_HOST_WAIT_MS, PERMALINK_TEST_TIMEOUT_MS, readEvidence, SETUP_HOOK_TIMEOUT_MS, scrollAndCountHosts, siteAuthEnabled, triggerStillClickable, usedHeapMb, waitForHost, wheelBySrc } from "./harness";
 import { DQ_SRC, postSurfaceHosts } from "./probes";
 import { ALL_SITES, authContentUrl, authFacebookGroupUrl, authFeedUrl, authInstagramCarouselUrl, authThreadsRepliesUrl, DEEP_SITES } from "./scenarios";
@@ -178,7 +179,7 @@ const DEEP_SCROLL_TIMEOUT_MS = 420_000;
          }
          return false;
        };
-       return dq('[data-khasky-emojery-mounted]').filter((a) => a.isConnected && insideComment(a)).length;`,
+       return dq('${MOUNTED_SELECTOR}').filter((a) => a.isConnected && insideComment(a)).length;`,
       );
       expect(anchorsInComments, "no Emojery anchor may sit inside a reddit comment").toBe(0);
       const ev = await readEvidence(b, "reddit");
@@ -231,7 +232,7 @@ const DEEP_SCROLL_TIMEOUT_MS = 420_000;
            const siblings = pressables.filter((p) => p !== pressables[0] && !pressables[0].contains(p));
            if (siblings.length === 0) continue;
            replyUnits++;
-           const hosts = [...u.querySelectorAll('.khasky-emojery-host')].filter((h) => h.getBoundingClientRect().width > 0);
+           const hosts = [...u.querySelectorAll('${HOST_SELECTOR}')].filter((h) => h.getBoundingClientRect().width > 0);
            strayHosts += hosts.filter((h) => !pressables[0].contains(h)).length;
          }
          return { replyUnits, strayHosts };`,

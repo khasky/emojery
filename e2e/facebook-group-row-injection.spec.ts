@@ -22,6 +22,7 @@ import { requireFacebookPostMount } from "./lib/mount-wait";
 import { gotoSettled } from "./lib/page-settle";
 import { pollForValue } from "./lib/picker-probes";
 import { DEEP_QUERY_ALL_SRC } from "./lib/probe-src";
+import { HOST_SELECTOR, MOUNT_ATTR, MOUNTED_SELECTOR } from "./lib/selectors";
 import { sharedSession } from "./lib/shared-session";
 
 const FACEBOOK_POST = envUrl("FACEBOOK_POST");
@@ -52,7 +53,7 @@ test("an icon-only Comment/Send action row (group photo-post shape) still mounts
     // post's own one-Like container walks stay untouched.
     const injected = await page.evaluate<boolean>(`(() => {
       ${DEEP_QUERY_ALL_SRC}
-      const anchor = deepQueryAll("[data-khasky-emojery-mounted]").find((el) => el.getBoundingClientRect().width > 0);
+      const anchor = deepQueryAll("${MOUNTED_SELECTOR}").find((el) => el.getBoundingClientRect().width > 0);
       if (!anchor) return false;
       const row = anchor.parentElement;
       const section = row && row.parentElement;
@@ -103,8 +104,8 @@ test("an icon-only Comment/Send action row (group photo-post shape) still mounts
           ${DEEP_QUERY_ALL_SRC}
           const unit = document.querySelector('[data-e2e-injected-grouprow="1"]');
           if (!unit) return { hostInUnit: false, keyed: false };
-          const hostInUnit = deepQueryAll(".khasky-emojery-host").some((h) => unit.contains(h) && h.getBoundingClientRect().width > 0);
-          const keyed = deepQueryAll("[data-khasky-emojery-mounted]").some((a) => unit.contains(a) && (a.getAttribute("data-khasky-emojery-mounted") || "").includes("${INJECTED_FBID}"));
+          const hostInUnit = deepQueryAll("${HOST_SELECTOR}").some((h) => unit.contains(h) && h.getBoundingClientRect().width > 0);
+          const keyed = deepQueryAll("${MOUNTED_SELECTOR}").some((a) => unit.contains(a) && (a.getAttribute("${MOUNT_ATTR}") || "").includes("${INJECTED_FBID}"));
           return { hostInUnit, keyed };
         })()`)
         .catch(() => ({ hostInUnit: false, keyed: false }));

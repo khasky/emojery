@@ -21,7 +21,7 @@ import { ensureSignedOut, firstServiceWorker } from "./lib/extension-pages";
 import { extensionLaunchArgs } from "./lib/launch-args";
 import { pollForValue } from "./lib/picker-probes";
 import { signInTestAccount } from "./lib/popup-probes";
-import { GRID_ITEM_SELECTOR, HOST_SELECTOR, SEARCH_INPUT_SELECTOR, TRIGGER_SELECTOR } from "./lib/selectors";
+import { COACH_TIP_CLASS, GATE_CLASS, GATE_SIGNIN_CLASS, GRID_ITEM_SELECTOR, HOST_SELECTOR, SEARCH_INPUT_SELECTOR, TRIGGER_SELECTOR } from "./lib/selectors";
 import { authConfigured, envUrl, otpSkipReason } from "./lib/test-config";
 
 // The onboarding tab itself never opens there (temporary add-on installs skip it by design),
@@ -159,12 +159,12 @@ test("Try it live opens the live repo in a new tab with the picker up, and the c
     // only its button opens auth.html.
     await expect(live.locator(SEARCH_INPUT_SELECTOR)).toBeVisible({ timeout: SITE_MOUNT_TIMEOUT_MS });
     await live.locator(GRID_ITEM_SELECTOR).first().click();
-    await expect(live.locator(".khasky-emojery-gate-signin")).toBeVisible({ timeout: 15_000 });
+    await expect(live.locator(`.${GATE_SIGNIN_CLASS}`)).toBeVisible({ timeout: 15_000 });
 
     // A deep-linked auto-open teaches the trigger by itself, so it spends the
     // one-shot coach-mark instead of stacking a tooltip under the popover.
     await expect.poll(() => readLocalKey(session.context, "coach_seen_v1")).toBe(true);
-    expect(await live.locator(".khasky-emojery-coach-tip").count()).toBe(0);
+    expect(await live.locator(`.${COACH_TIP_CLASS}`).count()).toBe(0);
 
     // Same latch the onboarding page watches: back on that tab, the button step is
     // ticked without anyone confirming anything.
@@ -219,7 +219,7 @@ test("signing in from the gate casts the held reaction and retires the dot", asy
     // Signed out still gets the whole palette; the gate follows the pick.
     await expect(page.locator(SEARCH_INPUT_SELECTOR)).toBeVisible({ timeout: 15_000 });
     await page.locator(GRID_ITEM_SELECTOR).first().click();
-    await expect(page.locator(".khasky-emojery-gate")).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator(`.${GATE_CLASS}`)).toBeVisible({ timeout: 15_000 });
 
     // Sign in from a tab of its own (the way the auth page opens for real);
     // the gate popover stays open in the background tab meanwhile.
@@ -227,7 +227,7 @@ test("signing in from the gate casts the held reaction and retires the dot", asy
     signedIn = true;
     await page.bringToFront();
     // No second pick: sign-in casts the reaction the gate was holding and closes.
-    await expect(page.locator(".khasky-emojery-gate"), "sign-in must consume the held pick").toHaveCount(0, { timeout: 30_000 });
+    await expect(page.locator(`.${GATE_CLASS}`), "sign-in must consume the held pick").toHaveCount(0, { timeout: 30_000 });
     await expect.poll(() => readGlobalBadge(session.context), { timeout: 20_000 }).toBe("");
     await expect.poll(() => readLocalKey(session.context, "onboarding_badge_v1")).toBe(false);
   } finally {
@@ -244,7 +244,7 @@ test("the coach-mark shows once on the first live trigger, then never again", as
   const page = await session.context.newPage();
   try {
     await page.goto(REPO_PAGE_URL);
-    const tip = page.locator(".khasky-emojery-coach-tip");
+    const tip = page.locator(`.${COACH_TIP_CLASS}`);
     await expect(tip).toBeVisible({ timeout: 30_000 });
 
     await page.keyboard.press("Escape");

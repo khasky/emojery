@@ -5,15 +5,14 @@
 // component only through the refs and setters it is handed.
 
 import { useEffect, useLayoutEffect } from "preact/hooks";
-import { LAYOUT_ATTR } from "../shared/dom";
+import { CATEGORY_ATTR, GRID_ITEM_SELECTOR, LAYOUT_ATTR, POPOVER_SCROLL_CLASS } from "../shared/dom";
 import type { Reaction } from "../shared/reactions";
 import { CATEGORIES } from "../shared/reactions";
 
 // The emoji grid is a roving tabindex: exactly one button is Tab-reachable and the
 // arrows move that one. Columns must match picker.css's grid so ArrowUp/Down land a row away.
 const GRID_COLUMNS = 6;
-const GRID_ITEM_SELECTOR = ".khasky-emojery-grid-item";
-const SCROLL_SELECTOR = ".khasky-emojery-popover-scroll";
+const SCROLL_SELECTOR = `.${POPOVER_SCROLL_CLASS}`;
 
 // WCAG 2.4.11 (focus not obscured). picker.css declares `scroll-padding` on the scroll
 // container so the opaque sticky head never covers the focused cell - but the browser's
@@ -327,7 +326,7 @@ export function useCategoryScrollSpy({
     let raf = 0;
     const compute = () => {
       raf = 0;
-      const sections = scrollEl.querySelectorAll<HTMLElement>("[data-khasky-emojery-cat]");
+      const sections = scrollEl.querySelectorAll<HTMLElement>(`[${CATEGORY_ATTR}]`);
       if (sections.length === 0) return;
       const scRect = scrollEl.getBoundingClientRect();
       const headH = stickyHeadRef.current?.offsetHeight ?? 0;

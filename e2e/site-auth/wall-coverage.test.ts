@@ -17,6 +17,7 @@
 // run with its permalink.
 
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { HOST_SELECTOR } from "../lib/selectors";
 import type { Bridge } from "./bridge";
 import { bridgeFixture, gotoSettled, noHostMounted, openPickerState, readEvidence, SETUP_HOOK_TIMEOUT_MS, siteAuthEnabled, triggerStillClickable, waitForHost, wheelBySrc } from "./harness";
 import { postSurfaceHosts } from "./probes";
@@ -68,7 +69,7 @@ for (const art of topArticles) {
   if (!like) continue;
   const likeTop = Math.round(like.getBoundingClientRect().top);
   if (likeTop <= -150 || likeTop >= innerHeight - 250) continue;
-  const host = [...art.querySelectorAll('.khasky-emojery-host')]
+  const host = [...art.querySelectorAll('${HOST_SELECTOR}')]
     .find((h) => h.getBoundingClientRect().width > 0);
   const hostTop = host ? Math.round(host.getBoundingClientRect().top) : null;
   const link = [...art.querySelectorAll('a[href]')]

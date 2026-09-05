@@ -4,6 +4,7 @@
 // the engine lays the popover out either way, and the damage surfaces as a wrong
 // scroll height only in a browser that applies the property.
 import { describe, expect, it } from "vitest";
+import { GRID_ITEM_SELECTOR } from "../shared/dom";
 import { PICKER_STYLESHEET } from "./mount-shadow";
 
 // Declarations only: the comments in these rules name the very properties being
@@ -24,7 +25,7 @@ describe("emoji grid cell", () => {
   // half collapses every off-screen row - the scroll height, the category-bar jumps and the
   // scroll-spy with it.
   it("pairs content-visibility with a size the contained box can still resolve", () => {
-    const body = ruleBody(".khasky-emojery-grid-item");
+    const body = ruleBody(GRID_ITEM_SELECTOR);
     expect(body).toContain("content-visibility");
     expect(body, "a skipped cell has no contents to size it").toMatch(/aspect-ratio|contain-intrinsic-size/);
     expect(body, "aspect-ratio needs a width to resolve against").toMatch(/width:/);

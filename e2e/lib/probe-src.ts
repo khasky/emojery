@@ -19,6 +19,8 @@
 // runs under vitest, sharing only lib's leaf constants and config with this
 // folder instead of its @playwright/test-bound probe helpers.
 
+import { HOST_SELECTOR, MOUNT_ATTR, MOUNTED_SELECTOR, OVERLAY_HOST_CLASS, TRIGGER_SELECTOR } from "./selectors";
+
 // Shadow-piercing deep query - `document.querySelector` does NOT cross the open
 // shadow roots the trigger/picker live in.
 export const DEEP_QUERY_ALL_SRC = `const deepQueryAll = (selector) => {
@@ -90,9 +92,9 @@ const near = (a, b) => {
 // instead. Interpolate AFTER DEEP_QUERY_ALL_SRC. Visible = non-zero WIDTH, the
 // check both readers built on this have always used.
 export const FIRST_VISIBLE_TRIGGER_SRC = `const firstVisibleTrigger = () => {
-  for (const host of deepQueryAll(".khasky-emojery-host")) {
+  for (const host of deepQueryAll("${HOST_SELECTOR}")) {
     if (host.getBoundingClientRect().width <= 0) continue;
-    const trigger = host.shadowRoot?.querySelector(".khasky-emojery-trigger, .khasky-emojery-counter");
+    const trigger = host.shadowRoot?.querySelector("${TRIGGER_SELECTOR}");
     if (trigger) return { host, trigger };
   }
   return null;
@@ -105,25 +107,25 @@ export const IS_VISIBLE_RECT_SRC = `const isVisibleRect = (rect) => rect.width >
 // ancestor, a sibling of the host (or its wrapper), or the parent - the host is
 // sometimes placed in a different DOM node than its keyed anchor.
 export const MOUNTED_KEY_OF_SRC = `const mountedKeyOf = (host) => {
-  const direct = host.closest("[data-khasky-emojery-mounted]");
-  if (direct) return direct.getAttribute("data-khasky-emojery-mounted");
+  const direct = host.closest("${MOUNTED_SELECTOR}");
+  if (direct) return direct.getAttribute("${MOUNT_ATTR}");
 
   const candidates = [host];
-  if (host.parentElement && !host.parentElement.classList.contains("khasky-emojery-overlay-host")) {
+  if (host.parentElement && !host.parentElement.classList.contains("${OVERLAY_HOST_CLASS}")) {
     candidates.push(host.parentElement);
   }
 
   for (const node of candidates) {
     const previous = node.previousElementSibling;
     const next = node.nextElementSibling;
-    if (previous?.hasAttribute("data-khasky-emojery-mounted")) {
-      return previous.getAttribute("data-khasky-emojery-mounted");
+    if (previous?.hasAttribute("${MOUNT_ATTR}")) {
+      return previous.getAttribute("${MOUNT_ATTR}");
     }
-    if (next?.hasAttribute("data-khasky-emojery-mounted")) {
-      return next.getAttribute("data-khasky-emojery-mounted");
+    if (next?.hasAttribute("${MOUNT_ATTR}")) {
+      return next.getAttribute("${MOUNT_ATTR}");
     }
-    if (node.parentElement?.hasAttribute("data-khasky-emojery-mounted")) {
-      return node.parentElement.getAttribute("data-khasky-emojery-mounted");
+    if (node.parentElement?.hasAttribute("${MOUNT_ATTR}")) {
+      return node.parentElement.getAttribute("${MOUNT_ATTR}");
     }
   }
 

@@ -8,6 +8,7 @@
 // strict-CSP site can block the image; the picker then keeps the OS-font glyphs it always
 // showed - never empty boxes.
 
+import { EMOJI_CHAR_CLASS, EMOJI_CLASS, EMOJI_IMG_CLASS, SPRITE_COL_VAR, SPRITE_COLS_VAR, SPRITE_ROW_VAR, SPRITE_ROWS_VAR } from "../shared/dom";
 import { REACTIONS } from "../shared/reactions";
 import { SPRITE_COLS, SPRITE_FILE, SPRITE_ROWS } from "./__generated__/emoji-sprite-map";
 
@@ -34,13 +35,13 @@ export const PICKER_SPRITE_SCOPE: SpriteCssScope = { base: "", sprite: `:host([$
  *  rather than clipping an empty box. */
 export function emojiSpriteCss(scope: SpriteCssScope): string {
   return `
-${scope.base} .khasky-emojery-emoji {
+${scope.base} .${EMOJI_CLASS} {
   display: inline;
 }
-${scope.base} .khasky-emojery-emoji-img {
+${scope.base} .${EMOJI_IMG_CLASS} {
   display: none;
 }
-${scope.sprite} .khasky-emojery-emoji:has(> .khasky-emojery-emoji-img) {
+${scope.sprite} .${EMOJI_CLASS}:has(> .${EMOJI_IMG_CLASS}) {
   display: inline-block;
   position: relative;
   width: 1em;
@@ -48,18 +49,18 @@ ${scope.sprite} .khasky-emojery-emoji:has(> .khasky-emojery-emoji-img) {
   overflow: hidden;
   vertical-align: middle;
 }
-${scope.sprite} .khasky-emojery-emoji-img {
+${scope.sprite} .${EMOJI_IMG_CLASS} {
   display: block;
   position: absolute;
-  left: calc(var(--khasky-emojery-col) * -1em);
-  top: calc(var(--khasky-emojery-row) * -1em);
-  width: calc(var(--khasky-emojery-sprite-cols) * 1em);
-  height: calc(var(--khasky-emojery-sprite-rows) * 1em);
+  left: calc(var(${SPRITE_COL_VAR}) * -1em);
+  top: calc(var(${SPRITE_ROW_VAR}) * -1em);
+  width: calc(var(${SPRITE_COLS_VAR}) * 1em);
+  height: calc(var(${SPRITE_ROWS_VAR}) * 1em);
   /* Defeat any inherited \`img { max-width: 100% }\` so the oversized sheet isn't shrunk. */
   max-width: none;
   pointer-events: none;
 }
-${scope.sprite} .khasky-emojery-emoji:has(> .khasky-emojery-emoji-img) > .khasky-emojery-emoji-char {
+${scope.sprite} .${EMOJI_CLASS}:has(> .${EMOJI_IMG_CLASS}) > .${EMOJI_CHAR_CLASS} {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -194,13 +195,13 @@ export function createEmojiSpriteElement(emoji: string): Node {
   if (!cell) return document.createTextNode(emoji);
 
   const root = document.createElement("span");
-  root.className = "khasky-emojery-emoji";
-  root.style.setProperty("--khasky-emojery-col", String(cell.col));
-  root.style.setProperty("--khasky-emojery-row", String(cell.row));
+  root.className = EMOJI_CLASS;
+  root.style.setProperty(SPRITE_COL_VAR, String(cell.col));
+  root.style.setProperty(SPRITE_ROW_VAR, String(cell.row));
 
   if (cell.url || spriteUrlPending()) {
     const img = document.createElement("img");
-    img.className = "khasky-emojery-emoji-img";
+    img.className = EMOJI_IMG_CLASS;
     if (cell.url) img.src = cell.url;
     else registerPendingSpriteImg(img);
     img.alt = "";
@@ -210,7 +211,7 @@ export function createEmojiSpriteElement(emoji: string): Node {
   }
 
   const char = document.createElement("span");
-  char.className = "khasky-emojery-emoji-char";
+  char.className = EMOJI_CHAR_CLASS;
   char.textContent = emoji;
   root.appendChild(char);
   return root;
@@ -271,8 +272,8 @@ export function preloadEmojiSprite(): void {
 
 // Stamp the sheet geometry + current mode on a host. Idempotent - the animation layer re-applies it on every use.
 export function applyEmojiSpriteHost(host: HTMLElement): void {
-  host.style.setProperty("--khasky-emojery-sprite-cols", String(SPRITE_COLS));
-  host.style.setProperty("--khasky-emojery-sprite-rows", String(SPRITE_ROWS));
+  host.style.setProperty(SPRITE_COLS_VAR, String(SPRITE_COLS));
+  host.style.setProperty(SPRITE_ROWS_VAR, String(SPRITE_ROWS));
   host.setAttribute(EMOJI_SPRITE_MODE_ATTR, mode);
   if (!probeSettled) spriteHosts.add(host);
   preloadEmojiSprite();

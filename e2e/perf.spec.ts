@@ -16,6 +16,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { expect, test } from "@playwright/test";
 import { closeSession, envUrl, firstMountedKey, isFirefoxRun, launchSession, openGithub } from "./lib/extension";
+import { OWN_NODES_SELECTOR } from "./lib/selectors";
 import { dismissInterstitialsInitScript, wallReason } from "./lib/site-walls";
 import { SUPPORTED_SITE_SCENARIOS } from "./supported-sites";
 
@@ -46,7 +47,7 @@ test("a deep feed scroll stays under the heap budget", async () => {
   const session = await launchSession();
   try {
     const page = await session.context.newPage();
-    await page.addInitScript(dismissInterstitialsInitScript, { exposeUnwallHook: false, keepDialogsWithReactionHost: false });
+    await page.addInitScript(dismissInterstitialsInitScript, { exposeUnwallHook: false, keepDialogsWithReactionHost: false, ownNodesSelector: OWN_NODES_SELECTOR });
     await page.addInitScript(() => {
       (window as unknown as { __emLongTasks: number[] }).__emLongTasks = [];
       try {

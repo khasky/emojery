@@ -21,6 +21,7 @@
 // E2E_AUTHURL_FACEBOOK_PINNED (see .env.e2e.example): a post whose pinned top
 // comment carries photo attachments; re-point the env key if it disappears.
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { MOUNT_ATTR, MOUNTED_SELECTOR } from "../lib/selectors";
 import { bridgeFixture, gotoSettled, SETUP_HOOK_TIMEOUT_MS, siteAuthEnabled, waitForHost } from "./harness";
 import { DQ_SRC } from "./probes";
 import { authFacebookPinnedUrl } from "./scenarios";
@@ -33,8 +34,8 @@ const COMMENT_HYDRATE_MS = Number(process.env.E2E_FB_COMMENT_HYDRATE_MS ?? 8_000
 // post's, so a mount that closes onto a nested one sits on a comment.
 const VISIBLE_MOUNTS_SRC = `
 ${DQ_SRC}
-const anchors = dq('[data-khasky-emojery-mounted]').filter((a) => a.getBoundingClientRect().width > 0);
-const keyOf = (a) => a.getAttribute('data-khasky-emojery-mounted');
+const anchors = dq('${MOUNTED_SELECTOR}').filter((a) => a.getBoundingClientRect().width > 0);
+const keyOf = (a) => a.getAttribute('${MOUNT_ATTR}');
 const onComment = (a) => {
   const article = a.closest('[role="article"]');
   return !!article && !!article.parentElement?.closest('[role="article"]');

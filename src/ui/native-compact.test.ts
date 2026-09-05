@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { describe, expect, it } from "vitest";
 import type { PickerInsertionPoint } from "../shared/adapter";
-import { compactCountText, compactNativeCounts, compactQuotedLabelText, restoreCompactedCounts } from "./native-compact";
+import { COUNT_ATTR, compactCountText, compactNativeCounts, compactQuotedLabelText, restoreCompactedCounts } from "./native-compact";
 
 describe("compactCountText", () => {
   it("compacts grouped integers with any locale separator", () => {
@@ -104,7 +104,7 @@ describe("compactNativeCounts / restoreCompactedCounts", () => {
 
     restoreCompactedCounts();
     expect(count.textContent).toBe("327 555");
-    expect(count.hasAttribute("data-khasky-emojery-count")).toBe(false);
+    expect(count.hasAttribute(COUNT_ATTR)).toBe(false);
     native.remove();
   });
 
@@ -123,7 +123,7 @@ describe("compactNativeCounts / restoreCompactedCounts", () => {
 
     restoreCompactedCounts();
     expect(count.textContent).toBe("327 555");
-    expect(count.hasAttribute("data-khasky-emojery-count")).toBe(false);
+    expect(count.hasAttribute(COUNT_ATTR)).toBe(false);
     outer.remove();
   });
 });

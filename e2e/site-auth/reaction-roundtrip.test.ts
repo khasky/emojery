@@ -5,6 +5,7 @@
 // emoji+count, and the pick PERSISTS across a reload. Runs (lightly) on all 9
 // sites; cross-tab sync (SW-brokered) is checked once on a stable target.
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { COUNTER_CLASS, GRID_ITEM_SELECTOR, HOST_SELECTOR, MOUNTED_SELECTOR } from "../lib/selectors";
 import type { Bridge } from "./bridge";
 import {
   bridgeFixture,
@@ -68,7 +69,7 @@ async function ensureLiveTrigger(b: Bridge, site: SiteId) {
         // a dialog over the profile) closes that dialog on Escape and lands on the home
         // feed, where the target's counter no longer exists.
         // The counter here is still the optimistic UI.
-        await b.waitFor(`const hosts = Array.from(document.querySelectorAll('.khasky-emojery-host')); return hosts.some((h) => { const r = h.getBoundingClientRect(); return r.width > 0 && r.height > 0 && !!(h.shadowRoot && h.shadowRoot.querySelector('button.khasky-emojery-counter')); });`, 8_000);
+        await b.waitFor(`const hosts = Array.from(document.querySelectorAll('${HOST_SELECTOR}')); return hosts.some((h) => { const r = h.getBoundingClientRect(); return r.width > 0 && r.height > 0 && !!(h.shadowRoot && h.shadowRoot.querySelector('button.${COUNTER_CLASS}')); });`, 8_000);
 
         const after = await readEvidence(b, site);
         const counter = after.hosts.find((h) => h.visible && h.isCounter);
@@ -175,7 +176,7 @@ async function ensureLiveTrigger(b: Bridge, site: SiteId) {
       await b.act(
         `const t2 = ${SECOND_TAB};
        for (let i = 0; i < 10; i++) {
-         await t2.evaluate(() => { const a = document.querySelector('[data-khasky-emojery-mounted]'); if (a) a.scrollIntoView({ block: 'center' }); }).catch(() => {});
+         await t2.evaluate(() => { const a = document.querySelector('${MOUNTED_SELECTOR}'); if (a) a.scrollIntoView({ block: 'center' }); }).catch(() => {});
          if ((await t2.locator(${JSON.stringify(TRIGGER_SELECTOR)}).count().catch(() => 0)) > 0) break;
          // Poll interval, bounded by the 10 attempts above: the second tab mounts on its
          // own IntersectionObserver, which no event in this tab can be awaited on.
@@ -196,7 +197,7 @@ async function ensureLiveTrigger(b: Bridge, site: SiteId) {
         `await page.bringToFront();
        await page.locator(${JSON.stringify(TRIGGER_SELECTOR)}).first().click({ timeout: 8000 });
        await page.waitForTimeout(700);
-       await page.locator('.khasky-emojery-grid-item').first().click({ timeout: 8000 });
+       await page.locator('${GRID_ITEM_SELECTOR}').first().click({ timeout: 8000 });
        await page.waitForTimeout(1500);`,
       );
       // This click bypasses openPickerState, so sweep any auth tab a signed-out

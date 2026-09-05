@@ -8,6 +8,7 @@
 
 import { h, render } from "preact";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { EMOJI_CHAR_CLASS, EMOJI_CLASS, EMOJI_IMG_CLASS } from "../shared/dom";
 import { type ChromeShimHandle, installChromeShim } from "../test/chrome-shim";
 import { EmojiImg } from "./emoji-img";
 import { applyEmojiSpriteHost, EMOJI_SPRITE_MODE_ATTR } from "./emoji-sprite";
@@ -54,11 +55,11 @@ describe("emoji sprite - WebKit probe", () => {
   it("EmojiImg renders an <img> at the resolved sprite URL, keeping the glyph fallback", () => {
     render(h(EmojiImg, { emoji: "🔥" }), container);
 
-    const img = container.querySelector<HTMLImageElement>("img.khasky-emojery-emoji-img");
+    const img = container.querySelector<HTMLImageElement>(`img.${EMOJI_IMG_CLASS}`);
     expect(img).not.toBeNull();
     expect(img!.getAttribute("src")).toBe(PNG_1X1);
     // The glyph stays in the DOM as the accessible / copyable fallback.
-    expect(container.querySelector(".khasky-emojery-emoji-char")?.textContent).toBe("🔥");
+    expect(container.querySelector(`.${EMOJI_CHAR_CLASS}`)?.textContent).toBe("🔥");
   });
 
   // The crop rules are GENERATED (emojiSpriteCss) for two scopes - the picker's shadow root
@@ -72,8 +73,8 @@ describe("emoji sprite - WebKit probe", () => {
     shadow.append(style, mount);
     render(h(EmojiImg, { emoji: "🔥" }), mount);
 
-    const glyph = shadow.querySelector<HTMLElement>(".khasky-emojery-emoji")!;
-    const img = shadow.querySelector<HTMLElement>(".khasky-emojery-emoji-img")!;
+    const glyph = shadow.querySelector<HTMLElement>(`.${EMOJI_CLASS}`)!;
+    const img = shadow.querySelector<HTMLElement>(`.${EMOJI_IMG_CLASS}`)!;
 
     host.setAttribute(EMOJI_SPRITE_MODE_ATTR, "text");
     expect(getComputedStyle(glyph).display, "text mode shows the OS glyph").toBe("inline");

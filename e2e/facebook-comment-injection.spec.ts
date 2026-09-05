@@ -25,6 +25,7 @@ import { envUrl } from "./lib/extension";
 import { requireFacebookPostMount } from "./lib/mount-wait";
 import { gotoSettled } from "./lib/page-settle";
 import { DEEP_QUERY_ALL_SRC } from "./lib/probe-src";
+import { HOST_SELECTOR, MOUNT_ATTR, MOUNTED_SELECTOR } from "./lib/selectors";
 import { sharedSession } from "./lib/shared-session";
 
 const FACEBOOK_POST = envUrl("FACEBOOK_POST");
@@ -52,7 +53,7 @@ test("a comment's reaction cluster never becomes a mount, even when it can see t
     // claimed with the post's own target) on the pre-fix build.
     const injected = await page.evaluate<boolean>(`(() => {
       ${DEEP_QUERY_ALL_SRC}
-      const anchor = deepQueryAll("[data-khasky-emojery-mounted]").find((el) => el.getBoundingClientRect().width > 0);
+      const anchor = deepQueryAll("${MOUNTED_SELECTOR}").find((el) => el.getBoundingClientRect().width > 0);
       if (!anchor) return false;
       const row = anchor.parentElement;
       const section = row && row.parentElement;
@@ -88,9 +89,9 @@ test("a comment's reaction cluster never becomes a mount, even when it can see t
       ${DEEP_QUERY_ALL_SRC}
       const art = document.querySelector('[data-e2e-injected-comment="1"]');
       if (!art) return -1;
-      let n = art.hasAttribute("data-khasky-emojery-mounted") ? 1 : 0;
-      n += deepQueryAll("[data-khasky-emojery-mounted]").filter((el) => art.contains(el)).length;
-      n += deepQueryAll(".khasky-emojery-host").filter((el) => art.contains(el)).length;
+      let n = art.hasAttribute("${MOUNT_ATTR}") ? 1 : 0;
+      n += deepQueryAll("${MOUNTED_SELECTOR}").filter((el) => art.contains(el)).length;
+      n += deepQueryAll("${HOST_SELECTOR}").filter((el) => art.contains(el)).length;
       return n;
     })()`);
     expect(commentMounts, "nothing may mount on or inside a comment article").toBe(0);

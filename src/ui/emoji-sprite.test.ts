@@ -6,6 +6,7 @@
 // CONTRIBUTING.md. The load probe itself is covered in WebKit by emoji-sprite.browser.test.tsx.
 
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { EMOJI_IMG_CLASS } from "../shared/dom";
 import { allowColdModuleReset } from "../test/cold-module-reset";
 
 allowColdModuleReset();
@@ -35,7 +36,7 @@ function stubSheetMint(mintedOrigin: string) {
 }
 
 function spriteImgOf(node: Node): HTMLImageElement | null {
-  return (node as HTMLElement).querySelector<HTMLImageElement>("img.khasky-emojery-emoji-img");
+  return (node as HTMLElement).querySelector<HTMLImageElement>(`img.${EMOJI_IMG_CLASS}`);
 }
 
 afterEach(() => vi.unstubAllGlobals());

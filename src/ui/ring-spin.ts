@@ -7,7 +7,7 @@
 
 // Gates the RGB ring's CSS spin (picker.css). Set only while the ring's host is BOTH allowed
 // to animate (the Reaction-animations setting) and actually on screen.
-const ANIMATE_ATTR = "data-khasky-emojery-animate";
+export const ANIMATE_ATTR = "data-khasky-emojery-animate";
 // The spin is a GREETING, not a permanent state: the masked, overflow-clipped ring box is
 // GPU-re-rastered every frame it turns, the extension's largest idle cost (why the mask is
 // there: picker.css `.khasky-emojery-ring`; the measured figures: ring-spin.test.ts).

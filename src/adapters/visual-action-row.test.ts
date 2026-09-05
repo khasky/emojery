@@ -9,7 +9,7 @@
 // contract). It deliberately models NO supported site's markup - which row of
 // which site the heuristic finds on a live page stays an e2e question.
 import { afterEach, describe, expect, it } from "vitest";
-import { HOST_CLASS } from "../shared/dom";
+import { HIDDEN_ATTR, HOST_CLASS } from "../shared/dom";
 import { findVisualActionSlot, hasRenderableBox, isRenderableInPageLayout, isStructuralRoot, pageHasLayout } from "./visual-action-row";
 
 // `box()` stamps an own property, and <body>/<html> are the two nodes the global
@@ -148,7 +148,7 @@ describe("isRenderableInPageLayout", () => {
   it("accepts a zero-box control whose ancestor carries our hidden marker", () => {
     layoutPage();
     const hiddenSlot = document.createElement("div");
-    hiddenSlot.setAttribute("data-khasky-emojery-hidden", "1");
+    hiddenSlot.setAttribute(HIDDEN_ATTR, "1");
     const control = box(document.createElement("button"), 0, 0);
     hiddenSlot.append(control);
     document.body.append(hiddenSlot);
@@ -285,7 +285,7 @@ describe("findVisualActionSlot", () => {
       layoutPage();
       const { row, buttons } = buildRow({ widths: [40, 40, 40] });
       const firstSlot = row.children[0] as HTMLElement;
-      firstSlot.setAttribute("data-khasky-emojery-hidden", "1");
+      firstSlot.setAttribute(HIDDEN_ATTR, "1");
       box(buttons[0]!, 0, 0);
 
       const found = findVisualActionSlot(buttons[2]!);
@@ -298,7 +298,7 @@ describe("findVisualActionSlot", () => {
       layoutPage();
       const { row, buttons } = buildRow({ widths: [40, 40, 40] });
       const firstSlot = row.children[0] as HTMLElement;
-      firstSlot.setAttribute("data-khasky-emojery-hidden", "1");
+      firstSlot.setAttribute(HIDDEN_ATTR, "1");
       box(buttons[0]!, 0, 0);
       // Its 0px width would blow any variance budget if it were measured.
       expect(findVisualActionSlot(buttons[2]!, { minSlotWidth: 10, maxWidthVariance: 0.01 })?.slots).toHaveLength(3);

@@ -7,6 +7,7 @@ import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import { launchRealisticContext, resolveExtensionPath, resolveUserDataDir } from "./browser-session";
 import { extensionLaunchArgs, realisticClientEnabled } from "./launch-args";
 import { debugEvidence, handleKnownInterstitials, isNoActionSurface, settleFullLoad, settlePage, waitForMountEvidence } from "./page-settle";
+import { OWN_NODES_SELECTOR } from "./selectors";
 import type { MountEvidence, SupportedSiteScenario } from "./site-evidence";
 import { dismissInterstitialsInitScript } from "./site-walls";
 
@@ -53,7 +54,7 @@ export async function launchE2eBrowserSession(options: LaunchE2eOptions = {}): P
   if (realisticClient) {
     await sessionContext.addInitScript(realisticClientInitScript);
   }
-  await sessionContext.addInitScript(dismissInterstitialsInitScript, { exposeUnwallHook: true, keepDialogsWithReactionHost: false });
+  await sessionContext.addInitScript(dismissInterstitialsInitScript, { exposeUnwallHook: true, keepDialogsWithReactionHost: false, ownNodesSelector: OWN_NODES_SELECTOR });
   return { context: sessionContext, generatedUserDataDir };
 }
 

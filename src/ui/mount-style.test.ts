@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { describe, expect, it } from "vitest";
 import type { PickerInsertionPoint, TargetRef } from "../shared/adapter";
-import { LAYOUT_ATTR, PAGE_FONT_VAR } from "../shared/dom";
+import { GLYPH_H_VAR, ICON_SIZE_VAR, LAYOUT_ATTR, PAGE_FONT_VAR, ROW_H_VAR, SITE_PAD_X_VAR, SITE_RADIUS_VAR } from "../shared/dom";
 import { hostShapeSignature, readActionLayout } from "./mount-style";
 
 const TARGET: TargetRef = {
@@ -41,11 +41,11 @@ describe("hostShapeSignature covers every property the re-blend stamps", () => {
   const MUTATIONS: Array<[string, (host: HTMLElement) => void]> = [
     ["font family", (h) => h.style.setProperty("font-family", "Inter")],
     ["page font size", (h) => h.style.setProperty(PAGE_FONT_VAR, "15px")],
-    ["site radius", (h) => h.style.setProperty("--khasky-emojery-site-radius", "18px")],
-    ["site padding", (h) => h.style.setProperty("--khasky-emojery-site-pad-x", "12px")],
-    ["row height", (h) => h.style.setProperty("--khasky-emojery-row-h", "32px")],
-    ["glyph height", (h) => h.style.setProperty("--khasky-emojery-glyph-h", "22px")],
-    ["icon size", (h) => h.style.setProperty("--khasky-emojery-icon-size", "48px")],
+    ["site radius", (h) => h.style.setProperty(SITE_RADIUS_VAR, "18px")],
+    ["site padding", (h) => h.style.setProperty(SITE_PAD_X_VAR, "12px")],
+    ["row height", (h) => h.style.setProperty(ROW_H_VAR, "32px")],
+    ["glyph height", (h) => h.style.setProperty(GLYPH_H_VAR, "22px")],
+    ["icon size", (h) => h.style.setProperty(ICON_SIZE_VAR, "48px")],
     ["icon-column layout", (h) => h.setAttribute(LAYOUT_ATTR, "icon-column")],
     ["left margin", (h) => h.style.setProperty("margin-left", "6px")],
     ["right margin", (h) => h.style.setProperty("margin-right", "6px")],
@@ -62,7 +62,7 @@ describe("hostShapeSignature covers every property the re-blend stamps", () => {
 
   it("is stable while nothing is restamped", () => {
     const host = document.createElement("span");
-    host.style.setProperty("--khasky-emojery-row-h", "32px");
+    host.style.setProperty(ROW_H_VAR, "32px");
     expect(hostShapeSignature(host)).toBe(hostShapeSignature(host));
   });
 });

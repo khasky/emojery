@@ -15,7 +15,7 @@ import { type BrowserContext, type ElementHandle, expect, type Page, test } from
 import * as ext from "./lib/extension";
 import { pollForValue } from "./lib/picker-probes";
 import { openHistoryTab } from "./lib/popup-probes";
-import { GRID_ITEM_SELECTOR } from "./lib/selectors";
+import { GRID_ITEM_SELECTOR, HOST_SELECTOR, OVERLAY_HOST_SELECTOR } from "./lib/selectors";
 
 // Tracing OFF for this file, on every attempt. The snapshotter re-serializes the
 // picker's ~600-button grid after each action, which costs seconds per pick (the
@@ -82,10 +82,10 @@ const refusedVotes = (responses: VoteResponse[]): VoteResponse[] => responses.fi
 // that is what decides whether the refused case can draw a refusal at all.
 const PICKER_GRID_ITEMS_SRC = `const pickerGridItems = () => {
   const out = [];
-  for (const host of document.querySelectorAll(".khasky-emojery-overlay-host, .khasky-emojery-host")) {
+  for (const host of document.querySelectorAll("${OVERLAY_HOST_SELECTOR}, ${HOST_SELECTOR}")) {
     const root = host.shadowRoot;
     if (!root) continue;
-    for (const item of root.querySelectorAll(".khasky-emojery-grid-item")) out.push(item);
+    for (const item of root.querySelectorAll("${GRID_ITEM_SELECTOR}")) out.push(item);
   }
   return out;
 };`;

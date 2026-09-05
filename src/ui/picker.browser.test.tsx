@@ -8,7 +8,35 @@
 import { h, render } from "preact";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { userEvent } from "vitest/browser";
-import { HOST_CLASS, LAYOUT_ATTR } from "../shared/dom";
+import {
+  BREAKDOWN_MORE_CLASS,
+  BREAKDOWN_ROW_SELECTOR,
+  CAT_BAR_CLASS,
+  CAT_BTN_CLASS,
+  COUNTER_CLASS,
+  COUNTER_EMOJIS_CLASS,
+  EMPTY_CLASS,
+  GATE_CANCEL_CLASS,
+  GATE_CLASS,
+  GATE_EMOJI_CLASS,
+  GATE_SIGNIN_CLASS,
+  GATE_TITLE_CLASS,
+  GRID_ITEM_CLASS,
+  GRID_ITEM_SELECTOR,
+  HOST_CLASS,
+  LAYOUT_ATTR,
+  POPOVER_CLASS,
+  POPOVER_SCROLL_CLASS,
+  RING_CLASS,
+  SEARCH_SELECTOR,
+  SECTION_CLEAR_CLASS,
+  SECTION_HEAD_CLASS,
+  SITE_FG_VAR,
+  STICKY_HEAD_BOTTOM_CLASS,
+  STICKY_HEAD_CLASS,
+  TRIGGER_CLASS,
+  TRIGGER_ICON_CLASS,
+} from "../shared/dom";
 import { CATEGORIES, REACTIONS } from "../shared/reactions";
 import { type ChromeShimHandle, installChromeShim } from "../test/chrome-shim";
 import { tk } from "../test/target-key";
@@ -58,8 +86,8 @@ function mountSignedOutPicker(onSignIn: () => void, opts: { autoOpen?: boolean; 
 // Opens a signed-out picker and clicks the first palette emoji, i.e. walks the whole
 // pre-auth path the gate now sits at the end of. Returns the emoji that was chosen.
 async function pickWhileSignedOut(): Promise<string> {
-  await userEvent.click(container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!);
-  const item = await pollForElement(() => portalRoot.querySelector<HTMLButtonElement>(".khasky-emojery-grid-item"));
+  await userEvent.click(container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!);
+  const item = await pollForElement(() => portalRoot.querySelector<HTMLButtonElement>(GRID_ITEM_SELECTOR));
   const emoji = item.textContent!.trim();
   await userEvent.click(item);
   return emoji;
@@ -107,7 +135,7 @@ describe("Picker - WebKit render", () => {
   it("renders an interactive trigger with a real layout box", async () => {
     mountPicker();
 
-    const trigger = container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger");
+    const trigger = container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`);
     expect(trigger, "idle trigger should render").not.toBeNull();
 
     const rect = trigger!.getBoundingClientRect();
@@ -137,7 +165,7 @@ describe("Picker - WebKit render", () => {
       container,
     );
 
-    const trigger = container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!;
+    const trigger = container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!;
     await userEvent.click(trigger);
     await expect.poll(() => portalRoot.querySelector('[role="dialog"]')).not.toBeNull();
 
@@ -149,15 +177,15 @@ describe("Picker - WebKit render", () => {
       authed: true,
     });
 
-    await expect.poll(() => container.querySelector(".khasky-emojery-counter")).not.toBeNull();
+    await expect.poll(() => container.querySelector(`.${COUNTER_CLASS}`)).not.toBeNull();
     expect(portalRoot.querySelector('[role="dialog"]'), "count hydration must not close an open popover").not.toBeNull();
-    expect(container.querySelector(".khasky-emojery-counter")!.getAttribute("aria-expanded")).toBe("true");
+    expect(container.querySelector(`.${COUNTER_CLASS}`)!.getAttribute("aria-expanded")).toBe("true");
   });
 
   it("opens the picker popover into the portal on click", async () => {
     mountPicker();
 
-    const trigger = container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!;
+    const trigger = container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!;
     await userEvent.click(trigger);
 
     // The popover renders via createPortal into portalRoot (outside the page's
@@ -165,8 +193,8 @@ describe("Picker - WebKit render", () => {
     await expect.poll(() => portalRoot.querySelector('[role="dialog"]')).not.toBeNull();
     expect(trigger.getAttribute("aria-expanded")).toBe("true");
 
-    expect(portalRoot.querySelector(".khasky-emojery-search")).not.toBeNull();
-    expect(portalRoot.querySelectorAll(".khasky-emojery-grid-item").length).toBeGreaterThan(0);
+    expect(portalRoot.querySelector(SEARCH_SELECTOR)).not.toBeNull();
+    expect(portalRoot.querySelectorAll(GRID_ITEM_SELECTOR).length).toBeGreaterThan(0);
   });
 
   // Trusted-gesture gate, see picker.tsx handlePick: a synthetic click must neither
@@ -186,12 +214,12 @@ describe("Picker - WebKit render", () => {
       container,
     );
 
-    const trigger = container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!;
+    const trigger = container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!;
     trigger.click();
     expect(portalRoot.querySelector('[role="dialog"]'), "a synthetic click must not open the picker").toBeNull();
 
     await userEvent.click(trigger);
-    const item = await pollForElement(() => portalRoot.querySelector<HTMLButtonElement>(".khasky-emojery-grid-item"));
+    const item = await pollForElement(() => portalRoot.querySelector<HTMLButtonElement>(GRID_ITEM_SELECTOR));
 
     // Opened for real, but the pick itself is synthetic - still no vote.
     item.click();
@@ -204,15 +232,15 @@ describe("Picker - WebKit render", () => {
   it("filters the grid as the user searches", async () => {
     mountPicker();
 
-    await userEvent.click(container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!);
-    const search = await pollForElement(() => portalRoot.querySelector<HTMLInputElement>(".khasky-emojery-search"));
+    await userEvent.click(container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!);
+    const search = await pollForElement(() => portalRoot.querySelector<HTMLInputElement>(SEARCH_SELECTOR));
 
     await userEvent.fill(search, "fire");
 
     // 🔥's English label is "fire" (bundled emojibase fallback), so at least one
     // grid option surfaces and the no-matches empty state is absent.
-    await expect.poll(() => Array.from(portalRoot.querySelectorAll<HTMLElement>(".khasky-emojery-grid-item")).some((el) => (el.getAttribute("aria-label") ?? "").toLowerCase().includes("fire"))).toBe(true);
-    expect(portalRoot.querySelector(".khasky-emojery-empty")).toBeNull();
+    await expect.poll(() => Array.from(portalRoot.querySelectorAll<HTMLElement>(GRID_ITEM_SELECTOR)).some((el) => (el.getAttribute("aria-label") ?? "").toLowerCase().includes("fire"))).toBe(true);
+    expect(portalRoot.querySelector(`.${EMPTY_CLASS}`)).toBeNull();
   });
 
   // The gradient ring is a rendered element inside the trigger, so it sits in the same
@@ -223,16 +251,16 @@ describe("Picker - WebKit render", () => {
   it("keeps the ring clear of the counter's emoji stack and of its clicks", async () => {
     mountCounterPicker();
 
-    const emojis = container.querySelector<HTMLElement>(".khasky-emojery-counter-emojis")!;
+    const emojis = container.querySelector<HTMLElement>(`.${COUNTER_EMOJIS_CLASS}`)!;
     expect(emojis.firstElementChild?.tagName).toBe("SPAN");
-    expect(emojis.lastElementChild?.classList.contains("khasky-emojery-ring")).toBe(true);
+    expect(emojis.lastElementChild?.classList.contains(RING_CLASS)).toBe(true);
 
     // Exactly one ring paints per trigger: the button's own in the default horizontal form.
-    const rings = Array.from(container.querySelectorAll<HTMLElement>(".khasky-emojery-ring"));
+    const rings = Array.from(container.querySelectorAll<HTMLElement>(`.${RING_CLASS}`));
     expect(rings.length).toBe(2);
     expect(rings.filter((r) => getComputedStyle(r).display !== "none").length).toBe(1);
 
-    const counter = container.querySelector<HTMLButtonElement>(".khasky-emojery-counter")!;
+    const counter = container.querySelector<HTMLButtonElement>(`.${COUNTER_CLASS}`)!;
     await userEvent.click(counter);
     await expect.poll(() => portalRoot.querySelector('[role="dialog"]')).not.toBeNull();
   });
@@ -247,7 +275,7 @@ describe("Picker - WebKit render", () => {
     const shadow = host.attachShadow({ mode: "open" });
 
     render(h(Picker, { initial: emptyInitial(), onPick: () => true, onSignIn: () => {}, portalRoot }), shadow);
-    await userEvent.click(shadow.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!);
+    await userEvent.click(shadow.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!);
     await expect.poll(() => portalRoot.querySelector('[role="dialog"]')).not.toBeNull();
 
     removeMountNode(host);
@@ -269,7 +297,7 @@ describe("Picker - WebKit render", () => {
     const shadow = host.attachShadow({ mode: "open" });
 
     render(h(Picker, { initial: emptyInitial(), onPick: () => true, onSignIn: () => {}, portalRoot }), shadow);
-    await userEvent.click(shadow.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!);
+    await userEvent.click(shadow.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!);
     await expect.poll(() => portalRoot.querySelector('[role="dialog"]')).not.toBeNull();
 
     registerMountNode(tk("x:recycled-card"), host);
@@ -295,13 +323,13 @@ describe("Picker - WebKit render", () => {
     try {
       render(h(Picker, { initial: emptyInitial(), onPick: () => true, onSignIn: () => {}, portalRoot }), shadow);
 
-      const buttonRing = shadow.querySelector<HTMLElement>(".khasky-emojery-trigger > .khasky-emojery-ring")!;
-      const iconRing = shadow.querySelector<HTMLElement>(".khasky-emojery-trigger-icon > .khasky-emojery-ring")!;
+      const buttonRing = shadow.querySelector<HTMLElement>(`.${TRIGGER_CLASS} > .${RING_CLASS}`)!;
+      const iconRing = shadow.querySelector<HTMLElement>(`.${TRIGGER_ICON_CLASS} > .${RING_CLASS}`)!;
       expect(getComputedStyle(buttonRing).display).toBe("none");
       expect(getComputedStyle(iconRing).display).not.toBe("none");
       // It takes the circle's shape, and covers it: a ring smaller than its icon reads as a
       // misaligned blob rather than a border.
-      const icon = shadow.querySelector<HTMLElement>(".khasky-emojery-trigger-icon")!;
+      const icon = shadow.querySelector<HTMLElement>(`.${TRIGGER_ICON_CLASS}`)!;
       expect(getComputedStyle(iconRing).borderRadius).toBe(getComputedStyle(icon).borderRadius);
       expect(iconRing.getBoundingClientRect().width).toBeCloseTo(icon.getBoundingClientRect().width, 0);
     } finally {
@@ -339,10 +367,10 @@ describe("Picker - WebKit render", () => {
 describe("Picker - WebKit layout (real geometry)", () => {
   it("positions the open popover inside the viewport, not the off-screen sentinel", async () => {
     mountPicker();
-    const trigger = container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!;
+    const trigger = container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!;
     await userEvent.click(trigger);
 
-    const popover = await pollForElement(() => portalRoot.querySelector<HTMLElement>(".khasky-emojery-popover"));
+    const popover = await pollForElement(() => portalRoot.querySelector<HTMLElement>(`.${POPOVER_CLASS}`));
     await expect.poll(() => popover.style.visibility).toBe("visible");
     const top = Number.parseFloat(popover.style.top);
     const left = Number.parseFloat(popover.style.left);
@@ -357,10 +385,10 @@ describe("Picker - WebKit layout (real geometry)", () => {
     // to stay on-screen (picker-hooks.ts usePopoverPosition: left = innerWidth - w - margin).
     container.style.cssText = "position: fixed; right: 0; top: 200px;";
     mountPicker();
-    const trigger = container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!;
+    const trigger = container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!;
     await userEvent.click(trigger);
 
-    const popover = await pollForElement(() => portalRoot.querySelector<HTMLElement>(".khasky-emojery-popover"));
+    const popover = await pollForElement(() => portalRoot.querySelector<HTMLElement>(`.${POPOVER_CLASS}`));
     await expect.poll(() => popover.style.visibility).toBe("visible");
     const left = Number.parseFloat(popover.style.left);
     expect(popover.offsetWidth).toBeGreaterThan(0);
@@ -369,7 +397,7 @@ describe("Picker - WebKit layout (real geometry)", () => {
 
   it("closes the popover on page scroll outside it", async () => {
     mountPicker();
-    const trigger = container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!;
+    const trigger = container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!;
     await userEvent.click(trigger);
     await pollForElement(() => portalRoot.querySelector('[role="dialog"]'));
 
@@ -384,7 +412,7 @@ describe("Picker - WebKit layout (real geometry)", () => {
 
   it("survives a movement-free scroll event (sub-pixel snap jitter at fractional OS scaling)", async () => {
     mountPicker();
-    const trigger = container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!;
+    const trigger = container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!;
     await userEvent.click(trigger);
     await pollForElement(() => portalRoot.querySelector('[role="dialog"]'));
 
@@ -409,14 +437,14 @@ describe("Picker - WebKit layout (real geometry)", () => {
 describe("Picker - mirrored placement above the trigger", () => {
   it("opens below by default: sticky head pinned at the top, before the grid", async () => {
     mountPicker();
-    const trigger = container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!;
+    const trigger = container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!;
     await userEvent.click(trigger);
-    const popover = await pollForElement(() => portalRoot.querySelector<HTMLElement>(".khasky-emojery-popover"));
+    const popover = await pollForElement(() => portalRoot.querySelector<HTMLElement>(`.${POPOVER_CLASS}`));
     await expect.poll(() => popover.style.visibility).toBe("visible");
 
-    const head = popover.querySelector<HTMLElement>(".khasky-emojery-sticky-head")!;
-    const firstItem = popover.querySelector<HTMLElement>(".khasky-emojery-grid-item")!;
-    expect(head.classList.contains("khasky-emojery-sticky-head--bottom")).toBe(false);
+    const head = popover.querySelector<HTMLElement>(`.${STICKY_HEAD_CLASS}`)!;
+    const firstItem = popover.querySelector<HTMLElement>(GRID_ITEM_SELECTOR)!;
+    expect(head.classList.contains(STICKY_HEAD_BOTTOM_CLASS)).toBe(false);
     expect(head.compareDocumentPosition(firstItem) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(popover.getBoundingClientRect().top).toBeGreaterThanOrEqual(trigger.getBoundingClientRect().bottom - 1);
   });
@@ -426,14 +454,14 @@ describe("Picker - mirrored placement above the trigger", () => {
     // above - so Picker flips to the mirrored layout.
     container.style.cssText = "position: fixed; left: 40px; bottom: 12px;";
     mountPicker();
-    const trigger = container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!;
+    const trigger = container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!;
     await userEvent.click(trigger);
-    const popover = await pollForElement(() => portalRoot.querySelector<HTMLElement>(".khasky-emojery-popover"));
+    const popover = await pollForElement(() => portalRoot.querySelector<HTMLElement>(`.${POPOVER_CLASS}`));
     await expect.poll(() => popover.style.visibility).toBe("visible");
 
-    const head = popover.querySelector<HTMLElement>(".khasky-emojery-sticky-head")!;
-    const firstItem = popover.querySelector<HTMLElement>(".khasky-emojery-grid-item")!;
-    expect(head.classList.contains("khasky-emojery-sticky-head--bottom"), "expected the mirrored above-layout - is the test viewport tall enough?").toBe(true);
+    const head = popover.querySelector<HTMLElement>(`.${STICKY_HEAD_CLASS}`)!;
+    const firstItem = popover.querySelector<HTMLElement>(GRID_ITEM_SELECTOR)!;
+    expect(head.classList.contains(STICKY_HEAD_BOTTOM_CLASS), "expected the mirrored above-layout - is the test viewport tall enough?").toBe(true);
     expect(firstItem.compareDocumentPosition(head) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 
     const gap = () => trigger.getBoundingClientRect().top - popover.getBoundingClientRect().bottom;
@@ -442,9 +470,9 @@ describe("Picker - mirrored placement above the trigger", () => {
 
     // The fix: searching shrinks the popover, but its bottom stays glued to the
     // trigger - the search box never jumps to the far top.
-    const search = popover.querySelector<HTMLInputElement>(".khasky-emojery-search")!;
+    const search = popover.querySelector<HTMLInputElement>(SEARCH_SELECTOR)!;
     await userEvent.fill(search, "fire");
-    await expect.poll(() => Array.from(popover.querySelectorAll<HTMLElement>(".khasky-emojery-grid-item")).some((el) => (el.getAttribute("aria-label") ?? "").toLowerCase().includes("fire"))).toBe(true);
+    await expect.poll(() => Array.from(popover.querySelectorAll<HTMLElement>(GRID_ITEM_SELECTOR)).some((el) => (el.getAttribute("aria-label") ?? "").toLowerCase().includes("fire"))).toBe(true);
     await expect.poll(() => gap() >= 0 && gap() < 20).toBe(true);
   });
 });
@@ -452,7 +480,7 @@ describe("Picker - mirrored placement above the trigger", () => {
 describe("Picker - keyboard a11y (real focus)", () => {
   it("Tab reaches the trigger, Enter opens, Escape closes and restores focus", async () => {
     mountPicker();
-    const trigger = container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!;
+    const trigger = container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!;
 
     await userEvent.tab();
     expect(document.activeElement).toBe(trigger);
@@ -481,7 +509,7 @@ describe("Picker - keyboard a11y (real focus)", () => {
     const siteListener = (e: KeyboardEvent) => seenBySite.push(e.key);
     document.addEventListener("keydown", siteListener);
     try {
-      await userEvent.click(container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!);
+      await userEvent.click(container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!);
       await pollForElement(() => portalRoot.querySelector('[role="dialog"]'));
 
       await userEvent.keyboard("{Escape}");
@@ -504,17 +532,17 @@ describe("Picker - keyboard a11y (real focus)", () => {
 
   it("arrow keys move focus across the emoji grid", async () => {
     mountPicker();
-    await userEvent.click(container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!);
-    const search = await pollForElement(() => portalRoot.querySelector<HTMLInputElement>(".khasky-emojery-search"));
+    await userEvent.click(container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!);
+    const search = await pollForElement(() => portalRoot.querySelector<HTMLInputElement>(SEARCH_SELECTOR));
     search.focus();
     await userEvent.keyboard("{ArrowDown}");
 
     const first = document.activeElement as HTMLElement;
-    expect(first.classList.contains("khasky-emojery-grid-item")).toBe(true);
+    expect(first.classList.contains(GRID_ITEM_CLASS)).toBe(true);
     expect(first.hasAttribute("aria-pressed")).toBe(true);
 
     await userEvent.keyboard("{ArrowRight}");
-    const items = Array.from(portalRoot.querySelectorAll<HTMLButtonElement>(".khasky-emojery-grid-item"));
+    const items = Array.from(portalRoot.querySelectorAll<HTMLButtonElement>(GRID_ITEM_SELECTOR));
     const second = document.activeElement as HTMLElement;
     // The NEXT item, not merely a different one: "moved somewhere" passed even
     // with the step size wrong (see picker-hooks.test.ts gridTargetIndex).
@@ -530,9 +558,9 @@ describe("Picker - keyboard a11y (real focus)", () => {
   // scroll-padding, fed the head's measured height by picker.tsx, moves that edge down.
   it("arrowing back up never leaves the focused emoji under the sticky head", async () => {
     mountPicker();
-    await userEvent.click(container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!);
-    const search = await pollForElement(() => portalRoot.querySelector<HTMLInputElement>(".khasky-emojery-search"));
-    const head = await pollForElement(() => portalRoot.querySelector<HTMLElement>(".khasky-emojery-sticky-head"));
+    await userEvent.click(container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!);
+    const search = await pollForElement(() => portalRoot.querySelector<HTMLInputElement>(SEARCH_SELECTOR));
+    const head = await pollForElement(() => portalRoot.querySelector<HTMLElement>(`.${STICKY_HEAD_CLASS}`));
     search.focus();
     await userEvent.keyboard("{ArrowDown}");
 
@@ -542,7 +570,7 @@ describe("Picker - keyboard a11y (real focus)", () => {
     for (let step = 0; step < 6; step++) {
       await userEvent.keyboard("{ArrowUp>6/}");
       const focused = document.activeElement as HTMLElement;
-      expect(focused.classList.contains("khasky-emojery-grid-item")).toBe(true);
+      expect(focused.classList.contains(GRID_ITEM_CLASS)).toBe(true);
       const cell = focused.getBoundingClientRect();
       const headBox = head.getBoundingClientRect();
       // 1px of slack for sub-pixel rounding; anything more is the cell tucked behind it.
@@ -578,17 +606,17 @@ describe("Picker - breakdown pagination (top-3 -> Show more <=10)", () => {
 
   it("the trigger shows exactly the top 3 emojis", () => {
     mountWithCounts();
-    const counter = container.querySelector(".khasky-emojery-counter");
+    const counter = container.querySelector(`.${COUNTER_CLASS}`);
     expect(counter, "counter trigger renders when reactions exist").not.toBeNull();
-    expect(counter!.querySelectorAll(".khasky-emojery-counter-emojis > span").length).toBe(3);
+    expect(counter!.querySelectorAll(`.${COUNTER_EMOJIS_CLASS} > span`).length).toBe(3);
   });
 
   it("breakdown opens at 3 rows, expands to <=10, then collapses back to 3", async () => {
     mountWithCounts();
-    await userEvent.click(container.querySelector<HTMLButtonElement>(".khasky-emojery-counter")!);
-    const popover = await pollForElement(() => portalRoot.querySelector<HTMLElement>(".khasky-emojery-popover"));
-    const rowCount = () => popover.querySelectorAll(".khasky-emojery-breakdown-row").length;
-    const moreBtn = () => popover.querySelector<HTMLButtonElement>(".khasky-emojery-breakdown-more");
+    await userEvent.click(container.querySelector<HTMLButtonElement>(`.${COUNTER_CLASS}`)!);
+    const popover = await pollForElement(() => portalRoot.querySelector<HTMLElement>(`.${POPOVER_CLASS}`));
+    const rowCount = () => popover.querySelectorAll(BREAKDOWN_ROW_SELECTOR).length;
+    const moreBtn = () => popover.querySelector<HTMLButtonElement>(`.${BREAKDOWN_MORE_CLASS}`);
 
     await expect.poll(rowCount).toBe(3);
     expect(moreBtn(), "Show more is offered when >3 reactions exist").not.toBeNull();
@@ -608,10 +636,10 @@ describe("Picker - site dark theme (trigger inherits the site fg)", () => {
   it("renders the trigger in the site's light-on-dark foreground", () => {
     // e.g. GitHub dark: near-white text (#f0f6fc) on #0d1117.
     container.style.background = "#0d1117";
-    container.style.setProperty("--khasky-emojery-site-fg", "#f0f6fc");
+    container.style.setProperty(SITE_FG_VAR, "#f0f6fc");
     mountPicker();
 
-    const trigger = container.querySelector<HTMLElement>(".khasky-emojery-trigger")!;
+    const trigger = container.querySelector<HTMLElement>(`.${TRIGGER_CLASS}`)!;
     const color = getComputedStyle(trigger).color;
     const [r, g, b] = parseRgb(color);
     const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
@@ -648,17 +676,17 @@ describe("Picker - category nav bar", () => {
       }),
       container,
     );
-    await userEvent.click(container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!);
-    await pollForElement(() => portalRoot.querySelector<HTMLElement>(".khasky-emojery-cat-bar"));
+    await userEvent.click(container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!);
+    await pollForElement(() => portalRoot.querySelector<HTMLElement>(`.${CAT_BAR_CLASS}`));
 
-    const buttons = Array.from(portalRoot.querySelectorAll<HTMLElement>(".khasky-emojery-cat-btn"));
+    const buttons = Array.from(portalRoot.querySelectorAll<HTMLElement>(`.${CAT_BTN_CLASS}`));
     expect(buttons).toHaveLength(CATEGORIES.length);
 
     // The bar keeps all its targets on one row only while the popover is wide enough for
     // them plus the chrome around them (see the width floor in picker.css for the terms).
     // Asserted on the popover's width, not on the rendered rows: the wrap reproduces only
     // where the scroll container's scrollbar takes layout width, which this browser's does not.
-    const popover = portalRoot.querySelector<HTMLElement>(".khasky-emojery-popover")!;
+    const popover = portalRoot.querySelector<HTMLElement>(`.${POPOVER_CLASS}`)!;
     const base = Number.parseFloat(fontMin!);
     const needed = CATEGORIES.length * 24 + (CATEGORIES.length - 1) * 0.1 * base + 1.65 * base + 17;
     // Floored: the engine resolves the same calc to 1/64-px precision, so an exact
@@ -674,12 +702,12 @@ describe("Picker - category nav bar", () => {
 
   it("renders one shortcut per category and scrolls the grid on click", async () => {
     mountPicker();
-    await userEvent.click(container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!);
-    const bar = await pollForElement(() => portalRoot.querySelector<HTMLElement>(".khasky-emojery-cat-bar"));
-    const buttons = bar.querySelectorAll<HTMLButtonElement>(".khasky-emojery-cat-btn");
+    await userEvent.click(container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!);
+    const bar = await pollForElement(() => portalRoot.querySelector<HTMLElement>(`.${CAT_BAR_CLASS}`));
+    const buttons = bar.querySelectorAll<HTMLButtonElement>(`.${CAT_BTN_CLASS}`);
     expect(buttons.length).toBe(CATEGORIES.length);
 
-    const scroll = portalRoot.querySelector<HTMLElement>(".khasky-emojery-popover-scroll")!;
+    const scroll = portalRoot.querySelector<HTMLElement>(`.${POPOVER_SCROLL_CLASS}`)!;
     expect(scroll.scrollTop).toBe(0);
 
     // Jump to a category well down the list (Food & Drink, index 4) - the
@@ -693,12 +721,12 @@ describe("Picker - category nav bar", () => {
 // section is omitted entirely until a list has been cached. The dynamic
 // "adopts the cached list" path is covered in shared/popular.test.ts.
 describe("Picker - Popular section", () => {
-  const headers = () => Array.from(portalRoot.querySelectorAll<HTMLElement>(".khasky-emojery-section-h"));
+  const headers = () => Array.from(portalRoot.querySelectorAll<HTMLElement>(`.${SECTION_HEAD_CLASS}`));
 
   it("is omitted when no Popular list has been cached", async () => {
     mountPicker();
-    await userEvent.click(container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!);
-    await pollForElement(() => portalRoot.querySelector(".khasky-emojery-grid-item"));
+    await userEvent.click(container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!);
+    await pollForElement(() => portalRoot.querySelector(GRID_ITEM_SELECTOR));
     expect(headers().some((h) => h.textContent?.trim() === "Popular")).toBe(false);
   });
 });
@@ -720,16 +748,16 @@ describe("Picker - clear Recently Used", () => {
       },
     });
     mountPicker();
-    await userEvent.click(container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!);
+    await userEvent.click(container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!);
 
-    const clearBtn = await pollForElement(() => portalRoot.querySelector<HTMLButtonElement>(".khasky-emojery-section-clear"));
+    const clearBtn = await pollForElement(() => portalRoot.querySelector<HTMLButtonElement>(`.${SECTION_CLEAR_CLASS}`));
 
     // Trusted-gesture gate, see picker.tsx handlePick: a script-dispatched click must not
     // wipe the account's stored stats. Waited out over two frames so an unguarded handler's
     // state flush and its storage write would both have landed by the assertions.
     clearBtn.click();
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    expect(portalRoot.querySelector(".khasky-emojery-section-clear"), "a synthetic click must not clear Recently Used").not.toBeNull();
+    expect(portalRoot.querySelector(`.${SECTION_CLEAR_CLASS}`), "a synthetic click must not clear Recently Used").not.toBeNull();
     expect(chromeShim.local.get("recents_v1"), "a synthetic click must not touch the stored stats").toEqual({
       [userId]: {
         "🔥": { count: 1, lastUsed: now - 1000 },
@@ -739,7 +767,7 @@ describe("Picker - clear Recently Used", () => {
 
     await userEvent.click(clearBtn);
 
-    await expect.poll(() => portalRoot.querySelector(".khasky-emojery-section-clear")).toBeNull();
+    await expect.poll(() => portalRoot.querySelector(`.${SECTION_CLEAR_CLASS}`)).toBeNull();
     // The account's whole entry goes, not just its emojis - the blob is keyed by
     // userId and an emptied record would be indistinguishable dead weight.
     await expect.poll(() => chromeShim.local.get("recents_v1")).toEqual({});
@@ -753,12 +781,12 @@ describe("Picker - signed-out gate", () => {
       signIns++;
     });
 
-    await userEvent.click(container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!);
+    await userEvent.click(container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!);
 
     // Signed out gets the whole path - search and palette - not a wall in front of it.
-    await expect.poll(() => portalRoot.querySelector(".khasky-emojery-search")).not.toBeNull();
-    expect(portalRoot.querySelectorAll(".khasky-emojery-grid-item").length).toBeGreaterThan(0);
-    expect(portalRoot.querySelector(".khasky-emojery-gate")).toBeNull();
+    await expect.poll(() => portalRoot.querySelector(SEARCH_SELECTOR)).not.toBeNull();
+    expect(portalRoot.querySelectorAll(GRID_ITEM_SELECTOR).length).toBeGreaterThan(0);
+    expect(portalRoot.querySelector(`.${GATE_CLASS}`)).toBeNull();
     expect(signIns, "the auth tab must wait for the gate's own button").toBe(0);
   });
 
@@ -779,21 +807,21 @@ describe("Picker - signed-out gate", () => {
 
     const emoji = await pickWhileSignedOut();
 
-    const gate = await pollForElement(() => portalRoot.querySelector<HTMLElement>(".khasky-emojery-gate"));
-    expect(gate.querySelector(".khasky-emojery-gate-emoji")?.textContent?.trim(), "the gate carries the emoji the user chose").toBe(emoji);
+    const gate = await pollForElement(() => portalRoot.querySelector<HTMLElement>(`.${GATE_CLASS}`));
+    expect(gate.querySelector(`.${GATE_EMOJI_CLASS}`)?.textContent?.trim(), "the gate carries the emoji the user chose").toBe(emoji);
     expect(picked, "an unauthed pick must not reach the host").toEqual([]);
     expect(signIns, "the auth tab must wait for the gate's own button").toBe(0);
-    expect(portalRoot.querySelector(".khasky-emojery-grid-item"), "the gate replaces the palette").toBeNull();
+    expect(portalRoot.querySelector(GRID_ITEM_SELECTOR), "the gate replaces the palette").toBeNull();
   });
 
   it("gives both gate buttons the full popover width", async () => {
     mountSignedOutPicker(() => {});
     await pickWhileSignedOut();
 
-    const signInBtn = await pollForElement(() => portalRoot.querySelector<HTMLButtonElement>(".khasky-emojery-gate-signin"));
-    const cancel = portalRoot.querySelector<HTMLButtonElement>(".khasky-emojery-gate-cancel")!;
+    const signInBtn = await pollForElement(() => portalRoot.querySelector<HTMLButtonElement>(`.${GATE_SIGNIN_CLASS}`));
+    const cancel = portalRoot.querySelector<HTMLButtonElement>(`.${GATE_CANCEL_CLASS}`)!;
     // The title is a padding-free block, so its box IS the gate's content width.
-    const contentWidth = portalRoot.querySelector<HTMLElement>(".khasky-emojery-gate-title")!.getBoundingClientRect().width;
+    const contentWidth = portalRoot.querySelector<HTMLElement>(`.${GATE_TITLE_CLASS}`)!.getBoundingClientRect().width;
 
     expect(signInBtn.getBoundingClientRect().width).toBeCloseTo(contentWidth, 0);
     expect(cancel.getBoundingClientRect().width).toBeCloseTo(contentWidth, 0);
@@ -806,19 +834,19 @@ describe("Picker - signed-out gate", () => {
     });
     await pickWhileSignedOut();
 
-    const signInBtn = await pollForElement(() => portalRoot.querySelector<HTMLButtonElement>(".khasky-emojery-gate-signin"));
+    const signInBtn = await pollForElement(() => portalRoot.querySelector<HTMLButtonElement>(`.${GATE_SIGNIN_CLASS}`));
     await userEvent.click(signInBtn);
 
     expect(signIns).toBe(1);
     // Open while the auth tab is used, so the pick is still held when sign-in lands.
-    expect(portalRoot.querySelector(".khasky-emojery-gate")).not.toBeNull();
+    expect(portalRoot.querySelector(`.${GATE_CLASS}`)).not.toBeNull();
   });
 
   it("the cancel button closes the gate", async () => {
     mountSignedOutPicker(() => {});
     await pickWhileSignedOut();
 
-    const cancel = await pollForElement(() => portalRoot.querySelector<HTMLButtonElement>(".khasky-emojery-gate-cancel"));
+    const cancel = await pollForElement(() => portalRoot.querySelector<HTMLButtonElement>(`.${GATE_CANCEL_CLASS}`));
     await userEvent.click(cancel);
 
     await expect.poll(() => portalRoot.querySelector('[role="dialog"]')).toBeNull();
@@ -838,7 +866,7 @@ describe("Picker - signed-out gate", () => {
     });
 
     const emoji = await pickWhileSignedOut();
-    await pollForElement(() => portalRoot.querySelector<HTMLElement>(".khasky-emojery-gate"));
+    await pollForElement(() => portalRoot.querySelector<HTMLElement>(`.${GATE_CLASS}`));
 
     pushRefresh!({ myReaction: null, authed: true });
 
@@ -861,7 +889,7 @@ describe("Picker - signed-out gate", () => {
     });
 
     await pickWhileSignedOut();
-    const cancel = await pollForElement(() => portalRoot.querySelector<HTMLButtonElement>(".khasky-emojery-gate-cancel"));
+    const cancel = await pollForElement(() => portalRoot.querySelector<HTMLButtonElement>(`.${GATE_CANCEL_CLASS}`));
     await userEvent.click(cancel);
 
     pushRefresh!({ myReaction: null, authed: true });
@@ -879,8 +907,8 @@ describe("Picker - signed-out gate", () => {
       { autoOpen: true },
     );
 
-    await expect.poll(() => portalRoot.querySelector(".khasky-emojery-search")).not.toBeNull();
-    expect(portalRoot.querySelector(".khasky-emojery-gate")).toBeNull();
+    await expect.poll(() => portalRoot.querySelector(SEARCH_SELECTOR)).not.toBeNull();
+    expect(portalRoot.querySelector(`.${GATE_CLASS}`)).toBeNull();
     expect(signIns, "auto-open must not open the auth tab uninvited").toBe(0);
   });
 });

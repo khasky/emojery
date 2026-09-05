@@ -8,6 +8,7 @@
 import { expect, type Page } from "@playwright/test";
 import { debugEvidence } from "./page-settle";
 import { DEEP_QUERY_ALL_SRC, IS_VISIBLE_RECT_SRC, MOUNTED_KEY_OF_SRC, RECT_GEOMETRY_SRC } from "./probe-src";
+import { HOST_SELECTOR, OWN_NODES_SELECTOR } from "./selectors";
 import type { MountEvidence, Rect, SupportedSiteScenario } from "./site-evidence";
 
 // Fallbacks for a scenario that pins neither distance itself: how far the
@@ -98,7 +99,7 @@ async function collectLocalizedNativePlacementEvidence(page: Page, site: Support
       };
 
       const isNativeControl = (el) => {
-        if (el.closest(".khasky-emojery-host, .khasky-emojery-overlay-host")) return false;
+        if (el.closest("${OWN_NODES_SELECTOR}")) return false;
         const tag = el.tagName.toLowerCase();
         if (tag === "button" || tag === "svg") return true;
         const role = el.getAttribute("role");
@@ -107,7 +108,7 @@ async function collectLocalizedNativePlacementEvidence(page: Page, site: Support
         return false;
       };
 
-      const hosts = deepQueryAll(".khasky-emojery-host")
+      const hosts = deepQueryAll("${HOST_SELECTOR}")
         .map((host) => ({
           el: host,
           mountKey: mountedKeyOf(host),

@@ -9,6 +9,7 @@
 // ignores e2e/selector-drift/**.
 import { expect, test } from "@playwright/test";
 import { envUrl } from "../lib/extension";
+import { OWN_NODES_SELECTOR } from "../lib/selectors";
 import { clickAmazonContinueShopping, dismissInterstitialsInitScript, wallReason } from "../lib/site-walls";
 import { SUPPORTED_SITE_SCENARIOS } from "../supported-sites";
 
@@ -56,7 +57,7 @@ function countTextLabelsDeep(labels: string[]): Array<{ sel: string; n: number }
 
 for (const site of SUPPORTED_SITE_SCENARIOS) {
   test(`${site.site}: ${site.label} scenario selectors alive`, async ({ page }) => {
-    await page.addInitScript(dismissInterstitialsInitScript, { exposeUnwallHook: false, keepDialogsWithReactionHost: false });
+    await page.addInitScript(dismissInterstitialsInitScript, { exposeUnwallHook: false, keepDialogsWithReactionHost: false, ownNodesSelector: OWN_NODES_SELECTOR });
     const navOk = await page.goto(envUrl(site.urlKey), { waitUntil: "domcontentloaded", timeout: 60_000 }).then(
       () => true,
       () => false,

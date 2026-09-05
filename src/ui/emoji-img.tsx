@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+import { EMOJI_CHAR_CLASS, EMOJI_CLASS, EMOJI_IMG_CLASS, SPRITE_COL_VAR, SPRITE_ROW_VAR } from "../shared/dom";
 import { emojiSpriteCell, registerPendingSpriteImg, spriteUrlPending } from "./emoji-sprite";
 
 interface Props {
@@ -21,15 +22,15 @@ export function EmojiImg({ emoji }: Props) {
 
   return (
     <span
-      class="khasky-emojery-emoji"
+      class={EMOJI_CLASS}
       style={{
-        "--khasky-emojery-col": cell.col,
-        "--khasky-emojery-row": cell.row,
+        [SPRITE_COL_VAR]: cell.col,
+        [SPRITE_ROW_VAR]: cell.row,
       }}
     >
       {cell.url || spriteUrlPending() ? (
         <img
-          class="khasky-emojery-emoji-img"
+          class={EMOJI_IMG_CLASS}
           src={cell.url ?? undefined}
           alt=""
           decoding="async"
@@ -39,7 +40,7 @@ export function EmojiImg({ emoji }: Props) {
           }}
         />
       ) : null}
-      <span class="khasky-emojery-emoji-char">{emoji}</span>
+      <span class={EMOJI_CHAR_CLASS}>{emoji}</span>
     </span>
   );
 }

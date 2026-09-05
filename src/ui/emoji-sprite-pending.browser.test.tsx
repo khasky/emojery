@@ -11,6 +11,7 @@
 
 import { h, render } from "preact";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { EMOJI_CLASS, EMOJI_IMG_CLASS } from "../shared/dom";
 import { type ChromeShimHandle, installChromeShim } from "../test/chrome-shim";
 import { EmojiImg } from "./emoji-img";
 import { applyEmojiSpriteHost, EMOJI_SPRITE_MODE_ATTR } from "./emoji-sprite";
@@ -49,7 +50,7 @@ describe("emoji sprite - async URL back-fill", () => {
 
     // Rendered BEFORE the probe starts - models the counter chip on a warm load.
     render(h(EmojiImg, { emoji: "🔥" }), mount);
-    const img = shadow.querySelector<HTMLImageElement>("img.khasky-emojery-emoji-img");
+    const img = shadow.querySelector<HTMLImageElement>(`img.${EMOJI_IMG_CLASS}`);
     expect(img, "the <img> renders src-less while the URL is pending").not.toBeNull();
     expect(img!.getAttribute("src")).toBeNull();
 
@@ -57,7 +58,7 @@ describe("emoji sprite - async URL back-fill", () => {
     await expect.poll(() => host.getAttribute(EMOJI_SPRITE_MODE_ATTR)).toBe("sprite");
 
     expect(img!.getAttribute("src"), "the settled probe back-fills the src").toMatch(/^blob:/);
-    const glyph = shadow.querySelector<HTMLElement>(".khasky-emojery-emoji")!;
+    const glyph = shadow.querySelector<HTMLElement>(`.${EMOJI_CLASS}`)!;
     expect(getComputedStyle(glyph).display, "the sprite rules apply to the upgraded emoji").toBe("inline-block");
     expect(getComputedStyle(glyph).overflow).toBe("hidden");
     expect(getComputedStyle(img!).display).toBe("block");

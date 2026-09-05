@@ -13,9 +13,8 @@ import { type ChromeShimHandle, installChromeShim } from "../test/chrome-shim";
 import { tk } from "../test/target-key";
 import { watchSettings } from "./mount";
 import { mountedCount, registerMountNode, resetMountRegistryForTests } from "./mount-registry";
+import { ANIMATE_ATTR } from "./ring-spin";
 import { registerThemedHost } from "./themed-hosts";
-
-const ANIMATE_ATTR = "data-khasky-emojery-animate";
 
 const adapter = {
   site: "github",

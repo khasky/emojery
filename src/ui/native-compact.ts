@@ -10,7 +10,7 @@ import { queryAllDeep } from "../shared/dom-query";
 
 // Original counter text, stamped on the counter's parent element so the change
 // is idempotent and reversible (see restoreCompactedCounts).
-const COUNT_ATTR = "data-khasky-emojery-count";
+export const COUNT_ATTR = "data-khasky-emojery-count";
 const COUNT_ATTR_SELECTOR = `[${COUNT_ATTR}]`;
 
 // A bare integer counter: plain digits, or three-digit groups joined by a locale separator

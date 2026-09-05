@@ -7,6 +7,7 @@
 // its own lighter settle on purpose.
 import type { Page } from "@playwright/test";
 import { DEEP_QUERY_ALL_SRC, IS_VISIBLE_RECT_SRC, MOUNTED_KEY_OF_SRC, RECT_GEOMETRY_SRC } from "./probe-src";
+import { HIDDEN_SELECTOR, HOST_SELECTOR, MOUNT_ATTR, MOUNTED_SELECTOR, TRIGGER_SELECTOR } from "./selectors";
 import { DEFAULT_SCROLL_STEPS, type MountEvidence, type SupportedSiteScenario } from "./site-evidence";
 import { clickAmazonContinueShopping, dismissDialogWall, dismissLoginWalls, INTERSTITIAL_PHRASES, interstitialTextRe, isBlockUrl } from "./site-walls";
 export async function safeGoto(page: Page, url: string): Promise<boolean> {
@@ -192,9 +193,9 @@ async function revealMountTarget(page: Page, site: SupportedSiteScenario): Promi
       // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
       const pattern = new RegExp(${JSON.stringify(site.mountKeyPattern)});
       ${DEEP_QUERY_ALL_SRC}
-      const anchors = Array.from(deepQueryAll("[data-khasky-emojery-mounted]"));
-      const matchingAnchor = anchors.find((anchor) => pattern.test(anchor.getAttribute("data-khasky-emojery-mounted") ?? ""));
-      const host = matchingAnchor?.parentElement?.querySelector(".khasky-emojery-host") ?? deepQueryAll(".khasky-emojery-host")[0];
+      const anchors = Array.from(deepQueryAll("${MOUNTED_SELECTOR}"));
+      const matchingAnchor = anchors.find((anchor) => pattern.test(anchor.getAttribute("${MOUNT_ATTR}") ?? ""));
+      const host = matchingAnchor?.parentElement?.querySelector("${HOST_SELECTOR}") ?? deepQueryAll("${HOST_SELECTOR}")[0];
       (host ?? matchingAnchor)?.scrollIntoView({
         block: "center",
         inline: "center",
@@ -215,8 +216,8 @@ export async function settlePage(page: Page, site: SupportedSiteScenario): Promi
   const settleStart = Date.now();
   await page
     .waitForFunction(
-      (nativeSelectors) => {
-        if (document.querySelector(".khasky-emojery-host")) return true;
+      ({ nativeSelectors, hostSelector }) => {
+        if (document.querySelector(hostSelector)) return true;
         return nativeSelectors.some((sel) => {
           try {
             return document.querySelector(sel) !== null;
@@ -225,7 +226,7 @@ export async function settlePage(page: Page, site: SupportedSiteScenario): Promi
           }
         });
       },
-      site.nativeSelectors,
+      { nativeSelectors: site.nativeSelectors, hostSelector: HOST_SELECTOR },
       { timeout: settleMs },
     )
     .catch(() => {});
@@ -319,9 +320,9 @@ export async function collectMountEvidence(page: Page, site: SupportedSiteScenar
       return (clone.textContent ?? "").replace(/\\s+/g, " ").trim().slice(0, 500);
     };
 
-    const hosts = deepQueryAll(".khasky-emojery-host");
-    const anchors = deepQueryAll("[data-khasky-emojery-mounted]");
-    const hiddenNativeEls = deepQueryAll('[data-khasky-emojery-hidden="1"]');
+    const hosts = deepQueryAll("${HOST_SELECTOR}");
+    const anchors = deepQueryAll("${MOUNTED_SELECTOR}");
+    const hiddenNativeEls = deepQueryAll('${HIDDEN_SELECTOR}');
     const nativeEls = nativeSelectors.flatMap((selector) => deepQueryAll(selector));
     const containerEls = containerSelectors.flatMap((selector) => deepQueryAll(selector));
 
@@ -362,7 +363,7 @@ export async function collectMountEvidence(page: Page, site: SupportedSiteScenar
         }
         ancestor = ancestor.parentElement;
       }
-      const trigger = host.shadowRoot?.querySelector(".khasky-emojery-trigger, .khasky-emojery-counter, button") ?? null;
+      const trigger = host.shadowRoot?.querySelector("${TRIGGER_SELECTOR}, button") ?? null;
       return {
         mountKey: mountedKeyOf(host),
         text: (trigger?.textContent ?? host.textContent ?? "").replace(/\\s+/g, " ").trim(),
@@ -379,7 +380,7 @@ export async function collectMountEvidence(page: Page, site: SupportedSiteScenar
 
     const nativeRects = nativeEls.map(rectOf).filter(isVisibleRect);
     const containerRects = containerEls.map(rectOf).filter(isVisibleRect);
-    const anchorKeys = anchors.map((anchor) => anchor.getAttribute("data-khasky-emojery-mounted") ?? "").filter(Boolean);
+    const anchorKeys = anchors.map((anchor) => anchor.getAttribute("${MOUNT_ATTR}") ?? "").filter(Boolean);
     const matchingAnchorKeys = anchorKeys.filter((key) => pattern.test(key));
     const matchingHostSamples = hostSamples.filter((host) => (host.mountKey ? pattern.test(host.mountKey) : false));
     const matchingHosts = hosts.filter((host) => {

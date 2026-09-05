@@ -21,6 +21,7 @@ import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import { closeSession, envUrl, firstServiceWorker, isFirefoxRun } from "./lib/extension";
 import { safeGoto } from "./lib/page-settle";
 import { DEEP_QUERY_ALL_SRC } from "./lib/probe-src";
+import { EMOJI_CLASS, GLYPH_H_VAR, HOST_SELECTOR, TRIGGER_ICON_CLASS } from "./lib/selectors";
 import type { SupportedSiteScenario } from "./lib/site-evidence";
 import { launchE2eBrowserSession, settleAndRequireMount } from "./lib/site-session";
 import { SUPPORTED_SITE_SCENARIOS } from "./supported-sites";
@@ -86,17 +87,17 @@ const MEASURE_SRC = `(() => {
   };
   const isIconSide = (side) => side >= ${ICON_SIDE_MIN_PX} && side <= ${ICON_SIDE_MAX_PX};
 
-  const hosts = deepQueryAll(".khasky-emojery-host").filter((h) => h.getBoundingClientRect().width > 0);
+  const hosts = deepQueryAll("${HOST_SELECTOR}").filter((h) => h.getBoundingClientRect().width > 0);
   const host = hosts[0] ?? null;
-  const emoji = host ? host.shadowRoot?.querySelector(".khasky-emojery-emoji") ?? null : null;
-  const iconSlot = emoji ?? (host ? host.shadowRoot?.querySelector(".khasky-emojery-trigger-icon") ?? null : null);
+  const emoji = host ? host.shadowRoot?.querySelector(".${EMOJI_CLASS}") ?? null : null;
+  const iconSlot = emoji ?? (host ? host.shadowRoot?.querySelector(".${TRIGGER_ICON_CLASS}") ?? null : null);
   const emojiRect = emoji ? emoji.getBoundingClientRect() : null;
   const hostRect = host ? host.getBoundingClientRect() : null;
 
   // The site's OWN control for this surface, from the scenario's nativeSelectors - never
   // our own subtree, and never a hidden one.
   const natives = NATIVE_SELECTORS.flatMap((selector) => deepQueryAll(selector))
-    .filter((el) => !el.closest(".khasky-emojery-host") && el.getBoundingClientRect().width > 0);
+    .filter((el) => !el.closest("${HOST_SELECTOR}") && el.getBoundingClientRect().width > 0);
   // An icon does not have to be an element: Amazon draws every one in its review
   // and buybox rows as a CSS sprite on an <i class="a-icon"> - measured live on the
   // US product page, ZERO svg/img inside the whole nativeSelectors set, against a
@@ -147,7 +148,7 @@ const MEASURE_SRC = `(() => {
   return {
     renderedEmojiPx: iconSlot ? Number.parseFloat(getComputedStyle(iconSlot).fontSize) : null,
     emojiBox: emojiRect ? { width: Math.round(emojiRect.width * 10) / 10, height: Math.round(emojiRect.height * 10) / 10 } : null,
-    measuredGlyphPx: host ? Number.parseFloat(host.style.getPropertyValue("--khasky-emojery-glyph-h")) || null : null,
+    measuredGlyphPx: host ? Number.parseFloat(host.style.getPropertyValue("${GLYPH_H_VAR}")) || null : null,
     nativeIconPx: sides.length > 0 ? sides[Math.floor(sides.length / 2)] : null,
     nativeIconSides: sides,
   };

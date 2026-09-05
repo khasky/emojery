@@ -7,7 +7,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { SITE_LABELS } from "../../src/shared/sites";
-import { GRID_ITEM_SELECTOR, SEARCH_INPUT_SELECTOR, TRIGGER_SELECTOR } from "../lib/selectors";
+import { GRID_ITEM_SELECTOR, HOST_SELECTOR, MOUNTED_SELECTOR, SEARCH_INPUT_SELECTOR, TRIGGER_SELECTOR } from "../lib/selectors";
 import { BLOCK_URL_RE, WALL_SENTENCES_RE } from "../lib/site-walls";
 import { SUPPORTED_SITE_SCENARIOS } from "../supported-sites";
 import { type Bridge, connectBridge, isBridgeError } from "./bridge";
@@ -123,7 +123,7 @@ async function dismissBlockingDialogs(bridge: Bridge): Promise<void> {
 // stop waiting the moment one appears. settleMs is only the CEILING - a page that
 // never mounts (wall, disabled site, a row below the fold) pays it in full. The host
 // is light DOM, so a plain query reaches it. The round-trip itself is the floor.
-const HOST_PAINTED = `return Array.from(document.querySelectorAll('.khasky-emojery-host')).some((h) => { const r = h.getBoundingClientRect(); return r.width > 0 && r.height > 0; });`;
+const HOST_PAINTED = `return Array.from(document.querySelectorAll('${HOST_SELECTOR}')).some((h) => { const r = h.getBoundingClientRect(); return r.width > 0 && r.height > 0; });`;
 
 // A site redirects within its own host (login hops, canonical paths, an SPA
 // rewriting the path) and none of that means the navigation missed. A DIFFERENT host
@@ -408,7 +408,7 @@ export async function waitForHost(bridge: Bridge, site: SiteId, timeoutMs = 12_0
     const pending = ev !== null && ev.hostCount === 0 && ev.siteKeyCount > 0;
     let nudge: string;
     if (pending) {
-      nudge = boundedSrc(`await page.evaluate(() => { const anchor = document.querySelector('[data-khasky-emojery-mounted]'); if (anchor) anchor.scrollIntoView({ block: 'center' }); }).catch(() => {});`);
+      nudge = boundedSrc(`await page.evaluate(() => { const anchor = document.querySelector('${MOUNTED_SELECTOR}'); if (anchor) anchor.scrollIntoView({ block: 'center' }); }).catch(() => {});`);
     } else if (downSteps >= NUDGE_DOWN_STEPS) {
       nudge = wheelBySrc(String(-NUDGE_PX * downSteps));
       downSteps = 0;

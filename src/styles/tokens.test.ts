@@ -10,6 +10,7 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { SPRITE_COL_VAR, SPRITE_COLS_VAR, SPRITE_ROW_VAR, SPRITE_ROWS_VAR } from "../shared/dom";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SRC = resolve(HERE, "..");
@@ -31,7 +32,7 @@ function withImports(rel: string): string {
 
 // Stamped per element at runtime by ui/emoji-sprite.ts (the sprite cell and the
 // sheet's dimensions), so no stylesheet declares them and none should.
-const RUNTIME_STAMPED = new Set(["--khasky-emojery-col", "--khasky-emojery-row", "--khasky-emojery-sprite-cols", "--khasky-emojery-sprite-rows"]);
+const RUNTIME_STAMPED = new Set([SPRITE_COL_VAR, SPRITE_ROW_VAR, SPRITE_COLS_VAR, SPRITE_ROWS_VAR]);
 
 const declared = (css: string): Set<string> => new Set([...css.matchAll(/(--khasky-emojery-[\w-]+)\s*:/g)].map((m) => m[1] as string));
 

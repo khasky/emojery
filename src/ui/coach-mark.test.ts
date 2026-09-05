@@ -4,7 +4,7 @@
 // and every dismissal path tearing the tooltip and the pulse attribute down.
 // The host/trigger here are Emojery's OWN shadow DOM, not a supported site's.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { COACH_ATTR, TRIGGER_CLASS } from "../shared/dom";
+import { COACH_ATTR, COACH_TIP_CLASS, TRIGGER_CLASS } from "../shared/dom";
 import { claimCoachMark } from "../shared/onboarding";
 import { type ChromeShimHandle, installChromeShim } from "../test/chrome-shim";
 
@@ -48,7 +48,7 @@ async function showMark(): Promise<void> {
 }
 
 function tip(): HTMLElement | null {
-  return overlay.root?.querySelector(".khasky-emojery-coach-tip") ?? null;
+  return overlay.root?.querySelector(`.${COACH_TIP_CLASS}`) ?? null;
 }
 
 beforeEach(() => {
