@@ -66,8 +66,12 @@ async function unReact(b: Bridge): Promise<boolean> {
         return false;
       },
     );
+    // Escape only closes a popover the click left open. A click that landed already
+    // closed it, so the keystroke would reach the SITE instead - and a Facebook
+    // permalink answers Escape by dismissing the post dialog and going to the home
+    // feed, which moves every later read of the case onto whatever post floats up there.
     if (clicked) removed = true;
-    await b.press("Escape");
+    else await b.press("Escape");
     await b.waitMs(600);
     // The optimistic clear lands only after the content script's round-trip to
     // the service worker, so poll before calling the pass wasted.
