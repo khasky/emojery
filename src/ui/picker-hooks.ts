@@ -98,7 +98,8 @@ export function useGridRovingFocus({ open, itemSetKey, popRef }: { open: boolean
       focusGridItem(e.key === "ArrowDown" ? "first" : "last");
       return;
     }
-    // Escape (close) and Tab (dialog focus trap) must reach the document-level handler.
+    // Tab (dialog focus trap) must reach the document-level handler. Escape never gets
+    // this far - usePopoverDismiss takes it in the capture phase, before the target.
     if (e.key !== "Escape" && e.key !== "Tab") e.stopPropagation();
   };
 
@@ -252,6 +253,13 @@ export function usePopoverDismiss({ open, triggerRef, popRef, close }: { open: b
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
+        // The open popover owns Escape: a site listening for it on document would
+        // otherwise dismiss its OWN surface behind ours. Facebook renders a post
+        // permalink as a dialog over the profile and routes to the home feed when that
+        // dialog closes, so a user who pressed Escape to shut the picker lost the post.
+        // Stopping it needs the capture phase (below) - the site's handler is already
+        // registered when the popover mounts and would run first in the bubble phase.
+        e.stopPropagation();
         close();
         triggerRef.current?.focus();
         return;
@@ -278,10 +286,10 @@ export function usePopoverDismiss({ open, triggerRef, popRef, close }: { open: b
       }
     };
     document.addEventListener("mousedown", onDown, true);
-    document.addEventListener("keydown", onKey);
+    document.addEventListener("keydown", onKey, true);
     return () => {
       document.removeEventListener("mousedown", onDown, true);
-      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("keydown", onKey, true);
     };
   }, [open]);
 }

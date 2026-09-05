@@ -484,9 +484,9 @@ export function Picker({ initial, typography, onPick, onSignIn, portalRoot, bind
           onFocus={() => setBreakdownDisplayLimit(BREAKDOWN_INITIAL)}
           /* Block site-level keyboard shortcuts while typing: sites bind single-letter
              shortcuts (GitHub g/t/c, Twitter j/k/l/r, YouTube f/m/space) on document via
-             bubble phase, so a search like "hEart" would otherwise fire them. Escape and
-             Tab still bubble - the document handler closes the popover on one and traps
-             focus on the other (picker-hooks.ts onSearchKeyDown). */
+             bubble phase, so a search like "hEart" would otherwise fire them. Tab still
+             bubbles, so the document handler can trap focus in the dialog; Escape is
+             taken earlier still, in that handler's capture phase (picker-hooks.ts). */
           onKeyDown={onSearchKeyDown}
           onKeyUp={(e) => {
             if (e.key !== "Escape") e.stopPropagation();

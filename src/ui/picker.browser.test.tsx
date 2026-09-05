@@ -467,6 +467,41 @@ describe("Picker - keyboard a11y (real focus)", () => {
     expect(document.activeElement).toBe(trigger);
   });
 
+  // A site listening for Escape on document (Facebook closes a post permalink's dialog
+  // and routes to the home feed) must not see the keystroke that dismissed the popover.
+  // Registered BEFORE the popover opens, which is what makes the capture phase the only
+  // place that can stop it.
+  // A site listening for Escape on document (Facebook closes a post permalink's dialog
+  // and routes to the home feed) must not see the keystroke that dismissed the popover.
+  // The listener is registered BEFORE the popover opens, which is what makes the capture
+  // phase the only place that can withhold it.
+  it("withholds the Escape that closes the popover from a site's document listener", async () => {
+    mountPicker();
+    const seenBySite: string[] = [];
+    const siteListener = (e: KeyboardEvent) => seenBySite.push(e.key);
+    document.addEventListener("keydown", siteListener);
+    try {
+      await userEvent.click(container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!);
+      await pollForElement(() => portalRoot.querySelector('[role="dialog"]'));
+
+      await userEvent.keyboard("{Escape}");
+      await expect.poll(() => portalRoot.querySelector('[role="dialog"]')).toBeNull();
+      expect(seenBySite, "the site must not see the Escape that dismissed the popover").not.toContain("Escape");
+
+      // Scoped to an OPEN popover: once the dismiss effect has torn down - Preact runs
+      // that after the commit which removed the dialog, so it trails the DOM - Escape
+      // belongs to the page again.
+      await expect
+        .poll(() => {
+          document.body.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+          return seenBySite.includes("Escape");
+        })
+        .toBe(true);
+    } finally {
+      document.removeEventListener("keydown", siteListener);
+    }
+  });
+
   it("arrow keys move focus across the emoji grid", async () => {
     mountPicker();
     await userEvent.click(container.querySelector<HTMLButtonElement>(".khasky-emojery-trigger")!);
