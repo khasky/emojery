@@ -109,6 +109,8 @@ pnpm zip:all           # wxt zip, chrome + firefox
 
 3 CI steps have no local equivalent and need nothing from you: after the build it scans the generated Chrome output, the generated Firefox output, and the AMO source archive for committed secrets (`scripts/scan-extension-artifact.sh`, `scripts/scan-source-archive.sh`).
 
+The commit hooks are the other half. `commit-msg` runs commitlint; `pre-commit` runs [gitleaks](https://github.com/gitleaks/gitleaks) over the staged diff, but only when the binary is on `PATH` — an absent one skips silently rather than making the repo uncommittable, so a machine without it commits with that filter off. Install it to get the local half; `security.yml` scans the full history on every PR either way, and rotating a leaked key beats rewriting the history that carries it.
+
 ## What CI runs, and when
 
 `ci.yml` and `security.yml` are the workflows your PR triggers — between them they run the gate above. The scheduled ones watch things no diff controls: a site's markup, a browser channel, a newly published CVE. A red scheduled run is a maintainer signal, not a review comment. All 8 workflows in `.github/workflows/`:
