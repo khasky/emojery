@@ -305,6 +305,9 @@ export function Picker({ initial, typography, onPick, onSignIn, portalRoot, bind
     // another extension's content script - can reach these buttons and `.click()` them,
     // which would vote from the signed-in account silently. Keyboard activation of a
     // <button> dispatches a trusted click, so this costs the keyboard path nothing.
+    // The residual it does not cover: the host sits in the page's own DOM, so the page can
+    // restyle or move it under a real cursor and harvest a genuine click. Bounded by taking
+    // two of them through a visible overlay, and no inline mount can do better than that.
     if (!ev?.isTrusted) return;
     // Signed out: keep the popover open and swap the grid for the gate, holding the pick.
     // Nothing is sent and no auth tab opens until the gate's own button is pressed.
