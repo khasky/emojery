@@ -37,10 +37,12 @@ allowBuilds:
 # `web-ext sign`, so there is no attacker-controlled input. The advisories name
 # >=2.0.3 as patched but no such version exists on npm; drop both entries (and
 # the osv-scanner.toml ones) once a fixed release ships and resolves here.
+# Revisit 2026-11: re-check npm for a patched image-size, or re-accept with a new
+# date. An acceptance with no review date is how a temporary one becomes permanent.
 auditConfig:
   ignoreGhsas:
-    - GHSA-w3rx-r6r6-pgpr # accepted 2026-08-07
-    - GHSA-5p2g-fcmc-qvqq # accepted 2026-08-07
+    - GHSA-w3rx-r6r6-pgpr # accepted 2026-08-07, revisit 2026-11
+    - GHSA-5p2g-fcmc-qvqq # accepted 2026-08-07, revisit 2026-11
 
 # A transitive dependency may only come from the registry - never a git, http
 # or local reference a compromised publish slipped into someone's manifest.
