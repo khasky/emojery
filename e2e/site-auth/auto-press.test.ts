@@ -24,9 +24,10 @@ import { githubStarLabelPressed } from "../../src/adapters/github";
 import { gitlabIconName, gitlabStarIconPressed } from "../../src/adapters/gitlab";
 import { IG_STEMS, IG_UNLIKE_RE, igLikeLabelPressed } from "../../src/adapters/instagram";
 import { isPaintedFill, THREADS_NON_LIKE_ICON_PATH_PREFIXES } from "../../src/adapters/threads";
+import { HOST_SELECTOR } from "../lib/selectors";
 import type { Bridge } from "./bridge";
 import { bridgeFixture, GRID_ITEM_SELECTOR, gotoSettled, openPickerState, SETUP_HOOK_TIMEOUT_MS, siteAuthEnabled, waitForHost } from "./harness";
-import { ownReactionProbe } from "./probes";
+import { DQ_SRC, ownReactionProbe } from "./probes";
 import { authContentUrl } from "./scenarios";
 
 const fx = bridgeFixture();
@@ -100,9 +101,44 @@ async function pollState<T>(b: Bridge, probe: string, want: T, timeoutMs: number
   }
 }
 
-const YT_LIKE = `return document.querySelector('like-button-view-model button')?.getAttribute('aria-pressed') ?? null;`;
-const YT_DISLIKE = `return document.querySelector('dislike-button-view-model button')?.getAttribute('aria-pressed') ?? null;`;
-const REDDIT_DOWN = `return document.querySelector('shreddit-post')?.shadowRoot?.querySelector('button[downvote]')?.getAttribute('aria-pressed') ?? null;`;
+// One control, described once. `find` is page-context source ending in `el`; the state
+// read the cases assert on and the tag a release click needs are both BUILT from it, so
+// the shipped reader and the click can never end up judging different buttons.
+interface NativeControl {
+  find: string;
+  state: string;
+  /** Value of `state` meaning a reaction is set, and the value meaning none is. */
+  pressed: string;
+  cleared: string;
+}
+
+const NATIVE_TAG = "data-khasky-e2e-native";
+
+// `find` + the reader's verdict. A control the page does not expose reads null, which
+// every case reports as its own "no readable control" setup message.
+function nativeControl(find: string, read: string, pressed = "true", cleared = "false"): NativeControl {
+  return { find, state: `${find}\n  if (!el) return null;\n  ${read}`, pressed, cleared };
+}
+
+// Mark the control so a REAL (trusted) Playwright click can reach it - synthetic clicks
+// are refused by several of these sites. Threads and Instagram read an <svg> whose
+// handler sits on the enclosing button; everywhere else `closest` returns `el` itself.
+function tagProbe(find: string): string {
+  return `${find}
+  if (!el) return false;
+  (el.closest('button, [role="button"], a') || el).setAttribute('${NATIVE_TAG}', '1');
+  return true;`;
+}
+
+// Shadow-piercing, because Reddit's downvote lives in shreddit-post's shadow root -
+// a document-level query would leave that tag behind for the next case's click.
+const CLEAR_NATIVE_TAGS = `${DQ_SRC}
+  for (const tagged of dq('[${NATIVE_TAG}]')) tagged.removeAttribute('${NATIVE_TAG}');
+  return true;`;
+
+const YT_LIKE = nativeControl(`const el = document.querySelector('like-button-view-model button');`, `return el.getAttribute('aria-pressed') ?? null;`);
+const YT_DISLIKE = nativeControl(`const el = document.querySelector('dislike-button-view-model button');`, `return el.getAttribute('aria-pressed') ?? null;`);
+const REDDIT_DOWN = nativeControl(`const el = document.querySelector('shreddit-post')?.shadowRoot?.querySelector('button[downvote]') ?? null;`, `return el.getAttribute('aria-pressed') ?? null;`);
 
 // Serialize a shipped function / regex into page-context source. `String(fn)`
 // yields the transpiled JS body, so the probe executes byte-for-byte what the
@@ -120,7 +156,7 @@ const reSrc = (re: RegExp) => re.toString();
 // adapter bound to. Emitted as page-context source, so it stays self-contained.
 const SCOPE_TO_HOST_ROW = `
   const hostRow = (matches) => {
-    const host = document.querySelector('.khasky-emojery-host');
+    const host = document.querySelector('${HOST_SELECTOR}');
     if (!host) return null;
     let node = host.parentElement;
     for (let depth = 0; node && depth < 10; depth++) {
@@ -135,76 +171,77 @@ const SCOPE_TO_HOST_ROW = `
 // chevron's "Change ... reaction" and the "Like: 3 people" count summary are
 // rejected exactly as the adapter rejects them (the summary sits in the same
 // row as the real button, so scoping alone does not exclude it).
-const FB_STATE = `
-  ${SCOPE_TO_HOST_ROW}
+const FB_STATE = nativeControl(
+  `${SCOPE_TO_HOST_ROW}
   const FB_REMOVE_RE = ${reSrc(FB_REMOVE_RE)};
   const FB_STEMS = { like: ${reSrc(FB_STEMS.like)} };
   const FB_REACTION_MENU_ARIA = ${reSrc(FB_REACTION_MENU_ARIA)};
   const fbLikeLabelPressed = ${fnSrc(fbLikeLabelPressed)};
   const readLabel = (b) => (b.getAttribute('aria-label') || '').trim();
-  const btn = hostRow((row) => [...row.querySelectorAll('div[role="button"], span[role="button"]')].find((b) => {
+  const el = hostRow((row) => [...row.querySelectorAll('div[role="button"], span[role="button"]')].find((b) => {
     const l = readLabel(b);
     if (!l || /suggested/i.test(l) || FB_REACTION_MENU_ARIA.test(l) || /:\\s*\\d/.test(l)) return false;
     return fbLikeLabelPressed(l) !== null;
-  }));
-  if (!btn) return null;
-  return fbLikeLabelPressed(readLabel(btn)) ? 'reacted' : 'plain';`;
+  }));`,
+  `return fbLikeLabelPressed(readLabel(el)) ? 'reacted' : 'plain';`,
+  "reacted",
+  "plain",
+);
 
 // GitLab exposes no aria-pressed and keeps `data-testid="star-button"` in both
 // states - only the icon flips, `star-o` outline vs filled `star`. Both the
 // icon-name read and the mapping are the shipped ones.
-const GITLAB_STAR = `
-  const gitlabIconName = ${fnSrc(gitlabIconName)};
+const GITLAB_STAR = nativeControl(
+  `const gitlabIconName = ${fnSrc(gitlabIconName)};
   const gitlabStarIconPressed = ${fnSrc(gitlabStarIconPressed)};
-  const btn = document.querySelector('button[data-testid="star-button"], button.star-btn');
-  if (!btn) return null;
-  const s = gitlabStarIconPressed(gitlabIconName(btn));
-  return s === null ? null : String(s);`;
+  const el = document.querySelector('button[data-testid="star-button"], button.star-btn');`,
+  `const s = gitlabStarIconPressed(gitlabIconName(el));
+  return s === null ? null : String(s);`,
+);
 
 // GitHub's Star exposes no aria-pressed either; the flipped aria-label
 // ("Star owner/repo" <-> "Unstar owner/repo") is the one signal, read by the
 // shipped label reader over every labelled button (the Star button is the only
 // one whose label it recognizes).
-const GITHUB_STAR = `
-  const githubStarLabelPressed = ${fnSrc(githubStarLabelPressed)};
-  for (const btn of document.querySelectorAll('button[aria-label]')) {
-    const s = githubStarLabelPressed((btn.getAttribute('aria-label') || '').trim());
-    if (s !== null) return String(s);
-  }
-  return null;`;
+const GITHUB_STAR = nativeControl(
+  `const githubStarLabelPressed = ${fnSrc(githubStarLabelPressed)};
+  const el = [...document.querySelectorAll('button[aria-label]')].find((b) => githubStarLabelPressed((b.getAttribute('aria-label') || '').trim()) !== null) ?? null;`,
+  `const s = githubStarLabelPressed((el.getAttribute('aria-label') || '').trim());
+  return s === null ? null : String(s);`,
+);
 
 // Threads localizes the heart's aria-label, so the state has to come from the
 // paint: outline when unliked, filled when liked. Inside the host's row the
 // heart is the one icon whose path matches none of the shipped non-Like
 // prefixes; the paint decision is the shipped one.
-const THREADS_LIKE = `
-  ${SCOPE_TO_HOST_ROW}
+const THREADS_LIKE = nativeControl(
+  `${SCOPE_TO_HOST_ROW}
   const OTHERS = ${JSON.stringify(THREADS_NON_LIKE_ICON_PATH_PREFIXES)};
   const isPaintedFill = ${fnSrc(isPaintedFill)};
   const pathOf = (svg) => (svg.querySelector('path')?.getAttribute('d') || '').replace(/\\s+/g, ' ');
-  const heart = hostRow((row) => {
+  const el = hostRow((row) => {
     const icons = [...row.querySelectorAll('svg')];
     // The row must actually be the action row: it carries the Reply icon.
     if (!icons.some((svg) => pathOf(svg).startsWith(OTHERS[0]))) return null;
     return icons.find((svg) => { const d = pathOf(svg); return d && !OTHERS.some((p) => d.startsWith(p)); }) ?? null;
-  });
-  if (!heart) return null;
-  const s = isPaintedFill(getComputedStyle(heart).fill);
-  return s === null ? null : String(s);`;
+  });`,
+  `const s = isPaintedFill(getComputedStyle(el).fill);
+  return s === null ? null : String(s);`,
+);
 
 // Instagram's heart carries a localized aria-label whose RU unlike CONTAINS the
 // like stem - the shipped negation-first reader is exactly what this probe
 // keeps honest. Scoped to the host's row: a permalink's comments each carry
 // their own "Нравится" heart, and the first in document order is not the post's.
-const IG_LIKE = `
-  ${SCOPE_TO_HOST_ROW}
+const IG_LIKE = nativeControl(
+  `${SCOPE_TO_HOST_ROW}
   const IG_UNLIKE_RE = ${reSrc(IG_UNLIKE_RE)};
   const IG_STEMS = { like: ${reSrc(IG_STEMS.like)} };
   const igLikeLabelPressed = ${fnSrc(igLikeLabelPressed)};
-  const heart = hostRow((row) => [...row.querySelectorAll('svg[aria-label]')].find((svg) => igLikeLabelPressed((svg.getAttribute('aria-label') || '').trim()) !== null) ?? null);
-  if (!heart) return null;
-  const s = igLikeLabelPressed((heart.getAttribute('aria-label') || '').trim());
-  return s === null ? null : String(s);`;
+  const el = hostRow((row) => [...row.querySelectorAll('svg[aria-label]')].find((svg) => igLikeLabelPressed((svg.getAttribute('aria-label') || '').trim()) !== null) ?? null);`,
+  `const s = igLikeLabelPressed((el.getAttribute('aria-label') || '').trim());
+  return s === null ? null : String(s);`,
+);
 
 // A press that never lands has two very different causes: the opt-in setting
 // is off (nothing here works, and no amount of debugging helps), or one site
@@ -226,31 +263,50 @@ function siteSpecificHint(site: string, pick: string): string {
   return anyPressLanded ? `${site} ${pick}: the auto-press setting is ON (another site pressed in this run), so this is a ${site}-specific failure - not a setup problem.` : `${site} ${pick}: ${ENABLE_HINT}`;
 }
 
+// A fixture can arrive with its native control already set: a run that died between
+// press and release, or the tester's own star/like. Ending the case with "unstar it
+// manually first" made every rerun need a human, so release it here through the SITE's
+// own control - a trusted click on the very element the shipped reader judges - and let
+// the case set it again through Emojery. What stays a hard stop is a control that will
+// not release, which no longer looks like a broken press in the report.
+const NATIVE_RELEASE_SETTLE_MS = 1_500;
+
+async function releaseNativeIfPressed(b: Bridge, site: string, control: NativeControl): Promise<void> {
+  if ((await b.evaluate<string | null>(control.state)) !== control.pressed) return;
+  await b.evaluate<boolean>(CLEAR_NATIVE_TAGS).catch(() => false);
+  expect(await b.evaluate<boolean>(tagProbe(control.find)), `${site}: the native control reads "${control.pressed}" but vanished before the release click`).toBe(true);
+  await b.act(`await page.locator('[${NATIVE_TAG}="1"]').first().click({ timeout: 8000 });`);
+  await b.evaluate<boolean>(CLEAR_NATIVE_TAGS).catch(() => false);
+  expect(await pollState(b, control.state, control.cleared, 10_000), `${site}: the fixture arrived already reacted and its own control did not release on a click - clear it by hand and re-run`).toBe(control.cleared);
+  // The site's write has to settle before the pick: react while it is still in flight and
+  // the extension reads the stale pressed state, decides there is nothing to do, and the
+  // case fails as a press that never happened.
+  await b.waitMs(NATIVE_RELEASE_SETTLE_MS);
+}
+
 // The GitLab, GitHub, Threads and Instagram cases are one flow: start from an
 // unpressed native control, pick 👍, poll the shipped reader to "pressed", and
 // prove un-react releases it. Only the probe and the wording differ, so the
 // four tests share this driver; YouTube (vote switch), Reddit (downvote) and
 // Facebook (flyout) keep their own.
-async function expectPickPressesAndUnReactReleases(site: "gitlab" | "github" | "threads" | "instagram", probe: string, msg: { host: string; noControl: string; alreadyPressed: string; release: string }): Promise<void> {
+async function expectPickPressesAndUnReactReleases(site: "gitlab" | "github" | "threads" | "instagram", control: NativeControl, msg: { host: string; noControl: string; release: string }): Promise<void> {
   const b = fx.need();
   await gotoSettled(b, authContentUrl(site), 4_000);
   expect(await waitForHost(b, site, 12_000), msg.host).toBeGreaterThan(0);
   await clearOwnReaction(b);
-
-  const before = await b.evaluate<string | null>(probe);
-  expect(before, msg.noControl).toBeTruthy();
-  expect(before, msg.alreadyPressed).toBe("false");
+  expect(await b.evaluate<string | null>(control.state), msg.noControl).toBeTruthy();
+  await releaseNativeIfPressed(b, site, control);
 
   try {
     const picker = await openPickerState(b);
     expect(picker.gridVisible, `${site}: Emojery picker did not open (extension signed out?)`).toBe(true);
     await pickEmoji(b, "👍");
-    expect(await pollState(b, probe, "true", 8_000), siteSpecificHint(site, "👍")).toBe("true");
+    expect(await pollState(b, control.state, "true", 8_000), siteSpecificHint(site, "👍")).toBe("true");
     recordPressLanded();
   } finally {
     await unReact(b);
   }
-  expect(await pollState(b, probe, "false", 8_000), msg.release).toBe("false");
+  expect(await pollState(b, control.state, "false", 8_000), msg.release).toBe("false");
 }
 
 // No bridge needed: the serialized shipped readers must stay valid page-context
@@ -258,8 +314,12 @@ async function expectPickPressesAndUnReactReleases(site: "gitlab" | "github" | "
 // anyone runs the browser flows).
 describe("auto-press probe serialization", () => {
   test("every shipped-reader probe compiles", () => {
-    for (const probe of [FB_STATE, GITLAB_STAR, GITHUB_STAR, THREADS_LIKE, IG_LIKE]) {
-      expect(() => new Function(probe)).not.toThrow();
+    // Both halves of every control: the state read, and the tag the release click needs.
+    // They are built from one `find`, so a serialization break shows up in both at once -
+    // but only compiling both proves the tagger's own lines are valid source too.
+    for (const control of [FB_STATE, GITLAB_STAR, GITHUB_STAR, THREADS_LIKE, IG_LIKE, YT_LIKE, YT_DISLIKE, REDDIT_DOWN]) {
+      expect(() => new Function(control.state)).not.toThrow();
+      expect(() => new Function(tagProbe(control.find))).not.toThrow();
     }
   });
 });
@@ -273,25 +333,28 @@ describe("auto-press probe serialization", () => {
     await gotoSettled(b, authContentUrl("youtube"), 4_000);
     expect(await waitForHost(b, "youtube", 12_000), "youtube: no Emojery host - log into YouTube / check the test video").toBeGreaterThan(0);
     await clearOwnReaction(b);
+    // Both halves of the vote, since either one left set makes the matching pick a no-op.
+    await releaseNativeIfPressed(b, "youtube", YT_LIKE);
+    await releaseNativeIfPressed(b, "youtube", YT_DISLIKE);
 
     try {
       let picker = await openPickerState(b);
       expect(picker.gridVisible, "youtube: Emojery picker did not open (extension signed out?)").toBe(true);
       await pickEmoji(b, "👍");
-      expect(await pollState(b, YT_LIKE, "true", 8_000), `youtube 👍: ${ENABLE_HINT}`).toBe("true");
+      expect(await pollState(b, YT_LIKE.state, "true", 8_000), `youtube 👍: ${ENABLE_HINT}`).toBe("true");
       recordPressLanded();
 
       picker = await openPickerState(b);
       expect(picker.gridVisible).toBe(true);
       await pickEmoji(b, "👎");
-      expect(await pollState(b, YT_DISLIKE, "true", 8_000), "youtube 👎: dislike was not pressed on a negative pick").toBe("true");
+      expect(await pollState(b, YT_DISLIKE.state, "true", 8_000), "youtube 👎: dislike was not pressed on a negative pick").toBe("true");
       // YouTube itself releases the opposite button on a vote switch.
-      expect(await pollState(b, YT_LIKE, "false", 4_000), "youtube: switching to a negative pick should release Like").toBe("false");
+      expect(await pollState(b, YT_LIKE.state, "false", 4_000), "youtube: switching to a negative pick should release Like").toBe("false");
     } finally {
       await unReact(b);
     }
-    expect(await pollState(b, YT_DISLIKE, "false", 8_000), "youtube: un-react must release the auto-pressed Dislike").toBe("false");
-    expect(await b.evaluate<string | null>(YT_LIKE), "youtube: nothing may stay pressed after un-react").toBe("false");
+    expect(await pollState(b, YT_DISLIKE.state, "false", 8_000), "youtube: un-react must release the auto-pressed Dislike").toBe("false");
+    expect(await b.evaluate<string | null>(YT_LIKE.state), "youtube: nothing may stay pressed after un-react").toBe("false");
   });
 
   test("reddit: negative presses downvote, un-react releases it", async () => {
@@ -299,17 +362,18 @@ describe("auto-press probe serialization", () => {
     await gotoSettled(b, authContentUrl("reddit"), 4_000);
     expect(await waitForHost(b, "reddit", 12_000), "reddit: no Emojery host - log into Reddit / check the test post").toBeGreaterThan(0);
     await clearOwnReaction(b);
+    await releaseNativeIfPressed(b, "reddit", REDDIT_DOWN);
 
     try {
       const picker = await openPickerState(b);
       expect(picker.gridVisible, "reddit: Emojery picker did not open (extension signed out?)").toBe(true);
       await pickEmoji(b, "👎");
-      expect(await pollState(b, REDDIT_DOWN, "true", 8_000), siteSpecificHint("reddit", "👎")).toBe("true");
+      expect(await pollState(b, REDDIT_DOWN.state, "true", 8_000), siteSpecificHint("reddit", "👎")).toBe("true");
       recordPressLanded();
     } finally {
       await unReact(b);
     }
-    expect(await pollState(b, REDDIT_DOWN, "false", 8_000), "reddit: un-react must release the auto-pressed downvote").toBe("false");
+    expect(await pollState(b, REDDIT_DOWN.state, "false", 8_000), "reddit: un-react must release the auto-pressed downvote").toBe("false");
   });
 
   // Star state is the only signal GitLab gives, and it is read from the icon
@@ -319,7 +383,6 @@ describe("auto-press probe serialization", () => {
     expectPickPressesAndUnReactReleases("gitlab", GITLAB_STAR, {
       host: "gitlab: no Emojery host - log into GitLab / check the test project",
       noControl: "gitlab: no readable Star button - signed out shows a starrers link instead",
-      alreadyPressed: "gitlab: the test project is already starred - unstar it manually first",
       release: "gitlab: un-react must release the auto-pressed Star",
     }));
 
@@ -330,7 +393,6 @@ describe("auto-press probe serialization", () => {
     expectPickPressesAndUnReactReleases("github", GITHUB_STAR, {
       host: "github: no Emojery host - log into GitHub / check the test repo",
       noControl: "github: no readable Star button found (signed out?)",
-      alreadyPressed: "github: the test repo is already starred - unstar it manually first",
       release: "github: un-react must release the auto-pressed Star",
     }));
 
@@ -340,7 +402,6 @@ describe("auto-press probe serialization", () => {
     expectPickPressesAndUnReactReleases("threads", THREADS_LIKE, {
       host: "threads: no Emojery host - log into Threads / check the test post",
       noControl: "threads: no readable Like heart found on the post",
-      alreadyPressed: "threads: the test post is already liked - unlike it manually first",
       release: "threads: un-react must release the auto-pressed Like",
     }));
 
@@ -351,7 +412,6 @@ describe("auto-press probe serialization", () => {
     expectPickPressesAndUnReactReleases("instagram", IG_LIKE, {
       host: "instagram: no Emojery host - log into Instagram / check the test post",
       noControl: "instagram: no readable Like heart found on the post",
-      alreadyPressed: "instagram: the test post is already liked - unlike it manually first",
       release: "instagram: un-react must release the auto-pressed Like",
     }));
 
@@ -364,20 +424,19 @@ describe("auto-press probe serialization", () => {
     expect(await waitForHost(b, "facebook", 60_000), "facebook: no Emojery host - log into Facebook / check the test post").toBeGreaterThan(0);
     await clearOwnReaction(b);
 
-    const before = await b.evaluate<string | null>(FB_STATE);
-    expect(before, "facebook: no Like control found near the post").toBeTruthy();
-    expect(before, "facebook: the test post already carries a native reaction - clear it manually first").toBe("plain");
+    expect(await b.evaluate<string | null>(FB_STATE.state), "facebook: no Like control found near the post").toBeTruthy();
+    await releaseNativeIfPressed(b, "facebook", FB_STATE);
 
     try {
       const picker = await openPickerState(b);
       expect(picker.gridVisible, "facebook: Emojery picker did not open (extension signed out?)").toBe(true);
       await pickEmoji(b, "❤️");
       // Flyout path: prewarmed while the picker was open, cold retry otherwise.
-      expect(await pollState(b, FB_STATE, "reacted", 12_000), siteSpecificHint("facebook", "❤️->Love")).toBe("reacted");
+      expect(await pollState(b, FB_STATE.state, "reacted", 12_000), siteSpecificHint("facebook", "❤️->Love")).toBe("reacted");
       recordPressLanded();
     } finally {
       await unReact(b);
     }
-    expect(await pollState(b, FB_STATE, "plain", 8_000), "facebook: un-react must clear the auto-set native reaction").toBe("plain");
+    expect(await pollState(b, FB_STATE.state, "plain", 8_000), "facebook: un-react must clear the auto-set native reaction").toBe("plain");
   }, 300_000);
 });
