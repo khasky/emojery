@@ -468,16 +468,37 @@ export async function closeSpawnedAuthTabs(bridge: Bridge): Promise<number> {
   return closed;
 }
 
-// Clicks the first VISIBLE trigger, then reports whether the emoji grid (authed) or
-// a sign-in CTA (unauthed) is shown. The filter picks the visible trigger, because a
-// permalink page can carry a second, off-screen host that .first() in DOM order would
-// reach, and on a Facebook post permalink the photo overlaps the action-row region.
-// force skips the actionability wait the site's own overlays would block.
+// Every trigger this file drives, resolved by ONE rule. A Facebook permalink loads as
+// the PROFILE with the named post in a modal, and the profile's own feed keeps its hosts
+// behind it - so `.first()` in DOM order is one of those, which is wrong twice over: it
+// sits under the overlay (a coordinate click lands on the photo link on top and follows
+// it, off to /photo/?fbid=...) and the feed reshuffles it on the next load, so a picker
+// re-opened after a reload reported no selection. The modal's trigger is the post the URL
+// names. Pages without a modal are untouched - the fallback is the old `.first()`.
+const DIALOG_TRIGGER_SELECTOR = TRIGGER_SELECTOR.split(",")
+  .map((sel) => `[role="dialog"] ${sel.trim()}`)
+  .join(", ");
+const RESOLVE_TRIGGER = `const inDialog = page.locator(${JSON.stringify(DIALOG_TRIGGER_SELECTOR)}).filter({ visible: true });
+   const trigger = (await inDialog.count()) > 0 ? inDialog.first() : page.locator(${JSON.stringify(TRIGGER_SELECTOR)}).filter({ visible: true }).first();`;
+
+// Clicks that trigger, then reports whether the emoji grid (authed) or a sign-in CTA
+// (unauthed) is shown. force skips the actionability wait the site's own overlays block.
 export async function openPickerState(bridge: Bridge): Promise<PickerState> {
   await dismissBlockingDialogs(bridge); // clear any modal that would eat the click
-  await bridge.act(`await page.locator(${JSON.stringify(TRIGGER_SELECTOR)}).filter({ visible: true }).first().click({ force: true, timeout: 8000 }).catch(() => {});`);
+  const before = await bridge.run<string>(`return page.url();`).catch(() => null);
+  await bridge.act(`${RESOLVE_TRIGGER} await trigger.click({ force: true, timeout: 8000 }).catch(() => {});`);
   // The popover needs a beat to render before the one-shot state probe below.
   await bridge.waitMs(1200);
+  // Safety net for any layout where a forced click still lands on a link on top of the
+  // trigger and FOLLOWS it - measured on a Facebook permalink before the rule above,
+  // where the page left /zuck/posts/... for /photo/?fbid=... and the keyboard fallback
+  // then opened the picker on the photo's target instead. A click that navigated has
+  // opened nothing, so come back before falling back.
+  if (before !== null && (await bridge.run<string>(`return page.url();`).catch(() => before)) !== before) {
+    await bridge.goto(before);
+    await bridge.waitFor(HOST_PAINTED, PERMALINK_HOST_WAIT_MS);
+    await dismissBlockingDialogs(bridge);
+  }
   let st = await bridge.evaluate<PickerState>(pickerStateProbe());
   // A spawned auth tab means the extension is signed out: report the unauthed state
   // and DON'T retry via keyboard - another click would only open another tab.
@@ -486,9 +507,9 @@ export async function openPickerState(bridge: Bridge): Promise<PickerState> {
   // coordinate click (Facebook photo permalinks): open via keyboard, focus + Enter.
   if (!st.gridVisible && !st.authTabHint) {
     await bridge.act(
-      `const t = page.locator(${JSON.stringify(TRIGGER_SELECTOR)}).filter({ visible: true }).first();
-       await t.scrollIntoViewIfNeeded().catch(() => {});
-       await t.focus().catch(() => {});
+      `${RESOLVE_TRIGGER}
+       await trigger.scrollIntoViewIfNeeded().catch(() => {});
+       await trigger.focus().catch(() => {});
        await page.keyboard.press('Enter').catch(() => {});`,
     );
     // Same render beat for the keyboard-opened popover before re-probing.

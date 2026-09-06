@@ -156,7 +156,12 @@ const reSrc = (re: RegExp) => re.toString();
 // adapter bound to. Emitted as page-context source, so it stays self-contained.
 const SCOPE_TO_HOST_ROW = `
   const hostRow = (matches) => {
-    const host = document.querySelector('${HOST_SELECTOR}');
+    // The same rule openPickerState resolves its trigger by: on a Facebook permalink the
+    // named post sits in a modal and the profile feed behind it keeps its own hosts, so
+    // the first in DOM order belongs to a different post. Both sides must land on the
+    // same host, or the case reacts to one post and measures another.
+    const hosts = Array.from(document.querySelectorAll('${HOST_SELECTOR}'));
+    const host = hosts.find((h) => h.closest('[role="dialog"]')) ?? hosts[0];
     if (!host) return null;
     let node = host.parentElement;
     for (let depth = 0; node && depth < 10; depth++) {
@@ -180,8 +185,16 @@ const FB_STATE = nativeControl(
   const readLabel = (b) => (b.getAttribute('aria-label') || '').trim();
   const el = hostRow((row) => [...row.querySelectorAll('div[role="button"], span[role="button"]')].find((b) => {
     const l = readLabel(b);
-    if (!l || /suggested/i.test(l) || FB_REACTION_MENU_ARIA.test(l) || /:\\s*\\d/.test(l)) return false;
-    return fbLikeLabelPressed(l) !== null;
+    if (!l || /suggested/i.test(l) || /:\\s*\\d/.test(l)) return false;
+    const state = fbLikeLabelPressed(l);
+    if (state === null) return false;
+    // The shipped reader's precedence, which this probe used to invert: the REMOVE form
+    // is the reacted Like and wins over the chevron rejection. Both carry "реакц" in
+    // RU/UA ("Видалити реакцію У захваті" vs "Змінити реакцію..."), so rejecting on the
+    // wording first made a reacted post unreadable - the walk climbed out of it and
+    // measured a neighbouring post's untouched Like instead. EN never showed it:
+    // "Remove Love" has no "reaction" in it.
+    return state === true || !FB_REACTION_MENU_ARIA.test(l);
   }));`,
   `return fbLikeLabelPressed(readLabel(el)) ? 'reacted' : 'plain';`,
   "reacted",
