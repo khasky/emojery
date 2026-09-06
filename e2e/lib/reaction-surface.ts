@@ -288,7 +288,7 @@ function waitForEmojiOption(page: Page, emoji: string, timeoutMs = 15_000) {
 
 // Open the picker tray via the KEYBOARD, never a coordinate click. The trigger
 // keeps re-measuring for up to ~10s after mount (GLYPH_REMEASURE_UNTIL_MS in
-// src/ui/mount.ts scheduleStyleReblend) and the deferred count fetch then swaps
+// src/ui/mount-reblend.ts scheduleStyleReblend) and the deferred count fetch then swaps
 // it to the wider counter form, so a click aimed at the pre-settle box lands
 // beside the button and the grid "never appears" (verified live: 3 of 6 runs,
 // zero click handlers reached). Focus + Space is coordinate-free and the same

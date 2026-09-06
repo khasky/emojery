@@ -162,7 +162,7 @@ function readMeasurement(page: Page, site: SupportedSiteScenario): Promise<Glyph
 // afterwards (the sizing gate holds it blank until the row's icon measures, a remembered
 // size may stand in, the counter's emoji paints once counts arrive). What this judges is
 // where the size LANDS, so it waits out the client's own window instead of breaking on the
-// first plateau: mount.ts re-measures a provisional trigger for GLYPH_REMEASURE_UNTIL_MS,
+// first plateau: mount-reblend.ts re-measures a provisional trigger for GLYPH_REMEASURE_UNTIL_MS,
 // and a late-hydrating row (YouTube watch) can hold a stand-in perfectly still for seconds
 // before that correction arrives. MEASURE_SETTLE_MS must stay above that window.
 async function measureGlyph(page: Page, site: SupportedSiteScenario): Promise<GlyphMeasurement> {

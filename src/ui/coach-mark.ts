@@ -12,7 +12,7 @@ import { t } from "../shared/i18n";
 import { claimCoachMark } from "../shared/onboarding";
 import { getOverlayRoot } from "./mount-shadow";
 
-// Let mount.ts's early re-blend passes land before pointing at the trigger.
+// Let mount-reblend.ts's early re-blend passes land before pointing at the trigger.
 // Deliberately SHORTER than its SIZING_REVEAL_DEADLINE_MS forced reveal, so a host
 // still held invisible by SIZING_ATTR can be pointed at: the only visibility guard on
 // that path is maybeShowCoachMark's zero-rect check before it calls showCoachMark,
