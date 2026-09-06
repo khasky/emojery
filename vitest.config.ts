@@ -3,6 +3,12 @@ import { configDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
+    // The dev console channel (shared/debug-log.ts) is on under Vitest, so a run
+    // interleaves hundreds of [emojery:*] payloads with the results. On CI, where
+    // nobody is reading them and the log is the only artifact, keep the output to
+    // what the run did - "passed-only" still prints the console of a test that
+    // FAILED, which is the run where those payloads are worth having.
+    silent: process.env.CI ? "passed-only" : false,
     environment: "jsdom",
     // Vitest's default replaces every `.css` import with an empty string -
     // INCLUDING `?raw`, which is how the picker's stylesheet reaches the shadow

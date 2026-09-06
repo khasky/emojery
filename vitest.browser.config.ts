@@ -26,6 +26,10 @@ export default defineConfig({
     },
   },
   test: {
+    // Same reason as the unit config: the [emojery:*] dev channel is live under
+    // Vitest, and a CI log is read for what the run did. "passed-only" keeps the
+    // console of a FAILED test, which is the run that needs it.
+    silent: process.env.CI ? "passed-only" : false,
     include: ["src/**/*.browser.test.{ts,tsx}"],
     // The provider launches WebKit and Gecko itself, outside the profile the e2e
     // suites stamp, so the reaper's dead-parent rule is what covers them - and it
