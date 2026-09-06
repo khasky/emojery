@@ -44,7 +44,7 @@ The **When CI runs it** column is the honest map of what a green pipeline has ac
 
 | File | Covers | Needs the Emojery test account? | When CI runs it |
 | --- | --- | --- | --- |
-| `site-injection.spec.ts` | Per-site placement, replace-native, localized placement, and the gated authed loop. Its scenario table is data-only in **`supported-sites.ts`**. | Only the authed loop | Every other day (`e2e-ci.yml`); the replace-native loop weekly; the GitHub + YouTube placement pair again in real Edge every other day (`edge-smoke.yml`) |
+| `site-injection.spec.ts` | Per-site placement, replace-native, localized placement, and the gated authed loop. Its scenario table is data-only in **`supported-sites.ts`**. | Only the authed loop | Every other day (`e2e-ci.yml`); the replace-native loop weekly; the GitHub + YouTube placement pair again in real Edge every other day (`edge-smoke.yml`); and the placement scenario alone on any PR touching `src/adapters/`, filtered to that diff's sites (`e2e-adapter.yml`, advisory) |
 | `theme-contrast.spec.ts` | Trigger blending + WCAG contrast on real sites, light and dark | Only the active-state pass | Weekly, own job (`e2e-ci.yml`) |
 | `glyph-size.spec.ts` | The trigger emoji is sized like the icons of the row it sits in, per site — plus the stale-size cases the per-site loop cannot produce | No | Manual only |
 | `overlay-freeze.spec.ts` | Threads' URL-addressed photo lightbox: a `/media` overlay open/close cycle (pushState/back, no real click needed) must leave the mounts untouched — no blink, no stale wrong-post trigger | No | Manual only |

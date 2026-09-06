@@ -113,13 +113,14 @@ The commit hooks are the other half. `commit-msg` runs commitlint; `pre-commit` 
 
 ## What CI runs, and when
 
-`ci.yml` and `security.yml` are the workflows your PR triggers — between them they run the gate above. The scheduled ones watch things no diff controls: a site's markup, a browser channel, a newly published CVE. A red scheduled run is a maintainer signal, not a review comment. All 8 workflows in `.github/workflows/`:
+`ci.yml` and `security.yml` are the workflows your PR triggers — between them they run the gate above. A PR that touches `src/adapters/` also triggers `e2e-adapter.yml`, which is **advisory**: it drives live third-party pages, so a red run can mean a site put up a login wall rather than a regression in your diff. Read it, don't obey it. The scheduled ones watch things no diff controls: a site's markup, a browser channel, a newly published CVE. A red scheduled run is a maintainer signal, not a review comment. All 9 workflows in `.github/workflows/`:
 
 | Workflow | Cadence | Watches |
 | --- | --- | --- |
 | `ci.yml` | every PR + every push to `main` | this repo's own code — the gate above |
 | `security.yml` | every PR, and daily | OSV Scanner, Gitleaks, Semgrep |
 | `selector-drift.yml` | daily | whether each scenario URL still serves the native controls the adapters anchor on |
+| `e2e-adapter.yml` | a PR touching `src/adapters/` | live-page placement for the sites that diff can have broken — advisory, never a required check |
 | `e2e-ci.yml` | every other day + weekly | live-page placement, replace-native, theme contrast |
 | `edge-smoke.yml` | every other day | the GitHub + YouTube placement pair in real Edge |
 | `a11y.yml` | every other day | the extension's own pages (axe, keyboard walk, reflow) |
