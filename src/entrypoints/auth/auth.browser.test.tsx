@@ -144,12 +144,16 @@ describe("auth page - the email step", () => {
     expect(storedCooldown()).toBeNull();
   });
 
-  it("shows the API's own message when it sends one", async () => {
-    install({ requestReply: { type: "auth:otpRequested", ok: false, status: 500, error: "backend on fire" } });
+  it("keeps the API's machine error string off the screen", async () => {
+    // `error` is a diagnostic for the background's message log, not UI copy: a status
+    // the user cannot act on renders the localized fallback, and the raw string
+    // reaches the page nowhere else either.
+    install({ requestReply: { type: "auth:otpRequested", ok: false, status: 500, error: "unsupported_client" } });
     await loadPage();
     await sendCode();
     await vi.waitFor(() => expect(errorText()).not.toBe(""));
-    expect(errorText()).toBe("backend on fire");
+    expect(errorText()).toBe("Something went wrong. Please try again.");
+    expect(document.body.textContent).not.toContain("unsupported_client");
   });
 
   it("treats a background that answers something else as a network error", async () => {
