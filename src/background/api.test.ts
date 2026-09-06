@@ -496,7 +496,9 @@ describe("fetchCount", () => {
 
   it("authed: merges myReaction from /reactions/mine", async () => {
     vi.mocked(getAuth).mockResolvedValue({ token: "tok", userId: "u" } as never);
-    const key = `${target.site}:${target.targetId}`;
+    // The wire key is the `site/targetId` token the request sent; `targetKey()` keeps
+    // its own `site:targetId` shape for local storage (api-read.ts mineWireKey).
+    const key = `${target.site}/${target.targetId}`;
     const fetchMock = stubMineAndCount({ [key]: "❤️" }, { counts: { "❤️": 1 }, total: 1, loaded: 1, hasMore: false });
     vi.stubGlobal("fetch", fetchMock);
 
@@ -513,7 +515,7 @@ describe("fetchCount", () => {
     // every target in one call, so the burst must not spend one request per trigger.
     vi.mocked(getAuth).mockResolvedValue({ token: "tok", userId: "u" } as never);
     const second: TargetRef = { ...target, targetId: "2", url: "https://www.facebook.com/zuck/posts/2" };
-    const fetchMock = stubMineAndCount({ [`${target.site}:1`]: "❤️", [`${target.site}:2`]: "🔥" }, { counts: {}, total: 0, loaded: 0, hasMore: false });
+    const fetchMock = stubMineAndCount({ [`${target.site}/1`]: "❤️", [`${target.site}/2`]: "🔥" }, { counts: {}, total: 0, loaded: 0, hasMore: false });
     vi.stubGlobal("fetch", fetchMock);
 
     const reads = Promise.all([fetchCount(target, 6), fetchCount(second, 6)]);
@@ -544,7 +546,7 @@ describe("fetchCount", () => {
 
   it("bypasses the browser cache on BOTH the count and mine reads (no-store)", async () => {
     vi.mocked(getAuth).mockResolvedValue({ token: "tok", userId: "u" } as never);
-    const key = `${target.site}:${target.targetId}`;
+    const key = `${target.site}/${target.targetId}`;
     const fetchMock = stubMineAndCount({ [key]: "❤️" }, { counts: { "❤️": 1 }, total: 1, loaded: 1, hasMore: false });
     vi.stubGlobal("fetch", fetchMock);
 
@@ -575,7 +577,7 @@ describe("fetchCount", () => {
 
   it("normalizes padded emoji from the response the way the message guard does", async () => {
     vi.mocked(getAuth).mockResolvedValue({ token: "tok", userId: "u" } as never);
-    const key = `${target.site}:${target.targetId}`;
+    const key = `${target.site}/${target.targetId}`;
     const fetchMock = stubMineAndCount({ [key]: " 👍 " }, { counts: { " ❤️ ": 2 }, total: 2, loaded: 1, hasMore: false });
     vi.stubGlobal("fetch", fetchMock);
 
@@ -612,7 +614,7 @@ describe("fetchCount", () => {
 
   it("drops a junk own-reaction value instead of surfacing it as myReaction", async () => {
     vi.mocked(getAuth).mockResolvedValue({ token: "tok", userId: "u" } as never);
-    const key = `${target.site}:${target.targetId}`;
+    const key = `${target.site}/${target.targetId}`;
     const fetchMock = stubMineAndCount({ [key]: 42, "facebook:unrequested": "🔥" }, { counts: {}, total: 0, loaded: 0, hasMore: false });
     vi.stubGlobal("fetch", fetchMock);
 

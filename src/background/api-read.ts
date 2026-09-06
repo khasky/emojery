@@ -141,11 +141,16 @@ function requestMyReactions(target: TargetRef, token: string): Promise<Record<st
   return batch.reactions;
 }
 
+/** The `site/targetId` token GET /reactions/mine takes and answers under. */
+function mineWireKey(target: TargetRef): string {
+  return `${target.site}/${target.targetId}`;
+}
+
 // Resolves to a (possibly empty) map, never rejects: a missing own-reaction only
 // costs the "you reacted" marker, and the shared promise is awaited by every
 // target in the batch - one rejection would surface as that many failures.
 async function sendMineRequest(token: string, targets: readonly TargetRef[]): Promise<Record<string, string>> {
-  const query = targets.map((target) => `t=${encodeURIComponent(`${target.site}/${target.targetId}`)}`).join("&");
+  const query = targets.map((target) => `t=${encodeURIComponent(mineWireKey(target))}`).join("&");
   try {
     // `no-store` for the same reason as the counts read below.
     const res = await apiFetch(`${API_BASE}/reactions/mine?${query}`, {
@@ -158,19 +163,24 @@ async function sendMineRequest(token: string, targets: readonly TargetRef[]): Pr
       return {};
     }
     if (!res.ok) return {};
-    // `{ reactions: { "<site>:<targetId>": "🤣" } }` - the map is wrapped so
+    // `{ reactions: { "<site>/<targetId>": "🤣" } }` - the map is wrapped so
     // the response can grow a field without colliding with a target key.
     // Filtered to the requested targets and to emoji-shaped values rather than
     // trusted from a cast: the shared map is read per target key, so nothing
     // beyond this batch's keys has a reader, and a junk value would otherwise
     // travel into the counts cache as `myReaction`.
+    //
+    // Two key shapes, deliberately: the API answers under the same `site/targetId`
+    // token this request sent, while `targetKey()` is the LOCAL storage key
+    // (`site:targetId`) that the durable stores are already written under. Reading
+    // the wire under one and returning the other keeps the rename on the wire
+    // instead of turning it into a storage migration.
     const body: unknown = await res.json();
     const raw = isRecord(body) && isRecord(body.reactions) ? body.reactions : {};
     const reactions: Record<string, string> = {};
     for (const target of targets) {
-      const key = targetKey(target);
-      const value = normalizeReaction(raw[key]);
-      if (value !== null) reactions[key] = value;
+      const value = normalizeReaction(raw[mineWireKey(target)]);
+      if (value !== null) reactions[targetKey(target)] = value;
     }
     return reactions;
   } catch (error) {
