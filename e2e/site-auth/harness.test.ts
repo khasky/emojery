@@ -177,9 +177,11 @@ describe("waitForHost", () => {
   });
 });
 
-// Pins the shared wall fixtures to the two walls Reddit served this suite's own
-// fixture URLs: the js_challenge redirect into the network-security block, and the
-// "Prove your humanity" reCAPTCHA on a CLEAN URL - which is why the text set exists.
+// Pins the shared wall fixtures to the walls the live suites actually met: the two
+// Reddit served this suite's own fixture URLs - the js_challenge redirect into the
+// network-security block, and the "Prove your humanity" reCAPTCHA on a CLEAN URL,
+// which is why the text set exists - and the Cloudflare challenge X now fronts its
+// profile feed with, whose sentences carry no wall word the older set matched.
 describe("wall fixtures", () => {
   it("recognizes both Reddit walls by sentence and the challenge redirect by URL", () => {
     expect(WALL_SENTENCES_RE.test("You've been blocked by network security.")).toBe(true);
@@ -187,5 +189,14 @@ describe("wall fixtures", () => {
     // Synthetic permalink of the real shape: the assertion is about the URL form.
     expect(BLOCK_URL_RE.test("https://www.reddit.com/r/emojery_e2e_fixture/comments/0abc123/fixture_post/?solution=abc&js_challenge=1&token=t")).toBe(true);
     expect(BLOCK_URL_RE.test("https://www.reddit.com/r/emojery_e2e_fixture/comments/0abc123/fixture_post/")).toBe(false);
+  });
+
+  it("recognizes the Cloudflare challenge X serves on a datacenter IP", () => {
+    expect(WALL_SENTENCES_RE.test("Performing security verification")).toBe(true);
+    expect(WALL_SENTENCES_RE.test("This website uses a security service to protect against malicious bots. This page is displayed while the website verifies you are not a bot.")).toBe(true);
+    // Turnstile's other wording, for the day Cloudflare swaps the template.
+    expect(WALL_SENTENCES_RE.test("Verifying you are human. This may take a few seconds.")).toBe(true);
+    // The challenge keeps the requested URL, so only the sentences can catch it.
+    expect(BLOCK_URL_RE.test("https://x.com/emojery_e2e_fixture")).toBe(false);
   });
 });

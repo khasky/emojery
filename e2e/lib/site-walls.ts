@@ -25,8 +25,12 @@ export function isBlockUrl(url: string): boolean {
 // evidence to disambiguate. Reddit serves two walls: a hard IP block ("You've
 // been blocked by network security", what every CI runner gets) and the JS
 // challenge ("Prove your humanity"); matched from the apostrophe-free tail so
-// the phrase holds whichever quote codepoint the page serves.
-export const WALL_SENTENCES_RE = /Click the button below to continue shopping|Enter the characters you see below|we just need to make sure you're not a robot|detected unusual traffic|verify you are (?:a )?human|blocked by network security|Prove your humanity/i;
+// the phrase holds whichever quote codepoint the page serves. X fronts its
+// profile pages with Cloudflare, which answers a datacenter IP with the managed
+// challenge instead of the feed - matched by BOTH of its sentences, because the
+// heading varies with the challenge type while the body paragraph stays.
+export const WALL_SENTENCES_RE =
+  /Click the button below to continue shopping|Enter the characters you see below|we just need to make sure you're not a robot|detected unusual traffic|verif(?:y|ies|ying) you are (?:a )?(?:human|not a bot)|blocked by network security|Prove your humanity|Performing security verification|protect against malicious bots/i;
 
 // The one shared "this page is a wall, and here is why" verdict for suites that
 // hold a live Page: the URL gate first, then the exact wall sentences. The text
