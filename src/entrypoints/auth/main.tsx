@@ -270,7 +270,11 @@ function App() {
     } else if (res.status === 400) {
       setError(t("authErrBadEmail"));
     } else {
-      setError(res.error ?? t("authErrUnknown"));
+      // The API's `error` is a machine string (`unsupported_client`), not UI copy, so
+      // it is not what a person is shown - every status the user can act on is
+      // branched above. The field stays on the response: it is what makes a rejected
+      // sign-in diagnosable from the background's message log.
+      setError(t("authErrUnknown"));
     }
     return false;
   }, []);
@@ -311,7 +315,7 @@ function App() {
       } else if (res.status === 401) {
         setError(t("authErrCodeInvalid"));
       } else {
-        setError(res.error ?? t("authErrVerifyFailed"));
+        setError(t("authErrVerifyFailed"));
       }
     },
     [email, code],
