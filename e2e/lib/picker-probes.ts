@@ -225,7 +225,15 @@ export async function pickReactionOnMatchingHost(page: Page, site: SupportedSite
       }
       await expectOpenPickerGrid(page, trigger, "Authenticated picker should open its reaction grid");
 
-      reaction = await clickFirstUnselectedReactionOption(page);
+      try {
+        reaction = await clickFirstUnselectedReactionOption(page);
+      } catch (error) {
+        // The grid can be gone by the time the keyboard fallback runs (the popover
+        // closes itself when the trigger moves under it), so the focus wait spins on
+        // nothing. That IS the failed pick this loop retries: reopen and pick again.
+        if (attempt === 0) continue;
+        throw error;
+      }
       expect(reaction, "A reaction option should be clicked").not.toBeNull();
       if (!reaction) throw new Error("Missing reaction option");
       // The pick MUST settle, but the counter-form trigger only shows the top emoji
