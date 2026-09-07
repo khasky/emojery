@@ -173,6 +173,8 @@ export function App() {
           {SUPPORTED_SITES.map((site) => (
             <li key={site.site}>{site.label}</li>
           ))}
+          {/* Not a chip: the list carries the sites that work today, this one closes the row with what is coming. */}
+          <li class="more">{t("onboardingSitesMore")}</li>
         </ul>
       ),
     },

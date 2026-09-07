@@ -585,6 +585,9 @@
   "onboardingSitesHeading": {
     "message": "Работает на"
   },
+  "onboardingSitesMore": {
+    "message": "Ещё 250+ сайтов в планах"
+  },
   "gateTitle": {
     "message": "Последний шаг"
   },

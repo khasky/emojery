@@ -585,6 +585,9 @@
   "onboardingSitesHeading": {
     "message": "支持的网站"
   },
+  "onboardingSitesMore": {
+    "message": "路线图上还有 250+ 个网站"
+  },
   "gateTitle": {
     "message": "最后一步"
   },

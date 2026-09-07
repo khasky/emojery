@@ -585,6 +585,9 @@
  "onboardingSitesHeading": {
   "message": "Works on"
  },
+ "onboardingSitesMore": {
+  "message": "250+ more sites on the roadmap"
+ },
  "gateTitle": {
   "message": "Last step"
  },

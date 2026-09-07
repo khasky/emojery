@@ -747,6 +747,10 @@
     "message": "Works on",
     "description": "Onboarding-page heading above the list of supported site names."
   },
+  "onboardingSitesMore": {
+    "message": "250+ more sites on the roadmap",
+    "description": "Onboarding-page note after the supported-site chips - how many more sites are planned."
+  },
   "gateTitle": {
     "message": "Last step",
     "description": "Title of the sign-in gate shown after a signed-out user picks a reaction."

@@ -585,6 +585,9 @@
   "onboardingSitesHeading": {
     "message": "対応サイト"
   },
+  "onboardingSitesMore": {
+    "message": "ロードマップにさらに250以上のサイト"
+  },
   "gateTitle": {
     "message": "最後のステップ"
   },

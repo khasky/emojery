@@ -585,6 +585,9 @@
   "onboardingSitesHeading": {
     "message": "Funciona en"
   },
+  "onboardingSitesMore": {
+    "message": "250+ sitios más en la hoja de ruta"
+  },
   "gateTitle": {
     "message": "Último paso"
   },

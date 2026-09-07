@@ -585,6 +585,9 @@
   "onboardingSitesHeading": {
     "message": "支援的網站"
   },
+  "onboardingSitesMore": {
+    "message": "藍圖上還有 250+ 個網站"
+  },
   "gateTitle": {
     "message": "最後一步"
   },

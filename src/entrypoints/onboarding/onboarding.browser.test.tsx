@@ -79,9 +79,11 @@ describe("onboarding checklist", () => {
     stubPinState(false);
     renderPage();
 
-    await expect.poll(() => container.querySelectorAll(".site-chips li").length).toBe(SUPPORTED_SITES.length);
-    const chips = [...container.querySelectorAll(".site-chips li")].map((li) => li.textContent);
+    await expect.poll(() => container.querySelectorAll(".site-chips li:not(.more)").length).toBe(SUPPORTED_SITES.length);
+    const chips = [...container.querySelectorAll(".site-chips li:not(.more)")].map((li) => li.textContent);
     expect(chips).toEqual(SUPPORTED_SITES.map((site) => site.label));
+    // The roadmap line closes the row and is not a supported site.
+    expect(container.querySelector(".site-chips li.more")?.textContent).toBe("250+ more sites on the roadmap");
     // The copy around the list carries no count to go stale when a site is added.
     expect(container.querySelector(TAGLINE_SELECTOR)?.textContent).not.toMatch(/\d/);
   });

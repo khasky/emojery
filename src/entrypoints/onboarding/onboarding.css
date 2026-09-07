@@ -179,6 +179,13 @@
   color: var(--khasky-emojery-muted);
 }
 
+/* Trails the chips as plain text, so the row reads as "these sites, and more coming". */
+.site-chips li.more {
+  background: none;
+  padding-inline: 2px;
+  align-self: center;
+}
+
 /* the brand side */
 
 .side {

@@ -585,6 +585,9 @@
   "onboardingSitesHeading": {
     "message": "Ezeken működik"
   },
+  "onboardingSitesMore": {
+    "message": "További 250+ webhely az ütemtervben"
+  },
   "gateTitle": {
     "message": "Utolsó lépés"
   },

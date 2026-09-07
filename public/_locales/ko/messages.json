@@ -585,6 +585,9 @@
   "onboardingSitesHeading": {
     "message": "지원 사이트"
   },
+  "onboardingSitesMore": {
+    "message": "로드맵에 250개 이상의 사이트"
+  },
   "gateTitle": {
     "message": "마지막 단계"
   },

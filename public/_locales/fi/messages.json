@@ -585,6 +585,9 @@
   "onboardingSitesHeading": {
     "message": "Toimii sivustoilla"
   },
+  "onboardingSitesMore": {
+    "message": "Tiekartalla 250+ sivustoa lisää"
+  },
   "gateTitle": {
     "message": "Viimeinen askel"
   },
