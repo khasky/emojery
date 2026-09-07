@@ -23,7 +23,7 @@ import {
 import { authPageFromUserAction, expectHistoryRowCount, expectHistorySearchFiltersReaction, expectHistorySignedOut, expectLatestHistoryReactions, openLatestHistoryReactionPage, setReplaceNativeFromPopup, setSiteEnabledFromPopup, signInTestAccount, waitForReactionOnHistoryPage } from "./lib/popup-probes";
 import { DEEP_QUERY_ALL_SRC } from "./lib/probe-src";
 import { clearReactionOnTarget, clickReactionBySearchOnTarget, expectPickerClosed, expectReactionOptionSelected, expectSelectedReaction, expectVisibleReactionOptions, pickReactionBySearchOnTarget } from "./lib/reaction-actions";
-import { GATE_SIGNIN_CLASS, HIDDEN_SELECTOR } from "./lib/selectors";
+import { EMAIL_INPUT_SELECTOR, GATE_SIGNIN_CLASS, HIDDEN_SELECTOR } from "./lib/selectors";
 import type { MountEvidence, SupportedSiteScenario } from "./lib/site-evidence";
 import { keyMatchDiagnostic, launchE2eBrowserSession, settleAndRequireMount, skipWithShot } from "./lib/site-session";
 import { isBlockUrl } from "./lib/site-walls";
@@ -74,7 +74,7 @@ test("extension is loaded in the browser profile", async () => {
   const auth = await context.newPage();
   try {
     await auth.goto(extensionPageUrl(extensionId, "auth.html"));
-    await expect(auth.locator("#email-input")).toBeVisible();
+    await expect(auth.locator(EMAIL_INPUT_SELECTOR)).toBeVisible();
   } finally {
     await auth.close().catch(() => {});
   }
@@ -94,7 +94,7 @@ test("private window: supported site button opens auth.html", async () => {
     authPage = await verifyUnauthClickOpensAuthTab(session.context, page, site, evidence);
     expect(authPage, "A private-window supported-site click should open visible auth.html").not.toBeNull();
     if (!authPage) return;
-    await expect(authPage.locator("#email-input")).toBeVisible();
+    await expect(authPage.locator(EMAIL_INPUT_SELECTOR)).toBeVisible();
   } finally {
     await authPage?.close().catch(() => {});
     await page.close().catch(() => {});
@@ -593,11 +593,15 @@ async function verifySupportedSiteInjection(browserContext: BrowserContext, site
     }
     expect(evidence.placementOk, debugEvidence(evidence)).toBe(true);
     expect(evidence.missingRequiredHostAncestors, debugEvidence(evidence)).toHaveLength(0);
-    // Visual-correctness invariant beyond proximity: one target key on more than
-    // one connected anchor is a duplicate/stolen-host bug. The softer signals stay
-    // evidence-only - `nativeSelectors` are too coarse to tell "beside" from
-    // "inside" (YouTube legitimately reports full overlap), so asserting them false-fails.
+    // Visual-correctness invariants beyond proximity. Two are asserted because both
+    // read only our OWN host: one target key on more than one connected anchor is a
+    // duplicate/stolen-host bug, and a host that renders visible but under 8px in
+    // either axis is a trigger the user cannot hit - the shipped one is ~20px on every
+    // surface, vertical icon rails included. The remaining signals stay evidence-only:
+    // they compare against `nativeSelectors`, which are too coarse to tell "beside"
+    // from "inside" (YouTube legitimately reports full overlap), so asserting them false-fails.
     expect(evidence.duplicateMatchingKeys, `A target key must not appear on more than one connected anchor. ${debugEvidence(evidence)}`).toHaveLength(0);
+    expect(evidence.clippedMatchingCount, `A visible trigger must not render smaller than 8px in either axis. ${debugEvidence(evidence)}`).toBe(0);
     if (options.verifyUnauthAuthClick) {
       authPage = await verifyUnauthClickOpensAuthTab(browserContext, page, site, evidence);
     }
@@ -694,7 +698,7 @@ async function verifyUnauthClickOpensAuthTab(browserContext: BrowserContext, pag
       await trigger.scrollIntoViewIfNeeded({ timeout: 5_000 }).catch(() => {});
       // Three-step since the gate moved behind the pick: the trigger click opens the
       // real palette, choosing a reaction raises the gate popover, and only its
-      // "Sign in & react" button opens auth.html. Playwright CSS pierces the overlay
+      // "Sign in" button opens auth.html. Playwright CSS pierces the overlay
       // root's open shadow to reach the gate button.
       authPage = await authPageFromUserAction(browserContext, loadedExtensionId, async () => {
         await attempt(trigger);
