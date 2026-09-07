@@ -177,11 +177,15 @@ function hostOf(url: string): string {
 async function topHistoryRows(context: BrowserContext, count: number): Promise<ReactionRow[]> {
   const popup = await openHistoryTab(context, { waitForRows: true });
   try {
-    const rows = await popup.locator(HISTORY_ROW_SELECTOR).evaluateAll((items) =>
-      items.map((li) => ({
-        emoji: (li.querySelector(HISTORY_EMOJI_SELECTOR)?.textContent ?? "").trim(),
-        href: li.querySelector(HISTORY_LINK_SELECTOR)?.getAttribute("href") ?? "",
-      })),
+    // The callback runs in the page, where the imported selector constants do not
+    // exist - they must travel as the evaluate argument.
+    const rows = await popup.locator(HISTORY_ROW_SELECTOR).evaluateAll(
+      (items, selectors) =>
+        items.map((li) => ({
+          emoji: (li.querySelector(selectors.emoji)?.textContent ?? "").trim(),
+          href: li.querySelector(selectors.link)?.getAttribute("href") ?? "",
+        })),
+      { emoji: HISTORY_EMOJI_SELECTOR, link: HISTORY_LINK_SELECTOR },
     );
     return rows.slice(0, count).map((row) => ({ emoji: row.emoji, host: hostOf(row.href) }));
   } finally {
