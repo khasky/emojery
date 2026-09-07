@@ -19,6 +19,13 @@ export default defineConfig({
   // data by its real path (`/public/emoji-data/*.json`, see src/test/chrome-shim.ts) -
   // a configured public dir would serve those files at `/` instead.
   publicDir: false,
+  // The [emojery:*] dev console channel (shared/debug-log.ts) defaults ON under Vitest,
+  // where this wxt.config.ts constant is undefined - and the real-IndexedDB suites walk
+  // hundreds of rows per case, so every run buried its results under the payload dump.
+  // Off here, exactly as in a production build: those traces are for the browser console
+  // of a dev build, not for a test log. The unit config leaves it undefined on purpose -
+  // src/background/debug.test.ts stubs the global to exercise both arms.
+  define: { __EM_DEBUG_LOG__: JSON.stringify(false) },
   resolve: {
     alias: {
       react: "preact/compat",
@@ -26,8 +33,8 @@ export default defineConfig({
     },
   },
   test: {
-    // Same reason as the unit config: the [emojery:*] dev channel is live under
-    // Vitest, and a CI log is read for what the run did. "passed-only" keeps the
+    // A CI log is read for what the run did, so whatever a passing test prints -
+    // engine warnings, a leftover trace - stays out of it. "passed-only" keeps the
     // console of a FAILED test, which is the run that needs it.
     silent: process.env.CI ? "passed-only" : false,
     include: ["src/**/*.browser.test.{ts,tsx}"],
