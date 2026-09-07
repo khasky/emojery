@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { t } from "../../shared/i18n";
 import { hasReactedOnce, hasSeenTrigger, watchOnboardingFlags } from "../../shared/onboarding";
 import { bootstrapPage } from "../../shared/page-bootstrap";
+import { CARD_CLASS, CONFETTI_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
 import { SUPPORTED_SITES } from "../../shared/sites";
 import { TRY_IT_LIVE_URL, withExtensionUtm } from "../../shared/tracking-links";
 import { getToolbarUserSettings } from "../../shared/webext";
@@ -128,7 +129,7 @@ function useCelebration(complete: boolean): boolean {
 // Index-derived angles and distances rather than Math.random: a burst that looks
 // the same every time is easier to judge, and nothing here needs entropy.
 const Confetti = () => (
-  <div class="confetti" aria-hidden="true">
+  <div class={CONFETTI_CLASS} aria-hidden="true">
     {Array.from({ length: CONFETTI_PIECES }, (_, i) => {
       const angle = (i / CONFETTI_PIECES) * Math.PI * 2;
       const distance = CONFETTI_BASE_PX + (i % CONFETTI_RADIUS_GROUPS) * CONFETTI_RADIUS_STRIDE_PX;
@@ -184,7 +185,7 @@ export function App() {
 
   return (
     <main class="wrap">
-      <div class="card">
+      <div class={CARD_CLASS}>
         <section class="checklist" aria-label={t("onboardingTitle")}>
           <div class={complete ? "progress complete" : "progress"}>
             {/* The bar is decorative; the label beside it carries the same value as text. */}
@@ -219,7 +220,7 @@ export function App() {
           </span>
           <div>
             <h1>{t("onboardingTitle")}</h1>
-            <p class="tagline">{t("onboardingTagline")}</p>
+            <p class={TAGLINE_CLASS}>{t("onboardingTagline")}</p>
           </div>
           {/* A new tab on purpose: this page is a live checklist, and following
               the link in place would throw away the very progress the visit is

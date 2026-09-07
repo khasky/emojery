@@ -7,6 +7,7 @@
 import { h, render } from "preact";
 import { afterEach, beforeEach, expect, it } from "vitest";
 import { userEvent } from "vitest/browser";
+import { TOOLTIP_POP_SELECTOR } from "../../shared/page-dom";
 import { mountContainer, requireEl, unmountContainer } from "../../test/browser-harness";
 import { HoverTooltip } from "./popup-tooltip";
 
@@ -25,11 +26,11 @@ const trigger = (cls: string): HTMLElement => requireEl(container, `.${cls}`);
 
 it("keeps at most one tooltip open across neighbouring triggers", async () => {
   await userEvent.hover(trigger("row-a"));
-  expect(container.querySelectorAll(".tt-pop")).toHaveLength(1);
+  expect(container.querySelectorAll(TOOLTIP_POP_SELECTOR)).toHaveLength(1);
 
   await userEvent.hover(trigger("row-b"));
-  const open = container.querySelectorAll(".tt-pop");
+  const open = container.querySelectorAll(TOOLTIP_POP_SELECTOR);
   expect(open).toHaveLength(1);
   expect(open[0]?.textContent).toBe("tip B");
-  expect(trigger("row-a").querySelector(".tt-pop")).toBeNull();
+  expect(trigger("row-a").querySelector(TOOLTIP_POP_SELECTOR)).toBeNull();
 });

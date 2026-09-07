@@ -3,6 +3,7 @@ import { type ComponentChild, Fragment } from "preact";
 import { useState } from "preact/hooks";
 import type { SupportedSite } from "../../shared/adapter";
 import { t } from "../../shared/i18n";
+import { ROW_SELECT_CLASS } from "../../shared/page-dom";
 import { DEFAULT_SITE_TOGGLES, resolveSiteHomeUrl, SITE_LABELS } from "../../shared/sites";
 import type { Settings } from "../../shared/storage";
 import { withExtensionUtm } from "../../shared/tracking-links";
@@ -96,7 +97,7 @@ export const SettingsView = ({ settings, update }: { settings: Settings; update:
           <span>{t("settingTheme")}</span>
           <span class="row-hint">{t("settingThemeHint")}</span>
         </span>
-        <select class="row-select" value={settings.theme} onChange={(e: Event) => update({ theme: (e.currentTarget as HTMLSelectElement).value as Settings["theme"] })}>
+        <select class={ROW_SELECT_CLASS} value={settings.theme} onChange={(e: Event) => update({ theme: (e.currentTarget as HTMLSelectElement).value as Settings["theme"] })}>
           {THEME_CHOICES.map((choice) => (
             <option key={choice} value={choice}>
               {t(THEME_LABEL_KEYS[choice])}

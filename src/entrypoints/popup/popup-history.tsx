@@ -5,6 +5,7 @@ import type { SupportedSite } from "../../shared/adapter";
 import { errorCopyKey, failureCode } from "../../shared/error-copy";
 import { t } from "../../shared/i18n";
 import type { HistoryStats, ReactionHistoryItem, RuntimeErrorCode } from "../../shared/messages";
+import { HISTORY_CLASS, HISTORY_DAY_CLASS, HISTORY_EMOJI_CLASS, HISTORY_LINK_CLASS, HISTORY_MID_CLASS, HISTORY_MORE_CLASS, HISTORY_NOMATCH_CLASS, HISTORY_SEARCH_INPUT_CLASS, HISTORY_TIME_CLASS, HISTORY_TITLE_CLASS } from "../../shared/page-dom";
 import { SITE_LABELS } from "../../shared/sites";
 import { sendRuntimeMessage } from "../../shared/webext";
 import { EmojiImg } from "../../ui/emoji-img";
@@ -139,7 +140,7 @@ const HistoryList = ({ items }: { items: ReactionHistoryItem[] }) => {
         <Fragment key={group.key}>
           {/* aria-level 2: the popup's only real heading above this is the <h1> brand title. */}
           {/* biome-ignore lint/a11y/useSemanticElements: a real <h2> between the day groups would sit inside the list flow and break `.history li` meaning exactly one reaction row */}
-          <div class="history-day" role="heading" aria-level={2}>
+          <div class={HISTORY_DAY_CLASS} role="heading" aria-level={2}>
             {group.label}
           </div>
           <ul>
@@ -151,19 +152,19 @@ const HistoryList = ({ items }: { items: ReactionHistoryItem[] }) => {
                 // Tint the row by what the click did; legacy rows stay untinted.
                 class={row.action ? `history-${row.action}` : undefined}
               >
-                <span class="history-emoji">
+                <span class={HISTORY_EMOJI_CLASS}>
                   <EmojiImg emoji={row.reaction} />
                 </span>
                 {/* URL first line, captured title second; rows recorded before titles existed show one line. */}
-                <div class="history-mid">
-                  <HoverTooltip variant="link" wrapClass="history-link" href={row.target.url} trigger={shortenUrl(row.target.url)} content={() => renderUrlParts(row.target.url)} />
+                <div class={HISTORY_MID_CLASS}>
+                  <HoverTooltip variant="link" wrapClass={HISTORY_LINK_CLASS} href={row.target.url} trigger={shortenUrl(row.target.url)} content={() => renderUrlParts(row.target.url)} />
                   {row.title ? (
-                    <span class="history-title" title={row.title}>
+                    <span class={HISTORY_TITLE_CLASS} title={row.title}>
                       {row.title}
                     </span>
                   ) : null}
                 </div>
-                <HoverTooltip variant="text" wrapClass="history-time" trigger={fmtRelative(row.ts)} content={() => <span class="tt-date">{fmtExactDate(row.ts)}</span>} />
+                <HoverTooltip variant="text" wrapClass={HISTORY_TIME_CLASS} trigger={fmtRelative(row.ts)} content={() => <span class="tt-date">{fmtExactDate(row.ts)}</span>} />
               </li>
             ))}
           </ul>
@@ -250,7 +251,7 @@ const HistoryView = () => {
 
   if (failed !== null) {
     return (
-      <section class="history empty">
+      <section class={`${HISTORY_CLASS} empty`}>
         <p role="alert">{t(errorCopyKey(failed, "loadError"))}</p>
       </section>
     );
@@ -265,7 +266,7 @@ const HistoryView = () => {
   // First-run empty state: no reactions and nothing filtered away, so no search box or facets.
   if (!hasFilter && items.length === 0 && !loading) {
     return (
-      <section class="history empty">
+      <section class={`${HISTORY_CLASS} empty`}>
         <p>{t("historyEmpty")}</p>
       </section>
     );
@@ -277,7 +278,7 @@ const HistoryView = () => {
 
   const search = (
     <Fragment>
-      <SearchField wrapClass="history-search" inputClass="history-search-input" placeholder={t("historySearchPlaceholder")} value={query} onInput={setQuery} />
+      <SearchField wrapClass="history-search" inputClass={HISTORY_SEARCH_INPUT_CLASS} placeholder={t("historySearchPlaceholder")} value={query} onInput={setQuery} />
       {/* Screen-reader announcement of filter results (only while a filter is active,
           so plain browsing stays quiet); the list itself is not live. */}
       <span class="sr-only" role="status">
@@ -288,21 +289,21 @@ const HistoryView = () => {
 
   if (items.length === 0) {
     return (
-      <section class="history">
+      <section class={HISTORY_CLASS}>
         {search}
         {facets}
-        {loading ? null : <p class="history-nomatch">{t("historyNoMatches")}</p>}
+        {loading ? null : <p class={HISTORY_NOMATCH_CLASS}>{t("historyNoMatches")}</p>}
       </section>
     );
   }
 
   return (
-    <section class="history">
+    <section class={HISTORY_CLASS}>
       {search}
       {facets}
       <HistoryList items={items} />
       {cursor !== null ? (
-        <div class="history-more">
+        <div class={HISTORY_MORE_CLASS}>
           <button class="linkish" type="button" disabled={loading} onClick={() => loadPage({ reset: false, cursor, query: normalizedQuery, emoji, site, since: rangeSince(range) })}>
             {t("pickerShowMore")}
           </button>

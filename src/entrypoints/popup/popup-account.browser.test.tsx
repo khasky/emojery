@@ -8,6 +8,7 @@
 import { h } from "preact";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { userEvent } from "vitest/browser";
+import { ACCOUNT_LIST_SELECTOR, DELETE_CONFIRM_WARN_SELECTOR, SIGNIN_PROMPT_MSG_SELECTOR } from "../../shared/page-dom";
 import { DEFAULT_SETTINGS } from "../../shared/storage";
 import { mountContainer, renderAndSettle, unmountContainer } from "../../test/browser-harness";
 import { type ChromeShimHandle, installChromeShim } from "../../test/chrome-shim";
@@ -88,8 +89,8 @@ describe("AccountView - session states", () => {
     install({ authed: false });
     await mountAndSettle();
 
-    expect(container.querySelector(".signin-prompt-msg")?.textContent).toBe("Sign in to manage your account.");
-    expect(container.querySelector(".acct-list")).toBeNull();
+    expect(container.querySelector(SIGNIN_PROMPT_MSG_SELECTOR)?.textContent).toBe("Sign in to manage your account.");
+    expect(container.querySelector(ACCOUNT_LIST_SELECTOR)).toBeNull();
     expect(sentTypes()).toEqual(["auth:status"]);
   });
 
@@ -97,7 +98,7 @@ describe("AccountView - session states", () => {
     install();
     await mountAndSettle();
 
-    const row = container.querySelector(".acct-list .row");
+    const row = container.querySelector(`${ACCOUNT_LIST_SELECTOR} .row`);
     expect(row?.textContent).toContain("Signed in");
     expect(row?.querySelector(".row-hint")?.textContent).toBe("user@example.com");
     expect(button("Delete")).toBeDefined();
@@ -115,7 +116,7 @@ describe("AccountView - session states", () => {
     await mountAndSettle();
     await userEvent.click(button("Sign out"));
 
-    await vi.waitFor(() => expect(container.querySelector(".signin-prompt-msg")).not.toBeNull());
+    await vi.waitFor(() => expect(container.querySelector(SIGNIN_PROMPT_MSG_SELECTOR)).not.toBeNull());
     // Signed out, then re-read: the tab never keeps a stale signed-in header.
     expect(sentTypes()).toEqual(["auth:status", "auth:signOut", "auth:status"]);
   });
@@ -127,7 +128,7 @@ describe("AccountView - deleting the account", () => {
     await mountAndSettle();
     await userEvent.click(button("Delete"));
 
-    expect(container.querySelector(".delete-confirm-warn")?.textContent).toContain("permanent and cannot be undone");
+    expect(container.querySelector(DELETE_CONFIRM_WARN_SELECTOR)?.textContent).toContain("permanent and cannot be undone");
     expect(container.querySelector('[role="slider"]')).not.toBeNull();
     expect(sentTypes()).toEqual(["auth:status"]);
   });
@@ -150,7 +151,7 @@ describe("AccountView - deleting the account", () => {
     // End is the slider's keyboard path to a full slide (WCAG 2.1.1).
     await userEvent.keyboard("{End}");
 
-    await vi.waitFor(() => expect(container.querySelector(".signin-prompt-msg")).not.toBeNull());
+    await vi.waitFor(() => expect(container.querySelector(SIGNIN_PROMPT_MSG_SELECTOR)).not.toBeNull());
     expect(sentTypes()).toEqual(["auth:status", "auth:delete", "auth:status"]);
   });
 
@@ -162,8 +163,8 @@ describe("AccountView - deleting the account", () => {
 
     // Back from "Deleting…" to the confirm, still signed in - a failure that
     // looked like a completed delete would be the dangerous outcome here.
-    await vi.waitFor(() => expect(container.querySelector(".delete-confirm-warn")).not.toBeNull());
+    await vi.waitFor(() => expect(container.querySelector(DELETE_CONFIRM_WARN_SELECTOR)).not.toBeNull());
     expect(container.querySelector(".delete-confirm-progress")).toBeNull();
-    expect(container.querySelector(".acct-list")).not.toBeNull();
+    expect(container.querySelector(ACCOUNT_LIST_SELECTOR)).not.toBeNull();
   });
 });

@@ -4,8 +4,10 @@
 // screen, the cooldown that survives a reload, and the pre-140 Firefox consent
 // gate. e2e/auth.spec.ts drives the real sign-in end to end; this file covers
 // the UI states against a mocked background.
+import { render } from "preact";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { userEvent } from "vitest/browser";
+import { CODE_INPUT_SELECTOR, COUNTDOWN_SELECTOR, EMAIL_INPUT_SELECTOR, NOTICE_SELECTOR, TAGLINE_SELECTOR } from "../../shared/page-dom";
 import { requireEl } from "../../test/browser-harness";
 import { type ChromeShimHandle, installChromeShim } from "../../test/chrome-shim";
 import { OTP_COOLDOWN_KEY, type OtpCooldown } from "./otp-cooldown";
@@ -17,13 +19,16 @@ const PAGE_URL = location.href;
 const EMAIL = "user@example.com";
 const OK_REQUEST = { type: "auth:otpRequested", ok: true, status: 200 };
 const OK_VERIFY = { type: "auth:otpVerified", ok: true, status: 200 };
+// In production the background closes this tab on an "ok", so nothing repaints
+// after it - here the page simply stays put, which is what the asserts read.
+const OK_RETURN = { type: "ok" };
 
 let shim: ChromeShimHandle;
 let sent: unknown[];
 /** Cache-buster: the module registry hands back the same instance however often it is asked. */
 let loads = 0;
 
-function install({ requestReply = OK_REQUEST, verifyReply = OK_VERIFY }: { requestReply?: unknown; verifyReply?: unknown } = {}): void {
+function install({ requestReply = OK_REQUEST, verifyReply = OK_VERIFY, returnReply = OK_RETURN }: { requestReply?: unknown; verifyReply?: unknown; returnReply?: unknown } = {}): void {
   sent = [];
   shim = installChromeShim({
     onMessage: (msg) => {
@@ -31,6 +36,7 @@ function install({ requestReply = OK_REQUEST, verifyReply = OK_VERIFY }: { reque
       const type = (msg as { type?: string }).type;
       if (type === "auth:requestOtp") return requestReply;
       if (type === "auth:verifyOtp") return verifyReply;
+      if (type === "auth:returnToOrigin") return returnReply;
       return undefined;
     },
   });
@@ -54,8 +60,8 @@ async function loadPage(): Promise<void> {
 }
 
 const heading = (): string => requireEl(document, "#app h1").textContent ?? "";
-const emailField = () => requireEl<HTMLInputElement>(document, "#email-input");
-const codeField = () => requireEl<HTMLInputElement>(document, "#code-input");
+const emailField = () => requireEl<HTMLInputElement>(document, EMAIL_INPUT_SELECTOR);
+const codeField = () => requireEl<HTMLInputElement>(document, CODE_INPUT_SELECTOR);
 const termsBox = () => requireEl<HTMLInputElement>(document, ".agree input[type=checkbox]");
 const primaryBtn = () => requireEl<HTMLButtonElement>(document, "button.primary");
 const errorText = (): string => document.querySelector(".error")?.textContent ?? "";
@@ -70,7 +76,7 @@ async function sendCode(address = EMAIL): Promise<void> {
 
 async function reachCodeStep(): Promise<void> {
   await sendCode();
-  await vi.waitFor(() => expect(document.querySelector("#code-input")).not.toBeNull());
+  await vi.waitFor(() => expect(document.querySelector(CODE_INPUT_SELECTOR)).not.toBeNull());
 }
 
 beforeEach(() => {
@@ -81,6 +87,11 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  // Unmount, don't just wipe the markup: the page's own timers (the resend
+  // countdown, the return countdown) live in effect cleanups, and a torn-down
+  // <body> leaves them running - a leaked return then messaged the NEXT test's shim.
+  const app = document.getElementById("app");
+  if (app) render(null, app);
   document.body.innerHTML = "";
   shim.uninstall();
 });
@@ -105,7 +116,7 @@ describe("auth page - the email step", () => {
     await reachCodeStep();
 
     expect(heading()).toBe("Enter your code");
-    expect(document.querySelector(".tagline")?.textContent).toContain(EMAIL);
+    expect(document.querySelector(TAGLINE_SELECTOR)?.textContent).toContain(EMAIL);
     // The cooldown outlives the page (localStorage), so a reload cannot buy a second code.
     expect(storedCooldown()).toMatchObject({ reason: "resend", email: EMAIL });
     const resend = linkish("Resend code");
@@ -120,9 +131,9 @@ describe("auth page - the email step", () => {
 
     await vi.waitFor(() => expect(errorText()).not.toBe(""));
     expect(errorText()).toBe("Too many requests. Please wait a few minutes and try again.");
-    expect(document.querySelector("#code-input")).toBeNull();
+    expect(document.querySelector(CODE_INPUT_SELECTOR)).toBeNull();
     // rateLimit shows no countdown - a 429 window is the server's, not the 30s resend one.
-    expect(document.querySelector(".notice")).toBeNull();
+    expect(document.querySelector(NOTICE_SELECTOR)).toBeNull();
     const cooldown = storedCooldown();
     expect(cooldown?.reason).toBe("rateLimit");
     expect((cooldown?.until ?? 0) - Date.now()).toBeGreaterThan(60_000);
@@ -139,7 +150,7 @@ describe("auth page - the email step", () => {
 
     await vi.waitFor(() => expect(errorText()).not.toBe(""));
     expect(errorText()).toBe(copy);
-    expect(document.querySelector("#code-input")).toBeNull();
+    expect(document.querySelector(CODE_INPUT_SELECTOR)).toBeNull();
     // A failed send arms nothing: the user may retry immediately.
     expect(storedCooldown()).toBeNull();
   });
@@ -164,7 +175,7 @@ describe("auth page - the email step", () => {
 
     await vi.waitFor(() => expect(errorText()).not.toBe(""));
     expect(errorText()).toBe("Something went wrong. Please try again.");
-    expect(document.querySelector("#code-input")).toBeNull();
+    expect(document.querySelector(CODE_INPUT_SELECTOR)).toBeNull();
   });
 
   it("re-arms from a cooldown another tab wrote instead of sending again", async () => {
@@ -176,9 +187,9 @@ describe("auth page - the email step", () => {
     seedCooldown({ until: Date.now() + 30_000, reason: "resend", email: EMAIL });
     await userEvent.click(primaryBtn());
 
-    await vi.waitFor(() => expect(document.querySelector(".notice")).not.toBeNull());
+    await vi.waitFor(() => expect(document.querySelector(NOTICE_SELECTOR)).not.toBeNull());
     expect(sent.some((m) => (m as { type?: string }).type === "auth:requestOtp")).toBe(false);
-    expect(document.querySelector(".notice")?.textContent).toContain("We already sent a code to this address");
+    expect(document.querySelector(NOTICE_SELECTOR)?.textContent).toContain("We already sent a code to this address");
   });
 
   it("keeps a one-click path back to a code that is still pending", async () => {
@@ -196,7 +207,7 @@ describe("auth page - the email step", () => {
     await userEvent.click(back);
 
     expect(heading()).toBe("Enter your code");
-    expect(document.querySelector(".tagline")?.textContent).toContain(pending);
+    expect(document.querySelector(TAGLINE_SELECTOR)?.textContent).toContain(pending);
   });
 });
 
@@ -245,6 +256,61 @@ describe("auth page - the code step", () => {
 
     await vi.waitFor(() => expect(heading()).toBe("You're signed in"));
     expect(sent.filter((m) => (m as { type?: string }).type === "auth:verifyOtp")).toEqual([{ type: "auth:verifyOtp", email: EMAIL, code: "123456" }]);
+    // No page to go back to: the dead-end copy, and nothing that could close a tab.
+    expect(document.querySelector(COUNTDOWN_SELECTOR)).toBeNull();
+    expect(sent.some((m) => (m as { type?: string }).type === "auth:returnToOrigin")).toBe(false);
+  });
+
+  describe("the return to the page the sign-in started from", () => {
+    async function verifyWithReturn(): Promise<void> {
+      install({ verifyReply: { ...OK_VERIFY, returnsToPage: true } });
+      await loadPage();
+      await reachCodeStep();
+      await userEvent.fill(codeField(), "123456");
+      await userEvent.click(primaryBtn());
+      await vi.waitFor(() => expect(heading()).toBe("You're signed in"));
+    }
+
+    it("counts down, then asks the background to take the user back", async () => {
+      await verifyWithReturn();
+
+      expect(requireEl(document, TAGLINE_SELECTOR).textContent).toBe("Taking you back to the page you were on.");
+      // The seconds and the draining bar are decoration over the sentence above -
+      // a screen reader gets the sentence once, not a tick per second.
+      expect(requireEl(document, COUNTDOWN_SELECTOR).getAttribute("aria-hidden")).toBe("true");
+      expect(requireEl(document, `${COUNTDOWN_SELECTOR} .seconds`).textContent).toBe("5");
+      // The primary action holds focus, since the Verify button it replaced is gone.
+      await vi.waitFor(() => expect((document.activeElement as HTMLElement | null)?.className).toBe("primary"));
+      // Going back is the only control the step offers - the tab closes itself,
+      // and closing it by hand is how a user stays put.
+      expect(document.querySelectorAll("#app button")).toHaveLength(1);
+    });
+
+    it("fires the return by itself once the countdown runs out", async () => {
+      await verifyWithReturn();
+
+      await vi.waitFor(() => expect(sent.some((m) => (m as { type?: string }).type === "auth:returnToOrigin")).toBe(true), { timeout: 12_000 });
+    }, 20_000);
+
+    it("goes back at once when asked, without waiting out the countdown", async () => {
+      await verifyWithReturn();
+      await userEvent.click(primaryBtn());
+
+      expect(sent.filter((m) => (m as { type?: string }).type === "auth:returnToOrigin")).toHaveLength(1);
+    });
+
+    it("falls back to the dead-end copy when the origin tab went away mid-countdown", async () => {
+      install({ verifyReply: { ...OK_VERIFY, returnsToPage: true }, returnReply: { type: "error", code: "unavailable", message: "gone" } });
+      await loadPage();
+      await reachCodeStep();
+      await userEvent.fill(codeField(), "123456");
+      await userEvent.click(primaryBtn());
+      await vi.waitFor(() => expect(heading()).toBe("You're signed in"));
+      await userEvent.click(primaryBtn());
+
+      await vi.waitFor(() => expect(document.querySelector(COUNTDOWN_SELECTOR)).toBeNull());
+      expect(requireEl(document, TAGLINE_SELECTOR).textContent).toBe("You can close this tab and react on any supported page.");
+    });
   });
 
   it("hands the field back for a different address", async () => {
@@ -271,7 +337,7 @@ describe("auth page - the legacy consent gate", () => {
     await loadPage();
 
     expect(heading()).toBe("What Emojery sends");
-    expect(document.querySelector("#email-input")).toBeNull();
+    expect(document.querySelector(EMAIL_INPUT_SELECTOR)).toBeNull();
 
     // The policy closes the disclosure paragraph as its last sentence - it was a
     // block of its own, which read as a second button beside Continue.

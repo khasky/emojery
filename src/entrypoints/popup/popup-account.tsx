@@ -3,6 +3,7 @@ import { type ComponentChild, Fragment } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { removeTechnicalAndInteractionConsent, requestTechnicalAndInteractionConsent } from "../../shared/data-consent";
 import { t } from "../../shared/i18n";
+import { ACCOUNT_LIST_CLASS, DELETE_CONFIRM_WARN_CLASS } from "../../shared/page-dom";
 import type { Settings } from "../../shared/storage";
 import { sendRuntimeMessage } from "../../shared/webext";
 import { HistoryDataSection } from "./popup-history-data";
@@ -61,7 +62,7 @@ const DeleteAccountRow = ({ refresh }: { refresh: () => void }) => {
             <p class="delete-confirm-progress">{t("deleteAccountProgress")}</p>
           ) : (
             <Fragment>
-              <p class="delete-confirm-warn">{t("deleteAccountConfirm")}</p>
+              <p class={DELETE_CONFIRM_WARN_CLASS}>{t("deleteAccountConfirm")}</p>
               <div class="delete-confirm-actions">
                 <SlideToConfirm
                   label={t("deleteAccountSlide")}
@@ -120,7 +121,7 @@ const AccountView = ({ settings, update }: { settings: Settings; update: (patch:
   // Sessions minted before the email field existed fall back to a short userId prefix.
   const subtitle = email ?? (userId ? `id: ${userId.slice(0, 8)}…` : "—");
   return (
-    <div class="acct-list">
+    <div class={ACCOUNT_LIST_CLASS}>
       <IconRow rowClass="row arow" icon={ICON_USER} label={t("signedInLabel")} hint={subtitle} hintTitle={email ?? undefined}>
         <button
           class="linkish"

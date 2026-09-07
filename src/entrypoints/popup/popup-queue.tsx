@@ -8,6 +8,7 @@
 import { useEffect, useState } from "preact/hooks";
 import { type FlushState, getFlushState } from "../../background/api";
 import { listQueuedVotes, type StoredVote, VOTE_QUEUE_MAX } from "../../background/votequeue";
+import { HISTORY_CLASS, HISTORY_DAY_CLASS, HISTORY_EMOJI_CLASS, HISTORY_LINK_CLASS, HISTORY_MID_CLASS, HISTORY_TIME_CLASS, HISTORY_TITLE_CLASS } from "../../shared/page-dom";
 import { EmojiImg } from "../../ui/emoji-img";
 import { shortenUrl } from "./popup-shared";
 
@@ -58,7 +59,7 @@ const QueueView = () => {
 
   if (failure) {
     return (
-      <section class="history empty">
+      <section class={`${HISTORY_CLASS} empty`}>
         <p role="alert">{`Queue read failed: ${failure}`}</p>
       </section>
     );
@@ -69,20 +70,20 @@ const QueueView = () => {
   const summary = [`${votes.length} queued`, holdUntil > now ? `hold ${inSeconds(holdUntil - now)}` : "no hold", `${flush.consecutiveFailures} consecutive failures`].join(" · ");
 
   return (
-    <section class="history">
-      <div class="history-day">{summary}</div>
+    <section class={HISTORY_CLASS}>
+      <div class={HISTORY_DAY_CLASS}>{summary}</div>
       {/* No empty state: the summary above already reads "0 queued". */}
       {votes.length > 0 ? (
         <ul>
           {votes.slice(0, VISIBLE_ROWS).map((vote) => (
             <li key={vote.id}>
               {/* An unreact carries no reaction; the emoji it removes is the one the History row keeps. */}
-              <span class="history-emoji">{vote.reaction ? <EmojiImg emoji={vote.reaction} /> : "✕"}</span>
-              <div class="history-mid">
-                <span class="history-link">{shortenUrl(vote.target.url)}</span>
-                <span class="history-title">{`#${vote.id} · ${vote.target.site} · ${vote.attempts} attempts`}</span>
+              <span class={HISTORY_EMOJI_CLASS}>{vote.reaction ? <EmojiImg emoji={vote.reaction} /> : "✕"}</span>
+              <div class={HISTORY_MID_CLASS}>
+                <span class={HISTORY_LINK_CLASS}>{shortenUrl(vote.target.url)}</span>
+                <span class={HISTORY_TITLE_CLASS}>{`#${vote.id} · ${vote.target.site} · ${vote.attempts} attempts`}</span>
               </div>
-              <span class="history-time">{waitLabel(vote, holdUntil, now)}</span>
+              <span class={HISTORY_TIME_CLASS}>{waitLabel(vote, holdUntil, now)}</span>
             </li>
           ))}
         </ul>

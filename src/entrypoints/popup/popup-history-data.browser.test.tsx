@@ -17,6 +17,7 @@ import { HistoryDataSection } from "./popup-history-data";
 // The theme case reads resolved colours, so it needs the real sheet.
 // @ts-expect-error side-effect css import, resolved by the browser-mode Vite server
 import "./popup.css";
+import { DATA_FILE_SELECTOR, IMPORT_CONFIRM_COUNT_SELECTOR, IMPORT_CONFIRM_SELECTOR } from "../../shared/page-dom";
 
 const LIVE_AUTH = makeLiveAuthSession();
 
@@ -41,16 +42,16 @@ function install(statsReply: RuntimeResponse): void {
 
 // The first stats read lands in an effect, so every assertion waits for the
 // section to leave its "still loading" shape (Import is the row always present).
-const mountAndSettle = () => renderAndSettle(container, h(HistoryDataSection, {}), ".data-file");
+const mountAndSettle = () => renderAndSettle(container, h(HistoryDataSection, {}), DATA_FILE_SELECTOR);
 
 async function armImportConfirm(): Promise<void> {
-  const input = requireEl<HTMLInputElement>(container, ".data-file");
+  const input = requireEl<HTMLInputElement>(container, DATA_FILE_SELECTOR);
   await userEvent.upload(input, new File([IMPORT_FILE], "history.json", { type: "application/json" }));
-  await vi.waitFor(() => expect(container.querySelector(".import-confirm-count")).not.toBeNull());
+  await vi.waitFor(() => expect(container.querySelector(IMPORT_CONFIRM_COUNT_SELECTOR)).not.toBeNull());
 }
 
 function confirmCountText(): string {
-  return container.querySelector(".import-confirm-count")?.textContent?.trim() ?? "";
+  return container.querySelector(IMPORT_CONFIRM_COUNT_SELECTOR)?.textContent?.trim() ?? "";
 }
 
 /** The count as assistive tech gets it - the visible line is arrow-only and aria-hidden. */
@@ -112,7 +113,7 @@ it("paints the confirm panel from the danger tokens, so it follows the theme", a
   install({ type: "history:stats", authed: true, stats: { total: 5, bySite: {}, byEmoji: {} } });
   await mountAndSettle();
   await armImportConfirm();
-  const panel = requireEl(container, ".import-confirm");
+  const panel = requireEl(container, IMPORT_CONFIRM_SELECTOR);
 
   const surface = () => {
     const style = getComputedStyle(panel);

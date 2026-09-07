@@ -8,6 +8,7 @@
 import { h, render } from "preact";
 import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 import { userEvent } from "vitest/browser";
+import { SENTIMENT_EDITOR_SELECTOR } from "../../shared/page-dom";
 import { ALL_SITES, DEFAULT_SITE_TOGGLES, SITE_LABELS } from "../../shared/sites";
 import { DEFAULT_SETTINGS, type Settings } from "../../shared/storage";
 import { mountContainer, requireEl, unmountContainer } from "../../test/browser-harness";
@@ -97,11 +98,11 @@ describe("SettingsView - per-site section", () => {
 describe("SettingsView - auto-press", () => {
   it("shows the emoji sentiment editor only while auto-press is on", async () => {
     mount({ autoTriggerNative: false });
-    expect(container.querySelector(".sentiment-editor")).toBeNull();
+    expect(container.querySelector(SENTIMENT_EDITOR_SELECTOR)).toBeNull();
 
     render(null, container);
     mount({ autoTriggerNative: true });
-    expect(container.querySelector(".sentiment-editor")).not.toBeNull();
+    expect(container.querySelector(SENTIMENT_EDITOR_SELECTOR)).not.toBeNull();
   });
 
   it("writes the toggled value through `update`", async () => {

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { errorCopyKey, failureCode } from "../../shared/error-copy";
 import { t } from "../../shared/i18n";
 import { HISTORY_EXPORT_SCHEMA_VERSION, HISTORY_IMPORT_MAX, type HistoryExportFile, type PortableHistoryRow } from "../../shared/messages";
+import { DATA_FILE_CLASS, DATA_STATUS_CLASS, IMPORT_CONFIRM_CLASS, IMPORT_CONFIRM_COUNT_CLASS } from "../../shared/page-dom";
 import { sendRuntimeMessage } from "../../shared/webext";
 import { BUILD_VERSION, IconRow } from "./popup-shared";
 
@@ -156,16 +157,16 @@ export const HistoryDataSection = () => {
         <button ref={importButtonRef} class="linkish" type="button" disabled={busy || pendingImportRows !== null} onClick={() => fileRef.current?.click()}>
           {t("importBtn")}
         </button>
-        <input ref={fileRef} type="file" accept="application/json,.json" class="data-file" onChange={onFile} />
+        <input ref={fileRef} type="file" accept="application/json,.json" class={DATA_FILE_CLASS} onChange={onFile} />
       </IconRow>
       {pendingImportRows ? (
-        <div class="import-confirm">
+        <div class={IMPORT_CONFIRM_CLASS}>
           <p class="import-confirm-warn" role="status">
             {t("importReplaceWarn")}
           </p>
           {/* The arrow reads as "right arrow" (or nothing) to a screen reader, so the
               figure this dialog turns on is spelled out in the sr-only copy beside it. */}
-          <p class="import-confirm-count" aria-hidden="true">{`${storedRowCount ?? "?"} → ${pendingImportRows.length}`}</p>
+          <p class={IMPORT_CONFIRM_COUNT_CLASS} aria-hidden="true">{`${storedRowCount ?? "?"} → ${pendingImportRows.length}`}</p>
           <span class="sr-only">{t("importReplaceCountAria", [String(storedRowCount ?? "?"), String(pendingImportRows.length)])}</span>
           <div class="import-confirm-actions">
             <button ref={confirmRef} class="primary danger" type="button" onClick={confirmReplace}>
@@ -178,7 +179,7 @@ export const HistoryDataSection = () => {
         </div>
       ) : null}
       {status ? (
-        <span class="data-status" role="status">
+        <span class={DATA_STATUS_CLASS} role="status">
           {status}
         </span>
       ) : null}

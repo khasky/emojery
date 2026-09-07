@@ -5,6 +5,7 @@ import { effectiveAnalyticsConsent } from "../../shared/data-consent";
 import { isOwnHomepage } from "../../shared/homepage";
 import { t } from "../../shared/i18n";
 import { bootstrapPage } from "../../shared/page-bootstrap";
+import { BUILD_INFO_CLASS, DEBUG_TAB_ID, POPUP_CLASS, TAB_ID_PREFIX, TAB_PANEL_ID } from "../../shared/page-dom";
 import { DEFAULT_SETTINGS, getSettings, mergeSettings, type Settings, setSettings } from "../../shared/storage";
 import { applyDocumentTheme } from "../../shared/theme";
 import { applyEmojiSpriteHost } from "../../ui/emoji-sprite";
@@ -79,11 +80,11 @@ function App() {
     if (!next) return;
     e.preventDefault();
     setView(next);
-    document.getElementById(`em-tab-${next}`)?.focus();
+    document.getElementById(`${TAB_ID_PREFIX}${next}`)?.focus();
   };
 
   return (
-    <div class="popup">
+    <div class={POPUP_CLASS}>
       <header class="popup-header">
         <div class="brand-row">
           <h1 class="brand-title">
@@ -93,7 +94,7 @@ function App() {
           <BuildInfo showStamp={settings.debugMode} />
           {/* Debug rides in the header rather than as a fifth tab - popup-view-state.ts's
               TAB_VIEWS says why; the layout contract lives with .debug-toggle-off in popup.css. */}
-          <button id="em-tab-debug" class={debugToggleClass} type="button" aria-pressed={shown === "debug" ? "true" : "false"} aria-controls="em-tabpanel" aria-label={t("settingDebug")} title={t("settingDebug")} onClick={() => setView(shown === "debug" ? "settings" : "debug")}>
+          <button id={DEBUG_TAB_ID} class={debugToggleClass} type="button" aria-pressed={shown === "debug" ? "true" : "false"} aria-controls={TAB_PANEL_ID} aria-label={t("settingDebug")} title={t("settingDebug")} onClick={() => setView(shown === "debug" ? "settings" : "debug")}>
             {svgIcon(ICON_BUG, "debug-toggle-icon")}
           </button>
         </div>
@@ -111,7 +112,7 @@ function App() {
           keyboard users must reach it. Debug is opened by the header button rather than a
           tab, so for it the panel drops to a plain region: calling it a tabpanel while no
           tab is selected would be a lie. */}
-      <main class="tab-panel" id="em-tabpanel" role={shown === "debug" ? "region" : "tabpanel"} aria-labelledby={`em-tab-${shown}`} tabIndex={0}>
+      <main class="tab-panel" id={TAB_PANEL_ID} role={shown === "debug" ? "region" : "tabpanel"} aria-labelledby={`${TAB_ID_PREFIX}${shown}`} tabIndex={0}>
         {shown === "settings" && <SettingsView settings={settings} update={update} />}
         {shown === "history" && <HistoryView />}
         {shown === "account" && <AccountView settings={settings} update={update} />}
@@ -124,10 +125,10 @@ function App() {
 
 const TabBtn = ({ id, active, anchor, onClick, label }: { id: View; active: boolean; anchor: boolean; onClick: () => void; label: string }) => (
   <button
-    id={`em-tab-${id}`}
+    id={`${TAB_ID_PREFIX}${id}`}
     role="tab"
     aria-selected={active ? "true" : "false"}
-    aria-controls="em-tabpanel"
+    aria-controls={TAB_PANEL_ID}
     // Roving tabindex: exactly one tab is in the Tab sequence (WAI-ARIA tabs pattern) - the
     // selected one, or the first when the Debug panel is what's open.
     tabIndex={anchor ? 0 : -1}
@@ -153,7 +154,7 @@ const BuildInfo = ({ showStamp }: { showStamp: boolean }) => {
   if (!BUILD_VERSION) return null;
   const stamp = showStamp && BUILD_TIME ? formatBuildStamp(BUILD_TIME) : "";
   return (
-    <div class="build-info" title={stamp ? `v${BUILD_VERSION} · ${BUILD_TIME}` : `v${BUILD_VERSION}`}>
+    <div class={BUILD_INFO_CLASS} title={stamp ? `v${BUILD_VERSION} · ${BUILD_TIME}` : `v${BUILD_VERSION}`}>
       <span class="build-version">{`v${BUILD_VERSION}`}</span>
       {stamp ? <span class="build-stamp">{` · ${stamp}`}</span> : null}
     </div>

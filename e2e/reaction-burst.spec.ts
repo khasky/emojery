@@ -15,7 +15,7 @@ import { type BrowserContext, type ElementHandle, expect, type Page, test } from
 import * as ext from "./lib/extension";
 import { pollForValue } from "./lib/picker-probes";
 import { openHistoryTab } from "./lib/popup-probes";
-import { GRID_ITEM_SELECTOR, HOST_SELECTOR, OVERLAY_HOST_SELECTOR } from "./lib/selectors";
+import { GRID_ITEM_SELECTOR, HISTORY_EMOJI_SELECTOR, HISTORY_LINK_SELECTOR, HISTORY_ROW_SELECTOR, HOST_SELECTOR, OVERLAY_HOST_SELECTOR } from "./lib/selectors";
 
 // Tracing OFF for this file, on every attempt. The snapshotter re-serializes the
 // picker's ~600-button grid after each action, which costs seconds per pick (the
@@ -177,10 +177,10 @@ function hostOf(url: string): string {
 async function topHistoryRows(context: BrowserContext, count: number): Promise<ReactionRow[]> {
   const popup = await openHistoryTab(context, { waitForRows: true });
   try {
-    const rows = await popup.locator(".history li").evaluateAll((items) =>
+    const rows = await popup.locator(HISTORY_ROW_SELECTOR).evaluateAll((items) =>
       items.map((li) => ({
-        emoji: (li.querySelector(".history-emoji")?.textContent ?? "").trim(),
-        href: li.querySelector("a.history-link")?.getAttribute("href") ?? "",
+        emoji: (li.querySelector(HISTORY_EMOJI_SELECTOR)?.textContent ?? "").trim(),
+        href: li.querySelector(HISTORY_LINK_SELECTOR)?.getAttribute("href") ?? "",
       })),
     );
     return rows.slice(0, count).map((row) => ({ emoji: row.emoji, host: hostOf(row.href) }));

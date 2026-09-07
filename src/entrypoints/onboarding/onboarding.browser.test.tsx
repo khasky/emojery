@@ -5,6 +5,7 @@
 // tick fires the confetti exactly once.
 import { h, render } from "preact";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { CONFETTI_SELECTOR, TAGLINE_SELECTOR } from "../../shared/page-dom";
 import { SUPPORTED_SITES } from "../../shared/sites";
 import { mountContainer, unmountContainer } from "../../test/browser-harness";
 import { type ChromeShimHandle, installChromeShim } from "../../test/chrome-shim";
@@ -82,7 +83,7 @@ describe("onboarding checklist", () => {
     const chips = [...container.querySelectorAll(".site-chips li")].map((li) => li.textContent);
     expect(chips).toEqual(SUPPORTED_SITES.map((site) => site.label));
     // The copy around the list carries no count to go stale when a site is added.
-    expect(container.querySelector(".tagline")?.textContent).not.toMatch(/\d/);
+    expect(container.querySelector(TAGLINE_SELECTOR)?.textContent).not.toMatch(/\d/);
   });
 
   it("links Try it live at a logged-out-safe supported page with the react hint", () => {
@@ -153,7 +154,7 @@ describe("onboarding confetti", () => {
     renderPage();
 
     await expect.poll(() => doneCount()).toBe(3);
-    expect(container.querySelector(".confetti")).toBeNull();
+    expect(container.querySelector(CONFETTI_SELECTOR)).toBeNull();
   });
 
   it("fires when the last step ticks, and says so in the progress label", async () => {
@@ -164,8 +165,8 @@ describe("onboarding confetti", () => {
 
     pushFlag("onboarding_badge_v1", false);
 
-    await expect.poll(() => container.querySelector(".confetti")).not.toBeNull();
-    expect(container.querySelectorAll(".confetti .piece").length).toBeGreaterThan(10);
+    await expect.poll(() => container.querySelector(CONFETTI_SELECTOR)).not.toBeNull();
+    expect(container.querySelectorAll(`${CONFETTI_SELECTOR} .piece`).length).toBeGreaterThan(10);
     expect(container.querySelector(".progress .label")?.textContent).toBe("All set!");
     expect(container.querySelector(".progress.complete")).not.toBeNull();
   });
@@ -177,14 +178,14 @@ describe("onboarding confetti", () => {
     seedFlags({ sawTrigger: true, reacted: true });
     renderPage();
 
-    await expect.poll(() => container.querySelector(".confetti")).not.toBeNull();
+    await expect.poll(() => container.querySelector(CONFETTI_SELECTOR)).not.toBeNull();
     // Let the burst retire itself, then complete the list a second time.
-    await expect.poll(() => container.querySelector(".confetti"), { timeout: 6_000 }).toBeNull();
+    await expect.poll(() => container.querySelector(CONFETTI_SELECTOR), { timeout: 6_000 }).toBeNull();
     setPinned(false);
     await expect.poll(() => doneCount(), { timeout: 5_000 }).toBe(3);
     setPinned(true);
     await expect.poll(() => doneCount(), { timeout: 5_000 }).toBe(4);
 
-    expect(container.querySelector(".confetti")).toBeNull();
+    expect(container.querySelector(CONFETTI_SELECTOR)).toBeNull();
   });
 });

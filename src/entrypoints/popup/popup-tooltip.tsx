@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import type { ComponentChild } from "preact";
 import { useEffect, useId, useRef, useState } from "preact/hooks";
+import { TOOLTIP_POP_CLASS } from "../../shared/page-dom";
 import { safeHttpHref } from "../../shared/safe-href";
 
 // A trigger whose bottom sits past this fraction of the viewport opens its tooltip
@@ -116,7 +117,7 @@ export const HoverTooltip = (props: TooltipProps) => {
     "aria-describedby": tip ? tipId : undefined,
   };
   const pop = tip && (
-    <span id={tipId} class="tt-pop" role="tooltip" style={tip.above ? `bottom:${tip.offset}px;` : `top:${tip.offset}px;`} onMouseEnter={cancelHide} onMouseLeave={hide}>
+    <span id={tipId} class={TOOLTIP_POP_CLASS} role="tooltip" style={tip.above ? `bottom:${tip.offset}px;` : `top:${tip.offset}px;`} onMouseEnter={cancelHide} onMouseLeave={hide}>
       {props.content()}
     </span>
   );

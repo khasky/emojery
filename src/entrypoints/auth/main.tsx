@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "preact/hooks"
 import { t } from "../../shared/i18n";
 import type { RuntimeMessage } from "../../shared/messages";
 import { bootstrapPage } from "../../shared/page-bootstrap";
+import { AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, CODE_INPUT_ID, COUNTDOWN_CLASS, EMAIL_INPUT_ID, NOTICE_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
 import { withExtensionUtm } from "../../shared/tracking-links";
 import { sendRuntimeMessage } from "../../shared/webext";
 import { getOtpCooldown, OTP_COOLDOWN_FALLBACK_SECONDS, OTP_RESEND_COOLDOWN_SECONDS, type OtpCooldown, setOtpCooldown } from "./otp-cooldown";
@@ -25,6 +26,9 @@ interface OtpOutcome {
   status: number;
   error?: string;
   retryAfterSeconds?: number;
+  /** Verify only - whether the done step may hand the user back to the page the
+      sign-in gate was opened from (background/auth-return.ts decides). */
+  returnsToPage?: boolean;
 }
 
 // `status: 0` is this page's "never reached the API" marker, distinct from every
@@ -60,12 +64,12 @@ function CodeStep({ email, code, error, busy, remainingSec, cooldown, onVerify, 
       {/* Distinct key per step so Preact mounts a FRESH <form>/<input> subtree. Without it the
           email <input> inherited this code input's maxLength/pattern/inputMode and rejected
           typing/paste after "use a different email" until a full page reload. */}
-      <form key="code-step" class="card" onSubmit={onVerify}>
+      <form key="code-step" class={CARD_CLASS} onSubmit={onVerify}>
         <h1>{t("authCodeTitle")}</h1>
-        <p class="tagline">{t("authCodeTagline", email)}</p>
+        <p class={TAGLINE_CLASS}>{t("authCodeTagline", email)}</p>
         <label for="code-input">{t("authCodeLabel")}</label>
         <input
-          id="code-input"
+          id={CODE_INPUT_ID}
           name="code"
           type="text"
           inputMode="numeric"
@@ -74,12 +78,12 @@ function CodeStep({ email, code, error, busy, remainingSec, cooldown, onVerify, 
           pattern="[0-9]*"
           class="code-input"
           value={code}
-          aria-describedby={error ? "auth-error" : undefined}
+          aria-describedby={error ? AUTH_ERROR_ID : undefined}
           aria-invalid={error ? "true" : undefined}
           onInput={(e: Event) => setCode((e.target as HTMLInputElement).value.replace(/\D/g, ""))}
         />
         {error ? (
-          <div class="error" id="auth-error" role="alert">
+          <div class={AUTH_ERROR_CLASS} id={AUTH_ERROR_ID} role="alert">
             {error}
           </div>
         ) : null}
@@ -109,6 +113,86 @@ function CodeStep({ email, code, error, busy, remainingSec, cooldown, onVerify, 
   );
 }
 
+// Long enough to read "You're signed in" and see where the tab is going, short
+// enough that the reaction waiting on the other tab is still what the user is
+// thinking about. "Stay here" turns it off (WCAG 2.2.1), and "Back to the page"
+// skips the wait entirely.
+const RETURN_DELAY_SECONDS = 5;
+
+/** The last step. Plain "you can close this" unless the sign-in started from a
+ *  page's gate and that tab is still open - then it takes the user back there, so
+ *  the reaction the gate was holding is watched landing instead of missed. */
+function DoneStep({ returnsToPage }: { returnsToPage: boolean }) {
+  const [remaining, setRemaining] = useState(RETURN_DELAY_SECONDS);
+  const [returning, setReturning] = useState(returnsToPage);
+  const backRef = useRef<HTMLButtonElement>(null);
+  // A click landing on the same tick the countdown expires would otherwise ask
+  // twice; the second ask finds the marker already spent and reads as a failure.
+  const returnSent = useRef(false);
+
+  const goBack = useCallback(async () => {
+    if (returnSent.current) return;
+    returnSent.current = true;
+    const res = await sendRuntimeMessage({ type: "auth:returnToOrigin" }).catch(() => undefined);
+    // On success the background closes this tab, so nothing below ever repaints.
+    // On failure the origin tab went away mid-countdown - the one thing that
+    // stops the countdown, and the reason this step keeps its old copy at all.
+    if (res?.type !== "ok") setReturning(false);
+  }, []);
+
+  useEffect(() => {
+    if (!returning) return;
+    if (remaining <= 0) {
+      void goBack();
+      return;
+    }
+    const id = setTimeout(() => setRemaining((s) => s - 1), 1000);
+    return () => clearTimeout(id);
+  }, [returning, remaining, goBack]);
+
+  // The primary action, focused as the step mounts: the Verify button it replaces
+  // has just been removed, which would otherwise drop focus to the body.
+  useEffect(() => {
+    backRef.current?.focus();
+  }, []);
+
+  if (!returning) {
+    return (
+      <main class="wrap">
+        <div class={CARD_CLASS}>
+          <h1>{t("authDoneTitle")}</h1>
+          <p class={TAGLINE_CLASS}>{t("authDoneTagline")}</p>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main class="wrap">
+      <div class={CARD_CLASS}>
+        <h1>{t("authDoneTitle")}</h1>
+        {/* Static text, so `status` announces the pending return exactly once - no
+            live region tracks the seconds, which would announce every tick. */}
+        <p class={TAGLINE_CLASS} role="status">
+          {t("authDoneReturnTagline")}
+        </p>
+        {/* The bar and the digits say the same thing twice, for the eye and for the
+            impatient; neither is the only carrier, so both are hidden from the a11y
+            tree and the sentence above stands alone there. */}
+        <div class={COUNTDOWN_CLASS} aria-hidden="true">
+          <span class="track">
+            <i style={{ animationDuration: `${RETURN_DELAY_SECONDS}s` }} />
+          </span>
+          <span class="seconds">{remaining}</span>
+        </div>
+        <button class="primary" type="button" ref={backRef} onClick={() => void goBack()}>
+          {t("authDoneReturnNowBtn")}
+        </button>
+      </div>
+    </main>
+  );
+}
+
 type EmailStepProps = {
   email: string;
   error: string | null;
@@ -132,11 +216,11 @@ function EmailStep({ email, error, busy, accepted, remainingSec, cooldown, onSen
   return (
     <main class="wrap">
       {/* See the code-step key note - keeps this <input> a separate node from the code field. */}
-      <form key="email-step" class="card" onSubmit={onSendCode}>
+      <form key="email-step" class={CARD_CLASS} onSubmit={onSendCode}>
         <h1>{t("authSignInTitle")}</h1>
-        <p class="tagline">{t("authSignInTagline")}</p>
+        <p class={TAGLINE_CLASS}>{t("authSignInTagline")}</p>
         <label for="email-input">{t("authEmailLabel")}</label>
-        <input id="email-input" type="email" autoComplete="email" required value={email} aria-describedby={error ? "auth-error" : undefined} aria-invalid={error ? "true" : undefined} onInput={(e: Event) => setEmail((e.target as HTMLInputElement).value)} />
+        <input id={EMAIL_INPUT_ID} type="email" autoComplete="email" required value={email} aria-describedby={error ? AUTH_ERROR_ID : undefined} aria-invalid={error ? "true" : undefined} onInput={(e: Event) => setEmail((e.target as HTMLInputElement).value)} />
         {remainingSec > 0 ? (
           cooldown?.reason === "rateLimit" ? (
             // 429 gets a generic message with no countdown; only the benign resend window shows a timer.
@@ -144,7 +228,7 @@ function EmailStep({ email, error, busy, accepted, remainingSec, cooldown, onSen
               {t("authErrRateLimit")}
             </div>
           ) : (
-            <div class="notice">
+            <div class={NOTICE_CLASS}>
               {/* The ticking line is aria-hidden; the sr-only copy (frozen at cooldown
                   start) carries the announcement so it fires once, not every second. */}
               <span aria-hidden="true">{t(cooldownMessageKey(cooldown, email), formatCountdown(remainingSec))}</span>
@@ -154,7 +238,7 @@ function EmailStep({ email, error, busy, accepted, remainingSec, cooldown, onSen
             </div>
           )
         ) : error ? (
-          <div class="error" id="auth-error" role="alert">
+          <div class={AUTH_ERROR_CLASS} id={AUTH_ERROR_ID} role="alert">
             {error}
           </div>
         ) : null}
@@ -218,6 +302,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [accepted, setAccepted] = useState(false);
   const [cooldown, setCooldown] = useState<OtpCooldown | null>(null);
+  const [returnsToPage, setReturnsToPage] = useState(false);
   const [nowTs, setNowTs] = useState(() => Date.now());
   const requestInFlight = useRef(false);
 
@@ -307,6 +392,7 @@ function App() {
       const res = await askOtp({ type: "auth:verifyOtp", email: email.trim(), code: code.trim() });
       setBusy(false);
       if (res.ok) {
+        setReturnsToPage(res.returnsToPage === true);
         setStep("done");
         return;
       }
@@ -322,20 +408,13 @@ function App() {
   );
 
   useEffect(() => {
+    // The done step has no field to land in - it focuses its own button instead.
+    if (step === "done") return;
     const el = document.querySelector<HTMLInputElement>(step === "email" ? 'input[type="email"]' : 'input[name="code"]');
     el?.focus();
   }, [step]);
 
-  if (step === "done") {
-    return (
-      <main class="wrap">
-        <div class="card">
-          <h1>{t("authDoneTitle")}</h1>
-          <p class="tagline">{t("authDoneTagline")}</p>
-        </div>
-      </main>
-    );
-  }
+  if (step === "done") return <DoneStep returnsToPage={returnsToPage} />;
 
   if (step === "code") {
     return <CodeStep email={email} code={code} error={error} busy={busy} remainingSec={remainingSec} cooldown={cooldown} onVerify={onVerify} onResend={onResend} setCode={setCode} setStep={setStep} setError={setError} />;
@@ -353,11 +432,11 @@ function ConsentGate() {
   if (acknowledged) return <App />;
   return (
     <main class="wrap">
-      <div class="card">
+      <div class={CARD_CLASS}>
         <h1>{t("dataConsentTitle")}</h1>
         {/* The policy closes the paragraph as a sentence of its own - the short body
             above says what is sent, the link carries the detail it dropped. */}
-        <p class="tagline">
+        <p class={TAGLINE_CLASS}>
           {t("dataConsentBody")}{" "}
           <a
             href={withExtensionUtm("https://emojery.app/privacy", {

@@ -3,6 +3,7 @@ import { type ComponentChild, type ComponentChildren, Fragment } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import type { SupportedSite } from "../../shared/adapter";
 import { t } from "../../shared/i18n";
+import { SIGNIN_PROMPT_MSG_CLASS } from "../../shared/page-dom";
 import { queryActiveTab, sendRuntimeMessage } from "../../shared/webext";
 import { SITE_BRAND } from "../../ui/brand-icons";
 
@@ -11,7 +12,7 @@ export const BUILD_VERSION = typeof chrome !== "undefined" ? (chrome.runtime.get
 // The unauthed empty state shared by the History, Account and Report tabs.
 export const SignInPrompt = ({ message }: { message: string }) => (
   <section class="signin-prompt">
-    <p class="signin-prompt-msg">{message}</p>
+    <p class={SIGNIN_PROMPT_MSG_CLASS}>{message}</p>
     <button
       class="primary"
       type="button"

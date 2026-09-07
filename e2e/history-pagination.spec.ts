@@ -14,6 +14,7 @@
 import { type BrowserContext, expect, type Page, type TestInfo, test } from "@playwright/test";
 import * as ext from "./lib/extension";
 import { openHistoryTab } from "./lib/popup-probes";
+import { HISTORY_LINK_SELECTOR, HISTORY_MORE_SELECTOR, HISTORY_NOMATCH_SELECTOR, HISTORY_ROW_SELECTOR, HISTORY_SEARCH_INPUT_SELECTOR } from "./lib/selectors";
 
 const REQUIRES_OTP = ext.otpSkipReason("the History paging checks");
 
@@ -111,26 +112,26 @@ test("History paging and search stay correct over a 10k-row uncapped store", asy
 
     await seedHistoryRows(session.context, VOLUME);
     let popup = await openSizedHistoryTab(session.context);
-    let rows = popup.locator(".history li");
+    let rows = popup.locator(HISTORY_ROW_SELECTOR);
     let moreBtn = popup.locator(".history-more button");
     await expect(rows).toHaveCount(PAGE_SIZE);
-    await expect(rows.first().locator("a.history-link")).toHaveAttribute("href", `https://github.com/e2e-seed/repo-${VOLUME - 1}`);
+    await expect(rows.first().locator(HISTORY_LINK_SELECTOR)).toHaveAttribute("href", `https://github.com/e2e-seed/repo-${VOLUME - 1}`);
     await expect(moreBtn).toHaveText(showMoreLabel);
     await moreBtn.scrollIntoViewIfNeeded();
     await captureStage(popup, testInfo, "history-1-10k-first-page");
 
     await moreBtn.click();
     await expect(rows).toHaveCount(2 * PAGE_SIZE);
-    await expect(rows.last().locator("a.history-link")).toHaveAttribute("href", `https://github.com/e2e-seed/repo-${VOLUME - 2 * PAGE_SIZE}`);
+    await expect(rows.last().locator(HISTORY_LINK_SELECTOR)).toHaveAttribute("href", `https://github.com/e2e-seed/repo-${VOLUME - 2 * PAGE_SIZE}`);
     await expect(moreBtn).toBeVisible();
     await moreBtn.scrollIntoViewIfNeeded();
     await captureStage(popup, testInfo, "history-2-10k-after-show-more");
 
-    const searchBox = popup.locator(".history-search-input");
+    const searchBox = popup.locator(HISTORY_SEARCH_INPUT_SELECTOR);
     await searchBox.fill(UNIQUE_ROW_NAME);
     await expect(rows).toHaveCount(1);
-    await expect(rows.first().locator("a.history-link")).toHaveAttribute("href", UNIQUE_ROW_URL);
-    await expect(popup.locator(".history-more")).toHaveCount(0);
+    await expect(rows.first().locator(HISTORY_LINK_SELECTOR)).toHaveAttribute("href", UNIQUE_ROW_URL);
+    await expect(popup.locator(HISTORY_MORE_SELECTOR)).toHaveCount(0);
     await captureStage(popup, testInfo, "history-3-10k-search-unique-match");
 
     await searchBox.fill("e2e-seed");
@@ -142,22 +143,22 @@ test("History paging and search stay correct over a 10k-row uncapped store", asy
     await captureStage(popup, testInfo, "history-4-10k-search-paged");
 
     await searchBox.fill("no-such-history-row");
-    await expect(popup.locator(".history-nomatch")).toBeVisible();
+    await expect(popup.locator(HISTORY_NOMATCH_SELECTOR)).toBeVisible();
     await expect(rows).toHaveCount(0);
     await popup.close().catch(() => {});
 
     await seedHistoryRows(session.context, PAGE_SIZE);
     popup = await openSizedHistoryTab(session.context);
-    rows = popup.locator(".history li");
+    rows = popup.locator(HISTORY_ROW_SELECTOR);
     await expect(rows).toHaveCount(PAGE_SIZE);
-    await expect(popup.locator(".history-more")).toHaveCount(0);
+    await expect(popup.locator(HISTORY_MORE_SELECTOR)).toHaveCount(0);
     await rows.last().scrollIntoViewIfNeeded();
     await captureStage(popup, testInfo, "history-5-exactly-100-no-pager");
     await popup.close().catch(() => {});
 
     await seedHistoryRows(session.context, PAGE_SIZE + 1);
     popup = await openSizedHistoryTab(session.context);
-    rows = popup.locator(".history li");
+    rows = popup.locator(HISTORY_ROW_SELECTOR);
     moreBtn = popup.locator(".history-more button");
     await expect(rows).toHaveCount(PAGE_SIZE);
     await expect(moreBtn).toHaveText(showMoreLabel);
@@ -166,7 +167,7 @@ test("History paging and search stay correct over a 10k-row uncapped store", asy
 
     await moreBtn.click();
     await expect(rows).toHaveCount(PAGE_SIZE + 1);
-    await expect(popup.locator(".history-more")).toHaveCount(0);
+    await expect(popup.locator(HISTORY_MORE_SELECTOR)).toHaveCount(0);
     await rows.last().scrollIntoViewIfNeeded();
     await captureStage(popup, testInfo, "history-7-101-rows-fully-expanded");
     await popup.close().catch(() => {});

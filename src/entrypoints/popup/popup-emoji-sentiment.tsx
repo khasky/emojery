@@ -10,6 +10,7 @@ import { useEffect, useMemo, useState } from "preact/hooks";
 import { getEmojiLabel, onLocalesChanged, searchEmojis } from "../../shared/emoji-meta";
 import { t } from "../../shared/i18n";
 import { DEFAULT_EMOJI_SENTIMENT, type Sentiment } from "../../shared/native-actions";
+import { SENTIMENT_CHIP_CLASS, SENTIMENT_CHIP_SELECTOR, SENTIMENT_EDITOR_CLASS, SENTIMENT_ZONE_TITLE_CLASS } from "../../shared/page-dom";
 import { REACTIONS } from "../../shared/reactions";
 import type { Settings } from "../../shared/storage";
 import { EmojiImg } from "../../ui/emoji-img";
@@ -56,7 +57,7 @@ export const EmojiSentimentEditor = ({ settings, update }: { settings: Settings;
     <button
       key={emoji}
       type="button"
-      class={selected === emoji ? "sentiment-chip sentiment-chip-selected" : "sentiment-chip"}
+      class={selected === emoji ? `${SENTIMENT_CHIP_CLASS} ${SENTIMENT_CHIP_CLASS}-selected` : SENTIMENT_CHIP_CLASS}
       draggable
       aria-label={getEmojiLabel(emoji)}
       aria-pressed={selected === emoji ? "true" : "false"}
@@ -104,13 +105,13 @@ export const EmojiSentimentEditor = ({ settings, update }: { settings: Settings;
       onClick={(e: Event) => {
         if (!selected) return;
         const target = e.target as HTMLElement;
-        if (target.closest(".sentiment-chip, .settings-filter, .sentiment-show-more")) return;
+        if (target.closest(`${SENTIMENT_CHIP_SELECTOR}, .settings-filter, .sentiment-show-more`)) return;
         moveTo(selected, dest);
       }}
     >
       <button
         type="button"
-        class="sentiment-zone-title"
+        class={SENTIMENT_ZONE_TITLE_CLASS}
         disabled={!selected}
         // Keyboard path (Tab + Enter); stopPropagation so the zone's own
         // click handler doesn't double the move.
@@ -126,7 +127,7 @@ export const EmojiSentimentEditor = ({ settings, update }: { settings: Settings;
   );
 
   return (
-    <div class="sentiment-editor">
+    <div class={SENTIMENT_EDITOR_CLASS}>
       <p class="sentiment-intro">{t("sentimentIntro")}</p>
       {zone("positive", t("sentimentPositiveZone"), positive.map(chip))}
       {zone("negative", t("sentimentNegativeZone"), negative.map(chip))}

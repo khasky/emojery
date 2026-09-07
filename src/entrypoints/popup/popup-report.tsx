@@ -5,6 +5,7 @@ import type { SupportedSite } from "../../shared/adapter";
 import { errorCopyKey, failureCode } from "../../shared/error-copy";
 import { t } from "../../shared/i18n";
 import { NOTE_MAX, type RuntimeErrorCode } from "../../shared/messages";
+import { EMPTY_NOTE_CLASS, REPORT_ERROR_CLASS, REPORT_NOTE_HINT_ID, REPORT_SUCCESS_CLASS } from "../../shared/page-dom";
 import { reportPageUrl } from "../../shared/report-url";
 import { safeHttpHref } from "../../shared/safe-href";
 import { detectSupportedSite, SITE_LABELS } from "../../shared/sites";
@@ -27,7 +28,7 @@ const ReportSuccess = ({ onAnother }: { onAnother: () => void }) => {
   useAutoFocus(anotherRef);
   return (
     <section class="report">
-      <div class="report-success" role="status">
+      <div class={REPORT_SUCCESS_CLASS} role="status">
         <span class="report-success-ring">{svgIcon(ICON_CHECK, "check-icon")}</span>
         <b>{t("reportSent")}</b>
         <button ref={anotherRef} class="linkish" type="button" onClick={onAnother}>
@@ -60,14 +61,14 @@ const ReportForm = ({ tab, note, setNote, canSubmit, noteTooShort, sendError, su
         </div>
         {svgIcon(ICON_EXT, "row-icon")}
       </a>
-      <textarea ref={noteRef} placeholder={t("reportPlaceholder")} aria-label={t("reportPlaceholder")} aria-describedby={noteTooShort ? "report-note-hint" : undefined} value={note} onInput={(e: Event) => setNote((e.currentTarget as HTMLTextAreaElement).value)} maxLength={NOTE_MAX} required />
+      <textarea ref={noteRef} placeholder={t("reportPlaceholder")} aria-label={t("reportPlaceholder")} aria-describedby={noteTooShort ? REPORT_NOTE_HINT_ID : undefined} value={note} onInput={(e: Event) => setNote((e.currentTarget as HTMLTextAreaElement).value)} maxLength={NOTE_MAX} required />
       {noteTooShort ? (
-        <p class="report-hint" id="report-note-hint">
+        <p class="report-hint" id={REPORT_NOTE_HINT_ID}>
           {t("reportPlaceholder")}
         </p>
       ) : null}
       {sendError !== null ? (
-        <p class="report-error" role="alert">
+        <p class={REPORT_ERROR_CLASS} role="alert">
           {t(errorCopyKey(sendError, "reportSendError"))}
         </p>
       ) : null}
@@ -142,7 +143,7 @@ const ReportView = () => {
   if (tab.state === "unsupported")
     return (
       <section class="report">
-        <p class="empty-note">{t("reportUnsupportedPage")}</p>
+        <p class={EMPTY_NOTE_CLASS}>{t("reportUnsupportedPage")}</p>
       </section>
     );
   if (sent)

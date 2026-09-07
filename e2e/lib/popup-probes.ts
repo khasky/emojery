@@ -18,6 +18,7 @@ import { openPopup, signIn } from "./extension-pages";
 import { handleKnownInterstitials } from "./page-settle";
 import { openVisiblePickerAndReadSelectedReaction, pollForValue, selectedReactionOnMatchingHost, waitForMountedTargetKey, waitForVisibleEmojeryTrigger } from "./picker-probes";
 import { setPopupCheckbox } from "./popup-settings";
+import { EMAIL_INPUT_SELECTOR, HISTORY_EMOJI_SELECTOR, HISTORY_LINK_SELECTOR, HISTORY_NOMATCH_SELECTOR, HISTORY_ROW_SELECTOR, HISTORY_SEARCH_INPUT_SELECTOR } from "./selectors";
 import type { PickedReaction, SupportedSiteScenario } from "./site-evidence";
 import { siteLabel } from "./site-evidence";
 import { dismissLoginWalls } from "./site-walls";
@@ -53,7 +54,7 @@ export async function authPageFromUserAction(browserContext: BrowserContext, loa
       await candidate.waitForURL(expectedUrl, { timeout: 750 }).catch(() => {});
     }
     if (!candidate.url().startsWith(expectedUrl)) continue;
-    await expect(candidate.locator("#email-input")).toBeVisible();
+    await expect(candidate.locator(EMAIL_INPUT_SELECTOR)).toBeVisible();
     return candidate;
   }
 
@@ -108,7 +109,7 @@ export async function openHistoryTab(browserContext: BrowserContext, opts: { vie
   const popup = await openPopup(browserContext);
   if (opts.viewport) await popup.setViewportSize(opts.viewport);
   await popup.getByRole("tab", { name: enMessage("tabHistory") }).click();
-  if (opts.waitForRows) await expect(popup.locator(".history li").first()).toBeVisible();
+  if (opts.waitForRows) await expect(popup.locator(HISTORY_ROW_SELECTOR).first()).toBeVisible();
   return popup;
 }
 
@@ -122,7 +123,7 @@ export async function expectHistorySignedOut(browserContext: BrowserContext): Pr
       }),
     ).toBeVisible();
     await expect(popup.getByRole("button", { name: enMessage("signInBtn") })).toBeVisible();
-    await expect(popup.locator(".history li")).toHaveCount(0);
+    await expect(popup.locator(HISTORY_ROW_SELECTOR)).toHaveCount(0);
   } finally {
     await popup.close().catch(() => {});
   }
@@ -144,7 +145,7 @@ export async function expectHistoryRowCount(browserContext: BrowserContext, expe
       .toBe(expected);
 
     await popup.getByRole("tab", { name: enMessage("tabHistory") }).click();
-    await expect(popup.locator(".history li")).toHaveCount(expected);
+    await expect(popup.locator(HISTORY_ROW_SELECTOR)).toHaveCount(expected);
   } finally {
     await popup.close().catch(() => {});
   }
@@ -175,7 +176,7 @@ export async function expectLatestHistoryReactions(browserContext: BrowserContex
       .toBe(true);
 
     await popup.getByRole("tab", { name: enMessage("tabHistory") }).click();
-    const rows = popup.locator(".history li");
+    const rows = popup.locator(HISTORY_ROW_SELECTOR);
     await expect
       .poll(() => rows.count(), {
         message: "History should show enough visible reaction rows",
@@ -184,8 +185,8 @@ export async function expectLatestHistoryReactions(browserContext: BrowserContex
 
     for (let index = 0; index < expectedReactions.length; index += 1) {
       const row = rows.nth(index);
-      await expect(row.locator(".history-emoji")).toHaveText(expectedReactions[index]!);
-      const link = row.locator("a.history-link").first();
+      await expect(row.locator(HISTORY_EMOJI_SELECTOR)).toHaveText(expectedReactions[index]!);
+      const link = row.locator(HISTORY_LINK_SELECTOR).first();
       await expect(link).toBeVisible();
       const url = await link.getAttribute("href");
       expect(url, "History row should expose an absolute target URL").toMatch(/^https?:\/\//);
@@ -199,8 +200,8 @@ export async function expectHistorySearchFiltersReaction(browserContext: Browser
   const popup = await openPopup(browserContext);
   try {
     await popup.getByRole("tab", { name: enMessage("tabHistory") }).click();
-    const search = popup.locator(".history-search-input");
-    const rows = popup.locator(".history li");
+    const search = popup.locator(HISTORY_SEARCH_INPUT_SELECTOR);
+    const rows = popup.locator(HISTORY_ROW_SELECTOR);
     await expect(search).toBeVisible();
 
     await search.fill(reaction);
@@ -219,7 +220,7 @@ export async function expectHistorySearchFiltersReaction(browserContext: Browser
 
     await search.fill(`no-history-match-${Date.now()}`);
     await expect(rows).toHaveCount(0);
-    await expect(popup.locator(".history-nomatch")).toBeVisible();
+    await expect(popup.locator(HISTORY_NOMATCH_SELECTOR)).toBeVisible();
 
     await search.fill("");
     await expect
@@ -256,10 +257,10 @@ export async function openLatestHistoryReactionPage(browserContext: BrowserConte
       )
       .toBeGreaterThan(0);
     await popup.getByRole("tab", { name: enMessage("tabHistory") }).click();
-    const first = popup.locator(".history li").first();
+    const first = popup.locator(HISTORY_ROW_SELECTOR).first();
     await expect(first).toBeVisible();
-    await expect(first.locator(".history-emoji")).toHaveText(picked.reaction);
-    const link = first.locator("a.history-link").first();
+    await expect(first.locator(HISTORY_EMOJI_SELECTOR)).toHaveText(picked.reaction);
+    const link = first.locator(HISTORY_LINK_SELECTOR).first();
     await expect(link).toBeVisible();
     const href = await link.getAttribute("href");
     expect(href, "History row should expose an absolute target URL").toMatch(/^https?:\/\//);

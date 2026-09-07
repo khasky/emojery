@@ -8,6 +8,7 @@ import { h } from "preact";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { userEvent } from "vitest/browser";
 import { AUTH_KEY } from "../../shared/auth-session";
+import { EMPTY_NOTE_SELECTOR, REPORT_ERROR_SELECTOR, REPORT_NOTE_HINT_SELECTOR, REPORT_SUCCESS_SELECTOR, SIGNIN_PROMPT_MSG_SELECTOR } from "../../shared/page-dom";
 import { mountContainer, renderAndSettle, requireEl, unmountContainer } from "../../test/browser-harness";
 import { type ChromeShimHandle, installChromeShim, makeLiveAuthSession } from "../../test/chrome-shim";
 import { ReportView } from "./popup-report";
@@ -62,21 +63,21 @@ describe("ReportView - gates", () => {
   it("asks a signed-out user to sign in, and sends nothing", async () => {
     install({ authed: false });
     await mountAndSettle();
-    expect(container.querySelector(".signin-prompt-msg")?.textContent).toBe("Sign in to submit a bug report.");
+    expect(container.querySelector(SIGNIN_PROMPT_MSG_SELECTOR)?.textContent).toBe("Sign in to submit a bug report.");
     expect(container.querySelector("textarea")).toBeNull();
   });
 
   it("explains itself on an unsupported page instead of offering a form", async () => {
     install({ activeTab: { url: "https://example.com/", id: 1 } });
     await mountAndSettle();
-    expect(container.querySelector(".empty-note")?.textContent).toContain("open the page where reactions aren't working");
+    expect(container.querySelector(EMPTY_NOTE_SELECTOR)?.textContent).toContain("open the page where reactions aren't working");
     expect(container.querySelector("textarea")).toBeNull();
   });
 
   it("treats an unreadable tab URL as unsupported", async () => {
     install({ activeTab: { url: "chrome://extensions", id: 1 } });
     await mountAndSettle();
-    expect(container.querySelector(".empty-note")).not.toBeNull();
+    expect(container.querySelector(EMPTY_NOTE_SELECTOR)).not.toBeNull();
   });
 });
 
@@ -90,13 +91,13 @@ describe("ReportView - the note length rule", () => {
     expect(sendButton().disabled).toBe(true);
     // Pins the below-field hint and its aria-describedby wiring (rationale in
     // popup-report.tsx).
-    const hint = container.querySelector("#report-note-hint");
+    const hint = container.querySelector(REPORT_NOTE_HINT_SELECTOR);
     expect(hint?.textContent).toContain("10-500");
     expect(noteField().getAttribute("aria-describedby")).toBe("report-note-hint");
 
     await userEvent.fill(noteField(), LONG_ENOUGH);
     expect(sendButton().disabled).toBe(false);
-    expect(container.querySelector("#report-note-hint")).toBeNull();
+    expect(container.querySelector(REPORT_NOTE_HINT_SELECTOR)).toBeNull();
   });
 
   it("counts the TRIMMED note, so whitespace cannot buy the 10 characters", async () => {
@@ -114,7 +115,7 @@ describe("ReportView - submit", () => {
     await userEvent.fill(noteField(), LONG_ENOUGH);
     await userEvent.click(sendButton());
 
-    await vi.waitFor(() => expect(container.querySelector(".report-success")).not.toBeNull());
+    await vi.waitFor(() => expect(container.querySelector(REPORT_SUCCESS_SELECTOR)).not.toBeNull());
     const report = sent.find((m) => (m as { type?: string }).type === "report") as Record<string, unknown>;
     expect(report).toMatchObject({ type: "report", site: "github", host: "github.com", note: LONG_ENOUGH });
     expect(report.url).toContain("github.com/torvalds/linux");
@@ -128,10 +129,10 @@ describe("ReportView - submit", () => {
     await userEvent.click(sendButton());
 
     await vi.waitFor(() => expect(container.querySelector('[role="alert"]')).not.toBeNull());
-    expect(container.querySelector(".report-error")?.textContent).toContain("Could not send");
+    expect(container.querySelector(REPORT_ERROR_SELECTOR)?.textContent).toContain("Could not send");
     // Nothing was lost: the user can retry without retyping.
     expect(noteField().value).toBe(LONG_ENOUGH);
-    expect(container.querySelector(".report-success")).toBeNull();
+    expect(container.querySelector(REPORT_SUCCESS_SELECTOR)).toBeNull();
   });
 
   // The background classifies every failure (background/respond.ts); these two codes are
@@ -147,7 +148,7 @@ describe("ReportView - submit", () => {
     await userEvent.click(sendButton());
 
     await vi.waitFor(() => expect(container.querySelector('[role="alert"]')).not.toBeNull());
-    const text = container.querySelector(".report-error")?.textContent ?? "";
+    const text = container.querySelector(REPORT_ERROR_SELECTOR)?.textContent ?? "";
     expect(text).toContain(expected);
     // ...and it is NOT the generic line, which is what made the classification pointless.
     expect(text).not.toContain("Could not send the report");
@@ -159,7 +160,7 @@ describe("ReportView - submit", () => {
     await mountAndSettle();
     await userEvent.fill(noteField(), LONG_ENOUGH);
     await userEvent.click(sendButton());
-    await vi.waitFor(() => expect(container.querySelector(".report-success")).not.toBeNull());
+    await vi.waitFor(() => expect(container.querySelector(REPORT_SUCCESS_SELECTOR)).not.toBeNull());
 
     await userEvent.click(requireEl<HTMLButtonElement>(container, ".report-success button"));
     expect(noteField().value).toBe("");

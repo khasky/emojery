@@ -9,6 +9,7 @@ import { expect, test } from "@playwright/test";
 import * as ext from "./lib/extension";
 import { openHistoryTab } from "./lib/popup-probes";
 import { reloadAndSettle } from "./lib/reload-settle";
+import { CODE_INPUT_SELECTOR, EMAIL_INPUT_SELECTOR } from "./lib/selectors";
 
 const REQUIRES_OTP = ext.otpSkipReason("multi-account e2e checks");
 
@@ -174,12 +175,12 @@ test("repeated wrong OTP codes stop verification", async () => {
     if (!extensionId) return;
     const authPage = await session.context.newPage();
     await authPage.goto(ext.extensionPageUrl(extensionId, "auth.html"));
-    await authPage.locator("#email-input").fill(email);
+    await authPage.locator(EMAIL_INPUT_SELECTOR).fill(email);
     await authPage.locator(".agree input[type=checkbox]").check();
     const sendBtn = authPage.getByRole("button", { name: "Send code" });
     await expect(sendBtn).toBeEnabled();
     await sendBtn.click();
-    const codeInput = authPage.locator("#code-input");
+    const codeInput = authPage.locator(CODE_INPUT_SELECTOR);
     await expect(codeInput).toBeVisible();
 
     const invalidError = authPage.getByText(ext.enMessage("authErrCodeInvalid"), { exact: true });

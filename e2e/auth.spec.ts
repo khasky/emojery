@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import { authConfigured, authEmail, authOtp, closeSession, extensionLaunchArgs, extensionPageUrl, FIREFOX_NO_EXTENSION_PAGES, isFirefoxRun, launchRealisticContext, localeMessage, otpSkipReason, removeProfileUnlessKept, resolveExtensionId, resolveExtensionPath, resolveUserDataDir, wrongOtpFor } from "./lib/extension";
+import { CODE_INPUT_SELECTOR, EMAIL_INPUT_SELECTOR } from "./lib/selectors";
 
 // Whole file drives auth.html/popup.html, which Playwright Firefox cannot reach.
 test.skip(isFirefoxRun(), FIREFOX_NO_EXTENSION_PAGES);
@@ -76,14 +77,14 @@ test.describe("extension account auth", () => {
     const authPage = await authPagePromise;
     await authPage.waitForURL(extensionPageUrl(extensionId, "auth.html"));
 
-    await expect(authPage.locator("#email-input")).toBeVisible();
-    const emailInput = authPage.locator("#email-input");
+    await expect(authPage.locator(EMAIL_INPUT_SELECTOR)).toBeVisible();
+    const emailInput = authPage.locator(EMAIL_INPUT_SELECTOR);
     const sendCodeButton = authPage.getByRole("button", { name: "Send code" });
 
     await expect(sendCodeButton).toBeDisabled();
     await emailInput.fill("not-an-email");
     await expect(sendCodeButton).toBeDisabled();
-    await expect(authPage.locator("#code-input")).toHaveCount(0);
+    await expect(authPage.locator(CODE_INPUT_SELECTOR)).toHaveCount(0);
 
     // Consent is opt-in: a valid address alone must not enable the send.
     const agreeCheckbox = authPage.locator(".agree input[type=checkbox]");
@@ -98,13 +99,13 @@ test.describe("extension account auth", () => {
         exact: true,
       }),
     ).toBeVisible();
-    await expect(authPage.locator("#code-input")).toHaveCount(0);
+    await expect(authPage.locator(CODE_INPUT_SELECTOR)).toHaveCount(0);
 
     await emailInput.fill(testEmail);
     await expect(sendCodeButton).toBeEnabled();
     await sendCodeButton.click();
 
-    const codeInput = authPage.locator("#code-input");
+    const codeInput = authPage.locator(CODE_INPUT_SELECTOR);
     const signInButton = authPage.getByRole("button", { name: "Sign in" });
     await expect(codeInput).toBeVisible();
     await expect(signInButton).toBeDisabled();
@@ -168,7 +169,7 @@ test.describe("extension account auth", () => {
             name: localeMessage(locale, "authSignInTitle"),
           }),
         ).toBeVisible();
-        await authPage.locator("#email-input").fill(rejectedEmail);
+        await authPage.locator(EMAIL_INPUT_SELECTOR).fill(rejectedEmail);
         await authPage.locator(".agree input[type=checkbox]").check();
         const sendCodeButton = authPage.getByRole("button", {
           name: localeMessage(locale, "authSendCodeBtn"),
@@ -181,11 +182,11 @@ test.describe("extension account auth", () => {
           }),
         ).toBeVisible();
 
-        await authPage.locator("#email-input").fill(testEmail);
+        await authPage.locator(EMAIL_INPUT_SELECTOR).fill(testEmail);
         await expect(sendCodeButton).toBeEnabled();
         await sendCodeButton.click();
 
-        const codeInput = authPage.locator("#code-input");
+        const codeInput = authPage.locator(CODE_INPUT_SELECTOR);
         const signInButton = authPage.getByRole("button", {
           name: localeMessage(locale, "authVerifyBtn"),
         });

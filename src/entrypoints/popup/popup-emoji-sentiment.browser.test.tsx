@@ -14,6 +14,7 @@ import { type ChromeShimHandle, installChromeShim } from "../../test/chrome-shim
 // icon SVG has no intrinsic size and Gecko lays it out huge, covering the chips.
 // @ts-expect-error side-effect css import, resolved by the browser-mode Vite server
 import "./popup.css";
+import { SENTIMENT_CHIP_SELECTOR, SENTIMENT_ZONE_TITLE_SELECTOR } from "../../shared/page-dom";
 import { EmojiSentimentEditor } from "./popup-emoji-sentiment";
 
 let chromeShim: ChromeShimHandle;
@@ -46,7 +47,7 @@ function mount(settings: Settings): void {
 const zone = (dest: string): HTMLElement => requireEl(container, `[data-zone="${dest}"]`);
 
 function chipIn(dest: string, emoji: string): HTMLButtonElement | null {
-  return [...zone(dest).querySelectorAll<HTMLButtonElement>(".sentiment-chip")].find((b) => b.textContent?.includes(emoji)) ?? null;
+  return [...zone(dest).querySelectorAll<HTMLButtonElement>(SENTIMENT_CHIP_SELECTOR)].find((b) => b.textContent?.includes(emoji)) ?? null;
 }
 
 // Select a chip and wait for the re-render to commit. Native click, not
@@ -87,7 +88,7 @@ describe("EmojiSentimentEditor", () => {
     mount(makeSettings());
     await selectChip("positive", "👍");
 
-    const negativeTitle = zone("negative").querySelector<HTMLButtonElement>(".sentiment-zone-title");
+    const negativeTitle = zone("negative").querySelector<HTMLButtonElement>(SENTIMENT_ZONE_TITLE_SELECTOR);
     if (!negativeTitle) throw new Error("negative zone title missing");
     expect(negativeTitle.disabled).toBe(false);
     await userEvent.click(negativeTitle);
@@ -113,7 +114,7 @@ describe("EmojiSentimentEditor", () => {
   it("moving to neutral just removes the emoji from both lists", async () => {
     mount(makeSettings());
     await selectChip("positive", "👍");
-    const neutralTitle = zone("neutral").querySelector<HTMLButtonElement>(".sentiment-zone-title");
+    const neutralTitle = zone("neutral").querySelector<HTMLButtonElement>(SENTIMENT_ZONE_TITLE_SELECTOR);
     if (!neutralTitle) throw new Error("neutral zone title missing");
     await userEvent.click(neutralTitle);
 
@@ -137,7 +138,7 @@ describe("EmojiSentimentEditor", () => {
     if (!input) throw new Error("neutral search input missing");
     await userEvent.fill(input, "robot");
     expect(chipIn("neutral", "🤖")).not.toBeNull();
-    const chips = zone("neutral").querySelectorAll(".sentiment-chip");
+    const chips = zone("neutral").querySelectorAll(SENTIMENT_CHIP_SELECTOR);
     expect(chips.length).toBeLessThan(20);
   });
 

@@ -45,3 +45,33 @@ export {
 // Element-scoped form of TRIGGER_SELECTOR, for probes that walk a host's shadow root
 // and want the button itself rather than any node carrying the class.
 export const TRIGGER_BUTTON_SELECTOR = `button.${TRIGGER_CLASS}, button.${COUNTER_CLASS}`;
+
+// The extension's OWN pages (popup, auth, onboarding) name their DOM in
+// src/shared/page-dom.ts; re-exported here so a spec reaches every selector
+// through one module, and a rename breaks `pnpm compile:e2e` rather than
+// silently matching nothing.
+export {
+  ACCOUNT_LIST_SELECTOR,
+  BUILD_INFO_SELECTOR,
+  CARD_SELECTOR,
+  CODE_INPUT_SELECTOR,
+  DATA_FILE_SELECTOR,
+  DATA_STATUS_SELECTOR,
+  DEBUG_TAB_SELECTOR,
+  EMAIL_INPUT_SELECTOR,
+  EMPTY_NOTE_SELECTOR,
+  HISTORY_DAY_SELECTOR,
+  HISTORY_EMOJI_SELECTOR,
+  HISTORY_LINK_SELECTOR,
+  HISTORY_MORE_SELECTOR,
+  HISTORY_NOMATCH_SELECTOR,
+  HISTORY_ROW_SELECTOR,
+  HISTORY_SEARCH_INPUT_SELECTOR,
+  IMPORT_CONFIRM_COUNT_SELECTOR,
+  IMPORT_CONFIRM_SELECTOR,
+  NOTICE_SELECTOR,
+  POPUP_SELECTOR,
+  ROW_SELECT_SELECTOR,
+  TAB_PANEL_SELECTOR,
+  TAGLINE_SELECTOR,
+} from "../../src/shared/page-dom";

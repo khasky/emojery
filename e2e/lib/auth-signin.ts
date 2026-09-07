@@ -18,6 +18,7 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type BrowserContext, expect, type Page } from "@playwright/test";
+import { CODE_INPUT_SELECTOR, EMAIL_INPUT_SELECTOR } from "./selectors";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 export const EXTENSION_ROOT = resolve(__dirname, "..", "..");
@@ -143,6 +144,19 @@ export async function signInThroughAuthPage(context: BrowserContext, extensionId
   }
 }
 
+/** The same exchange against an auth tab the CALLER owns - the one a page's
+ *  sign-in gate opened, which is the tab the return-to-page path closes by
+ *  itself. Retries like signInThroughAuthPage, minus the reopen: this tab is the
+ *  subject of the test, so losing it is a failure rather than a blip. */
+export async function verifyOtpOnAuthPage(authPage: Page, opts: AuthSignInOptions): Promise<void> {
+  const locale = opts.locale ?? "en";
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    if (await requestAndVerifyOtp(authPage, opts.email, opts.code, locale)) return;
+    await authPage.waitForTimeout(1_500);
+  }
+  await expect(authPage.getByRole("heading", { name: localeMessage(locale, "authDoneTitle") }), "sign-in never completed in the gate's own auth tab").toBeVisible();
+}
+
 // One request-code/verify pass. Returns true once "You're signed in" shows;
 // false if the code was rejected (the caller re-runs the exchange).
 // Structural failures - never reaching the code step, verify hanging - still throw.
@@ -159,8 +173,8 @@ async function requestAndVerifyOtp(authPage: Page, email: string, code: string, 
     }
   });
   await authPage.reload();
-  await expect(authPage.locator("#email-input")).toBeVisible();
-  await authPage.locator("#email-input").fill(email);
+  await expect(authPage.locator(EMAIL_INPUT_SELECTOR)).toBeVisible();
+  await authPage.locator(EMAIL_INPUT_SELECTOR).fill(email);
   // The Terms/Privacy box ships unchecked, so consent is a required step of
   // every sign-in.
   await authPage.locator(".agree input[type=checkbox]").check();
@@ -175,13 +189,13 @@ async function requestAndVerifyOtp(authPage: Page, email: string, code: string, 
   // with that error instead of the code field. Report it as a failed pass, like
   // the verify below, so the caller's retry loop runs a fresh exchange rather
   // than hard-failing on a field that was never going to appear.
-  const codeInput = authPage.locator("#code-input");
+  const codeInput = authPage.locator(CODE_INPUT_SELECTOR);
   const sent = await expect(codeInput.or(authPage.locator(".error")))
     .toBeVisible({ timeout: 30_000 })
     .then(() => codeInput.isVisible())
     .catch(() => false);
   if (!sent) return false;
-  await authPage.locator("#code-input").fill(code);
+  await authPage.locator(CODE_INPUT_SELECTOR).fill(code);
   await authPage.getByRole("button", { name: localeMessage(locale, "authVerifyBtn") }).click();
   const signedIn = authPage.getByRole("heading", { name: localeMessage(locale, "authDoneTitle") });
   // Wait for the verify to resolve either way - the success heading or the inline
