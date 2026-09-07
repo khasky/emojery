@@ -37,7 +37,7 @@ jobs:
       # virtual display (xvfb, pulled in by `playwright install --with-deps`).
       - name: Run e2e (signed-out subset)
         env:
-          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/e2e.json
+          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/e2e-ci.json
         # Through the npm script, not a second copy of its `-g`: the title filter has to
         # match site-injection.spec.ts, and a stale duplicate here runs zero tests. No `--`
         # before the flag - pnpm forwards it verbatim, and playwright then reads
@@ -65,7 +65,7 @@ jobs:
       - name: Gate on skip ratio
         if: always()
         run: |
-          node scripts/check-e2e-skips.mjs test-results/e2e.json
+          node scripts/check-e2e-skips.mjs test-results/e2e-ci.json
           node scripts/check-e2e-skips.mjs test-results/e2e-gates.json
 
       # Failure only: this repo is public, so a green run must not publish a
@@ -78,7 +78,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: e2e-report
+          name: e2e-ci-report
           path: test-results/
           if-no-files-found: ignore
           retention-days: 14
@@ -102,12 +102,12 @@ jobs:
 
       - name: Run e2e (replace-native sweep)
         env:
-          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/e2e.json
+          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/e2e-replace-native.json
         run: xvfb-run -a pnpm exec playwright test -c e2e/playwright.config.ts --reporter=list,json -g "replaces native buttons"
 
       - name: Gate on skip ratio
         if: always()
-        run: node scripts/check-e2e-skips.mjs test-results/e2e.json
+        run: node scripts/check-e2e-skips.mjs test-results/e2e-replace-native.json
 
       # Failure only, and the same accepted risk as the placement sweep above.
       - name: Upload replace-native report
@@ -139,12 +139,12 @@ jobs:
 
       - name: Run theme + contrast sweep
         env:
-          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/e2e-theme.json
+          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/e2e-theme-contrast.json
         run: xvfb-run -a pnpm exec playwright test -c e2e/playwright.config.ts --reporter=list,json theme-contrast.spec.ts
 
       - name: Gate on skip ratio
         if: always()
-        run: node scripts/check-e2e-skips.mjs test-results/e2e-theme.json
+        run: node scripts/check-e2e-skips.mjs test-results/e2e-theme-contrast.json
 
       # Failure only, and the same accepted risk as the placement sweep above.
       - name: Upload theme-contrast report

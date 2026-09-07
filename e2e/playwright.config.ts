@@ -18,6 +18,13 @@ const expectTimeout = Number(process.env.E2E_EXPECT_TIMEOUT_MS ?? 30_000);
 // attempt and stays red, while an environmental blip self-heals. 0 to reproduce raw.
 const retries = Number(process.env.E2E_RETRIES ?? 2);
 
+// One report per lane, named after the script that asked for it: `pnpm test:a11y`
+// leaves test-results/a11y-html instead of filing an accessibility run under the
+// whole suite's name. Only `pnpm run <script>` sets npm_lifecycle_event - a bare
+// `playwright test` (and every CI lane, which overrides the reporter list anyway)
+// falls back to the suite name.
+const htmlReportFolder = `test-results/${(process.env.npm_lifecycle_event ?? "e2e").replace(/^test:/, "").replace(/[^a-z0-9]+/gi, "-")}-html`;
+
 export default defineConfig({
   testDir: ".",
   testMatch: /\.spec\.ts/,
@@ -58,7 +65,7 @@ export default defineConfig({
       "html",
       {
         open: "never",
-        outputFolder: "test-results/e2e-html",
+        outputFolder: htmlReportFolder,
       },
     ],
     // For a machine-readable result with each skip/flaky/fail reason, point the

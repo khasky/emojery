@@ -40,14 +40,14 @@ jobs:
       - name: Run placement smoke in Edge
         env:
           E2E_CHROME_CHANNEL: msedge
-          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/e2e-edge.json
+          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/e2e-edge-smoke.json
         run: xvfb-run -a pnpm exec playwright test -c e2e/playwright.config.ts --reporter=list,json -g "(github|youtube):.*default unauth placement"
 
       # Two scenarios only: if both skip on a bot wall the smoke verified nothing
       # about Edge, which must not read as a green cross-browser signal.
       - name: Gate on skip ratio
         if: always()
-        run: node scripts/check-e2e-skips.mjs test-results/e2e-edge.json
+        run: node scripts/check-e2e-skips.mjs test-results/e2e-edge-smoke.json
 
       # Failure only: this repo is public, so a green run must not publish a trace
       # tree. Accepted risk, reviewed: a RED run still does. The smoke runs SIGNED
