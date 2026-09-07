@@ -65,6 +65,11 @@ export type RuntimeMessage =
   | { type: "history:import"; rows: PortableHistoryRow[] }
   | { type: "auth:status" }
   | { type: "auth:openTab" }
+  // Sent by the auth page once sign-in is done: activate the tab the sign-in was
+  // started from and close the auth tab. Carries no target - the background
+  // remembered it when the gate asked for the tab (background/auth-return.ts), so
+  // a page cannot name a tab to jump to.
+  | { type: "auth:returnToOrigin" }
   | { type: "auth:signOut" }
   | { type: "auth:delete" }
   // The email-code sign-in exchange, sent by the extension's auth page and by
@@ -175,7 +180,10 @@ export type RuntimeResponse =
   // machine string, rendered only as the last-resort fallback. Neither carries
   // the minted session - see the auth:verifyOtp note above.
   | { type: "auth:otpRequested"; ok: boolean; status: number; error?: string; retryAfterSeconds?: number }
-  | { type: "auth:otpVerified"; ok: boolean; status: number; error?: string }
+  // `returnsToPage` is not about the exchange: it is what the done step does next.
+  // True when this sign-in started from a page's sign-in gate and that tab is still
+  // open, which is the only case where the page offers to take the user back.
+  | { type: "auth:otpVerified"; ok: boolean; status: number; error?: string; returnsToPage?: boolean }
   | { type: "error"; code: RuntimeErrorCode; message: string };
 
 export type VoteBroadcast = {

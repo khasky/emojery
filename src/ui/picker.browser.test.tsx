@@ -875,6 +875,43 @@ describe("Picker - signed-out gate", () => {
     await expect.poll(() => portalRoot.querySelector('[role="dialog"]')).toBeNull();
   });
 
+  it("holds the held pick until the tab is on screen again", async () => {
+    let pushRefresh: RefreshPush | null = null;
+    const picked: (string | null)[] = [];
+    mountSignedOutPicker(() => {}, {
+      captureRefresh: (cb) => {
+        pushRefresh = cb;
+      },
+      onPick: (reaction) => {
+        picked.push(reaction);
+        return true;
+      },
+    });
+
+    const emoji = await pickWhileSignedOut();
+    await pollForElement(() => portalRoot.querySelector<HTMLElement>(`.${GATE_CLASS}`));
+
+    // Sign-in lands while this tab sits behind the auth tab - which is where it
+    // always lands, since the auth page is what the gate opened.
+    const real = Object.getOwnPropertyDescriptor(Document.prototype, "visibilityState");
+    Object.defineProperty(document, "visibilityState", { configurable: true, get: () => "hidden" });
+    try {
+      pushRefresh!({ myReaction: null, authed: true });
+      // Casting here would spend the reaction's animation on a tab nobody is looking at.
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      expect(picked).toEqual([]);
+      expect(portalRoot.querySelector(`.${GATE_CLASS}`)).not.toBeNull();
+    } finally {
+      delete (document as unknown as Record<string, unknown>).visibilityState;
+      if (real) Object.defineProperty(Document.prototype, "visibilityState", real);
+    }
+
+    document.dispatchEvent(new Event("visibilitychange"));
+
+    await expect.poll(() => picked).toEqual([emoji]);
+    await expect.poll(() => portalRoot.querySelector('[role="dialog"]')).toBeNull();
+  });
+
   it("a cancelled gate forgets the pick, so a later sign-in casts nothing", async () => {
     let pushRefresh: RefreshPush | null = null;
     const picked: (string | null)[] = [];

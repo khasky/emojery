@@ -453,9 +453,6 @@
   "authDoneReturnNowBtn": {
     "message": "返回該頁面"
   },
-  "authDoneStayBtn": {
-    "message": "留在此頁"
-  },
   "dataConsentTitle": {
     "message": "Emojery 會傳送什麼"
   },

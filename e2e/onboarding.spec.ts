@@ -16,13 +16,14 @@ import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 // as a 404 on someone's repository. The literal behind it is pinned by
 // onboarding.browser.test.tsx.
 import { TRY_IT_LIVE_URL } from "../src/shared/tracking-links";
+import { enMessage, verifyOtpOnAuthPage } from "./lib/auth-signin";
 import { closeSession, isFirefoxRun, launchRealisticContext, makeRunProfileDir, resolveExtensionPath } from "./lib/browser-session";
 import { ensureSignedOut, firstServiceWorker } from "./lib/extension-pages";
 import { extensionLaunchArgs } from "./lib/launch-args";
 import { pollForValue } from "./lib/picker-probes";
 import { signInTestAccount } from "./lib/popup-probes";
 import { COACH_TIP_CLASS, GATE_CLASS, GATE_SIGNIN_CLASS, GRID_ITEM_SELECTOR, HOST_SELECTOR, SEARCH_INPUT_SELECTOR, TRIGGER_SELECTOR } from "./lib/selectors";
-import { authConfigured, envUrl, otpSkipReason } from "./lib/test-config";
+import { authConfigured, authEmail, authOtp, envUrl, otpSkipReason } from "./lib/test-config";
 
 // The onboarding tab itself never opens there (temporary add-on installs skip it by design),
 // and extension pages are unreachable anyway - see isFirefoxRun().
@@ -192,6 +193,49 @@ test("the checklist ticks itself while the user is on another tab", async () => 
     await expect(onboarding.locator(".step.done")).toHaveCount(2, { timeout: 15_000 });
     await expect(onboarding.locator(".progress .label")).toHaveText(/2 .* 4/);
   } finally {
+    await page.close().catch(() => {});
+    await closeSession(session);
+  }
+});
+
+// The journey's last leg, driven through the tab the GATE opens rather than one of
+// the suite's own: the auth page hands the user back to the page they reacted on,
+// closes itself, and the pick the gate held is cast there - in front of them, since
+// the picker waits for the tab to be on screen before spending the animation.
+test("the gate's own auth tab returns to the page and closes itself", async () => {
+  test.skip(isFirefoxRun(), FIREFOX_NO_ONBOARDING);
+  test.skip(!authConfigured(), otpSkipReason("the return-to-the-page continuation"));
+  const session = await launchFreshInstall({ keepOnboardingTab: false });
+  const page = await session.context.newPage();
+  let signedIn = false;
+  try {
+    await page.goto(REPO_PAGE_URL);
+    await page.locator(HOST_SELECTOR).first().waitFor({ state: "attached", timeout: SITE_MOUNT_TIMEOUT_MS });
+    await page.waitForTimeout(2_000);
+    await page.locator(TRIGGER_SELECTOR).first().click({ timeout: 30_000 });
+    await expect(page.locator(SEARCH_INPUT_SELECTOR)).toBeVisible({ timeout: 15_000 });
+    await page.locator(GRID_ITEM_SELECTOR).first().click();
+    await expect(page.locator(`.${GATE_CLASS}`)).toBeVisible({ timeout: 15_000 });
+
+    // The gate's button is what arms the return: the background records the tab it
+    // came from before the auth tab exists.
+    const authPagePromise = session.context.waitForEvent("page", { timeout: 20_000 });
+    await page.locator(`.${GATE_SIGNIN_CLASS}`).click({ timeout: 10_000 });
+    const authPage = await authPagePromise;
+    await authPage.waitForLoadState("domcontentloaded");
+    expect(authPage.url()).toContain("/auth.html");
+
+    await verifyOtpOnAuthPage(authPage, { email: authEmail(), code: authOtp() });
+    signedIn = true;
+    await expect(authPage.getByRole("button", { name: enMessage("authDoneReturnNowBtn") })).toBeVisible();
+
+    // Nothing here brings the site tab forward - the countdown does, and the auth
+    // tab is gone once it has.
+    await expect.poll(() => authPage.isClosed(), { timeout: 30_000 }).toBe(true);
+    await expect.poll(() => page.evaluate(() => document.visibilityState), { timeout: 15_000 }).toBe("visible");
+    await expect(page.locator(`.${GATE_CLASS}`), "the held pick is cast once the page is back on screen").toHaveCount(0, { timeout: 30_000 });
+  } finally {
+    if (signedIn) await ensureSignedOut(session.context).catch(() => {});
     await page.close().catch(() => {});
     await closeSession(session);
   }

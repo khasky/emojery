@@ -27,6 +27,11 @@ vi.mock("./api-read", () => ({
   apiErrorCode: vi.fn(() => "unavailable"),
   fetchCount: vi.fn(async () => ({ counts: {}, total: 0, loaded: 0, hasMore: false })),
 }));
+vi.mock("./auth-return", () => ({
+  hasAuthOrigin: vi.fn(async () => true),
+  rememberAuthOrigin: vi.fn(async () => {}),
+  returnToAuthOrigin: vi.fn(async () => true),
+}));
 vi.mock("./debug", () => ({ logBackgroundError: vi.fn() }));
 vi.mock("./history", () => ({
   exportHistory: vi.fn(async () => []),
@@ -82,6 +87,7 @@ import { applyOptimisticReaction, clearCountsCache, setCachedCounts } from "../s
 import { addAlarmListener, createTab, setToolbarBadgeText } from "../shared/webext";
 import * as api from "./api";
 import * as apiRead from "./api-read";
+import { hasAuthOrigin, rememberAuthOrigin, returnToAuthOrigin } from "./auth-return";
 import { getHistoryPage } from "./history";
 import * as identity from "./identity";
 import { isExtensionPageSender } from "./message-guard";
@@ -241,9 +247,18 @@ describe("message router", () => {
     expect(toExtensionPage).toMatchObject({ email: "e2e@example.test" });
   });
 
-  it("auth:openTab opens the auth page", async () => {
+  it("auth:openTab opens the auth page, remembering the tab that asked", async () => {
     await expect(dispatch({ type: "auth:openTab" }).response).resolves.toEqual({ type: "ok" });
-    expect(createTab).toHaveBeenCalledWith({ url: "chrome-extension://ext-id/auth.html" });
+    expect(rememberAuthOrigin).toHaveBeenCalledWith(contentSender);
+    await vi.waitFor(() => expect(createTab).toHaveBeenCalledWith({ url: "chrome-extension://ext-id/auth.html" }));
+  });
+
+  it("auth:returnToOrigin sends the auth tab's own id back, and reports a lost origin", async () => {
+    await expect(dispatch({ type: "auth:returnToOrigin" }).response).resolves.toEqual({ type: "ok" });
+    expect(returnToAuthOrigin).toHaveBeenCalledWith(42);
+
+    vi.mocked(returnToAuthOrigin).mockResolvedValueOnce(false);
+    await expect(dispatch({ type: "auth:returnToOrigin" }).response).resolves.toMatchObject({ type: "error", code: "unavailable" });
   });
 
   it("auth:signOut flushes owned votes BEFORE revoking, and clears auth last", async () => {
@@ -294,12 +309,23 @@ describe("message router", () => {
   it("auth:verifyOtp answers the outcome only, never the minted session", async () => {
     const response = await dispatch({ type: "auth:verifyOtp", email: "a@b.com", code: "123456" }).response;
 
-    expect(response).toEqual({ type: "auth:otpVerified", ok: true, status: 200 });
+    expect(response).toEqual({ type: "auth:otpVerified", ok: true, status: 200, returnsToPage: true });
     expect(identity.verifyOtp).toHaveBeenCalledWith("a@b.com", "123456");
     expect(JSON.stringify(response)).not.toContain("tok");
 
     vi.mocked(identity.verifyOtp).mockResolvedValueOnce({ ok: false, status: 401, error: "bad_code" });
     await expect(dispatch({ type: "auth:verifyOtp", email: "a@b.com", code: "000000" }).response).resolves.toEqual({ type: "auth:otpVerified", ok: false, status: 401, error: "bad_code" });
+  });
+
+  // The field is omitted rather than sent false, so the page's `=== true` read and
+  // the response's own shape agree on "nothing to go back to".
+  it("auth:verifyOtp leaves returnsToPage off when there is no page to go back to", async () => {
+    vi.mocked(hasAuthOrigin).mockResolvedValueOnce(false);
+    await expect(dispatch({ type: "auth:verifyOtp", email: "a@b.com", code: "123456" }).response).resolves.toEqual({ type: "auth:otpVerified", ok: true, status: 200 });
+
+    // A failed lookup must cost the offer, not the sign-in that already succeeded.
+    vi.mocked(hasAuthOrigin).mockRejectedValueOnce(new Error("session storage unavailable"));
+    await expect(dispatch({ type: "auth:verifyOtp", email: "a@b.com", code: "123456" }).response).resolves.toEqual({ type: "auth:otpVerified", ok: true, status: 200 });
   });
 
   it("history:page and history:export answer through the authed responder", async () => {

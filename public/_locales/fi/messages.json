@@ -453,9 +453,6 @@
   "authDoneReturnNowBtn": {
     "message": "Takaisin sivulle"
   },
-  "authDoneStayBtn": {
-    "message": "Pysy tässä"
-  },
   "dataConsentTitle": {
     "message": "Mitä Emojery lähettää"
   },

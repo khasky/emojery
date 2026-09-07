@@ -153,6 +153,23 @@ export function queryTabs(queryInfo: chrome.tabs.QueryInfo): Promise<chrome.tabs
   return callChrome<chrome.tabs.Tab[]>((done) => chrome.tabs.query(queryInfo, done));
 }
 
+// The three below carry no "tabs" permission requirement - none of them reads a
+// tab's URL or title, which is what that permission gates.
+export function updateTab(tabId: number, props: chrome.tabs.UpdateProperties): Promise<void> {
+  return callChrome<void>((done) => chrome.tabs.update(tabId, props, () => done()));
+}
+
+export function removeTab(tabId: number): Promise<void> {
+  return callChrome<void>((done) => chrome.tabs.remove(tabId, () => done()));
+}
+
+/** Raises the window a tab lives in. Absent on Firefox for Android, where there
+ *  is only ever one window - the caller falls through to activating the tab. */
+export function focusWindow(windowId: number): Promise<void> {
+  if (!chrome.windows?.update) return Promise.resolve();
+  return callChrome<void>((done) => chrome.windows.update(windowId, { focused: true }, () => done()));
+}
+
 // MV3 injects a whole file list in one call; the Firefox MV2 build only has the
 // deprecated tabs.executeScript, which takes one file at a time.
 export async function executeScriptFiles(tabId: number, files: string[]): Promise<void> {

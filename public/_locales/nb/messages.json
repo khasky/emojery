@@ -453,9 +453,6 @@
   "authDoneReturnNowBtn": {
     "message": "Tilbake til siden"
   },
-  "authDoneStayBtn": {
-    "message": "Bli her"
-  },
   "dataConsentTitle": {
     "message": "Hva Emojery sender"
   },

@@ -7,7 +7,6 @@
 
 :root {
   --khasky-emojery-chip-bg: rgba(0, 0, 0, 0.05);
-  --khasky-emojery-track: rgba(0, 0, 0, 0.08);
   --khasky-emojery-step-done: #1a7f37;
   --khasky-emojery-step-done-bg: rgba(36, 163, 90, 0.14);
   --khasky-emojery-hairline: rgba(0, 0, 0, 0.08);
@@ -15,7 +14,6 @@
 
 :root[data-theme="dark"] {
   --khasky-emojery-chip-bg: rgba(255, 255, 255, 0.08);
-  --khasky-emojery-track: rgba(255, 255, 255, 0.12);
   --khasky-emojery-step-done: #4ac47e;
   --khasky-emojery-step-done-bg: rgba(74, 196, 126, 0.16);
   --khasky-emojery-hairline: rgba(255, 255, 255, 0.1);

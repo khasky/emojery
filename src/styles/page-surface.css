@@ -19,6 +19,8 @@
   --khasky-emojery-card: #fff;
   --khasky-emojery-heading: #1c1e21;
   --khasky-emojery-card-shadow: rgba(0, 0, 0, 0.08);
+  /* The unfilled rail behind a progress or countdown bar. */
+  --khasky-emojery-track: rgba(0, 0, 0, 0.08);
 }
 
 :root[data-theme="dark"] {
@@ -26,6 +28,7 @@
   --khasky-emojery-card: #18191a;
   --khasky-emojery-heading: #f2f3f5;
   --khasky-emojery-card-shadow: rgba(0, 0, 0, 0.35);
+  --khasky-emojery-track: rgba(255, 255, 255, 0.12);
 }
 
 html,

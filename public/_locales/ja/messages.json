@@ -453,9 +453,6 @@
   "authDoneReturnNowBtn": {
     "message": "ページに戻る"
   },
-  "authDoneStayBtn": {
-    "message": "このページに残る"
-  },
   "dataConsentTitle": {
     "message": "Emojery が送信する情報"
   },

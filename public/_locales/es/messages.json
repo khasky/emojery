@@ -453,9 +453,6 @@
   "authDoneReturnNowBtn": {
     "message": "Volver a la página"
   },
-  "authDoneStayBtn": {
-    "message": "Quedarme aquí"
-  },
   "dataConsentTitle": {
     "message": "Qué envía Emojery"
   },

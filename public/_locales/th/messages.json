@@ -453,9 +453,6 @@
   "authDoneReturnNowBtn": {
     "message": "กลับไปที่หน้าเดิม"
   },
-  "authDoneStayBtn": {
-    "message": "อยู่หน้านี้ต่อ"
-  },
   "dataConsentTitle": {
     "message": "ข้อมูลที่ Emojery ส่ง"
   },

@@ -12,6 +12,7 @@ import { setCachedCounts, targetKey } from "../shared/storage";
 import { createTab } from "../shared/webext";
 import { enqueueVote, flushOwnedVotesForSignOut } from "./api";
 import { apiErrorCode, fetchCount } from "./api-read";
+import { hasAuthOrigin, rememberAuthOrigin, returnToAuthOrigin } from "./auth-return";
 import { logBackgroundError } from "./debug";
 import { exportHistory, getHistoryPage, getHistoryStats, importHistory } from "./history";
 import { clearAuth, deleteAccount, getAuth, requestOtp, revokeSessionServerSide, verifyOtp } from "./identity";
@@ -43,8 +44,13 @@ type Handler<T extends RuntimeMessage["type"]> = (msg: Extract<RuntimeMessage, {
 /** One entry per message type - the mapped key is what makes that exhaustive. */
 type HandlerTable = { [T in RuntimeMessage["type"]]: Handler<T> };
 
-function openAuthTab(): void {
-  void createTab({ url: chrome.runtime.getURL(AUTH_URL_PATH) }).catch((error: unknown) => logBackgroundError("openAuthTab", error));
+function openAuthTab(sender: chrome.runtime.MessageSender): void {
+  // The origin is recorded BEFORE the tab exists, so the auth page can never load
+  // and ask where to go back to before the answer is written.
+  void rememberAuthOrigin(sender)
+    .catch((error: unknown) => logBackgroundError("rememberAuthOrigin", error))
+    .then(() => createTab({ url: chrome.runtime.getURL(AUTH_URL_PATH) }))
+    .catch((error: unknown) => logBackgroundError("openAuthTab", error));
 }
 
 const HANDLERS: HandlerTable = {
@@ -201,10 +207,17 @@ const HANDLERS: HandlerTable = {
     return ANSWER_LATER;
   },
 
-  "auth:openTab": (_msg, { sendResponse }) => {
-    openAuthTab();
+  "auth:openTab": (_msg, { sender, sendResponse }) => {
+    openAuthTab(sender);
     sendResponse({ type: "ok" });
     return ANSWERED_NOW;
+  },
+
+  "auth:returnToOrigin": (_msg, { sender, sendResponse }) => {
+    returnToAuthOrigin(sender.tab?.id)
+      .then((returned) => sendResponse(returned ? { type: "ok" } : errorResponse("unavailable", "auth:returnToOrigin")))
+      .catch((error: unknown) => sendResponse(errorResponse("unavailable", "auth:returnToOrigin", error)));
+    return ANSWER_LATER;
   },
 
   "auth:signOut": (_msg, { sendResponse }) => {
@@ -246,7 +259,12 @@ const HANDLERS: HandlerTable = {
       // Destructured, never spread: keeps the response to exactly these fields
       // even if VerifyOtpResult grows. The session lives in storage.local (read
       // by getAuth) and is never forwarded here.
-      .then(({ ok, status, error }) => sendResponse(defined({ type: "auth:otpVerified" as const, ok, status, error })))
+      .then(async ({ ok, status, error }) => {
+        // Only a success needs it, and a failed lookup must not fail the sign-in
+        // that already succeeded - it costs the return offer, nothing more.
+        const returnsToPage = ok ? await hasAuthOrigin().catch(() => false) : false;
+        sendResponse(defined({ type: "auth:otpVerified" as const, ok, status, error, returnsToPage: returnsToPage || undefined }));
+      })
       .catch((error: unknown) => sendResponse(errorResponse("unavailable", "auth:verifyOtp", error)));
     return ANSWER_LATER;
   },

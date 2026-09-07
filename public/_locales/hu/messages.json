@@ -453,9 +453,6 @@
   "authDoneReturnNowBtn": {
     "message": "Vissza az oldalra"
   },
-  "authDoneStayBtn": {
-    "message": "Maradok itt"
-  },
   "dataConsentTitle": {
     "message": "Mit küld az Emojery"
   },

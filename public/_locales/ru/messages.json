@@ -453,9 +453,6 @@
   "authDoneReturnNowBtn": {
     "message": "Вернуться на страницу"
   },
-  "authDoneStayBtn": {
-    "message": "Остаться здесь"
-  },
   "dataConsentTitle": {
     "message": "Что отправляет Emojery"
   },

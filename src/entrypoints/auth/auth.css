@@ -113,6 +113,59 @@ input:focus {
   text-decoration: none;
 }
 
+/* The return countdown, on the onboarding progress bar's rail but running the
+   other way. The bar drains in CSS rather than from the tick, so the seconds
+   beside it stay the only thing re-rendering. */
+.countdown {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.countdown .track {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--khasky-emojery-track);
+  overflow: hidden;
+}
+
+.countdown .track i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--khasky-emojery-fixed-primary);
+  /* Scale, not width: an animation the compositor can run without laying the
+     card out 60 times a second. Duration comes from the one constant in main.tsx. */
+  transform-origin: left center;
+  animation-name: khasky-emojery-countdown;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+.countdown .seconds {
+  font-size: 12.5px;
+  color: var(--khasky-emojery-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes khasky-emojery-countdown {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* The digits beside it already say how long is left. */
+@media (prefers-reduced-motion: reduce) {
+  .countdown .track {
+    display: none;
+  }
+}
+
 .code-actions {
   display: flex;
   justify-content: space-between;

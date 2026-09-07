@@ -581,10 +581,6 @@
     "message": "Back to the page",
     "description": "Button on the sign-in confirmation that returns to the page immediately instead of waiting out the countdown."
   },
-  "authDoneStayBtn": {
-    "message": "Stay here",
-    "description": "Button on the sign-in confirmation that cancels the automatic return and keeps the user on this tab."
-  },
   "dataConsentTitle": {
     "message": "What Emojery sends",
     "description": "Heading of the data-collection disclosure shown on first install in browsers without Firefox's built-in consent screen."

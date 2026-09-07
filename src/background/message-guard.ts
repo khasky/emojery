@@ -12,7 +12,7 @@ const CONTENT_SCRIPT_MESSAGE_TYPES: ReadonlySet<RuntimeMessage["type"]> = new Se
 // Types only the extension's own pages (popup/auth) send - never content scripts.
 // The OTP pair matters most: it is the one exchange that MINTS a credential, so a
 // content script on any supported site must never be able to drive it.
-const EXTENSION_PAGE_MESSAGE_TYPES: ReadonlySet<RuntimeMessage["type"]> = new Set(["report", "history:page", "history:stats", "history:export", "history:import", "auth:signOut", "auth:delete", "auth:requestOtp", "auth:verifyOtp"]);
+const EXTENSION_PAGE_MESSAGE_TYPES: ReadonlySet<RuntimeMessage["type"]> = new Set(["report", "history:page", "history:stats", "history:export", "history:import", "auth:signOut", "auth:delete", "auth:requestOtp", "auth:verifyOtp", "auth:returnToOrigin"]);
 
 const MESSAGE_TYPES: ReadonlySet<RuntimeMessage["type"]> = new Set([...CONTENT_SCRIPT_MESSAGE_TYPES, ...EXTENSION_PAGE_MESSAGE_TYPES, "auth:status", "auth:openTab"]);
 
@@ -124,6 +124,7 @@ export function parseRuntimeMessage(raw: unknown, sender: chrome.runtime.Message
     case "history:stats":
     case "auth:status":
     case "auth:openTab":
+    case "auth:returnToOrigin":
     case "auth:signOut":
     case "auth:delete":
       return { type };
