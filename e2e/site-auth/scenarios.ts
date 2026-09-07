@@ -88,4 +88,18 @@ export function authInstagramCarouselUrl(): string | null {
   return process.env.E2E_AUTHURL_INSTAGRAM_CAROUSEL?.trim() || null;
 }
 
+// YouTube SHORTS: the vertical action rail, a different binding from the watch
+// row (adapters/youtube.ts). No stable public default - a Short goes private or
+// gets deleted like any other upload - so the auto-press case runs only when the
+// tester points `E2E_AUTHURL_YOUTUBE_SHORTS` at one.
+export function authYouTubeShortsUrl(): string | null {
+  return process.env.E2E_AUTHURL_YOUTUBE_SHORTS?.trim() || null;
+}
+
+// Instagram REEL permalink - the same vertical-rail reason as Shorts, and the
+// heart there is a different control from the one on a /p/ post.
+export function authInstagramReelUrl(): string | null {
+  return process.env.E2E_AUTHURL_INSTAGRAM_REEL?.trim() || null;
+}
+
 export const ALL_SITES: readonly SiteId[] = [...DEEP_SITES, ...SMOKE_SITES];

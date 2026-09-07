@@ -7,6 +7,10 @@
 // NOT platform-passive: they press real native controls under the signed-in
 // account, and every case reverts its press before finishing.
 //
+// Surfaces, not just sites: the vertical rails (YouTube Shorts, Instagram reels)
+// bind differently from the watch row and the /p/ permalink, and a feed card binds
+// per post - so those run beside the permalink cases rather than instead of them.
+//
 // GitLab, GitHub, Threads and Instagram are here for a second reason: none of
 // them exposes a generic pressed state, so the client reads the star icon, the
 // flipped Star label, the heart's paint, or the localized heart label instead.
@@ -28,7 +32,7 @@ import { HOST_SELECTOR } from "../lib/selectors";
 import type { Bridge } from "./bridge";
 import { bridgeFixture, GRID_ITEM_SELECTOR, gotoSettled, openPickerState, SETUP_HOOK_TIMEOUT_MS, siteAuthEnabled, waitForHost } from "./harness";
 import { DQ_SRC, ownReactionProbe } from "./probes";
-import { authContentUrl } from "./scenarios";
+import { authContentUrl, authFeedUrl, authInstagramReelUrl, authYouTubeShortsUrl } from "./scenarios";
 
 const fx = bridgeFixture();
 
@@ -140,6 +144,23 @@ const YT_LIKE = nativeControl(`const el = document.querySelector('like-button-vi
 const YT_DISLIKE = nativeControl(`const el = document.querySelector('dislike-button-view-model button');`, `return el.getAttribute('aria-pressed') ?? null;`);
 const REDDIT_DOWN = nativeControl(`const el = document.querySelector('shreddit-post')?.shadowRoot?.querySelector('button[downvote]') ?? null;`, `return el.getAttribute('aria-pressed') ?? null;`);
 
+// The Shorts rail's Like. The watch row stays in a Shorts page's DOM but renders
+// hidden, so "the visible one" is what tells the two bindings apart.
+const YT_SHORTS_LIKE = nativeControl(`const el = [...document.querySelectorAll('like-button-view-model button')].find((b) => { const r = b.getBoundingClientRect(); return r.width > 0 && r.height > 0; }) ?? null;`, `return el.getAttribute('aria-pressed') ?? null;`);
+
+// A subreddit feed binds per card, and each card keeps its vote block inside its
+// own shadow root - so the card that carries the VISIBLE trigger is the one the
+// picker click lands on, and the only one whose upvote may move.
+const REDDIT_FEED_UP = nativeControl(
+  `const onScreen = (el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
+  const post = [...document.querySelectorAll('shreddit-post')].find((card) => {
+    const host = card.shadowRoot?.querySelector('${HOST_SELECTOR}');
+    return host ? onScreen(host) : false;
+  }) ?? null;
+  const el = post?.shadowRoot?.querySelector('button[upvote]') ?? null;`,
+  `return el.getAttribute('aria-pressed') ?? null;`,
+);
+
 // Serialize a shipped function / regex into page-context source. `String(fn)`
 // yields the transpiled JS body, so the probe executes byte-for-byte what the
 // extension ships (closured module constants are re-declared alongside).
@@ -161,7 +182,11 @@ const SCOPE_TO_HOST_ROW = `
     // the first in DOM order belongs to a different post. Both sides must land on the
     // same host, or the case reacts to one post and measures another.
     const hosts = Array.from(document.querySelectorAll('${HOST_SELECTOR}'));
-    const host = hosts.find((h) => h.closest('[role="dialog"]')) ?? hosts[0];
+    // openPickerState clicks the first VISIBLE trigger (harness.ts RESOLVE_TRIGGER), so
+    // the probe has to resolve the same one - on a feed the first host in DOM order can
+    // be a card scrolled out of view, which would measure a post nobody reacted to.
+    const onScreen = (el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
+    const host = hosts.find((h) => h.closest('[role="dialog"]')) ?? hosts.find(onScreen) ?? hosts[0];
     if (!host) return null;
     let node = host.parentElement;
     for (let depth = 0; node && depth < 10; depth++) {
@@ -256,6 +281,22 @@ const IG_LIKE = nativeControl(
   return s === null ? null : String(s);`,
 );
 
+// X publishes the like state as the testid itself - `like` unpressed, `unlike`
+// pressed - and no aria-pressed anywhere, so the testid IS the read. Host-scoped:
+// a feed carries one of these per tweet.
+const X_LIKE = nativeControl(
+  `${SCOPE_TO_HOST_ROW}
+  const el = hostRow((row) => row.querySelector('button[data-testid="like"], button[data-testid="unlike"]'));`,
+  `return el.getAttribute('data-testid') === 'unlike' ? 'true' : 'false';`,
+);
+
+// WHICH Facebook reaction is set, as the control's own label. Never parsed - only
+// compared between two picks, which is the one locale-proof way to prove the exact
+// -match table chose differently for ❤️ and 😂.
+const FB_LABEL = `${FB_STATE.find}
+  if (!el) return null;
+  return (el.getAttribute('aria-label') || '').trim();`;
+
 // A press that never lands has two very different causes: the opt-in setting
 // is off (nothing here works, and no amount of debugging helps), or one site
 // broke (everything else still works). The bridge cannot read the setting - it
@@ -330,10 +371,12 @@ describe("auto-press probe serialization", () => {
     // Both halves of every control: the state read, and the tag the release click needs.
     // They are built from one `find`, so a serialization break shows up in both at once -
     // but only compiling both proves the tagger's own lines are valid source too.
-    for (const control of [FB_STATE, GITLAB_STAR, GITHUB_STAR, THREADS_LIKE, IG_LIKE, YT_LIKE, YT_DISLIKE, REDDIT_DOWN]) {
+    for (const control of [FB_STATE, GITLAB_STAR, GITHUB_STAR, THREADS_LIKE, IG_LIKE, X_LIKE, YT_LIKE, YT_DISLIKE, YT_SHORTS_LIKE, REDDIT_DOWN, REDDIT_FEED_UP]) {
       expect(() => new Function(control.state)).not.toThrow();
       expect(() => new Function(tagProbe(control.find))).not.toThrow();
     }
+    // The label read is not a NativeControl (nothing clicks it), so it is compiled here.
+    expect(() => new Function(FB_LABEL)).not.toThrow();
   });
 });
 
@@ -452,4 +495,154 @@ describe("auto-press probe serialization", () => {
     }
     expect(await pollState(b, FB_STATE.state, "plain", 8_000), "facebook: un-react must clear the auto-set native reaction").toBe("plain");
   }, 300_000);
+
+  // X exposes the like state as the testid itself ("like" unpressed, "unlike"
+  // pressed) and no aria-pressed, so the read is the testid. Scoped to our host's
+  // row: a feed carries one Like per tweet.
+  test("x: positive presses Like in the feed and on a status page, un-react releases it", async () => {
+    const b = fx.need();
+    for (const [surface, url] of [
+      ["feed", authFeedUrl("x")],
+      ["status", authContentUrl("x")],
+    ] as const) {
+      await gotoSettled(b, url, 4_000);
+      expect(await waitForHost(b, "x", 12_000), `x ${surface}: no Emojery host - log into X / check the fixture`).toBeGreaterThan(0);
+      await clearOwnReaction(b);
+      expect(await b.evaluate<string | null>(X_LIKE.state), `x ${surface}: no readable Like control beside our trigger`).toBeTruthy();
+      await releaseNativeIfPressed(b, `x ${surface}`, X_LIKE);
+
+      try {
+        const picker = await openPickerState(b);
+        expect(picker.gridVisible, `x ${surface}: Emojery picker did not open (extension signed out?)`).toBe(true);
+        await pickEmoji(b, "👍");
+        expect(await pollState(b, X_LIKE.state, "true", 8_000), siteSpecificHint(`x ${surface}`, "👍")).toBe("true");
+        recordPressLanded();
+      } finally {
+        await unReact(b);
+      }
+      expect(await pollState(b, X_LIKE.state, "false", 8_000), `x ${surface}: un-react must release the auto-pressed Like`).toBe("false");
+    }
+  }, 240_000);
+
+  // The Shorts rail is a different binding from the watch row (adapters/youtube.ts
+  // resolves one or the other), and the watch row stays in the Shorts DOM - so the
+  // control read here is the VISIBLE like button, which on /shorts/ is the rail's.
+  test("youtube shorts: positive presses the rail's Like, un-react releases it", async (ctx) => {
+    const url = authYouTubeShortsUrl();
+    if (!url) {
+      ctx.skip(); // point E2E_AUTHURL_YOUTUBE_SHORTS at a Short this account may like
+    }
+    const b = fx.need();
+    await gotoSettled(b, url as string, 4_000);
+    expect(await waitForHost(b, "youtube", 15_000), "youtube shorts: no Emojery host - log into YouTube / check the Short").toBeGreaterThan(0);
+    await clearOwnReaction(b);
+    expect(await b.evaluate<string | null>(YT_SHORTS_LIKE.state), "youtube shorts: no visible Like button on the rail").toBeTruthy();
+    await releaseNativeIfPressed(b, "youtube shorts", YT_SHORTS_LIKE);
+
+    try {
+      const picker = await openPickerState(b);
+      expect(picker.gridVisible, "youtube shorts: Emojery picker did not open (extension signed out?)").toBe(true);
+      await pickEmoji(b, "👍");
+      expect(await pollState(b, YT_SHORTS_LIKE.state, "true", 8_000), siteSpecificHint("youtube shorts", "👍")).toBe("true");
+      recordPressLanded();
+    } finally {
+      await unReact(b);
+    }
+    expect(await pollState(b, YT_SHORTS_LIKE.state, "false", 8_000), "youtube shorts: un-react must release the auto-pressed Like").toBe("false");
+  });
+
+  // The permalink case above proves the heart read; this one proves the SURFACES
+  // the adapter binds differently - the feed card and the reel rail.
+  test("instagram: positive presses Like in the feed and in a reel, un-react releases it", async () => {
+    const b = fx.need();
+    const reelUrl = authInstagramReelUrl();
+    const surfaces: Array<readonly [string, string]> = [["feed", authFeedUrl("instagram")], ...(reelUrl ? ([["reel", reelUrl]] as const) : [])];
+    for (const [surface, url] of surfaces) {
+      await gotoSettled(b, url, 4_000);
+      expect(await waitForHost(b, "instagram", 15_000), `instagram ${surface}: no Emojery host - log into Instagram / check the fixture`).toBeGreaterThan(0);
+      await clearOwnReaction(b);
+      expect(await b.evaluate<string | null>(IG_LIKE.state), `instagram ${surface}: no readable Like heart beside our trigger`).toBeTruthy();
+      await releaseNativeIfPressed(b, `instagram ${surface}`, IG_LIKE);
+
+      try {
+        const picker = await openPickerState(b);
+        expect(picker.gridVisible, `instagram ${surface}: Emojery picker did not open (extension signed out?)`).toBe(true);
+        await pickEmoji(b, "👍");
+        expect(await pollState(b, IG_LIKE.state, "true", 8_000), siteSpecificHint(`instagram ${surface}`, "👍")).toBe("true");
+        recordPressLanded();
+      } finally {
+        await unReact(b);
+      }
+      expect(await pollState(b, IG_LIKE.state, "false", 8_000), `instagram ${surface}: un-react must release the auto-pressed Like`).toBe("false");
+    }
+  }, 300_000);
+
+  // The downvote case above runs on a post page; a subreddit feed binds per card,
+  // and the vote block lives in each card's shadow root - so this one also proves
+  // the press lands on the card our trigger sits in, not on the feed's first post.
+  test("reddit feed: positive presses the card's upvote, un-react releases it", async () => {
+    const b = fx.need();
+    await gotoSettled(b, authFeedUrl("reddit"), 4_000);
+    expect(await waitForHost(b, "reddit", 15_000), "reddit feed: no Emojery host - log into Reddit / check the fixture").toBeGreaterThan(0);
+    await clearOwnReaction(b);
+    expect(await b.evaluate<string | null>(REDDIT_FEED_UP.state), "reddit feed: no readable upvote button in the card carrying our trigger").toBeTruthy();
+    await releaseNativeIfPressed(b, "reddit feed", REDDIT_FEED_UP);
+
+    try {
+      const picker = await openPickerState(b);
+      expect(picker.gridVisible, "reddit feed: Emojery picker did not open (extension signed out?)").toBe(true);
+      await pickEmoji(b, "👍");
+      expect(await pollState(b, REDDIT_FEED_UP.state, "true", 8_000), siteSpecificHint("reddit feed", "👍")).toBe("true");
+      recordPressLanded();
+    } finally {
+      await unReact(b);
+    }
+    expect(await pollState(b, REDDIT_FEED_UP.state, "false", 8_000), "reddit feed: un-react must release the auto-pressed upvote").toBe("false");
+  }, 240_000);
+
+  // WHICH Facebook reaction the table picked, without knowing the account's
+  // language: ❤️ and 😂 must leave DIFFERENT labels on the Like control, and 👎 -
+  // absent from the table - must leave it untouched. Comparing two labels is the
+  // locale-proof form of "Love, not Haha"; reading the words is not.
+  test("facebook: the exact-match table picks a different reaction per emoji, and an unmapped one presses nothing", async () => {
+    const b = fx.need();
+    await gotoSettled(b, authContentUrl("facebook"), 4_000);
+    expect(await waitForHost(b, "facebook", 60_000), "facebook: no Emojery host - log into Facebook / check the test post").toBeGreaterThan(0);
+    expect(await b.evaluate<string | null>(FB_STATE.state), "facebook: no Like control found near the post").toBeTruthy();
+
+    const labels: string[] = [];
+    for (const emoji of ["❤️", "😂"]) {
+      await clearOwnReaction(b);
+      await releaseNativeIfPressed(b, "facebook", FB_STATE);
+      try {
+        const picker = await openPickerState(b);
+        expect(picker.gridVisible, "facebook: Emojery picker did not open (extension signed out?)").toBe(true);
+        await pickEmoji(b, emoji);
+        expect(await pollState(b, FB_STATE.state, "reacted", 12_000), siteSpecificHint("facebook", emoji)).toBe("reacted");
+        recordPressLanded();
+        const label = await b.evaluate<string | null>(FB_LABEL);
+        expect(label, `facebook ${emoji}: the reacted Like control lost its label`).toBeTruthy();
+        labels.push(label as string);
+      } finally {
+        await unReact(b);
+      }
+      expect(await pollState(b, FB_STATE.state, "plain", 8_000), `facebook ${emoji}: un-react must clear the auto-set native reaction`).toBe("plain");
+    }
+    expect(new Set(labels).size, `facebook: ❤️ and 😂 must set DIFFERENT native reactions - both left "${labels[0]}"`).toBe(2);
+
+    // 👎 is in no row of the table, so nothing may be pressed for it.
+    await clearOwnReaction(b);
+    await releaseNativeIfPressed(b, "facebook", FB_STATE);
+    try {
+      const picker = await openPickerState(b);
+      expect(picker.gridVisible).toBe(true);
+      await pickEmoji(b, "👎");
+      // Long enough for a press to have landed if one were coming - the ❤️ path above
+      // needs up to 12s, so silence here is only meaningful after the same wait.
+      await b.waitMs(12_000);
+      expect(await b.evaluate<string | null>(FB_STATE.state), "facebook 👎: an emoji outside the reaction table must press nothing").toBe("plain");
+    } finally {
+      await unReact(b);
+    }
+  }, 600_000);
 });
