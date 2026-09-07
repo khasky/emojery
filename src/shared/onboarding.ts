@@ -36,11 +36,13 @@ export async function markCoachSeen(): Promise<void> {
 }
 
 /**
- * Drop every onboarding latch. A reinstall keeps extension storage - Chromium
- * preserves it for an unpacked extension re-added to the same profile, and
- * Firefox does the same for a temporary add-on - so without this the first run
- * of a reinstalled extension inherits the old install's progress: a coach-mark
- * that never shows again and a onboarding checklist that opens half ticked.
+ * Drop every onboarding latch. A fresh-install event does not imply fresh storage:
+ * Chromium re-fires it on a profile whose data is still there (an unpacked build
+ * loaded from the command line does it on every launch), and a dev or e2e Firefox
+ * run re-installs its temporary add-on into the same profile. Without this, that
+ * run inherits the last one's progress: a coach-mark that never shows again and a
+ * checklist that opens half ticked. A real uninstall needs no help here - Chromium
+ * clears the extension's storage on its own.
  */
 export async function resetOnboardingLatches(): Promise<void> {
   await storageLocalRemove([COACH_SEEN_KEY, ONBOARDING_BADGE_KEY, TRIGGER_SEEN_KEY]);

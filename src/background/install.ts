@@ -11,11 +11,14 @@ import { logBackgroundError } from "./debug";
 import { clearAuth, clearPendingDeletion } from "./identity";
 import { startOnboardingBadge } from "./toolbar-badge";
 
-// Everything a reinstall must NOT inherit. Extension storage survives removing
-// and re-adding an extension (Chromium for an unpacked one, Firefox for a
-// temporary add-on), so a fresh install event has to wipe the last install's
-// session AND its onboarding progress - otherwise the new install opens its
-// onboarding checklist with steps already ticked by someone else's run.
+// Everything a fresh install must NOT inherit. The event does not imply fresh
+// storage: Chromium re-fires it on a profile whose data is still there (an
+// unpacked build loaded from the command line does it on every launch), and a dev
+// or e2e Firefox run re-installs its temporary add-on into the same profile. So it
+// has to wipe the last run's session AND its onboarding progress - otherwise the
+// new one opens its checklist with steps already ticked by someone else's run.
+// Removing the extension for real is not the case this covers: Chromium drops the
+// extension's storage itself, keys and on-disk directory both.
 export async function resetAuthOnFreshInstall(): Promise<void> {
   await clearAuth();
   await clearPendingDeletion();

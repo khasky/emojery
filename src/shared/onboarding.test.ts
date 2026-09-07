@@ -89,9 +89,10 @@ describe("checklist signals", () => {
   });
 });
 
-// A reinstall keeps extension storage - see resetOnboardingLatches in onboarding.ts.
+// The install event lands on whatever the last run left behind - see
+// resetOnboardingLatches in onboarding.ts.
 describe("resetOnboardingLatches", () => {
-  it("hands a reinstall an untouched checklist and an unspent coach-mark", async () => {
+  it("hands a fresh install an untouched checklist and an unspent coach-mark", async () => {
     await markCoachSeen();
     await markTriggerSeen();
     await setOnboardingBadgeActive(false);
