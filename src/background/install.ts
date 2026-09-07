@@ -4,12 +4,11 @@
 // every one of them through `installFreshInstallAuthReset` at the bottom.
 
 import { needsLegacyDataConsentNotice } from "../shared/data-consent";
-import { resetOnboardingLatches } from "../shared/onboarding";
+import { armFirstReaction, resetOnboardingLatches } from "../shared/onboarding";
 import { clearCountsCache } from "../shared/storage";
 import { createTab, executeScriptFiles, queryTabs } from "../shared/webext";
 import { logBackgroundError } from "./debug";
 import { clearAuth, clearPendingDeletion } from "./identity";
-import { startOnboardingBadge } from "./toolbar-badge";
 
 // Everything a fresh install must NOT inherit. The event does not imply fresh
 // storage: Chromium re-fires it on a profile whose data is still there (an
@@ -75,14 +74,15 @@ export async function openOnboardingPage(details: chrome.runtime.InstalledDetail
 export function installFreshInstallAuthReset(): void {
   chrome.runtime.onInstalled.addListener((details) => {
     if (details.reason !== "install") return;
-    // Everything below either writes an onboarding latch (the toolbar dot, the
-    // checklist page arming its own step) or sets off a write (a replayed content
+    // Everything below either writes an onboarding latch (the first-reaction step,
+    // the checklist page arming its own step) or sets off a write (a replayed content
     // script), so all of it waits for the wipe. Started alongside it, the wipe
     // could land last and undo them. A failed reset still lets them run - a first
     // run with no dot and no checklist would be worse than a stale latch.
     const afterReset = resetAuthOnFreshInstall().catch((error: unknown) => logBackgroundError("resetAuthOnFreshInstall", error));
-    // The dot then survives until the first queued vote (background/api.ts).
-    void afterReset.then(() => startOnboardingBadge()).catch((error: unknown) => logBackgroundError("startOnboardingBadge", error));
+    // Retired by the first queued vote (background/api.ts), which is the last step
+    // the onboarding checklist ticks.
+    void afterReset.then(() => armFirstReaction()).catch((error: unknown) => logBackgroundError("armFirstReaction", error));
     void afterReset.then(() => injectIntoOpenTabs()).catch((error: unknown) => logBackgroundError("injectIntoOpenTabs", error));
     void afterReset.then(() => openOnboardingPage(details)).catch((error: unknown) => logBackgroundError("openOnboardingPage", error));
     void openLegacyDataConsentNotice().catch((error: unknown) => logBackgroundError("openLegacyDataConsentNotice", error));

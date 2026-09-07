@@ -6,6 +6,7 @@ import { effectiveAnalyticsConsent, resolveLocalAnalyticsConsent } from "../shar
 import { defined } from "../shared/defined";
 import { normalizeLanguageTag } from "../shared/language-tag";
 import type { ReactionAction } from "../shared/messages";
+import { markReactedOnce } from "../shared/onboarding";
 import { randomId } from "../shared/random-id";
 import type { Reaction } from "../shared/reactions";
 import { clearOwnReactionIfMatches } from "../shared/storage";
@@ -14,7 +15,6 @@ import { apiFetch, logBackgroundError } from "./debug";
 import { pushHistory, removeHistoryEntry } from "./history";
 import { type AuthState, clearAuth, getAuth, jsonApiHeaders } from "./identity";
 import { parseRetryAfterSeconds } from "./retry-after";
-import { finishOnboardingBadge } from "./toolbar-badge";
 import { bumpAttempt, deleteById, enqueue, getQueueStats, peekNext, peekNextEligible, type QueuedVote, type StoredVote } from "./votequeue";
 
 const VOTE_FLUSH_DEBOUNCE_MS = 250;
@@ -102,8 +102,8 @@ export async function enqueueVote(record: { target: TargetRef; reaction: Reactio
   // would leave the queued vote with nothing to wake it.
   syncVoteWakeAlarm(true);
   void scheduleFlush();
-  // The first ever queued vote retires the fresh-install toolbar dot; a no-op after.
-  void finishOnboardingBadge().catch((error: unknown) => logBackgroundError("finishOnboardingBadge", error));
+  // The first ever queued vote ticks the onboarding checklist's last step; a no-op after.
+  void markReactedOnce().catch((error: unknown) => logBackgroundError("markReactedOnce", error));
   return true;
 }
 

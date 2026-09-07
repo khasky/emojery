@@ -5,12 +5,13 @@ import { logBackgroundError } from "../background/debug";
 import { migrateLegacyHistory } from "../background/history";
 import { finishPendingDeletion } from "../background/identity";
 import { installFreshInstallAuthReset } from "../background/install";
+import { isExtensionPageSender } from "../background/message-guard";
 import { handleRuntimeMessage } from "../background/message-router";
 import { ensurePopularFresh } from "../background/popular";
-import { clearInjectedBadge, PULSE_ALARM, pulseOnboardingBadge, reassertOnboardingBadge } from "../background/toolbar-badge";
+import { clearInjectedBadge, trackExtensionPage } from "../background/toolbar-badge";
 import { applyToolbarIconForTab } from "../background/toolbar-icon";
 import { AUTH_KEY } from "../shared/auth-session";
-import { TOOLBAR_PINNED_KEY } from "../shared/onboarding";
+import { PAGE_PRESENCE_PORT } from "../shared/page-presence";
 import { clearCountsCache, LEGACY_OWN_REACTIONS_KEY, maybeSweepCountsCache } from "../shared/storage";
 import { addAlarmListener, createAlarm, getTab, queryActiveTab, setUninstallURL, storageLocalRemove } from "../shared/webext";
 
@@ -54,11 +55,6 @@ export default defineBackground(() => {
   // refreshes it in long-lived browsers. ensurePopularFresh no-ops while fresh.
   void ensurePopularFresh();
 
-  // Badge text is session state, not profile state: re-paint the onboarding dot
-  // after a browser restart while the first reaction is still owed, and pulse it
-  // once on the way past if the icon is pinned.
-  void reassertOnboardingBadge().catch((error: unknown) => logBackgroundError("reassertOnboardingBadge", error));
-
   // Expired read-cache entries are dead weight in storage.local (getCachedCounts already
   // ignores them). Swept on worker start rather than on an alarm of its own - the worker
   // starts often enough during use, and maybeSweepCountsCache throttles itself.
@@ -70,15 +66,22 @@ export default defineBackground(() => {
   addAlarmListener((alarm) => {
     if (alarm.name === VOTE_WAKE_ALARM) void scheduleFlush();
     if (alarm.name === "popular-refresh") void ensurePopularFresh();
-    if (alarm.name === PULSE_ALARM) void pulseOnboardingBadge().catch((error: unknown) => logBackgroundError("pulseOnboardingBadge", error));
+  });
+
+  // The extension's own pages hold a port open while they are; the dot follows.
+  // Sender-checked like every other privileged message: a content script on a
+  // supported site can open a port with any name it likes.
+  chrome.runtime.onConnect.addListener((port) => {
+    if (port.name !== PAGE_PRESENCE_PORT) return;
+    if (port.sender?.id !== chrome.runtime.id) return;
+    if (!isExtensionPageSender(port.sender, chrome.runtime.getURL(""))) return;
+    trackExtensionPage(port);
   });
 
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== "local") return;
-    if (AUTH_KEY in changes) void clearCountsCache().catch((error: unknown) => logBackgroundError("clearCountsCache", error));
-    // The pin has no event of its own; the onboarding page's poll writes this key,
-    // and the write is what wakes the worker to start pulsing.
-    if (TOOLBAR_PINNED_KEY in changes) void pulseOnboardingBadge().catch((error: unknown) => logBackgroundError("pulseOnboardingBadge", error));
+    if (!(AUTH_KEY in changes)) return;
+    void clearCountsCache().catch((error: unknown) => logBackgroundError("clearCountsCache", error));
   });
 
   chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {

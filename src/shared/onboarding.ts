@@ -2,30 +2,23 @@
 //
 // One-way onboarding latches in storage.local. All of them are absent on installs
 // that predate this feature, and absent means "off": an existing profile updating
-// in must never grow a toolbar dot, a coach-mark or a checklist step it already
-// outlived.
+// in must never grow a coach-mark or a checklist step it already outlived.
 
 import { storageLocalGet, storageLocalRemove, storageLocalSet } from "./webext";
 
 const COACH_SEEN_KEY = "coach_seen_v1";
-const ONBOARDING_BADGE_KEY = "onboarding_badge_v1";
+// The first-reaction latch. Named for the toolbar dot it used to drive; the dot now
+// follows the extension's open pages instead (background/toolbar-badge.ts), and the
+// key is kept under its old name so an install part-way through onboarding does not
+// lose its progress. Three states: absent = not in play, true = owed, false = done.
+const FIRST_REACTION_KEY = "onboarding_badge_v1";
 // The checklist's "spot the button" step, kept apart from the coach-mark latch
 // on purpose: that one is spent by the FIRST mount of the install, including the
 // ones the install replays into tabs nobody is looking at, which ticked the step
-// for a button the user never saw. Three states, like the badge latch above:
+// for a button the user never saw. Three states, like the latch above:
 // absent = not in play, false = armed (the checklist has been on screen), true =
 // earned. ui/trigger-seen.ts decides when it is earned.
 const TRIGGER_SEEN_KEY = "trigger_seen_v1";
-// Whether the icon has ever been on the toolbar. Exported because the background
-// wakes on this key changing: the browser fires no pin/unpin event, so the value
-// arrives from the onboarding page's poll rather than from an API the worker can
-// subscribe to. Never walked back on an unpin - the badge is invisible then anyway,
-// so re-checking would buy nothing.
-export const TOOLBAR_PINNED_KEY = "toolbar_pinned_v1";
-// Bursts the pulsing dot still owes. Counts DOWN so an install that never signs in
-// stops flashing on its own; absent = never seeded, which the badge reads as a full
-// budget.
-const PULSE_BURSTS_KEY = "onboarding_pulse_v1";
 
 /**
  * Claim the one-time coach-mark: `true` exactly once per install, then latched.
@@ -55,40 +48,24 @@ export async function markCoachSeen(): Promise<void> {
  * clears the extension's storage on its own.
  */
 export async function resetOnboardingLatches(): Promise<void> {
-  await storageLocalRemove([COACH_SEEN_KEY, ONBOARDING_BADGE_KEY, TRIGGER_SEEN_KEY, TOOLBAR_PINNED_KEY, PULSE_BURSTS_KEY]);
+  await storageLocalRemove([COACH_SEEN_KEY, FIRST_REACTION_KEY, TRIGGER_SEEN_KEY]);
 }
 
-/** Whether the fresh-install toolbar dot is still owed. Missing key = inactive. */
-export async function isOnboardingBadgeActive(): Promise<boolean> {
-  const items = await storageLocalGet(ONBOARDING_BADGE_KEY);
-  return items[ONBOARDING_BADGE_KEY] === true;
+/** Whether the first reaction is still owed. Missing key = not in play. */
+export async function isFirstReactionOwed(): Promise<boolean> {
+  const items = await storageLocalGet(FIRST_REACTION_KEY);
+  return items[FIRST_REACTION_KEY] === true;
 }
 
-export async function setOnboardingBadgeActive(active: boolean): Promise<void> {
-  await storageLocalSet({ [ONBOARDING_BADGE_KEY]: active });
+/** Fresh install: put the first reaction in play, which is what the checklist ticks off. */
+export async function armFirstReaction(): Promise<void> {
+  await storageLocalSet({ [FIRST_REACTION_KEY]: true });
 }
 
-/** Whether the icon has been seen on the toolbar. Missing key = not pinned, or an engine that cannot say. */
-export async function isToolbarPinned(): Promise<boolean> {
-  const items = await storageLocalGet(TOOLBAR_PINNED_KEY);
-  return items[TOOLBAR_PINNED_KEY] === true;
-}
-
-/** Latch the pin. Guarded so a poll that keeps reading `true` writes storage once, not every second. */
-export async function markToolbarPinned(): Promise<void> {
-  if (await isToolbarPinned()) return;
-  await storageLocalSet({ [TOOLBAR_PINNED_KEY]: true });
-}
-
-/** `null` = never seeded; the badge substitutes its own full budget. */
-export async function readPulseBursts(): Promise<number | null> {
-  const items = await storageLocalGet(PULSE_BURSTS_KEY);
-  const value = items[PULSE_BURSTS_KEY];
-  return typeof value === "number" ? value : null;
-}
-
-export async function writePulseBursts(left: number): Promise<void> {
-  await storageLocalSet({ [PULSE_BURSTS_KEY]: left });
+/** First queued vote. Guarded so a later vote cannot re-settle a latch already spent. */
+export async function markReactedOnce(): Promise<void> {
+  if (!(await isFirstReactionOwed())) return;
+  await storageLocalSet({ [FIRST_REACTION_KEY]: false });
 }
 
 /** "off" = the checklist was never on screen, "armed" = waiting for a real look, "seen" = earned. */
@@ -124,15 +101,14 @@ export async function hasSeenTrigger(): Promise<boolean> {
 }
 
 /**
- * `true` once a vote has been queued. Read off the badge latch, which install
- * arms and the first queued vote retires - so the transition true -> false IS
- * the first reaction. An ABSENT key means the dot was never armed (a profile
- * older than the flag), which reads as "not reacted": the onboarding page only
- * opens on a fresh install, where install.ts arms it.
+ * `true` once a vote has been queued: install arms the latch and the first queued
+ * vote retires it, so the transition true -> false IS the first reaction. An ABSENT
+ * key means it was never armed (a profile older than the flag), which reads as "not
+ * reacted": the onboarding page only opens on a fresh install, where install.ts arms it.
  */
 export async function hasReactedOnce(): Promise<boolean> {
-  const items = await storageLocalGet(ONBOARDING_BADGE_KEY);
-  return items[ONBOARDING_BADGE_KEY] === false;
+  const items = await storageLocalGet(FIRST_REACTION_KEY);
+  return items[FIRST_REACTION_KEY] === false;
 }
 
 /**
@@ -143,7 +119,7 @@ export function watchOnboardingFlags(onChange: () => void): () => void {
   if (typeof chrome === "undefined" || !chrome.storage?.onChanged) return () => {};
   const listener = (changes: Record<string, unknown>, area: string): void => {
     if (area !== "local") return;
-    if (TRIGGER_SEEN_KEY in changes || ONBOARDING_BADGE_KEY in changes) onChange();
+    if (TRIGGER_SEEN_KEY in changes || FIRST_REACTION_KEY in changes) onChange();
   };
   chrome.storage.onChanged.addListener(listener);
   return () => chrome.storage.onChanged.removeListener(listener);

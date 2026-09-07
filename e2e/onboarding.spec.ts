@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // The fresh-install onboarding path, end to end on a real browser: the onboarding
-// tab and toolbar dot the install event owes (and their restart behavior), the
-// Try-it-live deep link landing on the live repo page with the picker
-// auto-opened, the one-time coach-mark on the first organically-visited
+// tab the install event owes, the toolbar dot that follows the extension's own
+// open pages, the Try-it-live deep link landing on the live repo page with the
+// picker auto-opened, the one-time coach-mark on the first organically-visited
 // trigger, and - behind the OTP credentials - the whole first-reaction journey
-// that retires the dot.
+// that ticks the checklist's last step.
 //
 // Every test launches its OWN throwaway profile - onboarding is a
 // once-per-install path, so a shared context would consume it for the rest.
@@ -16,9 +16,9 @@ import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 // as a 404 on someone's repository. The literal behind it is pinned by
 // onboarding.browser.test.tsx.
 import { TRY_IT_LIVE_URL } from "../src/shared/tracking-links";
-import { enMessage, verifyOtpOnAuthPage } from "./lib/auth-signin";
+import { enMessage, extensionPageUrl, verifyOtpOnAuthPage } from "./lib/auth-signin";
 import { closeSession, isFirefoxRun, launchRealisticContext, makeRunProfileDir, resolveExtensionPath } from "./lib/browser-session";
-import { ensureSignedOut, firstServiceWorker } from "./lib/extension-pages";
+import { ensureSignedOut, firstServiceWorker, resolveExtensionId } from "./lib/extension-pages";
 import { extensionLaunchArgs } from "./lib/launch-args";
 import { pollForValue } from "./lib/picker-probes";
 import { signInTestAccount } from "./lib/popup-probes";
@@ -81,13 +81,29 @@ function readGlobalBadge(context: BrowserContext): Promise<string> {
   return firstServiceWorker(context).then((worker) => worker.evaluate(() => (globalThis as unknown as { chrome: { action: { getBadgeText: (details: object) => Promise<string> } } }).chrome.action.getBadgeText({})));
 }
 
+// What the toolbar ACTUALLY shows while the given page is in front: the badge is
+// resolved per tab, and a tab carrying an empty per-tab override shows nothing even
+// while the global default is set. Reading the global badge alone would miss that
+// (it did once - the onboarding tab was blanked by the navigation handler).
+async function readBadgeOnFrontTab(context: BrowserContext, page: Page): Promise<string> {
+  await page.bringToFront();
+  const worker = await firstServiceWorker(context);
+  return worker.evaluate(async () => {
+    const api = globalThis as unknown as {
+      chrome: { tabs: { query: (q: object) => Promise<{ id?: number }[]> }; action: { getBadgeText: (details: object) => Promise<string> } };
+    };
+    const [tab] = await api.chrome.tabs.query({ active: true, lastFocusedWindow: true });
+    return tab?.id === undefined ? "<no active tab>" : api.chrome.action.getBadgeText({ tabId: tab.id });
+  });
+}
+
 // One storage.local key, read in the worker - the only context Playwright can
 // reach that holds extension storage.
 function readLocalKey(context: BrowserContext, key: string): Promise<unknown> {
   return firstServiceWorker(context).then((worker) => worker.evaluate(async (k) => (await (globalThis as unknown as { chrome: { storage: { local: { get: (key: string) => Promise<Record<string, unknown>> } } } }).chrome.storage.local.get(k))[k], key));
 }
 
-test("fresh install opens the onboarding page and arms the toolbar dot", async () => {
+test("fresh install opens the onboarding page, which carries the toolbar dot", async () => {
   test.skip(isFirefoxRun(), FIREFOX_NO_ONBOARDING);
   const session = await launchFreshInstall({ keepOnboardingTab: true });
   try {
@@ -100,8 +116,12 @@ test("fresh install opens the onboarding page and arms the toolbar dot", async (
     await expect(onboarding.locator(".progress .label")).toHaveText(/1 .* 4/);
     await expect(onboarding.locator("a.primary")).toHaveAttribute("href", TRY_IT_LIVE_URL);
 
-    // The onboarding dot: the GLOBAL default badge plus its storage latch.
+    // The dot is the GLOBAL default badge, held for as long as this page is open -
+    // and it has to survive on the onboarding tab itself, which is the one the user
+    // is looking at when it opens.
     await expect.poll(() => readGlobalBadge(session.context)).toBe("●");
+    await expect.poll(() => readBadgeOnFrontTab(session.context, onboarding), { timeout: 20_000 }).toBe("●");
+    // The checklist's last step is in play; nothing but a queued vote settles it.
     await expect.poll(() => readLocalKey(session.context, "onboarding_badge_v1")).toBe(true);
 
     // Being on screen is what arms the button step: false = armed and owed, and
@@ -112,8 +132,8 @@ test("fresh install opens the onboarding page and arms the toolbar dot", async (
   }
 });
 
-// Badge text is session state, not profile state, so the worker re-paints the
-// dot on every start while the first reaction is still owed.
+// The dot is not profile state and not onboarding state: it belongs to the
+// extension's own pages, and goes away with the last one.
 //
 // NOT tested here: that the onboarding tab does not open a second time. Chromium
 // re-fires onInstalled("install") for a `--load-extension` build on EVERY
@@ -122,18 +142,24 @@ test("fresh install opens the onboarding page and arms the toolbar dot", async (
 // onboarding tab still opens. The install-only guard is therefore unobservable
 // from this harness; what holds it is `details.reason !== "install"` in
 // background/install.ts, covered by install.test.ts.
-test("the toolbar dot survives a browser restart", async () => {
+test("the dot comes and goes with the extension's own pages", async () => {
   test.skip(isFirefoxRun(), FIREFOX_NO_ONBOARDING);
-  const first = await launchFreshInstall({ keepOnboardingTab: false });
-  await expect.poll(() => readGlobalBadge(first.context), { timeout: 20_000 }).toBe("●");
-  await closeSession(first, { keepDir: true });
-
-  const second = await launchFreshInstall({ keepOnboardingTab: false, reuseDir: first.generatedUserDataDir });
+  const session = await launchFreshInstall({ keepOnboardingTab: false });
   try {
-    await expect.poll(() => readGlobalBadge(second.context), { timeout: 20_000 }).toBe("●");
-    await expect.poll(() => readLocalKey(second.context, "onboarding_badge_v1")).toBe(true);
+    // Nothing of the extension's own is open: the badge belongs to the tabs again.
+    await expect.poll(() => readGlobalBadge(session.context), { timeout: 20_000 }).toBe("");
+
+    const extensionId = await resolveExtensionId(session.context);
+    expect(extensionId, "the extension must be loaded to open one of its pages").not.toBeNull();
+    const popup = await session.context.newPage();
+    await popup.goto(extensionPageUrl(extensionId ?? "", "popup.html"));
+    await expect.poll(() => readGlobalBadge(session.context), { timeout: 20_000 }).toBe("●");
+    await expect.poll(() => readBadgeOnFrontTab(session.context, popup), { timeout: 20_000 }).toBe("●");
+
+    await popup.close();
+    await expect.poll(() => readGlobalBadge(session.context), { timeout: 20_000 }).toBe("");
   } finally {
-    await closeSession(second);
+    await closeSession(session);
   }
 });
 
@@ -253,8 +279,8 @@ test("the gate's own auth tab returns to the page and closes itself", async () =
 
 // The whole first-reaction journey in one session: pick -> gate -> sign-in in the
 // auth tab -> the still-open popover casts the held pick by itself -> the vote
-// queues -> the toolbar dot retires for good.
-test("signing in from the gate casts the held reaction and retires the dot", async () => {
+// queues -> the checklist's last step settles for good.
+test("signing in from the gate casts the held reaction and ticks the last step", async () => {
   test.skip(isFirefoxRun(), FIREFOX_NO_ONBOARDING);
   test.skip(!authConfigured(), otpSkipReason("the gate sign-in continuation"));
   const session = await launchFreshInstall({ keepOnboardingTab: false });
@@ -282,8 +308,7 @@ test("signing in from the gate casts the held reaction and retires the dot", asy
     await page.bringToFront();
     // No second pick: sign-in casts the reaction the gate was holding and closes.
     await expect(page.locator(`.${GATE_CLASS}`), "sign-in must consume the held pick").toHaveCount(0, { timeout: 30_000 });
-    await expect.poll(() => readGlobalBadge(session.context), { timeout: 20_000 }).toBe("");
-    await expect.poll(() => readLocalKey(session.context, "onboarding_badge_v1")).toBe(false);
+    await expect.poll(() => readLocalKey(session.context, "onboarding_badge_v1"), { timeout: 20_000 }).toBe(false);
   } finally {
     if (signedIn) await ensureSignedOut(session.context).catch(() => {});
     await page.close().catch(() => {});

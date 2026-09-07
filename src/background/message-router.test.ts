@@ -101,8 +101,11 @@ type Listener = (...args: unknown[]) => void;
 const target: TargetRef = { site: "github", targetId: "o/r", url: "https://github.com/o/r" };
 const contentSender: chrome.runtime.MessageSender = { id: "ext-id", tab: { id: 42 } as chrome.tabs.Tab, url: "https://github.com/o/r" };
 
+type ConnectFn = (port: chrome.runtime.Port) => void;
+
 let route: RouteFn;
 let storageChanged: Listener;
+let connected: ConnectFn;
 
 // Drive one message through the captured router; resolves with the response.
 function dispatch(msg: unknown, sender = contentSender): { keepAlive: boolean; response: Promise<unknown> } {
@@ -117,11 +120,13 @@ function dispatch(msg: unknown, sender = contentSender): { keepAlive: boolean; r
 beforeEach(async () => {
   const onMessage: RouteFn[] = [];
   const onStorage: Listener[] = [];
+  const onConnect: ConnectFn[] = [];
   vi.stubGlobal("chrome", {
     runtime: {
       id: "ext-id",
       getURL: (p: string) => `chrome-extension://ext-id/${p}`,
       onMessage: { addListener: (l: RouteFn) => onMessage.push(l) },
+      onConnect: { addListener: (l: ConnectFn) => onConnect.push(l) },
     },
     storage: { onChanged: { addListener: (l: Listener) => onStorage.push(l) } },
     tabs: {
@@ -131,6 +136,7 @@ beforeEach(async () => {
   });
   backgroundEntry.main();
   route = onMessage[0] as RouteFn;
+  connected = onConnect[0] as ConnectFn;
   storageChanged = onStorage[0] as Listener;
   expect(route).toBeTypeOf("function");
   // Wait for the startup chores' terminal signal (scheduleFlush fires in
@@ -376,6 +382,21 @@ describe("background wiring beyond the router", () => {
     expect(ensurePopularFresh).toHaveBeenCalledTimes(1);
     fresh({ name: "unrelated" });
     expect(api.scheduleFlush).toHaveBeenCalledTimes(1);
+  });
+
+  // The presence port carries no payload, so the sender check is the whole guard:
+  // a content script can open a port under any name it likes. Which URLs pass is
+  // message-guard's own test; this one pins that the verdict is honoured at all.
+  it("shows the dot for a page port, and ignores one the sender check rejects", () => {
+    const pagePort = { name: "emojery:page-open", sender: { id: "ext-id", url: "chrome-extension://ext-id/popup.html" }, onDisconnect: { addListener: vi.fn() } } as unknown as chrome.runtime.Port;
+    vi.mocked(isExtensionPageSender).mockReturnValueOnce(true);
+    connected(pagePort);
+    expect(setToolbarBadgeText).toHaveBeenCalledWith({ text: "●" });
+
+    vi.mocked(setToolbarBadgeText).mockClear();
+    connected(pagePort);
+    connected({ ...pagePort, name: "something-else" } as unknown as chrome.runtime.Port);
+    expect(setToolbarBadgeText).not.toHaveBeenCalled();
   });
 
   it("clears the counts cache when the local auth key changes, and only then", () => {

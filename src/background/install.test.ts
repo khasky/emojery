@@ -181,22 +181,20 @@ describe("fresh-install injection into open tabs", () => {
   });
 });
 
-describe("onboarding page + toolbar dot on fresh install", () => {
-  it("opens onboarding.html and arms the global toolbar dot", async () => {
-    const { createTab, setBadgeText, local } = stubChromiumChrome();
+describe("onboarding page + first-reaction latch on fresh install", () => {
+  it("opens onboarding.html and puts the first reaction in play", async () => {
+    const { createTab, local } = stubChromiumChrome();
     installFreshInstallAuthReset();
 
     installedListener?.({ reason: "install" } as chrome.runtime.InstalledDetails);
     await drainInstallHandlers();
 
     expect(createTab).toHaveBeenCalledWith({ url: "chrome-extension://test/onboarding.html" }, expect.any(Function));
-    // The dot is the GLOBAL default badge - no tabId.
-    expect(setBadgeText).toHaveBeenCalledWith({ text: "●" }, expect.any(Function));
     expect(local.get("onboarding_badge_v1")).toBe(true);
   });
 
-  it("wipes the previous install's onboarding progress, and still arms the dot", async () => {
-    const { setBadgeText, local } = stubChromiumChrome();
+  it("wipes the previous install's onboarding progress, and still arms the latch", async () => {
+    const { local } = stubChromiumChrome();
     local.set("coach_seen_v1", true);
     local.set("trigger_seen_v1", true);
     local.set("onboarding_badge_v1", false);
@@ -207,20 +205,20 @@ describe("onboarding page + toolbar dot on fresh install", () => {
 
     expect(local.has("coach_seen_v1"), "the coach-mark is owed to the new install too").toBe(false);
     expect(local.has("trigger_seen_v1"), "the checklist step starts out of play, for the new install's own page to arm").toBe(false);
-    // Armed AFTER the wipe: the reverse order would leave no dot at all.
+    // Armed AFTER the wipe: the reverse order would leave the checklist's last step
+    // out of play for good.
     expect(local.get("onboarding_badge_v1")).toBe(true);
-    expect(setBadgeText).toHaveBeenCalledWith({ text: "●" }, expect.any(Function));
   });
 
   it("never fires on an update", async () => {
-    const { createTab, setBadgeText } = stubChromiumChrome();
+    const { createTab, local } = stubChromiumChrome();
     installFreshInstallAuthReset();
 
     installedListener?.({ reason: "update", previousVersion: "0.1.201" } as chrome.runtime.InstalledDetails);
     await drainInstallHandlers();
 
     expect(createTab).not.toHaveBeenCalled();
-    expect(setBadgeText).not.toHaveBeenCalled();
+    expect(local.has("onboarding_badge_v1")).toBe(false);
   });
 
   // Firefox temporary add-ons (web-ext dev, the e2e install) re-fire "install"

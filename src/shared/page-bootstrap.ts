@@ -6,12 +6,16 @@
 // before the first paint - the stored Theme setting can only arrive after an async
 // storage read. `lang` follows the UI locale (WCAG 3.1.1); a hardcoded "en" makes
 // screen readers read localized text with English pronunciation rules.
+import { announcePageOpen } from "./page-presence";
 import { getSettings } from "./storage";
 import { applyDocumentTheme } from "./theme";
 
 /** `followStoredTheme` is for pages with no Theme state of their own; the popup
  *  applies the stored setting from an effect instead. */
 export function bootstrapPage(title: string, followStoredTheme = false): void {
+  // Every extension page runs this, so it is also where they announce themselves for
+  // the toolbar dot - a page added later gets the dot without knowing about it.
+  announcePageOpen();
   document.title = title;
   applyDocumentTheme("system");
   if (followStoredTheme) {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { type ChromeShimHandle, installChromeShim } from "../test/chrome-shim";
-import { armTriggerSeen, claimCoachMark, hasReactedOnce, hasSeenTrigger, isOnboardingBadgeActive, markCoachSeen, markTriggerSeen, readTriggerSeen, resetOnboardingLatches, setOnboardingBadgeActive, watchOnboardingFlags } from "./onboarding";
+import { armFirstReaction, armTriggerSeen, claimCoachMark, hasReactedOnce, hasSeenTrigger, isFirstReactionOwed, markCoachSeen, markReactedOnce, markTriggerSeen, readTriggerSeen, resetOnboardingLatches, watchOnboardingFlags } from "./onboarding";
 
 let shim: ChromeShimHandle;
 
@@ -25,17 +25,17 @@ describe("coach-mark latch", () => {
   });
 });
 
-describe("onboarding badge flag", () => {
-  // Installs that predate the flag must never grow a dot on update.
-  it("absent means inactive", async () => {
-    expect(await isOnboardingBadgeActive()).toBe(false);
+describe("first-reaction latch", () => {
+  // Installs that predate the flag must never grow a checklist step on update.
+  it("absent means out of play", async () => {
+    expect(await isFirstReactionOwed()).toBe(false);
   });
 
   it("latches on and back off", async () => {
-    await setOnboardingBadgeActive(true);
-    expect(await isOnboardingBadgeActive()).toBe(true);
-    await setOnboardingBadgeActive(false);
-    expect(await isOnboardingBadgeActive()).toBe(false);
+    await armFirstReaction();
+    expect(await isFirstReactionOwed()).toBe(true);
+    await markReactedOnce();
+    expect(await isFirstReactionOwed()).toBe(false);
   });
 });
 
@@ -75,16 +75,16 @@ describe("spot-the-button latch", () => {
 // What the onboarding page's checklist reads. Both are derived from latches other
 // parts of the extension already write - nothing is recorded just for the page.
 describe("checklist signals", () => {
-  it("reads the first reaction off the badge latch retiring", async () => {
-    await setOnboardingBadgeActive(true);
+  it("reads the first reaction off the latch retiring", async () => {
+    await armFirstReaction();
     expect(await hasReactedOnce()).toBe(false);
-    await setOnboardingBadgeActive(false);
+    await markReactedOnce();
     expect(await hasReactedOnce()).toBe(true);
   });
 
-  // An install that predates the flag never armed the dot; that must read as
+  // An install that predates the flag never armed the latch; that must read as
   // "not reacted" rather than tick a step the user never did.
-  it("treats a missing badge latch as not reacted", async () => {
+  it("treats a missing latch as not reacted", async () => {
     expect(await hasReactedOnce()).toBe(false);
   });
 });
@@ -95,14 +95,15 @@ describe("resetOnboardingLatches", () => {
   it("hands a fresh install an untouched checklist and an unspent coach-mark", async () => {
     await markCoachSeen();
     await markTriggerSeen();
-    await setOnboardingBadgeActive(false);
+    await armFirstReaction();
+    await markReactedOnce();
 
     await resetOnboardingLatches();
 
     expect(await hasSeenTrigger()).toBe(false);
     expect(await readTriggerSeen(), "the step is out of play until the new install's page arms it").toBe("off");
     expect(await hasReactedOnce()).toBe(false);
-    expect(await isOnboardingBadgeActive()).toBe(false);
+    expect(await isFirstReactionOwed()).toBe(false);
     expect(await claimCoachMark(), "the coach-mark is owed again").toBe(true);
   });
 });
