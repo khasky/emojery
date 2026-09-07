@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// One-way onboarding latches in storage.local. All three are absent on installs
+// One-way onboarding latches in storage.local. All of them are absent on installs
 // that predate this feature, and absent means "off": an existing profile updating
 // in must never grow a toolbar dot, a coach-mark or a checklist step it already
 // outlived.
@@ -16,6 +16,16 @@ const ONBOARDING_BADGE_KEY = "onboarding_badge_v1";
 // absent = not in play, false = armed (the checklist has been on screen), true =
 // earned. ui/trigger-seen.ts decides when it is earned.
 const TRIGGER_SEEN_KEY = "trigger_seen_v1";
+// Whether the icon has ever been on the toolbar. Exported because the background
+// wakes on this key changing: the browser fires no pin/unpin event, so the value
+// arrives from the onboarding page's poll rather than from an API the worker can
+// subscribe to. Never walked back on an unpin - the badge is invisible then anyway,
+// so re-checking would buy nothing.
+export const TOOLBAR_PINNED_KEY = "toolbar_pinned_v1";
+// Bursts the pulsing dot still owes. Counts DOWN so an install that never signs in
+// stops flashing on its own; absent = never seeded, which the badge reads as a full
+// budget.
+const PULSE_BURSTS_KEY = "onboarding_pulse_v1";
 
 /**
  * Claim the one-time coach-mark: `true` exactly once per install, then latched.
@@ -45,7 +55,7 @@ export async function markCoachSeen(): Promise<void> {
  * clears the extension's storage on its own.
  */
 export async function resetOnboardingLatches(): Promise<void> {
-  await storageLocalRemove([COACH_SEEN_KEY, ONBOARDING_BADGE_KEY, TRIGGER_SEEN_KEY]);
+  await storageLocalRemove([COACH_SEEN_KEY, ONBOARDING_BADGE_KEY, TRIGGER_SEEN_KEY, TOOLBAR_PINNED_KEY, PULSE_BURSTS_KEY]);
 }
 
 /** Whether the fresh-install toolbar dot is still owed. Missing key = inactive. */
@@ -56,6 +66,29 @@ export async function isOnboardingBadgeActive(): Promise<boolean> {
 
 export async function setOnboardingBadgeActive(active: boolean): Promise<void> {
   await storageLocalSet({ [ONBOARDING_BADGE_KEY]: active });
+}
+
+/** Whether the icon has been seen on the toolbar. Missing key = not pinned, or an engine that cannot say. */
+export async function isToolbarPinned(): Promise<boolean> {
+  const items = await storageLocalGet(TOOLBAR_PINNED_KEY);
+  return items[TOOLBAR_PINNED_KEY] === true;
+}
+
+/** Latch the pin. Guarded so a poll that keeps reading `true` writes storage once, not every second. */
+export async function markToolbarPinned(): Promise<void> {
+  if (await isToolbarPinned()) return;
+  await storageLocalSet({ [TOOLBAR_PINNED_KEY]: true });
+}
+
+/** `null` = never seeded; the badge substitutes its own full budget. */
+export async function readPulseBursts(): Promise<number | null> {
+  const items = await storageLocalGet(PULSE_BURSTS_KEY);
+  const value = items[PULSE_BURSTS_KEY];
+  return typeof value === "number" ? value : null;
+}
+
+export async function writePulseBursts(left: number): Promise<void> {
+  await storageLocalSet({ [PULSE_BURSTS_KEY]: left });
 }
 
 /** "off" = the checklist was never on screen, "armed" = waiting for a real look, "seen" = earned. */

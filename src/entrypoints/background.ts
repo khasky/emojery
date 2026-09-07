@@ -7,9 +7,10 @@ import { finishPendingDeletion } from "../background/identity";
 import { installFreshInstallAuthReset } from "../background/install";
 import { handleRuntimeMessage } from "../background/message-router";
 import { ensurePopularFresh } from "../background/popular";
-import { clearInjectedBadge, reassertOnboardingBadge } from "../background/toolbar-badge";
+import { clearInjectedBadge, PULSE_ALARM, pulseOnboardingBadge, reassertOnboardingBadge } from "../background/toolbar-badge";
 import { applyToolbarIconForTab } from "../background/toolbar-icon";
 import { AUTH_KEY } from "../shared/auth-session";
+import { TOOLBAR_PINNED_KEY } from "../shared/onboarding";
 import { clearCountsCache, LEGACY_OWN_REACTIONS_KEY, maybeSweepCountsCache } from "../shared/storage";
 import { addAlarmListener, createAlarm, getTab, queryActiveTab, setUninstallURL, storageLocalRemove } from "../shared/webext";
 
@@ -54,7 +55,8 @@ export default defineBackground(() => {
   void ensurePopularFresh();
 
   // Badge text is session state, not profile state: re-paint the onboarding dot
-  // after a browser restart while the first reaction is still owed.
+  // after a browser restart while the first reaction is still owed, and pulse it
+  // once on the way past if the icon is pinned.
   void reassertOnboardingBadge().catch((error: unknown) => logBackgroundError("reassertOnboardingBadge", error));
 
   // Expired read-cache entries are dead weight in storage.local (getCachedCounts already
@@ -68,12 +70,15 @@ export default defineBackground(() => {
   addAlarmListener((alarm) => {
     if (alarm.name === VOTE_WAKE_ALARM) void scheduleFlush();
     if (alarm.name === "popular-refresh") void ensurePopularFresh();
+    if (alarm.name === PULSE_ALARM) void pulseOnboardingBadge().catch((error: unknown) => logBackgroundError("pulseOnboardingBadge", error));
   });
 
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== "local") return;
-    if (!(AUTH_KEY in changes)) return;
-    void clearCountsCache().catch((error: unknown) => logBackgroundError("clearCountsCache", error));
+    if (AUTH_KEY in changes) void clearCountsCache().catch((error: unknown) => logBackgroundError("clearCountsCache", error));
+    // The pin has no event of its own; the onboarding page's poll writes this key,
+    // and the write is what wakes the worker to start pulsing.
+    if (TOOLBAR_PINNED_KEY in changes) void pulseOnboardingBadge().catch((error: unknown) => logBackgroundError("pulseOnboardingBadge", error));
   });
 
   chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {

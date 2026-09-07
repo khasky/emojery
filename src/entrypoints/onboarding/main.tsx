@@ -8,7 +8,7 @@
 import { render } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { t } from "../../shared/i18n";
-import { armTriggerSeen, hasReactedOnce, hasSeenTrigger, watchOnboardingFlags } from "../../shared/onboarding";
+import { armTriggerSeen, hasReactedOnce, hasSeenTrigger, markToolbarPinned, watchOnboardingFlags } from "../../shared/onboarding";
 import { bootstrapPage } from "../../shared/page-bootstrap";
 import { CARD_CLASS, CONFETTI_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
 import { SUPPORTED_SITES } from "../../shared/sites";
@@ -62,6 +62,9 @@ function usePinnedState(): boolean | null {
       // claiming either value, and stop asking.
       if (typeof settings?.isOnToolbar !== "boolean") return;
       setPinned(settings.isOnToolbar);
+      // This poll is the only pin signal the extension has - the browser fires no
+      // event - so the background learns of it by watching the latch it writes.
+      if (settings.isOnToolbar) void markToolbarPinned().catch(() => {});
       again();
     };
     void check();
