@@ -7,6 +7,7 @@
 import { type BrowserContext, expect, type Page } from "@playwright/test";
 import { enMessage } from "./auth-signin";
 import { openPopup } from "./extension-pages";
+import { ROW_SELECT_SELECTOR } from "./selectors";
 
 // Prefix of a per-site row's accessible name ("Show the picker on Facebook"),
 // derived from the shipped template by splitting on a NUL stand-in for the site
@@ -46,6 +47,32 @@ async function setPerSiteEnabled(popup: Page, rowName: string, enabled: boolean)
       { message: `"${rowName}" should end up ${enabled ? "on" : "off"}` },
     )
     .toBe(enabled);
+}
+
+/** The Theme row's stored values, which are also its `<option>` values. */
+export type PopupThemeChoice = "light" | "dark" | "system";
+
+// The Theme row is the popup's only <select>, and its option values ARE the stored
+// preference - so this drives it by value and needs no localized option label.
+export async function setPopupTheme(context: BrowserContext, choice: PopupThemeChoice): Promise<void> {
+  const popup = await openPopup(context);
+  try {
+    await popup.getByRole("tab", { name: "Settings" }).click();
+    const select = popup.locator(ROW_SELECT_SELECTOR);
+    await expect(select).toBeVisible();
+    // The same hydration race setPopupCheckbox works around: the popup paints
+    // DEFAULT_SETTINGS first and the stored merge lands one storage read later,
+    // reverting a selection made inside that window.
+    await popup.waitForTimeout(300);
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      await select.selectOption(choice);
+      await popup.waitForTimeout(250);
+      if ((await select.inputValue()) === choice) break;
+    }
+    await expect(select).toHaveValue(choice);
+  } finally {
+    await popup.close().catch(() => {});
+  }
 }
 
 // Set a settings checkbox (by accessible name) in the popup to a target state,

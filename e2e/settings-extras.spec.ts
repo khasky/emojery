@@ -5,14 +5,16 @@
 // intro burst (decided at mount, so a reload); a second, already-open popup does
 // not live-sync a settings change until reopened (characterized, so a future
 // live-sync change is a conscious one); the popup reopens on the tab it was last
-// left on; turning a site off per-site restores the native control replace-native hid.
+// left on; turning a site off per-site restores the native control replace-native hid;
+// the Theme setting repaints a live trigger and the extension's own pages; and the
+// Debug setting is what reveals the queue panel.
 //
 // OS reduced-motion suppresses the bursts on top of the toggle (src/ui/animations.ts),
 // so these cases must never emulate reduce-motion.
-import { expect, type Page, test } from "@playwright/test";
+import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import * as ext from "./lib/extension";
 import { reloadAndSettle } from "./lib/reload-settle";
-import { CLICK_FLOAT_CLASS, INTRO_PARTICLE_CLASS } from "./lib/selectors";
+import { CLICK_FLOAT_CLASS, DEBUG_TAB_SELECTOR, HISTORY_DAY_SELECTOR, HOST_SELECTOR, INTRO_PARTICLE_CLASS, TAB_PANEL_SELECTOR } from "./lib/selectors";
 
 const REQUIRES_OTP = ext.otpSkipReason("the animations-toggle e2e check");
 
@@ -246,6 +248,119 @@ test("intro animation replays on reload and honors the animations toggle", async
     await ext.clearReaction(page);
   } finally {
     await ext.ensureSignedOut(session.context).catch(() => {});
+    await ext.closeSession(session);
+  }
+});
+
+// The trigger host carries the resolved palette as `data-theme` (ui/themed-hosts.ts),
+// so the Theme setting is observable on a live page without sampling any color.
+async function mountedHostTheme(page: Page): Promise<string | null> {
+  return page.locator(`${HOST_SELECTOR}[data-theme]`).first().getAttribute("data-theme");
+}
+
+// Forcing a palette must reach the mounted trigger through the settings watcher,
+// with no reload - and handing it back to "System" must return the page's own
+// answer. The baseline is READ rather than asserted: which palette GitHub serves
+// logged-out is the site's business, and the case is about the delta.
+test("the Theme setting repaints a mounted trigger with no reload", async () => {
+  const session = await ext.launchSession();
+  try {
+    const page = await ext.openGithub(session.context);
+    await expect.poll(() => ext.visibleHostCount(page), { message: "picker should mount on GitHub by default" }).toBeGreaterThan(0);
+    const systemBaseline = await mountedHostTheme(page);
+    expect(systemBaseline, "a mounted host should carry a resolved palette").not.toBeNull();
+
+    await ext.setPopupTheme(session.context, "dark");
+    await expect.poll(() => mountedHostTheme(page), { message: "forcing Dark should repaint the mounted trigger in place" }).toBe("dark");
+
+    await ext.setPopupTheme(session.context, "light");
+    await expect.poll(() => mountedHostTheme(page), { message: "forcing Light should repaint the mounted trigger in place" }).toBe("light");
+
+    await ext.setPopupTheme(session.context, "system");
+    await expect.poll(() => mountedHostTheme(page), { message: "System should hand the palette back to the page" }).toBe(systemBaseline);
+  } finally {
+    await ext.closeSession(session);
+  }
+});
+
+// An extension page has no host site to blend with, so its palette is the setting
+// itself - resolved against the BROWSER only while it says System. Emulating the
+// browser preference needs a reload: the page reads it once, at bootstrap.
+async function expectPopupTheme(context: BrowserContext, expected: string, colorScheme?: "light" | "dark"): Promise<void> {
+  const popup = await ext.openPopup(context);
+  try {
+    if (colorScheme) {
+      await popup.emulateMedia({ colorScheme });
+      await popup.reload();
+      await expect(popup.getByRole("heading", { name: "Emojery" })).toBeVisible();
+    }
+    await expect(popup.locator("html")).toHaveAttribute("data-theme", expected);
+  } finally {
+    await popup.close().catch(() => {});
+  }
+}
+
+test("the Theme setting drives the extension pages, and System follows the browser", async () => {
+  const session = await ext.launchSession();
+  try {
+    await ext.setPopupTheme(session.context, "dark");
+    await expectPopupTheme(session.context, "dark");
+
+    await ext.setPopupTheme(session.context, "light");
+    await expectPopupTheme(session.context, "light");
+
+    await ext.setPopupTheme(session.context, "system");
+    await expectPopupTheme(session.context, "dark", "dark");
+    await expectPopupTheme(session.context, "light", "light");
+  } finally {
+    await ext.closeSession(session);
+  }
+});
+
+// The Debug panel ships in every build behind the setting (docs/development.md).
+// The header's bug button is in the DOM either way and `display: none` until the
+// setting is on (.debug-toggle-off), so "revealed" is a visibility assertion. The
+// panel's summary is deliberately un-i18n'd (popup-queue.tsx): the text below is
+// the queue's own state, not a translation.
+test("Debug mode reveals the queue panel and hides it again", async () => {
+  const session = await ext.launchSession();
+  try {
+    const beforeToggle = await ext.openPopup(session.context);
+    try {
+      await expect(beforeToggle.locator(DEBUG_TAB_SELECTOR), "the bug button stays hidden while Debug is off").toBeHidden();
+    } finally {
+      await beforeToggle.close().catch(() => {});
+    }
+
+    await ext.setPopupCheckbox(session.context, { tab: "Settings", name: "Debug", checked: true });
+
+    const withDebug = await ext.openPopup(session.context);
+    try {
+      const bugButton = withDebug.locator(DEBUG_TAB_SELECTOR);
+      await expect(bugButton).toBeVisible();
+      await bugButton.click();
+      const summary = withDebug.locator(HISTORY_DAY_SELECTOR);
+      await expect(summary, "an idle queue reads as empty, not as an error").toContainText("0 queued");
+      await expect(summary).toContainText("no hold");
+      await expect(summary).toContainText("0 consecutive failures");
+      await expect(withDebug.getByRole("alert"), "reading the queue must not fail").toHaveCount(0);
+    } finally {
+      await withDebug.close().catch(() => {});
+    }
+
+    await ext.setPopupCheckbox(session.context, { tab: "Settings", name: "Debug", checked: false });
+
+    // The popup reopens on the view it was left on, and that view was Debug - with
+    // the setting off it has to fall back to Settings rather than render nothing.
+    const afterToggle = await ext.openPopup(session.context);
+    try {
+      await expect(afterToggle.locator(DEBUG_TAB_SELECTOR), "switching Debug off takes the bug button away again").toBeHidden();
+      await expect(afterToggle.locator(TAB_PANEL_SELECTOR)).not.toContainText("queued");
+      await expect(afterToggle.getByRole("tab", { name: "Settings" }), "a remembered Debug view falls back to Settings").toHaveAttribute("aria-selected", "true");
+    } finally {
+      await afterToggle.close().catch(() => {});
+    }
+  } finally {
     await ext.closeSession(session);
   }
 });
