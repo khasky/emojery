@@ -3,12 +3,14 @@
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "@playwright/test";
+import { snapshotExtensionForRun } from "./lib/extension-snapshot";
 import { loadE2eEnvFiles } from "./lib/load-env";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const extensionRoot = resolve(__dirname, "..");
 
 loadEnvFiles();
+snapshotExtensionForRun(extensionRoot);
 
 const testTimeout = Number(process.env.E2E_TEST_TIMEOUT_MS ?? 120_000);
 const expectTimeout = Number(process.env.E2E_EXPECT_TIMEOUT_MS ?? 30_000);
