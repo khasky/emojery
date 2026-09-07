@@ -4,11 +4,12 @@ Black-box checks of Emojery for users logged into the host platforms (Facebook, 
 
 > **Warning — `test:e2e:siteauth:autopress` acts as you, in public.** It exercises the **Auto-press original buttons** setting, so it presses real native controls under your signed-in accounts:
 >
-> - YouTube — a Like and a Dislike (anonymous, but they move a public count).
-> - Reddit — a downvote (same: anonymous, public count).
-> - Facebook — a ❤️ Love reaction, through the hover flyout.
+> - YouTube — a Like and a Dislike on the watch page, and a Like on a Short (anonymous, but they move a public count).
+> - Reddit — a downvote on a post page and an upvote on the first card of a subreddit feed (same: anonymous, public count).
+> - Facebook — a ❤️ Love and a 😂 Haha reaction, through the hover flyout.
 > - GitHub — a repo star. GitLab — a project star.
-> - Threads — a like. Instagram — a like.
+> - Threads — a like. Instagram — a like on a permalink, in the feed and (when configured) in a reel.
+> - X — a like, in the feed and on a status page.
 >
 > Each press is reverted before the flow ends. While it runs, the GitHub and GitLab stars, the Threads and Instagram likes, and the Facebook reaction are attributed to your account and visible to others, and the author's star/like notification can land before the revert does. Run this flow only from an account you are willing to do that with.
 
@@ -64,6 +65,8 @@ The bridge cannot open `chrome-extension://` pages, so it can neither read nor c
 | `pnpm run test:e2e:siteauth:autopress` | **Auto-press original buttons** on |
 
 The main command excludes the auto-press file rather than listing the others, so a new flow that runs on defaults joins it automatically.
+
+Two auto-press cases need a fixture that has no stable public default and skip without one: `E2E_AUTHURL_YOUTUBE_SHORTS` (a Short this account may like) and `E2E_AUTHURL_INSTAGRAM_REEL` (a reel permalink). Everything else runs off the fixtures already in `.env.e2e.example`.
 
 `:autopress` tells the 2 failure kinds apart: while no site has pressed yet, a failure says the setting is probably off; once any site has pressed, the setting is proven on and later failures name the specific site instead — so a broken site is never mistaken for a setup mistake.
 
