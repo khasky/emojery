@@ -451,7 +451,10 @@
     "message": "Emojery gửi những gì"
   },
   "dataConsentBody": {
-    "message": "Để đếm và chia sẻ phản ứng, Emojery gửi địa chỉ trang mà bạn phản ứng đến máy chủ của mình, cùng với các mã định danh cài đặt và phiên ngẫu nhiên không được tạo ra từ bạn. Khi đăng nhập, email của bạn được gửi một lần để chuyển mã dùng một lần; chỉ một mã băm một chiều của email được giữ làm mã định danh tài khoản của bạn, và lịch sử phản ứng của bạn ở lại trên thiết bị này. Ngữ cảnh tùy chọn vẫn tắt trong trình duyệt này."
+    "message": "Emojery gửi địa chỉ trang mà bạn phản ứng, các mã định danh cài đặt và phiên ngẫu nhiên, và email của bạn một lần khi đăng nhập; chỉ một mã băm một chiều của email được giữ lại. Ngữ cảnh tùy chọn vẫn tắt trong trình duyệt này."
+  },
+  "dataConsentPolicyLink": {
+    "message": "Chính sách quyền riêng tư."
   },
   "dataConsentContinueBtn": {
     "message": "Tiếp tục"

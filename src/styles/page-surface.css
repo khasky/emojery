@@ -1,0 +1,86 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * The canvas the extension's full-tab pages share (auth, onboarding): the centred
+ * card, the palette it paints on and the heading pair inside it. Values live here
+ * once so the two pages cannot drift apart - they are meant to read as one surface.
+ *
+ * The popup deliberately does not import this: it is a fixed-size panel with no
+ * canvas of its own, and it re-points `--khasky-emojery-bg` / `-heading` to panel
+ * values in its own sheet.
+ *
+ * Imported after tokens.css and before each page's own rules, which is what lets a
+ * page EXTEND what it finds here (onboarding's two-column card) instead of
+ * restating it. Each page still sets its own `#app` max-width - that is the one
+ * canvas value the two do not share.
+ */
+
+:root {
+  --khasky-emojery-bg: #f5f7fa;
+  --khasky-emojery-card: #fff;
+  --khasky-emojery-heading: #1c1e21;
+  --khasky-emojery-card-shadow: rgba(0, 0, 0, 0.08);
+}
+
+:root[data-theme="dark"] {
+  --khasky-emojery-bg: #0f1011;
+  --khasky-emojery-card: #18191a;
+  --khasky-emojery-heading: #f2f3f5;
+  --khasky-emojery-card-shadow: rgba(0, 0, 0, 0.35);
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  /* Pin the base size explicitly on both html and body so nothing in the
+     inheritance chain can resolve a control's `font: inherit` below it. */
+  font-size: 14px;
+  background: var(--khasky-emojery-bg);
+  color: var(--khasky-emojery-fg);
+}
+
+/* Padding lives here, not on the full-height child: a `min-height: 100vh`
+   element with its own padding overflows the viewport - the stray scrollbar. */
+body {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  overflow: auto;
+}
+
+/* The render root is the grid item body centres, so it carries the width - a
+   `width: 100%` inside a max-content item would collapse to nothing. */
+#app {
+  width: 100%;
+}
+
+.wrap {
+  width: 100%;
+}
+
+.card {
+  background: var(--khasky-emojery-card);
+  color: var(--khasky-emojery-fg);
+  border-radius: 14px;
+  padding: 34px 38px;
+  box-shadow: 0 4px 24px var(--khasky-emojery-card-shadow);
+}
+
+h1 {
+  margin: 0;
+  font-size: 20px;
+  color: var(--khasky-emojery-heading);
+  line-height: 1.2;
+}
+
+.tagline {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--khasky-emojery-muted);
+}
+
+a {
+  color: var(--khasky-emojery-link);
+}

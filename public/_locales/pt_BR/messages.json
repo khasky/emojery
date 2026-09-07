@@ -451,7 +451,10 @@
     "message": "O que o Emojery envia"
   },
   "dataConsentBody": {
-    "message": "Para contar e compartilhar reações, o Emojery envia ao seu servidor o endereço da página em que você reage, junto com identificadores aleatórios de instalação e sessão que não derivam de você. Ao entrar na conta, seu e-mail é enviado uma única vez para entregar um código de uso único; apenas um hash unidirecional dele é mantido como identificador da sua conta, e seu histórico de reações fica neste dispositivo. O contexto opcional permanece desativado neste navegador."
+    "message": "O Emojery envia o endereço da página em que você reage, identificadores aleatórios de instalação e sessão e, uma única vez ao entrar na conta, seu e-mail; dele é mantido apenas um hash unidirecional. O contexto opcional permanece desativado neste navegador."
+  },
+  "dataConsentPolicyLink": {
+    "message": "Política de Privacidade."
   },
   "dataConsentContinueBtn": {
     "message": "Continuar"

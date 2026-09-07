@@ -451,7 +451,10 @@
     "message": "Apa yang Emojery hantar"
   },
   "dataConsentBody": {
-    "message": "Untuk mengira dan berkongsi tindak balas, Emojery menghantar alamat halaman yang anda beri tindak balas ke pelayannya, bersama pengecam pemasangan dan sesi rawak yang tidak diterbitkan daripada anda. Semasa log masuk, e-mel anda dihantar sekali sahaja untuk menyampaikan kod sekali guna; hanya cincangan sehala bagi e-mel itu disimpan sebagai pengenal akaun anda, dan sejarah tindak balas anda kekal pada peranti ini. Konteks pilihan kekal dimatikan dalam pelayar ini."
+    "message": "Emojery menghantar alamat halaman yang anda beri tindak balas, pengecam pemasangan dan sesi rawak, serta e-mel anda sekali sahaja semasa log masuk; hanya cincangan sehala bagi e-mel itu disimpan. Konteks pilihan kekal dimatikan dalam pelayar ini."
+  },
+  "dataConsentPolicyLink": {
+    "message": "Dasar Privasi."
   },
   "dataConsentContinueBtn": {
     "message": "Teruskan"

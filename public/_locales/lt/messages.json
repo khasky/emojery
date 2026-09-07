@@ -451,7 +451,10 @@
     "message": "Ką siunčia „Emojery“"
   },
   "dataConsentBody": {
-    "message": "Kad galėtų skaičiuoti ir bendrinti reakcijas, „Emojery“ siunčia į savo serverį puslapio, kuriame reaguojate, adresą kartu su atsitiktiniais diegimo ir seanso identifikatoriais, kurie nėra sudaryti iš jūsų duomenų. Prisijungiant jūsų el. pašto adresas išsiunčiamas vieną kartą, kad būtų pristatytas vienkartinis kodas; saugoma tik vienkryptė jo maiša kaip jūsų paskyros identifikatorius, o reakcijų istorija lieka šiame įrenginyje. Pasirenkamas kontekstas šioje naršyklėje lieka išjungtas."
+    "message": "„Emojery“ siunčia puslapio, kuriame reaguojate, adresą, atsitiktinius diegimo ir seanso identifikatorius ir prisijungiant vieną kartą jūsų el. pašto adresą; saugoma tik vienkryptė jo maiša. Pasirenkamas kontekstas šioje naršyklėje lieka išjungtas."
+  },
+  "dataConsentPolicyLink": {
+    "message": "Privatumo politika."
   },
   "dataConsentContinueBtn": {
     "message": "Tęsti"

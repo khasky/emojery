@@ -578,8 +578,12 @@
     "description": "Heading of the data-collection disclosure shown on first install in browsers without Firefox's built-in consent screen."
   },
   "dataConsentBody": {
-    "message": "To count and share reactions, Emojery sends the address of the page you react on to its server, together with random install and session identifiers that are not derived from you. Signing in sends your email once to deliver a one-time code; only a one-way hash of it is kept as your account identifier, and your reaction history stays on this device. Optional context stays off in this browser.",
+    "message": "Emojery sends the address of the page you react on, random install and session identifiers, and your email once at sign-in; only a one-way hash of it is kept. Optional context stays off in this browser.",
     "description": "Body of the data-collection disclosure shown on first install in browsers without Firefox's built-in consent screen."
+  },
+  "dataConsentPolicyLink": {
+    "message": "Privacy Policy.",
+    "description": "Link ending the data-collection disclosure, pointing at the full privacy policy. Separate from authPrivacyLinkLabel, which half the locales inflect for the 'I agree to the ...' sentence and so cannot stand as a sentence of its own."
   },
   "dataConsentContinueBtn": {
     "message": "Continue",

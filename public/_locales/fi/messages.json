@@ -451,7 +451,10 @@
     "message": "Mitä Emojery lähettää"
   },
   "dataConsentBody": {
-    "message": "Reaktioiden laskemiseksi ja jakamiseksi Emojery lähettää palvelimelleen sen sivun osoitteen, jolla reagoit, sekä satunnaiset asennus- ja istuntotunnisteet, joita ei johdeta sinusta. Kirjautuessasi sähköpostiosoitteesi lähetetään kerran kertakoodin toimittamista varten; siitä säilytetään vain yksisuuntainen tiiviste tilisi tunnisteena, ja reaktiohistoriasi pysyy tällä laitteella. Valinnainen konteksti pysyy pois päältä tässä selaimessa."
+    "message": "Emojery lähettää sen sivun osoitteen, jolla reagoit, satunnaiset asennus- ja istuntotunnisteet sekä sähköpostiosoitteesi kerran kirjautuessasi; siitä säilytetään vain yksisuuntainen tiiviste. Valinnainen konteksti pysyy pois päältä tässä selaimessa."
+  },
+  "dataConsentPolicyLink": {
+    "message": "Tietosuojakäytäntö."
   },
   "dataConsentContinueBtn": {
     "message": "Jatka"

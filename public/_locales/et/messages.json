@@ -451,7 +451,10 @@
     "message": "Mida Emojery saadab"
   },
   "dataConsentBody": {
-    "message": "Reaktsioonide loendamiseks ja jagamiseks saadab Emojery oma serverisse selle lehe aadressi, millel reageerid, koos juhuslike paigaldus- ja seansitunnustega, mis ei tulene sinust. Sisselogimisel saadetakse su e-posti aadress ühe korra, et toimetada ühekordne kood; sellest säilitatakse ainult ühesuunaline räsi sinu konto tunnusena ja sinu reaktsioonide ajalugu jääb sellesse seadmesse. Valikuline kontekst jääb selles brauseris välja lülitatuks."
+    "message": "Emojery saadab selle lehe aadressi, millel reageerid, juhuslikud paigaldus- ja seansitunnused ning sisselogimisel ühe korra su e-posti aadressi; sellest säilitatakse ainult ühesuunaline räsi. Valikuline kontekst jääb selles brauseris välja lülitatuks."
+  },
+  "dataConsentPolicyLink": {
+    "message": "Privaatsuspoliitika."
   },
   "dataConsentContinueBtn": {
     "message": "Jätka"

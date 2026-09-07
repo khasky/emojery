@@ -451,7 +451,10 @@
     "message": "Ce qu’Emojery envoie"
   },
   "dataConsentBody": {
-    "message": "Pour compter et partager les réactions, Emojery envoie à son serveur l’adresse de la page sur laquelle vous réagissez, ainsi que des identifiants d’installation et de session aléatoires qui ne sont pas dérivés de vous. À la connexion, votre adresse e-mail est envoyée une seule fois pour livrer un code à usage unique ; seul un hachage à sens unique de celle-ci est conservé comme identifiant de votre compte, et votre historique de réactions reste sur cet appareil. Le contexte facultatif reste désactivé dans ce navigateur."
+    "message": "Emojery envoie l’adresse de la page sur laquelle vous réagissez, des identifiants d’installation et de session aléatoires, et votre adresse e-mail une seule fois à la connexion ; seul un hachage à sens unique de celle-ci est conservé. Le contexte facultatif reste désactivé dans ce navigateur."
+  },
+  "dataConsentPolicyLink": {
+    "message": "Politique de confidentialité."
   },
   "dataConsentContinueBtn": {
     "message": "Continuer"

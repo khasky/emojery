@@ -451,7 +451,10 @@
     "message": "Mit küld az Emojery"
   },
   "dataConsentBody": {
-    "message": "A reakciók számlálásához és megosztásához az Emojery elküldi a szerverének annak az oldalnak a címét, amelyen reagál, valamint véletlenszerű telepítési és munkamenet-azonosítókat, amelyek nem az Ön adataiból származnak. Bejelentkezéskor az e-mail-címe egyszer kerül elküldésre az egyszeri kód kézbesítéséhez; csak annak egyirányú kivonatát tároljuk fiókazonosítóként, a reakcióelőzményei pedig ezen az eszközön maradnak. A választható környezeti adat ebben a böngészőben kikapcsolva marad."
+    "message": "Az Emojery elküldi annak az oldalnak a címét, amelyen reagál, véletlenszerű telepítési és munkamenet-azonosítókat, valamint bejelentkezéskor egyszer az e-mail-címét; ebből csak egy egyirányú kivonatot tárolunk. A választható környezeti adat ebben a böngészőben kikapcsolva marad."
+  },
+  "dataConsentPolicyLink": {
+    "message": "Adatvédelmi szabályzat."
   },
   "dataConsentContinueBtn": {
     "message": "Tovább"

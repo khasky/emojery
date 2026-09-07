@@ -451,7 +451,10 @@
     "message": "Hva Emojery sender"
   },
   "dataConsentBody": {
-    "message": "For å telle og dele reaksjoner sender Emojery adressen til siden du reagerer på, til serveren sin, sammen med tilfeldige installasjons- og øktidentifikatorer som ikke er utledet av deg. Ved innlogging sendes e-postadressen din én gang for å levere en engangskode; bare en enveis-hash av den lagres som kontoidentifikatoren din, og reaksjonshistorikken din blir på denne enheten. Valgfri kontekst forblir avslått i denne nettleseren."
+    "message": "Emojery sender adressen til siden du reagerer på, tilfeldige installasjons- og øktidentifikatorer og e-postadressen din én gang ved innlogging; bare en enveis-hash av den lagres. Valgfri kontekst forblir avslått i denne nettleseren."
+  },
+  "dataConsentPolicyLink": {
+    "message": "Personvernerklæring."
   },
   "dataConsentContinueBtn": {
     "message": "Fortsett"

@@ -451,7 +451,10 @@
     "message": "Cosa invia Emojery"
   },
   "dataConsentBody": {
-    "message": "Per contare e condividere le reazioni, Emojery invia al suo server l’indirizzo della pagina su cui reagisci, insieme a identificatori casuali di installazione e sessione che non derivano da te. All’accesso il tuo indirizzo email viene inviato una sola volta per recapitare un codice monouso; ne viene conservato solo un hash unidirezionale come identificatore del tuo account e la cronologia delle reazioni resta su questo dispositivo. Il contesto facoltativo resta disattivato in questo browser."
+    "message": "Emojery invia l’indirizzo della pagina su cui reagisci, identificatori casuali di installazione e sessione e, una sola volta all’accesso, il tuo indirizzo email; di quest’ultimo viene conservato solo un hash unidirezionale. Il contesto facoltativo resta disattivato in questo browser."
+  },
+  "dataConsentPolicyLink": {
+    "message": "Informativa sulla privacy."
   },
   "dataConsentContinueBtn": {
     "message": "Continua"

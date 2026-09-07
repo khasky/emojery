@@ -273,6 +273,12 @@ describe("auth page - the legacy consent gate", () => {
     expect(heading()).toBe("What Emojery sends");
     expect(document.querySelector("#email-input")).toBeNull();
 
+    // The policy closes the disclosure paragraph as its last sentence - it was a
+    // block of its own, which read as a second button beside Continue.
+    const body = requireEl(document, "#app .tagline");
+    expect(body.querySelector("a")?.textContent).toBe("Privacy Policy.");
+    expect(document.querySelector("#app .notice")).toBeNull();
+
     await userEvent.click(primaryBtn());
     expect(heading()).toBe("Sign in to react");
   });

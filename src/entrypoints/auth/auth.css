@@ -1,61 +1,26 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 
-/* Below: only what is the auth page's own. */
+/* Below: only what is the auth page's own - the canvas, the card and the heading
+   pair come from styles/page-surface.css, shared with the onboarding page. */
 @import "../../styles/tokens.css";
+@import "../../styles/page-surface.css";
 
 :root {
   /* Every themed colour goes through a token, so the dark block at the bottom
      only re-points them. */
-  --khasky-emojery-bg: #f5f7fa;
-  --khasky-emojery-card: #fff;
 
-  --khasky-emojery-heading: #1c1e21;
-  /* Same on both themes: a disabled control reads as inert either way. */
+  /* Same on both themes: a disabled control reads as inert either way, so this
+     one is absent from that block. */
   --khasky-emojery-disabled-text: #8a8d91;
-
-  --khasky-emojery-card-shadow: rgba(0, 0, 0, 0.08);
 
   --khasky-emojery-error-bg: rgba(220, 53, 69, 0.08);
   --khasky-emojery-notice-bg: rgba(24, 119, 242, 0.08);
   --khasky-emojery-notice-text: #1b65c9;
 }
 
-html,
-body {
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  /* Pin the base size explicitly on both html and body so nothing in the
-     inheritance chain can resolve a control's `font: inherit` below it. */
-  font-size: 14px;
-  background: var(--khasky-emojery-bg);
-  color: var(--khasky-emojery-fg);
-}
-
-.wrap {
+/* A sign-in form, so the card stays a single narrow column. */
+#app {
   max-width: 420px;
-  margin: 64px auto;
-  padding: 24px;
-}
-
-.card {
-  background: var(--khasky-emojery-card);
-  color: var(--khasky-emojery-fg);
-  border-radius: 12px;
-  padding: 28px 28px 32px;
-  box-shadow: 0 4px 24px var(--khasky-emojery-card-shadow);
-}
-
-h1 {
-  margin: 0 0 4px;
-  font-size: 20px;
-  color: var(--khasky-emojery-heading);
-}
-
-.tagline {
-  margin: 0 0 20px;
-  font-size: 12px;
-  color: var(--khasky-emojery-muted);
 }
 
 label {
@@ -206,8 +171,8 @@ input:focus {
   cursor: pointer;
 }
 
+/* Undoes the browser default, so the consent links read as text until pointed at. */
 a {
-  color: var(--khasky-emojery-link);
   text-decoration: none;
 }
 
@@ -216,13 +181,6 @@ a:hover {
 }
 
 :root[data-theme="dark"] {
-  --khasky-emojery-bg: #0f1011;
-  --khasky-emojery-card: #18191a;
-
-  --khasky-emojery-heading: #f2f3f5;
-
-  --khasky-emojery-card-shadow: rgba(0, 0, 0, 0.35);
-
   --khasky-emojery-error-bg: rgba(255, 89, 103, 0.16);
   --khasky-emojery-notice-bg: rgba(45, 136, 255, 0.16);
   --khasky-emojery-notice-text: #9cc7ff;

@@ -355,8 +355,10 @@ function ConsentGate() {
     <main class="wrap">
       <div class="card">
         <h1>{t("dataConsentTitle")}</h1>
-        <p class="tagline">{t("dataConsentBody")}</p>
-        <p class="notice">
+        {/* The policy closes the paragraph as a sentence of its own - the short body
+            above says what is sent, the link carries the detail it dropped. */}
+        <p class="tagline">
+          {t("dataConsentBody")}{" "}
           <a
             href={withExtensionUtm("https://emojery.app/privacy", {
               campaign: "auth_consent_links",
@@ -365,7 +367,7 @@ function ConsentGate() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            {t("authPrivacyLinkLabel")}
+            {t("dataConsentPolicyLink")}
           </a>
         </p>
         <button

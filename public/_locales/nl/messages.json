@@ -451,7 +451,10 @@
     "message": "Wat Emojery verstuurt"
   },
   "dataConsentBody": {
-    "message": "Om reacties te tellen en te delen stuurt Emojery het adres van de pagina waarop je reageert naar zijn server, samen met willekeurige installatie- en sessie-identificatiegegevens die niet van jou zijn afgeleid. Bij het inloggen wordt je e-mailadres één keer verstuurd om een eenmalige code te bezorgen; alleen een eenwegshash ervan wordt bewaard als je accountidentificatie, en je reactiegeschiedenis blijft op dit apparaat. Optionele context blijft uitgeschakeld in deze browser."
+    "message": "Emojery stuurt het adres van de pagina waarop je reageert, willekeurige installatie- en sessie-identificatiegegevens en één keer bij het inloggen je e-mailadres; daarvan wordt alleen een eenwegshash bewaard. Optionele context blijft uitgeschakeld in deze browser."
+  },
+  "dataConsentPolicyLink": {
+    "message": "Privacybeleid."
   },
   "dataConsentContinueBtn": {
     "message": "Doorgaan"

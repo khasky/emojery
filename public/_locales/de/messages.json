@@ -451,7 +451,10 @@
     "message": "Was Emojery sendet"
   },
   "dataConsentBody": {
-    "message": "Um Reaktionen zu zählen und zu teilen, sendet Emojery die Adresse der Seite, auf der Sie reagieren, zusammen mit zufälligen Installations- und Sitzungskennungen, die nicht aus Ihren Daten abgeleitet sind, an seinen Server. Bei der Anmeldung wird Ihre E-Mail-Adresse einmal gesendet, um einen Einmalcode zuzustellen; nur ein Einweg-Hash davon wird als Ihre Kontokennung gespeichert, und Ihr Reaktionsverlauf bleibt auf diesem Gerät. Optionaler Kontext bleibt in diesem Browser deaktiviert."
+    "message": "Emojery sendet die Adresse der Seite, auf der Sie reagieren, zufällige Installations- und Sitzungskennungen sowie einmalig bei der Anmeldung Ihre E-Mail-Adresse; davon wird nur ein Einweg-Hash gespeichert. Optionaler Kontext bleibt in diesem Browser deaktiviert."
+  },
+  "dataConsentPolicyLink": {
+    "message": "Datenschutzrichtlinie."
   },
   "dataConsentContinueBtn": {
     "message": "Weiter"

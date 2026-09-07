@@ -451,7 +451,10 @@
     "message": "Co wysyła Emojery"
   },
   "dataConsentBody": {
-    "message": "Aby zliczać i udostępniać reakcje, Emojery wysyła na swój serwer adres strony, na której reagujesz, wraz z losowymi identyfikatorami instalacji i sesji, które nie są tworzone na podstawie Twoich danych. Przy logowaniu Twój adres e-mail jest wysyłany raz, aby dostarczyć kod jednorazowy; przechowywany jest tylko jego jednokierunkowy skrót jako identyfikator Twojego konta, a historia reakcji pozostaje na tym urządzeniu. Opcjonalny kontekst pozostaje wyłączony w tej przeglądarce."
+    "message": "Emojery wysyła adres strony, na której reagujesz, losowe identyfikatory instalacji i sesji oraz raz przy logowaniu Twój adres e-mail; przechowywany jest tylko jego jednokierunkowy skrót. Opcjonalny kontekst pozostaje wyłączony w tej przeglądarce."
+  },
+  "dataConsentPolicyLink": {
+    "message": "Polityka prywatności."
   },
   "dataConsentContinueBtn": {
     "message": "Dalej"

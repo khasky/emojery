@@ -1,14 +1,11 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 
-/* Below: only what is the onboarding page's own. The canvas/card values match
-   auth.css on purpose - the two pages should read as one surface. */
+/* Below: only what is the onboarding page's own - the canvas, the card and the
+   heading pair come from styles/page-surface.css, shared with the auth page. */
 @import "../../styles/tokens.css";
+@import "../../styles/page-surface.css";
 
 :root {
-  --khasky-emojery-bg: #f5f7fa;
-  --khasky-emojery-card: #fff;
-  --khasky-emojery-heading: #1c1e21;
-  --khasky-emojery-card-shadow: rgba(0, 0, 0, 0.08);
   --khasky-emojery-chip-bg: rgba(0, 0, 0, 0.05);
   --khasky-emojery-track: rgba(0, 0, 0, 0.08);
   --khasky-emojery-step-done: #1a7f37;
@@ -17,10 +14,6 @@
 }
 
 :root[data-theme="dark"] {
-  --khasky-emojery-bg: #0f1011;
-  --khasky-emojery-card: #18191a;
-  --khasky-emojery-heading: #f2f3f5;
-  --khasky-emojery-card-shadow: rgba(0, 0, 0, 0.35);
   --khasky-emojery-chip-bg: rgba(255, 255, 255, 0.08);
   --khasky-emojery-track: rgba(255, 255, 255, 0.12);
   --khasky-emojery-step-done: #4ac47e;
@@ -28,46 +21,16 @@
   --khasky-emojery-hairline: rgba(255, 255, 255, 0.1);
 }
 
-html,
-body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  font-size: 14px;
-  background: var(--khasky-emojery-bg);
-  color: var(--khasky-emojery-fg);
-}
-
-/* Padding lives here, not on the full-height child: a `min-height: 100vh`
-   element with its own padding overflows the viewport - the stray scrollbar. */
-body {
-  box-sizing: border-box;
-  display: grid;
-  place-items: center;
-  padding: 24px;
-  overflow: auto;
-}
-
-/* The render root is the grid item body centres, so it carries the width - a
-   `width: 100%` inside a max-content item would collapse to nothing. */
+/* Wide enough for the checklist and the 250px brand aside beside it. */
 #app {
-  width: 100%;
   max-width: 860px;
 }
 
-/* Deliberately NOT `overflow: hidden`: this box is exactly the card's box, so
-   clipping cut its shadow to four corner wedges that read as square corners.
-   The confetti stays off the scrollbars by being `position: fixed` instead. */
-.wrap {
-  width: 100%;
-}
-
+/* The shared card, laid out as two columns. Deliberately NOT `overflow: hidden`
+   on it or on `.wrap`: that box is exactly the card's box, so clipping cut its
+   shadow to four corner wedges that read as square corners. The confetti stays
+   off the scrollbars by being `position: fixed` instead. */
 .card {
-  background: var(--khasky-emojery-card);
-  color: var(--khasky-emojery-fg);
-  border-radius: 14px;
-  box-shadow: 0 4px 24px var(--khasky-emojery-card-shadow);
-  padding: 34px 38px;
   display: grid;
   grid-template-columns: 1fr 250px;
   gap: 40px;
@@ -238,19 +201,6 @@ body {
   }
 }
 
-h1 {
-  margin: 0;
-  font-size: 20px;
-  color: var(--khasky-emojery-heading);
-  line-height: 1.2;
-}
-
-.tagline {
-  margin: 6px 0 0;
-  font-size: 13px;
-  color: var(--khasky-emojery-muted);
-}
-
 /* Theme-fixed blue - the contrast maths is in styles/tokens.css. */
 .primary {
   display: inline-block;
@@ -269,10 +219,6 @@ h1 {
 
 .home {
   font-size: 12.5px;
-}
-
-a {
-  color: var(--khasky-emojery-link);
 }
 
 /* brand mark */
