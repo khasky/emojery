@@ -447,6 +447,15 @@
   "authDoneTagline": {
     "message": "Bezárhatja ezt a lapot és reagálhat bármely támogatott oldalon."
   },
+  "authDoneReturnTagline": {
+    "message": "Visszavisszük arra az oldalra, ahol járt."
+  },
+  "authDoneReturnNowBtn": {
+    "message": "Vissza az oldalra"
+  },
+  "authDoneStayBtn": {
+    "message": "Maradok itt"
+  },
   "dataConsentTitle": {
     "message": "Mit küld az Emojery"
   },
@@ -580,19 +589,19 @@
     "message": "Ezeken működik"
   },
   "gateTitle": {
-    "message": "Már csak egy lépés"
+    "message": "Utolsó lépés"
   },
   "gateBody": {
-    "message": "Jelentkezz be az e-mail-címeddel és egy megerősítő kóddal, hogy a reakciód számítson."
+    "message": "Jelentkezz be az e-mail-címeddel, hogy a reakciód számítson."
   },
   "gateSignInBtn": {
-    "message": "Bejelentkezés és reagálás"
+    "message": "Bejelentkezés"
   },
   "coachTitle": {
-    "message": "Újdonság: reagálj bármilyen emojival"
+    "message": "Újdonság: itt az Emojery"
   },
   "coachBody": {
-    "message": "Ez az Emojery — egy kattintás, a teljes emoji-paletta."
+    "message": "Egy kattintás, és látod a közösség reakcióit, a sajátodat pedig korlátlan emoji-palettáról választhatod."
   },
   "coachDismissAria": {
     "message": "Bezárás"

@@ -447,6 +447,15 @@
   "authDoneTagline": {
     "message": "このタブを閉じて、対応ページでリアクションできます。"
   },
+  "authDoneReturnTagline": {
+    "message": "元のページに戻ります。"
+  },
+  "authDoneReturnNowBtn": {
+    "message": "ページに戻る"
+  },
+  "authDoneStayBtn": {
+    "message": "このページに残る"
+  },
   "dataConsentTitle": {
     "message": "Emojery が送信する情報"
   },
@@ -580,19 +589,19 @@
     "message": "対応サイト"
   },
   "gateTitle": {
-    "message": "あと1ステップ"
+    "message": "最後のステップ"
   },
   "gateBody": {
-    "message": "メールアドレスと確認コードでサインインすると、リアクションが反映されます。"
+    "message": "メールアドレスでサインインすると、リアクションが反映されます。"
   },
   "gateSignInBtn": {
-    "message": "サインインしてリアクション"
+    "message": "サインイン"
   },
   "coachTitle": {
-    "message": "新機能: 好きな絵文字でリアクション"
+    "message": "新機能: Emojery が登場"
   },
   "coachBody": {
-    "message": "これが Emojery — ワンクリックで絵文字パレット全体が使えます。"
+    "message": "ワンクリックでみんなのリアクションを見て、無制限の絵文字パレットから自分のリアクションを選べます。"
   },
   "coachDismissAria": {
     "message": "閉じる"

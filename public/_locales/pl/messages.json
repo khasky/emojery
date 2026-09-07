@@ -447,6 +447,15 @@
   "authDoneTagline": {
     "message": "Możesz zamknąć tę kartę i reagować na dowolnej obsługiwanej stronie."
   },
+  "authDoneReturnTagline": {
+    "message": "Wracasz na stronę, na której byłeś."
+  },
+  "authDoneReturnNowBtn": {
+    "message": "Wróć na stronę"
+  },
+  "authDoneStayBtn": {
+    "message": "Zostań tutaj"
+  },
   "dataConsentTitle": {
     "message": "Co wysyła Emojery"
   },
@@ -580,19 +589,19 @@
     "message": "Działa na"
   },
   "gateTitle": {
-    "message": "Został jeden krok"
+    "message": "Ostatni krok"
   },
   "gateBody": {
-    "message": "Zaloguj się e-mailem i kodem weryfikacyjnym, aby Twoja reakcja się liczyła."
+    "message": "Zaloguj się e-mailem, aby Twoja reakcja się liczyła."
   },
   "gateSignInBtn": {
-    "message": "Zaloguj się i zareaguj"
+    "message": "Zaloguj się"
   },
   "coachTitle": {
-    "message": "Nowość: reaguj dowolnym emoji"
+    "message": "Nowość: Emojery już jest"
   },
   "coachBody": {
-    "message": "To Emojery — jedno kliknięcie i cała paleta emoji."
+    "message": "Jedno kliknięcie, aby zobaczyć reakcje społeczności i wybrać własną z nieograniczonej palety emoji."
   },
   "coachDismissAria": {
     "message": "Zamknij"

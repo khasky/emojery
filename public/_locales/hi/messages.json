@@ -447,6 +447,15 @@
   "authDoneTagline": {
     "message": "आप इस टैब को बंद कर सकते हैं और किसी भी समर्थित पेज पर प्रतिक्रिया दे सकते हैं।"
   },
+  "authDoneReturnTagline": {
+    "message": "आपको उसी पेज पर वापस ले जाया जा रहा है जहाँ आप थे।"
+  },
+  "authDoneReturnNowBtn": {
+    "message": "पेज पर वापस जाएँ"
+  },
+  "authDoneStayBtn": {
+    "message": "यहीं रहें"
+  },
   "dataConsentTitle": {
     "message": "Emojery क्या भेजता है"
   },
@@ -580,19 +589,19 @@
     "message": "इन साइटों पर चलता है"
   },
   "gateTitle": {
-    "message": "बस एक कदम बाकी"
+    "message": "आख़िरी कदम"
   },
   "gateBody": {
-    "message": "अपनी रिएक्शन गिनवाने के लिए ईमेल और वेरिफिकेशन कोड से साइन इन करें।"
+    "message": "अपनी रिएक्शन गिनवाने के लिए ईमेल से साइन इन करें।"
   },
   "gateSignInBtn": {
-    "message": "साइन इन करें और रिएक्ट करें"
+    "message": "साइन इन"
   },
   "coachTitle": {
-    "message": "नया: किसी भी इमोजी से रिएक्ट करें"
+    "message": "नया: Emojery आ गया"
   },
   "coachBody": {
-    "message": "यह है Emojery — एक क्लिक में पूरा इमोजी पैलेट।"
+    "message": "एक क्लिक में कम्युनिटी की रिएक्शन देखें और असीमित इमोजी पैलेट से अपनी रिएक्शन चुनें।"
   },
   "coachDismissAria": {
     "message": "बंद करें"

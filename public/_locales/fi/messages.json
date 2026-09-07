@@ -447,6 +447,15 @@
   "authDoneTagline": {
     "message": "Voit sulkea tämän välilehden ja reagoida millä tahansa tuetulla sivulla."
   },
+  "authDoneReturnTagline": {
+    "message": "Palautamme sinut sivulle, jolla olit."
+  },
+  "authDoneReturnNowBtn": {
+    "message": "Takaisin sivulle"
+  },
+  "authDoneStayBtn": {
+    "message": "Pysy tässä"
+  },
   "dataConsentTitle": {
     "message": "Mitä Emojery lähettää"
   },
@@ -580,19 +589,19 @@
     "message": "Toimii sivustoilla"
   },
   "gateTitle": {
-    "message": "Enää yksi askel"
+    "message": "Viimeinen askel"
   },
   "gateBody": {
-    "message": "Kirjaudu sisään sähköpostillasi ja vahvistuskoodilla, jotta reaktiosi lasketaan."
+    "message": "Kirjaudu sisään sähköpostillasi, jotta reaktiosi lasketaan."
   },
   "gateSignInBtn": {
-    "message": "Kirjaudu ja reagoi"
+    "message": "Kirjaudu"
   },
   "coachTitle": {
-    "message": "Uutta: reagoi millä tahansa emojilla"
+    "message": "Uutta: Emojery on täällä"
   },
   "coachBody": {
-    "message": "Tämä on Emojery — yksi napsautus, koko emojipaletti."
+    "message": "Yhdellä napsautuksella näet yhteisön reaktiot ja valitset omasi rajattomasta emojipaletista."
   },
   "coachDismissAria": {
     "message": "Sulje"

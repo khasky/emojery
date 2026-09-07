@@ -344,16 +344,34 @@ export function Picker({ initial, typography, onPick, onSignIn, portalRoot, bind
     await castPick(r, pickOriginFromEvent(ev));
   };
 
-  // Sign-in landed while the gate held a pick: honour the "Sign in & react" promise and cast
+  // Sign-in landed while the gate held a pick: honour the gate's promise and cast
   // it. `authed` only ever flips through the background's auth-change push (bindRefresh), so
   // the page cannot forge this - the trusted click that chose the emoji still gates it.
   useEffect(() => {
     if (!authed || !pendingReaction) return;
     const r = pendingReaction;
-    setPendingReaction(null);
-    setOpen(false);
-    triggerRef.current?.focus();
-    void castPick(r, elementOrigin(triggerRef.current));
+    const cast = () => {
+      setPendingReaction(null);
+      setOpen(false);
+      triggerRef.current?.focus();
+      void castPick(r, elementOrigin(triggerRef.current));
+    };
+    // Sign-in happens in a tab of its own, so this one is normally in the background
+    // when auth lands - casting straight away would spend the reaction's float
+    // animation where nobody is looking, and the user comes back to a result with no
+    // event. Hold it until the tab is on screen, which the auth page's own return
+    // makes the very next thing that happens.
+    if (document.visibilityState !== "hidden") {
+      cast();
+      return;
+    }
+    const onVisible = () => {
+      if (document.visibilityState === "hidden") return;
+      document.removeEventListener("visibilitychange", onVisible);
+      cast();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
   }, [authed, pendingReaction]);
 
   const onTriggerKey = (e: KeyboardEvent) => {

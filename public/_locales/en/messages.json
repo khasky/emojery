@@ -573,6 +573,18 @@
     "message": "You can close this tab and react on any supported page.",
     "description": "Subheading shown after sign-in completes."
   },
+  "authDoneReturnTagline": {
+    "message": "Taking you back to the page you were on.",
+    "description": "Subheading on the sign-in confirmation when the sign-in started from a page's sign-in gate: the tab is about to close and hand the user back to that page."
+  },
+  "authDoneReturnNowBtn": {
+    "message": "Back to the page",
+    "description": "Button on the sign-in confirmation that returns to the page immediately instead of waiting out the countdown."
+  },
+  "authDoneStayBtn": {
+    "message": "Stay here",
+    "description": "Button on the sign-in confirmation that cancels the automatic return and keeps the user on this tab."
+  },
   "dataConsentTitle": {
     "message": "What Emojery sends",
     "description": "Heading of the data-collection disclosure shown on first install in browsers without Firefox's built-in consent screen."
@@ -740,23 +752,23 @@
     "description": "Onboarding-page heading above the list of supported site names."
   },
   "gateTitle": {
-    "message": "One step left",
+    "message": "Last step",
     "description": "Title of the sign-in gate shown after a signed-out user picks a reaction."
   },
   "gateBody": {
-    "message": "Sign in with your email and a verification code to make your reaction count.",
+    "message": "Sign in with your email to make your reaction count.",
     "description": "Body of the sign-in gate: what signing in takes and why it matters."
   },
   "gateSignInBtn": {
-    "message": "Sign in & react",
+    "message": "Sign in",
     "description": "Primary button of the sign-in gate; opens the extension's auth tab."
   },
   "coachTitle": {
-    "message": "New: react with any emoji",
+    "message": "New: Emojery is here",
     "description": "Title of the one-time tooltip shown next to the first injected trigger."
   },
   "coachBody": {
-    "message": "That's Emojery — one click for the full emoji palette.",
+    "message": "One click to see the community's reactions and pick yours from an unlimited emoji palette.",
     "description": "Body of the one-time tooltip."
   },
   "coachDismissAria": {

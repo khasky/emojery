@@ -447,6 +447,15 @@
   "authDoneTagline": {
     "message": "Bạn có thể đóng tab này và phản ứng trên bất kỳ trang được hỗ trợ nào."
   },
+  "authDoneReturnTagline": {
+    "message": "Đang đưa bạn về trang bạn đang xem."
+  },
+  "authDoneReturnNowBtn": {
+    "message": "Quay lại trang"
+  },
+  "authDoneStayBtn": {
+    "message": "Ở lại đây"
+  },
   "dataConsentTitle": {
     "message": "Emojery gửi những gì"
   },
@@ -580,19 +589,19 @@
     "message": "Hoạt động trên"
   },
   "gateTitle": {
-    "message": "Chỉ còn một bước"
+    "message": "Bước cuối cùng"
   },
   "gateBody": {
-    "message": "Đăng nhập bằng email và mã xác minh để cảm xúc của bạn được ghi nhận."
+    "message": "Đăng nhập bằng email để cảm xúc của bạn được ghi nhận."
   },
   "gateSignInBtn": {
-    "message": "Đăng nhập & bày tỏ cảm xúc"
+    "message": "Đăng nhập"
   },
   "coachTitle": {
-    "message": "Mới: bày tỏ cảm xúc bằng bất kỳ emoji nào"
+    "message": "Mới: Emojery đã có mặt"
   },
   "coachBody": {
-    "message": "Đó là Emojery — một cú nhấp, cả bảng emoji."
+    "message": "Một cú nhấp để xem cảm xúc của cộng đồng và chọn cảm xúc của bạn từ bảng emoji không giới hạn."
   },
   "coachDismissAria": {
     "message": "Đóng"

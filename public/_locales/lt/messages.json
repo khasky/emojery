@@ -447,6 +447,15 @@
   "authDoneTagline": {
     "message": "Galite uždaryti šią kortelę ir reaguoti bet kuriame palaikomame puslapyje."
   },
+  "authDoneReturnTagline": {
+    "message": "Grąžiname jus į puslapį, kuriame buvote."
+  },
+  "authDoneReturnNowBtn": {
+    "message": "Grįžti į puslapį"
+  },
+  "authDoneStayBtn": {
+    "message": "Likti čia"
+  },
   "dataConsentTitle": {
     "message": "Ką siunčia „Emojery“"
   },
@@ -580,19 +589,19 @@
     "message": "Veikia svetainėse"
   },
   "gateTitle": {
-    "message": "Liko vienas žingsnis"
+    "message": "Paskutinis žingsnis"
   },
   "gateBody": {
-    "message": "Prisijunkite su savo el. paštu ir patvirtinimo kodu, kad jūsų reakcija būtų įskaityta."
+    "message": "Prisijunkite su savo el. paštu, kad jūsų reakcija būtų įskaityta."
   },
   "gateSignInBtn": {
-    "message": "Prisijungti ir reaguoti"
+    "message": "Prisijungti"
   },
   "coachTitle": {
-    "message": "Nauja: reaguokite bet kuriuo jaustuku"
+    "message": "Nauja: Emojery jau čia"
   },
   "coachBody": {
-    "message": "Tai Emojery — vienas spustelėjimas ir visa jaustukų paletė."
+    "message": "Vienu spustelėjimu pamatysite bendruomenės reakcijas ir pasirinksite savo iš neribotos jaustukų paletės."
   },
   "coachDismissAria": {
     "message": "Uždaryti"

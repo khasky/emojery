@@ -447,6 +447,15 @@
   "authDoneTagline": {
     "message": "Anda boleh menutup tab ini dan bertindak balas pada mana-mana halaman yang disokong."
   },
+  "authDoneReturnTagline": {
+    "message": "Anda dibawa kembali ke halaman tadi."
+  },
+  "authDoneReturnNowBtn": {
+    "message": "Kembali ke halaman"
+  },
+  "authDoneStayBtn": {
+    "message": "Kekal di sini"
+  },
   "dataConsentTitle": {
     "message": "Apa yang Emojery hantar"
   },
@@ -580,19 +589,19 @@
     "message": "Berfungsi di"
   },
   "gateTitle": {
-    "message": "Tinggal satu langkah"
+    "message": "Langkah terakhir"
   },
   "gateBody": {
-    "message": "Log masuk dengan e-mel anda dan kod pengesahan supaya reaksi anda dikira."
+    "message": "Log masuk dengan e-mel anda supaya reaksi anda dikira."
   },
   "gateSignInBtn": {
-    "message": "Log masuk & bertindak balas"
+    "message": "Log masuk"
   },
   "coachTitle": {
-    "message": "Baharu: bertindak balas dengan sebarang emoji"
+    "message": "Baharu: Emojery sudah tiba"
   },
   "coachBody": {
-    "message": "Inilah Emojery — satu klik, seluruh palet emoji."
+    "message": "Satu klik untuk melihat reaksi komuniti dan memilih reaksi anda daripada palet emoji tanpa had."
   },
   "coachDismissAria": {
     "message": "Tutup"

@@ -447,6 +447,15 @@
   "authDoneTagline": {
     "message": "您可以關閉此分頁並在任何支援的頁面上反應。"
   },
+  "authDoneReturnTagline": {
+    "message": "正在帶您返回剛才的頁面。"
+  },
+  "authDoneReturnNowBtn": {
+    "message": "返回該頁面"
+  },
+  "authDoneStayBtn": {
+    "message": "留在此頁"
+  },
   "dataConsentTitle": {
     "message": "Emojery 會傳送什麼"
   },
@@ -580,19 +589,19 @@
     "message": "支援的網站"
   },
   "gateTitle": {
-    "message": "只差一步"
+    "message": "最後一步"
   },
   "gateBody": {
-    "message": "使用電子郵件和驗證碼登入，讓你的反應生效。"
+    "message": "使用電子郵件登入，讓你的反應生效。"
   },
   "gateSignInBtn": {
-    "message": "登入並反應"
+    "message": "登入"
   },
   "coachTitle": {
-    "message": "新功能:用任意表情符號反應"
+    "message": "新功能：Emojery 來了"
   },
   "coachBody": {
-    "message": "這就是 Emojery — 一次點擊,完整的表情面板。"
+    "message": "一次點擊，即可查看社群的反應，並從無限表情面板中選出你的反應。"
   },
   "coachDismissAria": {
     "message": "關閉"

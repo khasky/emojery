@@ -447,6 +447,15 @@
   "authDoneTagline": {
     "message": "Võite selle vahelehe sulgeda ja reageerida igal toetatud lehel."
   },
+  "authDoneReturnTagline": {
+    "message": "Viime su tagasi lehele, kus sa olid."
+  },
+  "authDoneReturnNowBtn": {
+    "message": "Tagasi lehele"
+  },
+  "authDoneStayBtn": {
+    "message": "Jää siia"
+  },
   "dataConsentTitle": {
     "message": "Mida Emojery saadab"
   },
@@ -580,19 +589,19 @@
     "message": "Töötab saitidel"
   },
   "gateTitle": {
-    "message": "Jäänud on üks samm"
+    "message": "Viimane samm"
   },
   "gateBody": {
-    "message": "Logi sisse oma e-posti ja kinnituskoodiga, et su reaktsioon läheks arvesse."
+    "message": "Logi sisse oma e-postiga, et su reaktsioon läheks arvesse."
   },
   "gateSignInBtn": {
-    "message": "Logi sisse ja reageeri"
+    "message": "Logi sisse"
   },
   "coachTitle": {
-    "message": "Uus: reageeri mis tahes emojiga"
+    "message": "Uus: Emojery on kohal"
   },
   "coachBody": {
-    "message": "See on Emojery — üks klõps, kogu emojipalett."
+    "message": "Üks klõps, et näha kogukonna reaktsioone ja valida oma piiramatust emojipaletist."
   },
   "coachDismissAria": {
     "message": "Sulge"

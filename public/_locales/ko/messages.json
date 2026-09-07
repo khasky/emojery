@@ -447,6 +447,15 @@
   "authDoneTagline": {
     "message": "이 탭을 닫고 지원되는 페이지에서 반응할 수 있습니다."
   },
+  "authDoneReturnTagline": {
+    "message": "보고 있던 페이지로 돌아갑니다."
+  },
+  "authDoneReturnNowBtn": {
+    "message": "페이지로 돌아가기"
+  },
+  "authDoneStayBtn": {
+    "message": "여기 머무르기"
+  },
   "dataConsentTitle": {
     "message": "Emojery가 보내는 정보"
   },
@@ -580,19 +589,19 @@
     "message": "지원 사이트"
   },
   "gateTitle": {
-    "message": "한 단계 남았어요"
+    "message": "마지막 단계"
   },
   "gateBody": {
-    "message": "이메일과 인증 코드로 로그인하면 반응이 반영됩니다."
+    "message": "이메일로 로그인하면 반응이 반영됩니다."
   },
   "gateSignInBtn": {
-    "message": "로그인하고 반응하기"
+    "message": "로그인"
   },
   "coachTitle": {
-    "message": "신규: 원하는 이모지로 반응"
+    "message": "신규: Emojery가 나왔어요"
   },
   "coachBody": {
-    "message": "Emojery입니다 — 클릭 한 번으로 전체 이모지 팔레트를 사용할 수 있어요."
+    "message": "클릭 한 번으로 커뮤니티의 반응을 보고 무제한 이모지 팔레트에서 내 반응을 고르세요."
   },
   "coachDismissAria": {
     "message": "닫기"

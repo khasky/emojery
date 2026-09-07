@@ -447,6 +447,15 @@
  "authDoneTagline": {
   "message": "You can close this tab and react on any supported page."
  },
+ "authDoneReturnTagline": {
+  "message": "Taking you back to the page you were on."
+ },
+ "authDoneReturnNowBtn": {
+  "message": "Back to the page"
+ },
+ "authDoneStayBtn": {
+  "message": "Stay here"
+ },
  "dataConsentTitle": {
   "message": "What Emojery sends"
  },
@@ -580,19 +589,19 @@
   "message": "Works on"
  },
  "gateTitle": {
-  "message": "One step left"
+  "message": "Last step"
  },
  "gateBody": {
-  "message": "Sign in with your email and a verification code to make your reaction count."
+  "message": "Sign in with your email to make your reaction count."
  },
  "gateSignInBtn": {
-  "message": "Sign in & react"
+  "message": "Sign in"
  },
  "coachTitle": {
-  "message": "New: react with any emoji"
+  "message": "New: Emojery is here"
  },
  "coachBody": {
-  "message": "That's Emojery — one click for the full emoji palette."
+  "message": "One click to see the community's reactions and pick yours from an unlimited emoji palette."
  },
  "coachDismissAria": {
   "message": "Dismiss"

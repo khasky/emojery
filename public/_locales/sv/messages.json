@@ -447,6 +447,15 @@
   "authDoneTagline": {
     "message": "Du kan stänga den här fliken och reagera på alla sidor som stöds."
   },
+  "authDoneReturnTagline": {
+    "message": "Du skickas tillbaka till sidan du var på."
+  },
+  "authDoneReturnNowBtn": {
+    "message": "Tillbaka till sidan"
+  },
+  "authDoneStayBtn": {
+    "message": "Stanna här"
+  },
   "dataConsentTitle": {
     "message": "Vad Emojery skickar"
   },
@@ -580,19 +589,19 @@
     "message": "Fungerar på"
   },
   "gateTitle": {
-    "message": "Ett steg kvar"
+    "message": "Sista steget"
   },
   "gateBody": {
-    "message": "Logga in med din e-post och en verifieringskod så räknas din reaktion."
+    "message": "Logga in med din e-post så räknas din reaktion."
   },
   "gateSignInBtn": {
-    "message": "Logga in & reagera"
+    "message": "Logga in"
   },
   "coachTitle": {
-    "message": "Nytt: reagera med valfri emoji"
+    "message": "Nytt: Emojery är här"
   },
   "coachBody": {
-    "message": "Det är Emojery — ett klick, hela emoji-paletten."
+    "message": "Ett klick för att se communityns reaktioner och välja din egen från en obegränsad emoji-palett."
   },
   "coachDismissAria": {
     "message": "Stäng"

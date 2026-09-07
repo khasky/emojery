@@ -447,6 +447,15 @@
   "authDoneTagline": {
     "message": "Puoi chiudere questa scheda e reagire su qualsiasi pagina supportata."
   },
+  "authDoneReturnTagline": {
+    "message": "Ti riportiamo alla pagina in cui eri."
+  },
+  "authDoneReturnNowBtn": {
+    "message": "Torna alla pagina"
+  },
+  "authDoneStayBtn": {
+    "message": "Resta qui"
+  },
   "dataConsentTitle": {
     "message": "Cosa invia Emojery"
   },
@@ -580,19 +589,19 @@
     "message": "Funziona su"
   },
   "gateTitle": {
-    "message": "Manca un passo"
+    "message": "Ultimo passo"
   },
   "gateBody": {
-    "message": "Accedi con la tua e-mail e un codice di verifica per far contare la tua reazione."
+    "message": "Accedi con la tua e-mail per far contare la tua reazione."
   },
   "gateSignInBtn": {
-    "message": "Accedi e reagisci"
+    "message": "Accedi"
   },
   "coachTitle": {
-    "message": "Novità: reagisci con qualsiasi emoji"
+    "message": "Novità: Emojery è qui"
   },
   "coachBody": {
-    "message": "Questo è Emojery: un clic, l'intera tavolozza di emoji."
+    "message": "Un clic per vedere le reazioni della community e scegliere la tua da una tavolozza di emoji illimitata."
   },
   "coachDismissAria": {
     "message": "Chiudi"

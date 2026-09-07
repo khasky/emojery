@@ -447,6 +447,15 @@
   "authDoneTagline": {
     "message": "您可以关闭此标签并在任何支持的页面上反应。"
   },
+  "authDoneReturnTagline": {
+    "message": "正在带您返回刚才的页面。"
+  },
+  "authDoneReturnNowBtn": {
+    "message": "返回该页面"
+  },
+  "authDoneStayBtn": {
+    "message": "留在此页"
+  },
   "dataConsentTitle": {
     "message": "Emojery 会发送什么"
   },
@@ -580,19 +589,19 @@
     "message": "支持的网站"
   },
   "gateTitle": {
-    "message": "只差一步"
+    "message": "最后一步"
   },
   "gateBody": {
-    "message": "使用邮箱和验证码登录，让你的反应生效。"
+    "message": "使用邮箱登录，让你的反应生效。"
   },
   "gateSignInBtn": {
-    "message": "登录并反应"
+    "message": "登录"
   },
   "coachTitle": {
-    "message": "新功能:用任意表情符号反应"
+    "message": "新功能：Emojery 来了"
   },
   "coachBody": {
-    "message": "这就是 Emojery — 一次点击,完整的表情面板。"
+    "message": "一次点击，即可查看社区的反应，并从无限表情面板中选出你的反应。"
   },
   "coachDismissAria": {
     "message": "关闭"

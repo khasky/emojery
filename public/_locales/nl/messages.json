@@ -447,6 +447,15 @@
   "authDoneTagline": {
     "message": "Je kunt dit tabblad sluiten en reageren op elke ondersteunde pagina."
   },
+  "authDoneReturnTagline": {
+    "message": "Je gaat terug naar de pagina waar je was."
+  },
+  "authDoneReturnNowBtn": {
+    "message": "Terug naar de pagina"
+  },
+  "authDoneStayBtn": {
+    "message": "Hier blijven"
+  },
   "dataConsentTitle": {
     "message": "Wat Emojery verstuurt"
   },
@@ -580,19 +589,19 @@
     "message": "Werkt op"
   },
   "gateTitle": {
-    "message": "Nog één stap"
+    "message": "Laatste stap"
   },
   "gateBody": {
-    "message": "Log in met je e-mail en een verificatiecode om je reactie te laten meetellen."
+    "message": "Log in met je e-mail om je reactie te laten meetellen."
   },
   "gateSignInBtn": {
-    "message": "Inloggen & reageren"
+    "message": "Inloggen"
   },
   "coachTitle": {
-    "message": "Nieuw: reageer met elke emoji"
+    "message": "Nieuw: Emojery is er"
   },
   "coachBody": {
-    "message": "Dat is Emojery — één klik, het hele emoji-palet."
+    "message": "Eén klik om de reacties van de community te zien en je eigen reactie uit een onbeperkt emoji-palet te kiezen."
   },
   "coachDismissAria": {
     "message": "Sluiten"
