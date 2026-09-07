@@ -12,6 +12,11 @@ on:
     - cron: "23 4 */2 * *"
     - cron: "23 5 * * 0"
   workflow_dispatch:
+    inputs:
+      update_snapshots:
+        description: "Rewrite the visual baselines from this run (download the artifact and commit it)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -79,6 +84,68 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: e2e-ci-report
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  own-surfaces:
+    name: E2E (own surfaces - visual + locales)
+    # Every scheduled slot, not just Sunday: these run against the extension's OWN
+    # pages - no live site, no account, no network - so the whole job is ~3 minutes
+    # and a red one is always a real regression rather than an anti-bot wall.
+    #
+    # This job is also the ONLY place the pixel baselines are compared:
+    # playwright.config.ts sets `ignoreSnapshots` off CI, because a baseline is
+    # per-platform and a contributor's local run would diff Windows/macOS text
+    # rendering against Linux. Refresh them by dispatching this workflow with
+    # `update_snapshots`, then commit the artifact it uploads.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup e2e environment
+        uses: ./.github/actions/setup-e2e
+
+      - name: Run visual baselines + locale sweep
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/e2e-own-surfaces.json
+        run: xvfb-run -a pnpm exec playwright test -c e2e/playwright.config.ts --reporter=list,json visual.spec.ts locale-sweep.spec.ts ${{ inputs.update_snapshots && '--update-snapshots' || '' }}
+
+      # The popup settings that need no account: the Theme setting reaching a live
+      # trigger and the extension's own pages, and Debug revealing the queue panel.
+      - name: Run theme + debug settings cases
+        if: always()
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/e2e-settings-cases.json
+        run: xvfb-run -a pnpm exec playwright test -c e2e/playwright.config.ts --output=test-results/settings --reporter=list,json settings-extras.spec.ts -g "Theme setting|Debug mode"
+
+      - name: Gate on skip ratio
+        if: always()
+        run: |
+          node scripts/check-e2e-skips.mjs test-results/e2e-own-surfaces.json
+          node scripts/check-e2e-skips.mjs test-results/e2e-settings-cases.json
+
+      # The refreshed baselines, for the dispatch that asked for them: they are
+      # generated on this runner's platform and have to be committed by hand.
+      - name: Upload refreshed visual baselines
+        if: ${{ inputs.update_snapshots }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: visual-baselines
+          path: e2e/**/*-snapshots/**
+          if-no-files-found: warn
+          retention-days: 14
+
+      # Failure only, same policy as every other job here. These pages carry no
+      # account state: every case runs signed out.
+      - name: Upload own-surfaces report
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: own-surfaces-report
           path: test-results/
           if-no-files-found: ignore
           retention-days: 14
