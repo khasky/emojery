@@ -27,6 +27,11 @@ e2e/test-results/
 # Failure screenshots vitest browser mode drops next to a red component test
 src/**/__screenshots__/**/*.png
 
+# Visual baselines are the CI platform's (e2e/visual.spec.ts compares only under
+# CI); a local --update-snapshots writes a win32/darwin copy that no run reads.
+e2e/**/*-snapshots/*-win32.png
+e2e/**/*-snapshots/*-darwin.png
+
 # Logs & OS / editor noise
 *.log
 .DS_Store
