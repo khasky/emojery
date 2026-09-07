@@ -273,6 +273,16 @@ async function findEmojiOption(page: Page, emoji: string) {
   );
 }
 
+// Whether the emoji's grid option currently reads pressed, via a throwaway
+// handle - callers polling across grid re-renders must not hold one.
+async function emojiOptionPressed(page: Page, emoji: string): Promise<boolean> {
+  const option = await findEmojiOption(page, emoji);
+  if (!option) return false;
+  const pressed = (await option.getAttribute("aria-pressed").catch(() => null)) === "true";
+  await option.dispose().catch(() => {});
+  return pressed;
+}
+
 // findEmojiOption, polled to a deadline. The picker's search is debounced, so a
 // single read taken right after the fill can still see the pre-search grid under
 // load and report a working extension as "the picker has no such option" - the
@@ -308,12 +318,42 @@ export async function reactWith(page: Page, emoji: string): Promise<void> {
   await openPickerTray(page);
   await expect(page.locator(GRID_ITEM_SELECTOR).filter({ visible: true }).first()).toBeVisible({ timeout: 8_000 });
   await page.locator(SEARCH_INPUT_SELECTOR).filter({ visible: true }).first().fill(searchTermFor(emoji));
-  const option = await waitForEmojiOption(page, emoji);
-  expect(option, `picker should expose the ${emoji} option`).not.toBeNull();
-  if (option) {
-    const checked = await option.getAttribute("aria-pressed").catch(() => null);
-    if (checked !== "true") await option.click({ timeout: 10_000 });
-    await option.dispose().catch(() => {});
+  const probe = await waitForEmojiOption(page, emoji);
+  expect(probe, `picker should expose the ${emoji} option`).not.toBeNull();
+  await probe?.dispose().catch(() => {});
+  // Two passes, mirroring clearReaction: the pre-click `aria-pressed` read is one
+  // instant snapshot, and `mine` arrives with the deferred counts fetch - a
+  // leftover reaction from a prior run can flip the option to pressed BETWEEN
+  // that read and the click, turning the pick into a toggle-off that nothing
+  // ever undoes (seen live: the accounts recovery spec then polled
+  // `hasOwnReaction` for 30s over a reaction it had just cleared). The second
+  // pass re-clicks when the first ended unpressed. Every read and click takes a
+  // FRESH handle: any state change re-renders the grid - the optimistic pick
+  // itself does - and a held handle detaches ("Element is not attached").
+  for (let pass = 0; pass < 2; pass++) {
+    if (await emojiOptionPressed(page, emoji)) break;
+    const option = await findEmojiOption(page, emoji);
+    if (!option) continue;
+    try {
+      await option.click({ timeout: 10_000 });
+    } catch (err) {
+      // The grid re-rendered under the click; the next pass re-queries. Anything
+      // else (never visible, never stable) is a real failure and stays loud.
+      if (!String(err).includes("not attached")) throw err;
+    } finally {
+      await option.dispose().catch(() => {});
+    }
+    // Optimistic, but via a content-script -> service-worker round trip, so
+    // poll rather than read once.
+    if (
+      await pollForValue(
+        () => emojiOptionPressed(page, emoji),
+        (pressed) => pressed,
+        4_000,
+        250,
+      )
+    )
+      break;
   }
   // The pick is optimistic in the page and durable only after the worker answers; Escape
   // any sooner tears the picker down mid-write and the counter read below races it.
