@@ -1,13 +1,21 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// One-way onboarding latches in storage.local. Both are absent on installs that
-// predate this feature, and absent means "off": an existing profile updating in
-// must never grow a toolbar dot or a coach-mark it already outlived.
+// One-way onboarding latches in storage.local. All three are absent on installs
+// that predate this feature, and absent means "off": an existing profile updating
+// in must never grow a toolbar dot, a coach-mark or a checklist step it already
+// outlived.
 
 import { storageLocalGet, storageLocalRemove, storageLocalSet } from "./webext";
 
 const COACH_SEEN_KEY = "coach_seen_v1";
 const ONBOARDING_BADGE_KEY = "onboarding_badge_v1";
+// The checklist's "spot the button" step, kept apart from the coach-mark latch
+// on purpose: that one is spent by the FIRST mount of the install, including the
+// ones the install replays into tabs nobody is looking at, which ticked the step
+// for a button the user never saw. Three states, like the badge latch above:
+// absent = not in play, false = armed (the checklist has been on screen), true =
+// earned. ui/trigger-seen.ts decides when it is earned.
+const TRIGGER_SEEN_KEY = "trigger_seen_v1";
 
 /**
  * Claim the one-time coach-mark: `true` exactly once per install, then latched.
@@ -35,7 +43,7 @@ export async function markCoachSeen(): Promise<void> {
  * that never shows again and a onboarding checklist that opens half ticked.
  */
 export async function resetOnboardingLatches(): Promise<void> {
-  await storageLocalRemove([COACH_SEEN_KEY, ONBOARDING_BADGE_KEY]);
+  await storageLocalRemove([COACH_SEEN_KEY, ONBOARDING_BADGE_KEY, TRIGGER_SEEN_KEY]);
 }
 
 /** Whether the fresh-install toolbar dot is still owed. Missing key = inactive. */
@@ -48,14 +56,36 @@ export async function setOnboardingBadgeActive(active: boolean): Promise<void> {
   await storageLocalSet({ [ONBOARDING_BADGE_KEY]: active });
 }
 
+/** "off" = the checklist was never on screen, "armed" = waiting for a real look, "seen" = earned. */
+export type TriggerSeenState = "off" | "armed" | "seen";
+
+/** One read for all three states - the content script asks this on every page it mounts on. */
+export async function readTriggerSeen(): Promise<TriggerSeenState> {
+  const items = await storageLocalGet(TRIGGER_SEEN_KEY);
+  const value = items[TRIGGER_SEEN_KEY];
+  if (value === true) return "seen";
+  return value === false ? "armed" : "off";
+}
+
 /**
- * `true` once a trigger has mounted on a real page. The coach-mark latch doubles
- * as that record: it is claimed by the FIRST mount of the install (or spent by a
- * deep-linked auto-open, which is also a mount), and never unset.
+ * Arm the step, from the onboarding page's first visible render. Nothing may tick
+ * a checklist the user has not laid eyes on yet, so the page itself is what opens
+ * the window. Idempotent: an already-earned step is not walked back by a second
+ * visit to the page.
  */
+export async function armTriggerSeen(): Promise<void> {
+  if ((await readTriggerSeen()) !== "off") return;
+  await storageLocalSet({ [TRIGGER_SEEN_KEY]: false });
+}
+
+/** Earn the step. Only ui/trigger-seen.ts calls this, and only once it has proof of a look. */
+export async function markTriggerSeen(): Promise<void> {
+  await storageLocalSet({ [TRIGGER_SEEN_KEY]: true });
+}
+
+/** `true` once a trigger has been on screen, in a focused tab, after the checklist was seen. */
 export async function hasSeenTrigger(): Promise<boolean> {
-  const items = await storageLocalGet(COACH_SEEN_KEY);
-  return items[COACH_SEEN_KEY] === true;
+  return (await readTriggerSeen()) === "seen";
 }
 
 /**
@@ -71,14 +101,14 @@ export async function hasReactedOnce(): Promise<boolean> {
 }
 
 /**
- * Call `onChange` whenever either latch above moves. Returns an unsubscribe.
+ * Call `onChange` whenever either checklist latch moves. Returns an unsubscribe.
  * Storage events are the only live signal here - nothing polls for these two.
  */
 export function watchOnboardingFlags(onChange: () => void): () => void {
   if (typeof chrome === "undefined" || !chrome.storage?.onChanged) return () => {};
   const listener = (changes: Record<string, unknown>, area: string): void => {
     if (area !== "local") return;
-    if (COACH_SEEN_KEY in changes || ONBOARDING_BADGE_KEY in changes) onChange();
+    if (TRIGGER_SEEN_KEY in changes || ONBOARDING_BADGE_KEY in changes) onChange();
   };
   chrome.storage.onChanged.addListener(listener);
   return () => chrome.storage.onChanged.removeListener(listener);

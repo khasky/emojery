@@ -72,15 +72,16 @@ export async function openOnboardingPage(details: chrome.runtime.InstalledDetail
 export function installFreshInstallAuthReset(): void {
   chrome.runtime.onInstalled.addListener((details) => {
     if (details.reason !== "install") return;
-    // Chained, not fired alongside: the reset clears the onboarding latches and
-    // the arm below writes one of them, so running them in parallel would let
-    // the wipe land last and leave the fresh install with no toolbar dot.
-    void resetAuthOnFreshInstall()
-      // The dot then survives until the first queued vote (background/api.ts).
-      .then(() => startOnboardingBadge())
-      .catch((error: unknown) => logBackgroundError("resetAuthOnFreshInstall", error));
+    // Everything below either writes an onboarding latch (the toolbar dot, the
+    // checklist page arming its own step) or sets off a write (a replayed content
+    // script), so all of it waits for the wipe. Started alongside it, the wipe
+    // could land last and undo them. A failed reset still lets them run - a first
+    // run with no dot and no checklist would be worse than a stale latch.
+    const afterReset = resetAuthOnFreshInstall().catch((error: unknown) => logBackgroundError("resetAuthOnFreshInstall", error));
+    // The dot then survives until the first queued vote (background/api.ts).
+    void afterReset.then(() => startOnboardingBadge()).catch((error: unknown) => logBackgroundError("startOnboardingBadge", error));
+    void afterReset.then(() => injectIntoOpenTabs()).catch((error: unknown) => logBackgroundError("injectIntoOpenTabs", error));
+    void afterReset.then(() => openOnboardingPage(details)).catch((error: unknown) => logBackgroundError("openOnboardingPage", error));
     void openLegacyDataConsentNotice().catch((error: unknown) => logBackgroundError("openLegacyDataConsentNotice", error));
-    void injectIntoOpenTabs().catch((error: unknown) => logBackgroundError("injectIntoOpenTabs", error));
-    void openOnboardingPage(details).catch((error: unknown) => logBackgroundError("openOnboardingPage", error));
   });
 }

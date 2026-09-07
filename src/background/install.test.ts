@@ -198,6 +198,7 @@ describe("onboarding page + toolbar dot on fresh install", () => {
   it("wipes the previous install's onboarding progress, and still arms the dot", async () => {
     const { setBadgeText, local } = stubChromiumChrome();
     local.set("coach_seen_v1", true);
+    local.set("trigger_seen_v1", true);
     local.set("onboarding_badge_v1", false);
     installFreshInstallAuthReset();
 
@@ -205,6 +206,7 @@ describe("onboarding page + toolbar dot on fresh install", () => {
     await drainInstallHandlers();
 
     expect(local.has("coach_seen_v1"), "the coach-mark is owed to the new install too").toBe(false);
+    expect(local.has("trigger_seen_v1"), "the checklist step starts out of play, for the new install's own page to arm").toBe(false);
     // Armed AFTER the wipe: the reverse order would leave no dot at all.
     expect(local.get("onboarding_badge_v1")).toBe(true);
     expect(setBadgeText).toHaveBeenCalledWith({ text: "●" }, expect.any(Function));

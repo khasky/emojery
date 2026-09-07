@@ -48,6 +48,7 @@ import { Picker } from "./picker";
 import { setRingAnimation } from "./ring-spin";
 import { invalidateContentSettings, readContentSettings } from "./settings-cache";
 import { registerThemedHost } from "./themed-hosts";
+import { watchTriggerSeen } from "./trigger-seen";
 import { createOnPick } from "./vote-client";
 
 // An auth change refreshes every mounted target in every tab; unbounded, one
@@ -374,6 +375,9 @@ async function renderPicker(host: HTMLElement, point: PickerInsertionPoint, key:
 
   // After render, so the trigger button exists in the shadow to point at.
   if (!autoOpen) void maybeShowCoachMark(host).catch((error: unknown) => logContentError("maybeShowCoachMark", error));
+  // The checklist step is a separate, stricter question than the coach-mark latch:
+  // it needs the button to have been ON SCREEN in front of the user (trigger-seen.ts).
+  watchTriggerSeen(host);
 
   recordShownTarget(key);
   announceInjectedCount(shownTargetCount());

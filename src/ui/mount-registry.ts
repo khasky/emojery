@@ -14,6 +14,7 @@ import { cancelAllPendingMounts, cancelDisconnectedPendingMounts, cancelPendingM
 import { clearPlacedTargets, clearShownTargets } from "./mount-session";
 import { forgetRingHost, pruneRingHosts } from "./ring-spin";
 import { forgetThemedHost, pruneThemedHosts } from "./themed-hosts";
+import { forgetTriggerSeenHost } from "./trigger-seen";
 
 // One LIVE mount = an entry in mountedTargets + mountedAnchors + the listener/callback maps,
 // all keyed by TargetKey; only dropMount(key) removes them together, which is why those are
@@ -173,6 +174,7 @@ export function removeMountNode(node: Node): void {
     // IntersectionObserver keeps a strong reference to what it observes.
     forgetRingHost(host);
     forgetThemedHost(host);
+    forgetTriggerSeenHost(host);
     clearHostTimers(host);
   }
   node.parentNode?.removeChild(node);

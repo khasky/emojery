@@ -37,9 +37,10 @@ export function __resetCoachMarkForTest(): void {
 
 // A mount in a background tab is not something the user witnessed. The install
 // replays content scripts into every already-open supported tab
-// (background/install.ts), so claiming there would spend the one-shot on a
-// tooltip nobody sees - and tick the onboarding page's "spot the button" step for
-// a button that was never on screen. Resolves at once when the tab is visible.
+// (background/install.ts), so claiming there would spend the one-shot on a tooltip
+// nobody sees. Tab visibility is all this owes: the onboarding checklist's own
+// "spot the button" step asks a stricter question, and asks it in trigger-seen.ts.
+// Resolves at once when the tab is visible.
 function whenVisible(): Promise<void> {
   if (document.visibilityState === "visible") return Promise.resolve();
   return new Promise((resolve) => {

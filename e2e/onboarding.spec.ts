@@ -103,6 +103,10 @@ test("fresh install opens the onboarding page and arms the toolbar dot", async (
     // The onboarding dot: the GLOBAL default badge plus its storage latch.
     await expect.poll(() => readGlobalBadge(session.context)).toBe("●");
     await expect.poll(() => readLocalKey(session.context, "onboarding_badge_v1")).toBe(true);
+
+    // Being on screen is what arms the button step: false = armed and owed, and
+    // nothing on any tab may tick it before this lands.
+    await expect.poll(() => readLocalKey(session.context, "trigger_seen_v1")).toBe(false);
   } finally {
     await closeSession(session);
   }
@@ -177,23 +181,29 @@ test("Try it live opens the live repo in a new tab with the picker up, and the c
 });
 
 // The design's whole claim: the page reflects what the extension already knows.
-// Visiting a supported site in another tab has to tick the button step here.
-test("the checklist ticks itself while the user is on another tab", async () => {
+// The button step is the strict one - the trigger has to have been ON SCREEN, in a
+// focused tab, after this page armed it (ui/trigger-seen.ts).
+test("the checklist ticks itself once a trigger has been looked at", async () => {
   test.skip(isFirefoxRun(), FIREFOX_NO_ONBOARDING);
   const session = await launchFreshInstall({ keepOnboardingTab: true });
-  const page = await session.context.newPage();
+  let page: Page | null = null;
   try {
     const onboarding = await waitForOnboardingPage(session.context);
     await expect(onboarding.locator(".step.done")).toHaveCount(1);
+    // Opened before the checklist is armed, a site tab would tick nothing.
+    await expect.poll(() => readLocalKey(session.context, "trigger_seen_v1")).toBe(false);
 
+    page = await session.context.newPage();
     await page.goto(REPO_PAGE_URL);
     await page.locator(HOST_SELECTOR).first().waitFor({ state: "attached", timeout: SITE_MOUNT_TIMEOUT_MS });
+    // The look itself: the trigger has to stay on screen past the module's window.
+    await expect.poll(() => readLocalKey(session.context, "trigger_seen_v1"), { timeout: 15_000 }).toBe(true);
 
     await onboarding.bringToFront();
     await expect(onboarding.locator(".step.done")).toHaveCount(2, { timeout: 15_000 });
     await expect(onboarding.locator(".progress .label")).toHaveText(/2 .* 4/);
   } finally {
-    await page.close().catch(() => {});
+    await page?.close().catch(() => {});
     await closeSession(session);
   }
 });

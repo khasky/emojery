@@ -34,7 +34,8 @@ function stubPinState(isOnToolbar: boolean): (next: boolean) => void {
 // The two latches the content script and the vote queue write; the page reads
 // them once and then follows storage events.
 function seedFlags(flags: { sawTrigger?: boolean; reacted?: boolean }): void {
-  if (flags.sawTrigger !== undefined) shim.local.set("coach_seen_v1", flags.sawTrigger);
+  // Armed but unearned is what an open checklist looks like; `true` is the step earned.
+  if (flags.sawTrigger !== undefined) shim.local.set("trigger_seen_v1", flags.sawTrigger);
   // The badge latch is armed at install and retired by the first queued vote.
   if (flags.reacted !== undefined) shim.local.set("onboarding_badge_v1", !flags.reacted);
 }
@@ -127,14 +128,33 @@ describe("onboarding checklist", () => {
     await expect.poll(() => doneCount(), { timeout: 5_000 }).toBe(1);
   });
 
-  it("ticks the button step when a trigger first mounts on a page", async () => {
+  it("ticks the button step once a trigger has been looked at", async () => {
     stubPinState(false);
     renderPage();
     await expect.poll(() => doneCount()).toBe(1);
 
-    pushFlag("coach_seen_v1", true);
+    pushFlag("trigger_seen_v1", true);
 
     await expect.poll(() => doneCount()).toBe(2);
+  });
+
+  // The step the content script may earn is the one this page opens: mounting a
+  // trigger before the user ever met the checklist ticks nothing (ui/trigger-seen.ts).
+  it("arms the button step by being on screen", async () => {
+    stubPinState(false);
+    renderPage();
+
+    await expect.poll(() => shim.local.get("trigger_seen_v1")).toBe(false);
+    expect(doneCount(), "arming is not the same as earning").toBe(1);
+  });
+
+  it("leaves an already-earned button step alone on a second visit", async () => {
+    stubPinState(false);
+    seedFlags({ sawTrigger: true });
+    renderPage();
+
+    await expect.poll(() => doneCount()).toBe(2);
+    expect(shim.local.get("trigger_seen_v1")).toBe(true);
   });
 
   it("ticks the reaction step when the first vote retires the toolbar dot", async () => {

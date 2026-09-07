@@ -8,7 +8,7 @@
 import { render } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { t } from "../../shared/i18n";
-import { hasReactedOnce, hasSeenTrigger, watchOnboardingFlags } from "../../shared/onboarding";
+import { armTriggerSeen, hasReactedOnce, hasSeenTrigger, watchOnboardingFlags } from "../../shared/onboarding";
 import { bootstrapPage } from "../../shared/page-bootstrap";
 import { CARD_CLASS, CONFETTI_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
 import { SUPPORTED_SITES } from "../../shared/sites";
@@ -71,6 +71,28 @@ function usePinnedState(): boolean | null {
     };
   }, []);
   return pinned;
+}
+
+// Opens the window for the "spot the button" step, on the first render this page
+// is actually looked at. Until this lands, a trigger mounting somewhere - including
+// the tabs the install replays its content scripts into - ticks nothing.
+function useArmedChecklist(): void {
+  useEffect(() => {
+    const arm = (): void => {
+      void armTriggerSeen().catch(() => {});
+    };
+    if (document.visibilityState === "visible") {
+      arm();
+      return;
+    }
+    const onVisible = (): void => {
+      if (document.visibilityState !== "visible") return;
+      document.removeEventListener("visibilitychange", onVisible);
+      arm();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, []);
 }
 
 // The two latches the content script and the vote queue write. Event-driven:
@@ -155,6 +177,7 @@ interface Step {
 }
 
 export function App() {
+  useArmedChecklist();
   const pinned = usePinnedState();
   const { sawTrigger, reacted } = useOnboardingFlags();
 
