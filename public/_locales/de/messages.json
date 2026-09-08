@@ -507,8 +507,8 @@
   "authErrUndeliverable": {
     "message": "Die E-Mail konnte nicht zugestellt werden. Versuchen Sie es erneut oder überprüfen Sie die Adresse."
   },
-  "authErrEmailNotAccepted": {
-    "message": "Diese E-Mail-Adresse kann keine Anmeldecodes empfangen. Bitte verwenden Sie eine dauerhafte Adresse."
+  "authErrEmailDomainUndeliverable": {
+    "message": "Diese E-Mail-Domain kann keine Nachrichten empfangen. Prüfen Sie die Adresse auf Tippfehler oder verwenden Sie eine andere."
   },
   "authErrBadEmail": {
     "message": "Das sieht nicht nach einer gültigen E-Mail-Adresse aus."

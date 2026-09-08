@@ -507,8 +507,8 @@
   "authErrUndeliverable": {
     "message": "Kunde inte leverera e-postmeddelandet. Försök igen eller kontrollera adressen."
   },
-  "authErrEmailNotAccepted": {
-    "message": "Den här e-postadressen kan inte ta emot inloggningskoder. Använd en permanent adress."
+  "authErrEmailDomainUndeliverable": {
+    "message": "Den här e-postdomänen kan inte ta emot e-post. Kontrollera adressen för stavfel eller använd en annan."
   },
   "authErrBadEmail": {
     "message": "Detta ser inte ut som en giltig e-postadress."

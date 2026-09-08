@@ -507,8 +507,8 @@
   "authErrUndeliverable": {
     "message": "Tidak dapat menghantar e-mel. Cuba lagi atau semak alamat."
   },
-  "authErrEmailNotAccepted": {
-    "message": "Alamat e-mel ini tidak boleh menerima kod log masuk. Sila gunakan alamat tetap."
+  "authErrEmailDomainUndeliverable": {
+    "message": "Domain e-mel ini tidak boleh menerima mel. Semak alamat untuk kesilapan taip atau gunakan yang lain."
   },
   "authErrBadEmail": {
     "message": "Ini tidak kelihatan seperti alamat e-mel yang sah."

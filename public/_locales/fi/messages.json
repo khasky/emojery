@@ -507,8 +507,8 @@
   "authErrUndeliverable": {
     "message": "Sähköpostin toimitus epäonnistui. Yritä uudelleen tai tarkista osoite."
   },
-  "authErrEmailNotAccepted": {
-    "message": "Tämä sähköpostiosoite ei voi vastaanottaa kirjautumiskoodeja. Käytä pysyvää osoitetta."
+  "authErrEmailDomainUndeliverable": {
+    "message": "Tämä sähköpostiverkkotunnus ei voi vastaanottaa viestejä. Tarkista osoite kirjoitusvirheiden varalta tai käytä toista."
   },
   "authErrBadEmail": {
     "message": "Tämä ei näytä kelvolliselta sähköpostiosoitteelta."

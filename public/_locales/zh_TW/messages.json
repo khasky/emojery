@@ -507,8 +507,8 @@
   "authErrUndeliverable": {
     "message": "無法投遞電子郵件。請重試或檢查地址。"
   },
-  "authErrEmailNotAccepted": {
-    "message": "此電子郵件地址無法接收登入代碼。請使用永久地址。"
+  "authErrEmailDomainUndeliverable": {
+    "message": "此電子郵件網域無法接收郵件。請檢查地址是否有誤，或改用其他地址。"
   },
   "authErrBadEmail": {
     "message": "這看起來不是有效的電子郵件地址。"

@@ -507,8 +507,8 @@
   "authErrUndeliverable": {
     "message": "Kon de e-mail niet afleveren. Probeer het opnieuw of controleer het adres."
   },
-  "authErrEmailNotAccepted": {
-    "message": "Dit e-mailadres kan geen inlogcodes ontvangen. Gebruik een permanent adres."
+  "authErrEmailDomainUndeliverable": {
+    "message": "Dit e-maildomein kan geen berichten ontvangen. Controleer het adres op typefouten of gebruik een ander."
   },
   "authErrBadEmail": {
     "message": "Dat ziet er niet uit als een geldig e-mailadres."

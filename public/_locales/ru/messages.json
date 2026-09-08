@@ -507,8 +507,8 @@
   "authErrUndeliverable": {
     "message": "Не удалось доставить письмо. Попробуйте снова или проверьте адрес."
   },
-  "authErrEmailNotAccepted": {
-    "message": "Одноразовые/временные email-провайдеры не принимаются. Используйте постоянный адрес."
+  "authErrEmailDomainUndeliverable": {
+    "message": "Этот домен не принимает почту. Проверьте адрес на опечатку или укажите другой."
   },
   "authErrBadEmail": {
     "message": "Введите корректный email-адрес."

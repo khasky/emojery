@@ -95,7 +95,7 @@ test.describe("extension account auth", () => {
     await expect(sendCodeButton).toBeEnabled();
     await sendCodeButton.click();
     await expect(
-      authPage.getByText(localeMessage("en", "authErrEmailNotAccepted"), {
+      authPage.getByText(localeMessage("en", "authErrEmailDomainUndeliverable"), {
         exact: true,
       }),
     ).toBeVisible();
@@ -177,7 +177,7 @@ test.describe("extension account auth", () => {
         await expect(sendCodeButton).toBeEnabled();
         await sendCodeButton.click();
         await expect(
-          authPage.getByText(localeMessage(locale, "authErrEmailNotAccepted"), {
+          authPage.getByText(localeMessage(locale, "authErrEmailDomainUndeliverable"), {
             exact: true,
           }),
         ).toBeVisible();

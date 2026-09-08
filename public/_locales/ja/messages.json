@@ -507,8 +507,8 @@
   "authErrUndeliverable": {
     "message": "メールを配信できませんでした。もう一度試すかアドレスを確認してください。"
   },
-  "authErrEmailNotAccepted": {
-    "message": "このメールアドレスはサインインコードを受信できません。永続的なアドレスをご使用ください。"
+  "authErrEmailDomainUndeliverable": {
+    "message": "このメールドメインはメールを受信できません。アドレスの入力ミスを確認するか、別のアドレスをご使用ください。"
   },
   "authErrBadEmail": {
     "message": "有効なメールアドレスではないようです。"

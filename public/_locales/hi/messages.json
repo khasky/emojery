@@ -507,8 +507,8 @@
   "authErrUndeliverable": {
     "message": "ईमेल वितरित नहीं किया जा सका। पुनः प्रयास करें या पता जाँचें।"
   },
-  "authErrEmailNotAccepted": {
-    "message": "यह ईमेल पता साइन-इन कोड प्राप्त नहीं कर सकता। कृपया स्थायी पते का उपयोग करें।"
+  "authErrEmailDomainUndeliverable": {
+    "message": "यह ईमेल डोमेन संदेश प्राप्त नहीं कर सकता। पते में गलती जाँचें या दूसरा पता उपयोग करें।"
   },
   "authErrBadEmail": {
     "message": "यह वैध ईमेल पता नहीं लगता।"

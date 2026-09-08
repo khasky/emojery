@@ -507,8 +507,8 @@
   "authErrUndeliverable": {
     "message": "无法投递邮件。请重试或检查地址。"
   },
-  "authErrEmailNotAccepted": {
-    "message": "该邮箱地址无法接收登录代码。请使用永久地址。"
+  "authErrEmailDomainUndeliverable": {
+    "message": "该邮箱域名无法接收邮件。请检查地址是否有误，或换一个地址。"
   },
   "authErrBadEmail": {
     "message": "这看起来不是有效的邮箱地址。"

@@ -351,13 +351,17 @@ function App() {
     } else if (res.status === 502) {
       setError(t("authErrUndeliverable"));
     } else if (res.status === 422) {
-      setError(t("authErrEmailNotAccepted"));
+      // One line however the API phrased the refusal: the next step is the same for all
+      // of them - check the address, or use another one - so the copy does not vary
+      // with the `error` string. (502 above is a different thing: a send that failed on
+      // our side, where retrying the same address is the right advice.)
+      setError(t("authErrEmailDomainUndeliverable"));
     } else if (res.status === 400) {
       setError(t("authErrBadEmail"));
     } else {
-      // The API's `error` is a machine string (`unsupported_client`), not UI copy, so
-      // it is not what a person is shown - every status the user can act on is
-      // branched above. The field stays on the response: it is what makes a rejected
+      // The API's `error` is a machine string (`unsupported_client`), never UI copy - no
+      // branch here reads it and it is rendered nowhere. Every status the user can act on
+      // is branched already. The field stays on the response: it is what makes a rejected
       // sign-in diagnosable from the background's message log.
       setError(t("authErrUnknown"));
     }

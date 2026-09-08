@@ -645,9 +645,9 @@
     "message": "Could not deliver the email. Try again or check the address.",
     "description": "Auth error: HTTP 502 (email delivery failed) from the server."
   },
-  "authErrEmailNotAccepted": {
-    "message": "Disposable / temporary email providers are not accepted. Please use a permanent address.",
-    "description": "Auth error: HTTP 422 — the email address was not accepted."
+  "authErrEmailDomainUndeliverable": {
+    "message": "That email domain can't receive mail. Check the address for a typo, or try another one.",
+    "description": "Auth error: HTTP 422 — the sign-in code cannot be sent to that address."
   },
   "authErrBadEmail": {
     "message": "That doesn't look like a valid email address.",

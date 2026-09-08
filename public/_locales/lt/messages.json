@@ -507,8 +507,8 @@
   "authErrUndeliverable": {
     "message": "Nepavyko pristatyti laiško. Bandykite dar kartą arba patikrinkite adresą."
   },
-  "authErrEmailNotAccepted": {
-    "message": "Šis el. pašto adresas negali gauti prisijungimo kodų. Naudokite nuolatinį adresą."
+  "authErrEmailDomainUndeliverable": {
+    "message": "Šis el. pašto domenas negali gauti laiškų. Patikrinkite, ar adrese nėra klaidų, arba naudokite kitą."
   },
   "authErrBadEmail": {
     "message": "Tai neatrodo kaip galiojantis el. pašto adresas."

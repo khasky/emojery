@@ -507,8 +507,8 @@
   "authErrUndeliverable": {
     "message": "E-posti edastamine ebaõnnestus. Proovige uuesti või kontrollige aadressi."
   },
-  "authErrEmailNotAccepted": {
-    "message": "See e-posti aadress ei saa sisselogimiskoode vastu võtta. Kasutage püsivat aadressi."
+  "authErrEmailDomainUndeliverable": {
+    "message": "See e-posti domeen ei saa kirju vastu võtta. Kontrollige aadressi trükivigade suhtes või kasutage teist."
   },
   "authErrBadEmail": {
     "message": "See ei tundu kehtiv e-posti aadress."

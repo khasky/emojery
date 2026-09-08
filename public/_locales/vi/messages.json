@@ -507,8 +507,8 @@
   "authErrUndeliverable": {
     "message": "Không thể gửi email. Vui lòng thử lại hoặc kiểm tra địa chỉ."
   },
-  "authErrEmailNotAccepted": {
-    "message": "Địa chỉ email này không thể nhận mã đăng nhập. Vui lòng sử dụng địa chỉ vĩnh viễn."
+  "authErrEmailDomainUndeliverable": {
+    "message": "Miền email này không thể nhận thư. Vui lòng kiểm tra lỗi chính tả trong địa chỉ hoặc dùng địa chỉ khác."
   },
   "authErrBadEmail": {
     "message": "Đây không giống một địa chỉ email hợp lệ."

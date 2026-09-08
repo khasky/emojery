@@ -507,8 +507,8 @@
   "authErrUndeliverable": {
     "message": "이메일을 전달할 수 없습니다. 다시 시도하거나 주소를 확인하세요."
   },
-  "authErrEmailNotAccepted": {
-    "message": "이 이메일 주소는 로그인 코드를 받을 수 없습니다. 영구 주소를 사용하세요."
+  "authErrEmailDomainUndeliverable": {
+    "message": "이 이메일 도메인은 메일을 받을 수 없습니다. 주소에 오타가 없는지 확인하거나 다른 주소를 사용하세요."
   },
   "authErrBadEmail": {
     "message": "유효한 이메일 주소가 아닌 것 같습니다."

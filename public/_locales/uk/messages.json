@@ -507,8 +507,8 @@
   "authErrUndeliverable": {
     "message": "Не вдалося доставити листа. Спробуйте знову або перевірте адресу."
   },
-  "authErrEmailNotAccepted": {
-    "message": "На цю адресу не можна надіслати коди входу. Використовуйте постійну адресу."
+  "authErrEmailDomainUndeliverable": {
+    "message": "Цей домен не приймає пошту. Перевірте адресу на помилку або вкажіть іншу."
   },
   "authErrBadEmail": {
     "message": "Це не схоже на коректну email-адресу."

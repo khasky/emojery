@@ -19,6 +19,8 @@ const PAGE_URL = location.href;
 const EMAIL = "user@example.com";
 const OK_REQUEST = { type: "auth:otpRequested", ok: true, status: 200 };
 const OK_VERIFY = { type: "auth:otpVerified", ok: true, status: 200 };
+// The one line every refused address gets on a 422, whichever refusal the API named.
+const UNREACHABLE_COPY = "That email domain can't receive mail. Check the address for a typo, or try another one.";
 // In production the background closes this tab on an "ok", so nothing repaints
 // after it - here the page simply stays put, which is what the asserts read.
 const OK_RETURN = { type: "ok" };
@@ -141,9 +143,9 @@ describe("auth page - the email step", () => {
 
   it.each([
     [502, "Could not deliver the email. Try again or check the address."],
-    [422, "Disposable / temporary email providers are not accepted. Please use a permanent address."],
+    [422, UNREACHABLE_COPY],
     [400, "That doesn't look like a valid email address."],
-  ])("maps a %i to its own copy and stays put", async (status, copy) => {
+  ])("renders the %i copy and stays on the email step", async (status, copy) => {
     install({ requestReply: { type: "auth:otpRequested", ok: false, status } });
     await loadPage();
     await sendCode();
@@ -155,15 +157,19 @@ describe("auth page - the email step", () => {
     expect(storedCooldown()).toBeNull();
   });
 
-  it("keeps the API's machine error string off the screen", async () => {
-    // `error` is a diagnostic for the background's message log, not UI copy: a status
-    // the user cannot act on renders the localized fallback, and the raw string
-    // reaches the page nowhere else either.
-    install({ requestReply: { type: "auth:otpRequested", ok: false, status: 500, error: "unsupported_client" } });
+  // `error` is a diagnostic for the background's message log, never UI copy. Two
+  // properties in one: it is not rendered, and it does not SELECT what is rendered
+  // either - the copy for a status is the same whatever string rides along, so a
+  // refusal cannot be told apart by reading the screen.
+  it.each([
+    [500, "Something went wrong. Please try again."],
+    [422, UNREACHABLE_COPY],
+  ])("renders the %i copy whatever the machine error string says", async (status, copy) => {
+    install({ requestReply: { type: "auth:otpRequested", ok: false, status, error: "unsupported_client" } });
     await loadPage();
     await sendCode();
     await vi.waitFor(() => expect(errorText()).not.toBe(""));
-    expect(errorText()).toBe("Something went wrong. Please try again.");
+    expect(errorText()).toBe(copy);
     expect(document.body.textContent).not.toContain("unsupported_client");
   });
 

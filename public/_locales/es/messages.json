@@ -507,8 +507,8 @@
   "authErrUndeliverable": {
     "message": "No se pudo entregar el correo. Inténtalo de nuevo o revisa la dirección."
   },
-  "authErrEmailNotAccepted": {
-    "message": "Esta dirección no puede recibir códigos de inicio de sesión. Usa una dirección permanente."
+  "authErrEmailDomainUndeliverable": {
+    "message": "Este dominio de correo no puede recibir mensajes. Revisa si hay un error en la dirección o usa otra."
   },
   "authErrBadEmail": {
     "message": "Esto no parece una dirección de correo válida."

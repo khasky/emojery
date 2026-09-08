@@ -507,8 +507,8 @@
   "authErrUndeliverable": {
     "message": "Nie udało się dostarczyć e-maila. Spróbuj ponownie lub sprawdź adres."
   },
-  "authErrEmailNotAccepted": {
-    "message": "Ten adres e-mail nie może odbierać kodów logowania. Użyj stałego adresu."
+  "authErrEmailDomainUndeliverable": {
+    "message": "Ta domena e-mail nie może odbierać wiadomości. Sprawdź adres pod kątem literówek lub użyj innego."
   },
   "authErrBadEmail": {
     "message": "To nie wygląda na prawidłowy adres e-mail."

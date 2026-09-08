@@ -193,7 +193,7 @@ Emojery adds an emoji reaction control next to the native like/share/star button
 
 The reaction buttons and counts appear on the supported sites (x.com, facebook.com, reddit.com, instagram.com, youtube.com, github.com, gitlab.com, threads.com, amazon.com) without signing in — install and browse any of them. github.com/torvalds/linux is a reliable page to check without signing in.
 
-To test voting (optional): open the extension, choose Sign in, enter any real email address; a 6-digit code is emailed; enter it. Use a mainstream provider - disposable and temp-mail domains are refused by design, and an unrecognised or undeliverable domain is answered with HTTP 422 rather than a code. The code may land in spam.
+To test voting (optional): open the extension, choose Sign in, enter any real email address; a 6-digit code is emailed; enter it. Use a mainstream provider - an address the code cannot be sent to is answered with an on-screen notice rather than a code, and disposable and temp-mail domains are among those refused. The code may land in spam.
 
 VALIDATION WARNINGS
 

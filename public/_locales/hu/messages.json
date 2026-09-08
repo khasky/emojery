@@ -507,8 +507,8 @@
   "authErrUndeliverable": {
     "message": "Nem sikerült kézbesíteni az e-mailt. Próbálja újra, vagy ellenőrizze a címet."
   },
-  "authErrEmailNotAccepted": {
-    "message": "Erre az e-mail címre nem küldhetők bejelentkezési kódok. Használjon állandó címet."
+  "authErrEmailDomainUndeliverable": {
+    "message": "Ez az e-mail domain nem tud üzenetet fogadni. Ellenőrizze a címet, vagy használjon másikat."
   },
   "authErrBadEmail": {
     "message": "Ez nem tűnik érvényes e-mail címnek."
