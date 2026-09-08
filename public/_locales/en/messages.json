@@ -3,10 +3,6 @@
     "message": "Emojery",
     "description": "Extension name shown in the browser's extension list and store."
   },
-  "extShortName": {
-    "message": "Emojery",
-    "description": "Short extension name shown when space is limited (toolbar label, mobile)."
-  },
   "extDescription": {
     "message": "Turn every Like button on the web into a full emoji palette.",
     "description": "One-line extension description in the browser's extension list and store."

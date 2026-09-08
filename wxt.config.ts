@@ -143,7 +143,10 @@ export default defineConfig({
     // Staging builds get a literal name suffix (the `__MSG_extName__` token is still
     // i18n-substituted) so staging and prod are distinguishable when loaded side by side.
     name: mode === "staging" ? "__MSG_extName__ (Staging)" : "__MSG_extName__",
-    short_name: "__MSG_extShortName__",
+    // A literal rather than `__MSG_extShortName__`: Opera's uploader measures the raw
+    // token against the 12-character `short_name` limit instead of substituting it first.
+    // Every locale spelled it "Emojery" anyway.
+    short_name: "Emojery",
     description: "__MSG_extDescription__",
     ...(browser === "firefox" ? { developer: { name: "khasky", url: "https://github.com/khasky" } } : {}),
     // Surfaces as "Open extension website" on the browser's extension page.
