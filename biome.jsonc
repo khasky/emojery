@@ -59,7 +59,12 @@
         "noDuplicateJsxProps": "error",
         "noDuplicatedSpreadProps": "error"
       },
-      "security": { "noDangerouslySetInnerHtmlWithChildren": "error" },
+      // Both listed by name for the reason the correctness block gives: the `react`
+      // domain that would carry them never activates on Preact. AMO's linter reports
+      // Preact's OWN `dangerouslySetInnerHTML` branch in every bundled content script
+      // (UNSAFE_VAR_ASSIGNMENT), and the answer to a reviewer is that nothing here
+      // reaches it - see docs/amo-reviewer-build.md#linter-warnings.
+      "security": { "noDangerouslySetInnerHtml": "error", "noDangerouslySetInnerHtmlWithChildren": "error" },
       "style": { "noNonNullAssertion": "off" }
     }
   },

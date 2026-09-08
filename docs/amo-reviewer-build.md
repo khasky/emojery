@@ -33,6 +33,14 @@ To verify the submitted add-on, compare the rebuilt `.output/firefox-mv2/` direc
 
 The first 4 are constant for a given release build, so the stamp is the only value that changes between rebuilds: a rebuild in the same calendar month is byte-identical to the submitted package; a rebuild in a later month differs only in that string.
 
+## Linter warnings
+
+`web-ext lint` on the submitted package reports 0 errors and 12 warnings, and every one of them is expected.
+
+**10 × `UNSAFE_VAR_ASSIGNMENT`** — one per bundle that carries Preact: the 9 site content scripts and the shared `tracking-links` chunk. Each points at Preact's own `dangerouslySetInnerHTML` branch (`f.__html == e.innerHTML || (e.innerHTML = f.__html)`), which lands in each bundle separately because MV3 content scripts get no code splitting. Nothing in this extension reaches it: no source file passes that prop — `biome.jsonc` enables `security/noDangerouslySetInnerHtml` and `pnpm lint` runs `biome check --error-on-warnings`, so a first use fails the build — and `grep -rn innerHTML src` over the source archive returns only the DOM reset in `src/test/setup.ts`, which is vitest setup and ships in no artifact.
+
+**2 × `KEY_FIREFOX_UNSUPPORTED_BY_MIN_VERSION`** (desktop and Android) — `strict_min_version` sits below the 140/142 floor that introduced `data_collection_permissions`, deliberately; the next section has the reason and the 2 fallbacks that cover the builds below it.
+
 ## Data collection permissions
 
 The Firefox manifest declares required data collection through `browser_specific_settings.gecko.data_collection_permissions`: `authenticationInfo`, `websiteContent`, and `personallyIdentifyingInfo`. It also declares `technicalAndInteraction` as optional: reaction requests carry optional context fields for aggregate breakdowns only when both the in-extension "Community insights" toggle and Firefox's optional data permission are enabled.
