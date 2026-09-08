@@ -108,7 +108,7 @@ describe("AccountView - session states", () => {
     install({ email: null });
     await mountAndSettle();
 
-    expect(container.querySelector(".row-hint")?.textContent).toBe("id: abcdefgh…");
+    expect(container.querySelector(".row-hint")?.textContent).toBe("id: abcdefgh...");
   });
 
   it("signs out and lands back on the sign-in prompt", async () => {
@@ -161,7 +161,7 @@ describe("AccountView - deleting the account", () => {
     await armDeleteConfirm();
     await userEvent.keyboard("{End}");
 
-    // Back from "Deleting…" to the confirm, still signed in - a failure that
+    // Back from "Deleting..." to the confirm, still signed in - a failure that
     // looked like a completed delete would be the dangerous outcome here.
     await vi.waitFor(() => expect(container.querySelector(DELETE_CONFIRM_WARN_SELECTOR)).not.toBeNull());
     expect(container.querySelector(".delete-confirm-progress")).toBeNull();

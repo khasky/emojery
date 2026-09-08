@@ -144,7 +144,7 @@
     "message": "মুছতে স্লাইড করুন"
   },
   "deleteAccountProgress": {
-    "message": "আপনার অ্যাকাউন্ট মুছে ফেলা হচ্ছে… এই উইন্ডোটি বন্ধ করবেন না।"
+    "message": "আপনার অ্যাকাউন্ট মুছে ফেলা হচ্ছে... এই উইন্ডোটি বন্ধ করবেন না।"
   },
   "cancelBtn": {
     "message": "বাতিল"
@@ -400,7 +400,7 @@
     "message": "কোড পাঠান"
   },
   "authSendingBtn": {
-    "message": "পাঠানো হচ্ছে…"
+    "message": "পাঠানো হচ্ছে..."
   },
   "authAgreeIntro": {
     "message": "আমি "
@@ -433,7 +433,7 @@
     "message": "যাচাইকরণ কোড"
   },
   "authVerifyingBtn": {
-    "message": "যাচাই করা হচ্ছে…"
+    "message": "যাচাই করা হচ্ছে..."
   },
   "authVerifyBtn": {
     "message": "সাইন ইন"

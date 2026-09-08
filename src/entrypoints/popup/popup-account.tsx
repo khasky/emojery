@@ -119,7 +119,7 @@ const AccountView = ({ settings, update }: { settings: Settings; update: (patch:
   }
 
   // Sessions minted before the email field existed fall back to a short userId prefix.
-  const subtitle = email ?? (userId ? `id: ${userId.slice(0, 8)}…` : "—");
+  const subtitle = email ?? (userId ? `id: ${userId.slice(0, 8)}...` : "—");
   return (
     <div class={ACCOUNT_LIST_CLASS}>
       <IconRow rowClass="row arow" icon={ICON_USER} label={t("signedInLabel")} hint={subtitle} hintTitle={email ?? undefined}>

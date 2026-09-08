@@ -144,7 +144,7 @@
     "message": "Braukite, kad ištrintumėte"
   },
   "deleteAccountProgress": {
-    "message": "Jūsų paskyra šalinama… neuždarykite šio lango."
+    "message": "Jūsų paskyra šalinama... neuždarykite šio lango."
   },
   "cancelBtn": {
     "message": "Atšaukti"
@@ -400,7 +400,7 @@
     "message": "Siųsti kodą"
   },
   "authSendingBtn": {
-    "message": "Siunčiama…"
+    "message": "Siunčiama..."
   },
   "authAgreeIntro": {
     "message": "Sutinku su "
@@ -433,7 +433,7 @@
     "message": "Patvirtinimo kodas"
   },
   "authVerifyingBtn": {
-    "message": "Tikrinama…"
+    "message": "Tikrinama..."
   },
   "authVerifyBtn": {
     "message": "Prisijungti"

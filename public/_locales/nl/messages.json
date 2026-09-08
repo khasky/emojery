@@ -144,7 +144,7 @@
     "message": "Veeg om te verwijderen"
   },
   "deleteAccountProgress": {
-    "message": "Je account wordt verwijderd… sluit dit venster niet."
+    "message": "Je account wordt verwijderd... sluit dit venster niet."
   },
   "cancelBtn": {
     "message": "Annuleren"
@@ -400,7 +400,7 @@
     "message": "Code verzenden"
   },
   "authSendingBtn": {
-    "message": "Verzenden…"
+    "message": "Verzenden..."
   },
   "authAgreeIntro": {
     "message": "Ik ga akkoord met de "
@@ -433,7 +433,7 @@
     "message": "Verificatiecode"
   },
   "authVerifyingBtn": {
-    "message": "Verifiëren…"
+    "message": "Verifiëren..."
   },
   "authVerifyBtn": {
     "message": "Inloggen"

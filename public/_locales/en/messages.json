@@ -190,7 +190,7 @@
     "description": "Label inside the slide-to-confirm track the user drags to delete their account."
   },
   "deleteAccountProgress": {
-    "message": "Deleting your account… please don't close this window.",
+    "message": "Deleting your account... please don't close this window.",
     "description": "Non-dismissable notice shown while the account-deletion request is in flight."
   },
   "cancelBtn": {
@@ -512,7 +512,7 @@
     "description": "Submit button on the email step of the auth page."
   },
   "authSendingBtn": {
-    "message": "Sending…",
+    "message": "Sending...",
     "description": "Submit button label while the OTP request is in flight."
   },
   "authAgreeIntro": {
@@ -554,7 +554,7 @@
     "description": "Label for the 6-digit OTP input."
   },
   "authVerifyingBtn": {
-    "message": "Verifying…",
+    "message": "Verifying...",
     "description": "Submit button label while the OTP verification is in flight."
   },
   "authVerifyBtn": {

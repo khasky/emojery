@@ -144,7 +144,7 @@
     "message": "Lohista kustutamiseks"
   },
   "deleteAccountProgress": {
-    "message": "Kustutame sinu konto… ära sulge seda akent."
+    "message": "Kustutame sinu konto... ära sulge seda akent."
   },
   "cancelBtn": {
     "message": "Tühista"
@@ -400,7 +400,7 @@
     "message": "Saada kood"
   },
   "authSendingBtn": {
-    "message": "Saatmine…"
+    "message": "Saatmine..."
   },
   "authAgreeIntro": {
     "message": "Nõustun "
@@ -433,7 +433,7 @@
     "message": "Kinnituskood"
   },
   "authVerifyingBtn": {
-    "message": "Kontrollimine…"
+    "message": "Kontrollimine..."
   },
   "authVerifyBtn": {
     "message": "Logi sisse"

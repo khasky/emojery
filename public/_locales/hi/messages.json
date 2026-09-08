@@ -144,7 +144,7 @@
     "message": "हटाने के लिए स्लाइड करें"
   },
   "deleteAccountProgress": {
-    "message": "आपका खाता हटाया जा रहा है… यह विंडो बंद न करें।"
+    "message": "आपका खाता हटाया जा रहा है... यह विंडो बंद न करें।"
   },
   "cancelBtn": {
     "message": "रद्द करें"
@@ -400,7 +400,7 @@
     "message": "कोड भेजें"
   },
   "authSendingBtn": {
-    "message": "भेज रहा है…"
+    "message": "भेज रहा है..."
   },
   "authAgreeIntro": {
     "message": "मैं "
@@ -433,7 +433,7 @@
     "message": "सत्यापन कोड"
   },
   "authVerifyingBtn": {
-    "message": "सत्यापन कर रहा है…"
+    "message": "सत्यापन कर रहा है..."
   },
   "authVerifyBtn": {
     "message": "साइन इन"

@@ -144,7 +144,7 @@
     "message": "滑动以删除"
   },
   "deleteAccountProgress": {
-    "message": "正在删除你的账号……请不要关闭此窗口。"
+    "message": "正在删除你的账号......请不要关闭此窗口。"
   },
   "cancelBtn": {
     "message": "取消"
@@ -400,7 +400,7 @@
     "message": "发送代码"
   },
   "authSendingBtn": {
-    "message": "发送中…"
+    "message": "发送中..."
   },
   "authAgreeIntro": {
     "message": "我同意"
@@ -433,7 +433,7 @@
     "message": "验证码"
   },
   "authVerifyingBtn": {
-    "message": "验证中…"
+    "message": "验证中..."
   },
   "authVerifyBtn": {
     "message": "登录"

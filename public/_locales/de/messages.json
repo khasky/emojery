@@ -144,7 +144,7 @@
     "message": "Zum Löschen wischen"
   },
   "deleteAccountProgress": {
-    "message": "Dein Konto wird gelöscht… bitte schließe dieses Fenster nicht."
+    "message": "Dein Konto wird gelöscht... bitte schließe dieses Fenster nicht."
   },
   "cancelBtn": {
     "message": "Abbrechen"
@@ -400,7 +400,7 @@
     "message": "Code senden"
   },
   "authSendingBtn": {
-    "message": "Senden…"
+    "message": "Senden..."
   },
   "authAgreeIntro": {
     "message": "Ich akzeptiere die "
@@ -433,7 +433,7 @@
     "message": "Bestätigungscode"
   },
   "authVerifyingBtn": {
-    "message": "Wird geprüft…"
+    "message": "Wird geprüft..."
   },
   "authVerifyBtn": {
     "message": "Anmelden"

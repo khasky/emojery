@@ -144,7 +144,7 @@
     "message": "スライドして削除"
   },
   "deleteAccountProgress": {
-    "message": "アカウントを削除しています… このウィンドウを閉じないでください。"
+    "message": "アカウントを削除しています... このウィンドウを閉じないでください。"
   },
   "cancelBtn": {
     "message": "キャンセル"
@@ -400,7 +400,7 @@
     "message": "コードを送信"
   },
   "authSendingBtn": {
-    "message": "送信中…"
+    "message": "送信中..."
   },
   "authAgreeIntro": {
     "message": "私は"
@@ -433,7 +433,7 @@
     "message": "確認コード"
   },
   "authVerifyingBtn": {
-    "message": "確認中…"
+    "message": "確認中..."
   },
   "authVerifyBtn": {
     "message": "サインイン"

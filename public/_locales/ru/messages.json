@@ -144,7 +144,7 @@
     "message": "Проведите, чтобы удалить"
   },
   "deleteAccountProgress": {
-    "message": "Удаляем ваш аккаунт… не закрывайте это окно."
+    "message": "Удаляем ваш аккаунт... не закрывайте это окно."
   },
   "cancelBtn": {
     "message": "Отмена"
@@ -400,7 +400,7 @@
     "message": "Отправить код"
   },
   "authSendingBtn": {
-    "message": "Отправка…"
+    "message": "Отправка..."
   },
   "authAgreeIntro": {
     "message": "Я принимаю "
@@ -433,7 +433,7 @@
     "message": "Код подтверждения"
   },
   "authVerifyingBtn": {
-    "message": "Проверка…"
+    "message": "Проверка..."
   },
   "authVerifyBtn": {
     "message": "Войти"

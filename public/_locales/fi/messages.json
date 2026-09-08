@@ -144,7 +144,7 @@
     "message": "Poista liu'uttamalla"
   },
   "deleteAccountProgress": {
-    "message": "Poistetaan tiliäsi… älä sulje tätä ikkunaa."
+    "message": "Poistetaan tiliäsi... älä sulje tätä ikkunaa."
   },
   "cancelBtn": {
     "message": "Peruuta"
@@ -400,7 +400,7 @@
     "message": "Lähetä koodi"
   },
   "authSendingBtn": {
-    "message": "Lähetetään…"
+    "message": "Lähetetään..."
   },
   "authAgreeIntro": {
     "message": "Hyväksyn "
@@ -433,7 +433,7 @@
     "message": "Vahvistuskoodi"
   },
   "authVerifyingBtn": {
-    "message": "Tarkistetaan…"
+    "message": "Tarkistetaan..."
   },
   "authVerifyBtn": {
     "message": "Kirjaudu"

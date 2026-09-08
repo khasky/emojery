@@ -144,7 +144,7 @@
     "message": "Leret untuk padam"
   },
   "deleteAccountProgress": {
-    "message": "Memadamkan akaun anda… jangan tutup tetingkap ini."
+    "message": "Memadamkan akaun anda... jangan tutup tetingkap ini."
   },
   "cancelBtn": {
     "message": "Batal"
@@ -400,7 +400,7 @@
     "message": "Hantar kod"
   },
   "authSendingBtn": {
-    "message": "Menghantar…"
+    "message": "Menghantar..."
   },
   "authAgreeIntro": {
     "message": "Saya bersetuju dengan "
@@ -433,7 +433,7 @@
     "message": "Kod pengesahan"
   },
   "authVerifyingBtn": {
-    "message": "Mengesahkan…"
+    "message": "Mengesahkan..."
   },
   "authVerifyBtn": {
     "message": "Log masuk"

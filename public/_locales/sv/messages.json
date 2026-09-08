@@ -144,7 +144,7 @@
     "message": "Dra för att radera"
   },
   "deleteAccountProgress": {
-    "message": "Ditt konto tas bort… stäng inte det här fönstret."
+    "message": "Ditt konto tas bort... stäng inte det här fönstret."
   },
   "cancelBtn": {
     "message": "Avbryt"
@@ -400,7 +400,7 @@
     "message": "Skicka kod"
   },
   "authSendingBtn": {
-    "message": "Skickar…"
+    "message": "Skickar..."
   },
   "authAgreeIntro": {
     "message": "Jag godkänner "
@@ -433,7 +433,7 @@
     "message": "Verifieringskod"
   },
   "authVerifyingBtn": {
-    "message": "Verifierar…"
+    "message": "Verifierar..."
   },
   "authVerifyBtn": {
     "message": "Logga in"

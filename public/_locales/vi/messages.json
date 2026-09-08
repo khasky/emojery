@@ -144,7 +144,7 @@
     "message": "Trượt để xóa"
   },
   "deleteAccountProgress": {
-    "message": "Đang xóa tài khoản của bạn… đừng đóng cửa sổ này."
+    "message": "Đang xóa tài khoản của bạn... đừng đóng cửa sổ này."
   },
   "cancelBtn": {
     "message": "Hủy"
@@ -400,7 +400,7 @@
     "message": "Gửi mã"
   },
   "authSendingBtn": {
-    "message": "Đang gửi…"
+    "message": "Đang gửi..."
   },
   "authAgreeIntro": {
     "message": "Tôi đồng ý với "
@@ -433,7 +433,7 @@
     "message": "Mã xác minh"
   },
   "authVerifyingBtn": {
-    "message": "Đang xác minh…"
+    "message": "Đang xác minh..."
   },
   "authVerifyBtn": {
     "message": "Đăng nhập"

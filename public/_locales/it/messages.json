@@ -144,7 +144,7 @@
     "message": "Scorri per eliminare"
   },
   "deleteAccountProgress": {
-    "message": "Eliminazione del tuo account… non chiudere questa finestra."
+    "message": "Eliminazione del tuo account... non chiudere questa finestra."
   },
   "cancelBtn": {
     "message": "Annulla"
@@ -400,7 +400,7 @@
     "message": "Invia codice"
   },
   "authSendingBtn": {
-    "message": "Invio…"
+    "message": "Invio..."
   },
   "authAgreeIntro": {
     "message": "Accetto i "
@@ -433,7 +433,7 @@
     "message": "Codice di verifica"
   },
   "authVerifyingBtn": {
-    "message": "Verifica…"
+    "message": "Verifica..."
   },
   "authVerifyBtn": {
     "message": "Accedi"

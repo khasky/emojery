@@ -144,7 +144,7 @@
     "message": "เลื่อนเพื่อลบ"
   },
   "deleteAccountProgress": {
-    "message": "กำลังลบบัญชีของคุณ… อย่าปิดหน้าต่างนี้"
+    "message": "กำลังลบบัญชีของคุณ... อย่าปิดหน้าต่างนี้"
   },
   "cancelBtn": {
     "message": "ยกเลิก"
@@ -400,7 +400,7 @@
     "message": "ส่งรหัส"
   },
   "authSendingBtn": {
-    "message": "กำลังส่ง…"
+    "message": "กำลังส่ง..."
   },
   "authAgreeIntro": {
     "message": "ฉันยอมรับ"
@@ -433,7 +433,7 @@
     "message": "รหัสยืนยัน"
   },
   "authVerifyingBtn": {
-    "message": "กำลังตรวจสอบ…"
+    "message": "กำลังตรวจสอบ..."
   },
   "authVerifyBtn": {
     "message": "เข้าสู่ระบบ"

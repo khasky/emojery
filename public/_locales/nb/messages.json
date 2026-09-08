@@ -144,7 +144,7 @@
     "message": "Dra for å slette"
   },
   "deleteAccountProgress": {
-    "message": "Sletter kontoen din… ikke lukk dette vinduet."
+    "message": "Sletter kontoen din... ikke lukk dette vinduet."
   },
   "cancelBtn": {
     "message": "Avbryt"
@@ -400,7 +400,7 @@
     "message": "Send kode"
   },
   "authSendingBtn": {
-    "message": "Sender…"
+    "message": "Sender..."
   },
   "authAgreeIntro": {
     "message": "Jeg godtar "
@@ -433,7 +433,7 @@
     "message": "Verifiseringskode"
   },
   "authVerifyingBtn": {
-    "message": "Verifiserer…"
+    "message": "Verifiserer..."
   },
   "authVerifyBtn": {
     "message": "Logg inn"

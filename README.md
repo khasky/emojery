@@ -284,17 +284,17 @@ Reproducing the Firefox package for AMO review? See [docs/amo-reviewer-build.md]
 
 **Chromium-based browsers (Chrome, Edge, Brave, Arc, Opera, Vivaldi):**
 
-1. Open `chrome://extensions` (or `edge://extensions`, `brave://extensions`, …).
+1. Open `chrome://extensions` (or `edge://extensions`, `brave://extensions`, ...).
 2. Toggle **Developer mode** on (top-right).
 3. Click **Load unpacked** and pick the matching `.output/<target>` folder.
 
 **Firefox:**
 
 1. Open `about:debugging#/runtime/this-firefox`.
-2. Click **Load Temporary Add-on…** and pick any file inside `.output/firefox-mv2/` (e.g. `manifest.json`).
+2. Click **Load Temporary Add-on...** and pick any file inside `.output/firefox-mv2/` (e.g. `manifest.json`).
 3. The add-on stays loaded until you restart Firefox — repeat after every restart while side-loading.
 
-> Don't use **Install Add-on From File…** with the packaged Firefox zip: release/beta Firefox reject unsigned packages ("could not be verified"). Load the unpacked folder as a temporary add-on instead.
+> Don't use **Install Add-on From File...** with the packaged Firefox zip: release/beta Firefox reject unsigned packages ("could not be verified"). Load the unpacked folder as a temporary add-on instead.
 
 ### Testing
 
