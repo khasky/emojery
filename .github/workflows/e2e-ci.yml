@@ -112,7 +112,12 @@ jobs:
       - name: Run visual baselines + locale sweep
         env:
           PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/e2e-own-surfaces.json
-        run: xvfb-run -a pnpm exec playwright test -c e2e/playwright.config.ts --reporter=list,json visual.spec.ts locale-sweep.spec.ts ${{ inputs.update_snapshots && '--update-snapshots' || '' }}
+          # The flag travels through `env:` because `${{ inputs.* }}` inside a
+          # `run:` step is a blocking semgrep finding. Unquoted at the use site on
+          # purpose: a quoted empty value reaches playwright as a positional file
+          # filter, and an empty filter matches every spec.
+          UPDATE_SNAPSHOTS: ${{ inputs.update_snapshots && '--update-snapshots' || '' }}
+        run: xvfb-run -a pnpm exec playwright test -c e2e/playwright.config.ts --reporter=list,json visual.spec.ts locale-sweep.spec.ts $UPDATE_SNAPSHOTS
 
       # The popup settings that need no account: the Theme setting reaching a live
       # trigger and the extension's own pages, and Debug revealing the queue panel.
