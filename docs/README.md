@@ -7,6 +7,7 @@
 | [localization.md](localization.md) | Touching emoji labels or multilingual search: where the CLDR data comes from, how it is pruned, bundled, and looked up |
 | [permissions.md](permissions.md) | Reviewing or changing the manifest: every permission, the code that needs it, and what is deliberately not requested |
 | [amo-reviewer-build.md](amo-reviewer-build.md) | Reproducing the Firefox package submitted to addons.mozilla.org |
+| [store-listing-copy.md](store-listing-copy.md) | Submitting to a store: the listing copy, permission justifications, data-usage answers and reviewer notes for CWS, Edge and AMO |
 | [verifying-counts.md](verifying-counts.md) | Checking the published reaction counters yourself — the public log and the open-source verifier |
 | [releasing.md](releasing.md) | Maintainer-only: cutting a release, and the scripts no PR needs |
 
