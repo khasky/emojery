@@ -98,3 +98,18 @@ jobs:
             e2e/test-results/
           if-no-files-found: ignore
           retention-days: 14
+
+      # A daily probe nobody reads is a probe that does not exist: a red run pings
+      # the maintainer channel. No-ops when the secret is unset, so nothing here is
+      # mandatory setup. Scheduled runs only - whoever pressed workflow_dispatch is
+      # already watching this run.
+      - name: Alert
+        if: failure() && github.event_name == 'schedule'
+        env:
+          WEBHOOK: ${{ secrets.CI_ALERT_DISCORD_WEBHOOK_URL }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          [ -n "${WEBHOOK:-}" ] || exit 0
+          curl -sS -X POST -H "content-type: application/json" \
+            -d "{\"content\":\"Selector drift FAILED: ${RUN_URL}\"}" "$WEBHOOK" > /dev/null
