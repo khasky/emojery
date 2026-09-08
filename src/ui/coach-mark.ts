@@ -10,6 +10,7 @@
 import { COACH_ATTR, COACH_BODY_CLASS, COACH_CLOSE_CLASS, COACH_TIP_CLASS, COACH_TITLE_CLASS, COUNTER_CLASS, TRIGGER_CLASS } from "../shared/dom";
 import { t } from "../shared/i18n";
 import { claimCoachMark } from "../shared/onboarding";
+import { whenVisible } from "../shared/visibility";
 import { getOverlayRoot } from "./mount-shadow";
 
 // Let mount-reblend.ts's early re-blend passes land before pointing at the trigger.
@@ -35,29 +36,15 @@ export function __resetCoachMarkForTest(): void {
   attemptedOnThisPage = false;
 }
 
-// A mount in a background tab is not something the user witnessed. The install
-// replays content scripts into every already-open supported tab
-// (background/install.ts), so claiming there would spend the one-shot on a tooltip
-// nobody sees. Tab visibility is all this owes: the onboarding checklist's own
-// "spot the button" step asks a stricter question, and asks it in trigger-seen.ts.
-// Resolves at once when the tab is visible.
-function whenVisible(): Promise<void> {
-  if (document.visibilityState === "visible") return Promise.resolve();
-  return new Promise((resolve) => {
-    const onChange = (): void => {
-      if (document.visibilityState !== "visible") return;
-      document.removeEventListener("visibilitychange", onChange);
-      resolve();
-    };
-    document.addEventListener("visibilitychange", onChange);
-  });
-}
-
 export async function maybeShowCoachMark(host: HTMLElement): Promise<void> {
   if (attemptedOnThisPage) return;
   attemptedOnThisPage = true;
   const trigger = host.shadowRoot?.querySelector<HTMLElement>(`.${TRIGGER_CLASS}, .${COUNTER_CLASS}`);
   if (!trigger) return;
+  // A mount in a background tab is not something the user witnessed. The install
+  // replays content scripts into every already-open supported tab
+  // (background/install.ts), so claiming there would spend the one-shot on a
+  // tooltip nobody sees.
   await whenVisible();
   // The wait can outlive the mount - a feed recycles cards, and a tab can sit
   // hidden for hours before it is looked at.

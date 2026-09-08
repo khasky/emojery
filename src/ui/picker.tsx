@@ -35,6 +35,7 @@ import { applyCountsDelta, applyTotalDelta } from "../shared/reaction-delta";
 import type { Reaction, ReactionCounts, TargetCounts } from "../shared/reactions";
 import { CATEGORIES, REACTIONS } from "../shared/reactions";
 import { clearRecentEmojis, getRecentEmojis } from "../shared/recents";
+import { onceVisible } from "../shared/visibility";
 import type { ReactionAnimationOrigin } from "./animations";
 import { EmojiImg } from "./emoji-img";
 import { activeUserId } from "./messaging";
@@ -350,28 +351,17 @@ export function Picker({ initial, typography, onPick, onSignIn, portalRoot, bind
   useEffect(() => {
     if (!authed || !pendingReaction) return;
     const r = pendingReaction;
-    const cast = () => {
-      setPendingReaction(null);
-      setOpen(false);
-      triggerRef.current?.focus();
-      void castPick(r, elementOrigin(triggerRef.current));
-    };
     // Sign-in happens in a tab of its own, so this one is normally in the background
     // when auth lands - casting straight away would spend the reaction's float
     // animation where nobody is looking, and the user comes back to a result with no
     // event. Hold it until the tab is on screen, which the auth page's own return
     // makes the very next thing that happens.
-    if (document.visibilityState !== "hidden") {
-      cast();
-      return;
-    }
-    const onVisible = () => {
-      if (document.visibilityState === "hidden") return;
-      document.removeEventListener("visibilitychange", onVisible);
-      cast();
-    };
-    document.addEventListener("visibilitychange", onVisible);
-    return () => document.removeEventListener("visibilitychange", onVisible);
+    return onceVisible(() => {
+      setPendingReaction(null);
+      setOpen(false);
+      triggerRef.current?.focus();
+      void castPick(r, elementOrigin(triggerRef.current));
+    });
   }, [authed, pendingReaction]);
 
   const onTriggerKey = (e: KeyboardEvent) => {

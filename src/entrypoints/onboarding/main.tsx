@@ -13,6 +13,7 @@ import { bootstrapPage } from "../../shared/page-bootstrap";
 import { CARD_CLASS, CONFETTI_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
 import { SUPPORTED_SITES } from "../../shared/sites";
 import { TRY_IT_LIVE_URL, withExtensionUtm } from "../../shared/tracking-links";
+import { onceVisible } from "../../shared/visibility";
 import { getToolbarUserSettings } from "../../shared/webext";
 
 // The pin step re-checks on this cadence for as long as the page is open. No
@@ -77,22 +78,7 @@ function usePinnedState(): boolean | null {
 // is actually looked at. Until this lands, a trigger mounting somewhere - including
 // the tabs the install replays its content scripts into - ticks nothing.
 function useArmedChecklist(): void {
-  useEffect(() => {
-    const arm = (): void => {
-      void armTriggerSeen().catch(() => {});
-    };
-    if (document.visibilityState === "visible") {
-      arm();
-      return;
-    }
-    const onVisible = (): void => {
-      if (document.visibilityState !== "visible") return;
-      document.removeEventListener("visibilitychange", onVisible);
-      arm();
-    };
-    document.addEventListener("visibilitychange", onVisible);
-    return () => document.removeEventListener("visibilitychange", onVisible);
-  }, []);
+  useEffect(() => onceVisible(() => void armTriggerSeen().catch(() => {})), []);
 }
 
 // The two latches the content script and the vote queue write. Event-driven:
@@ -128,19 +114,13 @@ function useCelebration(complete: boolean): boolean {
   useEffect(() => {
     if (!complete || spent.current) return;
     let timer: number | undefined;
-    const fire = (): void => {
-      if (spent.current) return;
+    const cancelWait = onceVisible(() => {
       spent.current = true;
       setFiring(true);
       timer = window.setTimeout(() => setFiring(false), CONFETTI_MS);
-    };
-    const onVisible = (): void => {
-      if (document.visibilityState === "visible") fire();
-    };
-    if (document.visibilityState === "visible") fire();
-    else document.addEventListener("visibilitychange", onVisible);
+    });
     return () => {
-      document.removeEventListener("visibilitychange", onVisible);
+      cancelWait();
       if (timer !== undefined) clearTimeout(timer);
     };
   }, [complete]);
