@@ -2,19 +2,19 @@
 
 ## Extension Name
 
-```
+```text
 Emojery
 ```
 
 ## Summary / Title
 
-```
+```text
 Turn every Like button on the web into a full emoji palette.
 ```
 
 ## Description
 
-```
+```text
 Emojery adds 600+ emoji reactions to supported websites, right next to the Like, Star and vote buttons you already use. React with what you actually mean and see what other Emojery users picked.
 
 Most platforms give you a short list of reactions. Sometimes that's all you need. But when the thing you feel isn't on the menu, Emojery gives you more ways to express it.
@@ -71,79 +71,79 @@ Not affiliated with, sponsored by, or endorsed by Meta, Google, Reddit, X Corp.,
 
 ## Single purpose description
 
-```
+```text
 Emojery lets people react to web content with a full emoji palette and see aggregate reaction counts contributed by email-verified users, shown inline next to the existing Like / Star / vote buttons on a fixed list of supported sites. Every permission and every host exists to render that one reaction control and sync its counts.
 ```
 
 ## storage justification
 
-```
+```text
 Used to save extension settings, per-site preferences, the authentication token, recently used emoji, local reaction state and cached counts. Settings may sync through the browser's extension-settings sync; the session token and local reaction state are stored on the device. These values support the reaction picker, account session and consistent behavior between visits.
 ```
 
 ## unlimitedStorage justification
 
-```
+```text
 Used to retain the user's local reaction history in IndexedDB as it grows beyond default storage quotas and to protect it from automatic storage eviction. This supports history search, filtering, export and restoration. The browsable history database is not uploaded to Emojery's servers; submitted reactions are processed separately by the reaction service.
 ```
 
 ## alarms justification
 
-```
+```text
 Used to schedule short background tasks that retry queued reactions after temporary connection failures and refresh cached reaction counts. This lets pending submissions resume without keeping the extension's background service worker continuously running.
 ```
 
 ## activeTab justification
 
-```
+```text
 Used when the user opens the extension from the browser toolbar to inspect the active tab's URL, determine whether the current site is supported and display the appropriate site status and controls. Access is triggered by the user's action and is not used to monitor unrelated tabs or retrieve the browser's browsing-history database.
 ```
 
 ## scripting justification
 
-```
+```text
 Used to inject the extension's packaged content scripts into already-open supported pages when the extension is installed, so the reaction interface appears without requiring a page reload. Injection is restricted to supported host patterns. The scripts add the reaction interface and run from files included in the submitted extension package.
 ```
 
 ## Host permission justification
 
-```
+```text
 Access to the listed Facebook, Instagram, Reddit, YouTube, X, Threads, GitHub, GitLab and Amazon hosts is required to identify supported public content, insert the reaction interface and display its counts. User-enabled settings can hide native controls and link an emoji selection to a native reaction or vote on the current page; Auto-press is off by default. Access to api.emojery.app supports count lookups, email-code authentication, reaction submissions and removals, account deletion and user-submitted bug reports. Access to emojery.app lets a packaged script expose the installed version and handle reaction links. Content scripts run only on the declared supported hosts, not arbitrary websites.
 ```
 
 ## Homepage URL
 
-```
+```text
 https://emojery.app
 ```
 
 ## Support URL / Support website
 
-```
+```text
 https://emojery.app/contact
 ```
 
 ## Privacy policy URL
 
-```
+```text
 https://emojery.app/privacy
 ```
 
 ## Support Email
 
-```
+```text
 hello@emojery.app
 ```
 
 ## License
 
-```
+```text
 GNU General Public License v3.0
 ```
 
 ## Privacy Policy
 
-```
+```text
 Emojery collects the minimum needed to make a reaction count. Full policy: https://emojery.app/privacy (effective 24 August 2026).
 
 WHAT LEAVES YOUR BROWSER
@@ -172,7 +172,7 @@ Delete your account from the extension's Account tab. This removes your account 
 
 ## Notes to reviewer (AMO, 3000 characters)
 
-```
+```text
 BUILD INSTRUCTIONS
 
 Environment: Node.js 24 or newer. pnpm is pinned by the packageManager field in package.json; corepack provisions that exact version.
@@ -208,7 +208,7 @@ Nothing in this add-on reaches that branch, and the attached source archive show
 
 ## Test Instructions
 
-```
+```text
 No account is needed for the core features. Install the extension and open any supported page (youtube.com, reddit.com, github.com, gitlab.com, x.com, threads.com, facebook.com, instagram.com, amazon.com): the reaction button appears next to the site's own controls and shows the public counts. github.com/torvalds/linux is a reliable page to check without signing in.
 
 To test reacting: open the extension popup, choose Sign in, enter any real email address, and enter the 6-digit code that arrives. Disposable and temp-mail addresses are rejected, and the code can land in spam.
@@ -218,13 +218,13 @@ To test reacting: open the extension popup, choose Sign in, enter any real email
 
 ## AMO summary (250 characters)
 
-```
+```text
 Emoji reactions next to the Like, Star and vote buttons you already use, on Facebook, Instagram, Reddit, YouTube, X, Threads, GitHub, GitLab and Amazon. Counts are public, recorded in a tamper-evident log and recountable by an open-source verifier.
 ```
 
 ## Category and tags
 
-```
+```text
 Chrome Web Store
 Category: `Social & Communication`
 Tags: `emoji, reactions, react, like button, social, facebook, reddit, youtube, github, privacy, open source`
@@ -241,13 +241,13 @@ Tags: `emoji, reactions, like, dislike, upvote, github, reddit, transparency, pr
 
 ## Are you using remote code?
 
-```
+```text
 No, I am not using remote code.
 ```
 
 ## Data usage declarations (CWS and Edge)
 
-```
+```text
 Tick:
   Personally identifiable information  - email address at sign-in, account and installation identifiers.
   Authentication information           - the one-time code and the session token.
@@ -259,7 +259,7 @@ Tick:
 
 ## Notes for certification (Edge, 2000 characters)
 
-```
+```text
 Emojery adds an emoji reaction control next to the native Like, Star and vote buttons on 9 explicitly listed sites and shows the public reaction count for the item.
 
 Site access is limited to those sites - no <all_urls>, and no wildcard host match beyond each site's own subdomains. Two further hosts belong to the extension itself: emojery.app for the sign-in hand-off and an installed-version marker, and api.emojery.app, the backend that serves counts, accepts reactions and handles email sign-in. No remote code is executed; the content security policy is script-src 'self'.
