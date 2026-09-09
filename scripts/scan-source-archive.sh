@@ -50,7 +50,21 @@ fi
 # SHAPES as literal pattern text, so scanning them only ever finds the patterns
 # themselves. Everything else in the archive is scanned.
 deny="${SECRET_PATTERN_PREFIX}|${E2E_CREDENTIAL_PATTERN}"
-if unzip -p "$archive" -x 'scripts/lib/secret-patterns.sh' 'scripts/scan-source-archive.sh' 'scripts/scan-extension-artifact.sh' | grep -anE "$deny"; then
+# Unpacked to a file rather than piped into grep: under `pipefail` a non-zero unzip
+# (truncated archive, an entry it could not read) outranks grep's 0, so a real hit
+# printed to the log would still leave the `if` false. Same fail-open shape as the
+# `-I` one above, from the other end of the same pipeline.
+stream="$(mktemp)"
+trap 'rm -f "$stream"' EXIT
+if ! unzip -p "$archive" -x 'scripts/lib/secret-patterns.sh' 'scripts/scan-source-archive.sh' 'scripts/scan-extension-artifact.sh' >"$stream"; then
+  echo "::error::could not read the source archive - nothing was scanned"
+  exit 1
+fi
+if [ ! -s "$stream" ]; then
+  echo "::error::source archive holds nothing but this gate's own sources - nothing was scanned"
+  exit 1
+fi
+if grep -anE "$deny" "$stream"; then
   echo "::error::source archive contains a forbidden secret pattern"
   exit 1
 fi

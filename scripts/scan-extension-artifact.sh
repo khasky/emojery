@@ -55,9 +55,10 @@ fi
 # character class.
 deny="${SECRET_PATTERN_PREFIX}|${E2E_CREDENTIAL_PATTERN}|eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{4,}\.[A-Za-z0-9_-]{4,}|Bearer [A-Za-z0-9._-]{20,}|\.env|localhost|127\.0\.0\.1|sourceMappingURL|${staging_pattern}"
 # --binary-files=text, not the default binary-skip: a secret embedded in a .wasm, a font,
-# or a minified bundle carrying a NUL byte would otherwise never be scanned. Same choice
-# scan-source-archive.sh made for the same reason.
-if grep -RInE --binary-files=text "$deny" "$artifact"; then
+# or a minified bundle carrying a NUL byte would otherwise never be scanned. Never with
+# `-I` beside it - the two flags contradict and the last one wins, so an argument reshuffle
+# would silently restore the skip. Same choice scan-source-archive.sh made for the same reason.
+if grep -RnE --binary-files=text "$deny" "$artifact"; then
   echo "::error::extension artifact contains a forbidden secret/debug pattern"
   exit 1
 fi
