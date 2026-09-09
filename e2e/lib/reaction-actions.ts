@@ -37,9 +37,11 @@ export async function clickReactionBySearchOnTarget(page: Page, site: SupportedS
 
 export async function clearReactionOnTarget(page: Page, site: SupportedSiteScenario, targetKey: string): Promise<void> {
   const current = await selectedReactionViaPicker(page, site, targetKey);
-  if (!current) return;
-  await clickReactionBySearchOnTarget(page, site, targetKey, current, current);
-  await expectReactionOptionSelected(page, site, targetKey, current, false);
+  // Nothing to clear, whether the trigger is missing or carries no reaction. The step
+  // that needs the trigger asserts it for itself.
+  if (!current.found || current.reaction === null) return;
+  await clickReactionBySearchOnTarget(page, site, targetKey, current.reaction, current.reaction);
+  await expectReactionOptionSelected(page, site, targetKey, current.reaction, false);
 }
 
 export async function expectSelectedReaction(page: Page, site: SupportedSiteScenario, targetKey: string, expected: string | null): Promise<void> {
@@ -50,24 +52,29 @@ export async function expectSelectedReaction(page: Page, site: SupportedSiteScen
 
   await expect
     .poll(() => (expected === null ? selectedReactionViaPicker(page, site, targetKey) : selectedReactionViaPicker(page, site, targetKey, expected, expected)), {
-      message: expected === null ? "Visible picker should show no selected user reaction" : `Visible picker should show ${expected} as selected`,
+      message: expected === null ? "A visible trigger should open a picker showing no selected user reaction" : `Visible picker should show ${expected} as selected`,
       timeout: REACTION_POLL_TIMEOUT_MS,
     })
-    .toBe(expected);
+    .toEqual({ found: true, reaction: expected });
 }
 
 export async function expectReactionOptionSelected(page: Page, site: SupportedSiteScenario, targetKey: string, reaction: string, selected: boolean): Promise<void> {
   await expect
     .poll(() => selectedReactionViaPicker(page, site, targetKey, reaction, reaction), {
-      message: selected ? `Visible picker search result ${reaction} should be selected` : `Visible picker search result ${reaction} should not be selected`,
+      message: selected ? `Visible picker search result ${reaction} should be selected` : `A visible trigger should open a picker whose search result ${reaction} is not selected`,
       timeout: REACTION_POLL_TIMEOUT_MS,
     })
-    .toBe(selected ? reaction : null);
+    .toEqual({ found: true, reaction: selected ? reaction : null });
 }
 
-async function selectedReactionViaPicker(page: Page, site: SupportedSiteScenario, targetKey: string, query?: string, expectedVisibleReaction?: string): Promise<string | null> {
+// What one picker read saw. A missing trigger is its own outcome rather than a null
+// reaction: collapsing the two lets "nothing is selected" pass on a target that never
+// mounted, which is the opposite of what the negative assertions above are asserting.
+type PickerReadout = { found: false } | { found: true; reaction: string | null };
+
+async function selectedReactionViaPicker(page: Page, site: SupportedSiteScenario, targetKey: string, query?: string, expectedVisibleReaction?: string): Promise<PickerReadout> {
   const trigger = await waitForVisibleEmojeryTrigger(page, site, targetKey);
-  if (!trigger) return null;
+  if (!trigger) return { found: false };
   try {
     await openPickerWithVisibleUserAction(page, trigger);
     await expectVisibleReactionOptions(page);
@@ -77,7 +84,7 @@ async function selectedReactionViaPicker(page: Page, site: SupportedSiteScenario
         await expectVisibleEmojiGridOption(page, expectedVisibleReaction);
       }
     }
-    return await selectedReactionInOpenPicker(page);
+    return { found: true, reaction: await selectedReactionInOpenPicker(page) };
   } finally {
     await page.keyboard.press("Escape").catch(() => {});
     await trigger.dispose().catch(() => {});
