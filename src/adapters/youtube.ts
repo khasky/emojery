@@ -3,7 +3,7 @@ import type { TargetRef } from "../shared/adapter";
 import { queryFirst } from "../shared/dom-query";
 import { type Binding, defineSiteAdapter, type ScanContext } from "./framework";
 import { findFirstAnchor } from "./placement";
-import { compactElements, directChildSlot, matchesAny, safeMatches } from "./runtime";
+import { compactElements, matchesAny, safeMatches, slotOrSelf } from "./runtime";
 import { parseSiteHref, urlTargetResolver } from "./url-target";
 
 const ACTION_ROW_SELECTORS = ["#menu.ytd-watch-metadata #top-level-buttons-computed", "ytd-watch-metadata #top-level-buttons-computed", "ytd-menu-renderer #top-level-buttons-computed"];
@@ -116,11 +116,11 @@ export function resolveSegmentedGroup(
 ): HTMLElement[] {
   const segmented = queryFirst<HTMLElement>(row, selectors.segmented);
   if (segmented) {
-    return compactElements(directChildSlot(segmented, row) ?? segmented);
+    return compactElements(slotOrSelf(segmented, row));
   }
   const like = queryFirst<HTMLElement>(row, selectors.like);
   const dislike = queryFirst<HTMLElement>(row, selectors.dislike);
-  return compactElements(like ? (directChildSlot(like, row) ?? like) : null, dislike ? (directChildSlot(dislike, row) ?? dislike) : null);
+  return compactElements(like ? slotOrSelf(like, row) : null, dislike ? slotOrSelf(dislike, row) : null);
 }
 
 // Placement for one action row: hide the like/dislike control(s) (segmented
@@ -178,7 +178,7 @@ function bindingForShortsBar(bar: HTMLElement): Binding | null {
 
 function findShareAnchor(row: HTMLElement, replaceElements: readonly HTMLElement[]): HTMLElement | null {
   const labeled = queryFirst<HTMLElement>(row, SHARE_BUTTON_SELECTORS);
-  if (labeled) return directChildSlot(labeled, row) ?? labeled;
+  if (labeled) return slotOrSelf(labeled, row);
 
   const children = Array.from(row.children) as HTMLElement[];
   const replacementIndexes = replaceElements.map((el) => children.indexOf(el)).filter((index) => index >= 0);

@@ -4,7 +4,7 @@ import { queryAll, queryFirst } from "../shared/dom-query";
 import { defineLabelRegistry, STEM, STEM_PARTS, stem } from "./action-labels";
 import { defineSiteAdapter, type ScanContext } from "./framework";
 import { findSiblingAction, slotAction } from "./placement";
-import { directChildSlot, firstAncestor, matchesAny } from "./runtime";
+import { firstAncestor, matchesAny, slotOrSelf } from "./runtime";
 import { parseSiteHref } from "./url-target";
 
 // Logged-in tweets are `article[data-testid="tweet"]`; logged-out X (e.g. an
@@ -40,7 +40,7 @@ const xAdapter = defineSiteAdapter({
     // tweet, O(N^2) per scan. Only the ROOT tweet (first in the document, over ALL tweets)
     // may fall back to the page URL.
     const scan = ctx.memo(ctx.root, () => {
-      const currentStatus = parseXStatusUrl(location.href);
+      const currentStatus = extractXStatusRef(location.href);
       return { currentStatus, rootTweet: currentStatus ? (queryAll<HTMLElement>(ctx.root, TWEET_SELECTORS)[0] ?? null) : null };
     });
     return extractTarget(tweet, {
@@ -51,7 +51,7 @@ const xAdapter = defineSiteAdapter({
   resolveBinding: (tweet, ctx) => {
     const actionRow = memoTweetActionRow(ctx, tweet);
     if (!actionRow) return null;
-    const likeSlot = directChildSlot(actionRow.likeButton, actionRow.row) ?? actionRow.likeButton;
+    const likeSlot = slotOrSelf(actionRow.likeButton, actionRow.row);
     const placement = findPlacementAnchor(actionRow.row);
     const anchor = placement?.anchor ?? (likeSlot.nextElementSibling instanceof HTMLElement ? likeSlot.nextElementSibling : null) ?? likeSlot;
     const photoView = isCurrentStatusPhotoView();
@@ -68,7 +68,7 @@ const xAdapter = defineSiteAdapter({
     attributeFilter: ["aria-label", "href", "data-testid"],
     navKey: "href",
     navAlwaysTrigger: true,
-    linkPrimeSelectors: () => STATUS_LINK_SELECTORS,
+    linkPrimeSelectors: STATUS_LINK_SELECTORS,
   },
 });
 
@@ -135,7 +135,7 @@ function findPlacementAnchor(row: HTMLElement): { anchor: HTMLElement; position:
   if (sibling) return { anchor: sibling, position: "before" };
   const bookmark = xLabels.findActionControl(row, "bookmark");
   if (!bookmark) return null;
-  return { anchor: directChildSlot(bookmark, row) ?? bookmark, position: "before" };
+  return { anchor: slotOrSelf(bookmark, row), position: "before" };
 }
 
 // X's action row is a flex container whose leading slots (reply/retweet/like/
@@ -203,7 +203,7 @@ export function xTargetFromRef(ref: XStatusRef): TargetRef {
 function findOwnStatusRef(root: HTMLElement, selectors: readonly string[]): XStatusRef | null {
   for (const link of queryAll<HTMLAnchorElement>(root, selectors)) {
     if (isInQuotedTweet(link, root)) continue;
-    const parsed = parseXStatusUrl(link.getAttribute("href") || link.href);
+    const parsed = extractXStatusRef(link.getAttribute("href") || link.href);
     if (parsed) return parsed;
   }
   return null;
@@ -223,17 +223,13 @@ function isInQuotedTweet(link: Element, tweet: HTMLElement): boolean {
   return false;
 }
 
-export function extractXStatusRef(href: string): XStatusRef | null {
-  return parseXStatusUrl(href);
-}
-
 interface XStatusRef {
   handle: string;
   statusId: string;
   url: string;
 }
 
-function parseXStatusUrl(href: string): XStatusRef | null {
+export function extractXStatusRef(href: string): XStatusRef | null {
   return parseSiteHref(href, "x", (url) => {
     const match = url.pathname.match(STATUS_PATH_RE);
     const handle = match?.[1];

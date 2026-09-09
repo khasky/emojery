@@ -325,7 +325,7 @@ describe("createScanObserver", () => {
     const link = document.createElement("a");
     link.className = "prime-me";
     document.body.append(link);
-    const { onUpdate } = makeObserver({ linkPrimeSelectors: () => [".prime-me"] });
+    const { onUpdate } = makeObserver({ linkPrimeSelectors: [".prime-me"] });
     vi.advanceTimersByTime(250); // initial scan
     expect(onUpdate).toHaveBeenCalledTimes(1);
 

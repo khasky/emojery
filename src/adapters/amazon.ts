@@ -57,7 +57,7 @@ const amazonAdapter = defineSiteAdapter({
   },
   observer: {
     navKey: "href",
-    linkPrimeSelectors: () => VARIATION_CONTROL_SELECTORS,
+    linkPrimeSelectors: VARIATION_CONTROL_SELECTORS,
     attributeFilter: ["href", "data-asin", "data-defaultasin", "data-dp-url"],
   },
 });

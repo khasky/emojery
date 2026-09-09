@@ -30,16 +30,17 @@ const ACTION_LIST_WRAPPER = { tagName: "li" };
 // GitHub hides the repo-action `<ul>` on a narrow viewport, taking the primary
 // placement with it; these resolve the always-visible repo-name link as the
 // fallback anchor (the `strong[itemprop='name']` breadcrumb is the legacy shape).
-// Each selector's matches are filtered to a RENDERED one (`offsetParent`) before
-// falling through to the next: `#code-view-repo-link` stays in the DOM but
-// `hidden` on a narrow viewport, and a hidden match would win by priority and
-// mount on an anchor that never becomes visible, stalling mount.ts's
-// IntersectionObserver forever.
-const NARROW_HEADER_ANCHOR_SELECTORS = ["#code-view-repo-link", "a[data-testid='repo-name-link']", "#repository-container-header strong[itemprop='name']", "#repository-container-header #repo-title-component"];
-const NARROW_HEADER_ANCHOR_CANDIDATES = NARROW_HEADER_ANCHOR_SELECTORS.map((selector) => ({
-  selectors: [selector],
-  accept: (el: HTMLElement) => (el.offsetParent !== null ? el : null),
-}));
+// List order IS the priority (queryAll walks the selectors in turn), and every
+// match is filtered to a RENDERED one (`offsetParent`) before the next selector
+// gets its turn: `#code-view-repo-link` stays in the DOM but `hidden` on a narrow
+// viewport, and a hidden match would win by priority and mount on an anchor that
+// never becomes visible, stalling mount.ts's IntersectionObserver forever.
+const NARROW_HEADER_ANCHOR_CANDIDATES = [
+  {
+    selectors: ["#code-view-repo-link", "a[data-testid='repo-name-link']", "#repository-container-header strong[itemprop='name']", "#repository-container-header #repo-title-component"],
+    accept: (el: HTMLElement) => (el.offsetParent !== null ? el : null),
+  },
+];
 
 // Pressed-state read for auto-press: on the 2025 Primer-React header the
 // aria-label is the ONLY thing that flips (`Star owner/repo` <-> `Unstar ...`) -

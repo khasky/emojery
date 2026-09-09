@@ -16,7 +16,7 @@ const POST_LINK_SELECTORS = ['a[href*="/p/"]', 'a[href*="/reel/"]', 'a[href*="/t
 // (singular) the permalink - the SAME reel is reachable under both, so accept
 // either and normalize to the canonical singular `/reel/<sc>/`, keeping one
 // target key across both surfaces. `/reels/audio/<id>/` is the audio page, not a
-// reel - its "shortcode" would be the literal "audio"; rejected in parseInstagramUrl.
+// reel - its "shortcode" would be the literal "audio"; rejected in extractInstagramShortcode.
 const TARGET_PATH_RE = /^\/(?:(?:[A-Za-z0-9._]+)\/)?(p|reel|reels|tv)\/([A-Za-z0-9_-]+)(?:\/|$)/;
 const ROW_WALK_DEPTH = 10;
 // Post-action markers beyond Like - a post action bar carries at least one.
@@ -268,7 +268,7 @@ const instagramAdapter = defineSiteAdapter({
   observer: {
     attributeFilter: ["aria-label", "href"],
     navKey: "pathname",
-    linkPrimeSelectors: () => POST_LINK_SELECTORS,
+    linkPrimeSelectors: POST_LINK_SELECTORS,
     // Instagram is a pushState SPA: opening a post, returning to the feed, and
     // advancing the reel viewer all change the URL without a popstate, and the
     // new surface can settle without a childList mutation - the picker went
@@ -582,26 +582,22 @@ export function instagramTargetFromRef(ref: { shortcode: string; url: string }):
 // exactly this object back.
 function findPostRef(root: ParentNode): InstagramPostRef | null {
   for (const link of queryAll<HTMLAnchorElement>(root, POST_LINK_SELECTORS)) {
-    const parsed = parseInstagramUrl(link.getAttribute("href") || link.href);
+    const parsed = extractInstagramShortcode(link.getAttribute("href") || link.href);
     if (parsed) return parsed;
   }
   return null;
 }
 
 function currentPagePostRef(): InstagramPostRef | null {
-  return parseInstagramUrl(location.href);
+  return extractInstagramShortcode(location.href);
 }
 
 // Carries the canonical `url` alongside the parsed parts: `target-contract.ts`
 // pairs it with `instagramTargetFromRef`, so the canonical URL has ONE
-// construction site (parseInstagramUrl) rather than a second copy per caller.
+// construction site (extractInstagramShortcode) rather than a second copy per caller.
 type InstagramPostRef = { kind: string; shortcode: string; url: string };
 
 export function extractInstagramShortcode(href: string): InstagramPostRef | null {
-  return parseInstagramUrl(href);
-}
-
-function parseInstagramUrl(href: string): InstagramPostRef | null {
   return parseSiteHref(href, "instagram", (url) => {
     const match = url.pathname.match(TARGET_PATH_RE);
     const kindRaw = match?.[1];

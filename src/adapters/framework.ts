@@ -13,11 +13,10 @@ import { createScanObserver, type ScanObserverOptions } from "./scan-observer";
 
 export interface ScanContext {
   root: ParentNode;
-  // Dedupe sets, owned by the framework and reset per scan. Of the two only
-  // `seenTargets` is read by a callback (Facebook's shared-photo collision
-  // handler); neither is a callback's to mutate.
+  // Per-scan target dedupe, owned by the framework - read by Facebook's
+  // shared-photo collision handler, never a callback's to mutate. The container
+  // dedupe stays private to the scan loop; no callback needs it.
   seenTargets: Set<string>;
-  seenContainers: Set<HTMLElement>;
   // Memoize a per-candidate derived value for the current scan. Caches `null` /
   // falsy results too (via cache.has), so a negative lookup isn't recomputed.
   // The standard way an adapter shares one expensive lookup (its action-row
@@ -55,7 +54,6 @@ export function defineSiteAdapter(spec: SiteAdapterSpec): SiteAdapter {
     const ctx: ScanContext = {
       root,
       seenTargets: new Set<string>(),
-      seenContainers: new Set<HTMLElement>(),
       memo<T>(key: object, compute: () => T): T {
         if (cache.has(key)) return cache.get(key) as T;
         const value = compute();
@@ -66,11 +64,12 @@ export function defineSiteAdapter(spec: SiteAdapterSpec): SiteAdapter {
     if (spec.isPrivatePage?.(ctx)) return [];
 
     const points: PickerInsertionPoint[] = [];
+    const seenContainers = new Set<HTMLElement>();
     for (const candidate of spec.findCandidates(ctx)) {
       if (spec.dedupeContainer) {
         const container = spec.dedupeContainer(candidate, ctx);
-        if (!container || ctx.seenContainers.has(container)) continue;
-        ctx.seenContainers.add(container);
+        if (!container || seenContainers.has(container)) continue;
+        seenContainers.add(container);
       }
       const target = spec.resolveTarget(candidate, ctx);
       if (!target || ctx.seenTargets.has(target.targetId)) continue;

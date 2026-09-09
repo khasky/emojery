@@ -7,7 +7,7 @@
 // `slotAction` is counted with `findSiblingAction`, not against the rule: it
 // builds that function's arguments and has no meaning apart from it.
 import { queryAll, queryFirst } from "../shared/dom-query";
-import { directChildSlot } from "./runtime";
+import { slotOrSelf } from "./runtime";
 
 // A prioritized anchor candidate for `findFirstAnchor`: the selectors that find
 // it, and how to validate/transform a match into the final anchor (e.g. resolve a
@@ -56,6 +56,6 @@ export function findSiblingAction(scope: HTMLElement, actions: readonly SiblingA
 export function slotAction(row: HTMLElement, selectors: readonly string[]): SiblingAction {
   return {
     selectors,
-    resolve: (match) => directChildSlot(match, row) ?? match,
+    resolve: (match) => slotOrSelf(match, row),
   };
 }

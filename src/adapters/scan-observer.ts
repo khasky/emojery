@@ -30,7 +30,7 @@ export interface ScanObserverOptions {
   navAlwaysTrigger?: boolean;
   navEvents?: readonly string[];
   triggerEvents?: readonly string[];
-  linkPrimeSelectors?: () => readonly string[];
+  linkPrimeSelectors?: readonly string[];
   plugins?: readonly ObserverPlugin[];
 }
 
@@ -140,7 +140,7 @@ export function createScanObserver(opts: ScanObserverOptions): () => void {
   const onLinkClick = (event: Event): void => {
     const target = event.target;
     if (!(target instanceof Element) || !linkPrimeSelectors) return;
-    if (!closestAny(target, linkPrimeSelectors())) return;
+    if (!closestAny(target, linkPrimeSelectors)) return;
     window.setTimeout(onNav, LINK_NAV_CHECK_DELAY_MS);
     window.setTimeout(trigger, LINK_PRIME_DELAY_MS);
   };

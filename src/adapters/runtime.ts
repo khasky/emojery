@@ -67,6 +67,14 @@ export function directChildSlot(el: HTMLElement, row: HTMLElement): HTMLElement 
   return node && node.parentElement === row ? node : null;
 }
 
+// The anchor form every adapter wants: the row's own child that contains `el`, or
+// `el` itself when the walk leaves the row. A null from directChildSlot means "not
+// inside this row" - anchoring on `el` there keeps the insert next to the control
+// the caller found instead of dropping the mount.
+export function slotOrSelf(el: HTMLElement, row: HTMLElement): HTMLElement {
+  return directChildSlot(el, row) ?? el;
+}
+
 // Bounded upward walk, yielding `el` ITSELF first and then its parents:
 // `maxDepth` counts NODES VISITED (self-inclusive, like `closest()`), not parent
 // hops. A walk that tests the PARENT while returning the child slot

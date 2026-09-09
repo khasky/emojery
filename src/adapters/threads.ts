@@ -5,7 +5,7 @@ import { defineLabelRegistry } from "./action-labels";
 import { isPaintedFill } from "./css-alpha";
 import { type Binding, defineSiteAdapter, type ScanContext } from "./framework";
 import { urlChangeRescan } from "./observer-plugins";
-import { ancestors, compactElements, directChildSlot, precedes } from "./runtime";
+import { ancestors, compactElements, precedes, slotOrSelf } from "./runtime";
 import { parseSiteHref } from "./url-target";
 import { findVisualActionSlot, isStructuralRoot, pageHasLayout } from "./visual-action-row";
 
@@ -44,7 +44,7 @@ const threadsAdapter = defineSiteAdapter({
     const actionRow = actionRowFor(likeButton, ctx);
     if (!actionRow) return null;
     // Loop-invariant for the scan: keyed on the scan root, so one parse serves every candidate.
-    const currentPost = ctx.memo(ctx.root, () => parseThreadsPostUrl(location.href));
+    const currentPost = ctx.memo(ctx.root, () => extractThreadsPostRef(location.href));
     const target = extractTarget(actionRow.row, currentPost);
     if (!target) return null;
     // On a rendered detail/reply page, only mount the post the URL points at -
@@ -75,7 +75,7 @@ const threadsAdapter = defineSiteAdapter({
     // See isMediaViewerPath: the lightbox URL freezes the scan; the
     // urlChangeRescan plugin below fires the catch-up scans on close.
     suspendScan: () => isMediaViewerPath(location.pathname),
-    linkPrimeSelectors: () => POST_LINK_SELECTORS,
+    linkPrimeSelectors: POST_LINK_SELECTORS,
     // Threads is a pushState SPA whose navigations can settle with NO further
     // mutations - closing the /media viewer pushes the reply's URL onto an
     // already-rendered page, so the mutation-driven observer never fired and the
@@ -130,7 +130,7 @@ function dropNestedQuotedButtons(buttons: HTMLElement[]): HTMLElement[] {
 // unit there may legitimately start with the parent-context post above the
 // focused reply, so this filter must not run (it would drop the focused post).
 function dropFeedReplyButtons(buttons: HTMLElement[]): HTMLElement[] {
-  if (parseThreadsPostUrl(location.href)) return buttons;
+  if (extractThreadsPostRef(location.href)) return buttons;
   return buttons.filter((button) => {
     const unit = button.closest<HTMLElement>("[data-virtualized], [data-pagelet]");
     if (!unit) return true; // no unit info (headless / other surface) -> keep
@@ -191,8 +191,8 @@ function findActionRow(candidate: HTMLElement): ActionRow | null {
 
     const replyButton = findReplyButton(parent, candidate);
     if (replyButton) {
-      const likeSlot = directChildSlot(candidate, parent) ?? candidate;
-      const replySlot = directChildSlot(replyButton, parent) ?? replyButton;
+      const likeSlot = slotOrSelf(candidate, parent);
+      const replySlot = slotOrSelf(replyButton, parent);
       if (likeSlot !== replySlot) {
         return { row: parent, replySlot, likeButton: candidate };
       }
@@ -360,16 +360,12 @@ function findPostRefBefore(root: ParentNode, row: HTMLElement): { any: ThreadsPo
     // Skip a permalink that lives inside a NESTED quoted post's pressable - it
     // belongs to the embedded original, not to this row's (top-level) post.
     if (!linkBelongsToRowPost(link, row)) continue;
-    const parsed = parseThreadsPostUrl(link.getAttribute("href") || link.href);
+    const parsed = extractThreadsPostRef(link.getAttribute("href") || link.href);
     if (!parsed) continue;
     any = parsed;
     if (link.querySelector("time")) timed = parsed;
   }
   return { any, timed };
-}
-
-export function extractThreadsPostRef(href: string): ThreadsPostRef | null {
-  return parseThreadsPostUrl(href);
 }
 
 interface ThreadsPostRef {
@@ -378,7 +374,7 @@ interface ThreadsPostRef {
   url: string;
 }
 
-function parseThreadsPostUrl(href: string): ThreadsPostRef | null {
+export function extractThreadsPostRef(href: string): ThreadsPostRef | null {
   return parseSiteHref(href, "threads", (url) => {
     const match = url.pathname.match(POST_PATH_RE);
     const handle = match?.[1];

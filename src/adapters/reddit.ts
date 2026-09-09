@@ -70,7 +70,7 @@ const redditAdapter = defineSiteAdapter({
   observer: {
     navKey: "pathname",
     attributeFilter: SHADOW_ATTRIBUTE_FILTER,
-    linkPrimeSelectors: () => POST_LINK_SELECTORS,
+    linkPrimeSelectors: POST_LINK_SELECTORS,
     plugins: [shadowRootDiscovery({ attributeFilter: SHADOW_ATTRIBUTE_FILTER })],
   },
 });
@@ -162,7 +162,7 @@ function extractTarget(post: HTMLElement): TargetRef | null {
   const thingId = redditThingId(post);
   if (!thingId) return null;
 
-  const url = parseRedditUrl(post.getAttribute("permalink"))?.url ?? parseRedditUrl(location.href)?.url ?? parseRedditUrl(post.getAttribute("content-href"))?.url;
+  const url = extractRedditPostRef(post.getAttribute("permalink"))?.url ?? extractRedditPostRef(location.href)?.url ?? extractRedditPostRef(post.getAttribute("content-href"))?.url;
   if (!url) return null;
 
   return redditTargetFromRef({ thingId, url });
@@ -176,21 +176,17 @@ function redditThingId(post: HTMLElement): string | null {
   const id = post.getAttribute("id");
   if (id && REDDIT_THING_RE.test(id)) return id;
 
-  const permalink = parseRedditUrl(post.getAttribute("permalink"));
+  const permalink = extractRedditPostRef(post.getAttribute("permalink"));
   if (permalink) return permalink.thingId;
 
-  const current = parseRedditUrl(location.href);
+  const current = extractRedditPostRef(location.href);
   if (current) return current.thingId;
 
-  const contentHref = parseRedditUrl(post.getAttribute("content-href"));
+  const contentHref = extractRedditPostRef(post.getAttribute("content-href"));
   return contentHref?.thingId ?? null;
 }
 
-export function extractRedditPostRef(href: string): { thingId: string; url: string } | null {
-  return parseRedditUrl(href);
-}
-
-function parseRedditUrl(href: string | null): { thingId: string; url: string } | null {
+export function extractRedditPostRef(href: string | null): { thingId: string; url: string } | null {
   return parseSiteHref(href, "reddit", (url) => {
     const comments = url.pathname.match(COMMENTS_PATH_RE);
     if (comments?.[1]) {
