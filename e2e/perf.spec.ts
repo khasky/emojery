@@ -191,6 +191,11 @@ test("a mounted trigger stays inside its style and layout budget", async () => {
 
     // No trace at all is a broken measurement, not a pass - the counts would read zero.
     expect(events.length, "the tracing categories produced no events").toBeGreaterThan(0);
+    // The other two halves of the same measurement: a github-keyed mount is what makes the
+    // numbers per-trigger, and an empty attribution means the stack-trace category or the
+    // extension URL scheme moved, not that the extension rendered for free.
+    expect(mountKey, "no github-keyed trigger mounted, so there is no per-trigger render cost to bound").not.toBeNull();
+    expect(ours.length, "no trace event carried a chrome-extension:// stack frame - attribution broke, the counts below would read zero").toBeGreaterThan(0);
     expect(styleRecalcs.length, `extension-caused style recalculations in ${RENDER_SETTLE_MS}ms (${totalMs(styleRecalcs)}ms)`).toBeLessThanOrEqual(STYLE_RECALC_BUDGET);
     expect(layouts.length, `extension-caused layouts in ${RENDER_SETTLE_MS}ms (${totalMs(layouts)}ms)`).toBeLessThanOrEqual(LAYOUT_BUDGET);
   } finally {
