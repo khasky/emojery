@@ -497,7 +497,7 @@ describe("fetchCount", () => {
   it("authed: merges myReaction from /reactions/mine", async () => {
     vi.mocked(getAuth).mockResolvedValue({ token: "tok", userId: "u" } as never);
     // The wire key is the `site/targetId` token the request sent; `targetKey()` keeps
-    // its own `site:targetId` shape for local storage (api-read.ts mineWireKey).
+    // its own `site:targetId` shape for local storage (api-read.ts wireTargetToken).
     const key = `${target.site}/${target.targetId}`;
     const fetchMock = stubMineAndCount({ [key]: "❤️" }, { counts: { "❤️": 1 }, total: 1, loaded: 1, hasMore: false });
     vi.stubGlobal("fetch", fetchMock);

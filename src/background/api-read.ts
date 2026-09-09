@@ -141,8 +141,9 @@ function requestMyReactions(target: TargetRef, token: string): Promise<Record<st
   return batch.reactions;
 }
 
-/** The `site/targetId` token GET /reactions/mine takes and answers under. */
-function mineWireKey(target: TargetRef): string {
+/** The `site/targetId` token both reads send, and the key `mine` answers under.
+ *  `targetKey()` (shared/storage) is the separate LOCAL key, spelled `site:targetId`. */
+function wireTargetToken(target: TargetRef): string {
   return `${target.site}/${target.targetId}`;
 }
 
@@ -150,7 +151,7 @@ function mineWireKey(target: TargetRef): string {
 // costs the "you reacted" marker, and the shared promise is awaited by every
 // target in the batch - one rejection would surface as that many failures.
 async function sendMineRequest(token: string, targets: readonly TargetRef[]): Promise<Record<string, string>> {
-  const query = targets.map((target) => `t=${encodeURIComponent(mineWireKey(target))}`).join("&");
+  const query = targets.map((target) => `t=${encodeURIComponent(wireTargetToken(target))}`).join("&");
   try {
     // `no-store` for the same reason as the counts read below.
     const res = await apiFetch(`${API_BASE}/reactions/mine?${query}`, {
@@ -179,7 +180,7 @@ async function sendMineRequest(token: string, targets: readonly TargetRef[]): Pr
     const raw = isRecord(body) && isRecord(body.reactions) ? body.reactions : {};
     const reactions: Record<string, string> = {};
     for (const target of targets) {
-      const value = normalizeReaction(raw[mineWireKey(target)]);
+      const value = normalizeReaction(raw[wireTargetToken(target)]);
       if (value !== null) reactions[targetKey(target)] = value;
     }
     return reactions;
@@ -227,7 +228,7 @@ function isCount(value: unknown): value is number {
 }
 
 async function fetchTargetCountsAndOwnReaction(target: TargetRef, limit: number): Promise<TargetCounts> {
-  const targetParam = `${target.site}/${target.targetId}`;
+  const targetParam = wireTargetToken(target);
   const auth = await getAuth();
   // Both reads use `no-store`: the extension has its own read cache
   // (READ_CACHE_TTL_MS), so letting the browser HTTP layer also cache these could
