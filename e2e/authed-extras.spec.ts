@@ -125,10 +125,10 @@ test("offline: a reaction made offline persists after reconnect + reload", async
 
 // Deleting the account signs the user out AND removes the votes it cast,
 // observed exactly as a USER does: the public counter on the trigger rises when
-// you react and drops back after you delete. Signs in with a SEPARATE unique
-// per-run address on the configured test domain so destroying that account
-// never poisons the primary one. Public counts settle with a delay, so each
-// check waits and re-reads the RENDERED counter - never a direct API read.
+// you react and drops back after you delete. Signs in as a throwaway account of
+// its own, so destroying it never touches the primary one. Public counts settle
+// with a delay, so each check waits and re-reads the RENDERED counter - never a
+// direct API read.
 test("account deletion: signs out and reverses its reactions", async () => {
   test.skip(!ext.authConfigured(), ext.otpSkipReason("account deletion"));
   // Generous: we wait for the public counts to settle TWICE - once to see the

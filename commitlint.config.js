@@ -49,7 +49,6 @@ const scopes = [
   "sites",
   "staging",
   "test",
-  "test-auth",
   "threads",
   "trigger",
   "ui",
