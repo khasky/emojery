@@ -74,9 +74,9 @@ export async function openOnboardingPage(details: chrome.runtime.InstalledDetail
 export function installFreshInstallAuthReset(): void {
   chrome.runtime.onInstalled.addListener((details) => {
     if (details.reason !== "install") return;
-    // Everything below either writes an onboarding latch (the first-reaction step,
-    // the checklist page arming its own step) or sets off a write (a replayed content
-    // script), so all of it waits for the wipe. Started alongside it, the wipe
+    // The three chained below either write an onboarding latch (the first-reaction
+    // step, the checklist page arming its own step) or set off a write (a replayed
+    // content script), so each waits for the wipe. Started alongside it, the wipe
     // could land last and undo them. A failed reset still lets them run - a first
     // run with no dot and no checklist would be worse than a stale latch.
     const afterReset = resetAuthOnFreshInstall().catch((error: unknown) => logBackgroundError("resetAuthOnFreshInstall", error));
@@ -85,6 +85,7 @@ export function installFreshInstallAuthReset(): void {
     void afterReset.then(() => armFirstReaction()).catch((error: unknown) => logBackgroundError("armFirstReaction", error));
     void afterReset.then(() => injectIntoOpenTabs()).catch((error: unknown) => logBackgroundError("injectIntoOpenTabs", error));
     void afterReset.then(() => openOnboardingPage(details)).catch((error: unknown) => logBackgroundError("openOnboardingPage", error));
+    // Writes nothing of its own, so it does not wait for the wipe.
     void openLegacyDataConsentNotice().catch((error: unknown) => logBackgroundError("openLegacyDataConsentNotice", error));
   });
 }

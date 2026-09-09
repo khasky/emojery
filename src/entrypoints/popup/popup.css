@@ -1012,7 +1012,6 @@ h1 {
 }
 
 .row-hint {
-  /* 12px floor - the unified minimum across the popup and the auth page. */
   font-size: 12px;
   color: var(--khasky-emojery-muted);
 }

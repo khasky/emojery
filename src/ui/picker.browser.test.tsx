@@ -497,10 +497,6 @@ describe("Picker - keyboard a11y (real focus)", () => {
 
   // A site listening for Escape on document (Facebook closes a post permalink's dialog
   // and routes to the home feed) must not see the keystroke that dismissed the popover.
-  // Registered BEFORE the popover opens, which is what makes the capture phase the only
-  // place that can stop it.
-  // A site listening for Escape on document (Facebook closes a post permalink's dialog
-  // and routes to the home feed) must not see the keystroke that dismissed the popover.
   // The listener is registered BEFORE the popover opens, which is what makes the capture
   // phase the only place that can withhold it.
   it("withholds the Escape that closes the popover from a site's document listener", async () => {

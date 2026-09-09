@@ -56,7 +56,7 @@
 
 /* Pending the first glyph measurement (mount-style.ts SIZING_ATTR): the trigger must first
    paint at its exact size, never visibly resize - hold the slot, hide the pixels. Removed
-   on the first successful measure (then cached per site) or at mount.ts's bounded deadline. */
+   on the first successful measure (then cached per site) or at mount-reblend.ts's bounded deadline. */
 :host([data-khasky-emojery-sizing]) {
   visibility: hidden;
 }

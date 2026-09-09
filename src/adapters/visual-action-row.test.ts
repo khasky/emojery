@@ -19,8 +19,7 @@ afterEach(() => {
   for (const el of [document.body, document.documentElement] as Array<Partial<HTMLElement>>) delete el.getBoundingClientRect;
 });
 
-// jsdom doesn't lay out, so stamp a fixed box on an element (same idiom as
-// ui/mount-style.test.ts).
+// jsdom doesn't lay out, so stamp a fixed box on an element.
 function box(el: HTMLElement, w: number, h: number, x = 0, y = 0): HTMLElement {
   el.getBoundingClientRect = () => ({ x, y, left: x, top: y, right: x + w, bottom: y + h, width: w, height: h, toJSON: () => ({}) }) as DOMRect;
   return el;

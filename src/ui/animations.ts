@@ -9,8 +9,6 @@ export interface ReactionAnimationOrigin {
   y: number;
 }
 
-// The layer id is also the sprite scope below, and the `#khasky-emojery-reaction-animations`
-// rule in animations.css.
 const MAX_INTRO_PARTICLES = 10;
 // Intro stagger: each emoji's group starts a beat after the previous one, each particle
 // within a group a shorter beat after the last, plus a random spread so the launches

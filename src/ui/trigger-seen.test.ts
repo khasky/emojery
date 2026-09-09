@@ -63,7 +63,7 @@ async function mountAndShow(el: HTMLElement = host): Promise<void> {
   observer().emit(el, true);
 }
 
-/** Longer than the module's own look window. */
+/** The module's own look window - advancing the fake clock by it fires the latch. */
 const LOOKED_AT_MS = 1000;
 
 beforeEach(() => {

@@ -28,7 +28,7 @@ const parsedDataScripts = new WeakSet<Element>();
 
 // Both maps gain an entry per distinct media id the page's embedded JSON names,
 // and a feed session is unbounded - so, like the other long-lived id caches
-// (ui/mount-registry.ts, background/api-read.ts), they carry a hard ceiling,
+// (ui/mount-session.ts, background/api-read.ts), they carry a hard ceiling,
 // sized for this cache alone. Well above one session's working set: a feed
 // streams a few media ids per post.
 const IDENTITY_MAP_MAX_ENTRIES = 5_000;

@@ -134,7 +134,8 @@ function collectVisualActionSlots(row: HTMLElement, options: VisualActionRowOpti
     // Keep a hidden control's slot at its original index, as a placeholder exempt
     // from the size/variance filters: renumbering the row would slide a visible
     // sibling (e.g. Instagram's Comment) into slot 0 and re-anchor the picker past
-    // it. Never a mount target - findVisualActionSlot's entry guard rejects it.
+    // it. findVisualActionSlot admits a hidden control on purpose, so a re-scan
+    // that arrives on one still resolves to this slot.
     if (control.closest(HIDDEN_SELECTOR)) {
       out.push({ slot: child, control, width: 0, hidden: true });
       continue;

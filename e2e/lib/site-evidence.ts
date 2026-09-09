@@ -63,8 +63,8 @@ export interface MountEvidence {
   // rather than beside it (the Facebook photo overlap class), a host clipped by
   // an overflow ancestor, a matching host trapped inside a hidden ancestor, and
   // a stray visible tooltip (Facebook date-hover artifact). The default-unauth
-  // loop hard-asserts only the duplicate-key signal and surfaces the rest in
-  // evidence for debugging.
+  // loop hard-asserts the duplicate-key and clipped-host signals; the rest are
+  // surfaced in evidence for debugging only.
   duplicateMatchingKeys: string[];
   maxHostNativeOverlapRatio: number;
   clippedMatchingCount: number;

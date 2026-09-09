@@ -11,7 +11,7 @@ export interface TargetRef {
 }
 
 /**
- * Native controls that the "Auto-press native buttons" setting may press for
+ * Native controls that the "Auto-press original buttons" setting may press for
  * this point. Semantic, unlike `nativeElement` (which is "what to hide"): `like` /
  * `dislike` are the actual clickable controls. Adapters fill what the site
  * has; an absent field means the site offers no such action here.

@@ -120,7 +120,9 @@ export const COACH_BODY_CLASS = `${NS}-coach-body`;
 
 // --- Reaction animations, appended to the page (animations.ts) ---
 
-// The `@layer` the keyframes and particle rules live in, and the <style> that carries it.
+// The fixed overlay div the keyframes and particle rules render into, and the <style>
+// that carries them. The id doubles as the sprite scope and as animations.css's
+// `#khasky-emojery-reaction-animations` selector.
 export const ANIMATION_LAYER_ID = `${NS}-reaction-animations`;
 export const ANIMATION_STYLE_ID = `${ANIMATION_LAYER_ID}-style`;
 export const CLICK_FLOAT_CLASS = `${NS}-reaction-click-float`;

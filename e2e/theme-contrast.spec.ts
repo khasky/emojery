@@ -87,9 +87,9 @@ const scenarios: ThemeScenario[] = [
     scrollSteps: [0, 400, 900, 0],
   },
   // Setting-based / light-only surface: a distinct colored-control surface.
-  // (X is covered for both themes in site-injection.spec.ts instead - its
-  // logged-out action row, while now system-following, is unreliable to reveal
-  // in this contrast harness under automation.)
+  // (X is absent: site-injection.spec.ts mounts it in both themes, but nothing
+  // measures its contrast - its logged-out action row, while now system-following,
+  // is unreliable to reveal in this contrast harness under automation.)
   {
     site: "amazon",
     label: "Amazon product",

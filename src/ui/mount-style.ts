@@ -453,7 +453,7 @@ function isOwnMountNode(el: HTMLElement): boolean {
 }
 
 // Re-apply only the trigger's SIZE + SHAPE from the page's *current* styling, on a short
-// schedule after mount (see mount.ts) - Reddit hydrates its buttons a beat late. Colours are
+// schedule after mount (see mount-reblend.ts) - Reddit hydrates its buttons a beat late. Colours are
 // intentionally NOT re-stamped on this host: a later re-read risks capturing a neighbour's
 // hover/active fill. The read itself still refreshes the session's remembered site surface
 // (readSiteButtonStyle -> rememberSiteStyle), which mounts with an unreadable row fall back to.
@@ -503,7 +503,7 @@ export function hostShapeSignature(host: HTMLElement): string {
 // The host is invisible (CSS: [data-khasky-emojery-sizing]) until its glyph size is
 // known - the trigger must first paint at its exact size, never resize in front of the
 // user (YouTube's watch row hydrates its icons a beat late). Revealed on the first
-// successful glyph resolve, or unconditionally by mount.ts's bounded deadline.
+// successful glyph resolve, or unconditionally by mount-reblend.ts's bounded deadline.
 const SIZING_ATTR = "data-khasky-emojery-sizing";
 const revealedHosts = new WeakSet<HTMLElement>();
 
@@ -517,7 +517,7 @@ export function revealHost(host: HTMLElement): void {
 // see picker.css) and its visible GLYPH height as --khasky-emojery-glyph-h. Zero measurements
 // are skipped so a good earlier value survives. Returns whether THIS row's own icon was
 // measured, i.e. whether the size is final: a false return means the trigger wears a stand-in
-// and the caller owes it another measurement - a row that hydrates its icon past mount.ts's
+// and the caller owes it another measurement - a row that hydrates its icon past mount-reblend.ts's
 // 2.4s reblend window (YouTube's watch row) would otherwise keep the stand-in for the life of
 // the page.
 export function applyHostRowHeight(host: HTMLElement, point: PickerInsertionPoint): boolean {

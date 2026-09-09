@@ -105,7 +105,8 @@ export const SUPPORTED_SITES = [
 ] as const satisfies readonly SiteDescriptorInput[];
 
 // DERIVED single source of truth for the site-id union - adding a row above adds
-// the id here automatically. Re-exported from `./adapter` for back-compat.
+// the id here automatically. Re-exported from `./adapter`, which is where most
+// consumers take it from - they already import the adapter contract.
 export type SupportedSite = (typeof SUPPORTED_SITES)[number]["site"];
 
 // Widened view for uniform member access: the `as const` above narrows each row

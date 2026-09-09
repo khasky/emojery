@@ -55,6 +55,8 @@ function openAuthTab(sender: chrome.runtime.MessageSender): void {
 
 const HANDLERS: HandlerTable = {
   "ui:injected": (msg, { sender, sendResponse }) => {
+    // Narrowing, not a second gate: the guard rejects this type from a sender
+    // with no tab id.
     const tabId = sender.tab?.id;
     if (tabId !== undefined) {
       setInjectedBadge(tabId, msg.targetCount);

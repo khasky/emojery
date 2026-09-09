@@ -8,11 +8,13 @@
 // membership - is provisioned HERE at the start of the run and UNWOUND at the
 // end, so nothing the account had before a run is left changed.
 //
-// Every step is best-effort and VERIFICATION-GATED: it reads the real state, acts
-// only to reach the wanted state, confirms the change took, and records an undo
-// ONLY for a change it confirmed. A step that can't drive a site's UI (markup
-// drift, non-English account UI) leaves the account untouched. Steps never throw
-// out of here; a failed revert is logged loudly.
+// Every step that touches ACCOUNT state is best-effort and VERIFICATION-GATED: it
+// reads the real state, acts only to reach the wanted state, confirms the change
+// took, and records an undo ONLY for a change it confirmed. A step that can't drive
+// a site's UI (markup drift, non-English account UI) leaves the account untouched.
+// A step that changes only this client's own rendering (color-scheme emulation) has
+// no account state to read back, so it applies unconditionally and always returns
+// its undo. Steps never throw out of here; a failed revert is logged loudly.
 //
 // Crash safety: a confirmed change to REAL account state is journaled to
 // `.playwright/warmup-journal.json` first, so a process that dies between apply

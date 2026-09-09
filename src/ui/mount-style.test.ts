@@ -33,7 +33,7 @@ describe("readActionLayout - icon-column is an explicit adapter opt-in", () => {
   });
 });
 
-// mount.ts stops its post-mount re-blend schedule once two passes in a row leave this
+// mount-reblend.ts stops its post-mount re-blend schedule once two passes in a row leave this
 // signature unchanged, so anything reapplyHostShape stamps but the signature omits can be
 // applied ONCE and then frozen by an early stop - a trigger that never picks up the radius
 // its row hydrated a beat later. Each mutation below must therefore move the signature.

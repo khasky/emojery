@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// "Auto-press native buttons": mirror a picked emoji to the site's native
+// "Auto-press original buttons": mirror a picked emoji to the site's native
 // control. Split into a PURE decision (`decideNativeTrigger`, unit-tested
 // matrix) and an impure executor (`autoPressNative`) that reads state, clicks,
 // and books what WE pressed into the auto-native store - so un-react/neutral

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Emoji sentiment for the "Auto-press native buttons" setting: which native
+// Emoji sentiment for the "Auto-press original buttons" setting: which native
 // control (like/dislike) a picked reaction mirrors to, and the Facebook
 // reaction each emoji maps to 1:1. Pure data + lookups; the DOM work lives in
 // ui/native-trigger.ts.

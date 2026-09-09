@@ -115,9 +115,9 @@ test.describe("shared picker behavior", () => {
       await ensureSignedOut(session.context);
       await expectHistorySignedOut(session.context);
       const evidence = await signInOnSupportedSite(session.context, pageOne, site);
-      // A throwaway profile starts with no local history, and signing in through
-      // the gate casts exactly the one reaction it was holding - so anything but
-      // a single row here means the account inherited someone else's.
+      // History is device-local, so a throwaway profile starts with none, and
+      // signing in through the gate casts exactly the one reaction it was holding -
+      // anything but a single row means something earlier in this run wrote one.
       if (session.generatedUserDataDir) {
         await expectHistoryRowCount(session.context, 1);
       }
@@ -597,9 +597,10 @@ async function verifySupportedSiteInjection(browserContext: BrowserContext, site
     // read only our OWN host: one target key on more than one connected anchor is a
     // duplicate/stolen-host bug, and a host that renders visible but under 8px in
     // either axis is a trigger the user cannot hit - the shipped one is ~20px on every
-    // surface, vertical icon rails included. The remaining signals stay evidence-only:
-    // they compare against `nativeSelectors`, which are too coarse to tell "beside"
-    // from "inside" (YouTube legitimately reports full overlap), so asserting them false-fails.
+    // surface, vertical icon rails included. The overlap ratio stays evidence-only: it
+    // compares against `nativeSelectors`, which are too coarse to tell "beside" from
+    // "inside" (YouTube legitimately reports full overlap), so asserting it false-fails.
+    // The hidden-ancestor and stray-tooltip counts are collected and asserted nowhere.
     expect(evidence.duplicateMatchingKeys, `A target key must not appear on more than one connected anchor. ${debugEvidence(evidence)}`).toHaveLength(0);
     expect(evidence.clippedMatchingCount, `A visible trigger must not render smaller than 8px in either axis. ${debugEvidence(evidence)}`).toBe(0);
     if (options.verifyUnauthAuthClick) {

@@ -20,7 +20,9 @@ export interface SiteScenarioSpec {
   mountKeyPattern: string;
   nativeSelectors: string[];
   /** Exact visible labels of the same native controls, for a surface that names them
-   *  by TEXT with no aria-label (Facebook logged out). OR'd with `nativeSelectors`. */
+   *  by TEXT with no aria-label (Facebook logged out). Read by the selector-drift probe
+   *  alone, which ORs it with `nativeSelectors`; the mount-evidence probe matches
+   *  selectors only, so such a surface reaches it with no native to place against. */
   nativeTextLabels?: string[];
   containerSelectors: string[];
   requiredHostAncestorSelectors?: string[];

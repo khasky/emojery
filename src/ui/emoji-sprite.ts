@@ -239,6 +239,8 @@ function settleProbe(next: Mode): void {
 // settings gate). Idempotent. Later - at the first host's applyEmojiSpriteHost - races the paint and
 // visibly swaps glyphs a beat later; earlier - at content-script startup - pays the ~1 MB decode on
 // every page of every supported host, including pages with no target at all.
+// applyEmojiSpriteHost calls this too, as the backstop for a host that never passed the
+// mount gate (the animation layer).
 //
 // Probes the sheet once. A bare Image() load runs under the same page CSP the sprite will
 // face, so onload/onerror is the authoritative gate: onerror (CSP-blocked / asset missing)

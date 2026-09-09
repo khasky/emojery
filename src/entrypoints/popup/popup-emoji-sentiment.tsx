@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// The "Auto-press native buttons" list editor: three zones (presses Like /
+// The "Auto-press original buttons" list editor: three zones (presses Like /
 // presses Dislike / presses nothing) the user rearranges by dragging an emoji
 // between them, with a click-to-move fallback (select an emoji, then a zone)
 // for keyboard and touch. Neutral is implicit - everything not assigned - so

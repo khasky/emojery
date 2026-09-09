@@ -174,10 +174,10 @@ function findActionRow(candidate: HTMLElement): ActionRow | null {
     if (built) return built;
   }
 
-  // Headless / no-layout fallback (jsdom, document_idle before paint): identify
+  // Headless / no-layout fallback (document_idle before first paint): identify
   // the row by English aria-labels. Localized live pages always reach the
-  // visual path above (they have geometry), so this English-only path is only
-  // exercised by tests and very early scans. It must also not run after a
+  // visual path above (they have geometry), so this English-only path runs only
+  // while the document still has no layout at all. It must also not run after a
   // rejected visual row: the catch-all candidate scan surfaces 3-icon clusters
   // that are NOT post action rows (header Follow/More group, profile chips) and
   // this walk could re-grab one.
