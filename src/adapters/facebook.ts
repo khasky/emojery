@@ -7,6 +7,7 @@
 // facebook-post-row.ts decides WHICH control is a post Like, facebook-target.ts
 // decides WHAT that post is.
 
+import type { TargetRef } from "../shared/adapter";
 import { queryAll, queryFirst } from "../shared/dom-query";
 import {
   actionLabel,
@@ -107,29 +108,9 @@ const facebookAdapter = defineSiteAdapter({
     const container = findPostContainer(btn, action.row, action.geometry ?? false);
     if (!container) return null;
     const target = extractTarget(container, action.row);
-    // Two reshares of the same image both fall back to the shared photo id before
-    // their date links hydrate, colliding on ONE `photo:<id>` target - the
-    // per-target dedupe would drop the second post's picker (verified live: two
-    // group posts attaching the same two photos). The embedded-`<script>`
-    // ambiguity map (photoIsAmbiguous) only fixes this once BOTH stories are in
-    // the page's SSR'd JSON; until then, re-resolve the colliding post with the
-    // shared photo skipped so it keys on its own per-post CFT permalink and still
-    // mounts. Skipped while a dialog is open so a post shown in both the feed and
-    // an open modal still dedupes to one picker (the foreground copy).
-    if (target && ctx.seenTargets.has(target.targetId) && !hasOpenDialog()) {
-      // Only a collision across two DIFFERENT containers is the shared-photo
-      // case; the SAME container colliding means one post matched twice -
-      // re-keying would mount a second picker under a divergent key, so return
-      // the duplicate and let the per-target dedupe drop it.
-      if (targetContainers(ctx).get(target.targetId) === container) return target;
-      const distinct = extractTarget(container, action.row, { skipSharedPhoto: true });
-      if (distinct && !ctx.seenTargets.has(distinct.targetId)) {
-        targetContainers(ctx).set(distinct.targetId, container);
-        return distinct;
-      }
-      return target;
-    }
-    if (target) targetContainers(ctx).set(target.targetId, container);
+    if (!target) return null;
+    if (ctx.seenTargets.has(target.targetId) && !hasOpenDialog()) return rekeyPastSharedPhoto(target, container, action.row, ctx);
+    targetContainers(ctx).set(target.targetId, container);
     return target;
   },
   resolveBinding: (btn, ctx) => {
@@ -176,6 +157,27 @@ const facebookAdapter = defineSiteAdapter({
 
 function actionFor(btn: HTMLElement, ctx: ScanContext): ActionMatch | null {
   return ctx.memo(btn, () => resolvePostAction(btn));
+}
+
+// Two reshares of the same image both fall back to the shared photo id before their
+// date links hydrate, colliding on ONE `photo:<id>` target - the per-target dedupe
+// would drop the second post's picker (verified live: two group posts attaching the
+// same two photos). The embedded-`<script>` ambiguity map (photoIsAmbiguous) only
+// fixes this once BOTH stories are in the page's SSR'd JSON; until then, re-resolve
+// the colliding post with the shared photo skipped so it keys on its own per-post CFT
+// permalink and still mounts. The caller skips this while a dialog is open, so a post
+// shown in both the feed and an open modal still dedupes to one picker (the
+// foreground copy).
+function rekeyPastSharedPhoto(target: TargetRef, container: HTMLElement, row: HTMLElement | null, ctx: ScanContext): TargetRef {
+  // Only a collision across two DIFFERENT containers is the shared-photo case; the
+  // SAME container colliding means one post matched twice - re-keying would mount a
+  // second picker under a divergent key, so return the duplicate and let the
+  // per-target dedupe drop it.
+  if (targetContainers(ctx).get(target.targetId) === container) return target;
+  const distinct = extractTarget(container, row, { skipSharedPhoto: true });
+  if (!distinct || ctx.seenTargets.has(distinct.targetId)) return target;
+  targetContainers(ctx).set(distinct.targetId, container);
+  return distinct;
 }
 
 // Per-scan map: targetId -> the container that produced it. Lets the shared-photo

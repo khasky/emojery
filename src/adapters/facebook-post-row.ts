@@ -21,7 +21,22 @@ import { findVisualActionSlot, isRenderableInPageLayout, isStructuralRoot, type 
 // The Like verdict itself lives in readPostActionLikeButton.
 export const SCAN_SELECTORS = ['[role="button"]'];
 
-const ACTION_LABELS = ["Like", "Comment", "Share", "Send"];
+// Every canonical post action and the exact EN label `actionLabel` returns for it -
+// the one table the three readings below derive from: the EN list checked first, the
+// post-vs-comment row asymmetry, and the label a classified locale stem maps to. Reply
+// classifies rows but is not a post action, so it has no entry.
+const FB_ACTION_LABEL = {
+  like: "Like",
+  comment: "Comment",
+  share: "Share",
+  send: "Send",
+} as const satisfies Partial<Record<ActionKind, string>>;
+
+type FbPostActionKind = keyof typeof FB_ACTION_LABEL;
+
+// Like first: its prefix-aware match ("Like Mark's post" -> "Like") has to run before
+// the rest, and actionLabel walks this list in order.
+const ACTION_LABELS: readonly string[] = Object.values(FB_ACTION_LABEL);
 
 // Facebook's OWN Like/Comment button labels in all 26 shipped UI locales, read
 // off facebook.com one locale per page load - never translated. Exact forms
@@ -84,7 +99,8 @@ const LOCALIZED_LABEL_KIND: ReadonlyMap<string, string> = new Map(FB_LOCALIZED_A
 // post action row pairs Like with Comment/Share/Send, a comment row pairs it with
 // Reply alone. Stated once here; the readers below reference it rather than
 // restate it.
-const ROW_SIBLING_LABELS_SET: ReadonlySet<string> = new Set(["Comment", "Share", "Send"]);
+const ROW_SIBLING_KINDS: readonly FbPostActionKind[] = (Object.keys(FB_ACTION_LABEL) as FbPostActionKind[]).filter((kind) => kind !== "like");
+const ROW_SIBLING_LABELS_SET: ReadonlySet<string> = new Set(ROW_SIBLING_KINDS.map((kind) => FB_ACTION_LABEL[kind]));
 
 // Canonical action <-> locale-stem matchers via the shared label engine
 // (action-labels.ts). Facebook localizes BOTH the aria-label and the visible text
@@ -209,16 +225,7 @@ const fbLabels = defineLabelRegistry(
   },
 );
 
-// Canonical post-action kinds -> the label strings `actionLabel` returns. Reply
-// classifies (for comment-row detection) but is NOT a post action, so it maps to null.
-const FB_KIND_LABEL: Partial<Record<ActionKind, string>> = {
-  like: "Like",
-  comment: "Comment",
-  share: "Share",
-  send: "Send",
-};
-
-const fbCommentRowReject = rejectCommentRow(["comment", "share", "send"], "reply");
+const fbCommentRowReject = rejectCommentRow(ROW_SIBLING_KINDS, "reply");
 
 // Text labels marking the VISITOR view of a profile/page header - Follow /
 // Message / Add friend / Subscribe / Join and their RU/UA forms - which pair a
@@ -227,7 +234,7 @@ const fbCommentRowReject = rejectCommentRow(["comment", "share", "send"], "reply
 // language-blind geometry fallback, and is matched structurally instead (see
 // PROFILE_HEADER_CTA_SELECTOR).
 const HEADER_CTA_STEM =
-  /follow|following|message|subscribe|subscribed|invite|\bjoin\b|\bjoined\b|\bshop\b|\brespond\b|\bfriend request\b|\badd friend\b|\bconfirm request\b|\bdelete request\b|\bcancel request\b|\bremove friend\b|\bunfriend\b|подпис|підпис|стеж|сообщ|повідом|вступ|приєдн|приглас|запрос|запрош|в\s+групп|у\s+груп|магазин|добав.*друз|подтверд.*(?:запрос|заяв)|удал.*(?:запрос|заяв)|підтверд.*запит|видал.*запит|скас.*запит/iu;
+  /follow|message|subscribe|invite|\bjoin\b|\bjoined\b|\bshop\b|\brespond\b|\bfriend request\b|\badd friend\b|\bconfirm request\b|\bdelete request\b|\bcancel request\b|\bremove friend\b|\bunfriend\b|подпис|підпис|стеж|сообщ|повідом|вступ|приєдн|приглас|запрос|запрош|в\s+групп|у\s+груп|магазин|добав.*друз|подтверд.*заяв|удал.*заяв|підтверд.*запит|видал.*запит|скас.*запит/iu;
 
 // The owner's profile-header CTAs are anchors to Facebook routes (story composer,
 // profile-edit entry) that stay identical in EVERY UI language, unlike localized
@@ -579,7 +586,7 @@ export function actionLabel(el: Element): string | null {
   if (localized) return localized;
   // Locale-stem fallback for RU/UA (and any inflected EN form), via the shared label engine.
   const kind = fbLabels.classify(el);
-  if (kind) return FB_KIND_LABEL[kind] ?? null;
+  if (kind) return kind in FB_ACTION_LABEL ? FB_ACTION_LABEL[kind as FbPostActionKind] : null;
   // Last resort, no wording involved: paired with the reactions chevron. This is
   // the only path that reads a REACTED post's Like in a locale we have no
   // "Remove <reaction>" vocabulary for.
