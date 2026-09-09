@@ -196,8 +196,14 @@ async function sendMineRequest(token: string, targets: readonly TargetRef[]): Pr
 // status; counts entries are filtered per-entry and capped at the requested
 // breakdown limit. Building a fresh object also drops any extra fields the
 // response carried.
+//
+// `loaded` and `hasMore` are read leniently, since nothing renders either: the
+// first is derived from what survives the filter below (the wire value counts the
+// server's page, which the cap can shrink), the second coerced the way
+// shared/counts-cache.ts reads the same fields back off disk. A body missing them
+// then costs only the two numbers nothing shows.
 function parseTargetCounts(raw: unknown, limit: number): TargetCounts {
-  if (!isRecord(raw) || !isRecord(raw.counts) || !isCount(raw.total) || !isCount(raw.loaded) || typeof raw.hasMore !== "boolean") {
+  if (!isRecord(raw) || !isRecord(raw.counts) || !isCount(raw.total)) {
     throw new Error("malformed counts response");
   }
   const counts: ReactionCounts = {};
@@ -209,7 +215,7 @@ function parseTargetCounts(raw: unknown, limit: number): TargetCounts {
     counts[emoji] = count;
     kept++;
   }
-  return { counts, total: raw.total, loaded: raw.loaded, hasMore: raw.hasMore };
+  return { counts, total: raw.total, loaded: kept, hasMore: !!raw.hasMore };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

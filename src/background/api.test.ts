@@ -600,6 +600,10 @@ describe("fetchCount", () => {
     const data = await fetchCount(target, 6);
 
     expect(Object.keys(data.counts)).toEqual(emojis.slice(0, 6));
+    // `loaded` counts the entries that survived the cap. The response said 8, and a
+    // number that disagrees with the map beside it is what nothing reading the field
+    // would ever surface.
+    expect(data.loaded).toBe(6);
   });
 
   it("rejects a counts body whose top-level shape breaks the contract", async () => {
@@ -610,6 +614,18 @@ describe("fetchCount", () => {
     );
 
     await expect(fetchCount(target, 6)).rejects.toThrow("malformed counts response");
+  });
+
+  it("still reads a counts body that omits the two fields nothing renders", async () => {
+    vi.mocked(getAuth).mockResolvedValue(null);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response(JSON.stringify({ counts: { "👍": 3 }, total: 3 }), { status: 200 })),
+    );
+
+    const data = await fetchCount(target, 6);
+
+    expect(data).toEqual({ counts: { "👍": 3 }, total: 3, loaded: 1, hasMore: false, myReaction: null });
   });
 
   it("drops a junk own-reaction value instead of surfacing it as myReaction", async () => {
