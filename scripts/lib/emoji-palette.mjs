@@ -7,11 +7,9 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const PALETTE_JSON = resolve(dirname(fileURLToPath(import.meta.url)), "../../src/shared/__data__/emoji-categories.json");
+import { stripVS16 } from "./vs16.mjs";
 
-const VS16 = /️/g;
-/** @param {string} s */
-const stripVS16 = (s) => s.replace(VS16, "");
+const PALETTE_JSON = resolve(dirname(fileURLToPath(import.meta.url)), "../../src/shared/__data__/emoji-categories.json");
 
 /**
  * Every palette emoji in source order, de-duplicated. The sprite sheet is keyed

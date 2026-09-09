@@ -9,9 +9,7 @@
 // hexcode/group/order) is dead weight, stripped here so every locale ships the same
 // minimal shape.
 
-const VS16 = /\uFE0F/g;
-/** @param {string} s */
-const stripVS16 = (s) => s.replace(VS16, "");
+import { stripVS16 } from "./vs16.mjs";
 
 /**
  * `skins` is dropped (no skin-tone UI); empty `label`/`tags` are omitted so the JSON
