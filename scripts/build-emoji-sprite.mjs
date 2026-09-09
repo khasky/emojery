@@ -242,10 +242,10 @@ export const SPRITE_PALETTE_SIGNATURE = "${paletteSignature(emojis)}";
   writeFileSync(MAP_TS, ts);
 }
 
-/** Order-sensitive FNV-1a over the palette, hex. Mirrored by paletteSignature in ui/emoji-sprite.ts. */
+/** Order-sensitive FNV-1a over the palette, hex. Mirrored by paletteSignature in ui/emoji-sprite-coverage.test.ts, single-space separator included. */
 function paletteSignature(emojis) {
   let hash = 0x811c9dc5;
-  for (const unit of emojis.join(" ")) {
+  for (const unit of emojis.join(" ")) {
     hash ^= unit.codePointAt(0);
     hash = Math.imul(hash, 0x01000193) >>> 0;
   }
