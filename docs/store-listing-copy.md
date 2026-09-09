@@ -15,58 +15,53 @@ Turn every Like button on the web into a full emoji palette.
 ## Description
 
 ```text
-Emojery adds 600+ emoji reactions to supported websites, right next to the Like, Star and vote buttons you already use. React with what you actually mean and see what other Emojery users picked.
-
-Most platforms give you a short list of reactions. Sometimes that's all you need. But when the thing you feel isn't on the menu, Emojery gives you more ways to express it.
+Emojery adds 600+ emoji reactions beside the Like, Star and vote buttons on supported websites. Go beyond the built-in reaction menu, choose a more specific response and see what other users selected.
 
 HOW IT WORKS
 
-Open a supported post, video, repository or product page. The reaction button shows the top 3 emoji and the total. Click it to see the full breakdown, search the palette and choose your response.
+Open a supported post, video, repository or product page to see the top 3 emoji and the total reaction count. Click the button for the full breakdown, a searchable emoji palette and your own reaction controls.
 
-Reading counts needs no account. To react, sign in with a code sent to your email. The counts come from Emojery users and are separate from the site's own Likes, stars and votes.
+No account is needed to read counts. To add a reaction, sign in with an email code. These reactions are counted separately from the site's native Likes, stars and votes.
 
 FEATURES
 
 • 600+ emoji in 9 categories, with recently used choices one tap away.
 • Emoji labels and search in 26 languages. Type amour, 愛 or love to find ❤️.
 • A button that fits beside the site's existing controls and follows light or dark mode.
-• Per-site controls: switch Emojery off for individual sites, keep native buttons or hide them in your browser.
-• Reactions you can change or remove whenever you want.
+• Per-site settings to disable Emojery and keep or hide native buttons in your browser.
+• Reactions that you can change or remove at any time.
 • Local history with search, filters by site, emoji or date, and export for backup or restoration in another browser.
 • Queued reactions that are retried after a connection drop, with count updates across your open tabs.
+• Optional auto-press of the site's native reaction buttons, off by default, with customizable emoji mappings.
 
-AUTO-PRESS ORIGINAL BUTTONS
-
-Off until you switch it on. With it on, your emoji also presses the site's own control: a positive pick presses Like, upvote or Star, a negative one presses Dislike or downvote where the site has one, a neutral one presses nothing, and on Facebook your emoji maps to the matching native reaction. One pick, at most one press, on the page you are looking at and under your own account. You sort which emoji count as which by dragging them between lists, and removing your reaction releases only what the extension pressed.
-
-COUNTS YOU CAN CHECK
+CHECK THE TOTALS
 
 Accepted reactions are recorded in a public, tamper-evident log, with checkpoints anchored outside the service. A free, open-source verifier reconstructs the totals from that record.
 
 Email verification and anti-abuse checks help limit spam. Reactions identified as abuse can be removed from the totals.
 
-PRIVACY AND CONTROL
+PRIVACY AND DATA
 
-• No ad code, third-party advertising trackers or analytics SDKs in the extension.
+• The extension contains no ad code, third-party advertising trackers or analytics SDKs.
 • Your email is used to send a sign-in code and then discarded. A one-way keyed hash remains as your account ID.
-• Your browsable history stays on your device. Submitted reactions and public target identifiers are processed by the service; public log entries use pseudonyms.
-• Community insights is on by default. It may include coarse country/city, language, browser and operating-system context with reactions for aggregate statistics. Turn it off in Settings to exclude this optional context from future reactions.
+• Your browsable history stays on your device. The service processes submitted reactions and public target identifiers. Public log entries use pseudonyms.
+• Community insights is enabled by default. It may include coarse country/city, language, browser and operating-system context with reactions for aggregate statistics. Turn it off in Settings.
 • Account deletion removes your reactions from the totals. Historical pseudonymous log entries remain, with reversals recording the change.
 
-WHERE IT WORKS
+SUPPORTED SITES
 
-Facebook (posts, photos, Reels, videos) · Instagram (posts, Reels) · Reddit (posts) · GitHub (repositories) · GitLab (repositories) · YouTube (videos, Shorts) · X (posts, photos) · Threads (posts) · Amazon (products) · 250+ more sites on the roadmap.
+Emojery currently supports 9 sites, including Facebook, Instagram, Reddit, YouTube and GitHub. Check https://emojery.app for the full list and supported content types.
 
-Reactions are available on supported public content. New site support and fixes arrive through extension updates. You can request a site on GitHub.
+Reactions are available on supported public content. Site support and fixes come through extension updates. You can request another site in the source repository.
 
-FREE AND OPEN SOURCE
+ABOUT THE PROJECT
 
-Emojery is in public beta. Free and open source under GPL-3.0, donation-funded and built by one developer.
+Emojery is free, donation-funded and open source under GPL-3.0. Built by one developer, it is currently in public beta.
 
 Source code and site requests: https://github.com/khasky/emojery
 Privacy policy: https://emojery.app/privacy
 
-Not affiliated with, sponsored by, or endorsed by Meta, Google, Reddit, X Corp., GitHub, GitLab, or Amazon. All product names, logos, and trademarks are the property of their respective owners.
+Emojery is an independent project. All product names, logos and trademarks are the property of their respective owners.
 ```
 
 ## Single purpose description
@@ -147,6 +142,7 @@ GNU General Public License v3.0
 Emojery collects the minimum needed to make a reaction count. Full policy: https://emojery.app/privacy (effective 24 August 2026).
 
 WHAT LEAVES YOUR BROWSER
+
 - To show counts, the public target keys of supported items on the page, before you react. The count lookup itself is anonymous; while you are signed in, a second request asks which of those items you have already reacted to and carries your session token.
 - The reactions you submit, with the canonical URL and the public identifier of the item you reacted to.
 - Your email address at sign-in, transiently: sent over TLS, used once to deliver a 6-digit code, then discarded. What remains as your account identifier is a one-way keyed hash of it.
@@ -155,18 +151,23 @@ WHAT LEAVES YOUR BROWSER
 - With the optional "Community insights" setting on: coarse country/city, language, browser and OS alongside a reaction.
 
 WHAT IS NEVER COLLECTED
+
 Real names, stored email addresses, hardware or high-entropy fingerprints, advertising cookies or tracking pixels, and passwords. Raw IP addresses are never stored: the network layer sees your address the way any web server does, and what the service keeps is a salted hash that rotates daily and is used to rate-limit abuse. The extension loads no analytics SDK.
 
 STORAGE AND RETENTION
+
 Sign-in code: 10 minutes or until used. Session token: 30 days, in extension storage. Account record and active reactions: until you delete them. Aggregate per-item counts: indefinitely. Public transparency-log entries: permanent and append-only, so a deletion is recorded as a public revocation rather than an erasure.
 
 WHERE YOUR REACTIONS LIVE
+
 Your device keeps the browsable history, including page titles, in the browser's IndexedDB, and it is never uploaded. The service keeps your current reaction per item and the pseudonymous entries in the public log.
 
 SUBPROCESSORS
+
 Cloudflare (infrastructure, bot check, coarse country/city), Neon (managed database, EU or US), Resend (delivery of the one-time code; the address is not retained). The public transparency log is published to GitHub and anchored through Sigstore Rekor and the OpenTimestamps calendars; the entries it carries are pseudonymous. Changes to this list are dated and published before they take effect.
 
 YOUR RIGHTS
+
 Delete your account from the extension's Account tab. This removes your account record and your active reactions, and reverses their contribution to the totals. Pseudonymous log entries and their revocations remain permanent, and a suspended account keeps its email hash so the suspension survives a re-registration. Access, rectification, restriction, portability and objection under GDPR/UK GDPR/CCPA/PIPEDA/PIPA. Contact: privacy@emojery.app
 ```
 
@@ -227,7 +228,7 @@ Emoji reactions next to the Like, Star and vote buttons you already use, on Face
 ```text
 Chrome Web Store
 Category: `Social & Communication`
-Tags: `emoji, reactions, react, like button, social, facebook, reddit, youtube, github, privacy, open source`
+Tags: `emoji, reactions, react, like button, social, privacy, open source`
 
 Microsoft Edge
 Category: `Social`
