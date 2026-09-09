@@ -246,9 +246,9 @@ jobs:
       - name: Run perf budget
         env:
           E2E_PERF: "1"
-          # Persist the heap/long-task metrics on GREEN runs too - the budget is
-          # tuned from this artifact's history, and testInfo.attach alone only
-          # survives failures.
+          # Persist the heap/long-task metrics on GREEN runs too (testInfo.attach
+          # alone survives only failures). The upload step below is still disabled,
+          # so for now the file stays on the runner and no history accumulates.
           E2E_PERF_METRICS_FILE: test-results/perf-metrics.json
           PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/e2e-perf.json
         run: xvfb-run -a pnpm exec playwright test -c e2e/playwright.config.ts --reporter=list,json -g "heap budget"
