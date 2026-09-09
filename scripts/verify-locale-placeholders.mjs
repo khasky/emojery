@@ -15,7 +15,11 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const LOCALES = resolve(__dirname, "../public/_locales");
 
-const PH_RE = /\$([A-Z_]+)\$/g;
+// The token set Chrome's loader itself recognizes: a placeholder name is case-insensitive
+// and takes the same characters as a message name (A-Z, a-z, 0-9, _, @). Narrower than that
+// and this walks past the very name it exists to catch. Mirrored by
+// src/shared/i18n-locales.test.ts, which is the CI half of this check - widen both together.
+const PH_RE = /\$([A-Za-z0-9_@]+)\$/g;
 
 let issues = 0;
 const localeDirs = readdirSync(LOCALES).filter((name) => statSync(resolve(LOCALES, name)).isDirectory());

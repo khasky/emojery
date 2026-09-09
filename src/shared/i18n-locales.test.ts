@@ -29,13 +29,29 @@ const LOCALES = readdirSync(LOCALES_DIR).filter((d) => statSync(resolve(LOCALES_
 const EN = readLocale("en");
 const EN_KEYS = Object.keys(EN);
 const NON_EN = LOCALES.filter((l) => l !== "en");
-const PLACEHOLDER_RE = /\$([A-Z_]+)\$/g;
+// The token set Chrome's loader itself recognizes: a placeholder name is case-insensitive
+// and takes the same characters as a message name (A-Z, a-z, 0-9, _, @). Narrower than that
+// and the gate walks straight past the very name it exists to catch. Mirrored by
+// scripts/verify-locale-placeholders.mjs - the two must widen together.
+const PLACEHOLDER_RE = /\$([A-Za-z0-9_@]+)\$/g;
 
 describe("i18n locales", () => {
   it("ships en plus the load-bearing translations", () => {
     expect(LOCALES).toContain("en");
     // ru/uk also face the stricter no-backlog gate below; de/ja are only checked for presence.
     for (const l of ["de", "ru", "uk", "ja"]) expect(LOCALES).toContain(l);
+  });
+
+  // The parity check below is only worth its green if it reads the same tokens the browser
+  // does: a lowercase or digit-carrying name that this regex skips is a load failure it
+  // would report as a pass.
+  it("reads every placeholder shape Chrome accepts", () => {
+    const used = (message: string) => [...message.matchAll(PLACEHOLDER_RE)].map((m) => m[1]);
+
+    expect(used("Resend code in $time$")).toEqual(["time"]);
+    expect(used("Open $LINK1$ to continue")).toEqual(["LINK1"]);
+    expect(used("$COUNT$ of $TOTAL$")).toEqual(["COUNT", "TOTAL"]);
+    expect(used("Amount (in $$)")).toEqual([]);
   });
 
   // Placeholder parity (a missing entry fails the whole extension load).
