@@ -1054,21 +1054,19 @@ h1 {
 .delete-confirm {
   padding: 4px 0 10px;
 }
-.delete-confirm-warn {
-  margin: 0 0 10px;
-  font-size: 12px;
-  line-height: 1.45;
-  color: var(--khasky-emojery-muted);
-  /* Preserve the paragraph break baked into the confirm copy. */
-  white-space: pre-line;
-}
-/* Replaces the warning in place while the delete runs - same type treatment, so the
-   panel doesn't resize under the user at exactly that moment. */
+/* The progress line replaces the warning in place while the delete runs, so both carry
+   one type treatment - the panel must not resize under the user at exactly that moment. */
+.delete-confirm-warn,
 .delete-confirm-progress {
   margin: 0;
   font-size: 12px;
   line-height: 1.45;
   color: var(--khasky-emojery-muted);
+}
+.delete-confirm-warn {
+  margin-bottom: 10px;
+  /* Preserve the paragraph break baked into the confirm copy. */
+  white-space: pre-line;
 }
 .delete-confirm-actions {
   display: flex;
@@ -1097,7 +1095,7 @@ h1 {
 .slide-confirm {
   position: relative;
   flex: 1 1 auto;
-  height: 38px;
+  height: calc(var(--slide-thumb) + var(--slide-pad) * 2);
   border-radius: 999px;
   background: var(--khasky-emojery-danger-fill);
   border: 1px solid var(--khasky-emojery-danger-border);
@@ -1108,11 +1106,13 @@ h1 {
 }
 .slide-confirm-fill {
   position: absolute;
-  /* Inset by SLIDE_PAD; the width starts at the thumb's diameter, which is this height,
-     so border-radius:999px never degenerates into a lopsided oval. */
-  top: 3px;
-  left: 3px;
-  bottom: 3px;
+  /* Inset by the track padding; the width starts at the thumb's diameter, which is this
+     height, so border-radius:999px never degenerates into a lopsided oval.
+     --slide-pad / --slide-thumb are published by popup-slide-confirm.tsx, which needs the
+     same numbers for its pointer maths. */
+  top: var(--slide-pad);
+  left: var(--slide-pad);
+  bottom: var(--slide-pad);
   border-radius: 999px;
   /* Solid saturated bar, theme-fixed - see the token's declaration. */
   background: var(--khasky-emojery-fixed-danger);
@@ -1136,9 +1136,9 @@ h1 {
 }
 .slide-confirm-thumb {
   position: absolute;
-  top: 3px;
-  width: 32px;
-  height: 32px;
+  top: var(--slide-pad);
+  width: var(--slide-thumb);
+  height: var(--slide-thumb);
   border-radius: 50%;
   background: var(--khasky-emojery-slide-thumb-bg);
   color: var(--khasky-emojery-fixed-danger);

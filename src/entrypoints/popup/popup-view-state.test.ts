@@ -5,7 +5,7 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { DEFAULT_SETTINGS, mergeSettings, type Settings } from "../../shared/storage";
-import { nextViewForKey, rememberView, storedView, TAB_VIEWS, VIEW_LABEL_KEYS, VIEWS, type View } from "./popup-view-state";
+import { nextViewForKey, rememberView, resolveShownView, storedView, TAB_VIEWS, tabAnchorFor, VIEW_LABEL_KEYS, VIEWS, type View } from "./popup-view-state";
 
 const VIEW_KEY = "popup_view_v1";
 
@@ -122,5 +122,25 @@ describe("VIEWS", () => {
   it("keeps Debug out of the tab strip while still being a view the popup can show", () => {
     expect(TAB_VIEWS).toEqual(["settings", "history", "account", "report"]);
     expect(VIEWS).toContain("debug");
+  });
+});
+
+describe("resolveShownView / tabAnchorFor", () => {
+  it("falls back to Settings while Debug is switched off, without forgetting Debug", () => {
+    expect(resolveShownView("debug", false)).toBe("settings");
+    expect(resolveShownView("debug", true)).toBe("debug");
+  });
+
+  it("leaves every tab view alone whatever Debug is set to", () => {
+    for (const view of TAB_VIEWS) {
+      expect(resolveShownView(view, false)).toBe(view);
+      expect(resolveShownView(view, true)).toBe(view);
+    }
+  });
+
+  it("anchors the roving tabindex on a real tab while Debug is shown", () => {
+    expect(tabAnchorFor("debug")).toBe("settings");
+    expect(TAB_VIEWS).toContain(tabAnchorFor("debug"));
+    for (const view of TAB_VIEWS) expect(tabAnchorFor(view)).toBe(view);
   });
 });

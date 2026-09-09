@@ -15,7 +15,7 @@ import { QueueView } from "./popup-queue";
 import { ReportView } from "./popup-report";
 import { ICON_BUG, SettingsView } from "./popup-settings";
 import { BUILD_VERSION, svgIcon, useActiveTabUrl } from "./popup-shared";
-import { nextViewForKey, rememberView, storedView, TAB_VIEWS, VIEW_LABEL_KEYS, type View } from "./popup-view-state";
+import { nextViewForKey, rememberView, resolveShownView, storedView, TAB_VIEWS, tabAnchorFor, VIEW_LABEL_KEYS, type View } from "./popup-view-state";
 
 // The stored Theme setting lands later, from the effect in App.
 bootstrapPage(t("popupTitle"));
@@ -65,13 +65,8 @@ function App() {
     await setSettings(patch);
   };
 
-  // Debug is remembered like any other view but lives outside the strip, so it falls back
-  // for THIS render only when it is switched off - leaving the stored value alone means
-  // turning Debug back on returns to it.
-  const shown: View = view !== "debug" || settings.debugMode ? view : "settings";
-  // With Debug open no tab is selected, so the roving tabindex would leave the strip out
-  // of the Tab sequence entirely; anchor it (and the arrow walk) on the first tab instead.
-  const tabAnchor: View = shown === "debug" ? "settings" : shown;
+  const shown = resolveShownView(view, settings.debugMode);
+  const tabAnchor = tabAnchorFor(shown);
   const debugToggleClass = ["debug-toggle", shown === "debug" ? "debug-toggle-active" : "", settings.debugMode ? "" : "debug-toggle-off"].filter(Boolean).join(" ");
 
   // Arrow/Home/End move focus between tabs and activate them (roving tabindex lives on TabBtn).

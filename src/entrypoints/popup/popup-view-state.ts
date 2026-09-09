@@ -58,6 +58,20 @@ function isView(value: string | null): value is View {
   return value !== null && (VIEWS as readonly string[]).includes(value);
 }
 
+/** The panel a stored view actually resolves to. Debug is remembered like any other
+ *  view but lives outside the strip, so it falls back for THIS render only when it is
+ *  switched off - leaving the stored value alone means turning Debug back on returns
+ *  to it. */
+export function resolveShownView(view: View, debugMode: boolean): View {
+  return view !== "debug" || debugMode ? view : "settings";
+}
+
+/** The tab the roving tabindex and the arrow walk sit on. With Debug open no tab is
+ *  selected, and an unanchored strip would drop out of the Tab sequence entirely. */
+export function tabAnchorFor(shown: View): View {
+  return shown === "debug" ? "settings" : shown;
+}
+
 /** Where an arrow/Home/End press moves the tab bar's selection, or null for a key
  *  the tab bar does not own (which the caller must let bubble). Arrows wrap; the
  *  WAI-ARIA tabs pattern activates on move, so the caller both selects and focuses.

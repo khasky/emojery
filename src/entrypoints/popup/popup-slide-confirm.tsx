@@ -9,12 +9,14 @@ const slideIcon = (d: string) => (
   </svg>
 );
 
-// Geometry shared by the JS pointer maths and the inline CSS calc() so the
-// thumb lands flush against each track edge. PAD is the gap inside the track,
-// THUMB the diameter, EDGE the total horizontal space the thumb can't enter.
+// Geometry shared by the JS pointer maths and every rule popup.css draws the track
+// with: the track publishes these as custom properties, so the stylesheet reads them
+// instead of restating the numbers. PAD is the gap inside the track, THUMB the
+// diameter, EDGE the total horizontal space the thumb can't enter.
 const SLIDE_PAD = 3;
 const SLIDE_THUMB = 32;
 const SLIDE_EDGE = SLIDE_THUMB + SLIDE_PAD * 2;
+const SLIDE_GEOMETRY_VARS = `--slide-pad:${SLIDE_PAD}px;--slide-thumb:${SLIDE_THUMB}px`;
 // Released past this fraction of travel = confirmed; below it springs back.
 const SLIDE_THRESHOLD = 0.9;
 // Non-drag interaction tuning: one track click's advance, one Arrow-key step, how long
@@ -156,17 +158,17 @@ export const SlideToConfirm = ({ label, autoFocus, onConfirm }: { label: string;
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: the track is decorative; the interactive control is the role="slider" thumb below
     // biome-ignore lint/a11y/useKeyWithClickEvents: the keyboard path lives on the thumb (onKeyDown, Arrow/Home/End) - a second handler here would double every keystroke
-    <div ref={trackRef} class={`slide-confirm${dragging ? " dragging" : ""}${done ? " done" : ""}`} onClick={onTrackClick}>
-      {/* Left edge is pinned at SLIDE_PAD in CSS; width reaches the thumb's
+    <div ref={trackRef} class={`slide-confirm${dragging ? " dragging" : ""}${done ? " done" : ""}`} style={SLIDE_GEOMETRY_VARS} onClick={onTrackClick}>
+      {/* Left edge is pinned at --slide-pad in CSS; width reaches the thumb's
           right edge so the thumb always caps the fill. */}
-      <div class="slide-confirm-fill" style={`width:calc(${SLIDE_THUMB}px + ${travel})`} />
+      <div class="slide-confirm-fill" style={`width:calc(var(--slide-thumb) + ${travel})`} />
       <span class="slide-confirm-label" style={`opacity:${Math.max(0, 1 - progress * LABEL_FADE_RATE)}`}>
         {label}
       </span>
       <div
         ref={thumbRef}
         class="slide-confirm-thumb"
-        style={`left:calc(${SLIDE_PAD}px + ${travel})`}
+        style={`left:calc(var(--slide-pad) + ${travel})`}
         role="slider"
         tabIndex={done ? -1 : 0}
         aria-label={label}
