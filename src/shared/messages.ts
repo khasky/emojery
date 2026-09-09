@@ -25,10 +25,14 @@ export const HISTORY_IMPORT_MAX = 100_000;
 export const EMAIL_MAX = 320;
 export const OTP_CODE_MAX = 12;
 
-// Max UTF-8 bytes of one reaction emoji - same contract on both directions of the
-// wire: the background rejects a larger inbound one (background/message-guard.ts)
-// and drops a larger one from an API response (background/api-read.ts).
-export const REACTION_BYTES_MAX = 32;
+// Max UTF-8 bytes of one reaction emoji - one bound in every direction: the
+// background rejects a larger inbound one (background/message-guard.ts), drops a
+// larger one from an API response (background/api-read.ts), and the picker's
+// Popular row filters the fetched list by it (shared/popular.ts), so that row
+// cannot paint an item the click would then refuse. Size only, not shape: it has
+// to clear the longest RGI emoji sequence (a kiss carrying two skin tones), with
+// room for whatever a later Emoji release adds.
+export const REACTION_BYTES_MAX = 64;
 
 export type RuntimeMessage =
   | {

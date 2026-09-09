@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { normalizeReaction } from "../background/message-guard";
 import { allowColdModuleReset } from "../test/cold-module-reset";
+import { REACTION_BYTES_MAX } from "./messages";
 
 allowColdModuleReset();
 
@@ -46,6 +48,17 @@ describe("sanitizePopular", () => {
     expect(sanitizePopular("🔥")).toBeNull();
     expect(sanitizePopular([])).toBeNull();
     expect(sanitizePopular(["", "   ", 3, {}])).toBeNull();
+  });
+
+  // The point of the size bound: the row must not paint what the vote path will
+  // refuse, or the click reverts itself with nothing to show the user.
+  it("keeps nothing the vote guard would refuse", async () => {
+    const { sanitizePopular } = await freshModule();
+    const longRgiSequence = "🧑🏻‍❤️‍💋‍🧑🏿";
+    const overBound = "👍".repeat(REACTION_BYTES_MAX);
+    const kept = sanitizePopular([longRgiSequence, overBound, "🔥"]);
+    expect(kept).toEqual([longRgiSequence, "🔥"]);
+    for (const emoji of kept ?? []) expect(normalizeReaction(emoji), emoji).toBe(emoji);
   });
 
   it("caps the list length", async () => {

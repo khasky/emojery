@@ -30,6 +30,7 @@ vi.mock("../shared/storage", async (importOriginal) => ({
 }));
 
 import type { TargetRef } from "../shared/adapter";
+import { REACTION_BYTES_MAX } from "../shared/messages";
 import { clearOwnReactionIfMatches } from "../shared/storage";
 import { enqueueVote, flushOwnedVotesForSignOut, flushVotes, voteRetryDelayMs } from "./api";
 import { ApiHttpError, apiErrorCode, clearFailedReads, clearPendingMineBatch, fetchCount, MINE_BATCH_WINDOW_MS } from "./api-read";
@@ -602,7 +603,7 @@ describe("fetchCount", () => {
 
   it("holds the counts body to its contract: junk entries dropped, extra fields shed", async () => {
     vi.mocked(getAuth).mockResolvedValue(null);
-    const oversized = "x".repeat(33);
+    const oversized = "x".repeat(REACTION_BYTES_MAX + 1);
     const body = { counts: { "👍": 3, [oversized]: 5, "❤️": -1, "🔥": "9" }, total: 3, loaded: 1, hasMore: false, junk: true };
     vi.stubGlobal(
       "fetch",

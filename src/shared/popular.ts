@@ -6,6 +6,7 @@
 // so the picker fills the section *synchronously*, and picks up a background
 // refresh only between opens. No fallback: while empty, the section is hidden.
 
+import { REACTION_BYTES_MAX } from "./messages";
 import { storageLocalGet } from "./webext";
 
 // Shared with background/popular.ts (the write side).
@@ -18,12 +19,12 @@ export interface StoredPopular {
 }
 
 const MAX_POPULAR = 300;
-const MAX_EMOJI_BYTES = 64;
 const encoder = new TextEncoder();
 
 // Defensive cleaner for a list arriving from the network or storage: only
-// non-empty, reasonably-short, unique strings, capped in count. Null when
-// nothing usable survives, so callers keep their previous list.
+// non-empty, unique strings within the reaction size bound, capped in count. Null
+// when nothing usable survives, so callers keep their previous list. The bound is
+// the vote path's own, so the row cannot paint a button the click would refuse.
 export function sanitizePopular(value: unknown): string[] | null {
   if (!Array.isArray(value)) return null;
   const out: string[] = [];
@@ -32,7 +33,7 @@ export function sanitizePopular(value: unknown): string[] | null {
     if (typeof candidate !== "string") continue;
     const emoji = candidate.trim();
     if (!emoji || seen.has(emoji)) continue;
-    if (encoder.encode(emoji).length > MAX_EMOJI_BYTES) continue;
+    if (encoder.encode(emoji).length > REACTION_BYTES_MAX) continue;
     seen.add(emoji);
     out.push(emoji);
     if (out.length >= MAX_POPULAR) break;
