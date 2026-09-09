@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { describe, expect, it } from "vitest";
 import { EMAIL_MAX, NOTE_MAX, OTP_CODE_MAX, REACTION_BYTES_MAX, type RuntimeMessage } from "../shared/messages";
-import { FETCH_LIMIT_MAX, HISTORY_PAGE_LIMIT_MAX, HISTORY_QUERY_MAX, isExtensionPageSender, isTrustedSender, parseRuntimeMessage, TARGET_COUNT_MAX } from "./message-guard";
+import { CONTENT_SCRIPT_MESSAGE_TYPES, EXTENSION_PAGE_MESSAGE_TYPES, FETCH_LIMIT_MAX, HISTORY_PAGE_LIMIT_MAX, HISTORY_QUERY_MAX, isExtensionPageSender, isTrustedSender, MESSAGE_TYPES, parseRuntimeMessage, TARGET_COUNT_MAX } from "./message-guard";
 
 const RUNTIME_ID = "abcdefghijklmnopabcdefghijklmnop";
 const EXT_BASE = `chrome-extension://${RUNTIME_ID}/`;
@@ -28,13 +28,28 @@ function pageSender(overrides: Partial<chrome.runtime.MessageSender> = {}): chro
   return sender({ url: `${EXT_BASE}popup.html`, ...overrides });
 }
 
-const CONTENT_SCRIPT_TYPES: RuntimeMessage["type"][] = ["vote", "fetchCount", "ui:injected"];
+// Taken from the guard, never retyped: a copy of these lists drops whatever it forgets out of
+// every loop below, and the run stays green with that type never once carried across the
+// boundary. Shared = accepted from either sender, so it is the remainder by construction.
+const CONTENT_SCRIPT_TYPES: RuntimeMessage["type"][] = [...CONTENT_SCRIPT_MESSAGE_TYPES];
 
-const EXTENSION_PAGE_TYPES: RuntimeMessage["type"][] = ["report", "history:page", "history:stats", "history:export", "history:import", "auth:signOut", "auth:delete", "auth:requestOtp", "auth:verifyOtp"];
+const EXTENSION_PAGE_TYPES: RuntimeMessage["type"][] = [...EXTENSION_PAGE_MESSAGE_TYPES];
 
+// Spelled out, unlike the two above: these are the types the guard accepts from ANY sender,
+// so the list is a claim about what may go ungated, not a copy of one. The case below holds
+// it to the guard's own accept-list, which is what stops a new type from landing here by
+// default.
 const SHARED_TYPES: RuntimeMessage["type"][] = ["auth:status", "auth:openTab"];
 
 describe("isTrustedSender", () => {
+  it("classifies every type the guard accepts", () => {
+    // The loops below are only exhaustive while this holds. An accepted type that belongs to
+    // no group is one no case carries across the boundary - and since the two gated sets come
+    // from the guard itself, the only way to reach that state is a type accepted with no gate
+    // at all, which has to be argued for in SHARED_TYPES rather than defaulted into.
+    expect(new Set([...CONTENT_SCRIPT_TYPES, ...EXTENSION_PAGE_TYPES, ...SHARED_TYPES])).toEqual(new Set(MESSAGE_TYPES));
+  });
+
   it("rejects any message whose sender is a different extension", () => {
     for (const type of [...CONTENT_SCRIPT_TYPES, ...EXTENSION_PAGE_TYPES, ...SHARED_TYPES]) {
       expect(isTrustedSender(type, tabSender({ id: "someoneelse" }), RUNTIME_ID, EXT_BASE)).toBe(false);

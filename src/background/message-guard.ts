@@ -7,14 +7,19 @@ import { normalizeLanguageTag } from "../shared/language-tag";
 import { EMAIL_MAX, HISTORY_IMPORT_MAX, NOTE_MAX, OTP_CODE_MAX, type PortableHistoryRow, REACTION_BYTES_MAX, type ReactionAction, type RuntimeMessage, TITLE_MAX } from "../shared/messages";
 import { ALL_SITES, detectSupportedSite, type SupportedSite, targetUrlBelongsToSite } from "../shared/sites";
 
-const CONTENT_SCRIPT_MESSAGE_TYPES: ReadonlySet<RuntimeMessage["type"]> = new Set(["vote", "fetchCount", "ui:injected"]);
+// The three sets below are exported for the same reason as the four limits further down:
+// message-guard.test.ts and message-guard.fuzz.test.ts drive every boundary case from them,
+// and a hand-copied list keeps passing while quietly leaving whatever it forgot untested.
+export const CONTENT_SCRIPT_MESSAGE_TYPES: ReadonlySet<RuntimeMessage["type"]> = new Set(["vote", "fetchCount", "ui:injected"]);
 
 // Types only the extension's own pages (popup/auth) send - never content scripts.
 // The OTP pair matters most: it is the one exchange that MINTS a credential, so a
 // content script on any supported site must never be able to drive it.
-const EXTENSION_PAGE_MESSAGE_TYPES: ReadonlySet<RuntimeMessage["type"]> = new Set(["report", "history:page", "history:stats", "history:export", "history:import", "auth:signOut", "auth:delete", "auth:requestOtp", "auth:verifyOtp", "auth:returnToOrigin"]);
+export const EXTENSION_PAGE_MESSAGE_TYPES: ReadonlySet<RuntimeMessage["type"]> = new Set(["report", "history:page", "history:stats", "history:export", "history:import", "auth:signOut", "auth:delete", "auth:requestOtp", "auth:verifyOtp", "auth:returnToOrigin"]);
 
-const MESSAGE_TYPES: ReadonlySet<RuntimeMessage["type"]> = new Set([...CONTENT_SCRIPT_MESSAGE_TYPES, ...EXTENSION_PAGE_MESSAGE_TYPES, "auth:status", "auth:openTab"]);
+// Every type the guard will accept at all. The suites cover this set exhaustively, so a type
+// added here fails them until it is classified as content-script, extension-page or either.
+export const MESSAGE_TYPES: ReadonlySet<RuntimeMessage["type"]> = new Set([...CONTENT_SCRIPT_MESSAGE_TYPES, ...EXTENSION_PAGE_MESSAGE_TYPES, "auth:status", "auth:openTab"]);
 
 const SITE_IDS: ReadonlySet<string> = new Set(ALL_SITES);
 const TARGET_ID_MAX = 512;

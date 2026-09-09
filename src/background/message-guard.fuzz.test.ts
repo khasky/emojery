@@ -13,7 +13,7 @@ import { describe, expect, it } from "vitest";
 import { EMAIL_MAX, NOTE_MAX, OTP_CODE_MAX, type RuntimeMessage, TITLE_MAX } from "../shared/messages";
 import { ALL_SITES } from "../shared/sites";
 import { HOSTILE_STRINGS, HOSTILE_VALUES } from "../test/hostile-inputs";
-import { FETCH_LIMIT_MAX, HISTORY_PAGE_LIMIT_MAX, HISTORY_QUERY_MAX, parseRuntimeMessage, TARGET_COUNT_MAX } from "./message-guard";
+import { EXTENSION_PAGE_MESSAGE_TYPES, FETCH_LIMIT_MAX, HISTORY_PAGE_LIMIT_MAX, HISTORY_QUERY_MAX, MESSAGE_TYPES, parseRuntimeMessage, TARGET_COUNT_MAX } from "./message-guard";
 
 const RUNTIME_ID = "abcdefghijklmnopabcdefghijklmnop";
 const EXT_BASE = `chrome-extension://${RUNTIME_ID}/`;
@@ -24,9 +24,10 @@ const SENDER_SITE = "github";
 const contentScript = (overrides: Partial<chrome.runtime.MessageSender> = {}): chrome.runtime.MessageSender => ({ id: RUNTIME_ID, tab: { id: 7 }, url: "https://github.com/owner/repo", ...overrides }) as chrome.runtime.MessageSender;
 const extensionPage = (): chrome.runtime.MessageSender => ({ id: RUNTIME_ID, url: `${EXT_BASE}popup.html` }) as chrome.runtime.MessageSender;
 
-const CONTENT_SCRIPT_TYPES = ["vote", "fetchCount", "ui:injected"] as const;
-const EXTENSION_PAGE_TYPES = ["report", "history:page", "history:stats", "history:export", "history:import", "auth:signOut", "auth:delete", "auth:requestOtp", "auth:verifyOtp"] as const;
-const ALL_TYPES = [...CONTENT_SCRIPT_TYPES, ...EXTENSION_PAGE_TYPES, "auth:status", "auth:openTab"] as const;
+// Taken from the guard, never retyped: a type missing from a copy is one the generator never
+// produces and no property below ever sees.
+const EXTENSION_PAGE_TYPES: RuntimeMessage["type"][] = [...EXTENSION_PAGE_MESSAGE_TYPES];
+const ALL_TYPES: RuntimeMessage["type"][] = [...MESSAGE_TYPES];
 
 // Values worth putting in a field: fast-check's own spread, plus the fixed corpus so the
 // known-nasty vectors are tried on every run rather than only when the generator finds them.
