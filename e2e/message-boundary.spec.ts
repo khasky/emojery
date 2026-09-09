@@ -61,8 +61,15 @@ test("a forged runtime message from a supported page never reaches the service w
       return { channel: true as const, attempts };
     }, extensionId);
 
-    // No web-messaging API in the page world at all is itself a held boundary.
-    if (!outcome.channel) return;
+    // Both outcomes are a held boundary, and they are not the same green: one forged two
+    // messages and got nothing back, the other found nothing to forge with. Recorded, because
+    // the day Chromium stops handing web pages a chrome.runtime this gate would keep passing
+    // while probing nothing, and the report is the only place that difference can show.
+    if (!outcome.channel) {
+      test.info().annotations.push({ type: "boundary-probe", description: "no chrome.runtime.sendMessage in the page main world - nothing to forge" });
+      return;
+    }
+    test.info().annotations.push({ type: "boundary-probe", description: `forged from the page main world: ${outcome.attempts.map((attempt) => attempt.type).join(", ")}` });
     for (const attempt of outcome.attempts) {
       expect(attempt.response, `forged ${attempt.type} must get no response from the service worker`).toBeNull();
     }
