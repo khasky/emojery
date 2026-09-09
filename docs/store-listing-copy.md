@@ -146,7 +146,7 @@ WHAT LEAVES YOUR BROWSER
 - To show counts, the public target keys of supported items on the page, before you react. The count lookup itself is anonymous; while you are signed in, a second request asks which of those items you have already reacted to and carries your session token.
 - The reactions you submit, with the canonical URL and the public identifier of the item you reacted to.
 - Your email address at sign-in, transiently: sent over TLS, used once to deliver a 6-digit code, then discarded. What remains as your account identifier is a one-way keyed hash of it.
-- A session token, a random installation identifier that lasts as long as the installation, and a session identifier that rotates every 24 hours.
+- A session token, a random installation identifier that lasts as long as the installation, and a session identifier that rotates every 24 hours. The installation and session identifiers travel only on the requests you initiate that change something: signing in, submitting or removing a reaction, filing a report, deleting your account. Reading counts sends neither.
 - A bug report, only when you send one from the Report tab: your note, the page it is about, and, while Community insights is on, the browser's user-agent string and the extension version.
 - With the optional "Community insights" setting on: coarse country/city, language, browser and OS alongside a reaction.
 
