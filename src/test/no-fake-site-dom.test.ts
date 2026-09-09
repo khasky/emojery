@@ -57,8 +57,11 @@ function siteHelperModules(): string[] {
     .map((entry) => entry.file);
 }
 
+// Every vitest-run test under src/, browser-mode ones included: the rule is scoped to
+// `src/**/*.test.ts(x)` whatever runner picks the file up, and a fake site page is no more
+// allowed in real WebKit than in jsdom.
 function unitTestFiles(): string[] {
-  return walk(SRC_DIR).filter((file) => /\.test\.tsx?$/.test(file) && !file.endsWith(".browser.test.ts") && !file.endsWith(".browser.test.tsx"));
+  return walk(SRC_DIR).filter((file) => /\.test\.tsx?$/.test(file));
 }
 
 // Every module path a file imports, resolved to an absolute .ts path when relative.
@@ -74,8 +77,7 @@ describe("unit tests never drive a real site adapter's scan()", () => {
   const adapters = siteAdapterModules();
 
   it("finds the site adapter modules it is meant to guard", () => {
-    // A rename that emptied this list would make every assertion below vacuous.
-    expect(adapters.length).toBeGreaterThan(5);
+    expect(adapters.length).toBe(ALL_SITES.length);
   });
 
   for (const file of unitTestFiles()) {
