@@ -23,6 +23,8 @@ git status --short   # must be clean, except changes you are about to commit fir
 pnpm check           # the whole gate; CONTRIBUTING.md#pre-pr-gates lists what it covers
 ```
 
+A release that adds a supported site goes out only once that site is live on the production API (`docs/adding-a-site.md`). If the build reaches users first, reactions on the new site do not register until the two line up, with nothing on the page to say why.
+
 ## The first release
 
 For the first public release, use `--first-release`. It writes the changelog and creates the `v<package.json version>` tag without bumping the current `package.json` version:
