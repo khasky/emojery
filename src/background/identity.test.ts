@@ -16,6 +16,13 @@ vi.mock("./history", () => ({
   clearHistoryForUser: (userId: string) => clearHistoryForUser(userId),
 }));
 
+// Same for the vote queue: votequeue.browser.test.ts owns the scoped wipe itself,
+// here only the deletion path's call for it matters.
+const clearQueuedVotes = vi.fn(async (_userId?: string) => {});
+vi.mock("./votequeue", () => ({
+  clearQueuedVotes: (userId?: string) => clearQueuedVotes(userId),
+}));
+
 import { deleteAccount, finishPendingDeletion, getAuth, requestOtp, revokeSessionServerSide, verifyOtp } from "./identity";
 
 beforeEach(() => {
@@ -27,6 +34,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
   clearHistory.mockClear();
   clearHistoryForUser.mockClear();
+  clearQueuedVotes.mockClear();
 });
 
 describe("requestOtp", () => {
@@ -201,6 +209,8 @@ describe("account deletion", () => {
     expect(store.auth_v1).toBeUndefined();
     expect(clearHistoryForUser).toHaveBeenCalledWith("u1");
     expect(clearHistory).not.toHaveBeenCalled();
+    // Pending votes outlive the session, so the deleted account's own are wiped here.
+    expect(clearQueuedVotes).toHaveBeenCalledWith("u1");
     expect(store.own_reactions_v2).toEqual({ "facebook:2": { reaction: "🔥", userId: "u2" } });
     expect(store.auto_native_v1).toEqual({ "facebook:2": { action: "like", userId: "u2" } });
     expect(store.deletion_pending_v1).toBeUndefined();
@@ -262,6 +272,7 @@ describe("account deletion", () => {
     expect(await finishPendingDeletion()).toBe(true);
     expect(clearHistory).toHaveBeenCalled();
     expect(clearHistoryForUser).not.toHaveBeenCalled();
+    expect(clearQueuedVotes).toHaveBeenCalledWith(undefined);
     expect(store.deletion_pending_v1).toBeUndefined();
   });
 

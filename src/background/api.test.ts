@@ -34,7 +34,7 @@ import { clearOwnReactionIfMatches } from "../shared/storage";
 import { enqueueVote, flushOwnedVotesForSignOut, flushVotes, voteRetryDelayMs } from "./api";
 import { ApiHttpError, apiErrorCode, clearFailedReads, clearPendingMineBatch, fetchCount, MINE_BATCH_WINDOW_MS } from "./api-read";
 import { pushHistory, removeHistoryEntry } from "./history";
-import { getAuth } from "./identity";
+import { clearAuth, getAuth } from "./identity";
 import { bumpAttempt, deleteById, enqueue, peekNext, peekNextEligible, type StoredVote } from "./votequeue";
 
 const target: TargetRef = {
@@ -338,6 +338,41 @@ describe("flushVotes", () => {
     expect(fetchMock).not.toHaveBeenCalled();
     expect(clearOwnReactionIfMatches).not.toHaveBeenCalled();
     expect(deleteById).toHaveBeenCalledWith(12);
+  });
+
+  it("parks the queue when the session ends instead of emptying it", async () => {
+    // The clicks are this account's own; a session that ended (sign-out, expiry, a
+    // refused token) must not cost them. peekNextEligible keeps offering the same
+    // entry, so a drain that walked on would delete it - and 49 more after it.
+    vi.mocked(getAuth).mockResolvedValue(null);
+    vi.mocked(peekNextEligible).mockResolvedValue(queued({ id: 13, historyReaction: "❤️", optimisticHistoryId: "hist-13" }));
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    await flushVotes();
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(deleteById).not.toHaveBeenCalled();
+    expect(removeHistoryEntry).not.toHaveBeenCalled();
+    expect(clearOwnReactionIfMatches).not.toHaveBeenCalled();
+  });
+
+  it("keeps the vote a 401 refused and stops the drain on the cleared session", async () => {
+    // clearAuth really does end the session, so the mock does too: without that the
+    // next lap would re-send the same vote under a token the API just refused.
+    vi.mocked(clearAuth).mockImplementationOnce(async () => {
+      vi.mocked(getAuth).mockResolvedValue(null);
+    });
+    vi.mocked(peekNextEligible).mockResolvedValue(queued({ id: 14, historyReaction: "❤️", optimisticHistoryId: "hist-14" }));
+    const fetchMock = vi.fn(async () => new Response("unauthorized", { status: 401 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await flushVotes();
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(clearAuth).toHaveBeenCalled();
+    expect(deleteById).not.toHaveBeenCalled();
+    expect(removeHistoryEntry).not.toHaveBeenCalled();
   });
 
   it("writes history for queued votes without an optimistic history id", async () => {

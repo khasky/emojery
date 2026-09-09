@@ -82,6 +82,9 @@ export default defineBackground(() => {
     if (area !== "local") return;
     if (!(AUTH_KEY in changes)) return;
     void clearCountsCache().catch((error: unknown) => logBackgroundError("clearCountsCache", error));
+    // Signing in releases a queue that was parked without a session; signing out
+    // lets the same drain retire the wake-up (background/api.ts).
+    void scheduleFlush();
   });
 
   chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {

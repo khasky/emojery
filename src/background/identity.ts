@@ -10,6 +10,7 @@ import { clientSecurityHeaders } from "./client-security";
 import { apiFetch, logBackgroundError } from "./debug";
 import { clearHistory, clearHistoryForUser } from "./history";
 import { parseRetryAfterSeconds } from "./retry-after";
+import { clearQueuedVotes } from "./votequeue";
 
 export interface AuthState {
   userId: string;
@@ -282,6 +283,9 @@ async function clearLocalAccountStateAfterDeletion(userId: string | undefined): 
   } else {
     await clearHistory();
   }
+  // Votes still queued outlive the session now, so the deleted account's pending
+  // entries need a wipe of their own - nothing else would ever send or clear them.
+  await clearQueuedVotes(userId);
   await clearAuth();
   // Last: a wipe that throws (IndexedDB unavailable) must leave the resume marker
   // behind, or nothing is left to retry the deletion the server already performed.

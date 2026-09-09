@@ -222,7 +222,14 @@ export async function flushVotes(): Promise<void> {
       } catch {
         // Unreadable hold state only costs wake-up precision, not the wake-up.
       }
-      syncVoteWakeAlarm(stats.count > 0, wakeAt);
+      // A queue waiting for its account to sign back in has nothing to retry, so the
+      // wake-up sleeps with it - the AUTH_KEY listener in entrypoints/background.ts
+      // re-arms it. An unreadable session keeps the alarm rather than disarming a
+      // retry that is still live.
+      const signedOut = await getAuth()
+        .then((auth) => auth === null)
+        .catch(() => false);
+      syncVoteWakeAlarm(stats.count > 0 && !signedOut, wakeAt);
     } catch (error) {
       // Queue unreadable: leave the alarm as it is rather than disarming a pending retry.
       logBackgroundError("flushVotes.syncVoteWakeAlarm", error);
@@ -264,11 +271,10 @@ async function drainQueuedVotes(): Promise<void> {
     if (!vote) break;
 
     const auth = await getAuth();
-    if (!auth) {
-      await dropOptimisticHistory(vote);
-      await deleteById(vote.id);
-      continue;
-    }
+    // A queued vote belongs to the account that cast it, so a session that ended
+    // parks the queue instead of emptying it: the drain resumes once that account
+    // signs back in. An entry left behind by a different account is dropped below.
+    if (!auth) break;
     // A queued vote must never be submitted under a different account's token -
     // it would count as that account's vote - so drop it. This also drops
     // pre-stamp legacy entries, which carry no owner.
@@ -319,10 +325,10 @@ async function drainQueuedVotes(): Promise<void> {
 async function handleVoteResponse(res: Response, vote: StoredVote, auth: AuthState): Promise<void> {
   if (!res.ok) {
     if (res.status === 401) {
-      await dropOptimisticHistory(vote);
+      // The vote outlives the session that carried it: clearing the session stops
+      // the drain (no auth, no send), and the entry waits there for the next sign-in
+      // rather than being spent on a token the API has already refused.
       await clearAuth();
-      await deleteById(vote.id);
-      await recordFlushSuccess();
       return;
     }
     if (res.status >= 400 && res.status < 500 && res.status !== HTTP_TOO_MANY_REQUESTS) {

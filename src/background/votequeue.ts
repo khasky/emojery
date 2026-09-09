@@ -202,6 +202,33 @@ export async function deleteById(id: number): Promise<void> {
   );
 }
 
+// Account deletion (background/identity.ts): drop one account's pending votes,
+// leaving another account's entries on the device untouched. Undefined `userId`
+// takes the whole queue - the pre-`userId` deletion-resume marker names no account,
+// the same fallback clearHistory covers there.
+export async function clearQueuedVotes(userId?: string): Promise<void> {
+  await runQueueTx<number>(
+    "readwrite",
+    "clearQueuedVotes",
+    { userId },
+    (store) => {
+      let deleted = 0;
+      const cursor = store.openCursor();
+      cursor.onsuccess = () => {
+        const cur = cursor.result;
+        if (!cur) return;
+        if (userId === undefined || (cur.value as QueuedVote).userId === userId) {
+          cur.delete();
+          deleted++;
+        }
+        cur.continue();
+      };
+      return () => deleted;
+    },
+    (deleted) => ({ deleted }),
+  );
+}
+
 export async function bumpAttempt(id: number, nextAttemptAt?: number): Promise<void> {
   await runQueueTx<void>(
     "readwrite",

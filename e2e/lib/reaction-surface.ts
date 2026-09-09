@@ -365,7 +365,7 @@ export async function reactWith(page: Page, emoji: string): Promise<void> {
 // vote POST completes on the wire (any response settles the queue entry). Call
 // BEFORE the reaction click - the flush is async and a watcher installed
 // afterwards can miss an already-finished request and hang. Await the returned
-// thunk wherever a sign-out or profile teardown would drop a still-queued vote:
+// thunk wherever teardown would discard the profile a still-queued vote lives in:
 // a fixed sleep lost that race live (the close cancelled the POST mid-flight).
 export function watchNextVoteFlush(context: BrowserContext, timeoutMs = 60_000): () => Promise<void> {
   const flushed = context.waitForEvent("response", { predicate: (response) => response.url().includes("/reactions/vote"), timeout: timeoutMs }).then(

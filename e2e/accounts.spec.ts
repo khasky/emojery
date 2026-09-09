@@ -16,9 +16,9 @@ const REQUIRES_OTP = ext.otpSkipReason("multi-account e2e checks");
 // Whole file signs in through auth.html and reads the popup, which Playwright Firefox cannot reach.
 test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
 
-// Signing out drops a still-queued vote by design (see flushVotes), so a vote
-// followed by a sign-out or teardown must first reach the server: the main
-// flows await ext.watchNextVoteFlush; this budget serves the best-effort
+// A queued vote survives a sign-out now (see flushVotes), but not the throwaway
+// profile it lives in, so a vote followed by teardown must first reach the server:
+// the main flows await ext.watchNextVoteFlush; this budget serves the best-effort
 // cleanup paths only.
 const VOTE_FLUSH_MS = Number(process.env.E2E_VOTE_FLUSH_MS ?? 5_000);
 
@@ -211,8 +211,8 @@ test("repeated wrong OTP codes stop verification", async () => {
 // Two accounts on one target: each account's react/un-react moves the PUBLIC
 // aggregate by exactly one, independently. Runs TWO parallel sessions (one
 // browser profile per account) instead of switching accounts in one session:
-// no sign-out ever happens, so no queued vote can be dropped and no flush
-// sleeps are needed - each cross-account step is proven by polling the OTHER
+// no account switch ever happens, so no queued vote is dropped as another
+// account's and no flush sleeps are needed - each step is proven by polling the OTHER
 // session's RENDERED counter, which only moves once the server took the vote.
 test("two accounts raise and lower the shared counter independently", async () => {
   test.skip(!ext.authConfigured(), REQUIRES_OTP);
@@ -290,7 +290,7 @@ test("two accounts raise and lower the shared counter independently", async () =
   } finally {
     // Best-effort: leave the shared staging target without this run's votes.
     // Each account's session is still signed in, so clear directly; the flush
-    // wait matters here - closing the browser next would drop a queued un-react.
+    // wait matters here - closing the browser next takes a queued un-react with it.
     const cleanup = async (session: ext.Session | undefined, reacted: boolean) => {
       if (!session) return;
       if (reacted) {

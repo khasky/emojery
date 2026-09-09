@@ -6,7 +6,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { TargetRef } from "../shared/adapter";
 import { type ChromeShimHandle, installChromeShim } from "../test/chrome-shim";
-import { bumpAttempt, deleteById, enqueue, getQueueStats, listQueuedVotes, peekNext, peekNextEligible, type QueuedVote, VOTE_QUEUE_MAX } from "./votequeue";
+import { bumpAttempt, clearQueuedVotes, deleteById, enqueue, getQueueStats, listQueuedVotes, peekNext, peekNextEligible, type QueuedVote, VOTE_QUEUE_MAX } from "./votequeue";
 
 const target = (n: number): TargetRef => ({ site: "github", targetId: `o/r${n}`, url: `https://github.com/o/r${n}` });
 
@@ -19,19 +19,10 @@ const vote = (n: number, overrides: Partial<QueuedVote> = {}): Omit<QueuedVote, 
   ...overrides,
 });
 
-// The queue ships no clear(); draining through its own API doubles as coverage.
-async function drain(): Promise<void> {
-  for (;;) {
-    const head = await peekNext();
-    if (!head) return;
-    await deleteById(head.id);
-  }
-}
-
 let chromeShim: ChromeShimHandle;
 beforeEach(async () => {
   chromeShim = installChromeShim();
-  await drain();
+  await clearQueuedVotes();
 });
 afterEach(() => chromeShim.uninstall());
 
@@ -61,6 +52,15 @@ describe("vote queue - FIFO on real IndexedDB", () => {
     await expect(peekNext()).resolves.toMatchObject({ id: a });
     await deleteById(a);
     await expect(peekNext()).resolves.toBeUndefined();
+  });
+
+  it("clearQueuedVotes drops one account's entries and leaves another's", async () => {
+    await enqueue(vote(1));
+    const other = await enqueue(vote(2, { userId: "user-b" }));
+
+    await clearQueuedVotes("user-a");
+
+    await expect(listQueuedVotes(VOTE_QUEUE_MAX)).resolves.toMatchObject([{ id: other, userId: "user-b" }]);
   });
 
   it("bumpAttempt increments in place without reordering the queue", async () => {
