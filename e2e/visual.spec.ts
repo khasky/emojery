@@ -54,18 +54,18 @@ test("popup surfaces hold their look in light and dark", async () => {
       try {
         await shootPopup(popup, `popup-settings-${theme}.png`);
 
-        const perSite = popup.getByRole("checkbox", { name: "Only selected sites" });
+        const perSite = popup.getByRole("checkbox", { name: ext.enMessage("sectionPerSite") });
         await perSite.check();
-        await expect(popup.getByRole("searchbox", { name: "Filter sites" })).toBeVisible();
+        await expect(popup.getByRole("searchbox", { name: ext.enMessage("filterSitesPlaceholder") })).toBeVisible();
         await shootPopup(popup, `popup-per-site-${theme}.png`);
         // Switching the section off clears the exclusions, so the next shot starts clean.
         await perSite.uncheck();
 
-        await popup.getByRole("tab", { name: "Account" }).click();
-        await expect(popup.getByRole("button", { name: "Sign in" })).toBeVisible();
+        await popup.getByRole("tab", { name: ext.enMessage("tabAccount") }).click();
+        await expect(popup.getByRole("button", { name: ext.enMessage("signInBtn") })).toBeVisible();
         await shootPopup(popup, `popup-account-signed-out-${theme}.png`);
 
-        await popup.getByRole("tab", { name: "Report" }).click();
+        await popup.getByRole("tab", { name: ext.enMessage("tabReport") }).click();
         await shootPopup(popup, `popup-report-signed-out-${theme}.png`);
       } finally {
         await popup.close().catch(() => {});
@@ -73,8 +73,10 @@ test("popup surfaces hold their look in light and dark", async () => {
     }
 
     // Debug last: revealing it adds a button to the header that every shot above
-    // would otherwise have to include.
-    await ext.setPopupCheckbox(session.context, { tab: "Settings", name: "Debug", checked: true });
+    // would otherwise have to include. The theme is set explicitly rather than
+    // inherited from whatever the loop above left behind - the baseline is a dark one.
+    await ext.setPopupTheme(session.context, "dark");
+    await ext.setPopupCheckbox(session.context, { tab: "Settings", name: ext.enMessage("settingDebug"), checked: true });
     const withDebug = await openSizedPopup(session.context);
     try {
       await withDebug.locator(DEBUG_TAB_SELECTOR).click();
@@ -83,7 +85,7 @@ test("popup surfaces hold their look in light and dark", async () => {
     } finally {
       await withDebug.close().catch(() => {});
     }
-    await ext.setPopupCheckbox(session.context, { tab: "Settings", name: "Debug", checked: false });
+    await ext.setPopupCheckbox(session.context, { tab: "Settings", name: ext.enMessage("settingDebug"), checked: false });
   } finally {
     await ext.closeSession(session);
   }
@@ -103,12 +105,12 @@ test("the sign-in and onboarding pages hold their look in light and dark", async
       const page = await session.context.newPage();
       try {
         await page.goto(ext.extensionPageUrl(extensionId, "auth.html"));
-        await expect(page.getByRole("heading", { name: "Sign in to react" })).toBeVisible();
+        await expect(page.getByRole("heading", { name: ext.enMessage("authSignInTitle") })).toBeVisible();
         await settleForShot(page);
         await expect(page.locator(CARD_SELECTOR)).toHaveScreenshot(`auth-sign-in-${theme}.png`);
 
         await page.goto(ext.extensionPageUrl(extensionId, "onboarding.html"));
-        await expect(page.getByRole("heading", { name: "Emojery is ready" })).toBeVisible();
+        await expect(page.getByRole("heading", { name: ext.enMessage("onboardingTitle") })).toBeVisible();
         await settleForShot(page);
         await expect(page.locator(CARD_SELECTOR)).toHaveScreenshot(`onboarding-${theme}.png`);
       } finally {
@@ -132,7 +134,7 @@ test("the German popup and pages survive their longer labels", async () => {
     const popup = await openSizedPopup(session.context);
     try {
       await shootPopup(popup, "popup-settings-de.png");
-      await popup.getByRole("checkbox", { name: "Nur ausgewählte Websites" }).check();
+      await popup.getByRole("checkbox", { name: ext.localeMessage("de", "sectionPerSite") }).check();
       await shootPopup(popup, "popup-per-site-de.png");
     } finally {
       await popup.close().catch(() => {});
@@ -141,12 +143,12 @@ test("the German popup and pages survive their longer labels", async () => {
     const page = await session.context.newPage();
     try {
       await page.goto(ext.extensionPageUrl(extensionId, "auth.html"));
-      await expect(page.getByRole("heading", { name: "Zum Reagieren anmelden" })).toBeVisible();
+      await expect(page.getByRole("heading", { name: ext.localeMessage("de", "authSignInTitle") })).toBeVisible();
       await settleForShot(page);
       await expect(page.locator(CARD_SELECTOR)).toHaveScreenshot("auth-sign-in-de.png");
 
       await page.goto(ext.extensionPageUrl(extensionId, "onboarding.html"));
-      await expect(page.getByRole("heading", { name: "Emojery ist startklar" })).toBeVisible();
+      await expect(page.getByRole("heading", { name: ext.localeMessage("de", "onboardingTitle") })).toBeVisible();
       await settleForShot(page);
       await expect(page.locator(CARD_SELECTOR)).toHaveScreenshot("onboarding-de.png");
     } finally {

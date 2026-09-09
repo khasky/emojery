@@ -49,6 +49,9 @@ interface LaunchOptions {
    *  navigates TO onboarding.html). Needed by a spec that asserts on that page - without
    *  it `page.goto(onboarding.html)` is closed under the spec a moment after it loads. */
   keepOnboardingTab?: boolean;
+  /** A narrower window than the 1366x900 default, for a spec that drives only the
+   *  extension's own pages and wants them at their small size. */
+  viewport?: { width: number; height: number };
 }
 
 export function resolveExtensionPath(): string {
@@ -225,13 +228,15 @@ export async function launchSession(options: LaunchOptions = {}): Promise<Sessio
   const { dir: userDataDir, generatedUserDataDir } = await resolveUserDataDir("authed-user-data", { explicitDir: options.userDataDir });
   const locale = options.locale ?? process.env.E2E_LOCALE ?? "en-US";
 
+  const viewport = options.viewport ?? { width: 1366, height: 900 };
   const baseOptions = {
     headless: false as const,
-    viewport: { width: 1366, height: 900 },
+    viewport,
     locale,
+    extraHTTPHeaders: { "Accept-Language": `${locale},en;q=0.9` },
     // realisticClient is forced on here: these sessions drive real sites and have
     // never been opted out of the anti-detection flag.
-    args: extensionLaunchArgs({ extensionPaths: [extensionPath], locale, windowSize: "1366,900", realisticClient: true }),
+    args: extensionLaunchArgs({ extensionPaths: [extensionPath], locale, windowSize: `${viewport.width},${viewport.height}`, realisticClient: true }),
   };
   const context = await launchRealisticContext(userDataDir, baseOptions, options.keepOnboardingTab ? { keepOnboardingTab: true } : {});
   context.setDefaultTimeout(Number(process.env.E2E_DEFAULT_TIMEOUT_MS ?? 30_000));

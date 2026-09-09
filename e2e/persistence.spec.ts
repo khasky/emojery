@@ -72,13 +72,18 @@ test("a reaction survives a full browser restart", async () => {
       targetKey = await ext.firstMountedKey(page);
       expect(targetKey, "a GitHub Emojery host should mount").not.toBeNull();
       if (targetKey) {
-        await ext.clearReaction(page);
+        // A leftover reaction sends an un-react vote; let it reach the server first, so
+        // the watcher below settles on the reaction this test restarts the browser for.
+        const unreactFlushed = ext.watchNextVoteFlush(first.context);
+        const cleared = await ext.clearReaction(page);
+        if (cleared) await unreactFlushed();
+        const voteFlushed = ext.watchNextVoteFlush(first.context);
         await ext.reactWith(page, ext.REACTIONS.heart);
         await expect.poll(() => ext.hasOwnReaction(page)).toBe(true);
-        // Let the background queue POST the vote to the server, then confirm it
-        // persisted (survives a reload) BEFORE we close - otherwise the restart
-        // would read authoritative server state that never received the vote.
-        await page.waitForTimeout(2_500);
+        // The background queue has to POST the vote before we confirm it persisted
+        // (survives a reload) and close - otherwise the restart would read
+        // authoritative server state that never received the vote.
+        await voteFlushed();
         await reloadAndSettle(page, 2_500);
         await expect
           .poll(() => ext.hasOwnReaction(page), {

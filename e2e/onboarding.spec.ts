@@ -17,9 +17,8 @@ import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 // onboarding.browser.test.tsx.
 import { TRY_IT_LIVE_URL } from "../src/shared/tracking-links";
 import { enMessage, extensionPageUrl, verifyOtpOnAuthPage } from "./lib/auth-signin";
-import { closeSession, isFirefoxRun, launchRealisticContext, makeRunProfileDir, resolveExtensionPath } from "./lib/browser-session";
+import { closeSession, isFirefoxRun, launchSession, makeRunProfileDir } from "./lib/browser-session";
 import { ensureSignedOut, firstServiceWorker, resolveExtensionId } from "./lib/extension-pages";
-import { extensionLaunchArgs } from "./lib/launch-args";
 import { pollForValue } from "./lib/picker-probes";
 import { signInTestAccount } from "./lib/popup-probes";
 import { COACH_TIP_CLASS, GATE_CLASS, GATE_SIGNIN_CLASS, GRID_ITEM_SELECTOR, HOST_SELECTOR, SEARCH_INPUT_SELECTOR, TRIGGER_SELECTOR } from "./lib/selectors";
@@ -45,19 +44,12 @@ interface OnboardingSession {
   generatedUserDataDir: string;
 }
 
+// The shared launcher plus this file's one requirement: a profile dir that is always
+// fresh (onboarding only ever fires on a first install) and named for this suite, and
+// which the caller therefore owns for teardown even though it passed it in.
 async function launchFreshInstall(opts: { keepOnboardingTab: boolean; reuseDir?: string }): Promise<OnboardingSession> {
-  const extensionPath = resolveExtensionPath();
   const userDataDir = opts.reuseDir ?? (await makeRunProfileDir("onboarding"));
-  const context = await launchRealisticContext(
-    userDataDir,
-    {
-      headless: false,
-      viewport: { width: 1366, height: 900 },
-      locale: "en-US",
-      args: extensionLaunchArgs({ extensionPaths: [extensionPath], locale: "en-US", windowSize: "1366,900", realisticClient: true }),
-    },
-    { keepOnboardingTab: opts.keepOnboardingTab },
-  );
+  const { context } = await launchSession({ userDataDir, locale: "en-US", keepOnboardingTab: opts.keepOnboardingTab });
   return { context, generatedUserDataDir: userDataDir };
 }
 

@@ -16,7 +16,7 @@ import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import { authConfigured, closeSession, extensionPageUrl, FIREFOX_NO_EXTENSION_PAGES, isFirefoxRun, launchSession, openPerSiteList, otpSkipReason, resolveExtensionId, type Session, signIn } from "./lib/extension";
-import { EMAIL_INPUT_SELECTOR, TAGLINE_SELECTOR } from "./lib/selectors";
+import { AGREE_SELECTOR, CARD_SELECTOR, EMAIL_INPUT_SELECTOR, TAGLINE_SELECTOR } from "./lib/selectors";
 
 // Whole file drives the extension's own pages (popup/auth), which Playwright Firefox cannot reach.
 test.skip(isFirefoxRun(), FIREFOX_NO_EXTENSION_PAGES);
@@ -314,7 +314,7 @@ test("text spacing: key text survives WCAG 1.4.12 overrides without clipping", a
   const page = await openA11yPage();
   const clipped: string[] = [];
   const checks: { url: string; selectors: string[] }[] = [
-    { url: authUrl(), selectors: [".card h1", TAGLINE_SELECTOR, "label", ".agree span", "button.primary"] },
+    { url: authUrl(), selectors: [`${CARD_SELECTOR} h1`, TAGLINE_SELECTOR, "label", `${AGREE_SELECTOR} span`, "button.primary"] },
     { url: onboardingUrl(), selectors: [".card h1", ".checklist .label"] },
     { url: popupUrl(), selectors: [".tab", ".row-label > span:first-child", ".brand-title span"] },
   ];

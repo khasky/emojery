@@ -47,7 +47,6 @@ const ICON_SIDE_MAX_PX = 64;
 // ones are deliberately discarded. The window has to outlast mount.ts's own re-measure
 // chain (GLYPH_REMEASURE_UNTIL_MS).
 const MEASURE_SETTLE_MS = Number(process.env.E2E_GLYPH_SETTLE_MS ?? 13_000);
-const MEASURE_POLL_MS = 1_000;
 
 // How many of the nearest native matches contribute icons to the reference median.
 const NATIVE_NEIGHBOURHOOD = 5;
@@ -166,13 +165,8 @@ function readMeasurement(page: Page, site: SupportedSiteScenario): Promise<Glyph
 // and a late-hydrating row (YouTube watch) can hold a stand-in perfectly still for seconds
 // before that correction arrives. MEASURE_SETTLE_MS must stay above that window.
 async function measureGlyph(page: Page, site: SupportedSiteScenario): Promise<GlyphMeasurement> {
-  const deadline = Date.now() + MEASURE_SETTLE_MS;
-  let last = await readMeasurement(page, site);
-  while (Date.now() < deadline) {
-    await page.waitForTimeout(MEASURE_POLL_MS);
-    last = await readMeasurement(page, site);
-  }
-  return last;
+  await page.waitForTimeout(MEASURE_SETTLE_MS);
+  return readMeasurement(page, site);
 }
 
 function describeMeasurement(site: SupportedSiteScenario, m: GlyphMeasurement): string {

@@ -9,7 +9,7 @@ import { expect, test } from "@playwright/test";
 import * as ext from "./lib/extension";
 import { openHistoryTab } from "./lib/popup-probes";
 import { reloadAndSettle } from "./lib/reload-settle";
-import { CODE_INPUT_SELECTOR, EMAIL_INPUT_SELECTOR } from "./lib/selectors";
+import { AGREE_CHECKBOX_SELECTOR, CODE_INPUT_SELECTOR, EMAIL_INPUT_SELECTOR } from "./lib/selectors";
 
 const REQUIRES_OTP = ext.otpSkipReason("multi-account e2e checks");
 
@@ -176,8 +176,8 @@ test("repeated wrong OTP codes stop verification", async () => {
     const authPage = await session.context.newPage();
     await authPage.goto(ext.extensionPageUrl(extensionId, "auth.html"));
     await authPage.locator(EMAIL_INPUT_SELECTOR).fill(email);
-    await authPage.locator(".agree input[type=checkbox]").check();
-    const sendBtn = authPage.getByRole("button", { name: "Send code" });
+    await authPage.locator(AGREE_CHECKBOX_SELECTOR).check();
+    const sendBtn = authPage.getByRole("button", { name: ext.enMessage("authSendCodeBtn") });
     await expect(sendBtn).toBeEnabled();
     await sendBtn.click();
     const codeInput = authPage.locator(CODE_INPUT_SELECTOR);
@@ -185,7 +185,7 @@ test("repeated wrong OTP codes stop verification", async () => {
 
     const invalidError = authPage.getByText(ext.enMessage("authErrCodeInvalid"), { exact: true });
     const tooManyError = authPage.getByText(ext.enMessage("authErrTooManyTries"), { exact: true });
-    const signInBtn = authPage.getByRole("button", { name: "Sign in" });
+    const signInBtn = authPage.getByRole("button", { name: ext.enMessage("authVerifyBtn") });
     let stopped = false;
     for (let attempt = 1; attempt <= WRONG_CODE_BUDGET && !stopped; attempt += 1) {
       await codeInput.fill(wrongCode);
@@ -201,7 +201,7 @@ test("repeated wrong OTP codes stop verification", async () => {
     await expect(signInBtn).toBeEnabled();
     await signInBtn.click();
     await expect(tooManyError).toBeVisible({ timeout: 20_000 });
-    await expect(authPage.getByRole("heading", { name: "You're signed in" })).toHaveCount(0);
+    await expect(authPage.getByRole("heading", { name: ext.enMessage("authDoneTitle") })).toHaveCount(0);
     await authPage.close().catch(() => {});
   } finally {
     await ext.closeSession(session);

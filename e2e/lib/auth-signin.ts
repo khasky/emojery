@@ -18,7 +18,7 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type BrowserContext, expect, type Page } from "@playwright/test";
-import { CODE_INPUT_SELECTOR, EMAIL_INPUT_SELECTOR } from "./selectors";
+import { AGREE_CHECKBOX_SELECTOR, CODE_INPUT_SELECTOR, EMAIL_INPUT_SELECTOR } from "./selectors";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 export const EXTENSION_ROOT = resolve(__dirname, "..", "..");
@@ -177,7 +177,7 @@ async function requestAndVerifyOtp(authPage: Page, email: string, code: string, 
   await authPage.locator(EMAIL_INPUT_SELECTOR).fill(email);
   // The Terms/Privacy box ships unchecked, so consent is a required step of
   // every sign-in.
-  await authPage.locator(".agree input[type=checkbox]").check();
+  await authPage.locator(AGREE_CHECKBOX_SELECTOR).check();
   const sendBtn = authPage.getByRole("button", { name: localeMessage(locale, "authSendCodeBtn") });
   // Enabled once the email is valid + consent given + cooldown clear; wait out
   // any residual cooldown rather than clicking a disabled button.

@@ -3,8 +3,8 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
-import { authConfigured, authEmail, authOtp, closeSession, extensionLaunchArgs, extensionPageUrl, FIREFOX_NO_EXTENSION_PAGES, isFirefoxRun, launchRealisticContext, localeMessage, otpSkipReason, removeProfileUnlessKept, resolveExtensionId, resolveExtensionPath, resolveUserDataDir, wrongOtpFor } from "./lib/extension";
-import { CODE_INPUT_SELECTOR, EMAIL_INPUT_SELECTOR } from "./lib/selectors";
+import { authConfigured, authEmail, authOtp, closeSession, enMessage, extensionPageUrl, FIREFOX_NO_EXTENSION_PAGES, isFirefoxRun, launchSession, localeMessage, otpSkipReason, removeProfileUnlessKept, resolveExtensionId, resolveExtensionPath, wrongOtpFor } from "./lib/extension";
+import { AGREE_CHECKBOX_SELECTOR, CODE_INPUT_SELECTOR, EMAIL_INPUT_SELECTOR } from "./lib/selectors";
 
 // Whole file drives auth.html/popup.html, which Playwright Firefox cannot reach.
 test.skip(isFirefoxRun(), FIREFOX_NO_EXTENSION_PAGES);
@@ -39,6 +39,10 @@ const testEmail = authEmail();
 const testOtp = authOtp();
 const localizedAuthErrorLocales = ["ru", "de", "ja"] as const;
 
+// The auth page is a narrow card; shooting it at the suite default would frame mostly
+// empty background.
+const AUTH_VIEWPORT = { width: 1024, height: 768 };
+
 let context: BrowserContext;
 let generatedUserDataDir: string | null = null;
 let extensionId: string;
@@ -53,7 +57,7 @@ test.describe("extension account auth", () => {
     assertExtensionManifestAllowsApiBase(extensionPath, authApiBase);
     await assertApiReachable(authApiBase);
 
-    const session = await launchAuthBrowserSession(extensionPath);
+    const session = await launchAuthBrowserSession();
     context = session.context;
     generatedUserDataDir = session.generatedUserDataDir;
 
@@ -69,17 +73,17 @@ test.describe("extension account auth", () => {
 
   test("signs in from popup account tab and signs out again", async () => {
     const popup = await openPopupPage();
-    await popup.getByRole("tab", { name: "Account" }).click();
-    await expect(popup.getByText("Sign in to manage your account.")).toBeVisible();
+    await popup.getByRole("tab", { name: enMessage("tabAccount") }).click();
+    await expect(popup.getByText(enMessage("signInMsgAccount"))).toBeVisible();
 
     const authPagePromise = context.waitForEvent("page");
-    await popup.getByRole("button", { name: "Sign in" }).click();
+    await popup.getByRole("button", { name: enMessage("signInBtn") }).click();
     const authPage = await authPagePromise;
     await authPage.waitForURL(extensionPageUrl(extensionId, "auth.html"));
 
     await expect(authPage.locator(EMAIL_INPUT_SELECTOR)).toBeVisible();
     const emailInput = authPage.locator(EMAIL_INPUT_SELECTOR);
-    const sendCodeButton = authPage.getByRole("button", { name: "Send code" });
+    const sendCodeButton = authPage.getByRole("button", { name: enMessage("authSendCodeBtn") });
 
     await expect(sendCodeButton).toBeDisabled();
     await emailInput.fill("not-an-email");
@@ -87,7 +91,7 @@ test.describe("extension account auth", () => {
     await expect(authPage.locator(CODE_INPUT_SELECTOR)).toHaveCount(0);
 
     // Consent is opt-in: a valid address alone must not enable the send.
-    const agreeCheckbox = authPage.locator(".agree input[type=checkbox]");
+    const agreeCheckbox = authPage.locator(AGREE_CHECKBOX_SELECTOR);
     await emailInput.fill(rejectedEmail);
     await expect(agreeCheckbox).not.toBeChecked();
     await expect(sendCodeButton).toBeDisabled();
@@ -106,16 +110,16 @@ test.describe("extension account auth", () => {
     await sendCodeButton.click();
 
     const codeInput = authPage.locator(CODE_INPUT_SELECTOR);
-    const signInButton = authPage.getByRole("button", { name: "Sign in" });
+    const signInButton = authPage.getByRole("button", { name: enMessage("authVerifyBtn") });
     await expect(codeInput).toBeVisible();
     await expect(signInButton).toBeDisabled();
     await expect(authPage.getByRole("button", { name: /Resend code in \d+:\d{2}/ })).toBeDisabled();
 
-    await authPage.getByRole("button", { name: "Use a different email" }).click();
+    await authPage.getByRole("button", { name: enMessage("authUseDifferentEmail") }).click();
     // The cooldown text renders twice: the visible ticking line plus an sr-only
     // one-shot live-region copy - assert on the visible (aria-hidden) one.
     await expect(authPage.getByText(/We already sent a code to this address\./).and(authPage.locator('[aria-hidden="true"]'))).toBeVisible();
-    await authPage.getByRole("button", { name: `Enter the code we sent to ${testEmail}` }).click();
+    await authPage.getByRole("button", { name: enMessage("authEnterPendingCode", testEmail) }).click();
     await expect(codeInput).toBeVisible();
 
     await codeInput.fill(wrongOtpFor(testOtp));
@@ -129,19 +133,19 @@ test.describe("extension account auth", () => {
 
     await codeInput.fill(testOtp);
     await signInButton.click();
-    await expect(authPage.getByRole("heading", { name: "You're signed in" })).toBeVisible();
+    await expect(authPage.getByRole("heading", { name: enMessage("authDoneTitle") })).toBeVisible();
 
     await authPage.close();
     await popup.close();
 
     const signedInPopup = await openPopupPage();
-    await signedInPopup.getByRole("tab", { name: "Account" }).click();
-    await expect(signedInPopup.getByText("Signed in", { exact: true })).toBeVisible();
+    await signedInPopup.getByRole("tab", { name: enMessage("tabAccount") }).click();
+    await expect(signedInPopup.getByText(enMessage("signedInLabel"), { exact: true })).toBeVisible();
     await expect(signedInPopup.getByText(testEmail, { exact: true })).toBeVisible();
 
-    await signedInPopup.getByRole("button", { name: "Sign out" }).click();
-    await expect(signedInPopup.getByText("Sign in to manage your account.")).toBeVisible();
-    await expect(signedInPopup.getByRole("button", { name: "Sign in" })).toBeVisible();
+    await signedInPopup.getByRole("button", { name: enMessage("signOutBtn") }).click();
+    await expect(signedInPopup.getByText(enMessage("signInMsgAccount"))).toBeVisible();
+    await expect(signedInPopup.getByRole("button", { name: enMessage("signInBtn") })).toBeVisible();
     await expect(signedInPopup.getByText(testEmail, { exact: true })).toHaveCount(0);
 
     await signedInPopup.close();
@@ -149,8 +153,7 @@ test.describe("extension account auth", () => {
 
   for (const locale of localizedAuthErrorLocales) {
     test(`auth.html localizes visible errors with --lang=${locale}`, async () => {
-      const extensionPath = resolveExtensionPath();
-      const session = await launchAuthBrowserSession(extensionPath, {
+      const session = await launchAuthBrowserSession({
         locale,
         useGeneratedUserDataDir: true,
       });
@@ -170,7 +173,7 @@ test.describe("extension account auth", () => {
           }),
         ).toBeVisible();
         await authPage.locator(EMAIL_INPUT_SELECTOR).fill(rejectedEmail);
-        await authPage.locator(".agree input[type=checkbox]").check();
+        await authPage.locator(AGREE_CHECKBOX_SELECTOR).check();
         const sendCodeButton = authPage.getByRole("button", {
           name: localeMessage(locale, "authSendCodeBtn"),
         });
@@ -217,29 +220,22 @@ interface LaunchAuthBrowserOptions {
   useGeneratedUserDataDir?: boolean;
 }
 
-async function launchAuthBrowserSession(extensionPath: string, options: LaunchAuthBrowserOptions = {}): Promise<AuthBrowserSession> {
-  const { dir: userDataDir, generatedUserDataDir } = await resolveUserDataDir("auth-user-data", { explicitDir: process.env.E2E_USER_DATA_DIR, useGenerated: options.useGeneratedUserDataDir });
-  const locale = options.locale ?? process.env.E2E_LOCALE ?? "en-US";
-
-  const sessionContext = await launchRealisticContext(userDataDir, {
-    headless: false,
-    viewport: { width: 1024, height: 768 },
-    screen: { width: 1024, height: 768 },
-    locale,
-    extraHTTPHeaders: { "Accept-Language": `${locale},en;q=0.9` },
-    // realisticClient forced on: these auth flows have always hidden the
-    // automation flag, independently of E2E_REALISTIC_CLIENT.
-    args: extensionLaunchArgs({ extensionPaths: [extensionPath], locale, windowSize: "1024,768", realisticClient: true }),
+// The shared launcher at this file's own window size. `useGeneratedUserDataDir` drops
+// E2E_USER_DATA_DIR for that launch: the localized legs need a profile with no session
+// in it, whatever the runner points the shared one at.
+async function launchAuthBrowserSession(options: LaunchAuthBrowserOptions = {}): Promise<AuthBrowserSession> {
+  const explicitDir = options.useGeneratedUserDataDir ? undefined : process.env.E2E_USER_DATA_DIR;
+  return launchSession({
+    viewport: AUTH_VIEWPORT,
+    ...(explicitDir ? { userDataDir: explicitDir } : {}),
+    ...(options.locale ? { locale: options.locale } : {}),
   });
-  sessionContext.setDefaultTimeout(Number(process.env.E2E_DEFAULT_TIMEOUT_MS ?? 30_000));
-  sessionContext.setDefaultNavigationTimeout(Number(process.env.E2E_NAV_TIMEOUT_MS ?? 60_000));
-  return { context: sessionContext, generatedUserDataDir };
 }
 
 async function openPopupPage(): Promise<Page> {
   const page = await context.newPage();
   await page.goto(extensionPageUrl(extensionId, "popup.html"));
-  await expect(page.getByRole("heading", { name: "Emojery" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: enMessage("popupHeading") })).toBeVisible();
   return page;
 }
 

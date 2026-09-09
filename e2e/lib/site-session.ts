@@ -15,6 +15,13 @@ interface LaunchE2eOptions {
   locale?: string;
   incognito?: boolean;
   useGeneratedUserDataDir?: boolean;
+  /** Names the throwaway profile dir, so an orphan left by a crashed run says which
+   *  suite minted it. */
+  profileName?: string;
+  /** How the wall-dismissing init script behaves. The default suits the suites that
+   *  drive a site and want the unwall hook; a suite measuring a mounted trigger inside
+   *  a dialog passes its own. */
+  interstitials?: { exposeUnwallHook: boolean; keepDialogsWithReactionHost: boolean };
 }
 
 interface E2eBrowserSession {
@@ -26,7 +33,7 @@ interface E2eBrowserSession {
 
 export async function launchE2eBrowserSession(options: LaunchE2eOptions = {}): Promise<E2eBrowserSession> {
   const extensionPath = resolveExtensionPath();
-  const { dir: userDataDir, generatedUserDataDir } = await resolveUserDataDir("e2e-user-data", { explicitDir: process.env.E2E_USER_DATA_DIR, useGenerated: options.useGeneratedUserDataDir });
+  const { dir: userDataDir, generatedUserDataDir } = await resolveUserDataDir(options.profileName ?? "e2e-user-data", { explicitDir: process.env.E2E_USER_DATA_DIR, useGenerated: options.useGeneratedUserDataDir });
   const realisticClient = realisticClientEnabled();
   const locale = options.locale ?? process.env.E2E_LOCALE ?? "en-US";
   const setBrowserLanguage = realisticClient || options.locale;
@@ -54,7 +61,8 @@ export async function launchE2eBrowserSession(options: LaunchE2eOptions = {}): P
   if (realisticClient) {
     await sessionContext.addInitScript(realisticClientInitScript);
   }
-  await sessionContext.addInitScript(dismissInterstitialsInitScript, { exposeUnwallHook: true, keepDialogsWithReactionHost: false, ownNodesSelector: OWN_NODES_SELECTOR });
+  const interstitials = options.interstitials ?? { exposeUnwallHook: true, keepDialogsWithReactionHost: false };
+  await sessionContext.addInitScript(dismissInterstitialsInitScript, { ...interstitials, ownNodesSelector: OWN_NODES_SELECTOR });
   return { context: sessionContext, generatedUserDataDir };
 }
 

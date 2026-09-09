@@ -113,7 +113,7 @@ test("History paging and search stay correct over a 10k-row uncapped store", asy
     await seedHistoryRows(session.context, VOLUME);
     let popup = await openSizedHistoryTab(session.context);
     let rows = popup.locator(HISTORY_ROW_SELECTOR);
-    let moreBtn = popup.locator(".history-more button");
+    let moreBtn = popup.locator(`${HISTORY_MORE_SELECTOR} button`);
     await expect(rows).toHaveCount(PAGE_SIZE);
     await expect(rows.first().locator(HISTORY_LINK_SELECTOR)).toHaveAttribute("href", `https://github.com/e2e-seed/repo-${VOLUME - 1}`);
     await expect(moreBtn).toHaveText(showMoreLabel);
@@ -159,7 +159,7 @@ test("History paging and search stay correct over a 10k-row uncapped store", asy
     await seedHistoryRows(session.context, PAGE_SIZE + 1);
     popup = await openSizedHistoryTab(session.context);
     rows = popup.locator(HISTORY_ROW_SELECTOR);
-    moreBtn = popup.locator(".history-more button");
+    moreBtn = popup.locator(`${HISTORY_MORE_SELECTOR} button`);
     await expect(rows).toHaveCount(PAGE_SIZE);
     await expect(moreBtn).toHaveText(showMoreLabel);
     await moreBtn.scrollIntoViewIfNeeded();

@@ -13,12 +13,13 @@
 // in light only. Each run logs its measurement so the re-theming behavior is observable.
 
 import { type BrowserContext, type ElementHandle, expect, type Page, type TestInfo, test } from "@playwright/test";
-import { authConfigured, clearReaction, envUrl, extensionLaunchArgs, isFirefoxRun, launchRealisticContext, makeRunProfileDir, openPickerTray, realisticClientEnabled, removeProfileUnlessKept, resolveExtensionPath, signIn } from "./lib/extension";
+import { authConfigured, clearReaction, envUrl, isFirefoxRun, openPickerTray, removeProfileUnlessKept, signIn } from "./lib/extension";
 import { gotoSettled } from "./lib/page-settle";
 import { pollForValue } from "./lib/picker-probes";
 import { DEEP_QUERY_ALL_SRC } from "./lib/probe-src";
-import { GRID_ITEM_SELECTOR, HOST_SELECTOR, OVERLAY_HOST_SELECTOR, OWN_NODES_SELECTOR, SITE_FG_VAR, TRIGGER_SELECTOR } from "./lib/selectors";
-import { clickAmazonContinueShopping, dismissInterstitialsInitScript, interstitialTextRe, wallReason } from "./lib/site-walls";
+import { GRID_ITEM_SELECTOR, HOST_SELECTOR, OVERLAY_HOST_SELECTOR, SITE_FG_VAR, TRIGGER_SELECTOR } from "./lib/selectors";
+import { launchE2eBrowserSession } from "./lib/site-session";
+import { clickAmazonContinueShopping, interstitialTextRe, wallReason } from "./lib/site-walls";
 
 type Scheme = "light" | "dark";
 
@@ -103,44 +104,16 @@ let context: BrowserContext;
 let generatedUserDataDir: string | null = null;
 
 test.beforeAll(async () => {
-  const extensionPath = resolveExtensionPath();
-  generatedUserDataDir = await makeRunProfileDir("theme-contrast-user-data");
-  const realistic = realisticClientEnabled();
-  const locale = process.env.E2E_LOCALE ?? "en-US";
-
-  context = await launchRealisticContext(generatedUserDataDir, {
-    headless: false,
-    viewport: { width: 1366, height: 900 },
-    screen: { width: 1366, height: 900 },
-    deviceScaleFactor: 1,
-    hasTouch: false,
-    isMobile: false,
-    locale,
-    timezoneId: process.env.E2E_TIMEZONE_ID ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
-    // Spread rather than assign: an unset E2E_USER_AGENT must OMIT the key, not
-    // pass `undefined` (Playwright's option type rejects it under
-    // exactOptionalPropertyTypes, and an explicit undefined is not the default).
-    ...(process.env.E2E_USER_AGENT ? { userAgent: process.env.E2E_USER_AGENT } : {}),
-    extraHTTPHeaders: { "Accept-Language": `${locale},en;q=0.9` },
-    args: extensionLaunchArgs({ extensionPaths: [extensionPath], locale, windowSize: "1366,900", realisticClient: realistic }),
+  // The live-site launcher, with this suite's own wall handling: it measures a trigger
+  // that can sit INSIDE a dialog, so a dialog carrying one must survive the sweep.
+  const session = await launchE2eBrowserSession({
+    locale: process.env.E2E_LOCALE ?? "en-US",
+    useGeneratedUserDataDir: true,
+    profileName: "theme-contrast-user-data",
+    interstitials: { exposeUnwallHook: false, keepDialogsWithReactionHost: true },
   });
-  context.setDefaultTimeout(Number(process.env.E2E_DEFAULT_TIMEOUT_MS ?? 30_000));
-  context.setDefaultNavigationTimeout(Number(process.env.E2E_NAV_TIMEOUT_MS ?? 60_000));
-  if (realistic) {
-    await context.addInitScript(() => {
-      try {
-        Object.defineProperty(Navigator.prototype, "webdriver", {
-          configurable: true,
-          get: () => false,
-        });
-      } catch {
-        // Ignore non-configurable browser properties.
-      }
-    });
-  }
-  // Hide login/signup walls (DOM-only) so the action row underneath is reachable
-  // on Instagram/Threads. Does not log in or touch accounts.
-  await context.addInitScript(dismissInterstitialsInitScript, { exposeUnwallHook: false, keepDialogsWithReactionHost: true, ownNodesSelector: OWN_NODES_SELECTOR });
+  context = session.context;
+  generatedUserDataDir = session.generatedUserDataDir;
 
   // The active-phase check needs a reaction to stick, and only a signed-in
   // Emojery user gets an active trigger - sign in when the test account is

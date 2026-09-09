@@ -92,12 +92,17 @@ test("offline: a reaction made offline persists after reconnect + reload", async
   const session = await ext.launchSession();
   try {
     const page = await ext.signedInGithubPage(session.context);
-    await ext.clearReaction(page);
+    // A leftover reaction sends an un-react vote; let it reach the server before the
+    // offline vote is armed, so the watcher below settles on the reaction under test.
+    const unreactFlushed = ext.watchNextVoteFlush(session.context);
+    const cleared = await ext.clearReaction(page);
+    if (cleared) await unreactFlushed();
     // Same render wait as the counter tests: while the cleared reaction is still
     // shown, reactWith sees its option already pressed and skips the click, so
     // nothing is reacted offline.
     await expect.poll(() => ext.hasOwnReaction(page)).toBe(false);
 
+    const voteFlushed = ext.watchNextVoteFlush(session.context);
     await session.context.setOffline(true);
     await ext.reactWith(page, ext.REACTIONS.heart);
     await expect
@@ -107,8 +112,9 @@ test("offline: a reaction made offline persists after reconnect + reload", async
       .toBe(true);
 
     await session.context.setOffline(false);
-    // Let the reconnect flush POST the queued vote before the reload re-reads server state.
-    await page.waitForTimeout(3_000);
+    // The reconnect flush has to POST the queued vote before the reload re-reads
+    // server state - waited out on the wire, since the retry backoff decides when.
+    await voteFlushed();
     await reloadAndSettle(page, 2_500);
     await expect
       .poll(() => ext.hasOwnReaction(page), {
