@@ -25,14 +25,14 @@ No account is needed to read counts. To add a reaction, sign in with an email co
 
 FEATURES
 
-• 600+ emoji in 9 categories, with recently used choices one tap away.
-• Emoji labels and search in 26 languages. Type amour, 愛 or love to find ❤️.
-• A button that fits beside the site's existing controls and follows light or dark mode.
-• Per-site settings to disable Emojery and keep or hide native buttons in your browser.
-• Reactions that you can change or remove at any time.
-• Local history with search, filters by site, emoji or date, and export for backup or restoration in another browser.
-• Queued reactions that are retried after a connection drop, with count updates across your open tabs.
-• Optional auto-press of the site's native reaction buttons, off by default, with customizable emoji mappings.
+- 600+ emoji in 9 categories, with recently used choices one tap away.
+- Emoji labels and search in 26 languages. Type amour, 愛 or love to find ❤️.
+- A button that fits beside the site's existing controls and follows light or dark mode.
+- Per-site settings to disable Emojery and keep or hide native buttons in your browser.
+- Reactions that you can change or remove at any time.
+- Local history with search, filters by site, emoji or date, and export for backup or restoration in another browser.
+- Queued reactions that are retried after a connection drop, with count updates across your open tabs.
+- Optional auto-press of the site's native reaction buttons, off by default, with customizable emoji mappings.
 
 CHECK THE TOTALS
 
@@ -42,11 +42,11 @@ Email verification and anti-abuse checks help limit spam. Reactions identified a
 
 PRIVACY AND DATA
 
-• The extension contains no ad code, third-party advertising trackers or analytics SDKs.
-• Your email is used to send a sign-in code and then discarded. A one-way keyed hash remains as your account ID.
-• Your browsable history stays on your device. The service processes submitted reactions and public target identifiers. Public log entries use pseudonyms.
-• Community insights is enabled by default. It may include coarse country/city, language, browser and operating-system context with reactions for aggregate statistics. Turn it off in Settings.
-• Account deletion removes your reactions from the totals. Historical pseudonymous log entries remain, with reversals recording the change.
+- The extension contains no ad code, third-party advertising trackers or analytics SDKs.
+- Your email is used to send a sign-in code and then discarded. A one-way keyed hash remains as your account ID.
+- Your browsable history stays on your device. The service processes submitted reactions and public target identifiers. Public log entries use pseudonyms.
+- Community insights is enabled by default. It may include coarse country/city, language, browser and operating-system context with reactions for aggregate statistics. Turn it off in Settings.
+- Account deletion removes your reactions from the totals. Historical pseudonymous log entries remain, with reversals recording the change.
 
 SUPPORTED SITES
 
