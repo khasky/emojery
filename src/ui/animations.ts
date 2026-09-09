@@ -3,6 +3,7 @@ import { ANIMATION_LAYER_ID, ANIMATION_STYLE_ID, BUTTON_DROP_CLASS, BUTTON_DUST_
 import type { Reaction, ReactionCounts, TargetCounts } from "../shared/reactions";
 import animationsCss from "./animations.css?raw";
 import { applyEmojiSpriteHost, createEmojiSpriteElement, EMOJI_SPRITE_MODE_ATTR, emojiSpriteCss } from "./emoji-sprite";
+import { COUNTER_TRIO_LIMIT, topReactionsDesc } from "./picker-counts";
 
 export interface ReactionAnimationOrigin {
   x: number;
@@ -36,15 +37,9 @@ function prefersReducedMotion(): boolean {
   return typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-// As many as the trigger itself shows, so the intro animates exactly the emoji the user is
-// about to see settle into the pill.
-const INTRO_EMOJI_COUNT = 3;
-
 function topReactionEmojis(counts: ReactionCounts): Reaction[] {
-  return Object.entries(counts)
-    .filter(([, count]) => (count ?? 0) > 0)
-    .sort((a, b) => (b[1] ?? 0) - (a[1] ?? 0))
-    .slice(0, INTRO_EMOJI_COUNT)
+  return topReactionsDesc(counts)
+    .slice(0, COUNTER_TRIO_LIMIT)
     .map(([emoji]) => emoji);
 }
 

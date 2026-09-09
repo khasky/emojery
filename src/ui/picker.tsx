@@ -5,13 +5,6 @@ import { useEffect, useId, useMemo, useRef, useState } from "preact/hooks";
 import {
   CATEGORY_ATTR,
   EMPTY_CLASS,
-  GATE_BODY_CLASS,
-  GATE_BTN_CLASS,
-  GATE_CANCEL_CLASS,
-  GATE_CLASS,
-  GATE_EMOJI_CLASS,
-  GATE_SIGNIN_CLASS,
-  GATE_TITLE_CLASS,
   GRID_CLASS,
   PAGE_FONT_VAR,
   PICKER_ROOT_CLASS,
@@ -39,9 +32,9 @@ import { onceVisible } from "../shared/visibility";
 import type { ReactionAnimationOrigin } from "./animations";
 import { EmojiImg } from "./emoji-img";
 import { activeUserId } from "./messaging";
-import { deriveOwnReactionDisplay } from "./picker-counts";
+import { COUNTER_TRIO_LIMIT, deriveOwnReactionDisplay, topReactionsDesc } from "./picker-counts";
 import { useCategoryScrollSpy, useGridRovingFocus, usePopoverDismiss, usePopoverPosition } from "./picker-hooks";
-import { CategoryBar, EmojiButton, EmojiSection, PickerTrigger, ReactionBreakdown } from "./picker-parts";
+import { CategoryBar, EmojiButton, EmojiSection, PickerTrigger, ReactionBreakdown, SignInGate } from "./picker-parts";
 
 // 3 rows x 6 columns - the grid (picker.css) is `repeat(6, 1fr)`, so 18 fills it exactly.
 // Newest-clicked lands at index 0 (lastUsed-first sort in `shared/recents.ts`); the 19th
@@ -51,10 +44,6 @@ const RECENT_LIMIT = 18;
 // expands to a 10-row cap, and the same button toggles back as "Show less".
 const BREAKDOWN_INITIAL = 3;
 const BREAKDOWN_EXPANDED = 10;
-// The trigger shows at most this many emoji - the "counter trio" picker.css
-// sizes with --khasky-emojery-trio-scale.
-const COUNTER_TRIO_LIMIT = 3;
-
 // Measured height of the sticky head, published to picker.css as the scroll-padding that
 // keeps a keyboard-focused emoji out from under it. Read by
 // `.khasky-emojery-popover-scroll`, which spells the name out literally; 0 when the head
@@ -402,13 +391,7 @@ export function Picker({ initial, typography, onPick, onSignIn, portalRoot, bind
 
   const { counts: displayCounts, total: displayTotal } = deriveOwnReactionDisplay(counts, total, mine);
 
-  const sortedEntries = useMemo(
-    () =>
-      Object.entries(displayCounts)
-        .filter(([, n]) => (n ?? 0) > 0)
-        .sort((a, b) => (b[1] ?? 0) - (a[1] ?? 0)),
-    [displayCounts],
-  );
+  const sortedEntries = useMemo(() => topReactionsDesc(displayCounts), [displayCounts]);
 
   const visibleBreakdownEntries = useMemo(() => sortedEntries.slice(0, breakdownDisplayLimit), [sortedEntries, breakdownDisplayLimit]);
 
@@ -468,31 +451,6 @@ export function Picker({ initial, typography, onPick, onSignIn, portalRoot, bind
         </>
       )}
     </>
-  );
-
-  // Shown after a signed-out user has already chosen a reaction: it carries that emoji
-  // and asks for the identity the pick needs. The auth tab opens only from the button
-  // here, never from the trigger click or the emoji click that led to it.
-  const handleGateSignIn = (e: MouseEvent) => {
-    // trusted-gesture gate (see handlePick): opening a tab must cost a real click.
-    if (!e.isTrusted) return;
-    onSignIn();
-  };
-
-  const renderGate = (reaction: Reaction) => (
-    <div class={GATE_CLASS}>
-      <span class={GATE_EMOJI_CLASS} aria-hidden="true">
-        <EmojiImg emoji={reaction} />
-      </span>
-      <p class={GATE_TITLE_CLASS}>{t("gateTitle")}</p>
-      <p class={GATE_BODY_CLASS}>{t("gateBody")}</p>
-      <button ref={gateSignInRef} type="button" class={`${GATE_BTN_CLASS} ${GATE_SIGNIN_CLASS}`} onClick={handleGateSignIn}>
-        {t("gateSignInBtn")}
-      </button>
-      <button type="button" class={`${GATE_BTN_CLASS} ${GATE_CANCEL_CLASS}`} onClick={closePopover}>
-        {t("cancelBtn")}
-      </button>
-    </div>
   );
 
   // Search box + category nav, sticky inside the scroll container so they stay in reach while
@@ -570,7 +528,7 @@ export function Picker({ initial, typography, onPick, onSignIn, portalRoot, bind
             }}
           >
             {pendingReaction ? (
-              renderGate(pendingReaction)
+              <SignInGate reaction={pendingReaction} signInRef={gateSignInRef} onSignIn={onSignIn} onCancel={closePopover} />
             ) : (
               <>
                 <p class={SR_ONLY_CLASS} id={`${sectionIdPrefix}-hint`}>

@@ -18,6 +18,13 @@ import {
   COUNTER_CLASS,
   COUNTER_EMOJIS_CLASS,
   COUNTER_TOTAL_CLASS,
+  GATE_BODY_CLASS,
+  GATE_BTN_CLASS,
+  GATE_CANCEL_CLASS,
+  GATE_CLASS,
+  GATE_EMOJI_CLASS,
+  GATE_SIGNIN_CLASS,
+  GATE_TITLE_CLASS,
   GRID_CLASS,
   GRID_ITEM_CLASS,
   RING_CLASS,
@@ -193,5 +200,33 @@ export const CategoryBar = ({ intensity, onSelect }: { intensity: number[]; onSe
         </button>
       );
     })}
+  </div>
+);
+
+// Shown after a signed-out user has already chosen a reaction: it carries that emoji and
+// asks for the identity the pick needs. The auth tab opens only from the button here,
+// never from the trigger click or the emoji click that led to it - and only on a trusted
+// gesture (see handlePick), so a synthetic click cannot open a tab.
+export const SignInGate = ({ reaction, signInRef, onSignIn, onCancel }: { reaction: Reaction; signInRef: Ref<HTMLButtonElement>; onSignIn: () => void; onCancel: () => void }) => (
+  <div class={GATE_CLASS}>
+    <span class={GATE_EMOJI_CLASS} aria-hidden="true">
+      <EmojiImg emoji={reaction} />
+    </span>
+    <p class={GATE_TITLE_CLASS}>{t("gateTitle")}</p>
+    <p class={GATE_BODY_CLASS}>{t("gateBody")}</p>
+    <button
+      ref={signInRef}
+      type="button"
+      class={`${GATE_BTN_CLASS} ${GATE_SIGNIN_CLASS}`}
+      onClick={(e: MouseEvent) => {
+        if (!e.isTrusted) return;
+        onSignIn();
+      }}
+    >
+      {t("gateSignInBtn")}
+    </button>
+    <button type="button" class={`${GATE_BTN_CLASS} ${GATE_CANCEL_CLASS}`} onClick={onCancel}>
+      {t("cancelBtn")}
+    </button>
   </div>
 );
