@@ -112,6 +112,10 @@ export const CODE_INPUT_SELECTOR = `#${CODE_INPUT_ID}`;
 export const AUTH_ERROR_ID = "auth-error";
 export const AUTH_ERROR_SELECTOR = `#${AUTH_ERROR_ID}`;
 export const AUTH_ERROR_CLASS = "error";
+// The terms/privacy consent row; its checkbox gates the send-code button.
+export const AGREE_CLASS = "agree";
+export const AGREE_SELECTOR = `.${AGREE_CLASS}`;
+export const AGREE_CHECKBOX_SELECTOR = `.${AGREE_CLASS} input[type=checkbox]`;
 // The throttle/cooldown banner above the form.
 export const NOTICE_CLASS = "notice";
 export const NOTICE_SELECTOR = `.${NOTICE_CLASS}`;

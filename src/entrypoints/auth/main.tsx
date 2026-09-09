@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "preact/hooks"
 import { t } from "../../shared/i18n";
 import type { RuntimeMessage } from "../../shared/messages";
 import { bootstrapPage } from "../../shared/page-bootstrap";
-import { AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, CODE_INPUT_ID, COUNTDOWN_CLASS, EMAIL_INPUT_ID, NOTICE_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
+import { AGREE_CLASS, AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, CODE_INPUT_ID, COUNTDOWN_CLASS, EMAIL_INPUT_ID, NOTICE_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
 import { withExtensionUtm } from "../../shared/tracking-links";
 import { sendRuntimeMessage } from "../../shared/webext";
 import { getOtpCooldown, OTP_COOLDOWN_FALLBACK_SECONDS, OTP_RESEND_COOLDOWN_SECONDS, type OtpCooldown, setOtpCooldown } from "./otp-cooldown";
@@ -53,12 +53,11 @@ type CodeStepProps = {
   cooldown: OtpCooldown | null;
   onVerify: (e: Event) => void;
   onResend: () => void;
+  onUseDifferentEmail: () => void;
   setCode: (value: string) => void;
-  setStep: (value: Step) => void;
-  setError: (value: string | null) => void;
 };
 
-function CodeStep({ email, code, error, busy, remainingSec, cooldown, onVerify, onResend, setCode, setStep, setError }: CodeStepProps) {
+function CodeStep({ email, code, error, busy, remainingSec, cooldown, onVerify, onResend, onUseDifferentEmail, setCode }: CodeStepProps) {
   return (
     <main class="wrap">
       {/* Distinct key per step so Preact mounts a FRESH <form>/<input> subtree. Without it the
@@ -96,15 +95,7 @@ function CodeStep({ email, code, error, busy, remainingSec, cooldown, onVerify, 
             {/* A rate-limit hit stays disabled without a countdown. */}
             {remainingSec > 0 && cooldown?.reason !== "rateLimit" ? t("authResendInBtn", formatCountdown(remainingSec)) : t("authResendBtn")}
           </button>
-          <button
-            class="linkish"
-            type="button"
-            onClick={() => {
-              setStep("email");
-              setCode("");
-              setError(null);
-            }}
-          >
+          <button class="linkish" type="button" onClick={onUseDifferentEmail}>
             {t("authUseDifferentEmail")}
           </button>
         </div>
@@ -201,14 +192,12 @@ type EmailStepProps = {
   remainingSec: number;
   cooldown: OtpCooldown | null;
   onSendCode: (e: Event) => void;
+  onEnterPendingCode: (pendingEmail: string) => void;
   setEmail: (value: string) => void;
-  setCode: (value: string) => void;
-  setStep: (value: Step) => void;
-  setError: (value: string | null) => void;
   setAccepted: (value: boolean) => void;
 };
 
-function EmailStep({ email, error, busy, accepted, remainingSec, cooldown, onSendCode, setEmail, setCode, setStep, setError, setAccepted }: EmailStepProps) {
+function EmailStep({ email, error, busy, accepted, remainingSec, cooldown, onSendCode, onEnterPendingCode, setEmail, setAccepted }: EmailStepProps) {
   // One-shot screen-reader text, frozen at cooldown start (deps deliberately omit
   // `email`/time): the visible countdown re-renders every second, and a live region
   // tracking it would announce each tick.
@@ -245,20 +234,11 @@ function EmailStep({ email, error, busy, accepted, remainingSec, cooldown, onSen
         {/* Escape hatch: while a code is outstanding, keep a one-click path back to enter it,
             so "Use a different email" + the timer can never trap the user away from their code. */}
         {cooldown?.reason === "resend" ? (
-          <button
-            class="linkish"
-            type="button"
-            onClick={() => {
-              setEmail(cooldown.email);
-              setCode("");
-              setError(null);
-              setStep("code");
-            }}
-          >
+          <button class="linkish" type="button" onClick={() => onEnterPendingCode(cooldown.email)}>
             {t("authEnterPendingCode", cooldown.email)}
           </button>
         ) : null}
-        <label class="agree">
+        <label class={AGREE_CLASS}>
           <input type="checkbox" checked={accepted} onChange={(e: Event) => setAccepted((e.target as HTMLInputElement).checked)} />
           <span>
             {t("authAgreeIntro")}
@@ -411,6 +391,21 @@ function App() {
     [email, code],
   );
 
+  // The two step transitions the form itself offers, so each step gets one callback
+  // rather than the raw setters behind it.
+  const useDifferentEmail = (): void => {
+    setStep("email");
+    setCode("");
+    setError(null);
+  };
+
+  const enterPendingCode = (pendingEmail: string): void => {
+    setEmail(pendingEmail);
+    setCode("");
+    setError(null);
+    setStep("code");
+  };
+
   useEffect(() => {
     // The done step has no field to land in - it focuses its own button instead.
     if (step === "done") return;
@@ -421,10 +416,10 @@ function App() {
   if (step === "done") return <DoneStep returnsToPage={returnsToPage} />;
 
   if (step === "code") {
-    return <CodeStep email={email} code={code} error={error} busy={busy} remainingSec={remainingSec} cooldown={cooldown} onVerify={onVerify} onResend={onResend} setCode={setCode} setStep={setStep} setError={setError} />;
+    return <CodeStep email={email} code={code} error={error} busy={busy} remainingSec={remainingSec} cooldown={cooldown} onVerify={onVerify} onResend={onResend} onUseDifferentEmail={useDifferentEmail} setCode={setCode} />;
   }
 
-  return <EmailStep email={email} error={error} busy={busy} accepted={accepted} remainingSec={remainingSec} cooldown={cooldown} onSendCode={onSendCode} setEmail={setEmail} setCode={setCode} setStep={setStep} setError={setError} setAccepted={setAccepted} />;
+  return <EmailStep email={email} error={error} busy={busy} accepted={accepted} remainingSec={remainingSec} cooldown={cooldown} onSendCode={onSendCode} onEnterPendingCode={enterPendingCode} setEmail={setEmail} setAccepted={setAccepted} />;
 }
 
 // Shown ahead of the sign-in form on browsers that never prompted for data collection themselves.
