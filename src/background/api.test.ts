@@ -210,6 +210,10 @@ describe("vote retry backoff", () => {
   it("honors a longer Retry-After header", () => {
     expect(voteRetryDelayMs(1, 90, () => 0.5)).toBe(90_000);
   });
+
+  it("caps a Retry-After at the same ceiling as the backoff", () => {
+    expect(voteRetryDelayMs(1, 86_400, () => 0.5)).toBe(180_000);
+  });
 });
 
 describe("flushVotes", () => {

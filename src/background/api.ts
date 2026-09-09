@@ -138,7 +138,9 @@ export function voteRetryDelayMs(consecutiveFailures: number, retryAfterSec?: nu
   const jitter = exp * 0.25 * (random() * 2 - 1);
   let delay = Math.max(VOTE_FLUSH_MIN_RETRY_MS, Math.floor(exp + jitter));
   if (retryAfterSec !== undefined && retryAfterSec > 0) {
-    delay = Math.max(delay, retryAfterSec * 1000);
+    // Honored only up to the ceiling above: the value comes from whatever answered
+    // the request, and an hours-long one would park the whole queue until then.
+    delay = Math.max(delay, Math.min(retryAfterSec * 1000, VOTE_FLUSH_MAX_RETRY_MS));
   }
   return delay;
 }
@@ -157,7 +159,8 @@ async function recordVoteRetryBackoff(voteId: number): Promise<void> {
 async function recordServerBackoff(voteId: number, status: number, retryAfterSec?: number): Promise<void> {
   const state = await getFlushState();
   const poisonShaped = state.lastFailedVoteId === voteId && status !== HTTP_TOO_MANY_REQUESTS && retryAfterSec === undefined;
-  // Poison-shaped: only the owner moves, the hold and the failure count stay put.
+  // Poison-shaped: the hold and the failure count stay put, so one bad vote cannot
+  // drag the rest of the queue into its backoff.
   if (poisonShaped) {
     await setFlushState({ ...state, lastFailedVoteId: voteId });
     return;
