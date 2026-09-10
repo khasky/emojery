@@ -516,6 +516,9 @@
   "authErrUnknown": {
     "message": "Algo salió mal. Inténtalo de nuevo."
   },
+  "authErrOutdated": {
+    "message": "Esta versión de Emojery está desactualizada. Actualízala para iniciar sesión."
+  },
   "loadError": {
     "message": "Algo salió mal. Inténtalo de nuevo."
   },

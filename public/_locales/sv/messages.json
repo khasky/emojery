@@ -516,6 +516,9 @@
   "authErrUnknown": {
     "message": "Något gick fel. Försök igen."
   },
+  "authErrOutdated": {
+    "message": "Den här versionen av Emojery är föråldrad. Uppdatera den för att logga in."
+  },
   "loadError": {
     "message": "Något gick fel. Försök igen."
   },

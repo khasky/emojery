@@ -516,6 +516,9 @@
   "authErrUnknown": {
     "message": "Sesuatu yang tidak kena. Sila cuba lagi."
   },
+  "authErrOutdated": {
+    "message": "Versi Emojery ini sudah lapuk. Kemas kini untuk log masuk."
+  },
   "loadError": {
     "message": "Sesuatu yang tidak kena. Sila cuba lagi."
   },

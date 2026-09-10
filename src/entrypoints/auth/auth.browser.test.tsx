@@ -160,10 +160,11 @@ describe("auth page - the email step", () => {
   // `error` is a diagnostic for the background's message log, never UI copy. Two
   // properties in one: it is not rendered, and it does not SELECT what is rendered
   // either - the copy for a status is the same whatever string rides along, so a
-  // refusal cannot be told apart by reading the screen.
+  // refusal cannot be told apart by reading the screen. One exception below.
   it.each([
     [500, "Something went wrong. Please try again."],
     [422, UNREACHABLE_COPY],
+    [403, "Something went wrong. Please try again."],
   ])("renders the %i copy whatever the machine error string says", async (status, copy) => {
     install({ requestReply: { type: "auth:otpRequested", ok: false, status, error: "unsupported_client" } });
     await loadPage();
@@ -171,6 +172,17 @@ describe("auth page - the email step", () => {
     await vi.waitFor(() => expect(errorText()).not.toBe(""));
     expect(errorText()).toBe(copy);
     expect(document.body.textContent).not.toContain("unsupported_client");
+  });
+
+  // The exception: a build the API no longer serves. The fix is on the user's side,
+  // so the copy says update rather than try again.
+  it("asks for an update when the API refuses this build", async () => {
+    install({ requestReply: { type: "auth:otpRequested", ok: false, status: 403, error: "client_outdated" } });
+    await loadPage();
+    await sendCode();
+    await vi.waitFor(() => expect(errorText()).not.toBe(""));
+    expect(errorText()).toBe("This version of Emojery is out of date. Update it to sign in.");
+    expect(document.querySelector(CODE_INPUT_SELECTOR)).toBeNull();
   });
 
   it("treats a background that answers something else as a network error", async () => {

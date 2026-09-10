@@ -657,6 +657,10 @@
     "message": "Something went wrong. Please try again.",
     "description": "Auth error: generic fallback when no specific status applies."
   },
+  "authErrOutdated": {
+    "message": "This version of Emojery is out of date. Update it to sign in.",
+    "description": "Auth error: the API no longer serves this extension build; the user must update it from the store to sign in."
+  },
   "loadError": {
     "message": "Something went wrong. Please try again.",
     "description": "Shown when the popup could not read locally stored data (history, stats, export)."

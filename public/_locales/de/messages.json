@@ -516,6 +516,9 @@
   "authErrUnknown": {
     "message": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
   },
+  "authErrOutdated": {
+    "message": "Diese Version von Emojery ist veraltet. Aktualisieren Sie sie, um sich anzumelden."
+  },
   "loadError": {
     "message": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
   },

@@ -516,6 +516,9 @@
   "authErrUnknown": {
     "message": "Noget gik galt. Prøv igen."
   },
+  "authErrOutdated": {
+    "message": "Denne version af Emojery er forældet. Opdater den for at logge ind."
+  },
   "loadError": {
     "message": "Noget gik galt. Prøv igen."
   },

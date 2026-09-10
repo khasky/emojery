@@ -516,6 +516,9 @@
   "authErrUnknown": {
     "message": "Valami elromlott. Próbálja újra."
   },
+  "authErrOutdated": {
+    "message": "Az Emojery ezen verziója elavult. A bejelentkezéshez frissítse."
+  },
   "loadError": {
     "message": "Valami elromlott. Próbálja újra."
   },

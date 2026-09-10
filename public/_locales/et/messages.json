@@ -516,6 +516,9 @@
   "authErrUnknown": {
     "message": "Midagi läks valesti. Proovige uuesti."
   },
+  "authErrOutdated": {
+    "message": "See Emojery versioon on aegunud. Sisselogimiseks uuenda seda."
+  },
   "loadError": {
     "message": "Midagi läks valesti. Proovige uuesti."
   },

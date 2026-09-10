@@ -516,6 +516,9 @@
   "authErrUnknown": {
     "message": "出現問題。請重試。"
   },
+  "authErrOutdated": {
+    "message": "此版本的 Emojery 已過時。請更新後再登入。"
+  },
   "loadError": {
     "message": "出現問題。請重試。"
   },

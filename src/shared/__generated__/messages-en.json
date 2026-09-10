@@ -454,7 +454,7 @@
   "message": "What Emojery sends"
  },
  "dataConsentBody": {
-  "message": "Emojery sends the address of the page you react on, random install and session identifiers, and your email once at sign-in; only a one-way hash of it is kept. Optional context stays off in this browser."
+  "message": "Emojery sends the address of the page you react on, a random install identifier, and your email once at sign-in; only a one-way hash of it is kept. Optional context stays off in this browser."
  },
  "dataConsentPolicyLink": {
   "message": "Privacy Policy."
@@ -515,6 +515,9 @@
  },
  "authErrUnknown": {
   "message": "Something went wrong. Please try again."
+ },
+ "authErrOutdated": {
+  "message": "This version of Emojery is out of date. Update it to sign in."
  },
  "loadError": {
   "message": "Something went wrong. Please try again."

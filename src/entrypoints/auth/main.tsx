@@ -36,6 +36,12 @@ interface OtpOutcome {
 // the localized authErrUnknown/authErrVerifyFailed fallbacks render for it.
 const OTP_UNREACHABLE: OtpOutcome = { ok: false, status: 0 };
 
+// The API stopped serving this build: the only refusal whose fix is on the user's
+// side (update from the store), so it gets its own line instead of the fallback.
+function isOutdatedClient(res: OtpOutcome): boolean {
+  return res.status === 403 && res.error === "client_outdated";
+}
+
 // The exchange itself runs in the service worker (background/message-router), not
 // here: whatever it comes back with belongs where it is used, and a page is not
 // that place.
@@ -338,11 +344,13 @@ function App() {
       setError(t("authErrEmailDomainUndeliverable"));
     } else if (res.status === 400) {
       setError(t("authErrBadEmail"));
+    } else if (isOutdatedClient(res)) {
+      setError(t("authErrOutdated"));
     } else {
-      // The API's `error` is a machine string (`unsupported_client`), never UI copy - no
-      // branch here reads it and it is rendered nowhere. Every status the user can act on
-      // is branched already. The field stays on the response: it is what makes a rejected
-      // sign-in diagnosable from the background's message log.
+      // The API's `error` is a machine string (`unsupported_client`), never UI copy - the
+      // one string a branch reads is `client_outdated` above, the one refusal the user can
+      // act on. The field stays on the response: it is what makes a rejected sign-in
+      // diagnosable from the background's message log.
       setError(t("authErrUnknown"));
     }
     return false;
@@ -384,6 +392,8 @@ function App() {
         setError(t("authErrTooManyTries"));
       } else if (res.status === 401) {
         setError(t("authErrCodeInvalid"));
+      } else if (isOutdatedClient(res)) {
+        setError(t("authErrOutdated"));
       } else {
         setError(t("authErrVerifyFailed"));
       }

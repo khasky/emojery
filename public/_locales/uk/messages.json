@@ -516,6 +516,9 @@
   "authErrUnknown": {
     "message": "Щось пішло не так. Спробуйте знову."
   },
+  "authErrOutdated": {
+    "message": "Ця версія Emojery застаріла. Оновіть її, щоб увійти."
+  },
   "loadError": {
     "message": "Щось пішло не так. Спробуйте знову."
   },

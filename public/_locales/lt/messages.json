@@ -516,6 +516,9 @@
   "authErrUnknown": {
     "message": "Kažkas nepavyko. Bandykite dar kartą."
   },
+  "authErrOutdated": {
+    "message": "Ši „Emojery“ versija pasenusi. Norėdami prisijungti, ją atnaujinkite."
+  },
   "loadError": {
     "message": "Kažkas nepavyko. Bandykite dar kartą."
   },

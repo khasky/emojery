@@ -516,6 +516,9 @@
   "authErrUnknown": {
     "message": "Coś poszło nie tak. Spróbuj ponownie."
   },
+  "authErrOutdated": {
+    "message": "Ta wersja Emojery jest nieaktualna. Zaktualizuj ją, aby się zalogować."
+  },
   "loadError": {
     "message": "Coś poszło nie tak. Spróbuj ponownie."
   },

@@ -516,6 +516,9 @@
   "authErrUnknown": {
     "message": "Đã có lỗi xảy ra. Vui lòng thử lại."
   },
+  "authErrOutdated": {
+    "message": "Phiên bản Emojery này đã lỗi thời. Hãy cập nhật để đăng nhập."
+  },
   "loadError": {
     "message": "Đã có lỗi xảy ra. Vui lòng thử lại."
   },

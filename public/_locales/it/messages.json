@@ -516,6 +516,9 @@
   "authErrUnknown": {
     "message": "Qualcosa è andato storto. Riprova."
   },
+  "authErrOutdated": {
+    "message": "Questa versione di Emojery non è aggiornata. Aggiornala per accedere."
+  },
   "loadError": {
     "message": "Qualcosa è andato storto. Riprova."
   },

@@ -516,6 +516,9 @@
   "authErrUnknown": {
     "message": "Jotain meni pieleen. Yritä uudelleen."
   },
+  "authErrOutdated": {
+    "message": "Tämä Emojeryn versio on vanhentunut. Päivitä se kirjautuaksesi sisään."
+  },
   "loadError": {
     "message": "Jotain meni pieleen. Yritä uudelleen."
   },

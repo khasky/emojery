@@ -516,6 +516,9 @@
   "authErrUnknown": {
     "message": "問題が発生しました。もう一度お試しください。"
   },
+  "authErrOutdated": {
+    "message": "このバージョンの Emojery は古くなっています。サインインするには更新してください。"
+  },
   "loadError": {
     "message": "問題が発生しました。もう一度お試しください。"
   },

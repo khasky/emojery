@@ -516,6 +516,9 @@
   "authErrUnknown": {
     "message": "Une erreur s’est produite. Veuillez réessayer."
   },
+  "authErrOutdated": {
+    "message": "Cette version d’Emojery est obsolète. Mettez-la à jour pour vous connecter."
+  },
   "loadError": {
     "message": "Une erreur s’est produite. Veuillez réessayer."
   },

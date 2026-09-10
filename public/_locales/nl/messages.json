@@ -516,6 +516,9 @@
   "authErrUnknown": {
     "message": "Er is iets misgegaan. Probeer het opnieuw."
   },
+  "authErrOutdated": {
+    "message": "Deze versie van Emojery is verouderd. Werk hem bij om in te loggen."
+  },
   "loadError": {
     "message": "Er is iets misgegaan. Probeer het opnieuw."
   },

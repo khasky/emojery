@@ -516,6 +516,9 @@
   "authErrUnknown": {
     "message": "Algo deu errado. Tente novamente."
   },
+  "authErrOutdated": {
+    "message": "Esta versão do Emojery está desatualizada. Atualize para entrar."
+  },
   "loadError": {
     "message": "Algo deu errado. Tente novamente."
   },
