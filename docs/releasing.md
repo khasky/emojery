@@ -106,13 +106,44 @@ git switch main
 
 ## Repository settings
 
-The branching model above is only real if the repository enforces it — a ruleset on `main` with the maintainer left out of the bypass list, plus a merge policy that matches what [CONTRIBUTING.md](../CONTRIBUTING.md#branches-and-pull-requests) promises contributors:
+The branching model above is only real if the repository enforces it. Four GitHub rulesets, plus a merge policy that matches what [CONTRIBUTING.md](../CONTRIBUTING.md#branches-and-pull-requests) promises: squash merge only, the PR title as the squash commit message, head branches deleted on merge. `gh api repos/<owner>/<repo>/rulesets` lists what is in place; each block below recreates one rule on a fresh repository or a mirror (`non_fast_forward` is the force-push block).
 
-- **Ruleset on `main`**: require a pull request (0 approvals is fine for a solo maintainer — the requirement exists so CI runs on every change), require the `ci.yml` checks, require linear history, block force pushes and deletion. Adding yourself to the bypass list turns the whole gate into decoration.
-- **Ruleset on tag `v*`**: block deletion and non-fast-forward updates, so a published release tag can't be moved under an already-shipped store build.
-- **Ruleset on `release/*`**: block force pushes and deletion. Patches land there by cherry-pick from `main`, never by a rewrite.
+**`main`** - a pull request (0 approvals: the requirement exists so CI runs on every change), the `ci.yml` checks `Validate PR title` and `Typecheck, lint, test, build, docs`, linear history, no force-push, no deletion. The maintainer (repository role Admin, `actor_id` 5) bypasses it: the release commit, its tag and the merge of a release branch are pushed to `main` directly, and a solo maintainer's PR to themselves gates nothing. Every other write goes through a PR.
 
-The `release/*` rule as one command, so a fresh repository or a mirror gets the same one (`non_fast_forward` is the force-push block):
+```bash
+gh api -X POST repos/<owner>/<repo>/rulesets --input - <<'EOF'
+{
+  "name": "main",
+  "target": "branch",
+  "enforcement": "active",
+  "bypass_actors": [{ "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always" }],
+  "conditions": { "ref_name": { "include": ["~DEFAULT_BRANCH"], "exclude": [] } },
+  "rules": [
+    { "type": "deletion" },
+    { "type": "non_fast_forward" },
+    { "type": "required_linear_history" },
+    { "type": "pull_request", "parameters": { "required_approving_review_count": 0, "dismiss_stale_reviews_on_push": false, "require_code_owner_review": false, "require_last_push_approval": false, "required_review_thread_resolution": false } },
+    { "type": "required_status_checks", "parameters": { "strict_required_status_checks_policy": false, "required_status_checks": [{ "context": "Validate PR title" }, { "context": "Typecheck, lint, test, build, docs" }] } }
+  ]
+}
+EOF
+```
+
+**Tags `v*`** - no deletion, no non-fast-forward update, no bypass: a shipped release tag never moves.
+
+```bash
+gh api -X POST repos/<owner>/<repo>/rulesets --input - <<'EOF'
+{
+  "name": "release tags",
+  "target": "tag",
+  "enforcement": "active",
+  "conditions": { "ref_name": { "include": ["refs/tags/v*"], "exclude": [] } },
+  "rules": [{ "type": "deletion" }, { "type": "non_fast_forward" }]
+}
+EOF
+```
+
+**`release/*`** - no force-push, no deletion, no bypass. Patches land there by cherry-pick from `main`, never by a rewrite.
 
 ```bash
 gh api -X POST repos/<owner>/<repo>/rulesets --input - <<'EOF'
@@ -126,9 +157,20 @@ gh api -X POST repos/<owner>/<repo>/rulesets --input - <<'EOF'
 EOF
 ```
 
-No `bypass_actors`, so the rule binds the maintainer too. `gh api repos/<owner>/<repo>/rulesets` lists what is already there.
-- **Merge policy**: allow squash merging only, set *Default to pull request title for squash merge commits*, and enable *Automatically delete head branches*.
-- **PR title check**: the `commit-msg` hook validates commits, not PR titles, and a squash merge takes its message from the title — so the title needs its own commitlint check in CI, or a bad title silently becomes the changelog line and skews the derived version.
+**`backup/*`** - no force-push, no deletion, Admin bypasses. A `backup/<branch>-<date>` branch is a snapshot taken before a history operation; the rule stops a stray push from overwriting it, while the maintainer can still retire one.
+
+```bash
+gh api -X POST repos/<owner>/<repo>/rulesets --input - <<'EOF'
+{
+  "name": "protect-backup",
+  "target": "branch",
+  "enforcement": "active",
+  "bypass_actors": [{ "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always" }],
+  "conditions": { "ref_name": { "include": ["refs/heads/backup/*"], "exclude": [] } },
+  "rules": [{ "type": "deletion" }, { "type": "non_fast_forward" }]
+}
+EOF
+```
 
 ## Signed Firefox `.xpi` (optional, self-distribution)
 
