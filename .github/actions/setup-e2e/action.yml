@@ -1,12 +1,14 @@
 name: Setup e2e environment
 description: >-
-  Shared setup for the browser-suite workflows: the setup-node-pnpm triad, a cached
-  Playwright browser, and (by default) the staging extension build. Checkout stays in
+  Shared setup for the browser-suite workflows: the setup-node-pnpm triad, the cached
+  Playwright browsers it asks for, and (by default) the staging extension build. Checkout stays in
   the calling job - a local action can only run from an already checked-out tree.
 
 inputs:
   browser:
-    description: Playwright browser or channel to install (chromium, msedge, ...)
+    description: >-
+      Playwright browsers or channels to install (chromium, msedge, "webkit firefox", ...).
+      Space-separated for more than one.
     required: false
     default: chromium
   cache:
@@ -27,14 +29,27 @@ runs:
     - name: Setup Node and pnpm
       uses: ./.github/actions/setup-node-pnpm
 
-    # Cache covers the download half only; apt still runs on a hit.
+    # A multi-browser input reaches the key as `webkit-firefox`, so the key stays
+    # one dash-joined token however many browsers it names.
+    - name: Slug the browser list for the cache key
+      if: inputs.cache == 'true'
+      id: browsers
+      env:
+        BROWSER: ${{ inputs.browser }}
+      run: echo "slug=${BROWSER// /-}" >> "$GITHUB_OUTPUT"
+      shell: bash
+
+    # Cache covers the download half only; apt still runs on a hit. Keyed on the
+    # lockfile because that is what moves the pinned playwright version - an
+    # unrelated bump costs a miss. The browser list is part of the key: a
+    # webkit-only cache would hit, skip the install step and leave firefox missing.
     - name: Cache Playwright browsers
       if: inputs.cache == 'true'
       id: playwright-cache
       uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ~/.cache/ms-playwright
-        key: playwright-${{ inputs.browser }}-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+        key: playwright-${{ steps.browsers.outputs.slug }}-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
 
     # With the cache step skipped above, `cache-hit` is empty and this full
     # install (download + apt) runs unconditionally.
@@ -42,14 +57,15 @@ runs:
       if: steps.playwright-cache.outputs.cache-hit != 'true'
       env:
         BROWSER: ${{ inputs.browser }}
-      run: pnpm exec playwright install --with-deps "$BROWSER"
+      # Unquoted: a space-separated list has to reach playwright as separate arguments.
+      run: pnpm exec playwright install --with-deps $BROWSER
       shell: bash
 
     - name: Install browser system dependencies
       if: steps.playwright-cache.outputs.cache-hit == 'true'
       env:
         BROWSER: ${{ inputs.browser }}
-      run: pnpm exec playwright install-deps "$BROWSER"
+      run: pnpm exec playwright install-deps $BROWSER
       shell: bash
 
     - name: Build extension for e2e (staging)

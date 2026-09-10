@@ -48,8 +48,14 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Setup Node and pnpm
-        uses: ./.github/actions/setup-node-pnpm
+      # Same composite the browser-suite workflows use: node + pnpm, and the two
+      # browsers `pnpm test:browser` drives. `build: false` - this job builds
+      # further down, for chrome AND firefox, not just the staging bundle.
+      - name: Setup Node, pnpm and Playwright browsers
+        uses: ./.github/actions/setup-e2e
+        with:
+          browser: webkit firefox
+          build: "false"
 
       - name: Typecheck
         run: pnpm compile
@@ -79,32 +85,20 @@ jobs:
       - name: Unit tests with coverage report
         run: pnpm test:coverage
 
-      # Mirrors .github/actions/setup-e2e (which takes one browser; this needs two) -
-      # keep the pins and the cache/install pattern in lockstep with it.
-      # Keyed on the lockfile because that is what moves the pinned playwright
-      # version - an unrelated bump costs a miss.
-      # The browser list is part of the key: a webkit-only cache would hit,
-      # skip the install step and leave firefox missing.
-      - name: Cache Playwright browsers
-        id: playwright-cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-webkit-firefox-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-
-      - name: Install Playwright WebKit + Firefox
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps webkit firefox
-
-      - name: Install WebKit + Firefox system dependencies
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: pnpm exec playwright install-deps webkit firefox
-
       - name: Browser-mode tests (WebKit + Firefox)
         run: pnpm test:browser
 
       - name: Build unpacked extensions (chrome + firefox)
         run: pnpm build:all
+
+      # The build above re-ran `prepare:assets`, so anything it rewrote here was
+      # committed stale - and every gate in this job ran against the stale copy.
+      # --intent-to-add first: a plain diff sees tracked files only, and a locale
+      # added to the list generates a file that is untracked, not modified.
+      - name: Generated assets are committed
+        run: |
+          git add --intent-to-add -- public/emoji-data src/shared/__generated__
+          git diff --exit-code -- public/emoji-data src/shared/__generated__
 
       - name: Content-script weight budget
         run: pnpm check:bundle
