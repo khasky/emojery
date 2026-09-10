@@ -3,7 +3,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
-import { authConfigured, authEmail, authOtp, closeSession, enMessage, extensionPageUrl, FIREFOX_NO_EXTENSION_PAGES, isFirefoxRun, launchSession, localeMessage, otpSkipReason, removeProfileUnlessKept, resolveExtensionId, resolveExtensionPath, wrongOtpFor } from "./lib/extension";
+import { authCode, authConfigured, authEmail, closeSession, enMessage, extensionPageUrl, FIREFOX_NO_EXTENSION_PAGES, isFirefoxRun, launchSession, localeMessage, otpSkipReason, removeProfileUnlessKept, resolveExtensionId, resolveExtensionPath, wrongCodeFor } from "./lib/extension";
 import { AGREE_CHECKBOX_SELECTOR, CODE_INPUT_SELECTOR, EMAIL_INPUT_SELECTOR } from "./lib/selectors";
 
 // Whole file drives auth.html/popup.html, which Playwright Firefox cannot reach.
@@ -36,7 +36,6 @@ function requireRejectedEmail(): string {
 let authApiBase: string;
 let rejectedEmail: string;
 const testEmail = authEmail();
-const testOtp = authOtp();
 const localizedAuthErrorLocales = ["ru", "de", "ja"] as const;
 
 // The auth page is a narrow card; shooting it at the suite default would frame mostly
@@ -122,7 +121,7 @@ test.describe("extension account auth", () => {
     await authPage.getByRole("button", { name: enMessage("authEnterPendingCode", testEmail) }).click();
     await expect(codeInput).toBeVisible();
 
-    await codeInput.fill(wrongOtpFor(testOtp));
+    await codeInput.fill(wrongCodeFor(authCode(testEmail)));
     await expect(signInButton).toBeEnabled();
     await signInButton.click();
     await expect(
@@ -131,7 +130,7 @@ test.describe("extension account auth", () => {
       }),
     ).toBeVisible();
 
-    await codeInput.fill(testOtp);
+    await codeInput.fill(authCode(testEmail));
     await signInButton.click();
     await expect(authPage.getByRole("heading", { name: enMessage("authDoneTitle") })).toBeVisible();
 
@@ -194,7 +193,7 @@ test.describe("extension account auth", () => {
           name: localeMessage(locale, "authVerifyBtn"),
         });
         await expect(codeInput).toBeVisible();
-        await codeInput.fill(wrongOtpFor(testOtp));
+        await codeInput.fill(wrongCodeFor(authCode(testEmail)));
         await expect(signInButton).toBeEnabled();
         await signInButton.click();
         await expect(

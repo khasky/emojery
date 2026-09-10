@@ -59,13 +59,24 @@ function addressTemplate(): string {
   return process.env.E2E_AUTH_EMAIL?.trim().toLowerCase() ?? "";
 }
 
-export function authOtp(): string {
+function configuredCode(): string {
   return process.env.E2E_AUTH_OTP?.trim() ?? "";
 }
 
-// A code guaranteed to differ from `otp`.
-export function wrongOtpFor(otp: string): string {
-  return (otp.startsWith("0") ? "1" : "0") + otp.slice(1);
+// The sign-in code for `email`, from the source the run is configured with. Every
+// caller sits behind authConfigured(), so an empty source here is a misconfigured
+// run, not a skipped one - it fails loud rather than typing "" into the form.
+export function authCode(email: string): string {
+  const code = configuredCode();
+  if (!code) {
+    throw new Error(`No sign-in code configured for ${email}. Set E2E_AUTH_OTP in .env.e2e.local (see .env.e2e.example).`);
+  }
+  return code;
+}
+
+// A code guaranteed to differ from `code`.
+export function wrongCodeFor(code: string): string {
+  return (code.startsWith("0") ? "1" : "0") + code.slice(1);
 }
 
 // One address per purpose, resolved ONCE per WORKER PROCESS, so a spec that locks
@@ -86,7 +97,7 @@ export function otpSkipReason(what: string): string {
 // absent, so the suite stays green without them. A malformed value is NOT
 // pre-rejected here - the sign-in it is used for is where it fails.
 export function authConfigured(): boolean {
-  return isValidAddressTemplate(addressTemplate()) && authOtp().length > 0;
+  return isValidAddressTemplate(addressTemplate()) && configuredCode().length > 0;
 }
 
 // Callers need distinct values; a template with no `{id}` cannot give them.

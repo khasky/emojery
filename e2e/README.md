@@ -149,7 +149,7 @@ For **every site registered in `SUPPORTED_SITES`** (`SUPPORTED_SITE_SCENARIOS` i
   - single-target scenarios don't render more hosts than expected;
   - clicking the **visible** trigger opens the in-picker sign-in gate, and the gate's "Sign in" button opens `auth.html` (proves it's really interactive), without signing in.
 - **`... replaces native buttons after popup toggle`** (always-on, per scenario) — with "Hide original buttons" on, a host still renders and a native control is hidden (`data-khasky-emojery-hidden="1"`). **Exception:** a scenario carrying `expectHiddenNativeOnReplace: false` (Amazon CA) skips the hidden-native assert, the `replacedNativeInvisibleSelectors` check and the restore-after-off leg — for that scenario this case is a placement re-run only, so replacement there is covered by Amazon US, not by this title.
-- **`... handles auth, reaction history, and per-site toggle`** (per scenario, **gated** on `E2E_AUTH_EMAIL` + `E2E_AUTH_OTP`) — signs into Emojery via OTP, reacts, sees it in History, then per-site toggle removes the host. This is the only loop that needs the extension's own account; it's skipped without the OTP env.
+- **`... handles auth, reaction history, and per-site toggle`** (per scenario, **gated** on `E2E_AUTH_EMAIL` + `E2E_AUTH_OTP`) — signs into Emojery, reacts, sees it in History, then per-site toggle removes the host. This is the only loop that needs the extension's own account.
 - **`private window: ... opens auth.html`** — the unauth click works in a fresh incognito context too.
 - **Localized placement** (`ru`/`de`/`ja`) for selected scenarios.
 

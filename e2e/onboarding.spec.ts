@@ -22,7 +22,7 @@ import { ensureSignedOut, firstServiceWorker, resolveExtensionId } from "./lib/e
 import { pollForValue } from "./lib/picker-probes";
 import { signInTestAccount } from "./lib/popup-probes";
 import { COACH_TIP_CLASS, GATE_CLASS, GATE_SIGNIN_CLASS, GRID_ITEM_SELECTOR, HOST_SELECTOR, SEARCH_INPUT_SELECTOR, TRIGGER_SELECTOR } from "./lib/selectors";
-import { authConfigured, authEmail, authOtp, envUrl, otpSkipReason } from "./lib/test-config";
+import { authCode, authConfigured, authEmail, envUrl, otpSkipReason } from "./lib/test-config";
 
 // The onboarding tab itself never opens there (temporary add-on installs skip it by design),
 // and extension pages are unreachable anyway - see isFirefoxRun().
@@ -253,7 +253,8 @@ test("the gate's own auth tab returns to the page and closes itself", async () =
     await authPage.waitForLoadState("domcontentloaded");
     expect(authPage.url()).toContain("/auth.html");
 
-    await verifyOtpOnAuthPage(authPage, { email: authEmail(), code: authOtp() });
+    const email = authEmail();
+    await verifyOtpOnAuthPage(authPage, { email, code: authCode(email) });
     signedIn = true;
     await expect(authPage.getByRole("button", { name: enMessage("authDoneReturnNowBtn") })).toBeVisible();
 

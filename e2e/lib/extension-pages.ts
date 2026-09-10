@@ -12,7 +12,7 @@ import { extensionIdFromServiceWorkers, extensionPageUrl, localeMessage, signInT
 import { isFirefoxRun } from "./browser-session";
 import { FIREFOX_EXTENSION_UUID } from "./firefox-addon";
 import { DEEP_QUERY_ALL_SRC } from "./probe-src";
-import { authEmail, authOtp } from "./test-config";
+import { authCode, authEmail } from "./test-config";
 
 // The background worker - the one context that can write extension storage. It
 // starts with the first extension page/content script, so callers open a tab first.
@@ -77,7 +77,7 @@ export async function openPopup(context: BrowserContext): Promise<Page> {
 // Sign in by opening auth.html directly. Defaults to the primary test account;
 // `locale` as documented on auth-signin.ts's AuthSignInOptions. The exchange
 // itself lives in `auth-signin.ts`.
-export async function signIn(context: BrowserContext, email: string = authEmail(), code: string = authOtp(), locale = "en"): Promise<void> {
+export async function signIn(context: BrowserContext, email: string = authEmail(), code: string = authCode(email), locale = "en"): Promise<void> {
   requireExtensionPageAccess("signIn");
   const extensionId = await resolveExtensionId(context);
   expect(extensionId, "Emojery must be loaded before signing in").not.toBeNull();
