@@ -336,7 +336,7 @@ export function useCategoryScrollSpy({
       const bandBottom = bandTop + CATEGORY_FOCUS_BAND;
       const next = CATEGORIES.map(() => 0);
       sections.forEach((sec) => {
-        const idx = Number(sec.dataset.khaskyEmojeryCat);
+        const idx = Number(sec.getAttribute(CATEGORY_ATTR));
         if (!Number.isInteger(idx) || idx < 0 || idx >= next.length) return;
         const sectionRect = sec.getBoundingClientRect();
         const overlap = Math.min(sectionRect.bottom, bandBottom) - Math.max(sectionRect.top, bandTop);
