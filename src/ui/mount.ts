@@ -6,7 +6,7 @@ import { HIDDEN_SELECTOR, HOST_CLASS, LAYOUT_ATTR, PLACEMENT_ATTR } from "../sha
 import { ensureEnLoaded } from "../shared/emoji-meta";
 import type { VoteBroadcast } from "../shared/messages";
 import { markCoachSeen } from "../shared/onboarding";
-import { DEFAULT_SETTINGS, type Settings, type TargetKey, targetKey } from "../shared/storage";
+import { isSiteEnabled, resolveSettings, type Settings, type TargetKey, targetKey } from "../shared/storage";
 import { setThemePreference } from "../shared/theme";
 import { maybePlayPublicReactionIntro, playButtonPlacement } from "./animations";
 import { maybeShowCoachMark } from "./coach-mark";
@@ -106,15 +106,6 @@ export function unmountAll(): void {
   restoreCompactedCounts();
 }
 
-// The fields this watcher compares (enabled, sites, theme, replaceNative,
-// reactionAnimations), resolved from a raw storage.onChanged old/new snapshot the
-// way getSettings resolves them. Not getSettings' whole merge: `emojiSentiment`
-// comes through verbatim here, without its per-key default fallback.
-function resolveSettingsSnapshot(raw: unknown): Settings {
-  const stored = (raw ?? {}) as Partial<Settings>;
-  return { ...DEFAULT_SETTINGS, ...stored, sites: { ...DEFAULT_SETTINGS.sites, ...(stored.sites ?? {}) } };
-}
-
 let settingsWatcherInstalled = false;
 export function watchSettings(adapter: SiteAdapter): void {
   if (settingsWatcherInstalled) return;
@@ -123,13 +114,13 @@ export function watchSettings(adapter: SiteAdapter): void {
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== "sync" || !("settings" in changes)) return;
     invalidateContentSettings();
-    const prev = resolveSettingsSnapshot(changes.settings.oldValue);
-    const next = resolveSettingsSnapshot(changes.settings.newValue);
+    const prev = resolveSettings(changes.settings.oldValue);
+    const next = resolveSettings(changes.settings.newValue);
     // Ahead of the enable/site gates: the watcher re-stamps every mounted host through
     // shared/theme, and that has to happen even on a site whose mounts are switched off.
     setThemePreference(next.theme);
-    const wasOn = prev.enabled && prev.sites[adapter.site] !== false;
-    const isOn = next.enabled && next.sites[adapter.site] !== false;
+    const wasOn = isSiteEnabled(prev, adapter.site);
+    const isOn = isSiteEnabled(next, adapter.site);
     if (wasOn !== isOn) {
       if (isOn) mountAll(adapter.scan(document));
       else unmountAll();
@@ -220,7 +211,7 @@ async function schedulePendingMount(point: PickerInsertionPoint, key: TargetKey)
   setPendingMount(key, point);
 
   const settings = await readContentSettings();
-  if (!settings.enabled || !settings.sites[point.target.site]) {
+  if (!isSiteEnabled(settings, point.target.site)) {
     cancelPendingMount(key);
     return;
   }
@@ -250,7 +241,7 @@ async function reassertNativeState(mounted: Node, point: PickerInsertionPoint): 
     logContentError("reassertNativeState.readSettings", error);
     return null;
   });
-  if (!settings?.enabled || !settings.sites[point.target.site]) return;
+  if (!settings || !isSiteEnabled(settings, point.target.site)) return;
   if (settings.replaceNative) hideNativeForReplace(point);
   const host = hostElementOfMount(mounted);
   if (host?.isConnected) compactNativeCountsOnOverflow(host, point);

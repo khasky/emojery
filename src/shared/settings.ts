@@ -76,9 +76,22 @@ function storedTheme(value: unknown): ThemePreference {
   return value === "light" || value === "dark" || value === "system" ? value : DEFAULT_SETTINGS.theme;
 }
 
-export async function getSettings(): Promise<Settings> {
-  const stored = await storageSyncGet(["settings"]);
-  const storedSettings = stored.settings as Partial<Settings> | undefined;
+function storedSites(value: unknown): Record<SupportedSite, boolean> {
+  const stored = (value ?? {}) as Record<string, unknown>;
+  // Sites only a newer version knows survive the round trip (the reason the
+  // top-level spread survives too); the ones this version declares are re-derived.
+  const sites = { ...stored } as unknown as Record<SupportedSite, boolean>;
+  for (const site of Object.keys(DEFAULT_SETTINGS.sites) as SupportedSite[]) {
+    sites[site] = storedBoolean(stored[site], DEFAULT_SETTINGS.sites[site]);
+  }
+  return sites;
+}
+
+/** Turn a raw `settings` value out of storage.sync into a full Settings. The
+ *  content script's watcher resolves the same shape out of a storage.onChanged
+ *  snapshot, so both paths answer identically. */
+export function resolveSettings(raw: unknown): Settings {
+  const storedSettings = raw as Partial<Settings> | undefined;
   const storedSentiment = storedSettings?.emojiSentiment;
   const merged: Settings = {
     ...DEFAULT_SETTINGS,
@@ -93,10 +106,7 @@ export async function getSettings(): Promise<Settings> {
     analyticsConsent: storedBoolean(storedSettings?.analyticsConsent, DEFAULT_SETTINGS.analyticsConsent),
     debugMode: storedBoolean(storedSettings?.debugMode, DEFAULT_SETTINGS.debugMode),
     theme: storedTheme(storedSettings?.theme),
-    sites: {
-      ...DEFAULT_SETTINGS.sites,
-      ...(storedSettings?.sites ?? {}),
-    },
+    sites: storedSites(storedSettings?.sites),
     // A stored list replaces the default wholesale (an emptied list must stay
     // empty, not re-inherit defaults); per-key so a missing side falls back.
     emojiSentiment: {
@@ -105,6 +115,17 @@ export async function getSettings(): Promise<Settings> {
     },
   };
   return merged;
+}
+
+export async function getSettings(): Promise<Settings> {
+  const stored = await storageSyncGet(["settings"]);
+  return resolveSettings(stored.settings);
+}
+
+/** The one spelling of "should the extension mount on this site?" - the mount
+ *  gate and the settings watcher must never answer it differently. */
+export function isSiteEnabled(settings: Settings, site: SupportedSite): boolean {
+  return settings.enabled && settings.sites[site];
 }
 
 /** Lay a patch over a full Settings. `sites` is the one field that must merge

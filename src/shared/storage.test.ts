@@ -10,11 +10,14 @@ import {
   clearCountsCache,
   clearOwnReactionIfMatches,
   clearOwnReactionsForUser,
+  DEFAULT_SETTINGS,
   getAutoNative,
   getCachedCounts,
   getOwnReaction,
   getSettings,
+  isSiteEnabled,
   maybeSweepCountsCache,
+  mergeSettings,
   setAutoNative,
   setCachedCounts,
   setOwnReaction,
@@ -363,6 +366,32 @@ describe("getSettings emojiSentiment merge", () => {
     const s = await getSettings();
     expect(s.emojiSentiment.positive.length).toBeGreaterThan(0);
     expect(s.emojiSentiment.negative.length).toBeGreaterThan(0);
+  });
+});
+
+describe("getSettings sites merge", () => {
+  it("a non-boolean per-site value falls back to the default", async () => {
+    installFakeChrome({ sync: { settings: { sites: { github: 0, x: "yes", facebook: false } } } });
+    const s = await getSettings();
+    expect(s.sites.github).toBe(true);
+    expect(s.sites.x).toBe(true);
+    expect(s.sites.facebook).toBe(false);
+  });
+
+  it("a site only a newer version knows survives the round trip", async () => {
+    installFakeChrome({ sync: { settings: { sites: { tiktok: false } } } });
+    const s = await getSettings();
+    expect((s.sites as Record<string, unknown>).tiktok).toBe(false);
+    expect(s.sites.github).toBe(true);
+  });
+});
+
+describe("isSiteEnabled", () => {
+  it("a site toggled off is off, and the master switch overrides an on site", () => {
+    const off = mergeSettings(DEFAULT_SETTINGS, { sites: { ...DEFAULT_SETTINGS.sites, github: false } });
+    expect(isSiteEnabled(off, "github")).toBe(false);
+    expect(isSiteEnabled(off, "x")).toBe(true);
+    expect(isSiteEnabled(mergeSettings(DEFAULT_SETTINGS, { enabled: false }), "x")).toBe(false);
   });
 });
 
