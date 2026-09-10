@@ -110,8 +110,10 @@ export const EMAIL_INPUT_SELECTOR = `#${EMAIL_INPUT_ID}`;
 export const CODE_INPUT_ID = "code-input";
 export const CODE_INPUT_SELECTOR = `#${CODE_INPUT_ID}`;
 export const AUTH_ERROR_ID = "auth-error";
-export const AUTH_ERROR_SELECTOR = `#${AUTH_ERROR_ID}`;
 export const AUTH_ERROR_CLASS = "error";
+// The class sits on every error banner the page can raise; the id marks the one
+// the email and code fields point at through aria-describedby.
+export const AUTH_ERROR_SELECTOR = `.${AUTH_ERROR_CLASS}`;
 // The terms/privacy consent row; its checkbox gates the send-code button.
 export const AGREE_CLASS = "agree";
 export const AGREE_SELECTOR = `.${AGREE_CLASS}`;

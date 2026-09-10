@@ -7,7 +7,7 @@
 import { render } from "preact";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { userEvent } from "vitest/browser";
-import { CODE_INPUT_SELECTOR, COUNTDOWN_SELECTOR, EMAIL_INPUT_SELECTOR, NOTICE_SELECTOR, TAGLINE_SELECTOR } from "../../shared/page-dom";
+import { AUTH_ERROR_ID, AUTH_ERROR_SELECTOR, CODE_INPUT_SELECTOR, COUNTDOWN_SELECTOR, EMAIL_INPUT_SELECTOR, NOTICE_SELECTOR, TAGLINE_SELECTOR } from "../../shared/page-dom";
 import { requireEl } from "../../test/browser-harness";
 import { type ChromeShimHandle, installChromeShim } from "../../test/chrome-shim";
 import { OTP_COOLDOWN_KEY, type OtpCooldown } from "./otp-cooldown";
@@ -66,7 +66,7 @@ const emailField = () => requireEl<HTMLInputElement>(document, EMAIL_INPUT_SELEC
 const codeField = () => requireEl<HTMLInputElement>(document, CODE_INPUT_SELECTOR);
 const termsBox = () => requireEl<HTMLInputElement>(document, ".agree input[type=checkbox]");
 const primaryBtn = () => requireEl<HTMLButtonElement>(document, "button.primary");
-const errorText = (): string => document.querySelector(".error")?.textContent ?? "";
+const errorText = (): string => document.querySelector(AUTH_ERROR_SELECTOR)?.textContent ?? "";
 const linkish = (label: string): HTMLButtonElement | undefined => [...document.querySelectorAll<HTMLButtonElement>("button.linkish")].find((b) => b.textContent?.includes(label));
 
 /** Email step -> a sent request. Leaves the page wherever that request took it. */
@@ -233,7 +233,7 @@ describe("auth page - the code step", () => {
     expect(errorText()).toBe(copy);
     expect(heading()).toBe("Enter your code");
     // aria wiring for the message the screen reader has to reach (WCAG 3.3.1).
-    expect(codeField().getAttribute("aria-describedby")).toBe("auth-error");
+    expect(codeField().getAttribute("aria-describedby")).toBe(AUTH_ERROR_ID);
     expect(codeField().getAttribute("aria-invalid")).toBe("true");
   });
 

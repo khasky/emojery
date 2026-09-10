@@ -18,7 +18,7 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type BrowserContext, expect, type Page } from "@playwright/test";
-import { AGREE_CHECKBOX_SELECTOR, CODE_INPUT_SELECTOR, EMAIL_INPUT_SELECTOR } from "./selectors";
+import { AGREE_CHECKBOX_SELECTOR, AUTH_ERROR_SELECTOR, CODE_INPUT_SELECTOR, EMAIL_INPUT_SELECTOR } from "./selectors";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 export const EXTENSION_ROOT = resolve(__dirname, "..", "..");
@@ -134,7 +134,7 @@ export async function signInThroughAuthPage(context: BrowserContext, extensionId
     // as a missing field and says nothing about WHY the exchange never got past
     // "Send code" (a full-suite run lost three tests to exactly that).
     const reported = await authPage
-      .locator(".error")
+      .locator(AUTH_ERROR_SELECTOR)
       .first()
       .innerText()
       .catch(() => "");
@@ -190,7 +190,7 @@ async function requestAndVerifyOtp(authPage: Page, email: string, code: string, 
   // the verify below, so the caller's retry loop runs a fresh exchange rather
   // than hard-failing on a field that was never going to appear.
   const codeInput = authPage.locator(CODE_INPUT_SELECTOR);
-  const sent = await expect(codeInput.or(authPage.locator(".error")))
+  const sent = await expect(codeInput.or(authPage.locator(AUTH_ERROR_SELECTOR)))
     .toBeVisible({ timeout: 30_000 })
     .then(() => codeInput.isVisible())
     .catch(() => false);
@@ -202,7 +202,7 @@ async function requestAndVerifyOtp(authPage: Page, email: string, code: string, 
   // error. A verify request can also die at the network layer and change NOTHING
   // on the page (seen live) - report that as a failed pass so the
   // caller's retry loop reloads and runs a fresh exchange instead of throwing.
-  const resolved = await expect(signedIn.or(authPage.locator(".error")))
+  const resolved = await expect(signedIn.or(authPage.locator(AUTH_ERROR_SELECTOR)))
     .toBeVisible({ timeout: 30_000 })
     .then(() => true)
     .catch(() => false);
