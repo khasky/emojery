@@ -51,12 +51,11 @@ test("reaction animations toggle gates the click burst without a reload", async 
   const session = await ext.launchSession();
   try {
     const page = await ext.signedInGithubPage(session.context);
-    await ext.clearReaction(page);
     // The burst only spawns on an actual pick, and reactWith SKIPS the click on
     // an option that still reads as selected - so an un-react the trigger hasn't
     // caught up with yet turns this into "no click, no burst" and fails the ON
     // phase. Wait the clear out before arming the watcher.
-    await expect.poll(() => ext.hasOwnReaction(page), { message: "the clear should land before the burst check reacts again" }).toBe(false);
+    await ext.ensureNoOwnReaction(session.context, page);
 
     await armClickBurstWatcher(page);
     await ext.reactWith(page, ext.REACTIONS.heart);
@@ -226,6 +225,7 @@ test("intro animation replays on reload and honors the animations toggle", async
     // has to be through the server AND into the counts a reload reads before the watcher
     // is armed, so wait for the RENDERED total to settle rather than budgeting a fixed
     // sleep for the round-trip.
+    await ext.ensureNoOwnReaction(session.context, page);
     await ext.reactWith(page, ext.REACTIONS.heart);
     await expect.poll(() => ext.hasOwnReaction(page)).toBe(true);
     // Tighter than the helper's own 90s default: this only needs the count to be readable,

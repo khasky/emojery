@@ -57,6 +57,10 @@ test("account switching isolates history and the own reaction", async () => {
     expect(key, "a GitHub Emojery host should mount").not.toBeNull();
     if (!key) return;
 
+    // Account A is a fixed address on a shared staging target: a run that aborted
+    // after its pick leaves the reaction behind, and the pick below then lands on a
+    // selected option (toggle-off) instead of a fresh one.
+    await ext.ensureNoOwnReaction(session.context, page);
     const voteFlushed = ext.watchNextVoteFlush(session.context);
     await ext.reactWith(page, ext.REACTIONS.heart);
     cleanupAsA = true;
@@ -115,6 +119,8 @@ test("signing in with the same email from a fresh profile restores the reaction"
     await ext.signIn(first.context, email);
     const page = await ext.openGithub(first.context);
     expect(await ext.firstMountedKey(page), "a GitHub Emojery host should mount").not.toBeNull();
+    // Same fixed-address baseline as the switching case above.
+    await ext.ensureNoOwnReaction(first.context, page);
     const voteFlushed = ext.watchNextVoteFlush(first.context);
     await ext.reactWith(page, ext.REACTIONS.heart);
     await expect.poll(() => ext.hasOwnReaction(page)).toBe(true);
@@ -236,6 +242,9 @@ test("two accounts raise and lower the shared counter independently", async () =
     const key = await ext.firstMountedKey(pageA);
     expect(key, "a GitHub Emojery host should mount").not.toBeNull();
     if (!key) return;
+    // Same fixed-address baseline as the switching case above, and ahead of the
+    // settled-total read: a leftover un-react moves the public count too.
+    await ext.ensureNoOwnReaction(sessionA.context, pageA);
     // Settle the PUBLIC baseline before reacting: the rendered counter lags the
     // true total, so a single early read is stale and the absolute base+1/base+2
     // expectations below (including the COUNT_CACHE_WAIT_MS cross-session poll) can then never

@@ -40,8 +40,7 @@ test("history export writes a real file, and importing it back replaces the stor
   const session = await ext.launchSession();
   try {
     const page = await ext.signedInGithubPage(session.context);
-    await ext.clearReaction(page);
-    await expect.poll(() => ext.hasOwnReaction(page), { message: "the clear should land before the case reacts again" }).toBe(false);
+    await ext.ensureNoOwnReaction(session.context, page);
     await ext.reactWith(page, ext.REACTIONS.heart);
     // The vote reaches history only after the server confirms it, so wait on the
     // settled row before asking for an export of it.

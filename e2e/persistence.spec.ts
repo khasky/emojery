@@ -74,9 +74,7 @@ test("a reaction survives a full browser restart", async () => {
       if (targetKey) {
         // A leftover reaction sends an un-react vote; let it reach the server first, so
         // the watcher below settles on the reaction this test restarts the browser for.
-        const unreactFlushed = ext.watchNextVoteFlush(first.context);
-        const cleared = await ext.clearReaction(page);
-        if (cleared) await unreactFlushed();
+        await ext.ensureNoOwnReaction(first.context, page);
         const voteFlushed = ext.watchNextVoteFlush(first.context);
         await ext.reactWith(page, ext.REACTIONS.heart);
         await expect.poll(() => ext.hasOwnReaction(page)).toBe(true);

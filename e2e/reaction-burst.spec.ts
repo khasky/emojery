@@ -196,8 +196,7 @@ async function topHistoryRows(context: BrowserContext, count: number): Promise<R
 // An un-react is a vote like any other: let it land BEFORE the burst so it
 // counts into neither the burst nor its History rows.
 async function resetTarget(context: BrowserContext, page: Page): Promise<void> {
-  const flushed = ext.watchNextVoteFlush(context);
-  if (await ext.clearReaction(page)) await flushed();
+  await ext.ensureNoOwnReaction(context, page);
 }
 
 test("a fast burst the backend accepts is counted in full and every click shows in History", async () => {

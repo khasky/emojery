@@ -310,15 +310,44 @@ export async function openPickerTray(page: Page): Promise<void> {
   await page.keyboard.press(" ");
 }
 
+// The trigger paints from the local cache first and the server's counts and own
+// reaction land through a deferred fetch (ui/mount-counts.ts hydrateDeferredCounts) -
+// in a fresh profile that is the only source of `mine`, and it arrives ~0.5-1 s after
+// the page settles. A read or click taken before it judges a trigger that does not
+// know yet (measured live: a baseline clear found nothing, the fetch then marked the
+// leftover reaction pressed, and the pick skipped its click as "already selected" -
+// no vote, no burst). The counter form is the only DOM sign the fetch has landed; a
+// target with no reactions never takes it, hence the cap rather than a hard wait.
+const COUNTS_HYDRATION_CAP_MS = 6_000;
+async function waitForCountsHydrated(page: Page): Promise<void> {
+  await pollForValue(
+    () => readCounter(page).then((c) => c.isCounter),
+    (isCounter) => isCounter,
+    COUNTS_HYDRATION_CAP_MS,
+    250,
+  );
+}
+
+// Open the tray and search until `emoji`'s option is on screen; null when the
+// picker never surfaces it. The returned handle is a probe, not a click target.
+async function surfaceEmojiOption(page: Page, emoji: string) {
+  const grid = page.locator(GRID_ITEM_SELECTOR).filter({ visible: true }).first();
+  // Space on the trigger toggles: only press it while the grid is really gone.
+  if (!(await grid.isVisible().catch(() => false))) {
+    await openPickerTray(page);
+    await expect(grid).toBeVisible({ timeout: 8_000 });
+  }
+  await page.locator(SEARCH_INPUT_SELECTOR).filter({ visible: true }).first().fill(searchTermFor(emoji));
+  return waitForEmojiOption(page, emoji);
+}
+
 // React with a SPECIFIC emoji: open the picker, search to surface it, click the
 // option ONLY if it isn't already selected (clicking a selected option toggles
 // the reaction OFF). Normal click, NOT force, so the tall scrollable popover
 // scrolls the option into view first.
 export async function reactWith(page: Page, emoji: string): Promise<void> {
-  await openPickerTray(page);
-  await expect(page.locator(GRID_ITEM_SELECTOR).filter({ visible: true }).first()).toBeVisible({ timeout: 8_000 });
-  await page.locator(SEARCH_INPUT_SELECTOR).filter({ visible: true }).first().fill(searchTermFor(emoji));
-  const probe = await waitForEmojiOption(page, emoji);
+  await waitForCountsHydrated(page);
+  const probe = await surfaceEmojiOption(page, emoji);
   expect(probe, `picker should expose the ${emoji} option`).not.toBeNull();
   await probe?.dispose().catch(() => {});
   // Two passes, mirroring clearReaction: the pre-click `aria-pressed` read is one
@@ -332,8 +361,18 @@ export async function reactWith(page: Page, emoji: string): Promise<void> {
   // itself does - and a held handle detaches ("Element is not attached").
   for (let pass = 0; pass < 2; pass++) {
     if (await emojiOptionPressed(page, emoji)) break;
-    const option = await findEmojiOption(page, emoji);
-    if (!option) continue;
+    let option = await findEmojiOption(page, emoji);
+    if (!option) {
+      // The popover closes itself on any page scroll that moves the trigger
+      // (picker-hooks.ts usePopoverPosition) - and the click's own scroll-into-view,
+      // or a late layout shift on the page, is enough within the first seconds after
+      // mount. A pass that finds no option is that close, not a missing emoji: reopen,
+      // re-read (the swallowed click may still have landed), and only then click.
+      await (await surfaceEmojiOption(page, emoji))?.dispose().catch(() => {});
+      if (await emojiOptionPressed(page, emoji)) break;
+      option = await findEmojiOption(page, emoji);
+      if (!option) continue;
+    }
     try {
       await option.click({ timeout: 10_000 });
     } catch (err) {
@@ -405,6 +444,23 @@ export async function clearReaction(page: Page): Promise<boolean> {
     if (!(await stillActiveAfter(page, 3_000))) break;
   }
   return hadSelection;
+}
+
+// Start a spec from "no own reaction" on the server AND on screen - the baseline every
+// pick, counter delta and click-burst assertion assumes. clearReaction alone is not it:
+// the clear is optimistic and its un-react vote reaches the server later, so a pick made
+// in between races the deferred counts fetch, which can flip the option back to pressed
+// under the click and turn the pick into a toggle-off (seen live in the accounts and
+// animation specs: `hasOwnReaction` then polls false for 30 s over a click that did
+// happen, and no burst ever spawns). A leftover reaction from an aborted earlier run is
+// the same race from the other side. So: watch the wire, clear, wait the un-react out,
+// then poll the trigger until it agrees.
+export async function ensureNoOwnReaction(context: BrowserContext, page: Page): Promise<void> {
+  await waitForCountsHydrated(page);
+  const unreactFlushed = watchNextVoteFlush(context);
+  const cleared = await clearReaction(page);
+  if (cleared) await unreactFlushed();
+  await expect.poll(() => hasOwnReaction(page), { message: "the clear should land before the spec reacts" }).toBe(false);
 }
 
 function stillActiveAfter(page: Page, timeoutMs: number): Promise<boolean> {

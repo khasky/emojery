@@ -57,8 +57,7 @@ test("counter: a reaction increments and un-reaction decrements the aggregate", 
   try {
     const page = await ext.signedInGithubPage(session.context);
 
-    await ext.clearReaction(page);
-    await expect.poll(() => ext.hasOwnReaction(page)).toBe(false);
+    await ext.ensureNoOwnReaction(session.context, page);
     // Settled read: the trigger renders its plain (uncounted) form until the
     // count fetch lands, so an immediate read can report null on a target that
     // carries reactions - and a 0 baseline off that read fails the delta below
@@ -94,13 +93,7 @@ test("offline: a reaction made offline persists after reconnect + reload", async
     const page = await ext.signedInGithubPage(session.context);
     // A leftover reaction sends an un-react vote; let it reach the server before the
     // offline vote is armed, so the watcher below settles on the reaction under test.
-    const unreactFlushed = ext.watchNextVoteFlush(session.context);
-    const cleared = await ext.clearReaction(page);
-    if (cleared) await unreactFlushed();
-    // Same render wait as the counter tests: while the cleared reaction is still
-    // shown, reactWith sees its option already pressed and skips the click, so
-    // nothing is reacted offline.
-    await expect.poll(() => ext.hasOwnReaction(page)).toBe(false);
+    await ext.ensureNoOwnReaction(session.context, page);
 
     const voteFlushed = ext.watchNextVoteFlush(session.context);
     await session.context.setOffline(true);
@@ -325,15 +318,11 @@ test("rapid reaction switching settles on the last pick without corrupting the c
   try {
     const page = await ext.signedInGithubPage(session.context);
 
-    await ext.clearReaction(page);
-    // Wait for the un-react to RENDER before reading the baseline, exactly as the
-    // counter test above does. The picker applies its optimistic delta only after
-    // the content script's auth round-trip to the service worker resolves
-    // (ui/vote-client.ts createOnPick), so clearReaction's fixed post-click wait
-    // can return while the cleared reaction is still on screen - `data-active` and
-    // the aria-label total come from the same PickerTrigger render, so the
-    // baseline is then one too high and the end state lands on `base`, not `base + 1`.
-    await expect.poll(() => ext.hasOwnReaction(page)).toBe(false);
+    // The un-react must RENDER before the baseline read: `data-active` and the
+    // aria-label total come from the same PickerTrigger render, so a baseline taken
+    // while the cleared reaction is still on screen is one too high and the end state
+    // lands on `base`, not `base + 1`.
+    await ext.ensureNoOwnReaction(session.context, page);
     // Settled read: an un-counted trigger this early is usually one whose count
     // fetch has not landed, and a 0 baseline off that read makes the delta below
     // fail by the target's whole real total.
@@ -347,11 +336,13 @@ test("rapid reaction switching settles on the last pick without corrupting the c
     expect(await ext.isReactionChecked(page, ext.REACTIONS.fire), "last pick (🔥) wins").toBe(true);
     expect(await ext.isReactionChecked(page, ext.REACTIONS.heart), "earlier pick (❤️) cleared").toBe(false);
 
-    const after = (await ext.readCounter(page)).total;
-    // Same parseability guard as the counter test: one reaction is held here, so
-    // a counter is mandatory and an unparseable read is a real failure.
-    expect(after, "post-switch aggregate should parse as a number").not.toBeNull();
-    expect(after, "one held reaction should raise the aggregate by exactly one").toBe(base + 1);
+    // Polled, as the two-account spec reads its deltas: a deferred counts fetch that
+    // lands after the picks repaints the trigger with the server's cached total
+    // (mount-counts.ts refreshTarget), and a single read taken in that window shows
+    // the pre-vote number under a correctly held reaction (seen live: 152 for 153).
+    // A null total is a real failure here - one reaction is held, so the counter form
+    // is mandatory - and the poll surfaces it as a mismatch rather than a crash.
+    await expect.poll(async () => (await ext.readCounter(page)).total, { message: "one held reaction should raise the aggregate by exactly one" }).toBe(base + 1);
   } finally {
     await ext.ensureSignedOut(session.context).catch(() => {});
     await ext.closeSession(session);
@@ -368,9 +359,7 @@ test("a reaction in flight survives a reload (slow network)", async () => {
     // A leftover reaction from a prior test makes clearReaction send an un-react
     // vote; let it reach the server BEFORE arming the delay route, or the route
     // holds the un-react and the heart vote queues behind it into the reload.
-    const unreactFlushed = ext.watchNextVoteFlush(session.context);
-    const cleared = await ext.clearReaction(page);
-    if (cleared) await unreactFlushed();
+    await ext.ensureNoOwnReaction(session.context, page);
 
     // Hold the vote POST open so it is mid-flight at reload (the background SW
     // sends it; context.route intercepts service-worker requests too). Robust
