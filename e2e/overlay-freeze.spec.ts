@@ -15,7 +15,7 @@
 import { expect, type Page, test } from "@playwright/test";
 import { envUrl } from "./lib/extension";
 import { gotoSettled } from "./lib/page-settle";
-import { pollForValue } from "./lib/picker-probes";
+import { firstElementHandle, pollForValue } from "./lib/picker-probes";
 import { DEEP_QUERY_ALL_SRC } from "./lib/probe-src";
 import { MOUNT_ATTR, MOUNTED_SELECTOR } from "./lib/selectors";
 import { sharedSession } from "./lib/shared-session";
@@ -26,6 +26,12 @@ const MOUNT_TIMEOUT_MS = Number(process.env.E2E_OVERLAY_MOUNT_TIMEOUT_MS ?? 25_0
 // Past the urlChangeRescan settle delays (0/350/800ms), so a scan that WOULD
 // react to the overlay URL has had every chance to run before the read.
 const OVERLAY_SETTLE_MS = 2_000;
+// Threads replaces the post subtree once more while it hydrates, up to ~0.5 s after
+// the trigger first mounts (measured live: the anchor's parent DIV left the DOM 470 ms
+// after a push made right at first mount). That removal is the SITE's, and under the
+// suspended overlay URL nothing re-mounts it - correctly, and not what this spec
+// measures. A mount counts as the baseline only once it has outlived that window.
+const HYDRATION_CHURN_MS = 1_500;
 
 const session = sharedSession();
 
@@ -40,11 +46,29 @@ async function visibleMountKeys(page: Page): Promise<string[]> {
   })()`);
 }
 
+// The first mounted anchor, once it has stayed in the DOM for HYDRATION_CHURN_MS; a
+// mount the site tears down inside that window is waited out and the next one tried.
+async function waitForSettledMount(page: Page): Promise<void> {
+  const deadline = Date.now() + MOUNT_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    const anchor = await firstElementHandle(page, `(() => { ${DEEP_QUERY_ALL_SRC} return deepQueryAll("${MOUNTED_SELECTOR}").find((el) => el.getBoundingClientRect().width > 0) ?? null; })()`);
+    if (!anchor) {
+      await page.waitForTimeout(250);
+      continue;
+    }
+    await page.waitForTimeout(HYDRATION_CHURN_MS);
+    const survived = await anchor.evaluate((el) => el.isConnected).catch(() => false);
+    await anchor.dispose().catch(() => {});
+    if (survived) return;
+  }
+}
+
 test("a threads /media overlay cycle leaves the mounts untouched", async () => {
   const page = await session().context.newPage();
   try {
     await gotoSettled(page, THREADS_POST);
 
+    await waitForSettledMount(page);
     const before = await pollForValue(
       () => visibleMountKeys(page).catch(() => [] as string[]),
       (keys) => keys.length > 0,
