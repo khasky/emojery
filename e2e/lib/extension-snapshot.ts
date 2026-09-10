@@ -3,7 +3,7 @@
 // Run-private copy of the built extension. `wxt build` empties its output dir
 // before it writes, so a rebuild that overlaps a running suite yanks
 // `manifest.json` out from under every launch for a minute - three specs died
-// that way mid-run while a sibling session rebuilt staging. The runner copies
+// that way mid-run under a concurrent rebuild. The runner copies
 // the build once at config load (~5 MB) and points every launcher at the copy;
 // a concurrent rebuild then changes nothing this run reads.
 //

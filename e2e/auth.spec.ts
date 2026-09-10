@@ -35,7 +35,8 @@ function requireRejectedEmail(): string {
 
 let authApiBase: string;
 let rejectedEmail: string;
-const testEmail = authEmail();
+// Resolved in beforeAll, behind the sign-in gate: the resolver throws when unset.
+let testEmail: string;
 const localizedAuthErrorLocales = ["ru", "de", "ja"] as const;
 
 // The auth page is a narrow card; shooting it at the suite default would frame mostly
@@ -53,6 +54,7 @@ test.describe("extension account auth", () => {
     const extensionPath = resolveExtensionPath();
     authApiBase = requireAuthApiBase();
     rejectedEmail = requireRejectedEmail();
+    testEmail = authEmail();
     assertExtensionManifestAllowsApiBase(extensionPath, authApiBase);
     await assertApiReachable(authApiBase);
 

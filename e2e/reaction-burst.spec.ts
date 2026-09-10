@@ -2,13 +2,13 @@
 //
 // What a user gets when they react FAST, reported as "I placed a lot of
 // reactions quickly and not all of them were counted". Per click, end to end: a
-// burst the backend accepts must reach History in full (right emoji, right target,
-// right order); one it refuses must leave the refused clicks uncounted in that
-// window and still not lose them - the durable queue re-sends them, so History
-// again holds exactly one row per click.
+// burst answered 200 throughout must reach History in full (right emoji, right
+// target, right order); one that meets a 429 must leave those clicks uncounted in
+// that window and still not lose them - the durable queue re-sends them, so
+// History again holds exactly one row per click.
 //
 // Nothing is simulated: the real picker on the login-free GitHub/GitLab surfaces,
-// the real (staging) backend, the result read from the extension's own popup. The
+// the real staging API, the result read from the extension's own popup. The
 // wire record below is the black-box answer to "was it counted" - the queue
 // flushes from the service worker, whose requests context-level events see too.
 import { type BrowserContext, type ElementHandle, expect, type Page, test } from "@playwright/test";
@@ -20,7 +20,7 @@ import { GRID_ITEM_SELECTOR, HISTORY_EMOJI_SELECTOR, HISTORY_LINK_SELECTOR, HIST
 // Tracing OFF for this file, on every attempt. The snapshotter re-serializes the
 // picker's ~600-button grid after each action, which costs seconds per pick (the
 // measurement behind playwright.config.ts's `on-first-retry` default): a burst
-// that slow never draws a refusal at all, so a traced run of the refused case
+// that slow never draws a 429 at all, so a traced run of the refusal path
 // would go red for a reason that is purely the harness. Failure screenshots are
 // unaffected.
 test.use({ trace: "off" });
@@ -30,10 +30,10 @@ const REQUIRES_OTP = ext.otpSkipReason("the reaction-burst accounting checks");
 // Whole file signs in through auth.html, which Playwright Firefox cannot reach.
 test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
 
-// A burst plus the popup round-trip. The refused case additionally waits for the
-// refused clicks to be re-sent, so it gets its own, longer budget.
+// A burst plus the popup round-trip. The refusal path additionally waits for the
+// 429'd clicks to be re-sent, so it gets its own, longer budget.
 const BURST_TIMEOUT_MS = Number(process.env.E2E_BURST_TEST_TIMEOUT_MS ?? 300_000);
-const REFUSED_BURST_TIMEOUT_MS = Number(process.env.E2E_REFUSED_BURST_TEST_TIMEOUT_MS ?? 600_000);
+const REFUSAL_PATH_TIMEOUT_MS = Number(process.env.E2E_REFUSAL_PATH_TEST_TIMEOUT_MS ?? 600_000);
 const DRAIN_TIMEOUT_MS = 240_000;
 
 // A clean burst: this case is about the accounting, so it stays modest and
@@ -41,18 +41,18 @@ const DRAIN_TIMEOUT_MS = 240_000;
 const GITHUB_CLICKS = Number(process.env.E2E_BURST_CLEAN_GITHUB ?? 8);
 const GITLAB_CLICKS = Number(process.env.E2E_BURST_CLEAN_GITLAB ?? 2);
 
-// Shape of the refused case: clicks per round, how many rounds, and how long a
+// Shape of the refusal path: clicks per round, how many rounds, and how long a
 // round is staggered from the one before it. Configured, never defaulted in the
-// tree. Unset (or non-positive) => the refused case skips, like the OTP gate above.
-const MAX_BURST_CLICKS = Number(process.env.E2E_BURST_MAX_CLICKS);
-const BURST_ROUNDS = Number(process.env.E2E_BURST_ROUNDS);
-const BURST_ROUND_MS = Number(process.env.E2E_BURST_ROUND_MS);
+// tree. Unset (or non-positive) => that case skips, like the sign-in gate above.
+const MAX_BURST_CLICKS = Number(process.env.E2E_REFUSAL_PATH_CLICKS);
+const BURST_ROUNDS = Number(process.env.E2E_REFUSAL_PATH_ROUNDS);
+const BURST_ROUND_MS = Number(process.env.E2E_REFUSAL_PATH_ROUND_MS);
 const burstShapeConfigured = (): boolean => [MAX_BURST_CLICKS, BURST_ROUNDS, BURST_ROUND_MS].every((value) => Number.isFinite(value) && value > 0);
-const REQUIRES_BURST_SHAPE = "Set E2E_BURST_MAX_CLICKS, E2E_BURST_ROUNDS and E2E_BURST_ROUND_MS in .env.e2e.local (see .env.e2e.example) to run the refused-burst accounting check.";
+const REQUIRES_BURST_SHAPE = "Set E2E_REFUSAL_PATH_CLICKS, E2E_REFUSAL_PATH_ROUNDS and E2E_REFUSAL_PATH_ROUND_MS in .env.e2e.local (see .env.e2e.example) to run the refusal-path accounting check.";
 
 interface VoteResponse {
   status: number;
-  /** `retry-after` seconds, present on a refusal. */
+  /** `retry-after` seconds, present on a 429. */
   retryAfterSec: number | null;
   at: number;
 }
@@ -79,7 +79,7 @@ const refusedVotes = (responses: VoteResponse[]): VoteResponse[] => responses.fi
 // The grid lives in an OPEN shadow root, so reading it from that root directly is
 // what keeps a pick cheap: the document-wide shadow-piercing walk (lib/probe-src.ts)
 // costs seconds per call on a heavy page like a big repo header, and per click
-// that is what decides whether the refused case can draw a refusal at all.
+// that is what decides whether the refusal path can draw a 429 at all.
 const PICKER_GRID_ITEMS_SRC = `const pickerGridItems = () => {
   const out = [];
   for (const host of document.querySelectorAll("${OVERLAY_HOST_SELECTOR}, ${HOST_SELECTOR}")) {
@@ -114,7 +114,7 @@ function pickerOption(page: Page, emoji: string, timeoutMs = 10_000): Promise<El
 //
 // Keyboard, not a mouse click: clicking an option waits for the popover to stop moving
 // and scrolls the whole palette grid, which costs seconds per pick - a burst that slow
-// never draws a refusal, which is the whole point of the refused case
+// never draws a 429, which is the whole point of the refusal path
 // below. Enter on a focused <button> is the trusted activation the picker
 // requires, and it is coordinate-free like openPickerTray.
 async function pickEmoji(page: Page, emoji: string): Promise<void> {
@@ -199,7 +199,7 @@ async function resetTarget(context: BrowserContext, page: Page): Promise<void> {
   await ext.ensureNoOwnReaction(context, page);
 }
 
-test("a fast burst the backend accepts is counted in full and every click shows in History", async () => {
+test("a fast burst answered 200 throughout is counted in full and every click shows in History", async () => {
   test.skip(!ext.authConfigured(), REQUIRES_OTP);
   test.setTimeout(BURST_TIMEOUT_MS);
   const session = await ext.launchSession();
@@ -234,7 +234,7 @@ test("a fast burst the backend accepts is counted in full and every click shows 
 
     await expect
       .poll(() => countedVotes(responses.slice(sinceBurst)), {
-        message: `every one of the ${clicks.length} clicks should reach the backend and be counted`,
+        message: `every one of the ${clicks.length} clicks should reach the wire and be counted`,
         timeout: DRAIN_TIMEOUT_MS,
         intervals: [1_000],
       })
@@ -249,10 +249,10 @@ test("a fast burst the backend accepts is counted in full and every click shows 
   }
 });
 
-test("a burst the backend refuses is re-sent - no reaction is lost", async () => {
+test("a burst that meets a 429 is re-sent - no reaction is lost", async () => {
   test.skip(!ext.authConfigured(), REQUIRES_OTP);
   test.skip(!burstShapeConfigured(), REQUIRES_BURST_SHAPE);
-  test.setTimeout(REFUSED_BURST_TIMEOUT_MS);
+  test.setTimeout(REFUSAL_PATH_TIMEOUT_MS);
   const session = await ext.launchSession();
   const responses = watchVoteResponses(session.context);
   try {
@@ -273,8 +273,8 @@ test("a burst the backend refuses is re-sent - no reaction is lost", async () =>
       }
     }
 
-    // The click count alone cannot say why no refusal came: a burst that never
-    // reached the wire and one the backend accepted in full look identical from
+    // The click count alone cannot say why no 429 came: a burst that never
+    // reached the wire and one answered 200 throughout look identical from
     // it. Report what the wire actually carried, and over how long.
     const wireSummary = (): string => {
       const seen = responses.slice(sinceBurst);
@@ -288,8 +288,8 @@ test("a burst the backend refuses is re-sent - no reaction is lost", async () =>
     // still draining long after the last press - measured 40 clicks against 3
     // requests on the wire when the loop ended. The refusal therefore lands during
     // the DRAIN, and asserting the instant the loop exits only ever saw the first
-    // few sends. Wait for the wire to settle one way: a refusal, or the whole
-    // burst counted (which is the real "the backend accepted all of it" failure).
+    // few sends. Wait for the wire to settle one way: a 429, or the whole
+    // burst counted (which is the real "no refusal path drawn" failure).
     await expect
       .poll(() => refusedVotes(responses.slice(sinceBurst)).length > 0 || countedVotes(responses.slice(sinceBurst)) >= clicks.length, {
         message: `the burst should reach the wire (${wireSummary()})`,
@@ -299,20 +299,20 @@ test("a burst the backend refuses is re-sent - no reaction is lost", async () =>
       .toBe(true);
 
     const firstRefusal = refusedVotes(responses.slice(sinceBurst))[0];
-    expect(firstRefusal, `the backend should refuse part of the burst (${wireSummary()})`).toBeDefined();
+    expect(firstRefusal, `part of the burst should draw a 429 (${wireSummary()})`).toBeDefined();
     if (!firstRefusal) return;
-    expect(firstRefusal.retryAfterSec, "a refusal should tell the client when to retry").not.toBeNull();
+    expect(firstRefusal.retryAfterSec, "a 429 should tell the client when to retry").not.toBeNull();
 
-    // The refusal is real accounting: when the backend said no, fewer clicks
-    // had been counted than the user had made.
+    // The 429 is real accounting: at that point fewer clicks had been counted
+    // than the user had made.
     const countedAtRefusal = responses.slice(sinceBurst).filter((r) => r.status === 200 && r.at <= firstRefusal.at).length;
-    expect(countedAtRefusal, "the refused clicks should not be counted").toBeLessThan(clicks.length);
+    expect(countedAtRefusal, "the 429'd clicks should not be counted").toBeLessThan(clicks.length);
 
-    // ...and none of them is dropped: the durable queue re-sends the refused
+    // ...and none of them is dropped: the durable queue re-sends the 429'd
     // clicks, so the whole burst is counted in the end.
     await expect
       .poll(() => countedVotes(responses.slice(sinceBurst)), {
-        message: `all ${clicks.length} clicks should be counted once the queue re-sends the refused ones`,
+        message: `all ${clicks.length} clicks should be counted once the queue re-sends the 429'd ones`,
         timeout: DRAIN_TIMEOUT_MS,
         intervals: [2_000],
       })

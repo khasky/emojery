@@ -15,8 +15,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 const extensionRoot = resolve(here, "..", "..");
 
 // Load the same .env files the Playwright config uses (shared loader, so the
-// file list stays in lockstep), so the bridge suite can reach the test-account
-// creds (E2E_AUTH_EMAIL/OTP) and URL overrides. Shell env wins. Passed
+// file list stays in lockstep), so the bridge suite can reach the sign-in
+// resolver (E2E_SIGNIN_RESOLVER) and URL overrides. Shell env wins. Passed
 // through `test.env` so it reaches the forked test workers.
 function loadEnv(): Record<string, string> {
   const out = loadE2eEnvFiles(extensionRoot);

@@ -2,7 +2,7 @@
 //
 // Multi-account gap coverage: identity isolation across account switches,
 // independent counter moves per account, email-based account recovery, and
-// repeated wrong codes being refused. All flows run on
+// the wrong-code path of the sign-in form. All flows run on
 // GitHub (login-free mount surface) and read only what a user sees: the
 // shadow-hosted trigger/counter, the popup History tab, and auth.html's visible errors.
 import { expect, test } from "@playwright/test";
@@ -162,18 +162,18 @@ test("signing in with the same email from a fresh profile restores the reaction"
   }
 });
 
-// Repeated wrong codes switch the visible error from "incorrect code" to
-// authErrTooManyTries. Its own address, so the accounts other tests sign in with
-// are untouched.
-test("repeated wrong OTP codes stop verification", async () => {
+// The wrong-code path of the sign-in form: the visible error moves from
+// authErrCodeInvalid to authErrTooManyTries within the configured loop bound. Its
+// own address, so the accounts other tests sign in with are untouched.
+test("the wrong-code path of the sign-in form ends in authErrTooManyTries", async () => {
   test.skip(!ext.authConfigured(), REQUIRES_OTP);
   test.setTimeout(Number(process.env.E2E_WRONG_CODE_TEST_TIMEOUT_MS ?? 240_000));
   const email = ext.authEmail("wrong-codes");
   const wrongCode = ext.wrongCodeFor(ext.authCode(email));
   // Loop bound; the test fails if the error never switches within it. Configured
   // rather than defaulted in the tree. Unset => this case skips.
-  const WRONG_CODE_BUDGET = Number(process.env.E2E_WRONG_CODE_ATTEMPTS);
-  test.skip(!Number.isFinite(WRONG_CODE_BUDGET) || WRONG_CODE_BUDGET < 1, "Set E2E_WRONG_CODE_ATTEMPTS in .env.e2e.local (see .env.e2e.example) to run this check.");
+  const WRONG_CODE_BUDGET = Number(process.env.E2E_REFUSAL_PATH_CODE_ATTEMPTS);
+  test.skip(!Number.isFinite(WRONG_CODE_BUDGET) || WRONG_CODE_BUDGET < 1, "Set E2E_REFUSAL_PATH_CODE_ATTEMPTS in .env.e2e.local (see .env.e2e.example) to run this check.");
   const session = await ext.launchSession();
   try {
     const extensionId = await ext.resolveExtensionId(session.context);

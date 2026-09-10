@@ -1,11 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// What a run is configured WITH: the fixture URLs, the test credentials, and the
+// What a run is configured WITH: the fixture URLs, the sign-in fixtures, and the
 // reaction glyphs the authed flows react with. `load-env.ts` puts the dotenv
 // files into `process.env`; this module is what reads them back.
 //
 // A LEAF on purpose - no Playwright, no page, no browser. Anything here that grew
 // a `Page` parameter would belong in reaction-surface.ts instead.
+
+import { createRequire } from "node:module";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 // Picker emoji glyphs the authed flows react with. ❤️ is U+2764 + VS16 - the
 // exact sequence the picker renders.
@@ -54,23 +58,51 @@ export function gitlabUrl(): string {
   return envUrl("GITLAB");
 }
 
-// Test credentials, read from the git-ignored `.env.e2e.local`; never committed.
-function addressTemplate(): string {
-  return process.env.E2E_AUTH_EMAIL?.trim().toLowerCase() ?? "";
+// Sign-in fixtures come from a resolver module outside the tree: E2E_SIGNIN_RESOLVER
+// names a CommonJS or ES module (absolute, or relative to the repo root) exporting
+//   signInEmail(purpose: string): string  - an address for the flow named by `purpose`,
+//                                           distinct per purpose and per process, so a
+//                                           spec that locks or destroys its state never
+//                                           touches a sibling's;
+//   signInCode(email: string): string     - the code auth.html accepts for that address.
+// Unset => every authed spec skips. Set but unloadable => the run fails naming the
+// path; the module is never committed (keep it under .playwright/ or outside the repo).
+interface SignInResolver {
+  signInEmail(purpose: string): string;
+  signInCode(email: string): string;
 }
 
-function configuredCode(): string {
-  return process.env.E2E_AUTH_OTP?.trim() ?? "";
+const nodeRequire = createRequire(import.meta.url);
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+let loadedResolver: SignInResolver | undefined;
+
+function resolverPath(): string {
+  return process.env.E2E_SIGNIN_RESOLVER?.trim() ?? "";
 }
 
-// The sign-in code for `email`, from the source the run is configured with. Every
-// caller sits behind authConfigured(), so an empty source here is a misconfigured
-// run, not a skipped one - it fails loud rather than typing "" into the form.
+function signInResolver(): SignInResolver {
+  if (loadedResolver) return loadedResolver;
+  const configured = resolverPath();
+  if (!configured) throw new Error("No sign-in resolver configured. Set E2E_SIGNIN_RESOLVER in .env.e2e.local (see .env.e2e.example).");
+  const modulePath = resolve(REPO_ROOT, configured);
+  const loaded: unknown = nodeRequire(modulePath);
+  const exported = (loaded as { default?: unknown }).default ?? loaded;
+  if (!isSignInResolver(exported)) throw new Error(`E2E_SIGNIN_RESOLVER (${modulePath}) must export signInEmail(purpose) and signInCode(email).`);
+  loadedResolver = exported;
+  return exported;
+}
+
+function isSignInResolver(value: unknown): value is SignInResolver {
+  const candidate = value as Partial<SignInResolver> | null;
+  return typeof candidate?.signInEmail === "function" && typeof candidate?.signInCode === "function";
+}
+
+// The sign-in code for `email`. Every caller sits behind authConfigured(), so a
+// missing resolver here is a misconfigured run, not a skipped one - it fails loud
+// rather than typing "" into the form.
 export function authCode(email: string): string {
-  const code = configuredCode();
-  if (!code) {
-    throw new Error(`No sign-in code configured for ${email}. Set E2E_AUTH_OTP in .env.e2e.local (see .env.e2e.example).`);
-  }
+  const code = signInResolver().signInCode(email);
+  if (!code) throw new Error(`The sign-in resolver returned no code for ${email}.`);
   return code;
 }
 
@@ -79,30 +111,23 @@ export function wrongCodeFor(code: string): string {
   return (code.startsWith("0") ? "1" : "0") + code.slice(1);
 }
 
-// One address per purpose, resolved ONCE per WORKER PROCESS, so a spec that locks
-// or destroys its state never touches a sibling's. Playwright restarts the worker
-// after a failure, so a retried run resolves fresh values. Append
-// TEST_WORKER_INDEX if the suite ever runs parallel.
-const RUN_STAMP = Date.now();
+// One address per purpose. Playwright restarts the worker after a failure, so a
+// retried run resolves fresh values through the resolver.
 export function authEmail(purpose = "primary"): string {
-  const template = addressTemplate();
-  return template ? template.replace("{id}", `${purpose}-${RUN_STAMP}`) : "";
+  const email = signInResolver().signInEmail(purpose).trim().toLowerCase();
+  if (!email) throw new Error(`The sign-in resolver returned no address for "${purpose}".`);
+  return email;
 }
 
 export function otpSkipReason(what: string): string {
-  return `Set E2E_AUTH_EMAIL + E2E_AUTH_OTP (test credentials) to run ${what}.`;
+  return `Set E2E_SIGNIN_RESOLVER (see .env.e2e.example) to run ${what}.`;
 }
 
-// Authed gap specs `test.skip` themselves off when the test credentials are
-// absent, so the suite stays green without them. A malformed value is NOT
-// pre-rejected here - the sign-in it is used for is where it fails.
+// Authed gap specs `test.skip` themselves off when no resolver is configured, so
+// the suite stays green without one. A configured but broken resolver is NOT
+// pre-rejected here - the first sign-in that loads it is where it fails.
 export function authConfigured(): boolean {
-  return isValidAddressTemplate(addressTemplate()) && configuredCode().length > 0;
-}
-
-// Callers need distinct values; a template with no `{id}` cannot give them.
-function isValidAddressTemplate(template: string): boolean {
-  return /^[^@\s]*\{id\}[^@\s]*@[a-z0-9.-]+\.[a-z]+$/.test(template);
+  return resolverPath().length > 0;
 }
 
 // How long the test waits for an updated public count to become readable

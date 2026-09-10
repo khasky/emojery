@@ -4,15 +4,10 @@
 // the page's selectors, its shipped button labels, and the request-code/verify
 // exchange with the retries that make it survive a real backend.
 //
-// A LEAF module, and deliberately so: besides the e2e suites (through
-// lib/extension.ts, which re-exports it) external tooling resolves this file
-// via EM_EXT_ROOT and loads it directly under plain Node, where types are
-// stripped at load and imports resolve by Node's own rules. So: no relative
-// imports, nothing outside `node:*` and `@playwright/test` - and keep the
-// export shape stable.
-//
-// Nothing in CI runs that tooling, so only this single shared copy keeps a
-// renamed selector or label from breaking it silently while the suite stays green.
+// A LEAF module, and deliberately so: it is also loaded directly under plain
+// Node, where types are stripped at load and imports resolve by Node's own
+// rules. So: no relative imports, nothing outside `node:*` and
+// `@playwright/test` - and keep the export shape stable.
 
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -102,7 +97,7 @@ interface AuthSignInOptions {
   prepare?: (page: Page) => Promise<void>;
 }
 
-// Sign in by opening auth.html directly with the given test-account credentials.
+// Sign in by opening auth.html directly with the given sign-in fixtures.
 // Takes an already-resolved extension id: the two callers reach it differently.
 export async function signInThroughAuthPage(context: BrowserContext, extensionId: string, opts: AuthSignInOptions): Promise<void> {
   const locale = opts.locale ?? "en";

@@ -176,7 +176,7 @@ for (const scenario of scenarios) {
           // a skip and not a failure, so without this assert the whole active phase
           // used to pass on a broken picker. Surface the reason in the log and the
           // report next to the measurements.
-          const reason = isFirefoxRun() ? "firefox run: cannot sign in (auth.html unreachable from Playwright)" : authConfigured() ? `signed in, but ${pickFailure}` : "no Emojery test account configured (E2E_AUTH_EMAIL + E2E_AUTH_OTP)";
+          const reason = isFirefoxRun() ? "firefox run: cannot sign in (auth.html unreachable from Playwright)" : authConfigured() ? `signed in, but ${pickFailure}` : "no sign-in resolver configured (E2E_SIGNIN_RESOLVER)";
           console.log(`[theme] ${scenario.site} ${scheme}/active: not measured - ${reason}`);
           testInfo.annotations.push({ type: "active-phase-not-measured", description: `${scenario.label} (${scheme}): ${reason}` });
           expect(authConfigured() && !isFirefoxRun(), `${scenario.label} (${scheme}/active): ${reason}`).toBe(false);

@@ -42,7 +42,7 @@ What it covers: every content-script surface — placement, picker DOM, theming,
 
 The **When CI runs it** column is the honest map of what a green pipeline has actually verified. A spec marked *manual only* needs credentials CI does not hold or an opt-in source list — running it is on you before a release.
 
-| File | Covers | Needs the Emojery test account? | When CI runs it |
+| File | Covers | Needs the sign-in resolver? | When CI runs it |
 | --- | --- | --- | --- |
 | `site-injection.spec.ts` | Per-site placement, replace-native, localized placement, and the gated authed loop. Its scenario table is data-only in **`supported-sites.ts`**. | Only the authed loop | Every other day (`e2e-ci.yml`); the replace-native loop weekly; the GitHub + YouTube placement pair again in real Edge every other day (`edge-smoke.yml`); and the placement scenario alone on any PR touching `src/adapters/` (`e2e-adapter.yml`, advisory) |
 | `theme-contrast.spec.ts` | Trigger blending + WCAG contrast on real sites, light and dark | Only the active-state pass | Weekly, own job (`e2e-ci.yml`) |
@@ -51,7 +51,7 @@ The **When CI runs it** column is the honest map of what a green pipeline has ac
 | `facebook-comment-injection.spec.ts` | A comment's reaction cluster never becomes a mount: injects the vulnerable A/B-served comment shape next to a live post's own counts row and asserts nothing mounts on or inside it | No | Manual only |
 | `facebook-group-row-injection.spec.ts` | The icon-only Comment/Send action row (the group photo-post shape, which live sits behind a group login) still mounts a trigger: injects the captured row beside a live public post | No | Manual only |
 | `auth.spec.ts` | The OTP login flow: rejected address, wrong code, cooldown, sign-in/out, localized errors | Yes | Manual only |
-| `accounts.spec.ts` | Multi-account: identity isolation across switches, independent counter moves, email recovery, repeated wrong codes surfacing an error (all on GitHub) | Yes | Manual only |
+| `accounts.spec.ts` | Multi-account: identity isolation across switches, independent counter moves, email recovery, the wrong-code path of the sign-in form (all on GitHub) | Yes | Manual only |
 | `authed-extras.spec.ts` | Master toggle, react/un-react counter math, offline queue flush, account deletion, the Report tab, rapid reaction switching, an in-flight vote surviving a reload, the analytics-consent default | Yes | Manual only |
 | `reaction-burst.spec.ts` | A fast burst of reactions: every accepted click is counted and listed in History; a refused one is re-sent by the durable queue, losing nothing | Yes | Manual only |
 | `persistence.spec.ts` | Settings and reactions surviving a full browser restart; a fresh profile starts from defaults | Yes | Manual only |
@@ -119,7 +119,7 @@ Worth running before a release and whenever a Reddit placement bug is reported. 
 
 ## Authed gap specs, autonomous (GitHub + popup)
 
-Every spec marked "Yes" above covers the gaps the site loops don't, **autonomously** — all on GitHub (the picker mounts there with no platform login, so no anti-bot exposure) plus the extension's own popup. They sign into an Emojery account, so they need `E2E_AUTH_EMAIL` + `E2E_AUTH_OTP` (see `.env.e2e.example`); without them the authed cases `test.skip`. Shared helpers live in `lib/extension.ts`.
+Every spec marked "Yes" above covers the gaps the site loops don't, **autonomously** — all on GitHub (the picker mounts there with no platform login, so no anti-bot exposure) plus the extension's own popup. They sign into an Emojery account, so they need `E2E_SIGNIN_RESOLVER` (see `.env.e2e.example`); without it the authed cases `test.skip`. Shared helpers live in `lib/extension.ts`.
 
 - **`authed-extras.spec.ts`** — the popup and account gaps:
   - the master `Enabled` toggle removes the picker and restores it;
@@ -149,7 +149,7 @@ For **every site registered in `SUPPORTED_SITES`** (`SUPPORTED_SITE_SCENARIOS` i
   - single-target scenarios don't render more hosts than expected;
   - clicking the **visible** trigger opens the in-picker sign-in gate, and the gate's "Sign in" button opens `auth.html` (proves it's really interactive), without signing in.
 - **`... replaces native buttons after popup toggle`** (always-on, per scenario) — with "Hide original buttons" on, a host still renders and a native control is hidden (`data-khasky-emojery-hidden="1"`). **Exception:** a scenario carrying `expectHiddenNativeOnReplace: false` (Amazon CA) skips the hidden-native assert, the `replacedNativeInvisibleSelectors` check and the restore-after-off leg — for that scenario this case is a placement re-run only, so replacement there is covered by Amazon US, not by this title.
-- **`... handles auth, reaction history, and per-site toggle`** (per scenario, **gated** on `E2E_AUTH_EMAIL` + `E2E_AUTH_OTP`) — signs into Emojery, reacts, sees it in History, then per-site toggle removes the host. This is the only loop that needs the extension's own account.
+- **`... handles auth, reaction history, and per-site toggle`** (per scenario, **gated** on `E2E_SIGNIN_RESOLVER`) — signs into Emojery, reacts, sees it in History, then per-site toggle removes the host. This is the only loop that needs the extension's own account.
 - **`private window: ... opens auth.html`** — the unauth click works in a fresh incognito context too.
 - **Localized placement** (`ru`/`de`/`ja`) for selected scenarios.
 
@@ -159,7 +159,7 @@ For **every site registered in `SUPPORTED_SITES`** (`SUPPORTED_SITE_SCENARIOS` i
 
 ## Theme & contrast
 
-`theme-contrast.spec.ts` — black-box on real sites (no fixtures): the trigger blends into each site's action surface and stays legible (WCAG contrast), in light **and** dark. The idle-state check runs unauthenticated; the post-reaction (active) state is also measured when the test account is configured (`E2E_AUTH_EMAIL` / `E2E_AUTH_OTP`), since a reaction only sticks for a signed-in user.
+`theme-contrast.spec.ts` — black-box on real sites (no fixtures): the trigger blends into each site's action surface and stays legible (WCAG contrast), in light **and** dark. The idle-state check runs unauthenticated; the post-reaction (active) state is also measured when the sign-in resolver is configured (`E2E_SIGNIN_RESOLVER`), since a reaction only sticks for a signed-in user.
 
 `glyph-size.spec.ts` — the other half of blending: **size**. `site-injection` proves the host mounted next to the native action and `theme-contrast` proves it is legible; both pass just as happily with an emoji twice the size of its neighbours, which is what shipped when a remembered per-site glyph height outranked a row's own measurement. Per scenario it compares the size the trigger inherited against the icons the site itself draws inside that scenario's `nativeSelectors`; everything is relative, so a restyle moves both numbers together. 2 extra cases cover what one page cannot show: a **planted** stale size in extension storage that the trigger must ignore (deterministic), and the YouTube **surface order** a user walks, Shorts→watch and watch→Shorts in one profile (only fails on a day when the two surfaces really draw different icons — verified: against the pre-fix build the planted case failed every attempt while the ordered pair passed on retry).
 
@@ -191,10 +191,10 @@ Bundled Chromium by default (stable unpacked-extension loading), realistic-clien
 - `E2E_KEEP_OPEN_MS`, `E2E_KEEP_PROFILE` — keep the browser/profile after a run.
 - `E2E_RETRIES` — live-flake retry budget, 2 by default; set it to `0` to reproduce a failure raw (that also switches tracing to `retain-on-failure`). Not in `.env.e2e.example`.
 - `E2E_PERF=1` — opt in to the heap-budget run; `E2E_PERF_HEAP_LIMIT_MB` and `E2E_PERF_SCROLL_STEPS` retune it for a machine that isn't nightly CI, `E2E_PERF_METRICS_FILE` writes the measurements to a file.
-- `E2E_BURST_ROUNDS`, `E2E_BURST_ROUND_MS`, `E2E_BURST_MAX_CLICKS`, `E2E_BURST_CLEAN_GITHUB`, `E2E_BURST_CLEAN_GITLAB` — shape of the `reaction-burst.spec.ts` runs: how many rounds and how long each one is, the click cap that makes a round that never gets refused fail loudly instead of clicking forever, and the click counts of the clean burst.
+- `E2E_REFUSAL_PATH_ROUNDS`, `E2E_REFUSAL_PATH_ROUND_MS`, `E2E_REFUSAL_PATH_CLICKS`, `E2E_BURST_CLEAN_GITHUB`, `E2E_BURST_CLEAN_GITLAB` — shape of the `reaction-burst.spec.ts` runs: how many rounds and how long each one is, the click cap that makes a round that never draws a 429 fail loudly instead of clicking forever, and the click counts of the clean burst.
 - `E2E_MIN_CONTRAST`, `E2E_FG_TOLERANCE` — the minimum contrast ratio `theme-contrast.spec.ts` holds the trigger to, and the per-channel tolerance when checking that the trigger color tracks the sampled site foreground.
 - `E2E_GLYPH_SETTLE_MS` [13s] — how long `glyph-size.spec.ts` lets a trigger's size stop moving before judging it. The size is allowed to converge (a late-hydrating row paints a stand-in first); the spec asserts where it lands.
-- `E2E_*_TEST_TIMEOUT_MS` (`E2E_DELETE_`, `E2E_WRONG_CODE_`, `E2E_TWO_ACCOUNT_`, `E2E_BURST_`, `E2E_REFUSED_BURST_`, `E2E_COEXT_`, `E2E_I18N_`, `E2E_INTRO_`) plus `E2E_AUTHED_SITE_TIMEOUT_MS` — per-case budgets for the long authed flows.
+- `E2E_*_TEST_TIMEOUT_MS` (`E2E_DELETE_`, `E2E_WRONG_CODE_`, `E2E_TWO_ACCOUNT_`, `E2E_BURST_`, `E2E_REFUSAL_PATH_`, `E2E_COEXT_`, `E2E_I18N_`, `E2E_INTRO_`) plus `E2E_AUTHED_SITE_TIMEOUT_MS` — per-case budgets for the long authed flows.
 
 What a run is pointed at, all with a checked-in default in `.env.e2e.example`:
 
@@ -207,7 +207,7 @@ What a run is pointed at, all with a checked-in default in `.env.e2e.example`:
 | `E2E_LOCALE` [`en-US`] · `E2E_TIMEZONE_ID` [the machine's] · `E2E_USER_AGENT` [the browser's own] | The client identity every context is created with. An unset `E2E_USER_AGENT` omits the key rather than sending an empty one. |
 | `E2E_REALISTIC_CLIENT` [on; `0` disables] | The realistic-client launch flags that keep live sites from serving an automation shape. |
 | `E2E_VIDEO=1` | Record video, retained on failure. Off by default. |
-| `E2E_REJECTED_EMAIL` · `E2E_WRONG_CODE_ATTEMPTS` | The auth error-path fixtures: the address the rejection leg signs in with, and the wrong-code budget the repeated-wrong-code check needs (that case skips until it is set). |
+| `E2E_REJECTED_EMAIL` · `E2E_REFUSAL_PATH_CODE_ATTEMPTS` | The auth error-path fixtures: the address the rejection leg signs in with, and the loop bound of the wrong-code path (that case skips until it is set). |
 
 The rest are waits and per-spec knobs that only matter on a slow machine or when you are debugging one spec; each falls back to the default in brackets:
 

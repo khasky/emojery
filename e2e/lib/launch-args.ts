@@ -2,9 +2,8 @@
 //
 // The Chrome command line every extension-loading run needs.
 //
-// A LEAF module: external tooling resolves this file via EM_EXT_ROOT and loads it
-// directly under plain Node, so no relative imports, nothing outside node:*, and
-// keep the export shape stable.
+// A LEAF module: it is also loaded directly under plain Node, so no relative
+// imports, nothing outside node:*, and keep the export shape stable.
 
 interface ExtensionLaunchArgOptions {
   /** Unpacked extension folders to load (backslashes are normalized here). */

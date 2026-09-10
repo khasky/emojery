@@ -38,7 +38,7 @@ jobs:
         run: xvfb-run -a pnpm test:a11y --reporter=list,json
 
       # Same gate as every e2e-ci.yml run, for the same reason: half this suite skips itself
-      # when the OTP credentials are absent, and a job that skipped its way to green reads
+      # when no sign-in resolver is configured, and a job that skipped its way to green reads
       # exactly like one that checked the popup and the auth page.
       - name: Gate on skip ratio
         if: always()

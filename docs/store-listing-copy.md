@@ -152,7 +152,7 @@ WHAT LEAVES YOUR BROWSER
 
 WHAT IS NEVER COLLECTED
 
-Real names, stored email addresses, hardware or high-entropy fingerprints, advertising cookies or tracking pixels, and passwords. Raw IP addresses are never stored: the network layer sees your address the way any web server does, and what the service keeps is a salted hash that rotates daily and is used to rate-limit abuse. The extension loads no analytics SDK.
+Real names, stored email addresses, hardware or high-entropy fingerprints, advertising cookies or tracking pixels, and passwords. Raw IP addresses are never stored: the network layer sees your address the way any web server does, and what the service keeps is a short-lived salted hash used to limit abuse. The extension loads no analytics SDK.
 
 STORAGE AND RETENTION
 
@@ -168,7 +168,7 @@ Cloudflare (infrastructure, bot check, coarse country/city), Neon (managed datab
 
 YOUR RIGHTS
 
-Delete your account from the extension's Account tab. This removes your account record and your active reactions, and reverses their contribution to the totals. Pseudonymous log entries and their revocations remain permanent, and a suspended account keeps its email hash so the suspension survives a re-registration. Access, rectification, restriction, portability and objection under GDPR/UK GDPR/CCPA/PIPEDA/PIPA. Contact: privacy@emojery.app
+Delete your account from the extension's Account tab. This removes your account record and your active reactions, and reverses their contribution to the totals. Pseudonymous log entries and their revocations remain permanent, and a suspended account stays suspended. Access, rectification, restriction, portability and objection under GDPR/UK GDPR/CCPA/PIPEDA/PIPA. Contact: privacy@emojery.app
 ```
 
 ## Notes to reviewer (AMO, 3000 characters)

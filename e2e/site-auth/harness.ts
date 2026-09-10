@@ -463,7 +463,9 @@ export async function closeSpawnedAuthTabs(bridge: Bridge): Promise<number> {
     .catch(() => 0);
   authTabsSeen += closed;
   if (authTabsSeen >= AUTH_TAB_LIMIT) {
-    throw recordSetupFault(`Aborting: trigger clicks opened ${authTabsSeen} auth.html tabs - Emojery is SIGNED OUT in the connected Chrome. Sign in with the test account (E2E_AUTH_EMAIL / E2E_AUTH_OTP) in that Chrome, and confirm chrome://extensions shows the build this suite drives. ${MANUAL_SIGNIN_HINT}`);
+    throw recordSetupFault(
+      `Aborting: trigger clicks opened ${authTabsSeen} auth.html tabs - Emojery is SIGNED OUT in the connected Chrome. Sign in with the address the sign-in resolver names (E2E_SIGNIN_RESOLVER) in that Chrome, and confirm chrome://extensions shows the build this suite drives. ${MANUAL_SIGNIN_HINT}`,
+    );
   }
   return closed;
 }
@@ -614,7 +616,7 @@ export async function assertEmojerySignedIn(bridge: Bridge): Promise<void> {
   const picker = await openPickerState(bridge);
   await bridge.press("Escape").catch(() => {});
   if (!picker.gridVisible) {
-    throw recordSetupFault(`Emojery is SIGNED OUT in the connected Chrome - the trigger opened the sign-in CTA instead of the emoji grid. Sign in with the test account (E2E_AUTH_EMAIL / E2E_AUTH_OTP) in that Chrome, and confirm chrome://extensions shows the build this suite drives. ${MANUAL_SIGNIN_HINT}`);
+    throw recordSetupFault(`Emojery is SIGNED OUT in the connected Chrome - the trigger opened the sign-in CTA instead of the emoji grid. Sign in with the address the sign-in resolver names (E2E_SIGNIN_RESOLVER) in that Chrome, and confirm chrome://extensions shows the build this suite drives. ${MANUAL_SIGNIN_HINT}`);
   }
 }
 
