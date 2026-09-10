@@ -19,8 +19,6 @@ import { logBackgroundError } from "./debug";
 interface IdbHandle {
   /** Open (or reuse) the connection. Reopens after a versionchange closed it. */
   open(): Promise<IDBDatabase>;
-  /** Test seam: forget the memoized connection without closing it. */
-  reset(): void;
 }
 
 export function createIdbHandle(dbName: string, version: number, upgrade: (db: IDBDatabase) => void): IdbHandle {
@@ -57,10 +55,5 @@ export function createIdbHandle(dbName: string, version: number, upgrade: (db: I
     return dbPromise;
   };
 
-  return {
-    open,
-    reset: () => {
-      dbPromise = null;
-    },
-  };
+  return { open };
 }
