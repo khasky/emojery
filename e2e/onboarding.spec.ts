@@ -45,10 +45,10 @@ interface OnboardingSession {
 }
 
 // The shared launcher plus this file's one requirement: a profile dir that is always
-// fresh (onboarding only ever fires on a first install) and named for this suite, and
-// which the caller therefore owns for teardown even though it passed it in.
-async function launchFreshInstall(opts: { keepOnboardingTab: boolean; reuseDir?: string }): Promise<OnboardingSession> {
-  const userDataDir = opts.reuseDir ?? (await makeRunProfileDir("onboarding"));
+// fresh (onboarding only ever fires on a first install) and named for this suite. The
+// dir is minted here, so the caller's closeSession() is what removes it again.
+async function launchFreshInstall(opts: { keepOnboardingTab: boolean }): Promise<OnboardingSession> {
+  const userDataDir = await makeRunProfileDir("onboarding");
   const { context } = await launchSession({ userDataDir, locale: "en-US", keepOnboardingTab: opts.keepOnboardingTab });
   return { context, generatedUserDataDir: userDataDir };
 }
