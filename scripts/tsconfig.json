@@ -22,11 +22,6 @@
     "esModuleInterop": true,
     "noEmit": true,
     "resolveJsonModule": true,
-    // Lets a script import a `src/**.ts` source of truth by its real path
-    // (adapter-sites-from-diff.mjs reads the site registry). Node >= 24 runs the
-    // TypeScript directly, so the alternative is a second hand-kept copy of data the
-    // repo deliberately keeps in one place. Legal only because nothing is emitted here.
-    "allowImportingTsExtensions": true,
     // checkJs is what keeps `// @ts-check` honest - without it the pragma would be
     // decoration and the scripts would stay the only unchecked code in the repo.
     "allowJs": true,

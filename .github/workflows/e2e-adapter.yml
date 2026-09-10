@@ -10,8 +10,10 @@ name: E2E (changed adapters)
 # selector-drift probe happened to catch it.
 #
 # This closes that window for the change most likely to open it, and only that one: a diff
-# under src/adapters/. It runs the same signed-out placement scenario the sweep runs, filtered
-# to the sites the diff can actually have broken (scripts/adapter-sites-from-diff.mjs).
+# under src/adapters/. It runs the same signed-out placement scenario the sweep runs, for
+# every site: the toolkit files under src/adapters/ (framework, action-row, placement) are
+# called by every adapter, so a per-site filter would hide exactly the regression that only
+# shows up on the one site the diff never named.
 #
 # ADVISORY, deliberately. It is not in the repository's required checks, and must not be added
 # to them: these scenarios drive live third-party pages, so a red run can also mean X put up a
@@ -26,6 +28,7 @@ on:
   pull_request:
     paths:
       - "src/adapters/**"
+      - "!src/adapters/**/*.test.ts"
 
 permissions:
   contents: read
@@ -36,57 +39,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Deciding WHICH sites to sweep is a plain node call over the diff, so it runs in its own
-  # job ahead of the expensive one: a PR that only touched adapter unit tests, or a toolkit
-  # file with no site of its own, must not pay for a browser install and an extension build
-  # before finding out it had nothing to run.
-  sites:
-    name: Which sites the diff touches
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    outputs:
-      list: ${{ steps.pick.outputs.list }}
-      grep: ${{ steps.pick.outputs.grep }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          # The mapping reads the diff, so both endpoints have to be in the clone.
-          fetch-depth: 0
-
-      # No `pnpm install`: the script imports the site registry (a `.ts` source of truth, read
-      # directly by node's type stripping) and nothing else.
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version-file: .nvmrc
-
-      - name: Map the changed adapter files onto sites
-        id: pick
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          set -euo pipefail
-          # Three dots: what the branch changed since it forked, not what main did meanwhile.
-          changed=$(git diff --name-only "${BASE_SHA}...${HEAD_SHA}")
-          sites=$(printf '%s\n' "$changed" | xargs -r node scripts/adapter-sites-from-diff.mjs | tr '\n' ' ' | sed 's/ *$//')
-          echo "list=${sites}" >> "$GITHUB_OUTPUT"
-          if [ -n "${sites}" ]; then
-            # Alternation over the scenario titles, which read `<site>: <label> ...`.
-            # NOT `^`-anchored: playwright greps the whole title PATH (project, spec file,
-            # line, title), so an anchor matches nothing - verified, it selected 0 tests.
-            # The lookbehind is what a bare alternation costs instead: `x` would otherwise
-            # select a future `netflix:` scenario too.
-            echo "grep=(?<![a-z])($(printf '%s' "${sites}" | tr ' ' '|')): .*default unauth placement and auth-click" >> "$GITHUB_OUTPUT"
-            echo "### Sweeping: ${sites}" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "### No adapter behavior changed - nothing to sweep" >> "$GITHUB_STEP_SUMMARY"
-          fi
-
   sweep:
     name: Live placement (changed adapters)
-    needs: sites
-    if: needs.sites.outputs.list != ''
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -97,14 +51,14 @@ jobs:
       - name: Setup e2e environment
         uses: ./.github/actions/setup-e2e
 
-      # Playwright directly rather than `pnpm test:e2e:ci`, for the reason that job's comment
-      # gives in reverse: the script carries its own `-g`, and this run needs a different one.
-      # The extension only loads in a headed Chromium, hence xvfb.
-      - name: Run the placement scenario for the changed sites
+      # The same npm script and title filter e2e-ci.yml runs, so the two never drift on
+      # which scenario counts as "placement". The extension only loads in a headed
+      # Chromium, hence xvfb. No `--` before the flag - pnpm forwards it verbatim, and
+      # playwright then reads `--reporter=...` as a positional file filter instead.
+      - name: Run the placement scenario
         env:
           PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/e2e-adapter.json
-          GREP: ${{ needs.sites.outputs.grep }}
-        run: xvfb-run -a pnpm exec playwright test -c e2e/playwright.config.ts --reporter=list,json -g "$GREP"
+        run: xvfb-run -a pnpm test:e2e:ci --reporter=list,json
 
       # A run where the sites all sat behind an anti-bot wall verified nothing, and must not
       # read as green - the same gate every scheduled sweep uses.

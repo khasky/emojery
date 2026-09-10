@@ -120,7 +120,7 @@ The commit hooks are the other half. `commit-msg` runs commitlint; `pre-commit` 
 | `ci.yml` | every PR + every push to `main` | this repo's own code — the gate above |
 | `security.yml` | every PR, and daily | OSV Scanner, Gitleaks, Semgrep |
 | `selector-drift.yml` | daily | whether each scenario URL still serves the native controls the adapters anchor on |
-| `e2e-adapter.yml` | a PR touching `src/adapters/` | live-page placement for the sites that diff can have broken — advisory, never a required check |
+| `e2e-adapter.yml` | a PR touching `src/adapters/` | live-page placement on every supported site — advisory, never a required check |
 | `e2e-ci.yml` | every other day + weekly | live-page placement, replace-native, theme contrast |
 | `edge-smoke.yml` | every other day | the GitHub + YouTube placement pair in real Edge |
 | `a11y.yml` | every other day | the extension's own pages (axe, keyboard walk, reflow) |
@@ -178,7 +178,7 @@ Fixing that is the easiest way to contribute here — no build, no code, one fil
 1. Edit the `message` values in `public/_locales/<locale>/messages.json`. Never rename or add a key; English (`public/_locales/en/messages.json`) is the source of truth for which keys exist, and its `description` fields are the context for what each string means.
 2. Keep every `$PLACEHOLDER$` exactly as the English string spells it, along with the entry's `placeholders` block. A placeholder used but not defined fails the **whole extension load** in that language, not just that one string.
 3. Watch the width. Buttons, the popup and the picker are narrow; a string twice its English length overflows the control.
-4. Run `pnpm verify:locales` and `pnpm test` before opening the PR — `src/shared/i18n-locales.test.ts` checks key parity, placeholders, and that nothing is left empty.
+4. Run `pnpm test` before opening the PR — `src/shared/i18n-locales.test.ts` checks key parity, placeholders, and that nothing is left empty.
 5. One language per pull request, `fix(i18n): ...` (see [Commit messages](#commit-messages)), and say in the description that you speak it — nobody here can review a language they don't read, so that statement is the review.
 
 Adding a language that isn't in the 26 is a bigger change than a `messages.json` file — see [Adding or removing a locale](docs/localization.md#adding-or-removing-a-locale) and open an issue first.
