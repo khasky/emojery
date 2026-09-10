@@ -31,8 +31,7 @@ const EN_KEYS = Object.keys(EN);
 const NON_EN = LOCALES.filter((l) => l !== "en");
 // The token set Chrome's loader itself recognizes: a placeholder name is case-insensitive
 // and takes the same characters as a message name (A-Z, a-z, 0-9, _, @). Narrower than that
-// and the gate walks straight past the very name it exists to catch. Mirrored by
-// scripts/verify-locale-placeholders.mjs - the two must widen together.
+// and the gate walks straight past the very name it exists to catch.
 const PLACEHOLDER_RE = /\$([A-Za-z0-9_@]+)\$/g;
 
 describe("i18n locales", () => {

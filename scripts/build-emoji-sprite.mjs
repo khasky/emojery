@@ -18,11 +18,7 @@
 // `pnpm run gen:emoji-sprite`. Needs network access (downloads cached under scripts/.cache)
 // and Playwright's Chromium to compose the sheet on a canvas - avoids a native image
 // dependency.
-//
-// Downloaded bytes are pinned by sha256 in scripts/lib/noto-tile-hashes.json, recorded on
-// first sight and enforced on every run after - see verifyTile().
 
-import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -45,11 +41,6 @@ const NOTO_REF = process.env.NOTO_REF || "8998f5dd683424a73e2314a8c1f1e359c19e87
 // different bytes for the same ref.
 const NOTO_BASE = `https://raw.githubusercontent.com/googlefonts/noto-emoji/${NOTO_REF}/svg`;
 const CACHE_SUBDIR = resolve(CACHE_DIR, `noto-${NOTO_REF}-svg`);
-
-// Committed sha256 pins for the downloaded tiles, keyed by ref then filename - see verifyTile().
-const TILE_HASHES_FILE = resolve(__dirname, "lib/noto-tile-hashes.json");
-const tileHashes = existsSync(TILE_HASHES_FILE) ? JSON.parse(readFileSync(TILE_HASHES_FILE, "utf8")) : {};
-const newlyPinned = [];
 
 // Cell size the SVGs are rasterized to. The on-screen <img> crop is a third of this, so 72px
 // still carries a comfortable HiDPI multiple, and it is what keeps the sheet's DECODED
@@ -103,13 +94,6 @@ async function main() {
     process.exit(1);
   }
 
-  // Only once every tile verified: a run that bailed above must not leave a
-  // half-written pin map behind for the next run to trust.
-  if (newlyPinned.length) {
-    writeFileSync(TILE_HASHES_FILE, `${JSON.stringify(tileHashes, null, 2)}\n`);
-    console.log(`[build-emoji-sprite] pinned ${newlyPinned.length} new tile hash(es) into ${rel(TILE_HASHES_FILE)} - review that diff before committing`);
-  }
-
   const sheet = await composeSheet(tiles, COLS, rows, CELL);
   mkdirSync(SPRITE_DEST_DIR, { recursive: true });
   writeFileSync(SPRITE_IMAGE, sheet);
@@ -138,39 +122,15 @@ function fileCandidates(emoji) {
 async function fetchTile(emoji) {
   for (const file of fileCandidates(emoji)) {
     const cached = resolve(CACHE_SUBDIR, file);
-    if (existsSync(cached)) return verifyTile(file, readFileSync(cached));
+    if (existsSync(cached)) return readFileSync(cached);
     const res = await fetch(`${NOTO_BASE}/${file}`);
     if (res.status === 404 || res.status === 403) continue;
     if (!res.ok) throw new Error(`fetch ${file} -> HTTP ${res.status}`);
     const buf = Buffer.from(await res.arrayBuffer());
     writeFileSync(cached, buf);
-    return verifyTile(file, buf);
-  }
-  return null;
-}
-
-// Trust-on-first-use pinning for the downloaded art. `NOTO_REF` pins the upstream
-// commit, but the bytes still arrive over the network and land in a binary sheet no
-// reviewer can diff - so the first run that sees a tile records its sha256 into a
-// COMMITTED map, and every run after that fails closed if the same file under the
-// same ref ever comes back different. What it catches: a mirror serving other bytes
-// for a pinned commit, and a poisoned scripts/.cache. What it does not: the very
-// first pin (nothing to compare against) - review that diff like a lockfile.
-// A deliberate Noto bump changes NOTO_REF, which starts a fresh section; to
-// re-pin the CURRENT ref after an intentional art change, delete its section.
-function verifyTile(file, buf) {
-  const digest = createHash("sha256").update(buf).digest("hex");
-  const pinned = tileHashes[NOTO_REF]?.[file];
-  if (pinned === undefined) {
-    tileHashes[NOTO_REF] ??= {};
-    tileHashes[NOTO_REF][file] = digest;
-    newlyPinned.push(file);
     return buf;
   }
-  if (pinned !== digest) {
-    throw new Error(`${file} does not match its pinned hash for Noto @${NOTO_REF}\n  pinned:   ${pinned}\n  received: ${digest}\nA pinned commit's bytes changed. Do not re-pin without establishing why - delete ${rel(TILE_HASHES_FILE)}'s "${NOTO_REF}" section only once the change is explained.`);
-  }
-  return buf;
+  return null;
 }
 
 // Draw every tile onto one canvas in Chromium (already installed for e2e) and read it

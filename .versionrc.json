@@ -16,8 +16,5 @@
     { "type": "build", "hidden": true },
     { "type": "ci", "hidden": true },
     { "type": "chore", "hidden": true }
-  ],
-  "scripts": {
-    "prechangelog": "node scripts/clear-changelog-seed.mjs"
-  }
+  ]
 }

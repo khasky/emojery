@@ -2,10 +2,10 @@
 //
 // Every shipped locale, on the extension's own three pages: the translation is
 // actually substituted, no message key leaks through as raw text, and nothing
-// overruns the popup's real width. `verify:locales` already checks the
-// placeholder definitions in the catalogs and `i18n-locales.test.ts` the
-// translation backlog - neither loads the pages, so a string that fits the
-// catalog but not the layout only shows up here.
+// overruns the popup's real width. `i18n-locales.test.ts` already checks the
+// placeholder definitions in the catalogs and the translation backlog - it
+// never loads the pages, so a string that fits the catalog but not the layout
+// only shows up here.
 //
 // a11y.spec.ts owns the reflow breakpoint for auth/onboarding, in ONE language.
 // This file is the other axis: the same popup at its real width, in all of them.
