@@ -258,14 +258,10 @@ The `postinstall` hook runs `wxt prepare` and copies the bundled emoji locales i
 Pick the target that matches your browser. `pnpm dev` runs a live HMR watcher, `pnpm build` makes an unpacked production build, and `pnpm zip` packages it for upload.
 
 ```bash
-# Chrome / Brave / Arc / Opera / any Chromium fork (MV3)
+# Chrome / Edge / Brave / Arc / Opera / any Chromium fork (MV3)
 pnpm dev          # dev with HMR, opens a Chrome dev profile
 pnpm build        # production build → .output/chrome-mv3
 pnpm zip          # package          → .output/emojery-v<version>-chrome-mv3.zip
-
-# Microsoft Edge (MV3)
-pnpm build:edge   # → .output/edge-mv3
-pnpm zip:edge     # → .output/emojery-v<version>-edge-mv3.zip
 
 # Firefox / Firefox-based browsers (Manifest V2)
 pnpm dev:firefox       # dev with HMR
