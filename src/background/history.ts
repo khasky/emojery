@@ -258,6 +258,9 @@ function userKeyRange(userId: string): IDBKeyRange {
   return IDBKeyRange.bound([userId, -Infinity], [userId, Infinity]);
 }
 
+// Handing back the live cached array is fine: both readers walk it inside one open
+// readonly transaction, and the delta helpers above only run once a write has committed -
+// which that transaction blocks until the walk is done.
 async function getUserIdList(index: IDBIndex, userId: string): Promise<number[]> {
   const range = userKeyRange(userId);
   const count = await requestAsPromise(index.count(range));
