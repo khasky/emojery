@@ -7,6 +7,7 @@
 // the whole multi-megabyte CLDR set into every one: `scripts/copy-emoji-locales.mjs`
 // instead prunes it to the picker's REACTIONS entries, emitting `public/emoji-data/<locale>.json`,
 // ALL fetched at runtime via `chrome.runtime.getURL` - English included.
+import detectableLocaleKeys from "./__data__/emoji-locales.json";
 import { API_TIMEOUT_MS } from "./config";
 import { deadlineSignal } from "./fetch-deadline";
 
@@ -94,10 +95,12 @@ let primaryLocaleKey: string | null = null;
 const searchExtraMaps = new Map<string, Map<string, EmojiInfo>>();
 const inflightLoads = new Map<string, Promise<Map<string, EmojiInfo> | null>>();
 
-// Locales we ship emoji metadata for. `en` is absent on purpose - it loads
-// through ensureEnLoaded() as the universal fallback, not through this set;
-// regional near-duplicates fall back to the base language via normalizeKey().
-const SUPPORTED_LOCALE_KEYS: ReadonlySet<string> = new Set(["bn", "da", "de", "es", "et", "fi", "fr", "hi", "hu", "it", "ja", "ko", "lt", "ms", "nb", "nl", "pl", "pt", "ru", "sv", "th", "uk", "vi", "zh", "zh-hant"]);
+// Locales we ship emoji metadata for, from the one list the generator reads too
+// (__data__/emoji-locales.json). `en` is absent on purpose - it loads through
+// ensureEnLoaded() as the universal fallback, not through this set, so the
+// generator adds it on its side; regional near-duplicates fall back to the base
+// language via normalizeKey().
+const SUPPORTED_LOCALE_KEYS: ReadonlySet<string> = new Set(detectableLocaleKeys);
 
 // Traditional Chinese reaches us as a region tag (zh-TW/HK/MO) far more often than as an
 // explicit script tag, and every one of those splits to a bare "zh" - i.e. Simplified data

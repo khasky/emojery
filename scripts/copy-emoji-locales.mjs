@@ -23,7 +23,10 @@ const PUBLIC_DEST = resolve(__dirname, "../public/emoji-data");
 const BUNDLE_DEST = resolve(__dirname, "../src/shared/__generated__");
 const MESSAGES_SRC = resolve(__dirname, "../public/_locales/en/messages.json");
 const MESSAGES_SLIM = resolve(BUNDLE_DEST, "messages-en.json");
-const PUBLIC_EMOJI_LOCALES = new Set(["bn", "da", "de", "en", "es", "et", "fi", "fr", "hi", "hu", "it", "ja", "ko", "lt", "ms", "nb", "nl", "pl", "pt", "ru", "sv", "th", "uk", "vi", "zh", "zh-hant"]);
+// The shipped set: every locale emoji-meta.ts can DETECT, from the one list it
+// reads too, plus `en` - never detected, loaded unconditionally as the fallback.
+const LOCALES_SRC = resolve(__dirname, "../src/shared/__data__/emoji-locales.json");
+const PUBLIC_EMOJI_LOCALES = new Set([...JSON.parse(readFileSync(LOCALES_SRC, "utf8")), "en"]);
 
 if (!existsSync(SRC)) {
   console.warn("[copy-emoji-locales] emojibase-data not installed; skipping");

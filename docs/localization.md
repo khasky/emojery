@@ -36,17 +36,16 @@ Content scripts in MV3 have no code-splitting — Vite/WXT inline every dynamic 
 
 ### Adding or removing a locale
 
-Re-running `pnpm copy:emoji-data` alone changes nothing — the shipped set is 3 hand-maintained lists, and a new language is only live once all 3 carry it:
+Re-running `pnpm copy:emoji-data` alone changes nothing — the shipped set is 2 hand-maintained lists, and a new language is only live once both carry it:
 
 | List | Where | What it controls |
 | --- | --- | --- |
-| `PUBLIC_EMOJI_LOCALES` | `scripts/copy-emoji-locales.mjs` | Which `public/emoji-data/<locale>.json` files are generated at all |
-| `SUPPORTED_LOCALE_KEYS` | `src/shared/emoji-meta.ts` | Which browser languages `detectLocaleKey()` resolves to a shipped file |
+| `src/shared/__data__/emoji-locales.json` | read by `src/shared/emoji-meta.ts` (`SUPPORTED_LOCALE_KEYS`) and by `scripts/copy-emoji-locales.mjs` (`PUBLIC_EMOJI_LOCALES`) | Which browser languages `detectLocaleKey()` resolves, and which `public/emoji-data/<locale>.json` files are generated |
 | `public/_locales/<locale>/` | Chrome i18n message catalogs | The extension's **own UI strings** (a separate dataset from emoji labels) |
 
-The third list is the extension's own UI strings, whose translation quality differs per language — English, Russian and Ukrainian are human, the rest is machine translation. [CONTRIBUTING.md → Translations](../CONTRIBUTING.md#translations-and-how-good-they-actually-are) covers that and how to send a fix.
+The second list is the extension's own UI strings, whose translation quality differs per language — English, Russian and Ukrainian are human, the rest is machine translation. [CONTRIBUTING.md → Translations](../CONTRIBUTING.md#translations-and-how-good-they-actually-are) covers that and how to send a fix.
 
-The first two must match except for `en`, deliberately absent from `SUPPORTED_LOCALE_KEYS` because it is never the *detected* locale: `ensureEnLoaded()` loads it unconditionally as the fallback. Nothing pins the lists to each other automatically, so change them in one commit; a key in `SUPPORTED_LOCALE_KEYS` with no generated file makes the loader return `null` and the picker falls back to English.
+`en` is absent from the JSON on purpose: it is never the *detected* locale — `ensureEnLoaded()` loads it unconditionally as the fallback — so the generator appends it to the set it writes. Both readers taking the same list is what keeps a detectable key from existing without its generated file — a key with no file makes the loader return `null` and the picker fall back to English.
 
 ## Pruning
 
