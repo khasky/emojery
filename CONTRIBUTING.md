@@ -66,7 +66,7 @@ When placement looks right but behavior is wrong, check the mounted key first: a
 
 ## Branches and pull requests
 
-`main` is the only long-lived branch, and it is always releasable: every store submission is built from a `v*` tag on `main`, so anything merged there has already passed the [gates below](#pre-pr-gates). There is no `develop` branch — 1 version of the extension is live at a time, so a second integration branch would only double the merge work for no isolation gained. Staging is a build mode (`pnpm build:staging`), not a branch.
+`main` is the permanent branch and carries the next line: every change lands there first, experiments included, and every minor release is tagged on it, so anything merged there has already passed the [gates below](#pre-pr-gates). There is no `develop` branch — a second integration branch would only double the merge work for no isolation gained. Staging is a build mode (`pnpm build:staging`) of `main` against the staging API, not a branch; the version already in the stores lives on its `release/X.Y` branch (below).
 
 Outside contributors work in a fork; the branches in this repo belong to the maintainer and to Dependabot. The flow is the same either way:
 
@@ -83,7 +83,7 @@ git push -u origin fix/instagram-comment-rows
 
 PRs land as a **squash merge**, so `main` keeps a linear history where 1 PR is 1 commit and 1 line in `CHANGELOG.md`. That squashed commit takes its message from the **PR title**, not from the commits inside the branch, so the title itself has to follow [the convention](#commit-messages) (`fix(instagram): don't double-mount on comment rows`) even when every commit in the branch already does — the release version and changelog are derived from what lands on `main`. The head branch is deleted on merge.
 
-`release/<major>.<minor>` branches exist only when a version already shipped to the stores needs a patch after `main` has moved past it. They are cut on demand and are maintainer-only: [docs/releasing.md](docs/releasing.md#hotfixing-a-released-version).
+`release/<major>.<minor>` is cut from `main` at every minor release and is where a patch to a version already in the stores is tagged; a fix lands on `main` first and reaches the branch by cherry-pick. Maintainer-only, protected against force-push and deletion: [docs/releasing.md](docs/releasing.md#versions-and-branches).
 
 ## Pre-PR gates
 

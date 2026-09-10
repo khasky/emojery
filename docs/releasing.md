@@ -24,6 +24,17 @@ pnpm check           # the whole gate; CONTRIBUTING.md#pre-pr-gates lists what i
 
 A release that adds a supported site goes out only once that site is live on the production API (`docs/adding-a-site.md`). If the build reaches users first, reactions on the new site do not register until the two line up, with nothing on the page to say why.
 
+## Versions and branches
+
+The extension's `major.minor` is the API line it is built for: a `1.2.x` build talks to the `1.2` API, and the API keeps serving the previous minor while a store rollout is in flight, then retires it (`403 client_outdated`, which the sign-in page turns into an update prompt). So:
+
+- **A minor bump means the API moved.** It is released only after the matching API line is live; a patch (`X.Y.Z`) is this repo's own business and needs nothing on the other side.
+- **`main` is the permanent branch and the next line.** Every change lands there first, experiments included, and every minor is tagged on it. A `pnpm build:staging` of `main` talks to the staging API, which runs the newest backend ahead of production — that pairing is where the next minor is exercised before either side ships.
+- **`release/X.Y` is cut from `main` at `vX.Y.0`** and carries the patches of that line: a fix lands on `main` first, then reaches the branch by cherry-pick, and the patch tag `vX.Y.Z` sits on the branch. Patch tags are not merged back.
+- Release branches stay. A line is closed, not deleted, once the API no longer serves it: no patch goes there any more, and the branch remains the record of what shipped.
+
+The 1.0.0 release predates this procedure, so `release/1.0` was created after the fact (2026-09-10) from the existing `v1.0.0` tag.
+
 ## The first release
 
 For the first public release, use `--first-release`. It writes the changelog and creates the `v<package.json version>` tag without bumping the current `package.json` version:
@@ -43,10 +54,11 @@ pnpm first runs the `prerelease` lifecycle hook (`pnpm check` — the same gate 
 ```bash
 pnpm exec commit-and-tag-version --dry-run
 pnpm release
-git push origin main --follow-tags
+git branch release/X.Y vX.Y.0          # a minor only; a patch is tagged on the existing branch (below)
+git push origin main release/X.Y --follow-tags
 ```
 
-The `--dry-run` above prints the computed version and the CHANGELOG section for commits since the last `v*` tag, writing nothing.
+The `--dry-run` above prints the computed version and the CHANGELOG section for commits since the last `v*` tag, writing nothing. Check that the minor it computes is the one the API line expects: a `feat` that changed nothing on the wire still bumps the minor by convention, and the API side then cuts its matching line first.
 
 ## After pushing the tag
 
@@ -72,29 +84,25 @@ That archive is the only way back from a minified stack trace in a bug report to
 
 ## Hotfixing a released version
 
-Every release is cut from `main`. Once a tag is out, where a patch goes depends on whether `main` has moved on:
-
-- **`main` is still releasable** — nothing has landed since the tag that isn't ready to ship. Merge the fix through the normal PR flow and cut the patch release from `main` exactly as above. No extra branch.
-- **`main` has moved past it** — the next version's work is already merged while the tagged version is live in the stores or sitting in review. Store review latency makes this the common case, and the patch then needs a branch off the tag.
-
-The fix lands on `main` first, always, and only then travels to the release branch. The reverse order leaves it living on the branch alone, and the next minor release reintroduces the bug:
+Every minor is cut from `main`; every patch is tagged on that minor's `release/X.Y` branch, which exists from the day the minor shipped. The fix lands on `main` first, always, and only then travels to the release branch. The reverse order leaves it living on the branch alone, and the next minor release reintroduces the bug:
 
 ```bash
 # 1. the fix is merged to main through a normal PR
 
-# 2. branch off the released tag and take the fix across
-git switch -c release/1.2 v1.2.0
+# 2. take the fix across
+git switch release/1.2
 git cherry-pick <sha of the fix commit on main>
 
 # 3. gate, then tag the patch from that branch
 pnpm check
 pnpm exec commit-and-tag-version --release-as patch
 git push origin release/1.2 --follow-tags
+git switch main
 ```
 
 `pnpm release` is not used here: pnpm appends extra arguments to the end of the script, which for `release` is `zip:all` rather than `commit-and-tag-version`, so `--release-as` would reach the wrong command. Running `pnpm check` first restores what the `prerelease` hook would have done, and the workflow builds the zips from the tag anyway.
 
-`Release Extension Builds` triggers on any `v*` tag regardless of which branch carries it, so the draft release and its 5 zips arrive the same way they do for a release cut from `main`. Keep `release/1.2` while that line may still need another patch; delete it once the next minor is live in the stores.
+`Release Extension Builds` triggers on any `v*` tag regardless of which branch carries it, so the draft release and its 5 zips arrive the same way they do for a release cut from `main`. The branch stays after the patch; the line is closed once the API no longer serves `1.2`.
 
 ## Repository settings
 
@@ -102,6 +110,7 @@ The branching model above is only real if the repository enforces it — a rules
 
 - **Ruleset on `main`**: require a pull request (0 approvals is fine for a solo maintainer — the requirement exists so CI runs on every change), require the `ci.yml` checks, require linear history, block force pushes and deletion. Adding yourself to the bypass list turns the whole gate into decoration.
 - **Ruleset on tag `v*`**: block deletion and non-fast-forward updates, so a published release tag can't be moved under an already-shipped store build.
+- **Ruleset on `release/*`**: block force pushes and deletion. Patches land there by cherry-pick from `main`, never by a rewrite.
 - **Merge policy**: allow squash merging only, set *Default to pull request title for squash merge commits*, and enable *Automatically delete head branches*.
 - **PR title check**: the `commit-msg` hook validates commits, not PR titles, and a squash merge takes its message from the title — so the title needs its own commitlint check in CI, or a bad title silently becomes the changelog line and skews the derived version.
 
