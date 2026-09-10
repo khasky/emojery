@@ -8,3 +8,10 @@ declare module "*.css?raw" {
   const css: string;
   export default css;
 }
+
+// The authored text of a stylesheet the build ships shrunk (scripts/lib/shrink-raw-css.ts
+// skips this query). Read by picker-css.browser.test.tsx only.
+declare module "*.css?raw&authored" {
+  const css: string;
+  export default css;
+}

@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import preact from "@preact/preset-vite";
 import { parse as parseDotenv } from "dotenv";
 import { defineConfig } from "wxt";
-import { shrinkCss } from "./scripts/lib/css-shrink.mjs";
+import { shrinkRawCssPlugin } from "./scripts/lib/shrink-raw-css";
 import { PRODUCTION_API_BASE, STAGING_API_BASE } from "./src/shared/api-origins";
 import { HOMEPAGE_MATCH_PATTERN } from "./src/shared/homepage";
 import { ALL_SITE_MATCH_PATTERNS } from "./src/shared/sites";
@@ -66,29 +66,6 @@ function resolveApiOrigin(mode: string | undefined): string {
   }
 }
 
-// The picker mounts into a shadow root, so its stylesheet travels as a STRING
-// (`import css from "./picker.css?raw"`) and is inlined into every content-script bundle
-// that imports it, each copy carrying the file's full rationale comments - a large share
-// of each bundle's budget in scripts/check-bundle-budget.mjs (`pnpm check:bundle` prints
-// the current sizes). This strips the bytes no parser keeps.
-//
-// Build only: `pnpm dev` keeps the readable text in the browser's Sources panel, and the
-// test runners have their own configs, so a test always reads the stylesheet as authored.
-// scripts/lib/css-shrink.test.mjs pins the transform's string/url() safety; the CSSOM
-// equivalence check runs in a real browser in src/ui/picker-css.browser.test.tsx.
-function shrinkRawCssPlugin() {
-  return {
-    name: "emojery:shrink-raw-css",
-    // Ahead of Vite's own `?raw` loader, so this owns the module's contents.
-    enforce: "pre" as const,
-    load(id: string) {
-      if (!id.endsWith(".css?raw")) return null;
-      const file = id.slice(0, -"?raw".length);
-      return `export default ${JSON.stringify(shrinkCss(readFileSync(file, "utf8")))};`;
-    },
-  };
-}
-
 // Removes the source-map entries from one of WXT's build-output file lists, in place:
 // the lists are handed to the `build:done` hook as `Readonly<BuildOutput>`, which
 // freezes the properties, not the arrays.
@@ -125,6 +102,8 @@ export default defineConfig({
       // an AMO reviewer's rebuild is byte-identical within the same calendar month.
       __EM_BUILD_TIME__: JSON.stringify(BUILD_MODE === "staging" ? new Date().toISOString() : new Date().toISOString().slice(0, 7)),
     },
+    // The `?raw` stylesheets ship whitespace-minified (scripts/lib/shrink-raw-css.ts). Build
+    // only: `pnpm dev` keeps the readable text in the browser's Sources panel.
     plugins: [preact() as never, ...(env.command === "build" ? [shrinkRawCssPlugin() as never] : [])],
     // Extension pages load their chunks from disk, so a preload hint buys nothing
     // and Chrome logs "cross-world extension resource mismatch" for every chunk

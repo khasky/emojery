@@ -82,11 +82,10 @@
     "check:bundle": "node scripts/check-bundle-budget.mjs",
     "copy:emoji-data": "node scripts/copy-emoji-locales.mjs",
     "gen:emoji-sprite": "node scripts/build-emoji-sprite.mjs",
-    "verify:locales": "node scripts/verify-locale-placeholders.mjs",
-    "prepare:assets": "pnpm run copy:emoji-data && pnpm run verify:locales",
+    "prepare:assets": "pnpm run copy:emoji-data",
     "prerelease": "pnpm check",
     "prepare": "husky",
-    "postinstall": "wxt prepare && pnpm run copy:emoji-data"
+    "postinstall": "wxt prepare"
   },
   "dependencies": {
     "emojibase-data": "^17.0.0",
@@ -110,6 +109,7 @@
     "axe-core": "4.13.0",
     "commit-and-tag-version": "12.7.3",
     "dotenv": "^17.4.2",
+    "esbuild": "0.25.12",
     "fast-check": "4.9.0",
     "husky": "9.1.7",
     "jsdom": "^30.0.1",

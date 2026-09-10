@@ -11,10 +11,13 @@
 import preact from "@preact/preset-vite";
 import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vitest/config";
+import { shrinkRawCssPlugin } from "./scripts/lib/shrink-raw-css";
 
 export default defineConfig({
-  // Preact JSX transform, same as the production build (wxt.config.ts).
-  plugins: [preact() as never],
+  // Preact JSX transform and the `?raw` stylesheet shrink, same as the production build
+  // (wxt.config.ts): these engines render the picker from the bytes that ship, and
+  // src/ui/picker-css.browser.test.tsx compares them against the authored source.
+  plugins: [preact() as never, shrinkRawCssPlugin() as never],
   // Nothing here imports from `public/`, and the chrome shim fetches the shipped emoji
   // data by its real path (`/public/emoji-data/*.json`, see src/test/chrome-shim.ts) -
   // a configured public dir would serve those files at `/` instead.
