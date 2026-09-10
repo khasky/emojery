@@ -103,6 +103,8 @@ pnpm check:bundle      # per-content-script byte budget + no English message dic
 pnpm zip:all           # wxt zip, chrome + firefox
 ```
 
+`pnpm format` (`biome format --write .`) fixes what `pnpm lint` reports as formatting; it is not part of the gate, and `pnpm lint` still has to pass after it.
+
 `pnpm test:browser` dying in seconds with `page.goto: Page crashed` / `Browser connection was closed while running tests` and `Tests no tests` is a stale WebKit binary, not a broken suite — the `webkit-<rev>` under the Playwright browsers directory no longer matches the pinned `playwright`. Re-run `pnpm exec playwright install webkit`. A WebKit that launches and loads an ordinary page proves nothing here: only a bundle as heavy as the Vitest tester page crashes the mismatched build (seen on Windows with WebKit v2311, fixed by v2336). The pinned `firefox-<rev>` binary can go stale the same way — `pnpm exec playwright install firefox`.
 
 `pnpm test` (plain `vitest run`) is the fast inner loop, not the gate: it excludes the browser-mode specs (`*.browser.test.*`, which run under `test:browser` in real WebKit and Firefox), so a green `pnpm test` says nothing about them. `test:coverage` adds the report and nothing else — `vitest.config.ts` sets no thresholds, so coverage never fails a run either way. Same for `pnpm build` / `pnpm zip` — CI builds and packages both browsers.
