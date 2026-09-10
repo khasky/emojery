@@ -454,7 +454,7 @@
     "message": "Was Emojery sendet"
   },
   "dataConsentBody": {
-    "message": "Emojery sendet die Adresse der Seite, auf der Sie reagieren, zufällige Installations- und Sitzungskennungen sowie einmalig bei der Anmeldung Ihre E-Mail-Adresse; davon wird nur ein Einweg-Hash gespeichert. Optionaler Kontext bleibt in diesem Browser deaktiviert."
+    "message": "Emojery sendet die Adresse der Seite, auf der Sie reagieren, eine zufällige Installationskennung sowie einmalig bei der Anmeldung Ihre E-Mail-Adresse; davon wird nur ein Einweg-Hash gespeichert. Optionaler Kontext bleibt in diesem Browser deaktiviert."
   },
   "dataConsentPolicyLink": {
     "message": "Datenschutzrichtlinie."

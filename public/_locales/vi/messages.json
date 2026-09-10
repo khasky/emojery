@@ -454,7 +454,7 @@
     "message": "Emojery gửi những gì"
   },
   "dataConsentBody": {
-    "message": "Emojery gửi địa chỉ trang mà bạn phản ứng, các mã định danh cài đặt và phiên ngẫu nhiên, và email của bạn một lần khi đăng nhập; chỉ một mã băm một chiều của email được giữ lại. Ngữ cảnh tùy chọn vẫn tắt trong trình duyệt này."
+    "message": "Emojery gửi địa chỉ trang mà bạn phản ứng, một mã định danh cài đặt ngẫu nhiên, và email của bạn một lần khi đăng nhập; chỉ một mã băm một chiều của email được giữ lại. Ngữ cảnh tùy chọn vẫn tắt trong trình duyệt này."
   },
   "dataConsentPolicyLink": {
     "message": "Chính sách quyền riêng tư."

@@ -454,7 +454,7 @@
     "message": "Mitä Emojery lähettää"
   },
   "dataConsentBody": {
-    "message": "Emojery lähettää sen sivun osoitteen, jolla reagoit, satunnaiset asennus- ja istuntotunnisteet sekä sähköpostiosoitteesi kerran kirjautuessasi; siitä säilytetään vain yksisuuntainen tiiviste. Valinnainen konteksti pysyy pois päältä tässä selaimessa."
+    "message": "Emojery lähettää sen sivun osoitteen, jolla reagoit, satunnaisen asennustunnisteen sekä sähköpostiosoitteesi kerran kirjautuessasi; siitä säilytetään vain yksisuuntainen tiiviste. Valinnainen konteksti pysyy pois päältä tässä selaimessa."
   },
   "dataConsentPolicyLink": {
     "message": "Tietosuojakäytäntö."

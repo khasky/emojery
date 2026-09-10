@@ -454,7 +454,7 @@
     "message": "Wat Emojery verstuurt"
   },
   "dataConsentBody": {
-    "message": "Emojery stuurt het adres van de pagina waarop je reageert, willekeurige installatie- en sessie-identificatiegegevens en één keer bij het inloggen je e-mailadres; daarvan wordt alleen een eenwegshash bewaard. Optionele context blijft uitgeschakeld in deze browser."
+    "message": "Emojery stuurt het adres van de pagina waarop je reageert, een willekeurige installatie-identificatie en één keer bij het inloggen je e-mailadres; daarvan wordt alleen een eenwegshash bewaard. Optionele context blijft uitgeschakeld in deze browser."
   },
   "dataConsentPolicyLink": {
     "message": "Privacybeleid."

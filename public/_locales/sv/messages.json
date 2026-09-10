@@ -454,7 +454,7 @@
     "message": "Vad Emojery skickar"
   },
   "dataConsentBody": {
-    "message": "Emojery skickar adressen till sidan du reagerar på, slumpmässiga installations- och sessionsidentifierare och din e-postadress en gång vid inloggning; av den sparas bara en enkelriktad hash. Valfri kontext förblir avstängd i den här webbläsaren."
+    "message": "Emojery skickar adressen till sidan du reagerar på, en slumpmässig installationsidentifierare och din e-postadress en gång vid inloggning; av den sparas bara en enkelriktad hash. Valfri kontext förblir avstängd i den här webbläsaren."
   },
   "dataConsentPolicyLink": {
     "message": "Integritetspolicy."

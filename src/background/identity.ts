@@ -90,9 +90,11 @@ export function extensionClientHeaders(): Record<string, string> {
 // and the problem report (reports.ts). No two sources share a header name, so
 // spread order never changes the result. The GET reads (api-read.ts, popular.ts)
 // build their own, so a header added below reaches the POSTs only.
+//
+// The install id is part of the request shape, so a failure to read or create it
+// propagates to the caller instead of sending a request without it.
 export async function jsonApiHeaders(opts: { token?: string; lang?: string } = {}): Promise<Record<string, string>> {
-  // Deliberate absorb: these headers are best-effort, and the request goes out without them.
-  const securityHeaders = await clientSecurityHeaders().catch(() => ({}));
+  const securityHeaders = await clientSecurityHeaders();
   return {
     "content-type": "application/json",
     ...(opts.token ? { authorization: `Bearer ${opts.token}` } : {}),

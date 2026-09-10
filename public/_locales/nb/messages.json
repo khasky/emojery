@@ -454,7 +454,7 @@
     "message": "Hva Emojery sender"
   },
   "dataConsentBody": {
-    "message": "Emojery sender adressen til siden du reagerer på, tilfeldige installasjons- og øktidentifikatorer og e-postadressen din én gang ved innlogging; bare en enveis-hash av den lagres. Valgfri kontekst forblir avslått i denne nettleseren."
+    "message": "Emojery sender adressen til siden du reagerer på, en tilfeldig installasjonsidentifikator og e-postadressen din én gang ved innlogging; bare en enveis-hash av den lagres. Valgfri kontekst forblir avslått i denne nettleseren."
   },
   "dataConsentPolicyLink": {
     "message": "Personvernerklæring."

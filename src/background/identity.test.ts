@@ -27,6 +27,8 @@ import { deleteAccount, finishPendingDeletion, getAuth, requestOtp, revokeSessio
 
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ["Date"], now: FROZEN_NOW });
+  // Every JSON POST reads the install id from storage.local before it goes out.
+  installFakeChrome();
 });
 
 afterEach(() => {
@@ -87,7 +89,6 @@ describe("requestOtp", () => {
     });
     expect(init.headers).toMatchObject({
       "x-emojery-install-id": expect.stringMatching(/^[A-Za-z0-9_-]{16,128}$/),
-      "x-emojery-session-id": expect.stringMatching(/^[A-Za-z0-9_-]{16,128}$/),
     });
     expect(JSON.parse(init.body as string)).toEqual({
       email: "a@b.com",

@@ -454,7 +454,7 @@
     "message": "Ce qu’Emojery envoie"
   },
   "dataConsentBody": {
-    "message": "Emojery envoie l’adresse de la page sur laquelle vous réagissez, des identifiants d’installation et de session aléatoires, et votre adresse e-mail une seule fois à la connexion ; seul un hachage à sens unique de celle-ci est conservé. Le contexte facultatif reste désactivé dans ce navigateur."
+    "message": "Emojery envoie l’adresse de la page sur laquelle vous réagissez, un identifiant d’installation aléatoire, et votre adresse e-mail une seule fois à la connexion ; seul un hachage à sens unique de celle-ci est conservé. Le contexte facultatif reste désactivé dans ce navigateur."
   },
   "dataConsentPolicyLink": {
     "message": "Politique de confidentialité."

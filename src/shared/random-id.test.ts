@@ -7,6 +7,7 @@
 // where nobody looks until a stored id fails validation.
 
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { installFakeChrome } from "../test/fixtures";
 import { randomId } from "./random-id";
 
 // The readback validation in background/client-security.ts, verbatim.
@@ -56,14 +57,12 @@ describe("randomId", () => {
     expect(() => randomId()).toThrow(/no Web Crypto/);
   });
 
-  it("lets the API layer send a request without the client-security headers rather than fail", async () => {
-    // The one caller that must not become a hard failure: jsonApiHeaders absorbs it.
+  it("fails the API layer's header build rather than send a request without an install id", async () => {
+    // The install id is part of the request shape; jsonApiHeaders lets the failure propagate.
     vi.stubGlobal("crypto", undefined);
+    installFakeChrome();
     const { jsonApiHeaders } = await import("../background/identity");
-    const headers = await jsonApiHeaders({});
-    expect(headers["x-emojery-install-id"]).toBeUndefined();
-    expect(headers["x-emojery-session-id"]).toBeUndefined();
-    expect(headers["content-type"]).toBe("application/json");
+    await expect(jsonApiHeaders({})).rejects.toThrow(/no Web Crypto/);
   });
 
   it("does not repeat itself", () => {

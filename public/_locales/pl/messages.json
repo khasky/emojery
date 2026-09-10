@@ -454,7 +454,7 @@
     "message": "Co wysyła Emojery"
   },
   "dataConsentBody": {
-    "message": "Emojery wysyła adres strony, na której reagujesz, losowe identyfikatory instalacji i sesji oraz raz przy logowaniu Twój adres e-mail; przechowywany jest tylko jego jednokierunkowy skrót. Opcjonalny kontekst pozostaje wyłączony w tej przeglądarce."
+    "message": "Emojery wysyła adres strony, na której reagujesz, losowy identyfikator instalacji oraz raz przy logowaniu Twój adres e-mail; przechowywany jest tylko jego jednokierunkowy skrót. Opcjonalny kontekst pozostaje wyłączony w tej przeglądarce."
   },
   "dataConsentPolicyLink": {
     "message": "Polityka prywatności."

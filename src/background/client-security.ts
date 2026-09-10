@@ -1,16 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Opaque client identifiers used by API requests. They are not secrets, and they carry
-// nothing user-derived - both are random. The install id persists for the lifetime of the
-// installation; the session id rotates on the TTL below.
+// Opaque client identifier used by API requests. It is not a secret, and it carries
+// nothing user-derived - it is random. The install id persists for the lifetime of the
+// installation.
 
 import { randomId } from "../shared/random-id";
 import { storageLocalGet, storageLocalSet } from "../shared/webext";
 
 const SECURITY_CONTEXT_KEY = "security_context_v1";
-// Exported so client-security.test.ts probes the real rotation boundary. A copy of
-// the number there would still pass if the TTL shrank, silently stopping short of it.
-export const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 
 interface StoredSecurityContext {
   installId?: unknown;
@@ -20,44 +17,27 @@ interface StoredSecurityContext {
 
 interface ClientSecurityContext {
   installId: string;
-  sessionId: string;
 }
 
-export async function getClientSecurityContext(now: number = Date.now()): Promise<ClientSecurityContext> {
+export async function getClientSecurityContext(): Promise<ClientSecurityContext> {
   const stored = await storageLocalGet([SECURITY_CONTEXT_KEY]);
   const raw = stored[SECURITY_CONTEXT_KEY] as StoredSecurityContext | undefined;
 
   let installId = normalizeStoredId(raw?.installId);
-  let sessionId = normalizeStoredId(raw?.sessionId);
-  let sessionStartedAt = typeof raw?.sessionStartedAt === "number" && Number.isFinite(raw.sessionStartedAt) ? raw.sessionStartedAt : 0;
-  let changed = false;
+  const staleSession = raw !== undefined && ("sessionId" in raw || "sessionStartedAt" in raw);
 
-  if (!installId) {
-    installId = randomId();
-    changed = true;
+  if (!installId) installId = randomId();
+
+  if (installId !== raw?.installId || staleSession) {
+    await storageLocalSet({ [SECURITY_CONTEXT_KEY]: { installId } });
   }
 
-  if (!sessionId || sessionStartedAt <= 0 || now - sessionStartedAt >= SESSION_TTL_MS) {
-    sessionId = randomId();
-    sessionStartedAt = now;
-    changed = true;
-  }
-
-  if (changed) {
-    await storageLocalSet({
-      [SECURITY_CONTEXT_KEY]: { installId, sessionId, sessionStartedAt },
-    });
-  }
-
-  return { installId, sessionId };
+  return { installId };
 }
 
 export async function clientSecurityHeaders(): Promise<Record<string, string>> {
   const ctx = await getClientSecurityContext();
-  return {
-    "x-emojery-install-id": ctx.installId,
-    "x-emojery-session-id": ctx.sessionId,
-  };
+  return { "x-emojery-install-id": ctx.installId };
 }
 
 function normalizeStoredId(value: unknown): string | null {

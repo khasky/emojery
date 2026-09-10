@@ -454,7 +454,7 @@
     "message": "O que o Emojery envia"
   },
   "dataConsentBody": {
-    "message": "O Emojery envia o endereço da página em que você reage, identificadores aleatórios de instalação e sessão e, uma única vez ao entrar na conta, seu e-mail; dele é mantido apenas um hash unidirecional. O contexto opcional permanece desativado neste navegador."
+    "message": "O Emojery envia o endereço da página em que você reage, um identificador aleatório de instalação e, uma única vez ao entrar na conta, seu e-mail; dele é mantido apenas um hash unidirecional. O contexto opcional permanece desativado neste navegador."
   },
   "dataConsentPolicyLink": {
     "message": "Política de Privacidade."

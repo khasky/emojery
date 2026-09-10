@@ -454,7 +454,7 @@
     "message": "Apa yang Emojery hantar"
   },
   "dataConsentBody": {
-    "message": "Emojery menghantar alamat halaman yang anda beri tindak balas, pengecam pemasangan dan sesi rawak, serta e-mel anda sekali sahaja semasa log masuk; hanya cincangan sehala bagi e-mel itu disimpan. Konteks pilihan kekal dimatikan dalam pelayar ini."
+    "message": "Emojery menghantar alamat halaman yang anda beri tindak balas, satu pengecam pemasangan rawak, serta e-mel anda sekali sahaja semasa log masuk; hanya cincangan sehala bagi e-mel itu disimpan. Konteks pilihan kekal dimatikan dalam pelayar ini."
   },
   "dataConsentPolicyLink": {
     "message": "Dasar Privasi."

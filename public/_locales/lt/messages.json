@@ -454,7 +454,7 @@
     "message": "Ką siunčia „Emojery“"
   },
   "dataConsentBody": {
-    "message": "„Emojery“ siunčia puslapio, kuriame reaguojate, adresą, atsitiktinius diegimo ir seanso identifikatorius ir prisijungiant vieną kartą jūsų el. pašto adresą; saugoma tik vienkryptė jo maiša. Pasirenkamas kontekstas šioje naršyklėje lieka išjungtas."
+    "message": "„Emojery“ siunčia puslapio, kuriame reaguojate, adresą, atsitiktinį diegimo identifikatorių ir prisijungiant vieną kartą jūsų el. pašto adresą; saugoma tik vienkryptė jo maiša. Pasirenkamas kontekstas šioje naršyklėje lieka išjungtas."
   },
   "dataConsentPolicyLink": {
     "message": "Privatumo politika."

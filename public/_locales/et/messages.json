@@ -454,7 +454,7 @@
     "message": "Mida Emojery saadab"
   },
   "dataConsentBody": {
-    "message": "Emojery saadab selle lehe aadressi, millel reageerid, juhuslikud paigaldus- ja seansitunnused ning sisselogimisel ühe korra su e-posti aadressi; sellest säilitatakse ainult ühesuunaline räsi. Valikuline kontekst jääb selles brauseris välja lülitatuks."
+    "message": "Emojery saadab selle lehe aadressi, millel reageerid, juhusliku paigaldustunnuse ning sisselogimisel ühe korra su e-posti aadressi; sellest säilitatakse ainult ühesuunaline räsi. Valikuline kontekst jääb selles brauseris välja lülitatuks."
   },
   "dataConsentPolicyLink": {
     "message": "Privaatsuspoliitika."
