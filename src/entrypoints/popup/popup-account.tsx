@@ -118,8 +118,9 @@ const AccountView = ({ settings, update }: { settings: Settings; update: (patch:
     return <SignInPrompt message={t("signInMsgAccount")} />;
   }
 
-  // Sessions minted before the email field existed fall back to a short userId prefix.
-  const subtitle = email ?? (userId ? `id: ${userId.slice(0, 8)}...` : "—");
+  // A session carrying no email shows a short id prefix instead. The empty tail is
+  // unreachable - a signed-in session always has an id - but `hint` takes a string.
+  const subtitle = email ?? (userId ? `id: ${userId.slice(0, 8)}...` : "");
   return (
     <div class={ACCOUNT_LIST_CLASS}>
       <IconRow rowClass="row arow" icon={ICON_USER} label={t("signedInLabel")} hint={subtitle} hintTitle={email ?? undefined}>
