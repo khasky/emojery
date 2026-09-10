@@ -111,6 +111,22 @@ The branching model above is only real if the repository enforces it — a rules
 - **Ruleset on `main`**: require a pull request (0 approvals is fine for a solo maintainer — the requirement exists so CI runs on every change), require the `ci.yml` checks, require linear history, block force pushes and deletion. Adding yourself to the bypass list turns the whole gate into decoration.
 - **Ruleset on tag `v*`**: block deletion and non-fast-forward updates, so a published release tag can't be moved under an already-shipped store build.
 - **Ruleset on `release/*`**: block force pushes and deletion. Patches land there by cherry-pick from `main`, never by a rewrite.
+
+The `release/*` rule as one command, so a fresh repository or a mirror gets the same one (`non_fast_forward` is the force-push block):
+
+```bash
+gh api -X POST repos/<owner>/<repo>/rulesets --input - <<'EOF'
+{
+  "name": "release branches",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": { "ref_name": { "include": ["refs/heads/release/*"], "exclude": [] } },
+  "rules": [{ "type": "non_fast_forward" }, { "type": "deletion" }]
+}
+EOF
+```
+
+No `bypass_actors`, so the rule binds the maintainer too. `gh api repos/<owner>/<repo>/rulesets` lists what is already there.
 - **Merge policy**: allow squash merging only, set *Default to pull request title for squash merge commits*, and enable *Automatically delete head branches*.
 - **PR title check**: the `commit-msg` hook validates commits, not PR titles, and a squash merge takes its message from the title — so the title needs its own commitlint check in CI, or a bad title silently becomes the changelog line and skews the derived version.
 
