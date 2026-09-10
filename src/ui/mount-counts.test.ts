@@ -5,14 +5,14 @@ vi.mock("./messaging", () => ({ sendMessage: vi.fn() }));
 vi.mock("../shared/storage", async (importOriginal) => {
   // targetKey stays real (pure); only the async storage reads are mocked.
   const actual = await importOriginal<typeof import("../shared/storage")>();
-  return { ...actual, getCachedCounts: vi.fn(), getOwnReaction: vi.fn() };
+  return { ...actual, getCachedCounts: vi.fn(), getOwnReaction: vi.fn(), setCachedCounts: vi.fn() };
 });
 vi.mock("./animations", () => ({ maybePlayPublicReactionIntro: vi.fn() }));
 
 import type { PickerInsertionPoint } from "../shared/adapter";
 import type { RuntimeResponse } from "../shared/messages";
 import { DEFAULT_BREAKDOWN_LIMIT } from "../shared/reactions";
-import { type CachedTarget, getCachedCounts, getOwnReaction, targetKey } from "../shared/storage";
+import { type CachedTarget, getCachedCounts, getOwnReaction, setCachedCounts, targetKey } from "../shared/storage";
 import { maybePlayPublicReactionIntro } from "./animations";
 import { sendMessage } from "./messaging";
 import { clearCachedCountsPrime, hydrateDeferredCounts, loadInitial, pickAggregateCounts, primeCachedCounts, refreshTarget } from "./mount-counts";
@@ -166,6 +166,47 @@ describe("primeCachedCounts", () => {
 });
 
 describe("hydrateDeferredCounts", () => {
+  // The post-read cache check needs an explicit answer per case; a stub left over from
+  // the prime tests above would read as a click that never happened.
+  beforeEach(() => {
+    vi.mocked(getCachedCounts).mockResolvedValue({ hits: {}, misses: [point.target] });
+    vi.mocked(setCachedCounts).mockResolvedValue(undefined);
+  });
+
+  it("re-applies a click made while the read was in flight, on top of the server aggregate", async () => {
+    // The server answered from before the click (no own reaction, 2 thumbs); the click
+    // wrote its own entry over an empty cache, so that entry's aggregate is the delta alone.
+    vi.mocked(sendMessage).mockResolvedValue({ type: "count", data: { ...aggregate, myReaction: null } } as RuntimeResponse);
+    const clicked: CachedTarget = { counts: { "❤️": 1 }, total: 1, loaded: 1, hasMore: false, myReaction: "❤️", fetchedAt: 5_000 };
+    vi.mocked(getCachedCounts).mockResolvedValue({ hits: { [key]: clicked }, misses: [] });
+    const cb = vi.fn();
+    setRefreshCallback(key, cb);
+    await hydrateDeferredCounts(point, key, null, true, false);
+    const merged = { counts: { "👍": 2, "❤️": 1 }, total: 3, loaded: 2, hasMore: false };
+    expect(cb).toHaveBeenCalledWith({ value: merged, myReaction: "❤️", authed: true });
+    expect(setCachedCounts).toHaveBeenCalledWith({ [key]: { value: merged, myReaction: "❤️" } }, { skipIfCachedAfter: 5_001 });
+  });
+
+  it("re-applies a toggle-off made while the read was in flight", async () => {
+    vi.mocked(sendMessage).mockResolvedValue(countResponse);
+    const cleared: CachedTarget = { counts: {}, total: 0, loaded: 0, hasMore: false, myReaction: null, fetchedAt: 5_000 };
+    vi.mocked(getCachedCounts).mockResolvedValue({ hits: { [key]: cleared }, misses: [] });
+    const cb = vi.fn();
+    setRefreshCallback(key, cb);
+    await hydrateDeferredCounts(point, key, "👍", true, false);
+    expect(cb).toHaveBeenCalledWith({ value: { counts: { "👍": 1 }, total: 1, loaded: 1, hasMore: false }, myReaction: null, authed: true });
+  });
+
+  it("leaves a cache that agrees with the server alone", async () => {
+    vi.mocked(sendMessage).mockResolvedValue(countResponse);
+    vi.mocked(getCachedCounts).mockResolvedValue({ hits: { [key]: { ...countPayload, fetchedAt: 5_000 } }, misses: [] });
+    const cb = vi.fn();
+    setRefreshCallback(key, cb);
+    await hydrateDeferredCounts(point, key, null, true, false);
+    expect(cb).toHaveBeenCalledWith({ value: aggregate, myReaction: "👍", authed: true });
+    expect(setCachedCounts).not.toHaveBeenCalled();
+  });
+
   it("applies through a registered refresh callback", async () => {
     vi.mocked(sendMessage).mockResolvedValue(countResponse);
     const cb = vi.fn();

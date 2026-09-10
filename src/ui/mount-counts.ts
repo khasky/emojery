@@ -7,9 +7,10 @@
 
 import type { PickerInsertionPoint } from "../shared/adapter";
 import type { RuntimeResponse } from "../shared/messages";
+import { applyCountsDelta, applyTotalDelta } from "../shared/reaction-delta";
 import type { Reaction, TargetCounts } from "../shared/reactions";
 import { DEFAULT_BREAKDOWN_LIMIT } from "../shared/reactions";
-import { type CachedTarget, getCachedCounts, getOwnReaction, type TargetKey, targetKey } from "../shared/storage";
+import { type CachedTarget, getCachedCounts, getOwnReaction, setCachedCounts, type TargetKey, targetKey } from "../shared/storage";
 import { maybePlayPublicReactionIntro } from "./animations";
 import { sendMessage } from "./messaging";
 import { applyRefresh, type RefreshCallback } from "./mount-registry";
@@ -130,6 +131,22 @@ export async function hydrateDeferredCounts(point: PickerInsertionPoint, key: Ta
   if (fresh?.type !== "count") return;
   const serverCounts = fresh.data;
   const next = { value: pickAggregateCounts(serverCounts), myReaction: serverCounts.myReaction ?? fallbackMine, authed };
+  // A pick made while that read was in flight: the background keeps the click's cache
+  // entry over the older server read (message-router.ts fetchCount, skipIfCachedAfter),
+  // so the cache disagreeing with the answer IS the click. Re-apply it on top of the
+  // server aggregate - painting the answer as-is would show the pre-pick state over the
+  // user's click while the vote is still on its way. A fresh read, not the scan prime:
+  // the prime predates the click by design.
+  const cached = (await getCachedCounts([point.target]).catch(() => null))?.hits[key];
+  if (cached && cached.myReaction !== (serverCounts.myReaction ?? null)) {
+    const clicked = cached.myReaction;
+    const counts = applyCountsDelta(next.value.counts, next.myReaction, clicked);
+    next.value = { ...next.value, counts, total: applyTotalDelta(next.value.total, next.myReaction, clicked), loaded: Object.keys(counts).length };
+    next.myReaction = clicked;
+    // The click's own entry was written over an unhydrated cache, so its aggregate is
+    // the delta alone; replace it with the merged one unless a later click has landed.
+    await setCachedCounts({ [key]: { value: next.value, myReaction: clicked } }, { skipIfCachedAfter: cached.fetchedAt + 1 }).catch(() => {});
+  }
   const apply = () => applyRefresh(key, next);
   // The picker registers its refresh callback in a post-paint effect; a fetch
   // served from the background's memory can resolve before that, so `apply`
