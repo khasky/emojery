@@ -711,6 +711,28 @@ describe("fetchCount", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it("spends one deadline across both count attempts, not one per attempt", async () => {
+    // The page gives up on the round trip after RUNTIME_MESSAGE_TIMEOUT_MS. A deadline
+    // per attempt lets the retry outlast that: an error in the trigger, then counts
+    // written for nobody.
+    vi.mocked(getAuth).mockResolvedValue(null);
+    let attempt = 0;
+    const fetchMock = vi.fn(async (..._args: Parameters<typeof fetch>) => {
+      attempt++;
+      if (attempt === 1) return new Response("busy", { status: 503 });
+      return new Response(JSON.stringify({ counts: {}, total: 0, loaded: 0, hasMore: false }), { status: 200 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const read = fetchCount(target, 6);
+    await vi.advanceTimersByTimeAsync(500);
+    await read;
+
+    const [first, second] = fetchMock.mock.calls.map((call) => call[1]?.signal);
+    expect(first).toBeInstanceOf(AbortSignal);
+    expect(second).toBe(first);
+  });
+
   it("does not re-fetch a target whose read just failed (negative cache)", async () => {
     // Outage behavior: feed rescans re-request every visible target; a failed
     // read must short-circuit for its TTL instead of re-issuing the same failing
@@ -732,18 +754,15 @@ describe("fetchCount", () => {
     expect(apiErrorCode(new TypeError("Failed to fetch"))).toBe("network");
   });
 
-  it("sends nothing more after clearPendingMineBatch: the reset cancels the open batch's timer", async () => {
+  it("sends nothing more after clearPendingMineBatch, and settles the read it cancelled", async () => {
     // Real timers on purpose - the orphaned setTimeout is the whole point, and a
     // fake clock that afterEach discards would never let it fire.
     vi.useRealTimers();
     vi.mocked(getAuth).mockResolvedValue({ token: "tok", userId: "u" } as never);
-    // Its own target: this read stays pending forever (its batch never releases), so
-    // it must not sit in the in-flight map under a key another test reads.
-    const orphan: TargetRef = { ...target, targetId: "orphan", url: "https://www.facebook.com/zuck/posts/9" };
     const fetchMock = vi.fn(async (..._args: Parameters<typeof fetch>) => new Response(JSON.stringify({ counts: {}, total: 0, loaded: 0, hasMore: false }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
 
-    void fetchCount(orphan, 6);
+    const read = fetchCount(target, 6);
     // The count read going out means the /reactions/mine batch is open behind it
     // (fetchTargetCountsAndOwnReaction starts both in the same tick). Poll every
     // 1ms, not waitFor's default 50ms: the batch window is 25ms, so a slower poll
@@ -753,5 +772,8 @@ describe("fetchCount", () => {
     await new Promise((resolve) => setTimeout(resolve, MINE_BATCH_WINDOW_MS * 4));
 
     expect(fetchMock.mock.calls.filter((call) => String(call[0]).includes("/reactions/mine"))).toHaveLength(0);
+    // A cancelled batch costs the "you reacted" marker and nothing else: the read still
+    // settles, frees its slot, and the target stays readable.
+    await expect(read).resolves.toMatchObject({ total: 0, myReaction: null });
   });
 });

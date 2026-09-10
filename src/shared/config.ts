@@ -29,3 +29,8 @@ export const API_TIMEOUT_MS = 10_000;
 // page through sendRuntimeMessage. The background can be a cold service worker doing
 // IndexedDB work, so this is deliberately looser than the API one.
 export const RUNTIME_MESSAGE_TIMEOUT_MS = 15_000;
+
+// How long a whole counts read gets, retry included. Derived from the wait above so the
+// two can't drift: a read that outlives that wait shows an error and then writes counts
+// nobody is waiting for. The gap covers a cold worker and the cache write.
+export const COUNTS_READ_BUDGET_MS = RUNTIME_MESSAGE_TIMEOUT_MS - 3_000;

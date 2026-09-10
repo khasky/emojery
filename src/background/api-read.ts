@@ -5,7 +5,8 @@
 // shares only the fetch wrapper, the session and the Retry-After parser with it.
 
 import type { TargetRef } from "../shared/adapter";
-import { API_BASE } from "../shared/config";
+import { API_BASE, COUNTS_READ_BUDGET_MS } from "../shared/config";
+import { deadlineSignal } from "../shared/fetch-deadline";
 import type { RuntimeErrorCode } from "../shared/messages";
 import type { ReactionCounts, TargetCounts } from "../shared/reactions";
 import { DEFAULT_BREAKDOWN_LIMIT } from "../shared/reactions";
@@ -92,7 +93,7 @@ interface MineBatch {
   token: string;
   targets: TargetRef[];
   flush: () => void;
-  /** Drop the window timer without sending; the batch's promise stays pending forever. */
+  /** Drop the window timer without sending; the waiting reads settle on an empty map. */
   cancel: () => void;
   reactions: Promise<Record<string, string>>;
 }
@@ -100,7 +101,8 @@ interface MineBatch {
 let pendingMine: MineBatch | null = null;
 
 /** Test seam: the open batch is module state and outlives a test's stubbed fetch.
- *  Cancels the window timer too - an orphaned one still fires a real request. */
+ *  Cancels the window timer too - an orphaned one still fires a real request - and
+ *  settles the reads already waiting on that batch. */
 export function clearPendingMineBatch(): void {
   pendingMine?.cancel();
   pendingMine = null;
@@ -109,6 +111,7 @@ export function clearPendingMineBatch(): void {
 function openMineBatch(token: string): MineBatch {
   const targets: TargetRef[] = [];
   let timer = 0;
+  let cancelled = false;
   let release!: () => void;
   const gate = new Promise<void>((resolve) => {
     release = resolve;
@@ -126,8 +129,13 @@ function openMineBatch(token: string): MineBatch {
     cancel: () => {
       self.clearTimeout(timer);
       timer = 0;
+      cancelled = true;
+      release();
     },
-    reactions: gate.then(() => sendMineRequest(token, targets)),
+    // A cancelled batch answers like a failed request - an empty map. Left pending, it
+    // would hang every read waiting on it, and each one keeps its `inflightReads` slot,
+    // so those targets stay unreadable until the worker restarts.
+    reactions: gate.then(() => (cancelled ? {} : sendMineRequest(token, targets))),
   };
   timer = self.setTimeout(batch.flush, MINE_BATCH_WINDOW_MS);
   pendingMine = batch;
@@ -249,9 +257,11 @@ async function fetchTargetCountsAndOwnReaction(target: TargetRef, limit: number)
 // status, an exhausted retry, or a `Retry-After` past the cap rejects with the
 // status attached, so the caller can tell "rate limited" from "server down".
 async function fetchCountsWithRetry(url: string): Promise<Response> {
-  // One init for both attempts, so the retry carries the same client identity
-  // headers as the first request.
-  const init: RequestInit = { method: "GET", cache: "no-store", headers: extensionClientHeaders() };
+  // One init for both attempts: the retry carries the same client identity headers,
+  // and the pair shares one deadline. A deadline per attempt would let the retry
+  // outlast the page's wait, so the trigger shows an error while this read runs on.
+  const signal = deadlineSignal(COUNTS_READ_BUDGET_MS);
+  const init: RequestInit = { method: "GET", cache: "no-store", headers: extensionClientHeaders(), ...(signal ? { signal } : {}) };
   const res = await apiFetch(url, init);
   if (res.ok) return res;
   const retryInMs = readRetryDelayMs(res);
