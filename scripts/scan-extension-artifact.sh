@@ -46,8 +46,9 @@ if [ -n "$key_paths" ]; then
   exit 1
 fi
 
-# The staging host: wxt.config.ts lets a production-mode build be pointed at the staging
-# backend (the e2e build uses that). A store upload must never carry it.
+# The staging host: a production build compiles in the production origin, so this host in
+# a store artifact means the wrong build output got packed. A store upload must never
+# carry it.
 #
 # The bearer/JWT shapes are artifact-only, not in the shared prefix: the source archive
 # legitimately carries a documented sample JWT (src/background/debug.test.ts), and the

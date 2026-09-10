@@ -42,14 +42,13 @@ function readEnvFile(rel: string): Record<string, string> {
 
 // Build-time API-base override, injected into the bundle as
 // __EM_API_BASE_OVERRIDE__ (see src/shared/config.ts) and mirrored in the
-// manifest host permission. Non-production modes accept any override; a
-// production build only accepts the staging base (the e2e build points there),
-// so a rejected value never reaches the artifact.
+// manifest host permission. A production build takes no override at all - it
+// always compiles in PRODUCTION_API_BASE, so no env var can retarget a store
+// artifact. Another backend is reached through a non-production mode:
+// `--mode staging`, or WXT_API_BASE / .env.<mode> in dev and staging builds.
 function resolveApiBaseOverride(mode: string): string {
+  if (mode === "production") return "";
   const envOverride = process.env.WXT_API_BASE || "";
-  if (mode === "production") {
-    return envOverride === STAGING_API_BASE ? envOverride : "";
-  }
   return envOverride || readEnvFile(`.env.${mode}.local`).WXT_API_BASE || readEnvFile(`.env.${mode}`).WXT_API_BASE || "";
 }
 const API_BASE_OVERRIDE = resolveApiBaseOverride(BUILD_MODE);
