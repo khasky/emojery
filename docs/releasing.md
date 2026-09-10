@@ -106,12 +106,71 @@ git switch main
 
 ## Repository settings
 
-The branching model above is only real if the repository enforces it. Four GitHub rulesets, plus a merge policy that matches what [CONTRIBUTING.md](../CONTRIBUTING.md#branches-and-pull-requests) promises: squash merge only, the PR title as the squash commit message, head branches deleted on merge. `gh api repos/<owner>/<repo>/rulesets` lists what is in place; recreate the four on a fresh repository or a mirror (`non_fast_forward` is the force-push block):
+The branching model above is only real if the repository enforces it. Four GitHub rulesets, plus a merge policy that matches what [CONTRIBUTING.md](../CONTRIBUTING.md#branches-and-pull-requests) promises: squash merge only, the PR title as the squash commit message, head branches deleted on merge. `gh api repos/<owner>/<repo>/rulesets` lists what is in place. The blocks below are examples of the shape each rule takes, for recreating the set on a fresh repository or a mirror: fill in the owner, the repository and the bypass actor before running one (`non_fast_forward` is the force-push block).
 
-- **`main`** - a pull request (0 approvals: the requirement exists so CI runs on every change), the `ci.yml` checks `Validate PR title` and `Typecheck, lint, test, build, docs` as required status checks, linear history, no force-push, no deletion.
-- **Tags `v*`** - no deletion, no non-fast-forward update: a shipped release tag never moves.
-- **`release/*`** - no force-push, no deletion. Patches land there by cherry-pick from `main`, never by a rewrite.
-- **`backup/*`** - no force-push, no deletion. A `backup/<branch>-<date>` branch is a snapshot taken before a history operation; the rule stops a stray push from overwriting it.
+**`main`** - a pull request (0 approvals: the requirement exists so CI runs on every change), the `ci.yml` checks `Validate PR title` and `Typecheck, lint, test, build, docs`, linear history, no force-push, no deletion. The maintainer bypasses it: the release commit, its tag and the merge of a release branch are pushed to `main` directly, and a solo maintainer's PR to themselves gates nothing. Every other write goes through a PR.
+
+```bash
+gh api -X POST repos/<owner>/<repo>/rulesets --input - <<'EOF'
+{
+  "name": "main",
+  "target": "branch",
+  "enforcement": "active",
+  "bypass_actors": [{ "actor_id": <role-id>, "actor_type": "RepositoryRole", "bypass_mode": "always" }],
+  "conditions": { "ref_name": { "include": ["~DEFAULT_BRANCH"], "exclude": [] } },
+  "rules": [
+    { "type": "deletion" },
+    { "type": "non_fast_forward" },
+    { "type": "required_linear_history" },
+    { "type": "pull_request", "parameters": { "required_approving_review_count": 0, "dismiss_stale_reviews_on_push": false, "require_code_owner_review": false, "require_last_push_approval": false, "required_review_thread_resolution": false } },
+    { "type": "required_status_checks", "parameters": { "strict_required_status_checks_policy": false, "required_status_checks": [{ "context": "Validate PR title" }, { "context": "Typecheck, lint, test, build, docs" }] } }
+  ]
+}
+EOF
+```
+
+**Tags `v*`** - no deletion, no non-fast-forward update, no bypass: a shipped release tag never moves.
+
+```bash
+gh api -X POST repos/<owner>/<repo>/rulesets --input - <<'EOF'
+{
+  "name": "v* tags",
+  "target": "tag",
+  "enforcement": "active",
+  "conditions": { "ref_name": { "include": ["refs/tags/v*"], "exclude": [] } },
+  "rules": [{ "type": "deletion" }, { "type": "non_fast_forward" }]
+}
+EOF
+```
+
+**`release/*`** - no force-push, no deletion, no bypass. Patches land there by cherry-pick from `main`, never by a rewrite.
+
+```bash
+gh api -X POST repos/<owner>/<repo>/rulesets --input - <<'EOF'
+{
+  "name": "release/*",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": { "ref_name": { "include": ["refs/heads/release/*"], "exclude": [] } },
+  "rules": [{ "type": "non_fast_forward" }, { "type": "deletion" }]
+}
+EOF
+```
+
+**`backup/*`** - no force-push, no deletion, the maintainer bypasses. A `backup/<branch>-<date>` branch is a snapshot taken before a history operation; the rule stops a stray push from overwriting it, while the maintainer can still retire one.
+
+```bash
+gh api -X POST repos/<owner>/<repo>/rulesets --input - <<'EOF'
+{
+  "name": "backup/*",
+  "target": "branch",
+  "enforcement": "active",
+  "bypass_actors": [{ "actor_id": <role-id>, "actor_type": "RepositoryRole", "bypass_mode": "always" }],
+  "conditions": { "ref_name": { "include": ["refs/heads/backup/*"], "exclude": [] } },
+  "rules": [{ "type": "deletion" }, { "type": "non_fast_forward" }]
+}
+EOF
+```
 
 ## Signed Firefox `.xpi` (optional, self-distribution)
 
