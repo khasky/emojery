@@ -39,7 +39,7 @@ if [ -n "$forbidden_paths" ]; then
   exit 1
 fi
 
-# Contents: real credential shapes plus the e2e credential keys.
+# Contents: real credential shapes plus the harness token key.
 #
 # `-a`, never `-I`: the archive streams as ONE mixed text+binary input, and `-I`
 # makes grep call the whole stream binary the moment it hits the first sprite

@@ -2,31 +2,19 @@
 [extend]
 useDefault = true
 
-# Test-harness credentials the default ruleset does not recognise: only the
-# variable name identifies them, so each key is matched against a shape-free value
-# class - it catches strictly more, and says nothing about what those values look
-# like. The excluded leading characters keep an empty `KEY=`, a documented
-# placeholder and these definitions themselves from reading as hits.
+# A harness token the default ruleset does not recognise: only the variable name
+# identifies it, so the key is matched against a shape-free value class - it
+# catches strictly more, and says nothing about what the value looks like. The
+# excluded leading characters keep an empty `KEY=`, a documented placeholder and
+# this definition itself from reading as a hit.
 #
-# They belong in .env.e2e.local (git-ignored), never in a tracked file -
+# It belongs in .env.e2e.local (git-ignored), never in a tracked file -
 # .env.e2e.example is loaded as a REAL default (e2e/lib/load-env.ts), so it reads
 # like a working file and is the likely place to fill one in by mistake.
 #
 # Keep in lockstep with E2E_CREDENTIAL_PATTERN in scripts/lib/secret-patterns.sh,
-# which gates the same shapes at release; these rules run on every commit, which
+# which gates the same shape at release; this rule runs on every commit, which
 # is the point of having both.
-
-[[rules]]
-id = "emojery-e2e-auth-otp"
-description = "e2e test-account OTP (E2E_AUTH_OTP)"
-regex = '''E2E_AUTH_OTP=[^[:space:]<"$[]'''
-keywords = ["e2e_auth_otp"]
-
-[[rules]]
-id = "emojery-e2e-auth-email"
-description = "a committed E2E_AUTH_EMAIL value"
-regex = '''E2E_AUTH_EMAIL=[^[:space:]<"$[]'''
-keywords = ["e2e_auth_email"]
 
 [[rules]]
 id = "emojery-playwright-mcp-token"
