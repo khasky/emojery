@@ -1,8 +1,9 @@
 {
-  // Same rules as the repo root, minus the page-title requirement: an issue or
-  // PR template is pasted into a GitHub form, where an `# H1` would become a
-  // stray heading inside someone's issue body.
-  "extends": "../.markdownlint-cli2.jsonc",
+  // The root .markdownlint-cli2.jsonc reaches this directory on its own - cli2
+  // merges every config file down the directory tree - so this one only adds what
+  // the templates need: no page-title requirement, since a template is pasted into
+  // a GitHub form where an `# H1` would become a stray heading in someone's body.
+  "$schema": "https://raw.githubusercontent.com/DavidAnson/markdownlint-cli2/main/schema/markdownlint-cli2-config-schema.json",
   "config": {
     "MD041": false
   }
