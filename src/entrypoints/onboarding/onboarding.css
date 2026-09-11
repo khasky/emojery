@@ -222,6 +222,11 @@
   background: var(--khasky-emojery-fixed-primary-hover);
 }
 
+/* Sits under the site chips of the step it ticks off. */
+.step .primary {
+  margin-top: 12px;
+}
+
 .home {
   font-size: 12.5px;
 }

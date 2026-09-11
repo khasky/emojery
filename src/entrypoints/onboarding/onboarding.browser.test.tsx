@@ -72,6 +72,9 @@ describe("onboarding checklist", () => {
     await expect.poll(() => steps().length).toBe(4);
     expect(doneCount()).toBe(1);
     expect(container.querySelector(".progress .label")?.textContent).toBe("1 of 4 done");
+    // The tab strip carries the same count, in the UI language, so a backgrounded
+    // page still says how far along it is.
+    await expect.poll(() => document.title).toBe("Emojery — Onboarding 1/4");
     // The bar stays on its in-progress colour until the last tick.
     expect(container.querySelector(".progress.complete")).toBeNull();
   });
@@ -89,10 +92,13 @@ describe("onboarding checklist", () => {
     expect(container.querySelector(TAGLINE_SELECTOR)?.textContent).not.toMatch(/\d/);
   });
 
-  it("links Try it live at a logged-out-safe supported page with the react hint", () => {
+  it("links Try it live at a logged-out-safe supported page with the react hint, inside the step it ticks", () => {
     renderPage();
 
-    expect(container.querySelector("a.primary")?.getAttribute("href")).toBe("https://github.com/khasky/emojery#emojery-react");
+    const cta = container.querySelector("a.primary");
+    expect(cta?.getAttribute("href")).toBe("https://github.com/khasky/emojery#emojery-react");
+    // The button is the way to do "Spot the button", so it lives in that step and not beside the brand.
+    expect(cta?.closest(".step")?.querySelector("b")?.textContent).toBe("Spot the button");
   });
 
   it("drops the pin step where the browser cannot report pin state", async () => {
@@ -102,6 +108,7 @@ describe("onboarding checklist", () => {
     await expect.poll(() => steps().length).toBe(3);
     expect(titles()).not.toContain("Pin it");
     expect(container.querySelector(".progress .label")?.textContent).toBe("1 of 3 done");
+    await expect.poll(() => document.title).toBe("Emojery — Onboarding 1/3");
   });
 
   it("ticks the pin step off when the icon is already on the toolbar", async () => {

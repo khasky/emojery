@@ -172,13 +172,22 @@ export function App() {
       body: t("onboardingStepSpotBody"),
       done: sawTrigger,
       detail: (
-        <ul class="site-chips" aria-label={t("onboardingSitesHeading")}>
-          {SUPPORTED_SITES.map((site) => (
-            <li key={site.site}>{site.label}</li>
-          ))}
-          {/* Not a chip: the list carries the sites that work today, this one closes the row with what is coming. */}
-          <li class="more">{t("onboardingSitesMore")}</li>
-        </ul>
+        <>
+          <ul class="site-chips" aria-label={t("onboardingSitesHeading")}>
+            {SUPPORTED_SITES.map((site) => (
+              <li key={site.site}>{site.label}</li>
+            ))}
+            {/* Not a chip: the list carries the sites that work today, this one closes the row with what is coming. */}
+            <li class="more">{t("onboardingSitesMore")}</li>
+          </ul>
+          {/* Inside the step it ticks, so the button reads as the way to do this step.
+              A new tab on purpose: this page is a live checklist, and following the
+              link in place would throw away the very progress the visit is about to
+              tick off. */}
+          <a class="primary" href={TRY_IT_LIVE_URL} target="_blank" rel="noreferrer">
+            {t("onboardingTryBtn")}
+          </a>
+        </>
       ),
     },
     { key: "react", title: t("onboardingStepReactTitle"), body: t("onboardingStepReactBody"), done: reacted },
@@ -187,6 +196,12 @@ export function App() {
   const done = steps.filter((step) => step.done).length;
   const complete = done === steps.length;
   const celebrating = useCelebration(complete);
+
+  // The tab title carries the same count as the progress label, so the tab strip
+  // says how far the checklist is without opening it.
+  useEffect(() => {
+    document.title = t("onboardingTabTitle", [String(done), String(steps.length)]);
+  }, [done, steps.length]);
 
   return (
     <main class="wrap">
@@ -227,12 +242,6 @@ export function App() {
             <h1>{t("onboardingTitle")}</h1>
             <p class={TAGLINE_CLASS}>{t("onboardingTagline")}</p>
           </div>
-          {/* A new tab on purpose: this page is a live checklist, and following
-              the link in place would throw away the very progress the visit is
-              about to tick off. */}
-          <a class="primary" href={TRY_IT_LIVE_URL} target="_blank" rel="noreferrer">
-            {t("onboardingTryBtn")}
-          </a>
           <a class="home" href={withExtensionUtm("https://emojery.app/", { campaign: "onboarding_page", content: "footer_link" })} target="_blank" rel="noreferrer">
             emojery.app
           </a>
