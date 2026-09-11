@@ -384,6 +384,12 @@
   "authPageTitle": {
     "message": "Emojery — Logi sisse"
   },
+  "authCodePageTitle": {
+    "message": "Emojery — Sisestage oma kood"
+  },
+  "authDonePageTitle": {
+    "message": "Emojery — Olete sisse logitud"
+  },
   "authSignInTitle": {
     "message": "Logi sisse, et reageerida"
   },
@@ -554,6 +560,19 @@
   },
   "onboardingTitle": {
     "message": "Emojery on valmis"
+  },
+  "onboardingTabTitle": {
+    "message": "Emojery — Sissejuhatus $DONE$/$TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
   },
   "onboardingTagline": {
     "message": "Reageeri postitustele, videotele ja toodetele mis tahes emojiga."

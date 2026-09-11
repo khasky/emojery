@@ -299,6 +299,12 @@ function App() {
     setCooldown(getOtpCooldown());
   }, []);
 
+  // The tab title follows the step: a tab strip full of pages still says which one
+  // is waiting for the code and which one is done.
+  useEffect(() => {
+    document.title = t(step === "code" ? "authCodePageTitle" : step === "done" ? "authDonePageTitle" : "authPageTitle");
+  }, [step]);
+
   useEffect(() => {
     if (cooldown === null) return;
     setNowTs(Date.now());
@@ -458,14 +464,7 @@ function ConsentGate() {
             {t("dataConsentPolicyLink")}
           </a>
         </p>
-        <button
-          class="primary"
-          type="button"
-          onClick={() => {
-            document.title = t("authPageTitle");
-            setAcknowledged(true);
-          }}
-        >
+        <button class="primary" type="button" onClick={() => setAcknowledged(true)}>
           {t("dataConsentContinueBtn")}
         </button>
       </div>

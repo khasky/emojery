@@ -384,6 +384,12 @@
   "authPageTitle": {
     "message": "Emojery — вхід"
   },
+  "authCodePageTitle": {
+    "message": "Emojery — Введіть код"
+  },
+  "authDonePageTitle": {
+    "message": "Emojery — Ви ввійшли"
+  },
   "authSignInTitle": {
     "message": "Увійти, щоб відреагувати"
   },
@@ -554,6 +560,19 @@
   },
   "onboardingTitle": {
     "message": "Emojery готовий до роботи"
+  },
+  "onboardingTabTitle": {
+    "message": "Emojery — Знайомство $DONE$/$TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
   },
   "onboardingTagline": {
     "message": "Реагуйте на дописи, відео й товари будь-яким емодзі."

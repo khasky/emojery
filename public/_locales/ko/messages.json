@@ -384,6 +384,12 @@
   "authPageTitle": {
     "message": "Emojery — 로그인"
   },
+  "authCodePageTitle": {
+    "message": "Emojery — 코드 입력"
+  },
+  "authDonePageTitle": {
+    "message": "Emojery — 로그인되었습니다"
+  },
   "authSignInTitle": {
     "message": "로그인하고 리액션하기"
   },
@@ -554,6 +560,19 @@
   },
   "onboardingTitle": {
     "message": "Emojery 준비 완료"
+  },
+  "onboardingTabTitle": {
+    "message": "Emojery — 온보딩 $DONE$/$TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
   },
   "onboardingTagline": {
     "message": "게시물, 동영상, 상품에 원하는 이모지로 반응하세요."

@@ -384,6 +384,12 @@
   "authPageTitle": {
     "message": "Emojery — Logga in"
   },
+  "authCodePageTitle": {
+    "message": "Emojery — Ange din kod"
+  },
+  "authDonePageTitle": {
+    "message": "Emojery — Du är inloggad"
+  },
   "authSignInTitle": {
     "message": "Logga in för att reagera"
   },
@@ -554,6 +560,19 @@
   },
   "onboardingTitle": {
     "message": "Emojery är redo"
+  },
+  "onboardingTabTitle": {
+    "message": "Emojery — Introduktion $DONE$/$TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
   },
   "onboardingTagline": {
     "message": "Reagera på inlägg, videor och produkter med valfri emoji."

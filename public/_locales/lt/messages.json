@@ -384,6 +384,12 @@
   "authPageTitle": {
     "message": "Emojery — Prisijungti"
   },
+  "authCodePageTitle": {
+    "message": "Emojery — Įveskite savo kodą"
+  },
+  "authDonePageTitle": {
+    "message": "Emojery — Esate prisijungę"
+  },
   "authSignInTitle": {
     "message": "Prisijunkite, kad reaguotumėte"
   },
@@ -554,6 +560,19 @@
   },
   "onboardingTitle": {
     "message": "Emojery paruošta"
+  },
+  "onboardingTabTitle": {
+    "message": "Emojery — Įvadas $DONE$/$TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
   },
   "onboardingTagline": {
     "message": "Reaguokite į įrašus, vaizdo įrašus ir prekes bet kuriuo jaustuku."

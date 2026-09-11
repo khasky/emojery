@@ -384,6 +384,12 @@
   "authPageTitle": {
     "message": "Emojery — 登入"
   },
+  "authCodePageTitle": {
+    "message": "Emojery — 輸入驗證碼"
+  },
+  "authDonePageTitle": {
+    "message": "Emojery — 您已登入"
+  },
   "authSignInTitle": {
     "message": "登入以新增反應"
   },
@@ -554,6 +560,19 @@
   },
   "onboardingTitle": {
     "message": "Emojery 已就緒"
+  },
+  "onboardingTabTitle": {
+    "message": "Emojery — 新手引導 $DONE$/$TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
   },
   "onboardingTagline": {
     "message": "用任意表情符號對貼文、影片和商品做出反應。"

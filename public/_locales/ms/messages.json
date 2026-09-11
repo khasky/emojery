@@ -384,6 +384,12 @@
   "authPageTitle": {
     "message": "Emojery — Log masuk"
   },
+  "authCodePageTitle": {
+    "message": "Emojery — Masukkan kod anda"
+  },
+  "authDonePageTitle": {
+    "message": "Emojery — Anda telah log masuk"
+  },
   "authSignInTitle": {
     "message": "Log masuk untuk bertindak balas"
   },
@@ -554,6 +560,19 @@
   },
   "onboardingTitle": {
     "message": "Emojery sedia digunakan"
+  },
+  "onboardingTabTitle": {
+    "message": "Emojery — Pengenalan $DONE$/$TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
   },
   "onboardingTagline": {
     "message": "Bertindak balas pada siaran, video dan produk dengan sebarang emoji."

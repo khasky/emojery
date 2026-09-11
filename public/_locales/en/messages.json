@@ -491,6 +491,14 @@
     "message": "Emojery — Sign in",
     "description": "<title> for the auth page."
   },
+  "authCodePageTitle": {
+    "message": "Emojery — Enter your code",
+    "description": "<title> for the auth page while it waits for the emailed code."
+  },
+  "authDonePageTitle": {
+    "message": "Emojery — You're signed in",
+    "description": "<title> for the auth page once the sign-in has landed."
+  },
   "authSignInTitle": {
     "message": "Sign in to react",
     "description": "Heading on the auth page, email step."
@@ -705,7 +713,21 @@
   },
   "onboardingTitle": {
     "message": "Emojery is ready",
-    "description": "Heading and <title> of the post-install onboarding page."
+    "description": "Heading of the post-install onboarding page; the <title> is onboardingTabTitle."
+  },
+  "onboardingTabTitle": {
+    "message": "Emojery — Onboarding $DONE$/$TOTAL$",
+    "description": "<title> of the onboarding page. $DONE$ and $TOTAL$ are checklist step counts, so the tab strip shows the progress.",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
   },
   "onboardingTagline": {
     "message": "React to posts, videos and products with any emoji.",

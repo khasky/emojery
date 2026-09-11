@@ -384,6 +384,12 @@
   "authPageTitle": {
     "message": "Emojery — サインイン"
   },
+  "authCodePageTitle": {
+    "message": "Emojery — コードを入力"
+  },
+  "authDonePageTitle": {
+    "message": "Emojery — サインインしました"
+  },
   "authSignInTitle": {
     "message": "サインインしてリアクション"
   },
@@ -554,6 +560,19 @@
   },
   "onboardingTitle": {
     "message": "Emojery の準備ができました"
+  },
+  "onboardingTabTitle": {
+    "message": "Emojery — オンボーディング $DONE$/$TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
   },
   "onboardingTagline": {
     "message": "投稿・動画・商品に好きな絵文字でリアクション。"

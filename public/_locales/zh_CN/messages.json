@@ -384,6 +384,12 @@
   "authPageTitle": {
     "message": "Emojery — 登录"
   },
+  "authCodePageTitle": {
+    "message": "Emojery — 输入验证码"
+  },
+  "authDonePageTitle": {
+    "message": "Emojery — 您已登录"
+  },
   "authSignInTitle": {
     "message": "登录以添加反应"
   },
@@ -554,6 +560,19 @@
   },
   "onboardingTitle": {
     "message": "Emojery 已就绪"
+  },
+  "onboardingTabTitle": {
+    "message": "Emojery — 新手引导 $DONE$/$TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
   },
   "onboardingTagline": {
     "message": "用任意表情符号对帖子、视频和商品做出反应。"

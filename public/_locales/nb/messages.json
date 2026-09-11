@@ -384,6 +384,12 @@
   "authPageTitle": {
     "message": "Emojery — Logg inn"
   },
+  "authCodePageTitle": {
+    "message": "Emojery — Skriv inn koden din"
+  },
+  "authDonePageTitle": {
+    "message": "Emojery — Du er innlogget"
+  },
   "authSignInTitle": {
     "message": "Logg inn for å reagere"
   },
@@ -554,6 +560,19 @@
   },
   "onboardingTitle": {
     "message": "Emojery er klar"
+  },
+  "onboardingTabTitle": {
+    "message": "Emojery — Introduksjon $DONE$/$TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
   },
   "onboardingTagline": {
     "message": "Reager på innlegg, videoer og produkter med hvilken som helst emoji."

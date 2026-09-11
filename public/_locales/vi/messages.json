@@ -384,6 +384,12 @@
   "authPageTitle": {
     "message": "Emojery — Đăng nhập"
   },
+  "authCodePageTitle": {
+    "message": "Emojery — Nhập mã của bạn"
+  },
+  "authDonePageTitle": {
+    "message": "Emojery — Bạn đã đăng nhập"
+  },
   "authSignInTitle": {
     "message": "Đăng nhập để bày tỏ cảm xúc"
   },
@@ -554,6 +560,19 @@
   },
   "onboardingTitle": {
     "message": "Emojery đã sẵn sàng"
+  },
+  "onboardingTabTitle": {
+    "message": "Emojery — Hướng dẫn bắt đầu $DONE$/$TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
   },
   "onboardingTagline": {
     "message": "Bày tỏ cảm xúc với bài viết, video và sản phẩm bằng bất kỳ emoji nào."

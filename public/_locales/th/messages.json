@@ -384,6 +384,12 @@
   "authPageTitle": {
     "message": "Emojery — เข้าสู่ระบบ"
   },
+  "authCodePageTitle": {
+    "message": "Emojery — ป้อนรหัสของคุณ"
+  },
+  "authDonePageTitle": {
+    "message": "Emojery — คุณเข้าสู่ระบบแล้ว"
+  },
   "authSignInTitle": {
     "message": "เข้าสู่ระบบเพื่อแสดงความรู้สึก"
   },
@@ -554,6 +560,19 @@
   },
   "onboardingTitle": {
     "message": "Emojery พร้อมใช้งานแล้ว"
+  },
+  "onboardingTabTitle": {
+    "message": "Emojery — การเริ่มต้นใช้งาน $DONE$/$TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
   },
   "onboardingTagline": {
     "message": "แสดงความรู้สึกต่อโพสต์ วิดีโอ และสินค้าด้วยอิโมจิใดก็ได้"

@@ -384,6 +384,12 @@
   "authPageTitle": {
     "message": "Emojery — साइन इन"
   },
+  "authCodePageTitle": {
+    "message": "Emojery — अपना कोड दर्ज करें"
+  },
+  "authDonePageTitle": {
+    "message": "Emojery — आप साइन इन हो गए हैं"
+  },
   "authSignInTitle": {
     "message": "प्रतिक्रिया देने के लिए साइन इन करें"
   },
@@ -554,6 +560,19 @@
   },
   "onboardingTitle": {
     "message": "Emojery तैयार है"
+  },
+  "onboardingTabTitle": {
+    "message": "Emojery — ऑनबोर्डिंग $DONE$/$TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
   },
   "onboardingTagline": {
     "message": "पोस्ट, वीडियो और प्रोडक्ट पर किसी भी इमोजी से रिएक्ट करें।"

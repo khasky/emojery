@@ -384,6 +384,12 @@
   "authPageTitle": {
     "message": "Emojery — Inloggen"
   },
+  "authCodePageTitle": {
+    "message": "Emojery — Voer je code in"
+  },
+  "authDonePageTitle": {
+    "message": "Emojery — Je bent ingelogd"
+  },
   "authSignInTitle": {
     "message": "Log in om te reageren"
   },
@@ -554,6 +560,19 @@
   },
   "onboardingTitle": {
     "message": "Emojery is klaar voor gebruik"
+  },
+  "onboardingTabTitle": {
+    "message": "Emojery — Introductie $DONE$/$TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
   },
   "onboardingTagline": {
     "message": "Reageer op posts, video's en producten met elke emoji."

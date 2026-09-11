@@ -118,6 +118,7 @@ describe("auth page - the email step", () => {
     await reachCodeStep();
 
     expect(heading()).toBe("Enter your code");
+    await vi.waitFor(() => expect(document.title).toBe("Emojery — Enter your code"));
     expect(document.querySelector(TAGLINE_SELECTOR)?.textContent).toContain(EMAIL);
     // The cooldown outlives the page (localStorage), so a reload cannot buy a second code.
     expect(storedCooldown()).toMatchObject({ reason: "resend", email: EMAIL });
@@ -273,6 +274,7 @@ describe("auth page - the code step", () => {
     await userEvent.click(primaryBtn());
 
     await vi.waitFor(() => expect(heading()).toBe("You're signed in"));
+    await vi.waitFor(() => expect(document.title).toBe("Emojery — You're signed in"));
     expect(sent.filter((m) => (m as { type?: string }).type === "auth:verifyOtp")).toEqual([{ type: "auth:verifyOtp", email: EMAIL, code: "123456" }]);
     // No page to go back to: the dead-end copy, and nothing that could close a tab.
     expect(document.querySelector(COUNTDOWN_SELECTOR)).toBeNull();
@@ -355,6 +357,7 @@ describe("auth page - the legacy consent gate", () => {
     await loadPage();
 
     expect(heading()).toBe("What Emojery sends");
+    expect(document.title).toBe("What Emojery sends");
     expect(document.querySelector(EMAIL_INPUT_SELECTOR)).toBeNull();
 
     // The policy closes the disclosure paragraph as its last sentence - it was a
@@ -365,6 +368,8 @@ describe("auth page - the legacy consent gate", () => {
 
     await userEvent.click(primaryBtn());
     expect(heading()).toBe("Sign in to react");
+    // The consent title is the gate's alone: the sign-in form brings its own.
+    await vi.waitFor(() => expect(document.title).toBe("Emojery — Sign in"));
   });
 
   it("goes straight to sign-in without the flag", async () => {

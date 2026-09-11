@@ -384,6 +384,12 @@
  "authPageTitle": {
   "message": "Emojery — Sign in"
  },
+ "authCodePageTitle": {
+  "message": "Emojery — Enter your code"
+ },
+ "authDonePageTitle": {
+  "message": "Emojery — You're signed in"
+ },
  "authSignInTitle": {
   "message": "Sign in to react"
  },
@@ -554,6 +560,19 @@
  },
  "onboardingTitle": {
   "message": "Emojery is ready"
+ },
+ "onboardingTabTitle": {
+  "message": "Emojery — Onboarding $DONE$/$TOTAL$",
+  "placeholders": {
+   "done": {
+    "content": "$1",
+    "example": "2"
+   },
+   "total": {
+    "content": "$2",
+    "example": "4"
+   }
+  }
  },
  "onboardingTagline": {
   "message": "React to posts, videos and products with any emoji."

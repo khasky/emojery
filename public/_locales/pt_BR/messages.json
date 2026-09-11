@@ -384,6 +384,12 @@
   "authPageTitle": {
     "message": "Emojery — Entrar"
   },
+  "authCodePageTitle": {
+    "message": "Emojery — Digite seu código"
+  },
+  "authDonePageTitle": {
+    "message": "Emojery — Você entrou"
+  },
   "authSignInTitle": {
     "message": "Entre para reagir"
   },
@@ -554,6 +560,19 @@
   },
   "onboardingTitle": {
     "message": "O Emojery está pronto"
+  },
+  "onboardingTabTitle": {
+    "message": "Emojery — Introdução $DONE$/$TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
   },
   "onboardingTagline": {
     "message": "Reaja a posts, vídeos e produtos com qualquer emoji."

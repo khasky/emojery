@@ -384,6 +384,12 @@
   "authPageTitle": {
     "message": "Emojery — Bejelentkezés"
   },
+  "authCodePageTitle": {
+    "message": "Emojery — Adja meg a kódját"
+  },
+  "authDonePageTitle": {
+    "message": "Emojery — Bejelentkezett"
+  },
   "authSignInTitle": {
     "message": "Jelentkezzen be a reagáláshoz"
   },
@@ -554,6 +560,19 @@
   },
   "onboardingTitle": {
     "message": "Az Emojery készen áll"
+  },
+  "onboardingTabTitle": {
+    "message": "Emojery — Bevezetés $DONE$/$TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
   },
   "onboardingTagline": {
     "message": "Reagálj bejegyzésekre, videókra és termékekre bármilyen emojival."
