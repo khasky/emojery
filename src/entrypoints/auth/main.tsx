@@ -114,7 +114,7 @@ function CodeStep({ email, code, error, busy, remainingSec, cooldown, onVerify, 
 // enough that the reaction waiting on the other tab is still what the user is
 // thinking about. "Stay here" turns it off (WCAG 2.2.1), and "Back to the page"
 // skips the wait entirely.
-const RETURN_DELAY_SECONDS = 5;
+const RETURN_DELAY_SECONDS = 10;
 
 /** The last step. Plain "you can close this" unless the sign-in started from a
  *  page's gate and that tab is still open - then it takes the user back there, so

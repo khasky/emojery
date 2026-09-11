@@ -298,7 +298,7 @@ describe("auth page - the code step", () => {
       // The seconds and the draining bar are decoration over the sentence above -
       // a screen reader gets the sentence once, not a tick per second.
       expect(requireEl(document, COUNTDOWN_SELECTOR).getAttribute("aria-hidden")).toBe("true");
-      expect(requireEl(document, `${COUNTDOWN_SELECTOR} .seconds`).textContent).toBe("5");
+      expect(requireEl(document, `${COUNTDOWN_SELECTOR} .seconds`).textContent).toBe("10");
       // The primary action holds focus, since the Verify button it replaced is gone.
       await vi.waitFor(() => expect((document.activeElement as HTMLElement | null)?.className).toBe("primary"));
       // Going back is the only control the step offers - the tab closes itself,
@@ -309,8 +309,8 @@ describe("auth page - the code step", () => {
     it("fires the return by itself once the countdown runs out", async () => {
       await verifyWithReturn();
 
-      await vi.waitFor(() => expect(sent.some((m) => (m as { type?: string }).type === "auth:returnToOrigin")).toBe(true), { timeout: 12_000 });
-    }, 20_000);
+      await vi.waitFor(() => expect(sent.some((m) => (m as { type?: string }).type === "auth:returnToOrigin")).toBe(true), { timeout: 17_000 });
+    }, 25_000);
 
     it("goes back at once when asked, without waiting out the countdown", async () => {
       await verifyWithReturn();
