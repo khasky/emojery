@@ -1,6 +1,6 @@
 # Risk-accepted advisories for the OSV Scanner CI job (security.yml), mirrored
 # from auditConfig.ignoreGhsas in pnpm-workspace.yaml - keep the two lists in
-# lockstep and drop entries once a patched image-size release ships. Each entry
+# lockstep and drop an entry once its patched release ships. Each entry
 # carries its own revisit date - an acceptance nobody re-reads is a permanent one.
 
 [[IgnoredVulns]]
@@ -10,3 +10,7 @@ reason = "image-size ICNS DoS via web-ext>addons-linter: dev-only, parses this r
 [[IgnoredVulns]]
 id = "GHSA-5p2g-fcmc-qvqq"
 reason = "image-size JXL/HEIF DoS via web-ext>addons-linter: dev-only, parses this repo's own icon assets during `web-ext sign`; no patched release on npm. Accepted 2026-08-07, revisit 2026-11."
+
+[[IgnoredVulns]]
+id = "GHSA-vwc7-r8mq-g2x9"
+reason = "adm-zip symlink-follow on extract via web-ext>firefox-profile: dev-only, unpacks this repo's own build into a fresh temporary profile during `web-ext run`; no patched release on npm. Accepted 2026-09-11, revisit 2026-12."
