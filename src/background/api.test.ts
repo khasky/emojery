@@ -755,9 +755,6 @@ describe("fetchCount", () => {
   });
 
   it("sends nothing more after clearPendingMineBatch, and settles the read it cancelled", async () => {
-    // Real timers on purpose - the orphaned setTimeout is the whole point, and a
-    // fake clock that afterEach discards would never let it fire.
-    vi.useRealTimers();
     vi.mocked(getAuth).mockResolvedValue({ token: "tok", userId: "u" } as never);
     const fetchMock = vi.fn(async (..._args: Parameters<typeof fetch>) => new Response(JSON.stringify({ counts: {}, total: 0, loaded: 0, hasMore: false }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
@@ -769,7 +766,8 @@ describe("fetchCount", () => {
     // lets it flush on its own and the reset under test is never exercised.
     await vi.waitFor(() => expect(fetchMock).toHaveBeenCalled(), { interval: 1, timeout: 1_000 });
     clearPendingMineBatch();
-    await new Promise((resolve) => setTimeout(resolve, MINE_BATCH_WINDOW_MS * 4));
+    // Well past the window: a timer the cancel failed to clear would have fired by now.
+    await vi.advanceTimersByTimeAsync(MINE_BATCH_WINDOW_MS * 4);
 
     expect(fetchMock.mock.calls.filter((call) => String(call[0]).includes("/reactions/mine"))).toHaveLength(0);
     // A cancelled batch costs the "you reacted" marker and nothing else: the read still

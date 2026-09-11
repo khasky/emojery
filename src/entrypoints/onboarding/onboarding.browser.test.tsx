@@ -4,12 +4,12 @@
 // extension can observe on its own, the progress label follows, and the last
 // tick fires the confetti exactly once.
 import { h, render } from "preact";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CONFETTI_SELECTOR, TAGLINE_SELECTOR } from "../../shared/page-dom";
 import { SUPPORTED_SITES } from "../../shared/sites";
 import { mountContainer, unmountContainer } from "../../test/browser-harness";
 import { type ChromeShimHandle, installChromeShim } from "../../test/chrome-shim";
-import { App } from "./main";
+import { App, CONFETTI_MS, PIN_POLL_MS } from "./main";
 
 let shim: ChromeShimHandle;
 let container: HTMLDivElement;
@@ -61,6 +61,7 @@ beforeEach(() => {
 afterEach(() => {
   unmountContainer(container);
   shim.uninstall();
+  vi.useRealTimers();
 });
 
 describe("onboarding checklist", () => {
@@ -126,13 +127,14 @@ describe("onboarding checklist", () => {
   // user had already undone.
   it("follows the toolbar back when the icon is unpinned again", async () => {
     const setPinned = stubPinState(true);
+    vi.useFakeTimers();
     renderPage();
     await expect.poll(() => doneCount()).toBe(2);
 
     setPinned(false);
 
-    // One poll tick out (PIN_POLL_MS), so past expect.poll's own 1s default.
-    await expect.poll(() => doneCount(), { timeout: 5_000 }).toBe(1);
+    await vi.advanceTimersByTimeAsync(PIN_POLL_MS);
+    expect(doneCount()).toBe(1);
   });
 
   it("ticks the button step once a trigger has been looked at", async () => {
@@ -205,15 +207,19 @@ describe("onboarding confetti", () => {
   it("never fires twice", async () => {
     const setPinned = stubPinState(true);
     seedFlags({ sawTrigger: true, reacted: true });
+    vi.useFakeTimers();
     renderPage();
 
     await expect.poll(() => container.querySelector(CONFETTI_SELECTOR)).not.toBeNull();
     // Let the burst retire itself, then complete the list a second time.
-    await expect.poll(() => container.querySelector(CONFETTI_SELECTOR), { timeout: 6_000 }).toBeNull();
+    await vi.advanceTimersByTimeAsync(CONFETTI_MS);
+    expect(container.querySelector(CONFETTI_SELECTOR)).toBeNull();
     setPinned(false);
-    await expect.poll(() => doneCount(), { timeout: 5_000 }).toBe(3);
+    await vi.advanceTimersByTimeAsync(PIN_POLL_MS);
+    expect(doneCount()).toBe(3);
     setPinned(true);
-    await expect.poll(() => doneCount(), { timeout: 5_000 }).toBe(4);
+    await vi.advanceTimersByTimeAsync(PIN_POLL_MS);
+    expect(doneCount()).toBe(4);
 
     expect(container.querySelector(CONFETTI_SELECTOR)).toBeNull();
   });

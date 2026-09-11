@@ -19,10 +19,10 @@ import { getToolbarUserSettings } from "../../shared/webext";
 // The pin step re-checks on this cadence for as long as the page is open. No
 // event exists for pin/unpin, and the poll cannot stop at the first `true`:
 // unpinning right after pinning would leave a stale "Pinned!" until a reload.
-const PIN_POLL_MS = 1000;
+export const PIN_POLL_MS = 1000;
 
 // How long the burst stays in the DOM; the CSS animation is shorter.
-const CONFETTI_MS = 2600;
+export const CONFETTI_MS = 2600;
 const CONFETTI_PIECES = 30;
 const CONFETTI_COLORS = ["#1877f2", "#fec206", "#ef4444", "#22c55e", "#a855f7", "#06b6d4"];
 // Burst geometry: pieces fly out to a base distance plus a per-piece step, so a ring of

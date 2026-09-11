@@ -96,6 +96,7 @@ afterEach(() => {
   if (app) render(null, app);
   document.body.innerHTML = "";
   shim.uninstall();
+  vi.useRealTimers();
 });
 
 describe("auth page - the email step", () => {
@@ -307,10 +308,23 @@ describe("auth page - the code step", () => {
     });
 
     it("fires the return by itself once the countdown runs out", async () => {
-      await verifyWithReturn();
+      install({ verifyReply: { ...OK_VERIFY, returnsToPage: true } });
+      await loadPage();
+      await reachCodeStep();
+      await userEvent.fill(codeField(), "123456");
+      // The clock is faked before the done step mounts: its first tick is set on
+      // mount, and a tick set on the real clock keeps counting there.
+      vi.useFakeTimers();
+      await userEvent.click(primaryBtn());
+      await vi.waitFor(() => expect(heading()).toBe("You're signed in"));
+      const returned = () => sent.some((m) => (m as { type?: string }).type === "auth:returnToOrigin");
 
-      await vi.waitFor(() => expect(sent.some((m) => (m as { type?: string }).type === "auth:returnToOrigin")).toBe(true), { timeout: 17_000 });
-    }, 25_000);
+      // Nine ticks leave a second on the clock; the tenth spends it.
+      await vi.advanceTimersByTimeAsync(9_000);
+      expect(returned()).toBe(false);
+      await vi.advanceTimersByTimeAsync(2_000);
+      expect(returned()).toBe(true);
+    });
 
     it("goes back at once when asked, without waiting out the countdown", async () => {
       await verifyWithReturn();
