@@ -44,8 +44,8 @@ PRIVACY AND DATA
 
 - The extension contains no ad code, third-party advertising trackers or analytics SDKs.
 - Your email is used to send a sign-in code and then discarded. A one-way keyed hash remains as your account ID.
-- Your browsable history stays on your device. The service processes submitted reactions and public target identifiers. Public log entries use pseudonyms.
-- Community insights is enabled by default. It may include coarse country/city, language, browser and operating-system context with reactions for aggregate statistics. Turn it off in Settings.
+- Your browsable history stays on your device. To show counts, the extension sends the public identifiers of items on screen; the service answers without storing them. Submitted reactions and their public target identifiers are stored. Public log entries use pseudonyms.
+- Community insights is enabled by default. It attaches country and city, language, browser and operating system to the reactions you submit, for aggregate statistics. Turn it off in Settings.
 - Account deletion removes your reactions from the totals. Historical pseudonymous log entries remain, with reversals recording the change.
 
 SUPPORTED SITES
@@ -73,7 +73,7 @@ Emojery lets people react to web content with a full emoji palette and see aggre
 ## storage justification
 
 ```text
-Used to save extension settings, per-site preferences, the authentication token, recently used emoji, local reaction state and cached counts. Settings may sync through the browser's extension-settings sync; the session token and local reaction state are stored on the device. These values support the reaction picker, account session and consistent behavior between visits.
+Used to save extension settings, per-site preferences, the signed-in session (the session token and the email address it was opened with, kept only to label the account in the popup), a random installation identifier, recently used emoji, local reaction state and a 60-second cache of counts. Only the settings object syncs through the browser's extension-settings sync; the session, the identifier, the cache and the reaction state stay on the device. These values support the reaction picker, the account session and consistent behavior between visits.
 ```
 
 ## unlimitedStorage justification
@@ -139,24 +139,24 @@ GNU General Public License v3.0
 ## Privacy Policy
 
 ```text
-Emojery collects the minimum needed to make a reaction count. Full policy: https://emojery.app/privacy (effective 24 August 2026).
+Emojery collects the minimum needed to make a reaction count. Full policy: https://emojery.app/privacy (effective 10 September 2026).
 
 WHAT LEAVES YOUR BROWSER
 
-- To show counts, the public target keys of supported items on the page, before you react. The count lookup itself is anonymous; while you are signed in, a second request asks which of those items you have already reacted to and carries your session token.
-- The reactions you submit, with the canonical URL and the public identifier of the item you reacted to.
-- Your email address at sign-in, transiently: sent over TLS, used once to deliver a 6-digit code, then discarded. What remains as your account identifier is a one-way keyed hash of it.
+- To show counts, the public target keys of supported items that scroll into view, before you react. That lookup carries no account and no installation identifier, and the service answers it without storing or logging the keys. While you are signed in, a second request asks which of those items you have already reacted to; it carries your session token and is not stored either.
+- The reactions you submit, with the canonical URL and the public identifier of the item you reacted to. The service keeps the identifier, not the URL.
+- Your email address at sign-in, transiently: sent over TLS, used once to deliver a 6-digit code, then discarded on the server. What remains there as your account identifier is a one-way keyed hash of it. The extension keeps the address in its local storage to label the account, and sends it once more only if you delete the account.
 - A session token and a random installation identifier that lasts as long as the installation. The identifier travels only on the requests you initiate that change something: signing in, submitting or removing a reaction, filing a report, deleting your account. Reading counts sends neither.
 - A bug report, only when you send one from the Report tab: your note, the page it is about, and, while Community insights is on, the browser's user-agent string and the extension version.
-- With the optional "Community insights" setting on: coarse country/city, language, browser and OS alongside a reaction.
+- With the "Community insights" setting on, which it is unless you turn it off: country and city, language, browser family and OS alongside a reaction.
 
 WHAT IS NEVER COLLECTED
 
-Real names, stored email addresses, hardware or high-entropy fingerprints, advertising cookies or tracking pixels, and passwords. Raw IP addresses are never stored: the network layer sees your address the way any web server does, and what the service keeps is a short-lived salted hash used to limit abuse. The extension loads no analytics SDK.
+Real names, email addresses stored on the server, hardware or high-entropy fingerprints, advertising cookies or tracking pixels, passwords, and any stored record of pages you did not react on. Raw IP addresses are never stored: the network layer sees your address the way any web server does, and what the service keeps is a daily-rotating salted hash used to limit abuse. The extension loads no analytics SDK.
 
 STORAGE AND RETENTION
 
-Sign-in code: 10 minutes or until used. Session token: 30 days, in extension storage. Account record and active reactions: until you delete them. Aggregate per-item counts: indefinitely. Public transparency-log entries: permanent and append-only, so a deletion is recorded as a public revocation rather than an erasure.
+Sign-in code: 10 minutes or until used. Session token: 30 days, in extension storage. Account record and active reactions: until you delete them. Aggregate per-item counts: indefinitely. Public transparency-log entries: permanent and append-only, so a deletion is recorded as a public revocation rather than an erasure. A bug report you filed, and abuse decisions and linked-account reviews of the last 90 days, are kept after account deletion; the full table with every period is at https://emojery.app/privacy#retention.
 
 WHERE YOUR REACTIONS LIVE
 
@@ -164,11 +164,11 @@ Your device keeps the browsable history, including page titles, in the browser's
 
 SUBPROCESSORS
 
-Cloudflare (infrastructure, bot check, coarse country/city), Neon (managed database, EU or US), Resend (delivery of the one-time code; the address is not retained). The public transparency log is published to GitHub and anchored through Sigstore Rekor and the OpenTimestamps calendars; the entries it carries are pseudonymous. Changes to this list are dated and published before they take effect.
+Cloudflare (infrastructure, bot check, country/city), Neon (managed database, EU or US), Resend (delivery of the one-time code; the address is not retained), Axiom (backend logs, 30 days, no raw email, IP or user-agent), Discord (the maintainer's private alerts: abuse decisions, bug reports, uninstall-survey answers), DeepSeek (a language-model second opinion on anti-abuse findings; receives counts and public target keys only), rdap.org and Cloudflare DNS (the domain part of the sign-in address, to refuse throwaway domains). The public transparency log is published to GitHub, anchored through Sigstore Rekor and the OpenTimestamps calendars, and archived by Software Heritage; the entries it carries are pseudonymous. Changes to this list are dated at https://emojery.app/privacy#subprocessor-changes.
 
 YOUR RIGHTS
 
-Delete your account from the extension's Account tab. This removes your account record and your active reactions, and reverses their contribution to the totals. Pseudonymous log entries and their revocations remain permanent, and a suspended account stays suspended. Access, rectification, restriction, portability and objection under GDPR/UK GDPR/CCPA/PIPEDA/PIPA. Contact: privacy@emojery.app
+Delete your account from the extension's Account tab. This removes your account record and your active reactions, and reverses their contribution to the totals. Pseudonymous log entries and their revocations remain permanent, and a suspended account stays suspended. Access, rectification, restriction, portability and objection under GDPR/UK GDPR/CCPA/PIPEDA/PIPA. Contact: hello@emojery.app
 ```
 
 ## Notes to reviewer (AMO, 3000 characters)
@@ -249,13 +249,22 @@ No, I am not using remote code.
 ## Data usage declarations (CWS and Edge)
 
 ```text
-Tick:
-  Personally identifiable information  - email address at sign-in, account and installation identifiers.
-  Authentication information           - the one-time code and the session token.
-  Location                             - coarse country/city derived from the request IP while Community insights is on, plus IP processing for rate limiting.
-  Web history                          - target keys of supported public pages are sent to look up counts before any reaction, and the local history records what the user reacted to.
-  User activity                        - reactions submitted, changed and removed.
-  Website content                      - the public identifier of the item reacted to, read from the page.
+Tick 5 of the 9 categories. The wording after each dash is the reason, kept here so the dashboard answer and emojery.app/browser-permissions#chrome-labels say the same thing.
+
+  Personally identifiable information  - the email address, sent to the 2 sign-in endpoints and once more on account deletion; a keyed hash of it is the account identifier on the server, and the extension keeps the address in local storage to label the account.
+  Authentication information           - the 6-digit one-time code typed at sign-in and the 30-day session token.
+  Location                             - the country and city Cloudflare derives from the connection, stored with a reaction while Community insights is on; nothing finer than a city, nothing when the setting is off. The per-address request limiter uses the raw IP on Cloudflare's rate-limiting service and stores nothing beyond a windowed counter.
+  Web history                          - the canonical target key of each supported item that scrolls into view is sent to fetch its count, with no account attached, and answered without being stored or logged; the pages the user reacts on are stored with the reaction, and a bug report carries the page it is about.
+  Website content                      - the content script reads the page structure to find the action row and derive the item's public identifier, and sends the item's canonical link with a reaction.
+
+Leave unticked:
+  User activity                        - defined by Google as network monitoring, clicks, mouse position, scroll or keystroke logging. None is collected: no analytics library, no click or scroll telemetry, keyboard handling only inside the picker's own search box and focus trap. A submitted reaction is user content, and the timestamps and change count on its row exist so it can be changed or removed.
+  Health information, Financial and payment information, Personal communications - not handled.
+
+Certifications (all 3 ticked, and what keeps each true):
+  Not sold to third parties outside the approved use cases   - nothing tied to an account leaves the service; the planned paid API serves aggregate counts that are already public in the transparency log, plus at most a per-country map above a minimum count.
+  Not used or transferred for unrelated purposes             - Axiom (logs), Discord (maintainer alerts) and DeepSeek (anti-abuse second opinion, receives counts and target keys only) are operational and security processing; all are listed on emojery.app/privacy#subprocessors.
+  Not used for creditworthiness or lending                   - the API terms will forbid that use for callers and their downstream recipients.
 ```
 
 ## Notes for certification (Edge, 2000 characters)
