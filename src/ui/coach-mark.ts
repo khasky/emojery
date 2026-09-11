@@ -123,7 +123,7 @@ function buildTip(): HTMLElement {
 // Below the trigger, clamped into the viewport. Positioned once - a page that
 // scrolls afterwards dismisses the mark (onScroll) rather than dragging it around.
 function positionTip(tip: HTMLElement, rect: DOMRect): void {
-  const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+  const viewportWidth = document.documentElement.clientWidth;
   const left = Math.max(COACH_VIEWPORT_MARGIN_PX, Math.min(rect.left, viewportWidth - COACH_TIP_WIDTH_PX - COACH_VIEWPORT_MARGIN_PX));
   tip.style.width = `${COACH_TIP_WIDTH_PX}px`;
   tip.style.left = `${left}px`;
