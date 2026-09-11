@@ -7,14 +7,11 @@
 // shadow-hosted trigger/counter, the popup History tab, and auth.html's visible errors.
 import { expect, test } from "@playwright/test";
 import * as ext from "./lib/extension";
-import { openHistoryTab } from "./lib/popup-probes";
+import { historyPageOverBridge, openHistoryTab, withPopupOverBridge } from "./lib/popup-probes";
 import { reloadAndSettle } from "./lib/reload-settle";
 import { AGREE_CHECKBOX_SELECTOR, CODE_INPUT_SELECTOR, EMAIL_INPUT_SELECTOR } from "./lib/selectors";
 
 const REQUIRES_OTP = ext.otpSkipReason("multi-account e2e checks");
-
-// Whole file signs in through auth.html and reads the popup, which Playwright Firefox cannot reach.
-test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
 
 // A queued vote survives a sign-out now (see flushVotes), but not the throwaway
 // profile it lives in, so a vote followed by teardown must first reach the server:
@@ -25,6 +22,19 @@ const VOTE_FLUSH_MS = Number(process.env.E2E_VOTE_FLUSH_MS ?? 5_000);
 // The view shows the empty state while its storage read is still in flight, so
 // give an entry a grace window before trusting "empty".
 async function historyState(context: Parameters<typeof ext.openPopup>[0], host: string): Promise<{ empty: boolean; hasHostEntry: boolean }> {
+  if (ext.isFirefoxRun()) {
+    // No popup DOM on the firefox run: the rows the view renders from, through
+    // the runtime channel, with the same grace for an entry still in flight.
+    return withPopupOverBridge(context, async (popup) => {
+      const deadline = Date.now() + 8_000;
+      for (;;) {
+        const { items } = await historyPageOverBridge(popup, { limit: 50 });
+        const hasHostEntry = items.some((row) => row.target.url.includes(host));
+        if (hasHostEntry || Date.now() > deadline) return { empty: items.length === 0, hasHostEntry };
+        await new Promise((settle) => setTimeout(settle, 250));
+      }
+    });
+  }
   const popup = await openHistoryTab(context);
   try {
     const hostEntry = popup.locator(`.history a[href*="${host}"]`).first();
@@ -166,6 +176,7 @@ test("signing in with the same email from a fresh profile restores the reaction"
 // authErrCodeInvalid to authErrTooManyTries within the configured loop bound. Its
 // own address, so the accounts other tests sign in with are untouched.
 test("the wrong-code path of the sign-in form ends in authErrTooManyTries", async () => {
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
   test.skip(!ext.authConfigured(), REQUIRES_OTP);
   test.setTimeout(Number(process.env.E2E_WRONG_CODE_TEST_TIMEOUT_MS ?? 240_000));
   const email = ext.authEmail("wrong-codes");

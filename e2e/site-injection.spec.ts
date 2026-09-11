@@ -20,7 +20,19 @@ import {
   waitForMountedTargetKey,
   waitForVisibleEmojeryTrigger,
 } from "./lib/picker-probes";
-import { authPageFromUserAction, expectHistoryRowCount, expectHistorySearchFiltersReaction, expectHistorySignedOut, expectLatestHistoryReactions, openLatestHistoryReactionPage, setReplaceNativeFromPopup, setSiteEnabledFromPopup, signInTestAccount, waitForReactionOnHistoryPage } from "./lib/popup-probes";
+import {
+  type AuthTabHandle,
+  authPageFromUserAction,
+  expectHistoryRowCount,
+  expectHistorySearchFiltersReaction,
+  expectHistorySignedOut,
+  expectLatestHistoryReactions,
+  openLatestHistoryReactionPage,
+  setReplaceNativeFromPopup,
+  setSiteEnabledFromPopup,
+  signInTestAccount,
+  waitForReactionOnHistoryPage,
+} from "./lib/popup-probes";
 import { DEEP_QUERY_ALL_SRC } from "./lib/probe-src";
 import { clearReactionOnTarget, clickReactionBySearchOnTarget, expectPickerClosed, expectReactionOptionSelected, expectSelectedReaction, expectVisibleReactionOptions, pickReactionBySearchOnTarget } from "./lib/reaction-actions";
 import { EMAIL_INPUT_SELECTOR, GATE_SIGNIN_CLASS, HIDDEN_SELECTOR } from "./lib/selectors";
@@ -88,13 +100,14 @@ test("private window: supported site button opens auth.html", async () => {
   });
   const site = pickerBehaviorScenario();
   const page = await session.context.newPage();
-  let authPage: Page | null = null;
+  let authPage: AuthTabHandle | null = null;
   try {
     const evidence = await openSupportedSitePage(page, site);
     authPage = await verifyUnauthClickOpensAuthTab(session.context, page, site, evidence);
     expect(authPage, "A private-window supported-site click should open visible auth.html").not.toBeNull();
     if (!authPage) return;
-    await expect(authPage.locator(EMAIL_INPUT_SELECTOR)).toBeVisible();
+    // Chromium-only above, so the handle is the Playwright page.
+    await expect((authPage as Page).locator(EMAIL_INPUT_SELECTOR)).toBeVisible();
   } finally {
     await authPage?.close().catch(() => {});
     await page.close().catch(() => {});
@@ -105,7 +118,6 @@ test("private window: supported site button opens auth.html", async () => {
 test.describe("shared picker behavior", () => {
   test("github: supports toggle-off, switch reaction, and cross-tab sync", async () => {
     test.skip(!authConfigured(), otpSkipReason("authed picker behavior e2e checks"));
-    test.skip(isFirefoxRun(), FIREFOX_NO_EXTENSION_PAGES);
 
     const session = await launchE2eBrowserSession();
     const site = pickerBehaviorScenario();
@@ -174,7 +186,6 @@ test.describe("shared picker behavior", () => {
 
   test("github: picker supports keyboard operation with reduced motion", async () => {
     test.skip(!authConfigured(), otpSkipReason("authed keyboard e2e checks"));
-    test.skip(isFirefoxRun(), FIREFOX_NO_EXTENSION_PAGES);
 
     const session = await launchE2eBrowserSession();
     const site = pickerBehaviorScenario();
@@ -432,11 +443,7 @@ for (const site of supportedSiteScenarios) {
     const isolatedSession = site.isolatedContext && !process.env.E2E_USER_DATA_DIR ? await launchE2eBrowserSession() : null;
     const activeContext = isolatedSession?.context ?? context;
     try {
-      await verifySupportedSiteInjection(activeContext, site, {
-        // Placement is still fully asserted on firefox; only the auth-tab click
-        // check needs a juggler-visible moz-extension page.
-        verifyUnauthAuthClick: !isFirefoxRun(),
-      });
+      await verifySupportedSiteInjection(activeContext, site, { verifyUnauthAuthClick: true });
     } finally {
       if (isolatedSession) await closeSession(isolatedSession);
     }
@@ -487,7 +494,6 @@ for (const colorScheme of ["light", "dark"] as const) {
 for (const site of supportedSiteScenarios) {
   test(`${site.site}: ${site.label} handles auth, reaction history, and per-site toggle`, async () => {
     test.skip(!authConfigured(), otpSkipReason("authed site e2e checks"));
-    test.skip(isFirefoxRun(), FIREFOX_NO_EXTENSION_PAGES);
     // The authed flow chains sign-in (with OTP retry) and up to three
     // mount-evidence waits - initial load, post-sign-in reload, history URL -
     // so a slow-but-working anti-bot shell overruns the 120s default: Reddit's
@@ -516,7 +522,6 @@ for (const site of supportedSiteScenarios) {
 // the Amazon US scenario is the one that actually pins replacement.
 for (const site of supportedSiteScenarios) {
   test(`${site.site}: ${site.label} replaces native buttons after popup toggle`, async () => {
-    test.skip(isFirefoxRun(), FIREFOX_NO_EXTENSION_PAGES);
     const isolatedSession = process.env.E2E_USER_DATA_DIR ? null : await launchE2eBrowserSession();
     const activeContext = isolatedSession?.context ?? context;
     try {
@@ -538,7 +543,7 @@ for (const site of supportedSiteScenarios) {
 
 async function verifySupportedSiteInjection(browserContext: BrowserContext, site: SupportedSiteScenario, options: SiteCheckOptions = {}): Promise<void> {
   const page = await browserContext.newPage();
-  let authPage: Page | null = null;
+  let authPage: AuthTabHandle | null = null;
   let signedIn = false;
   try {
     if (options.colorScheme) {
@@ -662,7 +667,7 @@ function localizedAdapterScenario(check: LocalizedAdapterCheck): SupportedSiteSc
   return site;
 }
 
-async function verifyUnauthClickOpensAuthTab(browserContext: BrowserContext, page: Page, site: SupportedSiteScenario, evidence: MountEvidence): Promise<Page | null> {
+async function verifyUnauthClickOpensAuthTab(browserContext: BrowserContext, page: Page, site: SupportedSiteScenario, evidence: MountEvidence): Promise<AuthTabHandle | null> {
   const loadedExtensionId = await resolveExtensionId(browserContext);
   expect(loadedExtensionId, "Emojery must be loaded before unauth click can open auth.html").not.toBeNull();
   if (!loadedExtensionId) return null;
@@ -688,7 +693,7 @@ async function verifyUnauthClickOpensAuthTab(browserContext: BrowserContext, pag
   // and a handle captured once then reports "Element is not attached to the DOM"
   // for every remaining attempt - the ladder fails without ever reaching the
   // mounted button.
-  let authPage: Page | null = null;
+  let authPage: AuthTabHandle | null = null;
   let sawTrigger = false;
   for (const attempt of attempts) {
     await page.bringToFront().catch(() => {});

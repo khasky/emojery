@@ -14,7 +14,9 @@
 import { type BrowserContext, expect, type Page } from "@playwright/test";
 import type { SiteId } from "../supported-sites";
 import { enMessage, extensionPageUrl } from "./auth-signin";
+import { isFirefoxRun } from "./browser-session";
 import { openPopup, signIn } from "./extension-pages";
+import { type FirefoxExtensionTab, firefoxBridge } from "./firefox-bridge";
 import { handleKnownInterstitials } from "./page-settle";
 import { openVisiblePickerAndReadSelectedReaction, pollForValue, selectedReactionOnMatchingHost, waitForMountedTargetKey, waitForVisibleEmojeryTrigger } from "./picker-probes";
 import { setPopupCheckbox } from "./popup-settings";
@@ -41,7 +43,12 @@ interface OpenedHistoryReactionPage {
   shouldClose: boolean;
 }
 
-export async function authPageFromUserAction(browserContext: BrowserContext, loadedExtensionId: string, action: () => Promise<void>): Promise<Page | null> {
+/** The auth tab a user action opened: a Playwright Page on Chromium, a bridge
+ *  handle on Firefox - the callers only ever close it. */
+export type AuthTabHandle = Pick<Page, "close">;
+
+export async function authPageFromUserAction(browserContext: BrowserContext, loadedExtensionId: string, action: () => Promise<void>): Promise<AuthTabHandle | null> {
+  if (isFirefoxRun()) return authTabFromUserActionOverBridge(browserContext, action);
   const expectedUrl = extensionPageUrl(loadedExtensionId, "auth.html");
   const pagePromise = browserContext.waitForEvent("page", { timeout: 5_000 }).catch(() => null);
 
@@ -115,6 +122,14 @@ export async function openHistoryTab(browserContext: BrowserContext, opts: { vie
 }
 
 export async function expectHistorySignedOut(browserContext: BrowserContext): Promise<void> {
+  if (isFirefoxRun()) {
+    await withPopupOverBridge(browserContext, async (popup) => {
+      const answer = await historyPageOverBridge(popup, {});
+      expect(answer.authed, "history must answer signed-out").toBe(false);
+      expect(answer.items, "a signed-out history holds no rows").toHaveLength(0);
+    });
+    return;
+  }
   const popup = await openPopup(browserContext);
   try {
     await popup.getByRole("tab", { name: enMessage("tabHistory") }).click();
@@ -136,6 +151,17 @@ export async function expectHistorySignedOut(browserContext: BrowserContext): Pr
 // The count is polled through the runtime channel BEFORE the tab is opened, since
 // the History view loads once and would snapshot a pre-flush list (module header).
 export async function expectHistoryRowCount(browserContext: BrowserContext, expected: number): Promise<void> {
+  if (isFirefoxRun()) {
+    await withPopupOverBridge(browserContext, async (popup) => {
+      await expect
+        .poll(async () => (await historyPageOverBridge(popup, { limit: 50 })).items.length, {
+          message: `local history should settle at ${expected} row(s) for this account`,
+          timeout: HISTORY_FLUSH_TIMEOUT_MS,
+        })
+        .toBe(expected);
+    });
+    return;
+  }
   const popup = await openPopup(browserContext);
   try {
     await expect
@@ -153,6 +179,24 @@ export async function expectHistoryRowCount(browserContext: BrowserContext, expe
 }
 
 export async function expectLatestHistoryReactions(browserContext: BrowserContext, expectedReactions: string[]): Promise<void> {
+  if (isFirefoxRun()) {
+    await withPopupOverBridge(browserContext, async (popup) => {
+      await expect
+        .poll(
+          async () => {
+            const { items } = await historyPageOverBridge(popup, { limit: 50 });
+            return expectedReactions.every((reaction, index) => items[index]?.reaction === reaction);
+          },
+          { message: "the picked reactions should reach local history in order after the vote flush", timeout: HISTORY_FLUSH_TIMEOUT_MS },
+        )
+        .toBe(true);
+      const { items } = await historyPageOverBridge(popup, { limit: 50 });
+      for (let index = 0; index < expectedReactions.length; index += 1) {
+        expect(items[index]?.target.url, "History row should expose an absolute target URL").toMatch(/^https?:\/\//);
+      }
+    });
+    return;
+  }
   const popup = await openPopup(browserContext);
   try {
     // Reading immediately races the flush (see the module header) and finds the
@@ -198,6 +242,22 @@ export async function expectLatestHistoryReactions(browserContext: BrowserContex
 }
 
 export async function expectHistorySearchFiltersReaction(browserContext: BrowserContext, reaction: string): Promise<void> {
+  if (isFirefoxRun()) {
+    // The search box is a debounced `history:page` query; on Firefox the query is
+    // asserted through that channel and the rendered list stays with the Gecko
+    // component tests (popup-history-facets.browser.test.tsx).
+    await withPopupOverBridge(browserContext, async (popup) => {
+      const matching = await historyPageOverBridge(popup, { limit: 50, query: reaction });
+      expect(matching.items.length, "History search should show matching reaction rows").toBeGreaterThan(0);
+      expect(
+        matching.items.filter((item) => item.reaction !== reaction),
+        "every searched row carries the searched reaction",
+      ).toHaveLength(0);
+      const none = await historyPageOverBridge(popup, { limit: 50, query: `no-history-match-${Date.now()}` });
+      expect(none.items, "a query nothing matches must find no rows").toHaveLength(0);
+    });
+    return;
+  }
   const popup = await openPopup(browserContext);
   try {
     await popup.getByRole("tab", { name: enMessage("tabHistory") }).click();
@@ -235,6 +295,7 @@ export async function expectHistorySearchFiltersReaction(browserContext: Browser
 }
 
 export async function openLatestHistoryReactionPage(browserContext: BrowserContext, picked: PickedReaction, openInPage?: Page): Promise<OpenedHistoryReactionPage> {
+  if (isFirefoxRun()) return openLatestHistoryReactionPageOverBridge(browserContext, picked, openInPage);
   const popup = await openPopup(browserContext);
   try {
     // On feed-heavy sites the busy service worker can flush AFTER the popup
@@ -283,5 +344,84 @@ export async function openLatestHistoryReactionPage(browserContext: BrowserConte
     };
   } finally {
     await popup.close().catch(() => {});
+  }
+}
+
+// --- The firefox run: the popup as a bridge tab, history through its runtime channel ---
+//
+// Playwright cannot attach to the popup on Firefox, so the helpers above read
+// history the way the popup's own view does - the `history:page` message from an
+// extension page - and assert on the answer. What the rendered list looks like
+// is Gecko component-tested in src/entrypoints/popup/*.browser.test.tsx.
+
+interface HistoryPageAnswer {
+  items: Array<{ reaction: string; target: { url: string } }>;
+  authed: boolean;
+}
+
+export async function withPopupOverBridge<T>(browserContext: BrowserContext, run: (popup: FirefoxExtensionTab) => Promise<T>): Promise<T> {
+  const popup = await (await firefoxBridge(browserContext)).openExtensionTab("popup.html");
+  try {
+    return await run(popup);
+  } finally {
+    await popup.close();
+  }
+}
+
+export function historyPageOverBridge(popup: FirefoxExtensionTab, query: { limit?: number; query?: string }): Promise<HistoryPageAnswer> {
+  return popup.evaluate(
+    (query) =>
+      browser.runtime.sendMessage({ type: "history:page", ...query }).then((answer: { items?: HistoryPageAnswer["items"]; authed?: boolean } | undefined) => ({
+        items: answer?.items ?? [],
+        authed: answer?.authed === true,
+      })),
+    query,
+  );
+}
+
+async function openLatestHistoryReactionPageOverBridge(browserContext: BrowserContext, picked: PickedReaction, openInPage?: Page): Promise<OpenedHistoryReactionPage> {
+  const href = await withPopupOverBridge(browserContext, async (popup) => {
+    await expect
+      .poll(
+        async () => {
+          const { items } = await historyPageOverBridge(popup, { limit: 50 });
+          return items.some((entry) => entry.reaction === picked.reaction) ? items.length : 0;
+        },
+        { message: "the picked reaction should reach local history after the vote flush", timeout: HISTORY_FLUSH_TIMEOUT_MS },
+      )
+      .toBeGreaterThan(0);
+    const { items } = await historyPageOverBridge(popup, { limit: 50 });
+    const first = items[0];
+    expect(first?.reaction, "the newest History row should carry the picked reaction").toBe(picked.reaction);
+    expect(first?.target.url, "History row should expose an absolute target URL").toMatch(/^https?:\/\//);
+    return first?.target.url ?? "";
+  });
+  const historyPage = openInPage ?? (await browserContext.newPage());
+  await historyPage.bringToFront();
+  await historyPage.goto(href, { waitUntil: "domcontentloaded", timeout: 45_000 });
+  await historyPage.waitForLoadState("domcontentloaded", { timeout: 45_000 });
+  await historyPage.waitForLoadState("load", { timeout: 45_000 }).catch(() => {});
+  return {
+    page: historyPage,
+    snapshot: { reaction: picked.reaction, targetKey: picked.targetKey, url: href },
+    shouldClose: !openInPage,
+  };
+}
+
+// The auth tab a gate click opened, found in Firefox's own tab list (Playwright's
+// page events never report it) and confirmed to have rendered the email step.
+async function authTabFromUserActionOverBridge(browserContext: BrowserContext, action: () => Promise<void>): Promise<AuthTabHandle | null> {
+  const bridge = await firefoxBridge(browserContext);
+  await action().catch(() => {});
+  const deadline = Date.now() + 5_000;
+  for (;;) {
+    const authTab = await bridge.attach(/^moz-extension:\/\/[^/]+\/auth\.html/);
+    if (authTab) {
+      const rendered = await authTab.evaluate((selector) => document.querySelector(selector) !== null, EMAIL_INPUT_SELECTOR).catch(() => false);
+      expect(rendered, "the auth tab should render its email step").toBe(true);
+      return authTab;
+    }
+    if (Date.now() > deadline) return null;
+    await new Promise((settle) => setTimeout(settle, 150));
   }
 }

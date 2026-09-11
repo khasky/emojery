@@ -10,6 +10,7 @@
 export { EXTENSION_ROOT, enMessage, extensionPageUrl, localeMessage } from "./auth-signin";
 export * from "./browser-session";
 export * from "./extension-pages";
+export * from "./firefox-bridge";
 export { extensionLaunchArgs, realisticClientEnabled } from "./launch-args";
 export * from "./popup-settings";
 export * from "./reaction-surface";

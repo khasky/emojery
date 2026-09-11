@@ -10,9 +10,6 @@ import * as ext from "./lib/extension";
 
 const REQUIRES_OTP = ext.otpSkipReason("layout checks");
 
-// Both cases sign in through auth.html (the tray only opens signed-in), which Playwright Firefox cannot reach.
-test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
-
 type Fit = NonNullable<Awaited<ReturnType<typeof ext.openPickerViewportFit>>>;
 
 // The popover may be taller than a short viewport (it scrolls internally), so we

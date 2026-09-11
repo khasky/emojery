@@ -15,6 +15,7 @@ import { type BrowserContext, chromium, firefox, type Page } from "@playwright/t
 import { EXTENSION_ROOT } from "./auth-signin";
 import { markProfileOwner } from "./browser-reaper";
 import { firefoxRunPrefs, geckoIdFromManifest, installTemporaryAddon } from "./firefox-addon";
+import { registerFirefoxDebuggerPort } from "./firefox-bridge";
 import { extensionLaunchArgs } from "./launch-args";
 
 // E2E_BROWSER=firefox switches every launcher below to Playwright's Firefox
@@ -23,16 +24,20 @@ import { extensionLaunchArgs } from "./launch-args";
 //
 // THE canonical reason specs guard on this: Playwright Firefox's juggler neither
 // navigates to nor TRACKS `moz-extension://` pages - even a tab the background
-// opens via tabs.create never appears in context.pages() - so popup / auth /
-// background surfaces are unreachable there and their specs skip. Content-script
-// surfaces (placement, picker DOM, theming) run for real. Specs point here.
+// opens via tabs.create never appears in context.pages(). Content-script
+// surfaces (placement, picker DOM, theming) run for real; the extension's own
+// contexts are reached through firefox-bridge.ts instead (background evaluate,
+// sign-in, settings, history reads, extension tabs judged by evaluated
+// functions). What still skips here is what needs Playwright's own page
+// machinery on those pages: locators, screenshots, trusted keyboard input,
+// downloads. Specs point here.
 export function isFirefoxRun(): boolean {
   return process.env.E2E_BROWSER === "firefox";
 }
 
 // The one skip reason the specs guarding on isFirefoxRun cite, shared so the
 // wording cannot drift between them.
-export const FIREFOX_NO_EXTENSION_PAGES = "extension pages (popup/auth) are not reachable in Playwright Firefox - juggler does not attach to moz-extension:// tabs";
+export const FIREFOX_NO_EXTENSION_PAGES = "drives extension pages (popup/auth) through Playwright locators, which Playwright Firefox cannot attach to - juggler does not track moz-extension:// tabs (firefox-bridge.ts covers evaluate-only checks)";
 
 export interface Session {
   context: BrowserContext;
@@ -50,8 +55,14 @@ interface LaunchOptions {
    *  it `page.goto(onboarding.html)` is closed under the spec a moment after it loads. */
   keepOnboardingTab?: boolean;
   /** A narrower window than the 1366x900 default, for a spec that drives only the
-   *  extension's own pages and wants them at their small size. */
-  viewport?: { width: number; height: number };
+   *  extension's own pages and wants them at their small size. `null` turns the
+   *  viewport emulation off altogether - the firefox run needs that to size the
+   *  extension windows it opens (FirefoxExtensionTab.setContentSize). */
+  viewport?: { width: number; height: number } | null;
+  /** Pin prefers-color-scheme for the whole browser. On the firefox run this is a
+   *  launch pref (the only way its extension pages follow a scheme); on Chromium
+   *  it is the context option, which every page inherits. */
+  colorScheme?: "light" | "dark";
 }
 
 export function resolveExtensionPath(): string {
@@ -192,16 +203,20 @@ async function launchFirefoxContext(userDataDir: string, baseOptions: Parameters
     ...portable,
     args: ["-start-debugger-server", String(port)],
     firefoxUserPrefs: {
-      ...firefoxRunPrefs({ geckoId: geckoIdFromManifest(extensionPath), locale: baseOptions?.locale }),
+      ...firefoxRunPrefs({ geckoId: geckoIdFromManifest(extensionPath), locale: baseOptions?.locale, colorScheme: baseOptions?.colorScheme === "dark" || baseOptions?.colorScheme === "light" ? baseOptions.colorScheme : undefined }),
       ...baseOptions?.firefoxUserPrefs,
     },
   });
+  const addonId = geckoIdFromManifest(extensionPath);
   try {
     await installTemporaryAddon(port, extensionPath);
   } catch (err) {
     await context.close().catch(() => {});
     throw err;
   }
+  // The same debugger server is how firefox-bridge.ts reaches the add-on's
+  // background page and extension tabs for this context.
+  registerFirefoxDebuggerPort(context, port, addonId);
   return context;
 }
 
@@ -228,15 +243,17 @@ export async function launchSession(options: LaunchOptions = {}): Promise<Sessio
   const { dir: userDataDir, generatedUserDataDir } = await resolveUserDataDir("authed-user-data", { explicitDir: options.userDataDir });
   const locale = options.locale ?? process.env.E2E_LOCALE ?? "en-US";
 
-  const viewport = options.viewport ?? { width: 1366, height: 900 };
+  const viewport = options.viewport === undefined ? { width: 1366, height: 900 } : options.viewport;
+  const windowSize = viewport ?? { width: 1366, height: 900 };
   const baseOptions = {
     headless: false as const,
     viewport,
+    ...(options.colorScheme ? { colorScheme: options.colorScheme } : {}),
     locale,
     extraHTTPHeaders: { "Accept-Language": `${locale},en;q=0.9` },
     // realisticClient is forced on here: these sessions drive real sites and have
     // never been opted out of the anti-detection flag.
-    args: extensionLaunchArgs({ extensionPaths: [extensionPath], locale, windowSize: `${viewport.width},${viewport.height}`, realisticClient: true }),
+    args: extensionLaunchArgs({ extensionPaths: [extensionPath], locale, windowSize: `${windowSize.width},${windowSize.height}`, realisticClient: true }),
   };
   const context = await launchRealisticContext(userDataDir, baseOptions, options.keepOnboardingTab ? { keepOnboardingTab: true } : {});
   context.setDefaultTimeout(Number(process.env.E2E_DEFAULT_TIMEOUT_MS ?? 30_000));

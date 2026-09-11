@@ -39,14 +39,12 @@ const POPUP_VIEWPORT = { width: 400, height: 640 };
 // The schema literals mirror src/background/history.ts - a mismatch fails the
 // test loudly.
 async function seedHistoryRows(context: BrowserContext, count: number): Promise<void> {
-  const sw = await ext.firstServiceWorker(context);
-  await sw.evaluate(
-    async ({ count }) => {
-      const { chrome, indexedDB } = globalThis as unknown as {
-        chrome: { storage: { local: { get: (keys: string) => Promise<Record<string, { userId?: string } | undefined>> } } };
-        indexedDB: IDBFactory;
-      };
-      const stored = await chrome.storage.local.get("auth_v1");
+  await ext.evalInBackground(
+    context,
+    async ({ count }: { count: number }) => {
+      const api = (globalThis as { browser?: typeof browser }).browser ?? (chrome as unknown as typeof browser);
+      const { indexedDB } = globalThis as unknown as { indexedDB: IDBFactory };
+      const stored = (await api.storage.local.get("auth_v1")) as Record<string, { userId?: string } | undefined>;
       const userId = stored.auth_v1?.userId;
       if (!userId) throw new Error("history seeding needs a signed-in session");
       const db = await new Promise<IDBDatabase>((resolve, reject) => {
@@ -101,7 +99,7 @@ async function captureStage(popup: Page, testInfo: TestInfo, stage: string): Pro
 
 test("History paging and search stay correct over a 10k-row uncapped store", async () => {
   test.skip(!ext.authConfigured(), REQUIRES_OTP);
-  test.skip(ext.isFirefoxRun(), "seeds the history store through the background context, which Playwright cannot reach on Firefox (MV2 background page)");
+  test.skip(ext.isFirefoxRun(), "pages and screenshots the popup's History view through Playwright, which cannot attach to it on Firefox (the seeding itself goes through the bridge)");
   // test.info() instead of the `({}, testInfo)` callback params: the empty
   // fixture destructuring trips biome's noEmptyPattern.
   const testInfo = test.info();

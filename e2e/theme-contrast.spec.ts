@@ -13,7 +13,7 @@
 // in light only. Each run logs its measurement so the re-theming behavior is observable.
 
 import { type BrowserContext, type ElementHandle, expect, type Page, type TestInfo, test } from "@playwright/test";
-import { authConfigured, clearReaction, envUrl, isFirefoxRun, openPickerTray, removeProfileUnlessKept, signIn } from "./lib/extension";
+import { authConfigured, clearReaction, envUrl, openPickerTray, removeProfileUnlessKept, signIn } from "./lib/extension";
 import { gotoSettled } from "./lib/page-settle";
 import { pollForValue } from "./lib/picker-probes";
 import { DEEP_QUERY_ALL_SRC } from "./lib/probe-src";
@@ -120,7 +120,7 @@ test.beforeAll(async () => {
   // configured. Emojery auth is independent of the host platforms, which stay
   // logged out. Firefox cannot sign in (auth.html is unreachable from
   // Playwright), so there the active phase self-reports "not measured".
-  if (authConfigured() && !isFirefoxRun()) {
+  if (authConfigured()) {
     await signIn(context);
   }
 });
@@ -176,10 +176,10 @@ for (const scenario of scenarios) {
           // a skip and not a failure, so without this assert the whole active phase
           // used to pass on a broken picker. Surface the reason in the log and the
           // report next to the measurements.
-          const reason = isFirefoxRun() ? "firefox run: cannot sign in (auth.html unreachable from Playwright)" : authConfigured() ? `signed in, but ${pickFailure}` : "no sign-in resolver configured (E2E_SIGNIN_RESOLVER)";
+          const reason = authConfigured() ? `signed in, but ${pickFailure}` : "no sign-in resolver configured (E2E_SIGNIN_RESOLVER)";
           console.log(`[theme] ${scenario.site} ${scheme}/active: not measured - ${reason}`);
           testInfo.annotations.push({ type: "active-phase-not-measured", description: `${scenario.label} (${scheme}): ${reason}` });
-          expect(authConfigured() && !isFirefoxRun(), `${scenario.label} (${scheme}/active): ${reason}`).toBe(false);
+          expect(authConfigured(), `${scenario.label} (${scheme}/active): ${reason}`).toBe(false);
         }
       } finally {
         // Best-effort: these are shared PUBLIC targets, so the run's account should not be

@@ -12,19 +12,15 @@
 // src/ui/*.browser.test.tsx; site-mounted trigger contrast is covered live by
 // theme-contrast.spec.ts.
 
-import { readFileSync } from "node:fs";
-import { createRequire } from "node:module";
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
+import { type AxeViolation, axeSource, COLOR_SCHEMES, formatViolations, POPUP_TABS, TEXT_SPACING_CSS, WCAG_TAGS } from "./lib/axe";
 import { authConfigured, closeSession, extensionPageUrl, FIREFOX_NO_EXTENSION_PAGES, isFirefoxRun, launchSession, openPerSiteList, otpSkipReason, resolveExtensionId, type Session, signIn } from "./lib/extension";
 import { AGREE_SELECTOR, CARD_SELECTOR, EMAIL_INPUT_SELECTOR, TAGLINE_SELECTOR } from "./lib/selectors";
 
-// Whole file drives the extension's own pages (popup/auth), which Playwright Firefox cannot reach.
+// Whole file drives the extension's own pages through Playwright locators, keyboard
+// and aria snapshots; a11y-firefox.spec.ts runs the axe / reflow / text-spacing
+// layers on Gecko through the bridge.
 test.skip(isFirefoxRun(), FIREFOX_NO_EXTENSION_PAGES);
-
-const axeSource = readFileSync(createRequire(import.meta.url).resolve("axe-core/axe.min.js"), "utf8");
-
-const COLOR_SCHEMES = ["light", "dark"] as const;
-const POPUP_TABS = ["Settings", "History", "Account", "Report"] as const;
 
 let session: Session;
 let context: BrowserContext;
@@ -61,21 +57,13 @@ async function openA11yPage(): Promise<Page> {
   return page;
 }
 
-interface AxeViolation {
-  id: string;
-  impact: string | null;
-  help: string;
-  nodes: { target: string[] }[];
-}
-
-// One formatted line per violation so a red run names every offender at once.
 async function runAxe(page: Page, label: string): Promise<string[]> {
-  const violations = (await page.evaluate(async () => {
+  const violations = (await page.evaluate(async (tags) => {
     const axe = (window as unknown as { axe: { run: (context: Document, options: unknown) => Promise<{ violations: unknown[] }> } }).axe;
-    const res = await axe.run(document, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"] } });
+    const res = await axe.run(document, { runOnly: { type: "tag", values: tags } });
     return res.violations;
-  })) as AxeViolation[];
-  return violations.map((v) => `${label}: [${v.impact}] ${v.id} (${v.help}) at ${v.nodes.map((n) => n.target.join(" ")).join("; ")}`);
+  }, WCAG_TAGS)) as AxeViolation[];
+  return formatViolations(label, violations);
 }
 
 test("axe: every popup tab is WCAG A/AA clean in both color schemes", async () => {
@@ -297,18 +285,6 @@ test("reflow: no horizontal scrolling at narrow widths (WCAG 1.4.10)", async () 
   expect(await hasHorizontalOverflow(page), "popup overflows at its 360px floor").toBe(false);
   await page.close();
 });
-
-// WCAG 1.4.12 user style overrides. Elements that truncate BY DESIGN (history
-// URLs, hints with text-overflow) are exempt; the checked selectors are the
-// always-visible reading surfaces that must never clip under these overrides.
-const TEXT_SPACING_CSS = `
-  * {
-    line-height: 1.5 !important;
-    letter-spacing: 0.12em !important;
-    word-spacing: 0.16em !important;
-  }
-  p, h1, h2, h3, li { margin-bottom: 2em !important; }
-`;
 
 test("text spacing: key text survives WCAG 1.4.12 overrides without clipping", async () => {
   const page = await openA11yPage();

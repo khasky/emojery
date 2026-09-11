@@ -12,7 +12,7 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
-    "types": ["node", "chrome"],
+    "types": ["node", "chrome", "firefox-webext-browser"],
     "noEmit": true,
     "skipLibCheck": true,
     "esModuleInterop": true,

@@ -16,9 +16,8 @@ const REQUIRES_OTP = ext.otpSkipReason("authed extras");
 // total is not readable immediately - polling faster only reloads more.
 const COUNT_SETTLE_POLL_MS = 12_000;
 
-// Whole file signs in through auth.html and drives the popup, which Playwright Firefox cannot
-// reach.
-test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
+// The cases that read the popup through Playwright locators guard themselves; the
+// rest (sign-in, settings, counters) run on both engines through the bridge.
 
 // Needs no sign-in (hosts mount unauthed too), so it always runs.
 test("settings: master Enabled toggle removes and restores the picker", async () => {
@@ -129,6 +128,7 @@ test("offline: a reaction made offline persists after reconnect + reload", async
 // with a delay, so each check waits and re-reads the RENDERED counter - never a
 // direct API read.
 test("account deletion: signs out and reverses its reactions", async () => {
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
   test.skip(!ext.authConfigured(), ext.otpSkipReason("account deletion"));
   // Generous: we wait for the public counts to settle TWICE - once to see the
   // vote land in the public counter, once to see it removed.
@@ -232,6 +232,7 @@ test("account deletion: signs out and reverses its reactions", async () => {
 // Report gate: on a non-supported active tab (the popup's own page) the Report tab shows the
 // "open a supported page" notice.
 test("report: shows the unsupported-page notice off a supported site", async () => {
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
   test.skip(!ext.authConfigured(), REQUIRES_OTP);
   const session = await ext.launchSession();
   try {
@@ -389,6 +390,7 @@ test("a reaction in flight survives a reload (slow network)", async () => {
 });
 
 test("analytics consent defaults ON and is an authed-only control", async () => {
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
   test.skip(!ext.authConfigured(), REQUIRES_OTP);
   const session = await ext.launchSession();
   try {

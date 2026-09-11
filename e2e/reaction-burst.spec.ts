@@ -27,8 +27,10 @@ test.use({ trace: "off" });
 
 const REQUIRES_OTP = ext.otpSkipReason("the reaction-burst accounting checks");
 
-// Whole file signs in through auth.html, which Playwright Firefox cannot reach.
-test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
+// The accounting reads the vote responses off context.on("response"), which on
+// Firefox never sees the background page's fetches (verified: a 10-click burst
+// counted 0 on the wire with every click recorded in history) - chromium-only.
+test.skip(ext.isFirefoxRun(), 'the vote responses are read off context.on("response"), which does not see Firefox\'s background-page fetches');
 
 // A burst plus the popup round-trip. The refusal path additionally waits for the
 // 429'd clicks to be re-sent, so it gets its own, longer budget.

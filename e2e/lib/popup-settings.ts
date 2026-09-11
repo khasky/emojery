@@ -6,7 +6,9 @@
 // site is excluded - so a plain `setChecked` waits on a node that may be gone.
 import { type BrowserContext, expect, type Page } from "@playwright/test";
 import { enMessage } from "./auth-signin";
+import { isFirefoxRun } from "./browser-session";
 import { openPopup } from "./extension-pages";
+import { firefoxBridge } from "./firefox-bridge";
 import { ROW_SELECT_SELECTOR } from "./selectors";
 
 // Prefix of a per-site row's accessible name ("Show the picker on Facebook"),
@@ -55,6 +57,7 @@ export type PopupThemeChoice = "light" | "dark" | "system";
 // The Theme row is the popup's only <select>, and its option values ARE the stored
 // preference - so this drives it by value and needs no localized option label.
 export async function setPopupTheme(context: BrowserContext, choice: PopupThemeChoice): Promise<void> {
+  if (isFirefoxRun()) return setPopupThemeOverBridge(context, choice);
   const popup = await openPopup(context);
   try {
     await popup.getByRole("tab", { name: "Settings" }).click();
@@ -78,6 +81,7 @@ export async function setPopupTheme(context: BrowserContext, choice: PopupThemeC
 // Set a settings checkbox (by accessible name) in the popup to a target state,
 // retrying since the popup paints defaults before merging persisted settings.
 export async function setPopupCheckbox(context: BrowserContext, opts: { tab: "Settings" | "Account"; name: string; checked: boolean }): Promise<void> {
+  if (isFirefoxRun()) return setPopupCheckboxOverBridge(context, opts);
   const popup = await openPopup(context);
   try {
     await popup.getByRole("tab", { name: opts.tab }).click();
@@ -103,5 +107,105 @@ export async function setPopupCheckbox(context: BrowserContext, opts: { tab: "Se
     else await expect(toggle).not.toBeChecked();
   } finally {
     await popup.close().catch(() => {});
+  }
+}
+
+// The firefox run's twins of the two drivers above: the popup opened as a tab by
+// firefox-bridge.ts and driven by ONE evaluated function that does what the
+// locator sequence does - select the tab, resolve the control by its accessible
+// name (aria-label, else the wrapping label's text, as getByRole reads it), click
+// it, and re-read through the same hydration retries. A synthetic click on a
+// checkbox toggles it and fires change, which is the event the popup persists on.
+async function setPopupCheckboxOverBridge(context: BrowserContext, opts: { tab: "Settings" | "Account"; name: string; checked: boolean }): Promise<void> {
+  const tab = await (await firefoxBridge(context)).openExtensionTab("popup.html");
+  try {
+    const outcome = await tab.evaluate(
+      async ({ tab, name, checked, perSiteSection, perSiteRow }) => {
+        const sleep = (ms: number) => new Promise<void>((settle) => setTimeout(settle, ms));
+        const nameOf = (input: HTMLInputElement): string => {
+          const own = input.getAttribute("aria-label");
+          if (own) return own;
+          const label = input.closest("label") ?? (input.id ? document.querySelector<HTMLLabelElement>(`label[for="${CSS.escape(input.id)}"]`) : null);
+          return (label?.textContent ?? "").replace(/\s+/g, " ").trim();
+        };
+        const checkbox = (needle: string): HTMLInputElement | null => Array.from(document.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')).find((input) => nameOf(input).includes(needle)) ?? null;
+        // The popup renders its tab strip and, one storage read later, the panel
+        // rows - the same wait a locator's auto-retry gives the Chromium driver.
+        const appear = async <T>(find: () => T | null): Promise<T | null> => {
+          const deadline = Date.now() + 10_000;
+          for (;;) {
+            const found = find();
+            if (found || Date.now() > deadline) return found;
+            await sleep(100);
+          }
+        };
+        const tabButton = await appear(() => Array.from(document.querySelectorAll<HTMLElement>('[role="tab"]')).find((el) => (el.textContent ?? "").includes(tab)) ?? null);
+        if (!tabButton) return { error: `no "${tab}" tab in the popup` };
+        tabButton.click();
+        await sleep(300);
+        if (perSiteRow) {
+          const section = await appear(() => checkbox(perSiteSection));
+          if (!section) return { error: `no "${perSiteSection}" toggle in the Settings panel` };
+          if (!section.checked) {
+            section.click();
+            await sleep(250);
+          }
+        }
+        if (!(await appear(() => checkbox(name)))) return perSiteRow && checked ? { ok: true } : { error: `no checkbox named "${name}" in the ${tab} panel` };
+        for (let attempt = 0; attempt < 5; attempt += 1) {
+          const target = checkbox(name);
+          // A vanished per-site row means the section collapsed because no site is
+          // excluded any more - which is the enabled=true outcome (see setPerSiteEnabled).
+          if (!target) return perSiteRow && checked ? { ok: true } : { error: `no checkbox named "${name}" in the ${tab} panel` };
+          if (target.checked !== checked) target.click();
+          await sleep(250);
+          const after = checkbox(name);
+          if (!after) return perSiteRow && checked ? { ok: true } : { error: `the "${name}" checkbox disappeared after the click` };
+          if (after.checked === checked) return { ok: true };
+        }
+        return { error: `"${name}" never settled at ${checked ? "on" : "off"}` };
+      },
+      { tab: opts.tab, name: opts.name, checked: opts.checked, perSiteSection: enMessage("sectionPerSite"), perSiteRow: opts.name.startsWith(PER_SITE_ROW_PREFIX) },
+    );
+    if ("error" in outcome) throw new Error(`popup over the Firefox bridge: ${outcome.error}`);
+  } finally {
+    await tab.close();
+  }
+}
+
+async function setPopupThemeOverBridge(context: BrowserContext, choice: PopupThemeChoice): Promise<void> {
+  const tab = await (await firefoxBridge(context)).openExtensionTab("popup.html");
+  try {
+    const outcome = await tab.evaluate(
+      async ({ choice, selector }) => {
+        const sleep = (ms: number) => new Promise<void>((settle) => setTimeout(settle, ms));
+        const appear = async <T>(find: () => T | null): Promise<T | null> => {
+          const deadline = Date.now() + 10_000;
+          for (;;) {
+            const found = find();
+            if (found || Date.now() > deadline) return found;
+            await sleep(100);
+          }
+        };
+        const tabButton = await appear(() => Array.from(document.querySelectorAll<HTMLElement>('[role="tab"]')).find((el) => (el.textContent ?? "").includes("Settings")) ?? null);
+        if (!tabButton) return { error: "no Settings tab in the popup" };
+        tabButton.click();
+        await sleep(300);
+        if (!(await appear(() => document.querySelector<HTMLSelectElement>(selector)))) return { error: "no Theme select in the Settings panel" };
+        for (let attempt = 0; attempt < 5; attempt += 1) {
+          const select = document.querySelector<HTMLSelectElement>(selector);
+          if (!select) return { error: "no Theme select in the Settings panel" };
+          select.value = choice;
+          select.dispatchEvent(new Event("change", { bubbles: true }));
+          await sleep(250);
+          if (document.querySelector<HTMLSelectElement>(selector)?.value === choice) return { ok: true };
+        }
+        return { error: `the Theme select never settled at "${choice}"` };
+      },
+      { choice, selector: ROW_SELECT_SELECTOR },
+    );
+    if ("error" in outcome) throw new Error(`popup over the Firefox bridge: ${outcome.error}`);
+  } finally {
+    await tab.close();
   }
 }

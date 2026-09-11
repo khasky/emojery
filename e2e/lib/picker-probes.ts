@@ -4,6 +4,7 @@
 // key, opening it with a trusted user action, and reading back what the shadow DOM
 // shows. Every helper takes a Page and plain values and reads no suite state.
 import { type ElementHandle, expect, type Page } from "@playwright/test";
+import { isFirefoxRun } from "./browser-session";
 import { collectMountEvidence, debugEvidence, handleKnownInterstitials, scrollPassUntil, settlePage } from "./page-settle";
 import { ACTIVE_IN_ROOT_SRC, DEEP_QUERY_ALL_SRC, IS_VISIBLE_RECT_SRC, MOUNTED_KEY_OF_SRC } from "./probe-src";
 import { BREAKDOWN_ROW_SELECTOR, COUNTER_CLASS, GRID_ITEM_CLASS, GRID_ITEM_SELECTOR, HOST_CLASS, HOST_SELECTOR, MOUNT_ATTR, MOUNTED_SELECTOR, SEARCH_INPUT_SELECTOR, TRIGGER_BUTTON_SELECTOR, TRIGGER_CLASS, TRIGGER_ICON_CLASS, TRIGGER_SELECTOR } from "./selectors";
@@ -386,13 +387,27 @@ export async function expectFocusedEmojeryTrigger(page: Page, targetKey: string)
     .toBe(true);
 }
 
+// Activate a grid option the way a user does. Chromium: a real click. Firefox: focus
+// plus Enter - Playwright's click never gets past its actionability wait on the
+// grid there (verified: a static option with a stable rect times out even with
+// force, while focus + Enter registers the pick), and Enter on a focused button is
+// the same trusted activation the click delivers.
+export async function activateGridOption(page: Page, option: { focus(): Promise<void>; click(options: { timeout: number }): Promise<void> }): Promise<void> {
+  if (isFirefoxRun()) {
+    await option.focus();
+    await page.keyboard.press("Enter");
+    return;
+  }
+  await option.click({ timeout: 10_000 });
+}
+
 export async function clickVisibleEmojiGridOption(page: Page, reaction: string): Promise<void> {
   await expectVisibleEmojiGridOption(page, reaction);
   const option = await findVisibleEmojiGridOption(page, reaction);
   expect(option, `Picker should expose a visible ${reaction} option`).not.toBeNull();
   if (!option) return;
   try {
-    await option.click({ timeout: 10_000 });
+    await activateGridOption(page, option);
   } finally {
     await option.dispose().catch(() => {});
   }

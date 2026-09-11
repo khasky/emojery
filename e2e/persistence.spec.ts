@@ -11,8 +11,8 @@ import { reloadAndSettle } from "./lib/reload-settle";
 
 const REQUIRES_OTP = ext.otpSkipReason("authed persistence checks");
 
-// Whole file signs in / toggles settings through the extension's own pages, which Playwright Firefox cannot reach.
-test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
+// The cases that read the popup through Playwright locators guard themselves;
+// the reaction restart runs on both engines (sign-in through the bridge).
 
 // Each case below makes its own "persist" profile dir and removes it itself: the dir is
 // reused across the two launches of one restart case, so closeSession is called with
@@ -22,6 +22,7 @@ test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
 
 // storage.sync persists in the profile, so a changed setting survives a full close + reopen.
 test("settings: changed values survive a full browser restart", async () => {
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
   const dir = await ext.makeRunProfileDir("persist");
   try {
     const first = await ext.launchSession({ userDataDir: dir });
@@ -121,6 +122,7 @@ test("a reaction survives a full browser restart", async () => {
 // synced settings instead - a mechanism --load-extension can't reproduce; that
 // edge stays a manual check.
 test("a fresh profile starts with default settings", async () => {
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
   const session = await ext.launchSession();
   try {
     const popup = await ext.openPopup(session.context);
@@ -142,6 +144,7 @@ test("a fresh profile starts with default settings", async () => {
 // --load-extension re-install (see the caveat above), so session 2 re-signs in
 // to reveal the still-persisted toggle.
 test("analytics consent survives a full browser restart", async () => {
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
   test.skip(!ext.authConfigured(), REQUIRES_OTP);
   const consentLabel = ext.enMessage("settingAnalyticsConsent");
   const dir = await ext.makeRunProfileDir("persist");

@@ -92,8 +92,10 @@ async function expectFitsPopupWidth(page: Page, surface: string): Promise<void> 
   expect(fit.escaped, `${surface}: every control must stay inside the popup width`).toEqual([]);
 }
 
-// The whole file drives extension pages, which Playwright Firefox cannot reach.
-test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
+// Firefox: Playwright's Firefox ships no language packs, so intl.locale.requested
+// leaves browser.i18n on en-US (verified: getUILanguage() and getMessage() stay
+// English under de-DE) - the locales cannot be swept there at all, bridge or not.
+test.skip(ext.isFirefoxRun(), "Playwright Firefox carries no language packs - the extension renders every locale as en-US there");
 test.describe.configure({ retries: 0 });
 
 for (const locale of sweptLocales()) {

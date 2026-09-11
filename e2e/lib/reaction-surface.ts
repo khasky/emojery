@@ -11,8 +11,8 @@
 import { type BrowserContext, expect, type Page } from "@playwright/test";
 import { isPageCrash } from "./auth-signin";
 import { isFirefoxRun } from "./browser-session";
-import { signIn } from "./extension-pages";
-import { firstElementHandle, pollForValue } from "./picker-probes";
+import { evalInBackground, signIn } from "./extension-pages";
+import { activateGridOption, firstElementHandle, pollForValue } from "./picker-probes";
 import { DEEP_QUERY_ALL_SRC, FIRST_VISIBLE_TRIGGER_SRC } from "./probe-src";
 import { COUNTER_CLASS, GRID_ITEM_SELECTOR, HIDDEN_SELECTOR, HOST_SELECTOR, MOUNT_ATTR, MOUNTED_SELECTOR, POPOVER_CLASS, SEARCH_INPUT_SELECTOR, TRIGGER_BUTTON_SELECTOR, TRIGGER_SELECTOR } from "./selectors";
 import { githubUrl, searchTermFor } from "./test-config";
@@ -180,31 +180,14 @@ export async function readSettledTotal(page: Page, graceMs = COUNTER_GRACE_MS): 
 // reload is NOT a refetch - loadInitial renders a cache hit, so two
 // "consecutive" settle reads can be one stale snapshot.
 //
-// Chromium clears it in the service worker. Firefox has NO reachable extension
-// context at all (no service worker, and juggler cannot open extension pages),
-// so this is a no-op there - acceptable because every caller sits behind
-// signIn(), which is itself chromium-only.
+// Cleared in the background context on both engines (evalInBackground: the
+// service worker on Chromium, the background page over the bridge on Firefox).
 async function clearCountsCache(page: Page): Promise<void> {
-  const context = page.context();
-  if (isFirefoxRun()) return;
-  const worker = context.serviceWorkers()[0];
-  if (!worker) return;
-  await worker
-    .evaluate(async () => {
-      const { chrome } = globalThis as unknown as {
-        chrome: {
-          storage: {
-            local: {
-              get: (keys: null) => Promise<Record<string, unknown>>;
-              remove: (keys: string[]) => Promise<void>;
-            };
-          };
-        };
-      };
-      const keys = Object.keys(await chrome.storage.local.get(null)).filter((key) => key.startsWith("cache:"));
-      if (keys.length > 0) await chrome.storage.local.remove(keys);
-    })
-    .catch(() => {});
+  await evalInBackground(page.context(), async () => {
+    const api = (globalThis as { browser?: typeof browser }).browser ?? (chrome as unknown as typeof browser);
+    const keys = Object.keys(await api.storage.local.get(null)).filter((key) => key.startsWith("cache:"));
+    if (keys.length > 0) await api.storage.local.remove(keys);
+  }).catch(() => {});
 }
 
 // Reload and read the PUBLIC aggregate total off the rendered counter (shadow
@@ -374,7 +357,7 @@ export async function reactWith(page: Page, emoji: string): Promise<void> {
       if (!option) continue;
     }
     try {
-      await option.click({ timeout: 10_000 });
+      await activateGridOption(page, option);
     } catch (err) {
       // The grid re-rendered under the click; the next pass re-queries. Anything
       // else (never visible, never stable) is a real failure and stays loud.
@@ -407,6 +390,7 @@ export async function reactWith(page: Page, emoji: string): Promise<void> {
 // thunk wherever teardown would discard the profile a still-queued vote lives in:
 // a fixed sleep lost that race live (the close cancelled the POST mid-flight).
 export function watchNextVoteFlush(context: BrowserContext, timeoutMs = 60_000): () => Promise<void> {
+  if (isFirefoxRun()) return watchVoteQueueDrain(context, timeoutMs);
   const flushed = context.waitForEvent("response", { predicate: (response) => response.url().includes("/reactions/vote"), timeout: timeoutMs }).then(
     () => true,
     () => false,
@@ -433,7 +417,7 @@ export async function clearReaction(page: Page): Promise<boolean> {
     const checked = page.locator(`${GRID_ITEM_SELECTOR}[aria-pressed="true"]`).filter({ visible: true });
     if ((await checked.count()) > 0) {
       hadSelection = true;
-      await checked.first().click({ timeout: 10_000 });
+      await activateGridOption(page, checked.first());
       // Un-reacting is the same optimistic-then-durable round trip as the pick above; the
       // next `checked.count()` must not read the grid mid-update.
       await page.waitForTimeout(600);
@@ -553,4 +537,43 @@ export async function openPickerViewportFit(page: Page): Promise<{
     }
     return null;
   })()`);
+}
+
+// The Firefox twin of the wire watcher above: Playwright never sees the background
+// page's fetches there (verified), so the proof is the queue itself - the vote lands
+// in the durable IndexedDB queue on the click and leaves it once the server has
+// answered. The thunk first gives the click a moment to enqueue, then waits for the
+// queue to drain. Store names mirror src/background/votequeue.ts.
+function watchVoteQueueDrain(context: BrowserContext, timeoutMs: number): () => Promise<void> {
+  const queuedVotes = () =>
+    evalInBackground(context, async () => {
+      const { indexedDB } = globalThis as unknown as { indexedDB: IDBFactory };
+      const db = await new Promise<IDBDatabase>((resolveDb, reject) => {
+        const req = indexedDB.open("emojery-vote-queue");
+        req.onsuccess = () => resolveDb(req.result);
+        req.onerror = () => reject(req.error);
+      });
+      try {
+        if (!db.objectStoreNames.contains("votes")) return 0;
+        return await new Promise<number>((resolveCount, reject) => {
+          const req = db.transaction("votes", "readonly").objectStore("votes").count();
+          req.onsuccess = () => resolveCount(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      } finally {
+        db.close();
+      }
+    });
+  const armedAt = Date.now();
+  return async () => {
+    const enqueueDeadline = armedAt + 5_000;
+    while ((await queuedVotes()) === 0 && Date.now() < enqueueDeadline) await new Promise((settle) => setTimeout(settle, 200));
+    const deadline = armedAt + timeoutMs;
+    let pending = await queuedVotes();
+    while (pending > 0 && Date.now() < deadline) {
+      await new Promise((settle) => setTimeout(settle, 500));
+      pending = await queuedVotes();
+    }
+    expect(pending, "the queued vote should flush to the server before teardown").toBe(0);
+  };
 }

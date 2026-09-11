@@ -18,7 +18,7 @@
 // a user actually walks (only fails when the surfaces really differ).
 
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
-import { closeSession, envUrl, firstServiceWorker, isFirefoxRun } from "./lib/extension";
+import { closeSession, envUrl, evalInBackground } from "./lib/extension";
 import { safeGoto } from "./lib/page-settle";
 import { DEEP_QUERY_ALL_SRC } from "./lib/probe-src";
 import { EMOJI_CLASS, GLYPH_H_VAR, HOST_SELECTOR, TRIGGER_ICON_CLASS } from "./lib/selectors";
@@ -259,7 +259,6 @@ for (const site of scenarios) {
 // YouTube row has, load a page, and require the trigger to ignore it.
 test("youtube: a stale remembered glyph size never outranks the row's own icons", async () => {
   test.slow();
-  test.skip(isFirefoxRun(), "seeds the glyph memory through the background context, which Playwright cannot reach on Firefox (MV2 background page)");
   const site = YOUTUBE_SURFACES.watch;
   if (!site) throw new Error("Missing the YouTube watch scenario - supported-sites.ts changed");
 
@@ -269,11 +268,11 @@ test("youtube: a stale remembered glyph size never outranks the row's own icons"
     // The memory is read into the content script at startup, so it must be in storage
     // BEFORE the page that has to ignore it loads.
     await page.goto("about:blank").catch(() => {});
-    const worker = await firstServiceWorker(seeded.context);
-    await worker.evaluate(
+    await evalInBackground(
+      seeded.context,
       async ({ key, px }: { key: string; px: number }) => {
-        const { chrome } = globalThis as unknown as { chrome: { storage: { local: { set: (items: Record<string, unknown>) => Promise<void> } } } };
-        await chrome.storage.local.set({ [key]: { px, at: Date.now() } });
+        const api = (globalThis as { browser?: typeof browser }).browser ?? (chrome as unknown as typeof browser);
+        await api.storage.local.set({ [key]: { px, at: Date.now() } });
       },
       { key: SEEDED_GLYPH_KEY, px: STALE_GLYPH_PX },
     );
@@ -285,10 +284,10 @@ test("youtube: a stale remembered glyph size never outranks the row's own icons"
     // key it read (glyphPxOrRemembered persists only when nothing is remembered yet), so
     // a plant in the wrong key leaves the extension's own measurement in a SECOND glyph
     // key - which is exactly what this reads back.
-    const glyphKeys = await worker.evaluate(async () => {
-      const { chrome } = globalThis as unknown as { chrome: { storage: { local: { get: (keys: null) => Promise<Record<string, unknown>> } } } };
+    const glyphKeys = await evalInBackground(seeded.context, async () => {
+      const api = (globalThis as { browser?: typeof browser }).browser ?? (chrome as unknown as typeof browser);
       // Matched on the word, not the exact prefix, so a RENAMED key shows up here too.
-      return Object.keys(await chrome.storage.local.get(null))
+      return Object.keys(await api.storage.local.get(null))
         .filter((key) => key.toLowerCase().includes("glyph"))
         .sort();
     });

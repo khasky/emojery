@@ -18,8 +18,8 @@ import { CLICK_FLOAT_CLASS, DEBUG_TAB_SELECTOR, HISTORY_DAY_SELECTOR, HOST_SELEC
 
 const REQUIRES_OTP = ext.otpSkipReason("the animations-toggle e2e check");
 
-// Whole file toggles settings through the popup, which Playwright Firefox cannot reach.
-test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
+// The cases that read the popup itself through Playwright locators guard
+// themselves; the toggles reach the popup through the bridge on firefox.
 
 // Arm a page-wide watcher for the click-burst element BEFORE reacting; the burst
 // lives only ~600ms, so a post-hoc query would race its removal.
@@ -81,6 +81,7 @@ test("reaction animations toggle gates the click burst without a reload", async 
 // old value; reopening it shows the new one. This pins the CURRENT contract -
 // if live sync is ever added, this test should be updated deliberately.
 test("an already-open second popup shows stale settings until reopened", async () => {
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
   const session = await ext.launchSession();
   try {
     const first = await ext.openPopup(session.context);
@@ -124,6 +125,7 @@ test("an already-open second popup shows stale settings until reopened", async (
 // persist itself. Needs no sign-in: every tab renders signed-out (History and
 // Account as their sign-in prompt), which is exactly the state to restore into.
 test("the popup reopens on the tab it was last left on", async () => {
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
   const session = await ext.launchSession();
   try {
     const first = await ext.openPopup(session.context);
@@ -301,6 +303,7 @@ async function expectPopupTheme(context: BrowserContext, expected: string, color
 }
 
 test("the Theme setting drives the extension pages, and System follows the browser", async () => {
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
   const session = await ext.launchSession();
   try {
     await ext.setPopupTheme(session.context, "dark");
@@ -323,6 +326,7 @@ test("the Theme setting drives the extension pages, and System follows the brows
 // panel's summary is deliberately un-i18n'd (popup-queue.tsx): the text below is
 // the queue's own state, not a translation.
 test("Debug mode reveals the queue panel and hides it again", async () => {
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
   const session = await ext.launchSession();
   try {
     const beforeToggle = await ext.openPopup(session.context);

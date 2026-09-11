@@ -37,13 +37,20 @@ export function geckoIdFromManifest(extensionPath: string): string {
 // since that flag went in. Scaling output to zero rather than blocking autoplay
 // (`media.autoplay.default`) keeps parity with Chrome - the video still plays, so
 // the action row the suite measures renders the same either way.
-export function firefoxRunPrefs(opts: { geckoId: string; locale?: string | undefined }): Record<string, string | number | boolean> {
+export function firefoxRunPrefs(opts: { geckoId: string; locale?: string | undefined; colorScheme?: "light" | "dark" | null | undefined }): Record<string, string | number | boolean> {
   return {
     "devtools.debugger.remote-enabled": true,
     "devtools.debugger.prompt-connection": false,
+    // firefox-bridge.ts closes the auth tab a gate click opened by evaluating
+    // window.close() in it; Firefox refuses that for a tab no script opened
+    // unless this pref allows it.
+    "dom.allow_scripts_to_close_windows": true,
     "extensions.webextensions.uuids": JSON.stringify({ [opts.geckoId]: FIREFOX_EXTENSION_UUID }),
     "media.volume_scale": "0.0",
     ...(opts.locale ? { "intl.locale.requested": opts.locale } : {}),
+    // Playwright's colorScheme option reaches only the pages juggler tracks; the
+    // extension pages the bridge opens follow the OS-level pref instead.
+    ...(opts.colorScheme ? { "ui.systemUsesDarkTheme": opts.colorScheme === "dark" ? 1 : 0 } : {}),
   };
 }
 
@@ -52,9 +59,11 @@ export function firefoxRunPrefs(opts: { geckoId: string; locale?: string | undef
 // three packets deep (hello -> getRoot -> installTemporaryAddon), so a real
 // protocol library would be dead weight.
 
-type RdpPacket = Record<string, unknown> & { from?: string };
+export type RdpPacket = Record<string, unknown> & { from?: string };
 
-class RdpConnection {
+// Exported for firefox-bridge.ts, which keeps a connection open for the run to
+// reach the add-on's background page and its extension tabs.
+export class RdpConnection {
   private buffer = Buffer.alloc(0);
   private waiters: Array<{ match: (p: RdpPacket) => boolean; resolve: (p: RdpPacket) => void; reject: (e: Error) => void }> = [];
 
