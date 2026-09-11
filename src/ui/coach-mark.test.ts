@@ -109,6 +109,24 @@ describe("maybeShowCoachMark", () => {
     expect(host.hasAttribute(COACH_ATTR)).toBe(false);
   });
 
+  it("follows a window resize back inside the viewport", async () => {
+    // jsdom has no layout: the viewport width the clamp reads is stubbed.
+    const viewport = { width: 1000 };
+    Object.defineProperty(document.documentElement, "clientWidth", { get: () => viewport.width, configurable: true });
+    try {
+      await showMark();
+      expect(tip()?.style.left).toBe("50px");
+
+      viewport.width = 300;
+      window.dispatchEvent(new Event("resize"));
+
+      // 300 - 260 tip - 8 margin
+      expect(tip()?.style.left).toBe("32px");
+    } finally {
+      Reflect.deleteProperty(document.documentElement, "clientWidth");
+    }
+  });
+
   it("leaves on its own after the timeout", async () => {
     await showMark();
 

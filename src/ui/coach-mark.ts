@@ -56,15 +56,15 @@ export async function maybeShowCoachMark(host: HTMLElement): Promise<void> {
     if (!host.isConnected || !trigger.isConnected) return;
     const rect = trigger.getBoundingClientRect();
     if (rect.width === 0 && rect.height === 0) return;
-    showCoachMark(host, rect);
+    showCoachMark(host, trigger);
   }, COACH_SHOW_DELAY_MS);
 }
 
-function showCoachMark(host: HTMLElement, rect: DOMRect): void {
+function showCoachMark(host: HTMLElement, trigger: HTMLElement): void {
   host.setAttribute(COACH_ATTR, "1");
   const tip = buildTip();
   getOverlayRoot().appendChild(tip);
-  positionTip(tip, rect);
+  positionTip(tip, trigger.getBoundingClientRect());
 
   const shownAt = Date.now();
   const timer = window.setTimeout(dismiss, COACH_TIMEOUT_MS);
@@ -80,6 +80,15 @@ function showCoachMark(host: HTMLElement, rect: DOMRect): void {
   function onScroll(): void {
     if (Date.now() - shownAt >= COACH_SCROLL_GRACE_MS) dismiss();
   }
+  // A narrower window reflows the trigger and shrinks the room on the right;
+  // the tip follows instead of hanging past the edge.
+  function onResize(): void {
+    if (!trigger.isConnected) {
+      dismiss();
+      return;
+    }
+    positionTip(tip, trigger.getBoundingClientRect());
+  }
 
   function dismiss(): void {
     window.clearTimeout(timer);
@@ -87,6 +96,7 @@ function showCoachMark(host: HTMLElement, rect: DOMRect): void {
     host.removeAttribute(COACH_ATTR);
     document.removeEventListener("keydown", onKeydown, true);
     window.removeEventListener("scroll", onScroll, true);
+    window.removeEventListener("resize", onResize);
     host.removeEventListener("pointerdown", onHostInteract, true);
     host.removeEventListener("keydown", onHostInteract, true);
   }
@@ -95,6 +105,7 @@ function showCoachMark(host: HTMLElement, rect: DOMRect): void {
   document.addEventListener("keydown", onKeydown, true);
   // Capture catches the inner scroll containers some sites scroll instead of the window.
   window.addEventListener("scroll", onScroll, { capture: true, passive: true });
+  window.addEventListener("resize", onResize);
   host.addEventListener("pointerdown", onHostInteract, true);
   host.addEventListener("keydown", onHostInteract, true);
 }
@@ -120,8 +131,9 @@ function buildTip(): HTMLElement {
   return tip;
 }
 
-// Below the trigger, clamped into the viewport. Positioned once - a page that
-// scrolls afterwards dismisses the mark (onScroll) rather than dragging it around.
+// Below the trigger, clamped into the layout viewport (scrollbar excluded). Re-run
+// on resize only - a page that scrolls afterwards dismisses the mark (onScroll)
+// rather than dragging it around.
 function positionTip(tip: HTMLElement, rect: DOMRect): void {
   const viewportWidth = document.documentElement.clientWidth;
   const left = Math.max(COACH_VIEWPORT_MARGIN_PX, Math.min(rect.left, viewportWidth - COACH_TIP_WIDTH_PX - COACH_VIEWPORT_MARGIN_PX));
