@@ -6,7 +6,7 @@
 // extension runtime from src/test/chrome-shim.ts.
 
 import { h, render } from "preact";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, onTestFinished } from "vitest";
 import { userEvent } from "vitest/browser";
 import {
   BREAKDOWN_MORE_CLASS,
@@ -380,10 +380,18 @@ describe("Picker - WebKit layout (real geometry)", () => {
     expect(left).toBeGreaterThanOrEqual(0);
   });
 
-  it("clamps the popover so it never overflows the right viewport edge", async () => {
+  it("clamps the popover so it never overflows the right viewport edge, scrollbar included", async () => {
     // Park the trigger hard against the right edge; the popover must shift left
-    // to stay on-screen (picker-hooks.ts usePopoverPosition: left = innerWidth - w - margin).
+    // to stay on-screen (picker-hooks.ts usePopoverPosition: left = clientWidth - w - margin).
+    // A classic scrollbar takes its 15px off the layout viewport (clientWidth) but not
+    // off window.innerWidth. Headless browsers draw overlay scrollbars, so the gap is
+    // stubbed rather than provoked with a tall page.
     container.style.cssText = "position: fixed; right: 0; top: 200px;";
+    const root = document.documentElement;
+    Object.defineProperty(root, "clientWidth", { value: window.innerWidth - 15, configurable: true });
+    onTestFinished(() => {
+      delete (root as { clientWidth?: number }).clientWidth;
+    });
     mountPicker();
     const trigger = container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!;
     await userEvent.click(trigger);
@@ -392,7 +400,7 @@ describe("Picker - WebKit layout (real geometry)", () => {
     await expect.poll(() => popover.style.visibility).toBe("visible");
     const left = Number.parseFloat(popover.style.left);
     expect(popover.offsetWidth).toBeGreaterThan(0);
-    expect(left + popover.offsetWidth).toBeLessThanOrEqual(window.innerWidth);
+    expect(left + popover.offsetWidth).toBeLessThanOrEqual(document.documentElement.clientWidth);
   });
 
   it("closes the popover on page scroll outside it", async () => {
@@ -680,11 +688,13 @@ describe("Picker - category nav bar", () => {
 
     // The bar keeps all its targets on one row only while the popover is wide enough for
     // them plus the chrome around them (see the width floor in picker.css for the terms).
-    // Asserted on the popover's width, not on the rendered rows: the wrap reproduces only
-    // where the scroll container's scrollbar takes layout width, which this browser's does not.
+    // Asserted on the popover's width, not on the rendered row: the shortfall reproduces
+    // only where the scroll container's scrollbar takes layout width, which this
+    // headless browser's does not - and the floor once missed the popover's own border,
+    // which a 17px Windows Firefox scrollbar turned into a second row.
     const popover = portalRoot.querySelector<HTMLElement>(`.${POPOVER_CLASS}`)!;
     const base = Number.parseFloat(fontMin!);
-    const needed = CATEGORIES.length * 24 + (CATEGORIES.length - 1) * 0.1 * base + 1.65 * base + 17;
+    const needed = CATEGORIES.length * 24 + (CATEGORIES.length - 1) * 0.1 * base + 1.65 * base + 20;
     // Floored: the engine resolves the same calc to 1/64-px precision, so an exact
     // comparison fails on the rounding rather than on a bar that no longer fits.
     expect(popover.getBoundingClientRect().width, "popover too narrow for a single-row category bar").toBeGreaterThanOrEqual(Math.floor(needed));

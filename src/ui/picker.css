@@ -357,13 +357,15 @@
      labels without dominating the viewport on big-font pages.
      The floor keeps the category bar on ONE row: its targets are pinned at 24 CSS px
      (WCAG 2.5.8) while everything around them scales with the font, so at the 14px
-     font floor 18em is ~15px too narrow and the last category wraps to a row of its
-     own. Terms, outside-in: the popover's 2 x 0.6em padding, the scroller's 0.15em
-     padding-right, a 17px classic scrollbar (the Windows worst case; slack, not
-     breakage, where the scrollbar overlays), the bar's 2 x 0.15em padding, then the
-     targets and their 0.1em gaps. Category count comes from picker.tsx, so a 10th
-     category widens the popover instead of wrapping. */
-  width: max(18em, calc(var(--khasky-emojery-cat-count, 9) * 24px + (var(--khasky-emojery-cat-count, 9) - 1) * 0.1em + 1.65em + 17px));
+     font floor 18em is ~15px too narrow for the last category. Terms, outside-in:
+     the popover's 2 x 0.6em padding, the scroller's 0.15em padding-right, the bar's
+     2 x 0.15em padding, then the targets and their 0.1em gaps - plus 20px for the
+     popover's own 1px borders (the width is border-box, so they sit inside it) and a
+     classic scrollbar: 15px on Windows Chrome, 17px and a fraction more in Firefox
+     at a fractional device scale. Slack, not breakage, where the scrollbar overlays.
+     Category count comes from picker.tsx, so a 10th category widens the popover
+     instead of overflowing. */
+  width: max(18em, calc(var(--khasky-emojery-cat-count, 9) * 24px + (var(--khasky-emojery-cat-count, 9) - 1) * 0.1em + 1.65em + 20px));
   max-height: 28em;
   background: var(--khasky-emojery-bg);
   border: 1px solid var(--khasky-emojery-border-strong);
@@ -453,11 +455,12 @@
   align-items: stretch;
   gap: 0.1em;
   padding: 0 0.15em 0.3em;
-  /* Last resort for the `min-width` floor below: the popover's width floor sizes the
-     bar so every target fits on one row, and this only engages if that floor is ever
-     out of step with the category count. Wrapping to a second row costs a taller head
-     (measured, see picker.tsx) - shrinking the targets costs reachability. */
-  flex-wrap: wrap;
+  /* The popover's width floor sizes the bar so every target fits on one row. Should
+     that floor ever fall short by a fraction (a wider scrollbar, a rounding at a
+     fractional device scale), the last target overflows the bar by that fraction
+     under the scroller's overflow-x clip - a wrapped second row would instead
+     stretch the sticky head and push the grid down. */
+  flex-wrap: nowrap;
 }
 
 /* The cat bar's 0.3em bottom padding is breathing room before the grid in the top layout;

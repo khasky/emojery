@@ -166,9 +166,9 @@ export function usePopoverPosition({
       if (shadowHost instanceof HTMLElement && shadowHost.getAttribute(LAYOUT_ATTR) === "icon-column") {
         let sideLeft = triggerRect.left - popWidth - POPOVER_MARGIN;
         if (sideLeft < POPOVER_MARGIN) sideLeft = triggerRect.right + POPOVER_MARGIN;
-        if (sideLeft >= POPOVER_MARGIN && sideLeft + popWidth <= window.innerWidth - POPOVER_MARGIN) {
+        if (sideLeft >= POPOVER_MARGIN && sideLeft + popWidth <= document.documentElement.clientWidth - POPOVER_MARGIN) {
           const centered = triggerRect.top + triggerRect.height / 2 - popHeight / 2;
-          const sideTop = Math.min(Math.max(POPOVER_MARGIN, centered), Math.max(POPOVER_MARGIN, window.innerHeight - popHeight - POPOVER_MARGIN));
+          const sideTop = Math.min(Math.max(POPOVER_MARGIN, centered), Math.max(POPOVER_MARGIN, document.documentElement.clientHeight - popHeight - POPOVER_MARGIN));
           if (!opts.preserveVertical || placedAboveRef.current == null) {
             placedAboveRef.current = false;
             setPlacedAbove(false);
@@ -178,8 +178,8 @@ export function usePopoverPosition({
         }
       }
       let left = triggerRect.left;
-      if (left + popWidth > window.innerWidth - POPOVER_MARGIN) {
-        left = window.innerWidth - popWidth - POPOVER_MARGIN;
+      if (left + popWidth > document.documentElement.clientWidth - POPOVER_MARGIN) {
+        left = document.documentElement.clientWidth - popWidth - POPOVER_MARGIN;
       }
       if (left < POPOVER_MARGIN) left = POPOVER_MARGIN;
       // Choose the side once per open (above only when the full popover clears the top),
@@ -199,8 +199,8 @@ export function usePopoverPosition({
         top = Math.max(POPOVER_MARGIN, triggerRect.top - popHeight - POPOVER_MARGIN);
       } else {
         top = triggerRect.bottom + POPOVER_MARGIN;
-        if (top + popHeight > window.innerHeight - POPOVER_MARGIN) {
-          top = Math.max(POPOVER_MARGIN, window.innerHeight - popHeight - POPOVER_MARGIN);
+        if (top + popHeight > document.documentElement.clientHeight - POPOVER_MARGIN) {
+          top = Math.max(POPOVER_MARGIN, document.documentElement.clientHeight - popHeight - POPOVER_MARGIN);
         }
       }
       setPopPos({ top, left });
