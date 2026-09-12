@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // The content script's half of the dev console channel. Its own module rather than a
-// call into background/debug.ts: that one owns `apiFetch` too, and importing it here
-// would carry the fetch-deadline machinery into every content bundle.
+// call into background/debug.ts: that one formats the background's API and IndexedDB
+// traces too, and importing it here would carry them into every content bundle.
 
 import { logScopedError } from "../shared/debug-log";
 

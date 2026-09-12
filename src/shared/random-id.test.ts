@@ -57,12 +57,15 @@ describe("randomId", () => {
     expect(() => randomId()).toThrow(/no Web Crypto/);
   });
 
-  it("fails the API layer's header build rather than send a request without an install id", async () => {
-    // The install id is part of the request shape; jsonApiHeaders lets the failure propagate.
+  it("fails the API request rather than send it without an install id", async () => {
+    // The install id is part of the request shape; apiRequest lets the failure propagate.
     vi.stubGlobal("crypto", undefined);
     installFakeChrome();
-    const { jsonApiHeaders } = await import("../background/identity");
-    await expect(jsonApiHeaders({})).rejects.toThrow(/no Web Crypto/);
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const { apiRequest } = await import("../background/api-client");
+    await expect(apiRequest("/auth/request-otp", { method: "POST", body: {} })).rejects.toThrow(/no Web Crypto/);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("does not repeat itself", () => {

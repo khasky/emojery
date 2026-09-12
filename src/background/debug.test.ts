@@ -20,21 +20,12 @@ afterEach(() => {
 });
 
 describe("debug API logging", () => {
-  it("logs API requests in a dev build without consuming the response", async () => {
-    const { apiFetch } = await importDebug();
-    const fetchMock = vi.fn(async () => Response.json({ ok: true, token: "secret-token" }, { status: 202 }));
+  it("logs API exchanges in a dev build", async () => {
+    const { logApiExchange } = await importDebug();
     const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
-    vi.stubGlobal("fetch", fetchMock);
 
-    const response = await apiFetch("https://api.test/reactions/vote?x=1", {
-      method: "POST",
-      body: JSON.stringify({ targetId: "t1", token: "request-token" }),
-    });
+    logApiExchange("https://api.test/reactions/vote?x=1", { method: "POST", body: JSON.stringify({ targetId: "t1", token: "request-token" }) }, { status: 202, body: { ok: true, token: "secret-token" } }, Date.now());
 
-    await expect(response.json()).resolves.toEqual({
-      ok: true,
-      token: "secret-token",
-    });
     expect(info).toHaveBeenCalledWith(
       "[emojery:api]",
       expect.objectContaining({
@@ -54,17 +45,10 @@ describe("debug API logging", () => {
   });
 
   it("redacts the OTP email and code from logged auth request bodies", async () => {
-    const { apiFetch } = await importDebug();
+    const { logApiExchange } = await importDebug();
     const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => Response.json({ ok: true }, { status: 200 })),
-    );
 
-    await apiFetch("https://api.test/auth/verify-otp", {
-      method: "POST",
-      body: JSON.stringify({ email: "alice@example.com", code: "123456" }),
-    });
+    logApiExchange("https://api.test/auth/verify-otp", { method: "POST", body: JSON.stringify({ email: "alice@example.com", code: "123456" }) }, { status: 200, body: { ok: true } }, Date.now());
 
     expect(info).toHaveBeenCalledWith(
       "[emojery:api]",
@@ -77,17 +61,13 @@ describe("debug API logging", () => {
   });
 
   it("logs nothing in a production build, on any channel", async () => {
-    const { apiFetch, logBackgroundError, logIndexedDbDebug } = await importDebug(false);
+    const { logApiExchange, logBackgroundError, logIndexedDbDebug } = await importDebug(false);
     const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
     // Spied too, not just `info`: the error channel writes here now, so a silent
     // production build has to be proven on both methods or the assert has a hole.
     const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => Response.json({ ok: true })),
-    );
 
-    await apiFetch("https://api.test/reactions/count");
+    logApiExchange("https://api.test/reactions/count", { method: "GET" }, { status: 200, body: { ok: true } }, Date.now());
     logBackgroundError("scope", new Error("boom"));
     logIndexedDbDebug("enqueue", { store: "votes" }, { id: 7 }, Date.now());
 
@@ -118,20 +98,14 @@ describe("debug API logging", () => {
     expect(error).not.toHaveBeenCalled();
   });
 
-  it("redacts the failure message on the apiFetch reject path, like the success path", async () => {
-    const { apiFetch } = await importDebug();
+  it("redacts the failure message on the rejected-fetch arm, like the success arm", async () => {
+    const { logApiExchange } = await importDebug();
     const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
     // The jwt.io sample token, signed with the string "secret".
     // nosemgrep: generic.secrets.security.detected-jwt-token.detected-jwt-token
     const jwt = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U";
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => {
-        throw new Error(jwt);
-      }),
-    );
 
-    await expect(apiFetch("https://api.test/reactions/vote", { method: "POST", body: "{}" })).rejects.toThrow();
+    logApiExchange("https://api.test/reactions/vote", { method: "POST", body: "{}" }, { error: new Error(jwt) }, Date.now());
 
     expect(info).toHaveBeenCalledWith(
       "[emojery:api]",
@@ -143,14 +117,10 @@ describe("debug API logging", () => {
   });
 
   it("redacts renamed credential-like fields by key substring", async () => {
-    const { apiFetch } = await importDebug();
+    const { logApiExchange } = await importDebug();
     const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => Response.json({ access_token: "a", refresh_token: "b", session_id: "c", api_key: "d", targetId: "t1" }, { status: 200 })),
-    );
 
-    await apiFetch("https://api.test/auth/session");
+    logApiExchange("https://api.test/auth/session", { method: "GET" }, { status: 200, body: { access_token: "a", refresh_token: "b", session_id: "c", api_key: "d", targetId: "t1" } }, Date.now());
 
     expect(info).toHaveBeenCalledWith(
       "[emojery:api]",
@@ -167,17 +137,13 @@ describe("debug API logging", () => {
   });
 
   it("redacts JWT-shaped values regardless of the key name", async () => {
-    const { apiFetch } = await importDebug();
+    const { logApiExchange } = await importDebug();
     const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
     // The jwt.io sample token, signed with the string "secret".
     // nosemgrep: generic.secrets.security.detected-jwt-token.detected-jwt-token
     const jwt = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U";
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => Response.json({ data: jwt, note: "eyJnot.a.jwt but text" }, { status: 200 })),
-    );
 
-    await apiFetch("https://api.test/reactions/mine");
+    logApiExchange("https://api.test/reactions/mine", { method: "GET" }, { status: 200, body: { data: jwt, note: "eyJnot.a.jwt but text" } }, Date.now());
 
     expect(info).toHaveBeenCalledWith(
       "[emojery:api]",

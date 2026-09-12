@@ -11,7 +11,8 @@ import { EMPTY_HISTORY_STATS, type RuntimeMessage, type RuntimeResponse } from "
 import { setCachedCounts, targetKey } from "../shared/storage";
 import { createTab } from "../shared/webext";
 import { enqueueVote, flushOwnedVotesForSignOut } from "./api";
-import { apiErrorCode, fetchCount } from "./api-read";
+import { apiErrorCode } from "./api-client";
+import { fetchCount } from "./api-read";
 import { hasAuthOrigin, rememberAuthOrigin, returnToAuthOrigin } from "./auth-return";
 import { logBackgroundError } from "./debug";
 import { exportHistory, getHistoryPage, getHistoryStats, importHistory } from "./history";

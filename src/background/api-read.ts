@@ -2,44 +2,27 @@
 //
 // Read path: fetch a target's public counts plus the signed-in user's own
 // reaction. Kept apart from api.ts (the durable vote-write queue): the read path
-// shares only the fetch wrapper, the session and the Retry-After parser with it.
+// shares only the API client and the session with it.
 
 import type { TargetRef } from "../shared/adapter";
-import { API_BASE, COUNTS_READ_BUDGET_MS } from "../shared/config";
+import { COUNTS_READ_BUDGET_MS } from "../shared/config";
 import { deadlineSignal } from "../shared/fetch-deadline";
-import type { RuntimeErrorCode } from "../shared/messages";
 import type { ReactionCounts, TargetCounts } from "../shared/reactions";
 import { DEFAULT_BREAKDOWN_LIMIT } from "../shared/reactions";
 import { targetKey } from "../shared/storage";
-import { apiFetch, logBackgroundError } from "./debug";
-import { clearAuth, extensionClientHeaders, getAuth } from "./identity";
+import { ApiHttpError, type ApiReply, apiRequest, isRecord } from "./api-client";
+import { logBackgroundError } from "./debug";
+import { clearAuth, getAuth } from "./identity";
 import { normalizeReaction } from "./message-guard";
-import { parseRetryAfterSeconds } from "./retry-after";
-
-// A non-ok API response. Carries the status so callers classify the failure from
-// a field instead of re-parsing a message string.
-export class ApiHttpError extends Error {
-  constructor(readonly status: number) {
-    super(`http ${status}`);
-    this.name = "ApiHttpError";
-  }
-}
-
-export function apiErrorCode(error: unknown): RuntimeErrorCode {
-  if (!(error instanceof ApiHttpError)) return "network";
-  if (error.status === 429) return "rate_limited";
-  return error.status >= 500 ? "server" : "unavailable";
-}
 
 // One retry is all a page read can afford. A `Retry-After` longer than this is
 // more than a mounted trigger can wait through, so give up rather than retry late.
 const READ_RETRY_MAX_DELAY_MS = 2_000;
 const READ_RETRY_DEFAULT_DELAY_MS = 500;
 
-function readRetryDelayMs(res: Response): number | null {
-  if (res.status !== 429 && res.status < 500) return null;
-  const retryAfterSeconds = parseRetryAfterSeconds(res.headers.get("retry-after"));
-  const delayMs = retryAfterSeconds === undefined ? READ_RETRY_DEFAULT_DELAY_MS : retryAfterSeconds * 1000;
+function readRetryDelayMs(reply: ApiReply): number | null {
+  if (reply.status !== 429 && reply.status < 500) return null;
+  const delayMs = reply.retryAfterSeconds === undefined ? READ_RETRY_DEFAULT_DELAY_MS : reply.retryAfterSeconds * 1000;
   return delayMs <= READ_RETRY_MAX_DELAY_MS ? delayMs : null;
 }
 
@@ -162,16 +145,12 @@ async function sendMineRequest(token: string, targets: readonly TargetRef[]): Pr
   const query = targets.map((target) => `t=${encodeURIComponent(wireTargetToken(target))}`).join("&");
   try {
     // `no-store` for the same reason as the counts read below.
-    const res = await apiFetch(`${API_BASE}/reactions/mine?${query}`, {
-      method: "GET",
-      cache: "no-store",
-      headers: { ...extensionClientHeaders(), authorization: `Bearer ${token}` },
-    });
-    if (res.status === 401) {
+    const reply = await apiRequest(`/reactions/mine?${query}`, { method: "GET", token, cache: "no-store" });
+    if (reply.status === 401) {
       await clearAuth();
       return {};
     }
-    if (!res.ok) return {};
+    if (!reply.ok) return {};
     // `{ reactions: { "<site>/<targetId>": "🤣" } }` - the map is wrapped so
     // the response can grow a field without colliding with a target key.
     // Filtered to the requested targets and to emoji-shaped values rather than
@@ -184,8 +163,7 @@ async function sendMineRequest(token: string, targets: readonly TargetRef[]): Pr
     // (`site:targetId`) that the durable stores are already written under. Reading
     // the wire under one and returning the other keeps the rename on the wire
     // instead of turning it into a storage migration.
-    const body: unknown = await res.json();
-    const raw = isRecord(body) && isRecord(body.reactions) ? body.reactions : {};
+    const raw = isRecord(reply.body) && isRecord(reply.body.reactions) ? reply.body.reactions : {};
     const reactions: Record<string, string> = {};
     for (const target of targets) {
       const value = normalizeReaction(raw[wireTargetToken(target)]);
@@ -227,10 +205,6 @@ function parseTargetCounts(raw: unknown, limit: number): TargetCounts {
   return { counts, total: raw.total, loaded: kept, hasMore: !!raw.hasMore };
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
 function isCount(value: unknown): value is number {
   return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 }
@@ -241,13 +215,12 @@ async function fetchTargetCountsAndOwnReaction(target: TargetRef, limit: number)
   // Both reads use `no-store`: the extension has its own read cache
   // (READ_CACHE_TTL_MS), so letting the browser HTTP layer also cache these could
   // resurface counts the user changed minutes ago.
-  const countsP = fetchCountsWithRetry(`${API_BASE}/reactions/count?t=${encodeURIComponent(targetParam)}&limit=${limit}`);
+  const countsP = fetchCountsWithRetry(`/reactions/count?t=${encodeURIComponent(targetParam)}&limit=${limit}`);
   // `mine` runs concurrently with `count`; a non-ok `count` throws below while
   // it is still in flight, which is safe because the batched read never rejects.
   const mineP = auth ? requestMyReactions(target, auth.token) : null;
 
-  const countsRes = await countsP;
-  const base = parseTargetCounts(await countsRes.json(), limit);
+  const base = parseTargetCounts((await countsP).body, limit);
 
   const myReaction = mineP ? ((await mineP)[targetKey(target)] ?? null) : null;
   return { ...base, myReaction };
@@ -256,20 +229,19 @@ async function fetchTargetCountsAndOwnReaction(target: TargetRef, limit: number)
 // The counts read, retried once on a transient failure (429/5xx). A permanent
 // status, an exhausted retry, or a `Retry-After` past the cap rejects with the
 // status attached, so the caller can tell "rate limited" from "server down".
-async function fetchCountsWithRetry(url: string): Promise<Response> {
-  // One init for both attempts: the retry carries the same client identity headers,
-  // and the pair shares one deadline. A deadline per attempt would let the retry
+async function fetchCountsWithRetry(path: string): Promise<ApiReply> {
+  // One deadline for both attempts. A deadline per attempt would let the retry
   // outlast the page's wait, so the trigger shows an error while this read runs on.
   const signal = deadlineSignal(COUNTS_READ_BUDGET_MS);
-  const init: RequestInit = { method: "GET", cache: "no-store", headers: extensionClientHeaders(), ...(signal ? { signal } : {}) };
-  const res = await apiFetch(url, init);
-  if (res.ok) return res;
-  const retryInMs = readRetryDelayMs(res);
-  if (retryInMs === null) throw new ApiHttpError(res.status);
+  const options = { method: "GET" as const, cache: "no-store" as const, ...(signal ? { signal } : {}) };
+  const reply = await apiRequest(path, options);
+  if (reply.ok) return reply;
+  const retryInMs = readRetryDelayMs(reply);
+  if (retryInMs === null) throw new ApiHttpError(reply.status);
   await new Promise<void>((resolve) => {
     self.setTimeout(resolve, retryInMs);
   });
-  const retried = await apiFetch(url, init);
+  const retried = await apiRequest(path, options);
   if (!retried.ok) throw new ApiHttpError(retried.status);
   return retried;
 }

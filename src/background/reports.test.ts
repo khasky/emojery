@@ -1,26 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { firefoxDataConsentManifest, installFakeChrome, lastFetchCall } from "../test/fixtures";
+import { firefoxDataConsentManifest, installFakeChrome, lastFetchCall, stubFetch } from "../test/fixtures";
 
-vi.mock("./debug", () => ({
-  apiFetch: vi.fn(),
-  logBackgroundError: vi.fn(),
-}));
 vi.mock("./identity", () => ({
-  authRequestLanguage: vi.fn(() => "uk-UA"),
-  // Stands in for the shared header builder - the assertions below check that
-  // reports.ts hands it the token and language, not how it composes them.
-  jsonApiHeaders: vi.fn(async ({ token, lang }: { token?: string; lang?: string } = {}) => ({
-    "content-type": "application/json",
-    ...(token ? { authorization: `Bearer ${token}` } : {}),
-    "x-emojery-client": "extension",
-    ...(lang ? { "accept-language": lang } : {}),
-  })),
   getAuth: vi.fn(),
 }));
 
-import { apiFetch } from "./debug";
-import { getAuth, jsonApiHeaders } from "./identity";
+import { getAuth } from "./identity";
 import { reportProblem } from "./reports";
 
 const reportPayload = {
@@ -35,13 +21,14 @@ function stubChrome(dataCollection: string[]): void {
   installFakeChrome({ manifest: { version: "0.1.203", ...firefoxDataConsentManifest }, dataCollection });
 }
 
+let fetchMock: ReturnType<typeof vi.fn>;
+
 beforeEach(() => {
   vi.clearAllMocks();
-  // clearAllMocks drops calls, not implementations - restore the happy path so a
-  // failure case set by one test cannot leak into the next.
-  vi.mocked(apiFetch).mockResolvedValue(new Response("", { status: 200 }));
+  fetchMock = stubFetch(async () => new Response("", { status: 200 }));
   vi.stubGlobal("navigator", {
     userAgent: "Mozilla/5.0 Test",
+    language: "uk-UA",
   });
   vi.mocked(getAuth).mockResolvedValue({
     userId: "u1",
@@ -64,13 +51,13 @@ describe("reportProblem outcome", () => {
 
   it("reports false on a non-ok response", async () => {
     stubChrome([]);
-    vi.mocked(apiFetch).mockResolvedValue(new Response("nope", { status: 500 }));
+    fetchMock.mockResolvedValue(new Response("nope", { status: 500 }));
     await expect(reportProblem(reportPayload)).resolves.toBe(false);
   });
 
   it("reports false when the request throws", async () => {
     stubChrome([]);
-    vi.mocked(apiFetch).mockRejectedValue(new TypeError("Failed to fetch"));
+    fetchMock.mockRejectedValue(new TypeError("Failed to fetch"));
     await expect(reportProblem(reportPayload)).resolves.toBe(false);
   });
 
@@ -78,7 +65,7 @@ describe("reportProblem outcome", () => {
     stubChrome([]);
     vi.mocked(getAuth).mockResolvedValue(null);
     await expect(reportProblem(reportPayload)).resolves.toBe(false);
-    expect(apiFetch).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });
 
@@ -88,7 +75,8 @@ describe("reportProblem", () => {
 
     await reportProblem(reportPayload);
 
-    const [, init] = lastFetchCall(vi.mocked(apiFetch));
+    const [url, init] = lastFetchCall(fetchMock);
+    expect(url).toMatch(/\/report$/);
     const body = JSON.parse(init.body as string) as Record<string, unknown>;
     expect(body).toMatchObject({
       event: "report",
@@ -107,7 +95,7 @@ describe("reportProblem", () => {
 
     await reportProblem(reportPayload);
 
-    const [, init] = lastFetchCall(vi.mocked(apiFetch));
+    const [, init] = lastFetchCall(fetchMock);
     const body = JSON.parse(init.body as string) as Record<string, unknown>;
     expect(body).toMatchObject({
       event: "report",
@@ -115,10 +103,12 @@ describe("reportProblem", () => {
     });
     expect(body).not.toHaveProperty("ua");
     expect(body).not.toHaveProperty("version");
+    // The session token and the UI language ride as headers, as on every JSON POST.
     expect(init.headers).toMatchObject({
+      authorization: "Bearer jwt",
       "x-emojery-client": "extension",
       "accept-language": "uk-UA",
     });
-    expect(jsonApiHeaders).toHaveBeenCalledWith({ token: "jwt", lang: "uk-UA" });
+    expect(init.keepalive).toBe(true);
   });
 });

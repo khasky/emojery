@@ -23,8 +23,8 @@ vi.mock("./api", () => ({
   scheduleFlush: vi.fn(async () => {}),
   VOTE_WAKE_ALARM: "vote-wake",
 }));
+vi.mock("./api-client", () => ({ apiErrorCode: vi.fn(() => "unavailable") }));
 vi.mock("./api-read", () => ({
-  apiErrorCode: vi.fn(() => "unavailable"),
   fetchCount: vi.fn(async () => ({ counts: {}, total: 0, loaded: 0, hasMore: false })),
 }));
 vi.mock("./auth-return", () => ({

@@ -2,14 +2,11 @@
 // Extension-local auth session state.
 
 import { AUTH_KEY, isAuthSessionLive } from "../shared/auth-session";
-import { API_BASE } from "../shared/config";
-import { normalizeLanguageTag } from "../shared/language-tag";
 import { clearAutoNativesForUser, clearOwnReactionsForUser } from "../shared/storage";
 import { storageLocalGet, storageLocalRemove, storageLocalSet, storageSessionGet, storageSessionRemove, storageSessionSet } from "../shared/webext";
-import { clientSecurityHeaders } from "./client-security";
-import { apiFetch, logBackgroundError } from "./debug";
+import { apiErrorString, apiRequest, isRecord, requestLanguage } from "./api-client";
+import { logBackgroundError } from "./debug";
 import { clearHistory, clearHistoryForUser } from "./history";
-import { parseRetryAfterSeconds } from "./retry-after";
 import { clearQueuedVotes } from "./votequeue";
 
 export interface AuthState {
@@ -64,83 +61,20 @@ interface RequestOtpResult {
   retryAfterSeconds?: number;
 }
 
-// The UI language the auth endpoints get, as an `accept-language` header and a
-// `lang` body field. Held to a well-formed BCP-47 tag by normalizeLanguageTag
-// (shared/language-tag), the same validator the vote path uses, so region survives
-// (`pt-BR` stays `pt-BR`) and only a malformed value is dropped. Empty string,
-// not undefined - callers gate on falsiness and omit the field.
-export function authRequestLanguage(): string {
-  return normalizeLanguageTag(typeof navigator !== "undefined" ? navigator.language : undefined) ?? "";
-}
-
-// Client identity headers used by API requests. Not secrets.
-export function extensionClientHeaders(): Record<string, string> {
-  const runtime = globalThis.chrome?.runtime;
-  const manifest = runtime?.getManifest?.();
-  const runtimeOrigin = extensionRuntimeOrigin(runtime);
-  return {
-    "x-emojery-client": "extension",
-    "x-emojery-client-version": manifest?.version ?? "0.0.0",
-    ...(runtime?.id ? { "x-emojery-runtime-id": runtime.id } : {}),
-    ...(runtimeOrigin ? { "x-emojery-runtime-origin": runtimeOrigin } : {}),
-  };
-}
-
-// The headers every JSON POST shares - the auth endpoints here, the vote (api.ts)
-// and the problem report (reports.ts). No two sources share a header name, so
-// spread order never changes the result. The GET reads (api-read.ts, popular.ts)
-// build their own, so a header added below reaches the POSTs only.
-//
-// The install id is part of the request shape, so a failure to read or create it
-// propagates to the caller instead of sending a request without it.
-export async function jsonApiHeaders(opts: { token?: string; lang?: string } = {}): Promise<Record<string, string>> {
-  const securityHeaders = await clientSecurityHeaders();
-  return {
-    "content-type": "application/json",
-    ...(opts.token ? { authorization: `Bearer ${opts.token}` } : {}),
-    ...extensionClientHeaders(),
-    ...(opts.lang ? { "accept-language": opts.lang } : {}),
-    ...securityHeaders,
-  };
-}
-
-function extensionRuntimeOrigin(runtime: typeof chrome.runtime | undefined): string {
-  try {
-    const root = runtime?.getURL?.("");
-    if (!root) return "";
-    const url = new URL(root);
-    if (url.protocol === "chrome-extension:" || url.protocol === "moz-extension:" || url.protocol === "safari-web-extension:") {
-      return `${url.protocol}//${url.host}`;
-    }
-    return url.origin;
-  } catch {
-    return "";
-  }
-}
-
-async function postRequestOtp(email: string, lang: string): Promise<Response> {
-  return apiFetch(`${API_BASE}/auth/request-otp`, {
-    method: "POST",
-    headers: await jsonApiHeaders({ lang }),
-    body: JSON.stringify({ email, ...(lang ? { lang } : {}) }),
-  });
-}
-
 export async function requestOtp(email: string): Promise<RequestOtpResult> {
-  const lang = authRequestLanguage();
-  const res = await postRequestOtp(email, lang);
+  const lang = requestLanguage();
+  const reply = await apiRequest("/auth/request-otp", { method: "POST", lang, body: { email, ...(lang ? { lang } : {}) } });
 
-  if (res.ok) return { ok: true, status: res.status };
-  const err = (await res.json().catch(() => ({}))) as { error?: string };
+  if (reply.ok) return { ok: true, status: reply.status };
   // The `retry-after` header is the only source of a delay; the response body
-  // carries an `error` string and nothing the client reads. Absent header means
-  // no delay to surface - the caller falls back to its own cooldown.
-  const retryAfterSeconds = parseRetryAfterSeconds(res.headers.get("retry-after"));
+  // carries an `error` string and nothing else the client reads. Absent header
+  // means no delay to surface - the caller falls back to its own cooldown.
+  const error = apiErrorString(reply.body);
   return {
     ok: false,
-    status: res.status,
-    ...(err.error ? { error: err.error } : {}),
-    ...(retryAfterSeconds !== undefined ? { retryAfterSeconds } : {}),
+    status: reply.status,
+    ...(error ? { error } : {}),
+    ...(reply.retryAfterSeconds !== undefined ? { retryAfterSeconds: reply.retryAfterSeconds } : {}),
   };
 }
 
@@ -154,28 +88,24 @@ interface VerifyOtpResult {
 }
 
 export async function verifyOtp(email: string, code: string): Promise<VerifyOtpResult> {
-  const res = await apiFetch(`${API_BASE}/auth/verify-otp`, {
-    method: "POST",
-    headers: await jsonApiHeaders({ lang: authRequestLanguage() }),
-    body: JSON.stringify({ email, code }),
-  });
-  if (res.ok) {
+  const reply = await apiRequest("/auth/verify-otp", { method: "POST", lang: requestLanguage(), body: { email, code } });
+  if (reply.ok) {
     // The wire field is `expiresAtSec` (seconds). The stored AuthState keeps its
     // own `expiresAt` name (documented as seconds), so no migration of a saved
     // `auth_v1` record is needed.
-    const session = (await res.json().catch(() => null)) as { userId?: unknown; token?: unknown; expiresAtSec?: unknown } | null;
-    if (!session || typeof session.userId !== "string" || !session.userId || typeof session.token !== "string" || !session.token || typeof session.expiresAtSec !== "number" || !Number.isFinite(session.expiresAtSec)) {
-      return { ok: false, status: res.status, error: "invalid_session" };
+    const session = reply.body;
+    if (!isRecord(session) || typeof session.userId !== "string" || !session.userId || typeof session.token !== "string" || !session.token || typeof session.expiresAtSec !== "number" || !Number.isFinite(session.expiresAtSec)) {
+      return { ok: false, status: reply.status, error: "invalid_session" };
     }
     const authState: AuthState = { userId: session.userId, token: session.token, expiresAt: session.expiresAtSec, email };
     await setAuth(authState);
-    return { ok: true, status: res.status };
+    return { ok: true, status: reply.status };
   }
-  const err = (await res.json().catch(() => ({}))) as { error?: string };
+  const error = apiErrorString(reply.body);
   return {
     ok: false,
-    status: res.status,
-    ...(err.error ? { error: err.error } : {}),
+    status: reply.status,
+    ...(error ? { error } : {}),
   };
 }
 
@@ -186,13 +116,9 @@ export async function verifyOtp(email: string, code: string): Promise<VerifyOtpR
 // `keepalive` so the request survives the popup closing right after the click.
 export async function revokeSessionServerSide(token: string): Promise<boolean> {
   try {
-    const res = await apiFetch(`${API_BASE}/auth/logout`, {
-      method: "POST",
-      headers: await jsonApiHeaders({ token, lang: authRequestLanguage() }),
-      keepalive: true,
-    });
+    const reply = await apiRequest("/auth/logout", { method: "POST", token, lang: requestLanguage(), keepalive: true });
     // 401 means the server already considers it dead - the goal either way.
-    return res.ok || res.status === 401;
+    return reply.ok || reply.status === 401;
   } catch (error) {
     logBackgroundError("revokeSessionServerSide", error);
     return false;
@@ -257,14 +183,9 @@ export async function clearPendingDeletion(): Promise<void> {
 // `email` is optional; the deletion does not depend on it.
 async function requestAccountDeletion(token: string, email: string | undefined): Promise<boolean> {
   try {
-    const lang = authRequestLanguage();
-    const res = await apiFetch(`${API_BASE}/auth/delete`, {
-      method: "POST",
-      headers: await jsonApiHeaders({ token, lang }),
-      body: JSON.stringify({ ...(email ? { email } : {}), ...(lang ? { lang } : {}) }),
-      keepalive: true,
-    });
-    return res.ok || res.status === 401;
+    const lang = requestLanguage();
+    const reply = await apiRequest("/auth/delete", { method: "POST", token, lang, body: { ...(email ? { email } : {}), ...(lang ? { lang } : {}) }, keepalive: true });
+    return reply.ok || reply.status === 401;
   } catch (error) {
     logBackgroundError("requestAccountDeletion", error);
     return false;

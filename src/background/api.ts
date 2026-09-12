@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import type { TargetRef } from "../shared/adapter";
-import { API_BASE } from "../shared/config";
 import { effectiveAnalyticsConsent, resolveLocalAnalyticsConsent } from "../shared/data-consent";
 import { defined } from "../shared/defined";
 import { normalizeLanguageTag } from "../shared/language-tag";
@@ -11,10 +10,10 @@ import { randomId } from "../shared/random-id";
 import type { Reaction } from "../shared/reactions";
 import { clearOwnReactionIfMatches } from "../shared/storage";
 import { clearAlarm, createAlarm, storageLocalGet, storageLocalSet } from "../shared/webext";
-import { apiFetch, logBackgroundError } from "./debug";
+import { type ApiReply, apiRequest, isRecord, requestLanguage } from "./api-client";
+import { logBackgroundError } from "./debug";
 import { pushHistory, removeHistoryEntry } from "./history";
-import { type AuthState, clearAuth, getAuth, jsonApiHeaders } from "./identity";
-import { parseRetryAfterSeconds } from "./retry-after";
+import { type AuthState, clearAuth, getAuth } from "./identity";
 import { bumpAttempt, deleteById, enqueue, getQueueStats, peekNext, peekNextEligible, type QueuedVote, type StoredVote } from "./votequeue";
 
 const VOTE_FLUSH_DEBOUNCE_MS = 250;
@@ -75,7 +74,7 @@ export async function enqueueVote(record: { target: TargetRef; reaction: Reactio
   const auth = await getAuth();
   if (!auth) return false;
   const analyticsConsent = await resolveLocalAnalyticsConsent();
-  const lang = analyticsConsent ? (normalizeLanguageTag(record.lang) ?? browserLanguage()) : undefined;
+  const lang = analyticsConsent ? (normalizeLanguageTag(record.lang) ?? requestLanguage()) : undefined;
   const clicked = record.reaction ?? record.prevReaction;
   const action = historyActionFor(record.reaction, record.prevReaction);
   const optimisticHistoryId = clicked ? randomId() : undefined;
@@ -258,7 +257,7 @@ export async function flushOwnedVotesForSignOut(): Promise<void> {
 }
 
 async function drainQueuedVotes(): Promise<void> {
-  const langHeader = browserLanguage();
+  const langHeader = requestLanguage();
   for (let sends = 0; sends < MAX_SENDS_PER_DRAIN; sends++) {
     const now = Date.now();
     let holdUntil = 0;
@@ -290,12 +289,13 @@ async function drainQueuedVotes(): Promise<void> {
     const analyticsConsent = await effectiveAnalyticsConsent(vote.analyticsConsent !== false);
     const lang = analyticsConsent ? (normalizeLanguageTag(vote.lang) ?? langHeader) : undefined;
     try {
-      const res = await apiFetch(`${API_BASE}/reactions/vote`, {
+      const reply = await apiRequest("/reactions/vote", {
         method: "POST",
+        token: auth.token,
         // `accept-language` is the standard request header (live locale), not the consent-gated
         // `lang` analytics field in the body below.
-        headers: await jsonApiHeaders(defined({ token: auth.token, lang: langHeader })),
-        body: JSON.stringify({
+        lang: langHeader,
+        body: {
           targetId: vote.target.targetId,
           site: vote.target.site,
           targetUrl: vote.target.url,
@@ -304,10 +304,10 @@ async function drainQueuedVotes(): Promise<void> {
           analyticsConsent,
           ...(lang ? { lang } : {}),
           nonce: `${vote.id}:${vote.ts}`,
-        }),
+        },
         keepalive: true,
       });
-      await handleVoteResponse(res, vote, auth);
+      await handleVoteResponse(reply, vote, auth);
     } catch (error) {
       // Offline and a bug in the request build land here alike; without the trace a
       // vote that can NEVER succeed looks like a flaky network and the queue drains
@@ -325,36 +325,27 @@ async function drainQueuedVotes(): Promise<void> {
   }
 }
 
-async function handleVoteResponse(res: Response, vote: StoredVote, auth: AuthState): Promise<void> {
-  if (!res.ok) {
-    if (res.status === 401) {
+async function handleVoteResponse(reply: ApiReply, vote: StoredVote, auth: AuthState): Promise<void> {
+  if (!reply.ok) {
+    if (reply.status === 401) {
       // The vote outlives the session that carried it: clearing the session stops
       // the drain (no auth, no send), and the entry waits there for the next sign-in
       // rather than being spent on a token the API has already refused.
       await clearAuth();
       return;
     }
-    if (res.status >= 400 && res.status < 500 && res.status !== HTTP_TOO_MANY_REQUESTS) {
+    if (reply.status >= 400 && reply.status < 500 && reply.status !== HTTP_TOO_MANY_REQUESTS) {
       await dropOptimisticHistory(vote);
       await deleteById(vote.id);
       await recordFlushSuccess();
       return;
     }
-    const retryAfter = parseRetryAfterSeconds(res.headers.get("retry-after"));
-    await retryVoteOrDropAfterLimit(vote, retryAfter);
-    await recordServerBackoff(vote.id, res.status, retryAfter);
+    await retryVoteOrDropAfterLimit(vote, reply.retryAfterSeconds);
+    await recordServerBackoff(vote.id, reply.status, reply.retryAfterSeconds);
     return;
   }
 
-  let storedTargetId: string | undefined;
-  try {
-    const body = (await res.json()) as { targetId?: unknown };
-    storedTargetId = typeof body.targetId === "string" && body.targetId.length > 0 ? body.targetId : undefined;
-  } catch (error) {
-    // Only costs the corrected key below, but a 2xx the client cannot read is a
-    // server-contract break worth a trace.
-    logBackgroundError("handleVoteResponse.parseBody", error);
-  }
+  const storedTargetId = isRecord(reply.body) && typeof reply.body.targetId === "string" && reply.body.targetId.length > 0 ? reply.body.targetId : undefined;
   // A 2xx keeps the click's history row whatever `accepted` says: `accepted: false`
   // is a no-op acknowledgement - the reaction is already recorded - so rolling the row
   // back would delete history for a reaction that stands. A refusal arrives as 4xx,
@@ -409,8 +400,4 @@ async function dropOptimisticHistory(vote: QueuedVote): Promise<void> {
   if (vote.reaction !== null && vote.userId) {
     await clearOwnReactionIfMatches(vote.target, vote.reaction, vote.userId).catch((error: unknown) => logBackgroundError("dropOptimisticHistory.clearOwnReaction", error));
   }
-}
-
-function browserLanguage(): string | undefined {
-  return normalizeLanguageTag(typeof navigator !== "undefined" ? navigator.language : undefined);
 }

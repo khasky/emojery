@@ -2,9 +2,9 @@
 //
 // The dev/staging console channel, shared by the background and the content script.
 // Lives in shared/ because the content script must NOT reach background/debug.ts: that
-// module also owns `apiFetch`, and importing it would pull the fetch-deadline machinery
-// into every content bundle. Nothing checks that import edge directly - the content-script
-// weight budget is the only thing that would eventually notice.
+// module formats the background's API and IndexedDB traces, and importing it would pull
+// that into every content bundle. Nothing checks that import edge directly - the
+// content-script weight budget is the only thing that would eventually notice.
 //
 // Everything here folds to dead code in a production build - see DEBUG_LOG_ENABLED.
 
