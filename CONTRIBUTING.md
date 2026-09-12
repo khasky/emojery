@@ -119,7 +119,7 @@ The commit hooks are the other half. `commit-msg` runs commitlint; `pre-commit` 
 
 | Workflow | Cadence | Watches |
 | --- | --- | --- |
-| `ci.yml` | every PR + every push to `main` | this repo's own code — the gate above |
+| `ci.yml` | every PR + every push to `main` that touches more than prose | this repo's own code — the gate above |
 | `security.yml` | every PR, and daily | OSV Scanner, Gitleaks, Semgrep |
 | `selector-drift.yml` | daily | whether each scenario URL still serves the native controls the adapters anchor on |
 | `e2e-adapter.yml` | a PR touching `src/adapters/` | live-page placement on every supported site — advisory, never a required check |

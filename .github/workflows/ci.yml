@@ -3,6 +3,17 @@ name: CI
 on:
   push:
     branches: [main]
+    # A push that changes only prose has nothing for the gates below to check.
+    # Markdown is still linted: `lint:docs` covers the whole tree, so the next
+    # code push reads every page, and every pull request runs it regardless -
+    # `paths-ignore` here is on `push` only, so a required check never waits on
+    # a workflow that did not start.
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+      - "LICENSE"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/FUNDING.yml"
   pull_request:
     branches: [main]
   workflow_dispatch:
