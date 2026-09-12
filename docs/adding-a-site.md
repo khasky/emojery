@@ -106,8 +106,9 @@ export default defineSiteAdapter({
   // `matches` defaults to `detectSupportedSite(host) === "<site>"` (the registry
   // run-host contract) — omit it unless your site needs a bespoke host rule.
   findCandidates: ({ root }) => /* DOM elements to bind from */,
-  resolveTarget: (candidate, ctx) => /* TargetRef | null */,
-  resolveBinding: (candidate, ctx) => /* Omit<PickerInsertionPoint,"target"> | null */,
+  resolveRow: (candidate, ctx) => /* the action row the callbacks below share, or null to drop the candidate */,
+  resolveTarget: (candidate, ctx, row) => /* TargetRef | null */,
+  resolveBinding: (candidate, ctx, row) => /* Omit<PickerInsertionPoint,"target"> | null */,
   observer: { /* ScanObserverProfile, e.g. navKey: "pathname" */ },
 });
 ```
@@ -149,7 +150,7 @@ A typical social site is mostly configuration: a label registry + an action-row 
 - Placement strategies: `placement.ts` — `findFirstAnchor` (the single page-level anchor from a prioritized fallback chain, as in `github.ts`/`gitlab.ts`/`amazon.ts`/`youtube.ts`) and `findSiblingAction`/`slotAction`. A strategy used by exactly one site lives in that adapter instead, next to its caller (`closestWithin` in `gitlab.ts`, `findListItemWithin`/`isListItemWithin` in `github.ts`, `resolveSegmentedGroup` in `youtube.ts`). A row that needs the host wrapped to hold the row's layout declares that as the adapter's own `wrapper` on the `PickerInsertionPoint` (see `x.ts`'s grow-slot wrapper), not through a shared helper. Path parsing: `url-target.ts` `pathSegments`.
 - Visual geometry: `visual-action-row.ts` — `findVisualActionSlot`, `isRenderableInPageLayout`, `hasRenderableBox`, `isStructuralRoot`.
 
-Pipeline rules the framework enforces for you: target dedupe by `targetId`, optional container dedupe (`dedupeContainer`), dropping candidates with no target/binding, and the observer. Use `ctx.memo(candidate, () => ...)` to compute an expensive per-candidate lookup once and share it across the `dedupeContainer` / `resolveTarget` / `resolveBinding` callbacks (it caches `null` results too).
+Pipeline rules the framework enforces for you: target dedupe by `targetId`, optional container dedupe (`dedupeContainer`), dropping candidates with no row/target/binding, and the observer. The expensive per-candidate lookup (the action row, usually) goes in `resolveRow`: it runs once per candidate per scan and its result reaches `dedupeContainer` / `resolveTarget` / `resolveBinding` as their third argument, so none of them repeats or null-checks it. `ctx.memo(key, () => ...)` is for a value the whole scan shares, keyed on `ctx.root` (a parse of the page URL, as in `x.ts` / `threads.ts`); it caches `null` results too.
 
 The spec also has an optional page-level gate. `isPrivatePage`: when the page's content isn't viewable by an anonymous public visitor (a private repo / project / account), it returns true and the scan yields no points — a site with private content **must** ship it (see `page-visibility.ts` and its use in `github.ts` / `gitlab.ts`).
 

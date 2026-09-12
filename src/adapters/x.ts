@@ -2,7 +2,7 @@
 import type { TargetRef } from "../shared/adapter";
 import { queryAll, queryFirst } from "../shared/dom-query";
 import { defineLabelRegistry, STEM, STEM_PARTS, stem } from "./action-labels";
-import { defineSiteAdapter, type ScanContext } from "./framework";
+import { defineSiteAdapter } from "./framework";
 import { findSiblingAction, slotAction } from "./placement";
 import { firstAncestor, matchesAny, slotOrSelf } from "./runtime";
 import { parseSiteHref } from "./url-target";
@@ -33,7 +33,8 @@ const STATUS_PHOTO_PATH_RE = /^\/[A-Za-z0-9_]{1,20}\/status\/\d+\/photo\/\d+\/?$
 
 const xAdapter = defineSiteAdapter({
   site: "x",
-  findCandidates: (ctx) => queryAll<HTMLElement>(ctx.root, TWEET_SELECTORS).filter((tweet) => memoTweetActionRow(ctx, tweet) !== null),
+  findCandidates: (ctx) => queryAll<HTMLElement>(ctx.root, TWEET_SELECTORS),
+  resolveRow: tweetActionRow,
   resolveTarget: (tweet, ctx) => {
     // Both are loop-invariant for the scan, so they share one entry memoized on the scan
     // root - per candidate the root-tweet lookup alone was 3 document-wide queries per
@@ -48,9 +49,7 @@ const xAdapter = defineSiteAdapter({
       allowCurrentPageFallback: tweet === scan.rootTweet,
     });
   },
-  resolveBinding: (tweet, ctx) => {
-    const actionRow = memoTweetActionRow(ctx, tweet);
-    if (!actionRow) return null;
+  resolveBinding: (_tweet, _ctx, actionRow) => {
     const likeSlot = slotOrSelf(actionRow.likeButton, actionRow.row);
     const placement = findPlacementAnchor(actionRow.row);
     const anchor = placement?.anchor ?? (likeSlot.nextElementSibling instanceof HTMLElement ? likeSlot.nextElementSibling : null) ?? likeSlot;
@@ -71,13 +70,6 @@ const xAdapter = defineSiteAdapter({
     linkPrimeSelectors: STATUS_LINK_SELECTORS,
   },
 });
-
-// One action-row resolution per tweet per scan (memo keyed by the tweet):
-// findCandidates and resolveBinding both need it, and each call is 4 selector
-// queries plus an ancestor walk.
-function memoTweetActionRow(ctx: ScanContext, tweet: HTMLElement): { likeButton: HTMLElement; row: HTMLElement } | null {
-  return ctx.memo(tweet, () => tweetActionRow(tweet));
-}
 
 function tweetActionRow(tweet: HTMLElement): { likeButton: HTMLElement; row: HTMLElement } | null {
   const likeButton = queryFirst<HTMLElement>(tweet, LIKE_BUTTON_SELECTORS) ?? xLabels.findActionControl(tweet, "like");

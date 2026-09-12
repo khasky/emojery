@@ -102,9 +102,8 @@ const facebookAdapter = defineSiteAdapter({
     resetPostActionLikeCache();
     return orderModalFirst(queryAll<HTMLElement>(root, SCAN_SELECTORS));
   },
-  resolveTarget: (btn, ctx) => {
-    const action = actionFor(btn, ctx);
-    if (!action) return null;
+  resolveRow: resolvePostAction,
+  resolveTarget: (btn, ctx, action) => {
     const container = findPostContainer(btn, action.row, action.geometry ?? false);
     if (!container) return null;
     const target = extractTarget(container, action.row);
@@ -113,9 +112,7 @@ const facebookAdapter = defineSiteAdapter({
     targetContainers(ctx).set(target.targetId, container);
     return target;
   },
-  resolveBinding: (btn, ctx) => {
-    const action = actionFor(btn, ctx);
-    if (!action) return null;
+  resolveBinding: (btn, _ctx, action) => {
     // The action row is a horizontal flex container; anchor on the Like column
     // wrapper so the picker becomes a sibling flex item between Like and Comment
     // (inserting after the button itself would render it BELOW the Like).
@@ -154,10 +151,6 @@ const facebookAdapter = defineSiteAdapter({
     plugins: [lazyHoverPriming({ selector: LAZY_LINK_SELECTOR }), photoClickContextCapture()],
   },
 });
-
-function actionFor(btn: HTMLElement, ctx: ScanContext): ActionMatch | null {
-  return ctx.memo(btn, () => resolvePostAction(btn));
-}
 
 // Two reshares of the same image both fall back to the shared photo id before their
 // date links hydrate, colliding on ONE `photo:<id>` target - the per-target dedupe

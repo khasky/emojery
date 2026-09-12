@@ -103,6 +103,25 @@ describe("defineSiteAdapter scan", () => {
     expect(resolveTarget).toHaveBeenCalledTimes(1);
   });
 
+  it("resolves the row once per candidate, hands it to every callback, and drops a null row before any of them", () => {
+    const a = document.createElement("div");
+    const b = document.createElement("div");
+    const resolveRow = vi.fn((el: HTMLElement) => (el === a ? { row: el } : null));
+    const dedupeContainer = vi.fn((_el: HTMLElement, _ctx: unknown, row: { row: HTMLElement }) => row.row);
+    const resolveTarget = vi.fn((_el: HTMLElement, _ctx: unknown, row: { row: HTMLElement }) => (row.row === a ? target("A") : null));
+    const resolveBinding = vi.fn((_el: HTMLElement, _ctx: unknown, row: { row: HTMLElement }) => ({ anchor: row.row, position: "after" as const }));
+    const adapter = defineSiteAdapter({ site: "amazon", findCandidates: () => [a, b], resolveRow, dedupeContainer, resolveTarget, resolveBinding });
+
+    const points = adapter.scan(document);
+    expect(points).toHaveLength(1);
+    expect(points[0]?.anchor).toBe(a);
+    expect(resolveRow).toHaveBeenCalledTimes(2);
+    for (const callback of [dedupeContainer, resolveTarget, resolveBinding]) {
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback.mock.calls[0]?.[0]).toBe(a);
+    }
+  });
+
   it("drops candidates whose dedupeContainer returns null", () => {
     const a = document.createElement("div");
     const adapter = build({

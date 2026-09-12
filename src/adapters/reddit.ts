@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import type { TargetRef } from "../shared/adapter";
 import { queryAll, queryAllDeep } from "../shared/dom-query";
-import { type Binding, defineSiteAdapter, type ScanContext } from "./framework";
+import { type Binding, defineSiteAdapter } from "./framework";
 import { shadowRootDiscovery } from "./observer-plugins";
 import { safeMatches } from "./runtime";
 import { parseSiteHref } from "./url-target";
@@ -43,10 +43,9 @@ const redditAdapter = defineSiteAdapter({
   // Candidates = root posts only. Reddit reactions are post-only; profile
   // comment cards (Overview/Comments tabs) are intentionally NOT candidates.
   findCandidates: ({ root }) => queryAll<HTMLElement>(root, POST_SELECTORS),
-  resolveTarget: (el, ctx) => resolveReddit(el, ctx)?.target ?? null,
-  resolveBinding: (el, ctx) => {
-    const match = resolveReddit(el, ctx);
-    if (!match) return null;
+  resolveRow: resolveReddit,
+  resolveTarget: (_el, _ctx, match) => match.target,
+  resolveBinding: (_el, _ctx, match) => {
     const placement = votePlacement(match.actionElement, match.replacesNative);
     const binding: Binding = {
       anchor: placement.anchor,
@@ -77,12 +76,10 @@ const redditAdapter = defineSiteAdapter({
 
 // Resolve a post candidate to its target + action element (the vote block, or
 // the fallback anchor when none matches); null unless BOTH resolve.
-function resolveReddit(el: HTMLElement, ctx: ScanContext): RedditMatch | null {
-  return ctx.memo(el, () => {
-    const target = extractTarget(el);
-    const action = findRootActionElement(el, redditThingId(el));
-    return target && action ? { target, ...action } : null;
-  });
+function resolveReddit(el: HTMLElement): RedditMatch | null {
+  const target = extractTarget(el);
+  const action = findRootActionElement(el, redditThingId(el));
+  return target && action ? { target, ...action } : null;
 }
 
 interface VotePlacement {

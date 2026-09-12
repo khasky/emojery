@@ -3,7 +3,7 @@ import type { TargetRef } from "../shared/adapter";
 import { queryAll } from "../shared/dom-query";
 import { defineLabelRegistry } from "./action-labels";
 import { isPaintedFill } from "./css-alpha";
-import { type Binding, defineSiteAdapter, type ScanContext } from "./framework";
+import { type Binding, defineSiteAdapter } from "./framework";
 import { urlChangeRescan } from "./observer-plugins";
 import { ancestors, compactElements, precedes, slotOrSelf } from "./runtime";
 import { parseSiteHref } from "./url-target";
@@ -39,10 +39,9 @@ const threadsAdapter = defineSiteAdapter({
     const buttons = compactElements(...queryAll<SVGElement>(root, LIKE_ICON_SELECTORS).map((icon) => closestActionButton(icon)));
     return dropFeedReplyButtons(dropNestedQuotedButtons(buttons));
   },
-  dedupeContainer: (likeButton, ctx) => actionRowFor(likeButton, ctx)?.row ?? null,
-  resolveTarget: (likeButton, ctx) => {
-    const actionRow = actionRowFor(likeButton, ctx);
-    if (!actionRow) return null;
+  resolveRow: findActionRow,
+  dedupeContainer: (_likeButton, _ctx, actionRow) => actionRow.row,
+  resolveTarget: (_likeButton, ctx, actionRow) => {
     // Loop-invariant for the scan: keyed on the scan root, so one parse serves every candidate.
     const currentPost = ctx.memo(ctx.root, () => extractThreadsPostRef(location.href));
     const target = extractTarget(actionRow.row, currentPost);
@@ -53,9 +52,7 @@ const threadsAdapter = defineSiteAdapter({
     if (currentTargetId && target.targetId !== currentTargetId) return null;
     return target;
   },
-  resolveBinding: (likeButton, ctx) => {
-    const actionRow = actionRowFor(likeButton, ctx);
-    if (!actionRow) return null;
+  resolveBinding: (_likeButton, _ctx, actionRow) => {
     // Anchor before the Reply (comment) control. With a Like present this lands
     // the picker between Like and Reply; when likes are disabled the row starts
     // at Reply, so the picker sits before the comment button - both correct.
@@ -92,10 +89,6 @@ interface ActionRow {
   replySlot: HTMLElement;
   // Absent when the post has likes disabled (the row starts at Reply).
   likeButton?: HTMLElement;
-}
-
-function actionRowFor(likeButton: HTMLElement, ctx: ScanContext): ActionRow | null {
-  return ctx.memo(likeButton, () => findActionRow(likeButton));
 }
 
 // Threads wraps every post - and every quoted/reposted post embedded inside

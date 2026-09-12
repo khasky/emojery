@@ -3,7 +3,7 @@ import type { TargetRef } from "../shared/adapter";
 import { queryAll } from "../shared/dom-query";
 import { type ActionKind, defineLabelRegistry, STEM, STEM_PARTS, stem } from "./action-labels";
 import { rejectCommentRow } from "./action-row";
-import { type Binding, defineSiteAdapter, type ScanContext } from "./framework";
+import { type Binding, defineSiteAdapter } from "./framework";
 import { urlChangeRescan } from "./observer-plugins";
 import { ancestors, collapseWhitespace, compactElements, orderModalFirst, textOf } from "./runtime";
 import { parseSiteHref } from "./url-target";
@@ -230,16 +230,13 @@ const instagramAdapter = defineSiteAdapter({
     }
     return orderModalFirst(ordered);
   },
-  dedupeContainer: (likeButton, ctx) => actionRowFor(likeButton, ctx)?.row ?? null,
-  resolveTarget: (likeButton, ctx) => {
-    const actionRow = actionRowFor(likeButton, ctx);
-    if (!actionRow) return null;
+  resolveRow: findActionRow,
+  dedupeContainer: (_likeButton, _ctx, actionRow) => actionRow.row,
+  resolveTarget: (_likeButton, _ctx, actionRow) => {
     const container = findPostContainer(actionRow.row);
     return extractTarget(container ?? actionRow.row);
   },
-  resolveBinding: (likeButton, ctx) => {
-    const actionRow = actionRowFor(likeButton, ctx);
-    if (!actionRow) return null;
+  resolveBinding: (_likeButton, _ctx, actionRow) => {
     const container = findPostContainer(actionRow.row);
     const inlineCount = findInlineLikeCount(actionRow.row, actionRow.likeSlot);
     const detachedCount = inlineCount ?? findStandaloneLikeCount(actionRow.row, container);
@@ -285,10 +282,6 @@ interface ActionRow {
   /** Set when the "row" is a reel viewer's VERTICAL action rail - the binding
    *  then opts the trigger into the round icon-column form. */
   rail?: boolean;
-}
-
-function actionRowFor(likeButton: HTMLElement, ctx: ScanContext): ActionRow | null {
-  return ctx.memo(likeButton, () => findActionRow(likeButton));
 }
 
 function findActionRow(likeButton: HTMLElement): ActionRow | null {
