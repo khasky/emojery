@@ -51,8 +51,7 @@ export interface QueuedVote {
 export type StoredVote = QueuedVote & { id: number };
 
 // Connection lifecycle (versionchange / blocked / reopen) lives in idb-open.ts, shared
-// with the history store. It matters most here: the popup's Debug tab holds a second
-// connection to THIS database while the worker drains it.
+// with the history store.
 const queueDb = createIdbHandle(DB_NAME, VERSION, (db) => {
   if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath: "id", autoIncrement: true });
 });
@@ -143,8 +142,8 @@ export function peekNextEligible(now: number): Promise<StoredVote | undefined> {
   );
 }
 
-// Oldest-first snapshot of the queue, capped at `limit` - read-only, and read by
-// the popup's Debug tab only. One getAll() instead of a cursor walk, like
+// Oldest-first snapshot of the queue, capped at `limit` - read-only, answering the
+// popup's Debug tab (message-router queue:snapshot). One getAll() instead of a cursor walk, like
 // history.ts: a per-row IPC round trip is the wrong cost for a panel that
 // refreshes on a timer.
 export function listQueuedVotes(limit: number): Promise<StoredVote[]> {

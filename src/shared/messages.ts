@@ -67,6 +67,9 @@ export type RuntimeMessage =
   // (deduped within the file, re-homed to the importing account).
   | { type: "history:export" }
   | { type: "history:import"; rows: PortableHistoryRow[] }
+  // The popup's Debug tab: what the durable vote queue holds and why it is
+  // sending nothing. Read-only; the queue is the background's alone.
+  | { type: "queue:snapshot" }
   | { type: "auth:status" }
   | { type: "auth:openTab" }
   // Sent by the auth page once sign-in is done: activate the tab the sign-in was
@@ -151,6 +154,23 @@ export const EMPTY_HISTORY_STATS: HistoryStats = {
   bySite: {},
 };
 
+// One queued vote as the Debug tab prints it: the fields that explain why it is
+// still queued, and nothing else a queued vote carries (owner, title, language).
+export interface QueuedVoteRow {
+  id: number;
+  target: TargetRef;
+  reaction: Reaction | null;
+  attempts: number;
+  /** Epoch-ms before which this vote's own retry must not run; absent means eligible now. */
+  nextAttemptAt?: number;
+}
+
+// The queue-wide hold: every vote waits for it before its own backoff counts.
+export interface FlushSnapshot {
+  nextAttemptAt: number;
+  consecutiveFailures: number;
+}
+
 // Failure class a caller can switch on. The paired `message` is a fixed,
 // credential-free string for developers - never render it, localize from `code`.
 export type RuntimeErrorCode =
@@ -198,6 +218,7 @@ export type RuntimeResponse =
   // Import replaces the account's whole history with the file's rows; `imported`
   // is how many were written, `replaced` how many were wiped first.
   | { type: "history:import"; imported: number; replaced: number; authed: boolean }
+  | { type: "queue:snapshot"; votes: QueuedVoteRow[]; flush: FlushSnapshot }
   | {
       type: "auth:status";
       authed: boolean;

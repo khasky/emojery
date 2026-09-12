@@ -380,8 +380,8 @@ describe("parseRuntimeMessage", () => {
     expect(parseRuntimeMessage({ type: "fetchCount", target }, urlless, RUNTIME_ID, EXT_BASE)).toBeNull();
   });
 
-  it("rejects history import/export/stats from a content-script sender", () => {
-    for (const type of ["history:stats", "history:export", "history:import"] as const) {
+  it("rejects history import/export/stats and the queue snapshot from a content-script sender", () => {
+    for (const type of ["history:stats", "history:export", "history:import", "queue:snapshot"] as const) {
       expect(parseRuntimeMessage({ type, rows: [] }, tabSender(), RUNTIME_ID, EXT_BASE)).toBeNull();
     }
   });

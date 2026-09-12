@@ -3,10 +3,10 @@
 // One connection opener and one transaction runner for both IndexedDB stores
 // (history.ts, votequeue.ts).
 //
-// Shared for the second-context-wants-a-new-schema-version case, which is real in
-// production: the popup's Debug tab (entrypoints/popup/popup-queue.tsx) opens the
-// vote queue directly while the service worker holds both stores. Handled before
-// the first VERSION bump ever needs it, because:
+// Shared for the second-context-wants-a-new-schema-version case: an extension
+// page opening a store the service worker also holds (the popup's Debug tab did,
+// before it went through the message channel; a build still in the field does).
+// Handled before the first VERSION bump ever needs it, because:
 //   - without `onversionchange`, this context keeps its connection open and the
 //     other context's upgrade sits in `blocked` forever;
 //   - without `onblocked`, that wait is silent - `open()` never settles and every

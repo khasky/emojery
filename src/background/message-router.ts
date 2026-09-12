@@ -10,7 +10,7 @@ import { defined } from "../shared/defined";
 import { EMPTY_HISTORY_STATS, type RuntimeMessage, type RuntimeResponse } from "../shared/messages";
 import { setCachedCounts, targetKey } from "../shared/storage";
 import { createTab } from "../shared/webext";
-import { enqueueVote, flushOwnedVotesForSignOut } from "./api";
+import { enqueueVote, flushOwnedVotesForSignOut, getFlushState } from "./api";
 import { apiErrorCode } from "./api-client";
 import { fetchCount } from "./api-read";
 import { hasAuthOrigin, rememberAuthOrigin, returnToAuthOrigin } from "./auth-return";
@@ -22,6 +22,7 @@ import { reportProblem } from "./reports";
 import { errorResponse, respondAuthed } from "./respond";
 import { setInjectedBadge } from "./toolbar-badge";
 import { broadcastVoteDelta } from "./vote-sync";
+import { listQueuedVotes, VOTE_QUEUE_MAX } from "./votequeue";
 
 const AUTH_URL_PATH = "auth.html";
 
@@ -164,6 +165,21 @@ const HANDLERS: HandlerTable = {
       },
       "history:stats",
     );
+    return ANSWER_LATER;
+  },
+
+  "queue:snapshot": (_msg, { sendResponse }) => {
+    Promise.all([listQueuedVotes(VOTE_QUEUE_MAX), getFlushState()])
+      .then(([votes, flush]) =>
+        sendResponse({
+          type: "queue:snapshot",
+          // Rebuilt field by field: a queued vote also carries its owner, the page
+          // title and the language, none of which the Debug tab prints.
+          votes: votes.map((vote) => defined({ id: vote.id, target: vote.target, reaction: vote.reaction, attempts: vote.attempts, nextAttemptAt: vote.nextAttemptAt })),
+          flush: { nextAttemptAt: flush.nextAttemptAt, consecutiveFailures: flush.consecutiveFailures },
+        }),
+      )
+      .catch((error: unknown) => sendResponse(errorResponse("unavailable", "queue:snapshot", error)));
     return ANSWER_LATER;
   },
 

@@ -20,8 +20,13 @@ vi.mock("wxt/utils/define-background", () => ({
 vi.mock("./api", () => ({
   enqueueVote: vi.fn(async () => true),
   flushOwnedVotesForSignOut: vi.fn(async () => {}),
+  getFlushState: vi.fn(async () => ({ nextAttemptAt: 1_000, consecutiveFailures: 2, lastFailedVoteId: 7 })),
   scheduleFlush: vi.fn(async () => {}),
   VOTE_WAKE_ALARM: "vote-wake",
+}));
+vi.mock("./votequeue", () => ({
+  listQueuedVotes: vi.fn(async () => [{ id: 7, target: { site: "github", targetId: "o/r", url: "https://github.com/o/r" }, reaction: "👍", ts: 5, attempts: 3, userId: "u1", title: "secret page title", lang: "uk", nextAttemptAt: 2_000 }]),
+  VOTE_QUEUE_MAX: 500,
 }));
 vi.mock("./api-client", () => ({ apiErrorCode: vi.fn(() => "unavailable") }));
 vi.mock("./api-read", () => ({
@@ -222,6 +227,16 @@ describe("message router", () => {
     await expect(dispatch(msg).response).resolves.toEqual({ type: "ok" });
     vi.mocked(reportProblem).mockResolvedValueOnce(false);
     await expect(dispatch(msg).response).resolves.toMatchObject({ type: "error", code: "unavailable" });
+  });
+
+  it("queue:snapshot answers the Debug tab's rows and the hold, and nothing else a queued vote carries", async () => {
+    const response = await dispatch({ type: "queue:snapshot" }).response;
+    expect(response).toEqual({
+      type: "queue:snapshot",
+      votes: [{ id: 7, target: { site: "github", targetId: "o/r", url: "https://github.com/o/r" }, reaction: "👍", attempts: 3, nextAttemptAt: 2_000 }],
+      flush: { nextAttemptAt: 1_000, consecutiveFailures: 2 },
+    });
+    expect(JSON.stringify(response)).not.toContain("secret page title");
   });
 
   it("history:stats routes through the authed responder", async () => {
