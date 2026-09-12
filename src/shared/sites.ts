@@ -146,9 +146,9 @@ export function targetUrlBelongsToSite(url: string, site: SupportedSite): boolea
   }
 }
 
-// The `https://<host>/*` patterns each `entrypoints/<site>.content.ts` must
-// declare literally (WXT extracts them statically, so they can't be computed
-// there); `content-matches.test.ts` pins the drift. Regex hosts excluded.
+// The `https://<host>/*` patterns `entrypoints/<site>.content.ts` declares as its
+// `matches` (WXT evaluates the entrypoint's options at build time, so the manifest
+// reads them from here). Regex hosts excluded.
 export function matchPatternsForSite(site: SupportedSite): string[] {
   const descriptor = SITE_BY_ID.get(site);
   return descriptor ? descriptor.hosts.map((h) => `https://${h}/*`) : [];
