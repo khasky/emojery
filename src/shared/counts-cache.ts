@@ -4,7 +4,7 @@
 
 import type { TargetRef } from "./adapter";
 import { READ_CACHE_TTL_MS } from "./config";
-import { applyCountsDelta, applyTotalDelta } from "./reaction-delta";
+import { applyReactionTransition } from "./reaction-delta";
 import type { Reaction, TargetCounts } from "./reactions";
 import { setOwnReaction, targetKey } from "./target-store";
 import { storageLocalGet, storageLocalGetKeys, storageLocalRemove, storageLocalSet } from "./webext";
@@ -133,17 +133,7 @@ export async function applyOptimisticReaction(target: TargetRef, reaction: React
   // Same derivation the picker paints with (shared/reaction-delta) - the two
   // must not drift, or a re-mount reads back a different number than the one on
   // screen.
-  const counts = applyCountsDelta(prev.counts, prev.myReaction, reaction);
-  const total = applyTotalDelta(prev.total, prev.myReaction, reaction);
-  const loaded = Object.keys(counts).length;
-  const next: CachedTarget = {
-    counts,
-    total,
-    loaded,
-    hasMore: prev.hasMore,
-    myReaction: reaction,
-    fetchedAt: Date.now(),
-  };
+  const next: CachedTarget = { ...applyReactionTransition(prev, prev.myReaction, reaction), myReaction: reaction, fetchedAt: Date.now() };
   await storageLocalSet({ [key]: next });
   await setOwnReaction(target, reaction, userId);
   return { next, prevReaction: prev.myReaction };

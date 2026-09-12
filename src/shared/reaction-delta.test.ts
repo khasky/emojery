@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { describe, expect, it } from "vitest";
-import { applyCountsDelta, applyTotalDelta } from "./reaction-delta";
+import { applyCountsDelta, applyReactionTransition, applyTotalDelta } from "./reaction-delta";
 
 describe("applyCountsDelta", () => {
   it("adds a first reaction", () => {
@@ -39,6 +39,21 @@ describe("applyCountsDelta", () => {
     const counts = { "😀": 1 };
     applyCountsDelta(counts, "😀", "😢");
     expect(counts).toEqual({ "😀": 1 });
+  });
+});
+
+describe("applyReactionTransition", () => {
+  const aggregate = { counts: { "👍": 2 }, total: 2, loaded: 1, hasMore: true };
+
+  it("moves counts and total together and recounts loaded, keeping hasMore", () => {
+    expect(applyReactionTransition(aggregate, null, "❤️")).toEqual({ counts: { "👍": 2, "❤️": 1 }, total: 3, loaded: 2, hasMore: true });
+    expect(applyReactionTransition(aggregate, "👍", "❤️")).toEqual({ counts: { "👍": 1, "❤️": 1 }, total: 2, loaded: 2, hasMore: true });
+    expect(applyReactionTransition({ counts: { "👍": 1 }, total: 1, loaded: 1, hasMore: false }, "👍", null)).toEqual({ counts: {}, total: 0, loaded: 0, hasMore: false });
+  });
+
+  it("leaves the input untouched", () => {
+    applyReactionTransition(aggregate, null, "❤️");
+    expect(aggregate).toEqual({ counts: { "👍": 2 }, total: 2, loaded: 1, hasMore: true });
   });
 });
 

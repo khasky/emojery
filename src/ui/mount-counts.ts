@@ -7,17 +7,16 @@
 
 import type { PickerInsertionPoint } from "../shared/adapter";
 import type { RuntimeResponse } from "../shared/messages";
-import { applyCountsDelta, applyTotalDelta } from "../shared/reaction-delta";
-import type { Reaction, TargetCounts } from "../shared/reactions";
+import { applyReactionTransition } from "../shared/reaction-delta";
+import type { AggregateCounts, Reaction, TargetCounts } from "../shared/reactions";
 import { DEFAULT_BREAKDOWN_LIMIT } from "../shared/reactions";
 import { type CachedTarget, getCachedCounts, getOwnReaction, setCachedCounts, type TargetKey, targetKey } from "../shared/storage";
 import { maybePlayPublicReactionIntro } from "./animations";
 import { sendMessage } from "./messaging";
 import { applyRefresh, type RefreshCallback } from "./mount-registry";
 
-// The community-aggregate half of a TargetCounts (everything except the per-user
-// `myReaction`), copied so callers thread the user's own reaction in separately.
-type AggregateCounts = Pick<TargetCounts, "counts" | "total" | "loaded" | "hasMore">;
+// The community half of a TargetCounts, copied so callers thread the user's own
+// reaction in separately.
 export function pickAggregateCounts(src: AggregateCounts): AggregateCounts {
   return { counts: src.counts, total: src.total, loaded: src.loaded, hasMore: src.hasMore };
 }
@@ -140,8 +139,7 @@ export async function hydrateDeferredCounts(point: PickerInsertionPoint, key: Ta
   const cached = (await getCachedCounts([point.target]).catch(() => null))?.hits[key];
   if (cached && cached.myReaction !== (serverCounts.myReaction ?? null)) {
     const clicked = cached.myReaction;
-    const counts = applyCountsDelta(next.value.counts, next.myReaction, clicked);
-    next.value = { ...next.value, counts, total: applyTotalDelta(next.value.total, next.myReaction, clicked), loaded: Object.keys(counts).length };
+    next.value = applyReactionTransition(next.value, next.myReaction, clicked);
     next.myReaction = clicked;
     // The click's own entry was written over an unhydrated cache, so its aggregate is
     // the delta alone; replace it with the merged one unless a later click has landed.

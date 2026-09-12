@@ -14,6 +14,18 @@ export interface TargetCounts {
   myReaction?: Reaction | null;
 }
 
+// The community half of a TargetCounts: everything except the per-user `myReaction`.
+export type AggregateCounts = Omit<TargetCounts, "myReaction">;
+
+// What a mounted picker takes to repaint without a remount. Both `value` and
+// `authed` are optional: an omitted field keeps its current state (sign-out
+// strips "mine" while the community counts stay put).
+export interface CountsRefresh {
+  value?: TargetCounts;
+  myReaction: Reaction | null;
+  authed?: boolean;
+}
+
 export const DEFAULT_BREAKDOWN_LIMIT = 6;
 
 interface EmojiCategory {

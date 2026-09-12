@@ -8,7 +8,7 @@ import { render } from "preact";
 import type { PickerInsertionPoint } from "../shared/adapter";
 import { HOST_CLASS, HOST_SELECTOR, MOUNT_ATTR } from "../shared/dom";
 import type { VoteBroadcast } from "../shared/messages";
-import type { Reaction, TargetCounts } from "../shared/reactions";
+import type { CountsRefresh } from "../shared/reactions";
 import { type TargetKey, targetKey } from "../shared/storage";
 import { cancelAllPendingMounts, cancelDisconnectedPendingMounts, cancelPendingMountOnAnchor, cancelPendingMountsOutside, clearPendingMountsForTests } from "./mount-anchors";
 import { clearPlacedTargets, clearShownTargets } from "./mount-session";
@@ -39,9 +39,8 @@ function clearHostTimers(host: HTMLElement): void {
   for (const id of list) window.clearTimeout(id);
 }
 
-/** How a mounted picker takes a counts update. `value` is optional: the sign-out
- *  path strips the per-user "mine" marker without touching the community counts. */
-export type RefreshCallback = (next: { value?: TargetCounts; myReaction: Reaction | null; authed?: boolean }) => void;
+/** How a mounted picker takes a counts update (the shape is shared/reactions CountsRefresh). */
+export type RefreshCallback = (next: CountsRefresh) => void;
 
 const voteListeners = new Map<TargetKey, (b: VoteBroadcast) => void>();
 const refreshCallbacks = new Map<TargetKey, RefreshCallback>();

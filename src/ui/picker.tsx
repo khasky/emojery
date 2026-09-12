@@ -24,8 +24,8 @@ import { ensureLocaleLoaded, onLocalesChanged, searchEmojis } from "../shared/em
 import { t } from "../shared/i18n";
 import type { VoteBroadcast } from "../shared/messages";
 import { getPopularSync, primePopular } from "../shared/popular";
-import { applyCountsDelta, applyTotalDelta } from "../shared/reaction-delta";
-import type { Reaction, ReactionCounts, TargetCounts } from "../shared/reactions";
+import { applyReactionTransition } from "../shared/reaction-delta";
+import type { AggregateCounts, CountsRefresh, Reaction, TargetCounts } from "../shared/reactions";
 import { CATEGORIES, REACTIONS } from "../shared/reactions";
 import { clearRecentEmojis, getRecentEmojis } from "../shared/recents";
 import { onceVisible } from "../shared/visibility";
@@ -78,11 +78,8 @@ interface Props {
    *  can't strand it. */
   portalRoot: HTMLElement | (() => HTMLElement);
   bindBroadcast?: (cb: (b: VoteBroadcast) => void) => void;
-  /**
-   * Pushes fresh counts without remounting. Both `authed` and `value` are optional: an
-   * omitted field keeps its current state (sign-out strips "mine", counts stay put).
-   */
-  bindRefresh?: (cb: (next: { value?: TargetCounts; myReaction: Reaction | null; authed?: boolean }) => void) => void;
+  /** Pushes fresh counts without remounting. */
+  bindRefresh?: (cb: (next: CountsRefresh) => void) => void;
   /**
    * /react deep-link: when true, the picker opens itself once on mount, exactly
    * as a trigger click would - the popover, signed in or not. Set by the mount
@@ -99,27 +96,21 @@ interface Props {
 // slice: they only ever move together, through exactly two operations, a delta (own pick or
 // another tab's broadcast) and a server snapshot (refresh, sign-in/out).
 function useReactionState(initial: Initial) {
-  const [counts, setCounts] = useState<ReactionCounts>(initial.value.counts);
-  const [total, setTotal] = useState<number>(initial.value.total);
+  const [aggregate, setAggregate] = useState<AggregateCounts>(initial.value);
   const [mine, setMine] = useState<Reaction | null>(initial.myReaction);
 
-  // Counts and total derive independently, so each goes through its own functional
-  // setState - correct even when two deltas land in the same batch.
+  // Functional setState: correct even when two deltas land in the same batch.
   const applyDelta = (prev: Reaction | null, next: Reaction | null): void => {
-    setCounts((prevCounts) => applyCountsDelta(prevCounts, prev, next));
-    setTotal((prevTotal) => applyTotalDelta(prevTotal, prev, next));
+    setAggregate((current) => applyReactionTransition(current, prev, next));
     setMine(next);
   };
 
   const applySnapshot = (value: TargetCounts | undefined, myReaction: Reaction | null): void => {
-    if (value) {
-      setCounts(value.counts);
-      setTotal(value.total);
-    }
+    if (value) setAggregate(value);
     setMine(myReaction);
   };
 
-  return { counts, total, mine, applyDelta, applySnapshot };
+  return { counts: aggregate.counts, total: aggregate.total, mine, applyDelta, applySnapshot };
 }
 
 export function Picker({ initial, typography, onPick, onSignIn, portalRoot, bindBroadcast, bindRefresh, autoOpen, onOpenChange }: Props) {
