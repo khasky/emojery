@@ -153,6 +153,12 @@ export async function waitForMountEvidence(page: Page, site: SupportedSiteScenar
   let wallPasses = 0;
 
   while (Date.now() < deadline) {
+    // A pass counts as walled only when EVERY step saw no action surface: the
+    // last step alone sits at the bottom of the page, where a header row (YouTube
+    // watch) is scrolled out of view and reads as "no visible natives" while it is
+    // still hydrating up top - Gecko takes ~6s there, and two such passes fit
+    // inside that, so the loop bailed as walled before the mount could land.
+    let everyStepWalled = true;
     for (const y of scrollSteps) {
       // Also checked INSIDE the pass (same reason as scrollPassUntil): the
       // remaining steps of a pass entered just before the deadline would run
@@ -177,8 +183,9 @@ export async function waitForMountEvidence(page: Page, site: SupportedSiteScenar
       if (last.matchingAnchorKeys.length > 0 && last.visibleMatchingHostCount >= 1 && last.placementOk && (!expectHiddenNative || last.hiddenNativeCount > 0 || isBlockUrl(last.url))) {
         return last;
       }
+      if (!isNoActionSurface(last)) everyStepWalled = false;
     }
-    wallPasses = last && isNoActionSurface(last) ? wallPasses + 1 : 0;
+    wallPasses = last && everyStepWalled ? wallPasses + 1 : 0;
     // `last!` is sound: two wall passes require `last` truthy on both of them.
     if (wallPasses >= 2) return last!;
   }
