@@ -2,9 +2,10 @@
 // Extension-local auth session state.
 
 import { AUTH_KEY, isAuthSessionLive } from "../shared/auth-session";
+import type { OtpRequestRefusal, OtpVerifyRefusal } from "../shared/messages";
 import { clearAutoNativesForUser, clearOwnReactionsForUser } from "../shared/storage";
 import { storageLocalGet, storageLocalRemove, storageLocalSet, storageSessionGet, storageSessionRemove, storageSessionSet } from "../shared/webext";
-import { apiErrorString, apiRequest, isRecord, requestLanguage } from "./api-client";
+import { type ApiReply, apiErrorString, apiRequest, isRecord, requestLanguage } from "./api-client";
 import { logBackgroundError } from "./debug";
 import { clearHistory, clearHistoryForUser } from "./history";
 import { clearQueuedVotes } from "./votequeue";
@@ -52,28 +53,31 @@ export async function clearAuth(): Promise<void> {
   await storageLocalRemove([AUTH_KEY]);
 }
 
-interface RequestOtpResult {
-  ok: boolean;
-  /** HTTP status for UI-specific failure handling. */
-  status: number;
-  error?: string;
-  /** Seconds the caller should wait before retrying. */
-  retryAfterSeconds?: number;
+export type RequestOtpResult =
+  | { ok: true }
+  // `retryAfterSeconds` comes from the `retry-after` header alone, the only source
+  // of a delay; absent, the auth page falls back to its own cooldown.
+  | { ok: false; refusal: OtpRequestRefusal; retryAfterSeconds?: number };
+
+// Where an HTTP status becomes a named refusal. The API's `error` string is a
+// machine diagnostic that stays in the background's request log; the one it
+// selects on is `client_outdated`, the only refusal whose fix is on the user's side.
+const REQUEST_OTP_REFUSALS: Record<number, OtpRequestRefusal> = { 429: "rate_limited", 400: "invalid_email", 422: "email_rejected", 502: "delivery_failed" };
+const VERIFY_OTP_REFUSALS: Record<number, OtpVerifyRefusal> = { 401: "code_invalid", 423: "locked" };
+
+function otpRefusal<R extends OtpRequestRefusal | OtpVerifyRefusal>(reply: ApiReply, byStatus: Record<number, R>): R | "client_outdated" | "unavailable" {
+  if (reply.status === 403 && apiErrorString(reply.body) === "client_outdated") return "client_outdated";
+  return byStatus[reply.status] ?? "unavailable";
 }
 
 export async function requestOtp(email: string): Promise<RequestOtpResult> {
   const lang = requestLanguage();
   const reply = await apiRequest("/auth/request-otp", { method: "POST", lang, body: { email, ...(lang ? { lang } : {}) } });
 
-  if (reply.ok) return { ok: true, status: reply.status };
-  // The `retry-after` header is the only source of a delay; the response body
-  // carries an `error` string and nothing else the client reads. Absent header
-  // means no delay to surface - the caller falls back to its own cooldown.
-  const error = apiErrorString(reply.body);
+  if (reply.ok) return { ok: true };
   return {
     ok: false,
-    status: reply.status,
-    ...(error ? { error } : {}),
+    refusal: otpRefusal(reply, REQUEST_OTP_REFUSALS),
     ...(reply.retryAfterSeconds !== undefined ? { retryAfterSeconds: reply.retryAfterSeconds } : {}),
   };
 }
@@ -81,11 +85,7 @@ export async function requestOtp(email: string): Promise<RequestOtpResult> {
 // Deliberately carries no AuthState: the session (bearer token included) is
 // already persisted via setAuth and read back through getAuth, so returning it
 // would only widen the credential's exposure surface.
-interface VerifyOtpResult {
-  ok: boolean;
-  status: number;
-  error?: string;
-}
+export type VerifyOtpResult = { ok: true } | { ok: false; refusal: OtpVerifyRefusal };
 
 export async function verifyOtp(email: string, code: string): Promise<VerifyOtpResult> {
   const reply = await apiRequest("/auth/verify-otp", { method: "POST", lang: requestLanguage(), body: { email, code } });
@@ -95,18 +95,15 @@ export async function verifyOtp(email: string, code: string): Promise<VerifyOtpR
     // `auth_v1` record is needed.
     const session = reply.body;
     if (!isRecord(session) || typeof session.userId !== "string" || !session.userId || typeof session.token !== "string" || !session.token || typeof session.expiresAtSec !== "number" || !Number.isFinite(session.expiresAtSec)) {
-      return { ok: false, status: reply.status, error: "invalid_session" };
+      // A 2xx without a usable session is a contract break, not a wrong code.
+      logBackgroundError("verifyOtp.session", new Error("malformed session body"));
+      return { ok: false, refusal: "unavailable" };
     }
     const authState: AuthState = { userId: session.userId, token: session.token, expiresAt: session.expiresAtSec, email };
     await setAuth(authState);
-    return { ok: true, status: reply.status };
+    return { ok: true };
   }
-  const error = apiErrorString(reply.body);
-  return {
-    ok: false,
-    status: reply.status,
-    ...(error ? { error } : {}),
-  };
+  return { ok: false, refusal: otpRefusal(reply, VERIFY_OTP_REFUSALS) };
 }
 
 // End this account's session server-side; clearing the local token alone does not.

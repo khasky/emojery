@@ -259,14 +259,18 @@ const HANDLERS: HandlerTable = {
 
   "auth:verifyOtp": (msg, { sendResponse }) => {
     verifyOtp(msg.email, msg.code)
-      // Destructured, never spread: keeps the response to exactly these fields
-      // even if VerifyOtpResult grows. The session lives in storage.local (read
-      // by getAuth) and is never forwarded here.
-      .then(async ({ ok, status, error }) => {
-        // Only a success needs it, and a failed lookup must not fail the sign-in
-        // that already succeeded - it costs the return offer, nothing more.
-        const returnsToPage = ok ? await hasAuthOrigin().catch(() => false) : false;
-        sendResponse(defined({ type: "auth:otpVerified" as const, ok, status, error, returnsToPage: returnsToPage || undefined }));
+      // Rebuilt field by field, never spread: keeps the response to exactly these
+      // fields even if VerifyOtpResult grows. The session lives in storage.local
+      // (read by getAuth) and is never forwarded here.
+      .then(async (res) => {
+        if (!res.ok) {
+          sendResponse({ type: "auth:otpVerified", ok: false, refusal: res.refusal });
+          return;
+        }
+        // A failed lookup must not fail the sign-in that already succeeded - it
+        // costs the return offer, nothing more.
+        const returnsToPage = await hasAuthOrigin().catch(() => false);
+        sendResponse(returnsToPage ? { type: "auth:otpVerified", ok: true, returnsToPage: true } : { type: "auth:otpVerified", ok: true });
       })
       .catch((error: unknown) => sendResponse(errorResponse("unavailable", "auth:verifyOtp", error)));
     return ANSWER_LATER;

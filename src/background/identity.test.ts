@@ -42,33 +42,38 @@ afterEach(() => {
 describe("requestOtp", () => {
   it("returns ok on a 2xx", async () => {
     stubFetchJson(200, "");
-    expect(await requestOtp("a@b.com")).toEqual({ ok: true, status: 200 });
+    expect(await requestOtp("a@b.com")).toEqual({ ok: true });
   });
 
   it("surfaces Retry-After header seconds on a 429", async () => {
     stubFetchJson(429, { error: "rate limited" }, { "retry-after": "90" });
-    expect(await requestOtp("a@b.com")).toMatchObject({
-      ok: false,
-      status: 429,
-      retryAfterSeconds: 90,
-    });
+    expect(await requestOtp("a@b.com")).toEqual({ ok: false, refusal: "rate_limited", retryAfterSeconds: 90 });
   });
 
   // The header is the only source the client reads; a delay in the body is not
   // part of the response contract.
   it("ignores a retry value in the response body", async () => {
     stubFetchJson(429, { error: "rate limited", retry_after: 45 });
-    expect((await requestOtp("a@b.com")).retryAfterSeconds).toBeUndefined();
-  });
-
-  it("omits retryAfterSeconds when the header is absent", async () => {
-    stubFetchJson(429, {});
-    expect((await requestOtp("a@b.com")).retryAfterSeconds).toBeUndefined();
+    expect(await requestOtp("a@b.com")).toEqual({ ok: false, refusal: "rate_limited" });
   });
 
   it("ignores a malformed Retry-After header", async () => {
     stubFetchJson(429, {}, { "retry-after": "soon-ish" });
-    expect((await requestOtp("a@b.com")).retryAfterSeconds).toBeUndefined();
+    expect(await requestOtp("a@b.com")).toEqual({ ok: false, refusal: "rate_limited" });
+  });
+
+  // The page picks its copy by the refusal's name: every status the API answers
+  // the request with lands on one, and the API's machine string never travels.
+  it.each([
+    [400, "invalid_email", "invalid_email"],
+    [422, "undeliverable_email_provider", "email_rejected"],
+    [502, "email_delivery_failed", "delivery_failed"],
+    [403, "client_outdated", "client_outdated"],
+    [403, "unsupported_client", "unavailable"],
+    [500, "boom", "unavailable"],
+  ] as const)("classifies a %i %s as %s", async (status, error, refusal) => {
+    stubFetchJson(status, { error });
+    expect(await requestOtp("a@b.com")).toEqual({ ok: false, refusal });
   });
 
   it("sends cross-browser extension source headers", async () => {
@@ -107,7 +112,7 @@ describe("verifyOtp - session wire contract", () => {
 
     const res = await verifyOtp("a@b.com", "123456");
 
-    expect(res).toMatchObject({ ok: true, status: 200 });
+    expect(res).toEqual({ ok: true });
     expect(await getAuth()).toEqual({ userId: "u1", token: "tok-123", expiresAt: expiresAtSec, email: "a@b.com" });
   });
 
@@ -115,7 +120,20 @@ describe("verifyOtp - session wire contract", () => {
     installFakeChrome({ id: "a".repeat(32), manifest: { version: "0.1.0" } });
     stubFetchJson(200, { userId: "u1", token: "tok-123" });
 
-    expect(await verifyOtp("a@b.com", "123456")).toMatchObject({ ok: false, error: "invalid_session" });
+    expect(await verifyOtp("a@b.com", "123456")).toEqual({ ok: false, refusal: "unavailable" });
+    expect(await getAuth()).toBeNull();
+  });
+
+  it.each([
+    [401, "invalid_code", "code_invalid"],
+    [423, "locked", "locked"],
+    [403, "client_outdated", "client_outdated"],
+    [403, "unsupported_client", "unavailable"],
+    [400, "invalid_input", "unavailable"],
+  ] as const)("classifies a %i %s as %s", async (status, error, refusal) => {
+    installFakeChrome({ id: "a".repeat(32), manifest: { version: "0.1.0" } });
+    stubFetchJson(status, { error });
+    expect(await verifyOtp("a@b.com", "123456")).toEqual({ ok: false, refusal });
     expect(await getAuth()).toBeNull();
   });
 });

@@ -164,6 +164,31 @@ export type RuntimeErrorCode =
   // unexpected 4xx) - the generic "try again" bucket.
   | "unavailable";
 
+// Why the API refused an OTP exchange, classified by the background (identity.ts)
+// from the HTTP status so the auth page picks its copy by name and never sees a
+// status or the API's machine string. `unavailable` is the generic bucket: an
+// unexpected status, a session body the client could not read.
+export type OtpRequestRefusal =
+  // Too many codes for this address or source; `retryAfterSeconds` says how long.
+  | "rate_limited"
+  // The address did not parse.
+  | "invalid_email"
+  // The address's provider cannot receive the code.
+  | "email_rejected"
+  // The API tried to send the mail and failed.
+  | "delivery_failed"
+  // The API stopped serving this build; the fix is an update.
+  | "client_outdated"
+  | "unavailable";
+
+export type OtpVerifyRefusal =
+  // Wrong or expired code.
+  | "code_invalid"
+  // Too many wrong codes; the address is locked for a while.
+  | "locked"
+  | "client_outdated"
+  | "unavailable";
+
 export type RuntimeResponse =
   | { type: "ok" }
   | { type: "count"; data: TargetCounts }
@@ -179,15 +204,15 @@ export type RuntimeResponse =
       userId: string | null;
       email: string | null;
     }
-  // `status` is the API's own HTTP status, which the auth page maps to its copy
-  // (429 cooldown, 502 undeliverable, 423 locked out, ...); `error` is the API's
-  // machine string, rendered only as the last-resort fallback. Neither carries
-  // the minted session - see the auth:verifyOtp note above.
-  | { type: "auth:otpRequested"; ok: boolean; status: number; error?: string; retryAfterSeconds?: number }
+  // A refused exchange names why (see the refusal types above); neither answer
+  // carries the minted session - see the auth:verifyOtp note above.
+  | { type: "auth:otpRequested"; ok: true }
+  | { type: "auth:otpRequested"; ok: false; refusal: OtpRequestRefusal; retryAfterSeconds?: number }
   // `returnsToPage` is not about the exchange: it is what the done step does next.
   // True when this sign-in started from a page's sign-in gate and that tab is still
   // open, which is the only case where the page offers to take the user back.
-  | { type: "auth:otpVerified"; ok: boolean; status: number; error?: string; returnsToPage?: boolean }
+  | { type: "auth:otpVerified"; ok: true; returnsToPage?: boolean }
+  | { type: "auth:otpVerified"; ok: false; refusal: OtpVerifyRefusal }
   | { type: "error"; code: RuntimeErrorCode; message: string };
 
 export type VoteBroadcast = {

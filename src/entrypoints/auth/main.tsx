@@ -4,8 +4,8 @@
 
 import { render } from "preact";
 import { useCallback, useEffect, useMemo, useRef, useState } from "preact/hooks";
-import { t } from "../../shared/i18n";
-import type { RuntimeMessage } from "../../shared/messages";
+import { type I18nKey, t } from "../../shared/i18n";
+import type { OtpRequestRefusal, OtpVerifyRefusal, RuntimeResponse } from "../../shared/messages";
 import { bootstrapPage } from "../../shared/page-bootstrap";
 import { AGREE_CLASS, AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, CODE_INPUT_ID, COUNTDOWN_CLASS, EMAIL_INPUT_ID, NOTICE_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
 import { withExtensionUtm } from "../../shared/tracking-links";
@@ -21,33 +21,40 @@ bootstrapPage(CONSENT_ONLY ? t("dataConsentTitle") : t("authPageTitle"), true);
 
 type Step = "email" | "code" | "done";
 
-interface OtpOutcome {
-  ok: boolean;
-  status: number;
-  error?: string;
-  retryAfterSeconds?: number;
-  /** Verify only - whether the done step may hand the user back to the page the
-      sign-in gate was opened from (background/auth-return.ts decides). */
-  returnsToPage?: boolean;
-}
+type OtpRequested = Extract<RuntimeResponse, { type: "auth:otpRequested" }>;
+type OtpVerified = Extract<RuntimeResponse, { type: "auth:otpVerified" }>;
 
-// `status: 0` is this page's "never reached the API" marker, distinct from every
-// real HTTP status the mapping below branches on. It carries no `error` text, so
-// the localized authErrUnknown/authErrVerifyFailed fallbacks render for it.
-const OTP_UNREACHABLE: OtpOutcome = { ok: false, status: 0 };
+// The copy each named refusal gets. `rate_limited` is absent on purpose: it arms a
+// cooldown instead of a line (see requestCode). `client_outdated` is the one
+// refusal whose fix is on the user's side (update from the store), so it gets its
+// own line instead of the generic fallback.
+const REQUEST_REFUSAL_COPY: Record<Exclude<OtpRequestRefusal, "rate_limited">, I18nKey> = {
+  invalid_email: "authErrBadEmail",
+  email_rejected: "authErrEmailDomainUndeliverable",
+  delivery_failed: "authErrUndeliverable",
+  client_outdated: "authErrOutdated",
+  unavailable: "authErrUnknown",
+};
 
-// The API stopped serving this build: the only refusal whose fix is on the user's
-// side (update from the store), so it gets its own line instead of the fallback.
-function isOutdatedClient(res: OtpOutcome): boolean {
-  return res.status === 403 && res.error === "client_outdated";
-}
+const VERIFY_REFUSAL_COPY: Record<OtpVerifyRefusal, I18nKey> = {
+  code_invalid: "authErrCodeInvalid",
+  locked: "authErrTooManyTries",
+  client_outdated: "authErrOutdated",
+  unavailable: "authErrVerifyFailed",
+};
 
 // The exchange itself runs in the service worker (background/message-router), not
 // here: whatever it comes back with belongs where it is used, and a page is not
-// that place.
-async function askOtp(msg: Extract<RuntimeMessage, { type: "auth:requestOtp" | "auth:verifyOtp" }>): Promise<OtpOutcome> {
-  const res = await sendRuntimeMessage(msg).catch(() => undefined);
-  return res?.type === "auth:otpRequested" || res?.type === "auth:otpVerified" ? res : OTP_UNREACHABLE;
+// that place. An answer that is not the exchange's own envelope (the background's
+// generic error, a dropped channel) reads as the generic refusal.
+async function askRequestOtp(email: string): Promise<OtpRequested> {
+  const res = await sendRuntimeMessage({ type: "auth:requestOtp", email }).catch(() => undefined);
+  return res?.type === "auth:otpRequested" ? res : { type: "auth:otpRequested", ok: false, refusal: "unavailable" };
+}
+
+async function askVerifyOtp(email: string, code: string): Promise<OtpVerified> {
+  const res = await sendRuntimeMessage({ type: "auth:verifyOtp", email, code }).catch(() => undefined);
+  return res?.type === "auth:otpVerified" ? res : { type: "auth:otpVerified", ok: false, refusal: "unavailable" };
 }
 
 type CodeStepProps = {
@@ -330,34 +337,18 @@ function App() {
     if (requestInFlight.current) return false;
     requestInFlight.current = true;
     setBusy(true);
-    const res = await askOtp({ type: "auth:requestOtp", email: trimmed });
+    const res = await askRequestOtp(trimmed);
     requestInFlight.current = false;
     setBusy(false);
     if (res.ok) {
       setCooldown(setOtpCooldown(trimmed, OTP_RESEND_COOLDOWN_SECONDS, "resend"));
       return true;
     }
-    if (res.status === 429) {
+    if (res.refusal === "rate_limited") {
       const retryAfter = res.retryAfterSeconds || OTP_COOLDOWN_FALLBACK_SECONDS;
       setCooldown(setOtpCooldown(trimmed, retryAfter, "rateLimit"));
-    } else if (res.status === 502) {
-      setError(t("authErrUndeliverable"));
-    } else if (res.status === 422) {
-      // One line however the API phrased the refusal: the next step is the same for all
-      // of them - check the address, or use another one - so the copy does not vary
-      // with the `error` string. (502 above is a different thing: a send that failed on
-      // our side, where retrying the same address is the right advice.)
-      setError(t("authErrEmailDomainUndeliverable"));
-    } else if (res.status === 400) {
-      setError(t("authErrBadEmail"));
-    } else if (isOutdatedClient(res)) {
-      setError(t("authErrOutdated"));
     } else {
-      // The API's `error` is a machine string (`unsupported_client`), never UI copy - the
-      // one string a branch reads is `client_outdated` above, the one refusal the user can
-      // act on. The field stays on the response: it is what makes a rejected sign-in
-      // diagnosable from the background's message log.
-      setError(t("authErrUnknown"));
+      setError(t(REQUEST_REFUSAL_COPY[res.refusal]));
     }
     return false;
   }, []);
@@ -387,22 +378,14 @@ function App() {
       e.preventDefault();
       setBusy(true);
       setError(null);
-      const res = await askOtp({ type: "auth:verifyOtp", email: email.trim(), code: code.trim() });
+      const res = await askVerifyOtp(email.trim(), code.trim());
       setBusy(false);
       if (res.ok) {
         setReturnsToPage(res.returnsToPage === true);
         setStep("done");
         return;
       }
-      if (res.status === 423) {
-        setError(t("authErrTooManyTries"));
-      } else if (res.status === 401) {
-        setError(t("authErrCodeInvalid"));
-      } else if (isOutdatedClient(res)) {
-        setError(t("authErrOutdated"));
-      } else {
-        setError(t("authErrVerifyFailed"));
-      }
+      setError(t(VERIFY_REFUSAL_COPY[res.refusal]));
     },
     [email, code],
   );

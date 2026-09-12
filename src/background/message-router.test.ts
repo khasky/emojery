@@ -45,12 +45,12 @@ vi.mock("./identity", () => ({
   deleteAccount: vi.fn(async () => true),
   finishPendingDeletion: vi.fn(async () => {}),
   getAuth: vi.fn(async () => ({ userId: "u1", email: "e2e@example.test", token: "tok" })),
-  requestOtp: vi.fn(async () => ({ ok: true, status: 200 })),
+  requestOtp: vi.fn(async () => ({ ok: true })),
   revokeSessionServerSide: vi.fn(async () => true),
   // Deliberately WIDER than the real VerifyOtpResult, which carries no AuthState
   // (identity.ts says so at the type). The handler must forward only ok/status/error,
   // and a mock that cannot hand it a token proves nothing about that.
-  verifyOtp: vi.fn(async () => ({ ok: true, status: 200, auth: { userId: "u1", token: "tok", expiresAt: 1, email: "e2e@example.test" } })),
+  verifyOtp: vi.fn(async () => ({ ok: true, auth: { userId: "u1", token: "tok", expiresAt: 1, email: "e2e@example.test" } })),
 }));
 vi.mock("./install", () => ({ installFreshInstallAuthReset: vi.fn() }));
 vi.mock("./message-guard", () => ({
@@ -295,16 +295,15 @@ describe("message router", () => {
     await expect(dispatch({ type: "auth:delete" }).response).resolves.toMatchObject({ type: "error" });
   });
 
-  it("auth:requestOtp forwards the address and passes the API's status/detail straight back", async () => {
-    await expect(dispatch({ type: "auth:requestOtp", email: "a@b.com" }).response).resolves.toEqual({ type: "auth:otpRequested", ok: true, status: 200 });
+  it("auth:requestOtp forwards the address and passes the named refusal straight back", async () => {
+    await expect(dispatch({ type: "auth:requestOtp", email: "a@b.com" }).response).resolves.toEqual({ type: "auth:otpRequested", ok: true });
     expect(identity.requestOtp).toHaveBeenCalledWith("a@b.com");
 
-    vi.mocked(identity.requestOtp).mockResolvedValueOnce({ ok: false, status: 429, error: "rate_limited", retryAfterSeconds: 42 });
+    vi.mocked(identity.requestOtp).mockResolvedValueOnce({ ok: false, refusal: "rate_limited", retryAfterSeconds: 42 });
     await expect(dispatch({ type: "auth:requestOtp", email: "a@b.com" }).response).resolves.toEqual({
       type: "auth:otpRequested",
       ok: false,
-      status: 429,
-      error: "rate_limited",
+      refusal: "rate_limited",
       retryAfterSeconds: 42,
     });
   });
@@ -315,23 +314,23 @@ describe("message router", () => {
   it("auth:verifyOtp answers the outcome only, never the minted session", async () => {
     const response = await dispatch({ type: "auth:verifyOtp", email: "a@b.com", code: "123456" }).response;
 
-    expect(response).toEqual({ type: "auth:otpVerified", ok: true, status: 200, returnsToPage: true });
+    expect(response).toEqual({ type: "auth:otpVerified", ok: true, returnsToPage: true });
     expect(identity.verifyOtp).toHaveBeenCalledWith("a@b.com", "123456");
     expect(JSON.stringify(response)).not.toContain("tok");
 
-    vi.mocked(identity.verifyOtp).mockResolvedValueOnce({ ok: false, status: 401, error: "bad_code" });
-    await expect(dispatch({ type: "auth:verifyOtp", email: "a@b.com", code: "000000" }).response).resolves.toEqual({ type: "auth:otpVerified", ok: false, status: 401, error: "bad_code" });
+    vi.mocked(identity.verifyOtp).mockResolvedValueOnce({ ok: false, refusal: "code_invalid" });
+    await expect(dispatch({ type: "auth:verifyOtp", email: "a@b.com", code: "000000" }).response).resolves.toEqual({ type: "auth:otpVerified", ok: false, refusal: "code_invalid" });
   });
 
   // The field is omitted rather than sent false, so the page's `=== true` read and
   // the response's own shape agree on "nothing to go back to".
   it("auth:verifyOtp leaves returnsToPage off when there is no page to go back to", async () => {
     vi.mocked(hasAuthOrigin).mockResolvedValueOnce(false);
-    await expect(dispatch({ type: "auth:verifyOtp", email: "a@b.com", code: "123456" }).response).resolves.toEqual({ type: "auth:otpVerified", ok: true, status: 200 });
+    await expect(dispatch({ type: "auth:verifyOtp", email: "a@b.com", code: "123456" }).response).resolves.toEqual({ type: "auth:otpVerified", ok: true });
 
     // A failed lookup must cost the offer, not the sign-in that already succeeded.
     vi.mocked(hasAuthOrigin).mockRejectedValueOnce(new Error("session storage unavailable"));
-    await expect(dispatch({ type: "auth:verifyOtp", email: "a@b.com", code: "123456" }).response).resolves.toEqual({ type: "auth:otpVerified", ok: true, status: 200 });
+    await expect(dispatch({ type: "auth:verifyOtp", email: "a@b.com", code: "123456" }).response).resolves.toEqual({ type: "auth:otpVerified", ok: true });
   });
 
   it("history:page and history:export answer through the authed responder", async () => {

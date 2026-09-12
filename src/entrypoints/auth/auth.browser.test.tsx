@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// The auth page's client-side state machine: what each API status turns into on
-// screen, the cooldown that survives a reload, and the pre-140 Firefox consent
+// The auth page's client-side state machine: what each named refusal turns into
+// on screen, the cooldown that survives a reload, and the pre-140 Firefox consent
 // gate. e2e/auth.spec.ts drives the real sign-in end to end; this file covers
 // the UI states against a mocked background.
 import { render } from "preact";
@@ -17,10 +17,8 @@ import { OTP_COOLDOWN_KEY, type OtpCooldown } from "./otp-cooldown";
 // is what later dynamic imports resolve against.
 const PAGE_URL = location.href;
 const EMAIL = "user@example.com";
-const OK_REQUEST = { type: "auth:otpRequested", ok: true, status: 200 };
-const OK_VERIFY = { type: "auth:otpVerified", ok: true, status: 200 };
-// The one line every refused address gets on a 422, whichever refusal the API named.
-const UNREACHABLE_COPY = "That email domain can't receive mail. Check the address for a typo, or try another one.";
+const OK_REQUEST = { type: "auth:otpRequested", ok: true };
+const OK_VERIFY = { type: "auth:otpVerified", ok: true };
 // In production the background closes this tab on an "ok", so nothing repaints
 // after it - here the page simply stays put, which is what the asserts read.
 const OK_RETURN = { type: "ok" };
@@ -129,7 +127,7 @@ describe("auth page - the email step", () => {
   });
 
   it("holds a 429 on the email step with time-free copy, and stores the server's window", async () => {
-    install({ requestReply: { type: "auth:otpRequested", ok: false, status: 429, retryAfterSeconds: 90 } });
+    install({ requestReply: { type: "auth:otpRequested", ok: false, refusal: "rate_limited", retryAfterSeconds: 90 } });
     await loadPage();
     await sendCode();
 
@@ -144,11 +142,12 @@ describe("auth page - the email step", () => {
   });
 
   it.each([
-    [502, "Could not deliver the email. Try again or check the address."],
-    [422, UNREACHABLE_COPY],
-    [400, "That doesn't look like a valid email address."],
-  ])("renders the %i copy and stays on the email step", async (status, copy) => {
-    install({ requestReply: { type: "auth:otpRequested", ok: false, status } });
+    ["delivery_failed", "Could not deliver the email. Try again or check the address."],
+    ["email_rejected", "That email domain can't receive mail. Check the address for a typo, or try another one."],
+    ["invalid_email", "That doesn't look like a valid email address."],
+    ["unavailable", "Something went wrong. Please try again."],
+  ])("renders the %s copy and stays on the email step", async (refusal, copy) => {
+    install({ requestReply: { type: "auth:otpRequested", ok: false, refusal } });
     await loadPage();
     await sendCode();
 
@@ -159,27 +158,10 @@ describe("auth page - the email step", () => {
     expect(storedCooldown()).toBeNull();
   });
 
-  // `error` is a diagnostic for the background's message log, never UI copy. Two
-  // properties in one: it is not rendered, and it does not SELECT what is rendered
-  // either - the copy for a status is the same whatever string rides along, so a
-  // refusal cannot be told apart by reading the screen. One exception below.
-  it.each([
-    [500, "Something went wrong. Please try again."],
-    [422, UNREACHABLE_COPY],
-    [403, "Something went wrong. Please try again."],
-  ])("renders the %i copy whatever the machine error string says", async (status, copy) => {
-    install({ requestReply: { type: "auth:otpRequested", ok: false, status, error: "unsupported_client" } });
-    await loadPage();
-    await sendCode();
-    await vi.waitFor(() => expect(errorText()).not.toBe(""));
-    expect(errorText()).toBe(copy);
-    expect(document.body.textContent).not.toContain("unsupported_client");
-  });
-
-  // The exception: a build the API no longer serves. The fix is on the user's side,
-  // so the copy says update rather than try again.
+  // A build the API no longer serves: the fix is on the user's side, so the copy
+  // says update rather than try again.
   it("asks for an update when the API refuses this build", async () => {
-    install({ requestReply: { type: "auth:otpRequested", ok: false, status: 403, error: "client_outdated" } });
+    install({ requestReply: { type: "auth:otpRequested", ok: false, refusal: "client_outdated" } });
     await loadPage();
     await sendCode();
     await vi.waitFor(() => expect(errorText()).not.toBe(""));
@@ -188,7 +170,7 @@ describe("auth page - the email step", () => {
   });
 
   it("treats a background that answers something else as a network error", async () => {
-    // Anything but an auth:otpRequested envelope is askOtp's OTP_UNREACHABLE marker.
+    // Anything but an auth:otpRequested envelope reads as the generic refusal.
     install({ requestReply: { type: "error", code: "unavailable" } });
     await loadPage();
     await sendCode();
@@ -233,10 +215,12 @@ describe("auth page - the email step", () => {
 
 describe("auth page - the code step", () => {
   it.each([
-    [401, "That code is incorrect or has expired."],
-    [423, "Too many wrong codes. Try again later."],
-  ])("maps a %i to its own copy and keeps the form", async (status, copy) => {
-    install({ verifyReply: { type: "auth:otpVerified", ok: false, status } });
+    ["code_invalid", "That code is incorrect or has expired."],
+    ["locked", "Too many wrong codes. Try again later."],
+    ["client_outdated", "This version of Emojery is out of date. Update it to sign in."],
+    ["unavailable", "Verification failed. Please try again."],
+  ])("maps %s to its own copy and keeps the form", async (refusal, copy) => {
+    install({ verifyReply: { type: "auth:otpVerified", ok: false, refusal } });
     await loadPage();
     await reachCodeStep();
 
