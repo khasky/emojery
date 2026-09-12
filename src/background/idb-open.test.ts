@@ -7,7 +7,7 @@
 // history.browser.test.ts / votequeue.browser.test.ts.
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createIdbHandle } from "./idb-open";
+import { createIdbHandle, runTransaction } from "./idb-open";
 
 interface FakeRequest {
   result: FakeDb;
@@ -147,5 +147,59 @@ describe("createIdbHandle", () => {
     opens[1]?.onsuccess?.();
     await expect(retry).resolves.toBeTruthy();
     expect(opens).toHaveLength(2);
+  });
+});
+
+// The transaction runner's three exits, against a fake transaction: the event
+// wiring is what is under test, and a real IndexedDB cannot be told to abort
+// without an error on demand. Real reads and writes are covered by the two
+// stores' browser suites.
+describe("runTransaction", () => {
+  interface FakeTx {
+    error: DOMException | null;
+    oncomplete: (() => void) | null;
+    onerror: (() => void) | null;
+    onabort: (() => void) | null;
+  }
+
+  function fakeDb(): { db: IDBDatabase; tx: FakeTx; store: IDBObjectStore } {
+    const tx: FakeTx = { error: null, oncomplete: null, onerror: null, onabort: null };
+    const store = { name: "s" } as unknown as IDBObjectStore;
+    const db = { transaction: () => Object.assign(tx, { objectStore: () => store }) } as unknown as IDBDatabase;
+    return { db, tx, store };
+  }
+
+  it("resolves with the thunk's value once the transaction completes", async () => {
+    const { db, tx, store } = fakeDb();
+    let seen: IDBObjectStore | null = null;
+    const done = runTransaction(db, "s", "readonly", "aborted", (s) => {
+      seen = s;
+      return () => 42;
+    });
+    tx.oncomplete?.();
+    await expect(done).resolves.toBe(42);
+    expect(seen).toBe(store);
+  });
+
+  it("rejects with the transaction's own error, and with the abort message when there is none", async () => {
+    const failed = fakeDb();
+    const failing = runTransaction(failed.db, "s", "readwrite", "aborted", () => () => undefined);
+    failed.tx.error = new DOMException("quota", "QuotaExceededError");
+    failed.tx.onerror?.();
+    await expect(failing).rejects.toMatchObject({ name: "QuotaExceededError" });
+
+    const aborted = fakeDb();
+    const aborting = runTransaction(aborted.db, "s", "readwrite", "history push aborted", () => () => undefined);
+    aborted.tx.onabort?.();
+    await expect(aborting).rejects.toMatchObject({ message: "history push aborted" });
+  });
+
+  it("lets `run` reject early through the handle it is given", async () => {
+    const { db } = fakeDb();
+    const guarded = runTransaction(db, "s", "readwrite", "aborted", (_store, reject) => {
+      reject(new Error("vote queue full"));
+      return () => undefined;
+    });
+    await expect(guarded).rejects.toThrow("vote queue full");
   });
 });

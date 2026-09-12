@@ -6,7 +6,7 @@ import type { TargetRef } from "../shared/adapter";
 import type { ReactionAction } from "../shared/messages";
 import type { Reaction } from "../shared/reactions";
 import { logIndexedDbDebug } from "./debug";
-import { createIdbHandle } from "./idb-open";
+import { createIdbHandle, runTransaction } from "./idb-open";
 
 const DB_NAME = "emojery-vote-queue";
 const STORE = "votes";
@@ -67,19 +67,11 @@ interface QueueStats {
   earliestNextAttemptAt?: number;
 }
 
-// The same transaction lifecycle as history.ts's runWrite, plus the dev trace. `run` may
-// also reject early (enqueue's full-queue guard) through the `reject` it is handed;
-// `toLog` reshapes the traced response.
+// One queue transaction plus the dev trace; `toLog` reshapes the traced response.
 async function runQueueTx<T>(mode: IDBTransactionMode, operation: string, requestPayload: Record<string, unknown>, run: (store: IDBObjectStore, reject: (reason: unknown) => void) => () => T, toLog: (result: T) => unknown = (result) => result): Promise<T> {
   const startedAt = Date.now();
   const db = await openDb();
-  const result = await new Promise<T>((resolve, reject) => {
-    const tx = db.transaction(STORE, mode);
-    const getResult = run(tx.objectStore(STORE), reject);
-    tx.oncomplete = () => resolve(getResult());
-    tx.onerror = () => reject(tx.error);
-    tx.onabort = () => reject(tx.error ?? new DOMException(`vote queue ${operation} aborted`));
-  });
+  const result = await runTransaction(db, STORE, mode, `vote queue ${operation} aborted`, run);
   logIndexedDbDebug(operation, { store: STORE, ...requestPayload }, toLog(result), startedAt);
   return result;
 }

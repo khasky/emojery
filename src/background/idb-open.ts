@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// One connection opener for both IndexedDB stores (history.ts, votequeue.ts).
+// One connection opener and one transaction runner for both IndexedDB stores
+// (history.ts, votequeue.ts).
 //
 // Shared for the second-context-wants-a-new-schema-version case, which is real in
 // production: the popup's Debug tab (entrypoints/popup/popup-queue.tsx) opens the
@@ -56,4 +57,19 @@ export function createIdbHandle(dbName: string, version: number, upgrade: (db: I
   };
 
   return { open };
+}
+
+// One transaction, settled by its own lifecycle. `run` wires its request handlers
+// on the store and returns a thunk read at `complete` time for the resolve value;
+// it may also reject early through the `reject` it is handed (a guard that then
+// aborts the transaction). An abort with no `tx.error` rejects with a DOMException
+// carrying `abortMessage`.
+export function runTransaction<T>(db: IDBDatabase, storeName: string, mode: IDBTransactionMode, abortMessage: string, run: (store: IDBObjectStore, reject: (reason: unknown) => void) => () => T): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const tx = db.transaction(storeName, mode);
+    const getResult = run(tx.objectStore(storeName), reject);
+    tx.oncomplete = () => resolve(getResult());
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error ?? new DOMException(abortMessage));
+  });
 }

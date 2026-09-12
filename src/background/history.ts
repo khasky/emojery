@@ -12,7 +12,7 @@ import type { Reaction } from "../shared/reactions";
 import { bumpRecentEmoji, clearAllRecentEmojiStats, clearRecentEmojis, dropRecentEmoji, importRecentEmojiStats, type RecentEmojiStatsByUser } from "../shared/recents";
 import { storageLocalGet, storageLocalRemove } from "../shared/webext";
 import { logBackgroundError } from "./debug";
-import { createIdbHandle } from "./idb-open";
+import { createIdbHandle, runTransaction } from "./idb-open";
 
 const DB_NAME = "emojery-history";
 const STORE = "history";
@@ -61,25 +61,15 @@ function buildRow(userId: string, target: TargetRef, reaction: Reaction, ts: num
   };
 }
 
-// `run` wires its request handlers on the store and returns a thunk read at
-// oncomplete time for the resolve value; an abort with no tx.error rejects with a
-// DOMException carrying `abortMessage`.
-function runWrite<T>(db: IDBDatabase, storeName: string, abortMessage: string, run: (store: IDBObjectStore) => () => T): Promise<T> {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(storeName, "readwrite");
-    const store = tx.objectStore(storeName);
-    const getResult = run(store);
-    tx.oncomplete = () => resolve(getResult());
-    tx.onerror = () => reject(tx.error);
-    tx.onabort = () => reject(tx.error ?? new DOMException(abortMessage));
-  });
+function runWrite<T>(db: IDBDatabase, abortMessage: string, run: (store: IDBObjectStore) => () => T): Promise<T> {
+  return runTransaction(db, STORE, "readwrite", abortMessage, run);
 }
 
 // Invalidates before AND again after the commit: a read that runs while the
 // transaction is open can re-prime the caches from the pre-write rows.
-async function runInvalidatingWrite<T>(db: IDBDatabase, storeName: string, abortMessage: string, run: (store: IDBObjectStore) => () => T): Promise<T> {
+async function runInvalidatingWrite<T>(db: IDBDatabase, abortMessage: string, run: (store: IDBObjectStore) => () => T): Promise<T> {
   invalidateHistoryCaches();
-  const result = await runWrite(db, storeName, abortMessage, run);
+  const result = await runWrite(db, abortMessage, run);
   invalidateHistoryCaches();
   return result;
 }
@@ -92,7 +82,7 @@ type PushOutcome = { added: number } | "confirmed-duplicate" | { movedFromUserId
 export async function pushHistory(userId: string, target: TargetRef, reaction: Reaction, opts: { historyId?: string; ts?: number; action?: ReactionAction; title?: string } = {}): Promise<void> {
   const db = await openDb();
   const ts = opts.ts ?? Date.now();
-  const outcome = await runWrite<PushOutcome>(db, STORE, "history push aborted", (store) => {
+  const outcome = await runWrite<PushOutcome>(db, "history push aborted", (store) => {
     let result: PushOutcome = { added: -1 };
     const addRow = () => {
       const add = store.add(buildRow(userId, target, reaction, ts, opts));
@@ -143,7 +133,7 @@ export async function pushHistory(userId: string, target: TargetRef, reaction: R
 
 export async function removeHistoryEntry(historyId: string): Promise<void> {
   const db = await openDb();
-  const removed = await runWrite<(ReactionHistoryItem & { id: number }) | null>(db, STORE, "history remove aborted", (store) => {
+  const removed = await runWrite<(ReactionHistoryItem & { id: number }) | null>(db, "history remove aborted", (store) => {
     let removedRow: (ReactionHistoryItem & { id: number }) | null = null;
     const lookup = store.index(HISTORY_ID_INDEX).get(historyId);
     lookup.onsuccess = () => {
@@ -389,7 +379,7 @@ function buildImportRows(userId: string, rows: PortableHistoryRow[]): ReactionHi
 export async function importHistory(userId: string, rows: PortableHistoryRow[]): Promise<{ imported: number; replaced: number }> {
   const fresh = buildImportRows(userId, rows);
   const db = await openDb();
-  return runInvalidatingWrite<{ imported: number; replaced: number }>(db, STORE, "history import aborted", (store) => {
+  return runInvalidatingWrite<{ imported: number; replaced: number }>(db, "history import aborted", (store) => {
     let replaced = 0;
     const priorKeys = store.index(USER_INDEX).getAllKeys(userKeyRange(userId));
     priorKeys.onsuccess = () => {
@@ -406,7 +396,7 @@ export async function importHistory(userId: string, rows: PortableHistoryRow[]):
 export async function importHistoryRows(rows: ReactionHistoryItem[]): Promise<void> {
   if (rows.length === 0) return;
   const db = await openDb();
-  await runInvalidatingWrite<void>(db, STORE, "history import aborted", (store) => {
+  await runInvalidatingWrite<void>(db, "history import aborted", (store) => {
     for (const row of rows) store.add(row);
     return () => undefined;
   });
@@ -417,7 +407,7 @@ export async function importHistoryRows(rows: ReactionHistoryItem[]): Promise<vo
 // importHistory keeps.
 export async function clearHistoryForUser(userId: string): Promise<void> {
   const db = await openDb();
-  await runInvalidatingWrite<void>(db, STORE, "history clear aborted", (store) => {
+  await runInvalidatingWrite<void>(db, "history clear aborted", (store) => {
     const keys = store.index(USER_INDEX).getAllKeys(userKeyRange(userId));
     keys.onsuccess = () => {
       for (const id of keys.result as number[]) store.delete(id);
@@ -432,7 +422,7 @@ export async function clearHistoryForUser(userId: string): Promise<void> {
 // there because nothing in that marker names the account.
 export async function clearHistory(): Promise<void> {
   const db = await openDb();
-  await runInvalidatingWrite<void>(db, STORE, "history clear aborted", (store) => {
+  await runInvalidatingWrite<void>(db, "history clear aborted", (store) => {
     store.clear();
     return () => undefined;
   });
