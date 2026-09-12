@@ -106,17 +106,21 @@ pnpm exec playwright test -c e2e/selector-drift/playwright.config.ts
 
 Its CI job persists a per-scenario skip counter across runs (`scripts/track-selector-drift-skips.mjs`), because a URL that walls the probe every single day has gone silently blind and one run can't tell.
 
-### Reddit is not covered here
+### Not covered here
 
-Reddit hard-blocks datacenter IPs: on a GitHub-hosted runner every `reddit.com` URL answers "You've been blocked by network security", so all 3 Reddit scenarios skip in this job **and** in the placement sweep (`e2e-ci.yml`). Nothing in the repo can lift that — it is the runner's IP, not a fixture or a selector. A `macos-latest` runner sits on other infrastructure and was measured too (2026-08-26): same 3 skips, so no runner label buys this back. `selector-drift.yml` therefore declares them (`E2E_DRIFT_KNOWN_BLOCKED: "reddit:"`): the tracker prints them as an uncovered gap rather than failing on an unfixable block, and tells us to drop the entry the day a run gets through.
+The walls below answer the runner's IP rather than its request — no fixture URL or probe tweak is the missing piece. Each is declared in `E2E_DRIFT_KNOWN_BLOCKED` (`selector-drift.yml`): the tracker prints it as an uncovered gap rather than failing on a block nobody can act on, and names it the day it loads `E2E_DRIFT_MAX_CONSECUTIVE_SKIPS` runs in a row.
 
-So Reddit's selectors are ours to check, off a CI IP — from any ordinary connection it takes half a minute:
+**Reddit** (`reddit:`). Reddit hard-blocks datacenter IPs: on a GitHub-hosted runner every `reddit.com` URL answers "You've been blocked by network security", so all 3 Reddit scenarios skip in this job **and** in the placement sweep (`e2e-ci.yml`). It is the runner's IP, not a fixture or a selector. A `macos-latest` runner sits on other infrastructure and was measured too (2026-08-26): same 3 skips, so no runner label buys this back.
+
+**The X profile feed** (`x: X profile feed`). Since 2026-09-05 `x.com/<user>` fronts a GitHub-hosted runner with Cloudflare's managed challenge — "Performing security verification" and a "Verify you are human" checkbox — instead of the feed. Declared by its scenario TITLE rather than the `x:` site id, because `x: X status detail` loads on every run and carries the SAME `nativeSelectors` and `containerSelectors` (`supported-sites.ts`): X's selector groups stay checked daily, and only the profile surface goes unwatched. The challenge does let a run through every week or so, which is why the tracker waits for a whole threshold of clean runs before it advises dropping the entry.
+
+So these selectors are ours to check, off a CI IP — from any ordinary connection it takes half a minute:
 
 ```bash
-pnpm exec playwright test -c e2e/selector-drift/playwright.config.ts -g reddit
+pnpm exec playwright test -c e2e/selector-drift/playwright.config.ts -g "reddit|X profile"
 ```
 
-Worth running before a release and whenever a Reddit placement bug is reported. The `site-auth/` bridge suite covers Reddit the same way, on your own browser and IP.
+Worth running before a release and whenever a Reddit or X placement bug is reported. The `site-auth/` bridge suite covers both the same way, on your own browser and IP.
 
 > A separate, non-e2e tier (WebKit + Firefox component tests, `pnpm run test:browser`) lives in `src/`, not here. See [Engine component tests (not e2e)](#engine-component-tests-not-e2e) at the end of this file.
 
@@ -232,7 +236,7 @@ The rest are waits and per-spec knobs that only matter on a slow machine or when
 That is every `E2E_*` the specs and helpers in this folder read. 2 more layers carry their own:
 
 - **The site-authenticated suite** — `E2E_SITEAUTH`, `E2E_MCP_URL`, `E2E_AUTHURL_<SITE>`, `E2E_WARMUP_FACEBOOK_GROUP`, `E2E_DEEP_SCROLL_STEPS`, `E2E_DEEP_SCROLL_HEAP_LIMIT_MB`, `E2E_FB_COMMENT_HYDRATE_MS`, `E2E_WALL_SCROLL_STEPS`, documented in [site-auth/README.md](site-auth/README.md).
-- **The CI gate scripts**, which read a Playwright JSON report rather than running a spec: `E2E_MAX_SKIP_RATIO` [0.5] fails a sweep whose skipped share crosses it (`scripts/check-e2e-skips.mjs`, the "Gate on skip ratio" step in `e2e-ci.yml` and `edge-smoke.yml`), and `E2E_DRIFT_MAX_CONSECUTIVE_SKIPS` [5] fails the drift probe when one scenario URL has walled it that many runs in a row (`scripts/track-selector-drift-skips.mjs`), with `E2E_DRIFT_KNOWN_BLOCKED` [``] listing the scenario-title prefixes that runner cannot reach at all (see [Reddit is not covered here](#reddit-is-not-covered-here)).
+- **The CI gate scripts**, which read a Playwright JSON report rather than running a spec: `E2E_MAX_SKIP_RATIO` [0.5] fails a sweep whose skipped share crosses it (`scripts/check-e2e-skips.mjs`, the "Gate on skip ratio" step in `e2e-ci.yml` and `edge-smoke.yml`), and `E2E_DRIFT_MAX_CONSECUTIVE_SKIPS` [5] fails the drift probe when one scenario URL has walled it that many runs in a row (`scripts/track-selector-drift-skips.mjs`), with `E2E_DRIFT_KNOWN_BLOCKED` [``] listing the scenario-title prefixes that runner cannot reach at all (see [Not covered here](#not-covered-here)).
 
 After adding one, re-derive the full set with `git grep -ho "E2E_[A-Z0-9_]*" e2e/ scripts/ | sort -u` and document it in the matching list above or in `.env.e2e.example`.
 

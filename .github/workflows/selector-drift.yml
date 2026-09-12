@@ -61,17 +61,17 @@ jobs:
           PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/selector-drift.json
         run: xvfb-run -a pnpm exec playwright test -c e2e/selector-drift/playwright.config.ts --reporter=list,json
 
-      # Reddit answers every GitHub-hosted runner with its hard IP block ("You've
-      # been blocked by network security"), so all 3 of its scenarios skip on
-      # every single run - no fixture URL or probe tweak reaches it from here, and
-      # failing daily on an unfixable block just teaches everyone to ignore this
-      # job. Declared instead: the tracker reports them as an uncovered gap and
-      # tells us the day the block lifts. Their selectors are still checked, off a
-      # CI IP - see "Reddit is not covered here" in e2e/README.md.
+      # These walls answer the runner's IP rather than its request: no fixture URL
+      # or probe tweak gets past them, and failing daily on that only teaches
+      # everyone to ignore this job, so the tracker reports them as an uncovered
+      # gap and names one the day it loads again. X is listed by scenario title,
+      # not by `x:` - its status-detail sibling loads every run and carries the
+      # same selector lists, so X keeps its drift signal. All are checked off a CI
+      # IP - see "Not covered here" in e2e/README.md.
       - name: Track consecutive skips
         if: always()
         env:
-          E2E_DRIFT_KNOWN_BLOCKED: "reddit:"
+          E2E_DRIFT_KNOWN_BLOCKED: "reddit:,x: X profile feed"
         run: node scripts/track-selector-drift-skips.mjs test-results/selector-drift.json .selector-drift-state/counters.json
 
       # Saved even when the job fails: the gate itself is what fails it, and a

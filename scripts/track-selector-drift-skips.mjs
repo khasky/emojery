@@ -9,12 +9,10 @@
 // runs via the workflow's cache step; a scenario reaching the threshold fails
 // the job with an actionable message.
 //
-// One class of blindness is NOT actionable: a site that hard-blocks the runner's
-// datacenter IP outright (Reddit answers every GitHub-hosted runner with "You've
-// been blocked by network security"). No fixture URL or probe tweak reaches it,
-// so failing daily only trains everyone to ignore this job. Those scenarios are
-// declared in E2E_DRIFT_KNOWN_BLOCKED and reported as an uncovered gap instead -
-// they are covered by running the probe off a CI IP (see e2e/README.md).
+// One class of blindness is NOT actionable: a wall no fixture URL or probe tweak
+// gets past, because it answers the runner's datacenter IP. Those scenarios are
+// declared in E2E_DRIFT_KNOWN_BLOCKED, reported as an uncovered gap, and probed
+// off a CI IP instead (see e2e/README.md).
 //
 // Usage: node scripts/track-selector-drift-skips.mjs <playwright.json> <state.json>
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -24,8 +22,8 @@ import { forEachTest } from "./lib/playwright-report.mjs";
 const reportFile = process.argv[2] ?? "test-results/selector-drift.json";
 const stateFile = process.argv[3] ?? ".selector-drift-state/counters.json";
 const threshold = Number(process.env.E2E_DRIFT_MAX_CONSECUTIVE_SKIPS ?? 5);
-// Comma-separated scenario-title prefixes (the site id, e.g. `reddit:`) this
-// runner is known to be unable to reach at all.
+// Comma-separated title prefixes this runner cannot reach: a whole site
+// (`reddit:`) or a single scenario (`x: X profile feed`).
 const knownBlocked = (process.env.E2E_DRIFT_KNOWN_BLOCKED ?? "")
   .split(",")
   .map((entry) => entry.trim())
@@ -69,8 +67,16 @@ for (const [title, reason] of seen) {
     uncovered.push(`${title} - ${reason}`);
     continue;
   }
-  if (listed && reason === null) stale.push(title);
-  counters[title] = reason !== null ? (counters[title] ?? 0) + 1 : 0;
+  if (listed && reason === null) {
+    // Clean runs count down: one pass through an intermittent wall is not the
+    // block lifting, so the exemption is stale only after `threshold` of them.
+    counters[title] = Math.min(counters[title] ?? 0, 0) - 1;
+    if (counters[title] <= -threshold) stale.push(title);
+    continue;
+  }
+  // The floor at 0: a counter the countdown left negative starts its skip streak
+  // at 1, instead of climbing out of the hole first.
+  counters[title] = reason !== null ? Math.max(counters[title] ?? 0, 0) + 1 : 0;
   if (counters[title] >= threshold) blind.push(`${title} - skipped ${counters[title]} runs in a row (last reason: ${reason})`);
 }
 
@@ -84,7 +90,7 @@ if (uncovered.length > 0) {
   for (const line of uncovered) console.log(`  ${line}`);
 }
 for (const title of stale) {
-  console.log(`selector-drift: "${title}" loaded fine - drop its prefix from E2E_DRIFT_KNOWN_BLOCKED so the gate covers it again.`);
+  console.log(`selector-drift: "${title}" loaded fine ${threshold} runs in a row - drop its prefix from E2E_DRIFT_KNOWN_BLOCKED so the gate covers it again.`);
 }
 
 if (blind.length > 0) {
