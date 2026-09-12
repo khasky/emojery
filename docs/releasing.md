@@ -80,7 +80,7 @@ Safari is built only here, by `pnpm zip:safari` — `zip:all` (what `pnpm check`
 
 The shipped bundles carry no `sourceMappingURL`, and `scripts/scan-extension-artifact.sh` fails the build if a `.map` file is ever left inside an artifact. The maps are still generated: `wxt.config.ts` builds with Vite's `sourcemap: "hidden"` (same output bytes, no trailing comment) and its `build:done` hook moves every map out to `.output/sourcemaps/<target>/<version>/` before the artifact is weighed, scanned or zipped. The release workflow packs that directory into `emojery-v<version>-sourcemaps.zip`.
 
-That archive is the only way back from a minified stack trace in a bug report to a source line, and only the archive for that exact version will resolve it — download the one matching the reporter's version, not the newest. It is a release asset rather than a `source-maps` branch on purpose: tens of megabytes of maps per release would sit in the git history permanently, and `mirror.yml` re-clones the whole repository once per mirror, every day.
+That archive is the only way back from a minified stack trace in a bug report to a source line, and only the archive for that exact version will resolve it — download the one matching the reporter's version, not the newest. It is a release asset rather than a `source-maps` branch on purpose: tens of megabytes of maps per release would sit in the git history permanently, and `mirror.yml` re-clones the whole repository on every push, and daily.
 
 ## Hotfixing a released version
 

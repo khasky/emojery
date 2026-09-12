@@ -127,7 +127,7 @@ jobs:
       # line, and it has to be the one for that exact version. It rides on the
       # release instead of a `source-maps` branch: tens of megabytes of maps per
       # release would otherwise land in the git history permanently, growing with
-      # every release, and mirror.yml re-clones the whole repository per mirror.
+      # every release, and mirror.yml re-clones the whole repository on every run.
       - name: Archive source maps
         shell: bash
         env:
