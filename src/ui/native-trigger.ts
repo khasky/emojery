@@ -351,8 +351,6 @@ export function stopFbPrewarm(point: PickerInsertionPoint): void {
   }, FB_PREWARM_DISMISS_DELAY_MS);
 }
 
-// Executor.
-
 interface NativeTriggerDeps {
   press: (el: HTMLElement) => void;
   pickFb: typeof pickFbReaction;

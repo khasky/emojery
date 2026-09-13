@@ -31,8 +31,6 @@ function metaContent(root: ParentNode, name: string): string | null {
   return el?.getAttribute("content") ?? null;
 }
 
-// GitHub
-
 // Repo-title containers that carry the visibility badge next to the repo name.
 const GITHUB_REPO_HEADER_SELECTORS = ["#repository-container-header", "#repo-title-component"];
 
@@ -67,8 +65,6 @@ function githubHeaderShowsPrivate(root: ParentNode): boolean {
   }
   return false;
 }
-
-// GitLab
 
 // GitLab renders a single visibility icon in the project-name heading:
 // `<button class="visibility-icon"><svg><use href="...#earth|#lock|#shield">`.
