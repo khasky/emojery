@@ -15,22 +15,21 @@ import {
   claimMountAnchor,
   clearAdjacentMountNodes,
   clearStaleAnchorMount,
+  destroyMount,
   dispatchVoteSync,
-  dropMount,
   hostElementOfMount,
   isCurrentMountPoint,
   mountedNode,
-  moveMountNode,
   pruneDisconnected,
   reconcileScanMounts,
   registerMountNode,
   removeMountNode,
   resetMountRegistryForTests,
-  setVoteListener,
+  reuseMountNode,
+  subscribeMount,
   teardownAllMounts,
-  WRAPPER_SPEC_ATTR,
+  wrapHost,
   wrapperSpecChanged,
-  wrapperSpecKey,
 } from "./mount-registry";
 import { clearPlacedTargets, detectRouteChange, markFirstPlacement, recordShownTarget, shownTargetCount } from "./mount-session";
 
@@ -200,13 +199,9 @@ describe("wrapperSpecChanged - rebuild the mount when the surface's wrapper diff
   }
 
   function wrappedMount(wrapper: NonNullable<PickerInsertionPoint["wrapper"]>): HTMLElement {
-    const el = document.createElement(wrapper.tagName);
-    el.style.cssText = wrapper.style ?? "";
-    el.setAttribute(WRAPPER_SPEC_ATTR, wrapperSpecKey(wrapper));
     const host = document.createElement("span");
     host.className = HOST_CLASS;
-    el.appendChild(host);
-    return el;
+    return wrapHost(host, wrapper) as HTMLElement;
   }
 
   it("keeps a mount whose wrapper still matches the binding", () => {
@@ -240,17 +235,19 @@ function pointAt(anchor: HTMLElement, position: PickerInsertionPoint["position"]
   return { anchor, position, target: TARGET_X1 };
 }
 
-describe("moveMountNode - idempotent re-positioning", () => {
+describe("reuseMountNode - idempotent re-positioning", () => {
+  const KEY = tk("x:1");
+
   it("places and keeps a node after its anchor without duplicating", () => {
     const anchor = document.createElement("div");
     document.body.append(anchor);
     const node = makeHost();
     const p = pointAt(anchor, "after");
 
-    moveMountNode(node, p);
+    reuseMountNode(node, p, KEY);
     expect(anchor.nextSibling).toBe(node);
 
-    moveMountNode(node, p); // already in place - must not detach/re-append
+    reuseMountNode(node, p, KEY); // already in place - must not detach/re-append
     expect(anchor.nextSibling).toBe(node);
     expect(document.querySelectorAll(`.${HOST_CLASS}`)).toHaveLength(1);
   });
@@ -259,11 +256,11 @@ describe("moveMountNode - idempotent re-positioning", () => {
     const anchor = document.createElement("div");
     document.body.append(anchor);
     const before = makeHost();
-    moveMountNode(before, pointAt(anchor, "before"));
+    reuseMountNode(before, pointAt(anchor, "before"), KEY);
     expect(anchor.previousSibling).toBe(before);
 
     const inner = makeHost();
-    moveMountNode(inner, pointAt(anchor, "append"));
+    reuseMountNode(inner, pointAt(anchor, "append"), KEY);
     expect(inner.parentNode).toBe(anchor);
   });
 
@@ -272,8 +269,8 @@ describe("moveMountNode - idempotent re-positioning", () => {
     const newAnchor = document.createElement("div");
     document.body.append(oldAnchor, newAnchor);
     const node = makeHost();
-    moveMountNode(node, pointAt(oldAnchor, "after"));
-    moveMountNode(node, pointAt(newAnchor, "after"));
+    reuseMountNode(node, pointAt(oldAnchor, "after"), KEY);
+    reuseMountNode(node, pointAt(newAnchor, "after"), KEY);
     expect(newAnchor.nextSibling).toBe(node);
     expect(oldAnchor.nextSibling).not.toBe(node);
   });
@@ -433,8 +430,8 @@ describe("dispatchVoteSync - routes a broadcast to its target's listener only", 
   it("invokes the matching listener and nobody else", () => {
     const mine = vi.fn();
     const other = vi.fn();
-    setVoteListener(tk("x:1"), mine);
-    setVoteListener(tk("x:2"), other);
+    subscribeMount(tk("x:1"), TARGET_X1, mine);
+    subscribeMount(tk("x:2"), { ...TARGET_X1, targetId: "2" }, other);
 
     const broadcast = { target: TARGET_X1, reaction: "❤️" as const, prevReaction: null };
     dispatchVoteSync(broadcast);
@@ -450,7 +447,7 @@ describe("dispatchVoteSync - routes a broadcast to its target's listener only", 
 // One live mount spans several registries. Dropping it from only one of them
 // left the others holding the key - which is exactly what callers used to do,
 // because the all-collections teardown was module-private.
-describe("dropMount - a mount leaves every registry at once", () => {
+describe("destroyMount - a mount leaves every registry at once", () => {
   afterEach(() => {
     resetMountRegistryForTests();
   });
@@ -458,10 +455,11 @@ describe("dropMount - a mount leaves every registry at once", () => {
   it("takes the vote listener with the node, so a later broadcast reaches nobody", () => {
     const key = tk("x:1");
     const cb = vi.fn();
-    registerMountNode(key, makeHost());
-    setVoteListener(key, cb);
+    const node = makeHost();
+    registerMountNode(key, node);
+    subscribeMount(key, TARGET_X1, cb);
 
-    dropMount(key);
+    destroyMount(key, node);
 
     expect(mountedNode(key)).toBeUndefined();
     dispatchVoteSync({ target: TARGET_X1, reaction: "❤️", prevReaction: null });
@@ -472,10 +470,11 @@ describe("dropMount - a mount leaves every registry at once", () => {
     const key = tk("x:1");
     const anchor = document.createElement("div");
     document.body.appendChild(anchor);
-    registerMountNode(key, makeHost());
+    const node = makeHost();
+    registerMountNode(key, node);
     claimMountAnchor(anchor, key);
 
-    dropMount(key);
+    destroyMount(key, node);
 
     expect(anchor.hasAttribute(MOUNT_ATTR)).toBe(false);
     anchor.remove();

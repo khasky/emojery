@@ -145,20 +145,14 @@ function linkBelongsToRowPost(link: Element, row: HTMLElement): boolean {
 }
 
 function findActionRow(candidate: HTMLElement): ActionRow | null {
+  // The icon-strip defaults fit: a real Threads post action row exposes at least
+  // Like, Comment and Repost (Share too), and the 3-slot floor rejects the post
+  // HEADER cluster - the pencil (Edit) + "..." (More) pair - which the
+  // locale-independent catch-all `svg[role="img"][aria-label]` scan would
+  // otherwise treat as an action row, mounting a stray trigger in the top-right
+  // of every post.
   const visual = findVisualActionSlot(candidate, {
-    maxDepth: ROW_WALK_DEPTH,
-    // A real Threads post action row always exposes at least Like, Comment and
-    // Repost (Share too), so require >=3 icon slots. This rejects the post HEADER
-    // cluster - the pencil (Edit) + "..." (More) pair sits in a 2-slot row, which
-    // the locale-independent catch-all `svg[role="img"][aria-label]` scan would
-    // otherwise treat as an action row, mounting a stray trigger in the
-    // top-right of every post.
-    minSlots: 3,
-    maxSlots: 5,
     minRowWidth: 48,
-    maxRowHeight: 96,
-    minSlotWidth: 16,
-    minSlotHeight: 16,
     controlPredicate: isActionButton,
     boundary: isSearchBoundary,
   });

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // The value-level half of mount-style.ts: given lengths, colours and a style record -
-// never an element, never a live box - decide the value to stamp on the host. It sits
-// apart for the same reason mount-placement.ts does: mount-style.ts is
-// coverage-excluded because its real work is reading a live page's computed styles, and
-// excluding a whole file hides whatever pure logic sits in it. This module IS measured.
+// never an element, never a live box - decide the value to stamp on the host. Pure
+// arithmetic next to a module that reads a live page's computed styles: the split is
+// the boundary between the two, and it is what lets this half be unit-tested and
+// measured while mount-style.ts is coverage-excluded.
 //
 // The line to hold when adding here: a helper qualifies only if it takes plain values.
 // The moment it needs `getComputedStyle`, a rect or a DOM walk, it belongs next door.

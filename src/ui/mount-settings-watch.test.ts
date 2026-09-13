@@ -12,7 +12,7 @@ import { DEFAULT_SETTINGS, type Settings } from "../shared/storage";
 import { type ChromeShimHandle, installChromeShim } from "../test/chrome-shim";
 import { tk } from "../test/target-key";
 import { watchSettings } from "./mount";
-import { mountedCount, registerMountNode, resetMountRegistryForTests } from "./mount-registry";
+import { mountedNode, registerMountNode, resetMountRegistryForTests } from "./mount-registry";
 import { ANIMATE_ATTR } from "./ring-spin";
 import { registerThemedHost } from "./themed-hosts";
 
@@ -100,6 +100,6 @@ describe("watchSettings", () => {
     emitSettingsChange(shim, settingsWith({ enabled: true }), settingsWith({ enabled: false }));
 
     expect(host.isConnected).toBe(false);
-    expect(mountedCount()).toBe(0);
+    expect(mountedNode(tk("github:disable"))).toBeUndefined();
   });
 });

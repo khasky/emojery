@@ -50,11 +50,6 @@ export function mountedNode(key: TargetKey): Node | undefined {
   return mountedTargets.get(key);
 }
 
-/** Test seam: how many mounts the registry holds; no production caller. */
-export function mountedCount(): number {
-  return mountedTargets.size;
-}
-
 /** Record the node just inserted for `key`. The rest of the mount's entries are
  *  registered as the render reaches them (subscribeMount /
  *  setRefreshCallback); `dropMount` clears all of them together. */
@@ -71,9 +66,7 @@ export function subscribeMount(key: TargetKey, target: PickerInsertionPoint["tar
   refreshTargets.set(key, target);
 }
 
-/** Half of `subscribeMount`, exported for the suites that register a listener without a
- *  target; no production caller reaches past `subscribeMount`. */
-export function setVoteListener(key: TargetKey, listener: (b: VoteBroadcast) => void): void {
+function setVoteListener(key: TargetKey, listener: (b: VoteBroadcast) => void): void {
   voteListeners.set(key, listener);
 }
 
@@ -198,9 +191,8 @@ export function claimMountAnchor(anchor: HTMLElement, key: TargetKey): void {
  *  collection strands the listener, the refresh callback or the anchor's `MOUNT_ATTR` claim,
  *  and a stale callback keeps taking broadcasts for a picker that is gone. Does NOT touch the
  *  DOM and does not unmount the picker - every caller that has the node pairs it with
- *  `removeMountNode` through `destroyMount` below, detached node included. Exported only
- *  for the suites that assert the registry half on its own. */
-export function dropMount(key: TargetKey): void {
+ *  `removeMountNode` through `destroyMount` below, detached node included. */
+function dropMount(key: TargetKey): void {
   mountedTargets.delete(key);
   voteListeners.delete(key);
   refreshCallbacks.delete(key);
@@ -323,11 +315,10 @@ function isMountNode(node: Node): boolean {
 // The wrapper spec a mount was built with, stamped verbatim (see wrapHost below).
 // Compared as the RAW spec string - the browser-normalized style.cssText formats
 // differently and would flag a phantom change on every scan (a permanent remount loop).
-// The mark and its key are written and read inside this module; both are exported so the
-// suites can assert the stamp without reaching into a rendered mount.
-export const WRAPPER_SPEC_ATTR = "data-khasky-emojery-wrapper-spec";
+// The mark and its key are written (wrapHost) and read (wrapperSpecChanged) here only.
+const WRAPPER_SPEC_ATTR = "data-khasky-emojery-wrapper-spec";
 
-export function wrapperSpecKey(wrapper: NonNullable<PickerInsertionPoint["wrapper"]>): string {
+function wrapperSpecKey(wrapper: NonNullable<PickerInsertionPoint["wrapper"]>): string {
   return [wrapper.tagName, wrapper.className ?? "", wrapper.style ?? ""].join("|");
 }
 
@@ -367,9 +358,8 @@ export function reuseMountNode(mounted: Node, point: PickerInsertionPoint, key: 
   clearAdjacentMountNodes(point, mounted);
 }
 
-// The DOM half of `reuseMountNode`, its only production caller; exported so the suites can
-// assert the move without also claiming the anchor.
-export function moveMountNode(node: Node, point: PickerInsertionPoint): void {
+// The DOM half of `reuseMountNode`.
+function moveMountNode(node: Node, point: PickerInsertionPoint): void {
   switch (point.position) {
     case "before":
       if (point.anchor.previousSibling !== node) {

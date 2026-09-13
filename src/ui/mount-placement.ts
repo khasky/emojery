@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // Which of an insertion point's two declared placements is live, and whether a
-// mounted host is still on that one. Kept out of mount.ts so it is MEASURED:
-// mount.ts is excluded from coverage wholesale (its live-page orchestration is
-// e2e's to cover), and at file granularity that exclusion swallowed this
-// struct-level decision logic too - the part that needs nothing but a
-// PickerInsertionPoint and a generic element.
+// mounted host is still on that one. Decision logic over a PickerInsertionPoint
+// and a generic element, with no mount lifecycle in it - which is also why it
+// is unit-tested and measured here while mount.ts (live-page orchestration,
+// e2e's to cover) is coverage-excluded.
 import type { PickerInsertionPoint } from "../shared/adapter";
 import { PLACEMENT_ATTR } from "../shared/dom";
 import { hostElementOfMount } from "./mount-registry";

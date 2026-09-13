@@ -16,7 +16,7 @@ import { type CachedTarget, getCachedCounts, getOwnReaction, setCachedCounts, ta
 import { maybePlayPublicReactionIntro } from "./animations";
 import { sendMessage } from "./messaging";
 import { clearCachedCountsPrime, hydrateDeferredCounts, loadInitial, pickAggregateCounts, primeCachedCounts, refreshTarget } from "./mount-counts";
-import { dropMount, setRefreshCallback } from "./mount-registry";
+import { resetMountRegistryForTests, setRefreshCallback } from "./mount-registry";
 
 const point: PickerInsertionPoint = {
   anchor: document.createElement("div"),
@@ -34,7 +34,7 @@ beforeEach(() => {
 
 afterEach(() => {
   // The registry is real module state - leave no key behind.
-  dropMount(key);
+  resetMountRegistryForTests();
   vi.useRealTimers();
 });
 

@@ -15,6 +15,12 @@ export interface VisualActionSlot {
   slots: HTMLElement[];
 }
 
+// The defaults describe an ICON action strip (Instagram, Threads): 3 to 5 icon
+// slots of at least 16px in a row no taller than 96px, up to 10 ancestors above the
+// control. 3 is the floor that keeps a 2-button header cluster (edit + more) from
+// reading as a row. A wide labelled row (Facebook's Like / Comment / Share) sets its
+// own shape; the per-site floors that differ (a row's minimum width, what counts as
+// a control, where the walk stops) stay with the adapter.
 interface VisualActionRowOptions {
   maxDepth?: number;
   minSlots?: number;
@@ -28,6 +34,8 @@ interface VisualActionRowOptions {
   controlPredicate?: (el: HTMLElement) => boolean;
   boundary?: (el: HTMLElement) => boolean;
 }
+
+const ICON_STRIP = { maxDepth: 10, minSlots: 3, maxSlots: 5, maxRowHeight: 96, minSlotWidth: 16, minSlotHeight: 16 } as const;
 
 // Wider than the same-named constant in action-labels.ts, which omits `a[href]`.
 // Deliberate, not drift: slot discovery has to accept a link, because GitHub's Star IS
@@ -92,7 +100,7 @@ export function findVisualActionSlot(control: HTMLElement, options: VisualAction
   // so the row geometry and slot index stay correct.
   if (!isRenderableInPageLayout(control)) return null;
 
-  const maxDepth = options.maxDepth ?? 8;
+  const maxDepth = options.maxDepth ?? ICON_STRIP.maxDepth;
   let branch: HTMLElement | null = control;
   for (let depth = 0; depth < maxDepth && branch; depth += 1) {
     const row: HTMLElement | null = branch.parentElement;
@@ -117,7 +125,7 @@ export function findVisualActionSlot(control: HTMLElement, options: VisualAction
 function collectVisualActionSlots(row: HTMLElement, options: VisualActionRowOptions): Array<{ slot: HTMLElement; control: HTMLElement }> {
   const rowRect = row.getBoundingClientRect();
   if (rowRect.width < (options.minRowWidth ?? 0)) return [];
-  if (options.maxRowHeight && rowRect.height > options.maxRowHeight) return [];
+  if (rowRect.height > (options.maxRowHeight ?? ICON_STRIP.maxRowHeight)) return [];
 
   const out: Array<{
     slot: HTMLElement;
@@ -146,13 +154,13 @@ function collectVisualActionSlots(row: HTMLElement, options: VisualActionRowOpti
     const controlRect = control.getBoundingClientRect();
     const width = Math.max(slotRect.width, controlRect.width);
     const height = Math.max(slotRect.height, controlRect.height);
-    if (width < (options.minSlotWidth ?? 0)) continue;
-    if (height < (options.minSlotHeight ?? 0)) continue;
+    if (width < (options.minSlotWidth ?? ICON_STRIP.minSlotWidth)) continue;
+    if (height < (options.minSlotHeight ?? ICON_STRIP.minSlotHeight)) continue;
     out.push({ slot: child, control, width, hidden: false });
   }
 
-  const minSlots = options.minSlots ?? 2;
-  const maxSlots = options.maxSlots ?? Number.POSITIVE_INFINITY;
+  const minSlots = options.minSlots ?? ICON_STRIP.minSlots;
+  const maxSlots = options.maxSlots ?? ICON_STRIP.maxSlots;
   if (out.length < minSlots || out.length > maxSlots) return [];
 
   const maxWidthVariance = options.maxWidthVariance;

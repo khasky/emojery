@@ -217,11 +217,11 @@ describe("findVisualActionSlot", () => {
     it("drops slots under minSlotWidth / minSlotHeight, which can starve the row below minSlots", () => {
       layoutPage();
       const { buttons } = buildRow({ widths: [40, 40, 4] });
-      // The 4px slot is filtered out, leaving 2 - still a row.
-      expect(findVisualActionSlot(buttons[0]!, { minSlotWidth: 10 })?.slots).toHaveLength(2);
+      // The 4px slot is filtered out, leaving 2 - still a row at a 2-slot floor.
+      expect(findVisualActionSlot(buttons[0]!, { minSlots: 2, minSlotWidth: 10 })?.slots).toHaveLength(2);
       // Raising the floor starves it below minSlots.
-      expect(findVisualActionSlot(buttons[0]!, { minSlotWidth: 60 })).toBeNull();
-      expect(findVisualActionSlot(buttons[0]!, { minSlotHeight: 40 })).toBeNull();
+      expect(findVisualActionSlot(buttons[0]!, { minSlots: 2, minSlotWidth: 60 })).toBeNull();
+      expect(findVisualActionSlot(buttons[0]!, { minSlots: 2, minSlotHeight: 40 })).toBeNull();
     });
   });
 

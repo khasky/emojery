@@ -309,13 +309,7 @@ function findActionRowCandidate(likeButton: HTMLElement): ActionRow | null {
   // pre-hydration mount. The tight geometry gates can't match a reel feed's whole
   // container, so the off-screen-neighbour problem below doesn't apply here.
   const visual = findVisualActionSlot(likeButton, {
-    maxDepth: ROW_WALK_DEPTH,
-    minSlots: 3,
-    maxSlots: 5,
     minRowWidth: 60,
-    maxRowHeight: 96,
-    minSlotWidth: 16,
-    minSlotHeight: 16,
     controlSelector: '[role="button"]',
     controlPredicate: isIconActionControl,
     boundary: isActionSearchBoundary,

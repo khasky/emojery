@@ -2,7 +2,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { VoteSyncMessage } from "../shared/messages";
 import { targetKey } from "../shared/storage";
-import { resetMountRegistryForTests, setVoteListener } from "./mount-registry";
+import { resetMountRegistryForTests, subscribeMount } from "./mount-registry";
 import { handleVoteSyncMessage } from "./vote-sync";
 
 const RUNTIME_ID = "our-extension-id";
@@ -28,7 +28,7 @@ afterEach(() => {
 describe("handleVoteSyncMessage - cross-tab vote sync trust gate", () => {
   it("dispatches a voteSync from our own extension to the target's picker", () => {
     const cb = vi.fn();
-    setVoteListener(KEY, cb);
+    subscribeMount(KEY, target, cb);
 
     const handled = handleVoteSyncMessage(voteSync("👍"), sender(RUNTIME_ID), RUNTIME_ID);
 
@@ -39,7 +39,7 @@ describe("handleVoteSyncMessage - cross-tab vote sync trust gate", () => {
 
   it("ignores a voteSync whose sender is NOT our extension (spoof attempt)", () => {
     const cb = vi.fn();
-    setVoteListener(KEY, cb);
+    subscribeMount(KEY, target, cb);
 
     expect(handleVoteSyncMessage(voteSync("😡"), sender("evil-extension"), RUNTIME_ID)).toBe(false);
     expect(handleVoteSyncMessage(voteSync("😡"), sender(undefined), RUNTIME_ID)).toBe(false);
@@ -49,7 +49,7 @@ describe("handleVoteSyncMessage - cross-tab vote sync trust gate", () => {
 
   it("ignores non-voteSync and malformed messages without throwing", () => {
     const cb = vi.fn();
-    setVoteListener(KEY, cb);
+    subscribeMount(KEY, target, cb);
 
     expect(handleVoteSyncMessage({ type: "vote" }, sender(RUNTIME_ID), RUNTIME_ID)).toBe(false);
     expect(handleVoteSyncMessage(null, sender(RUNTIME_ID), RUNTIME_ID)).toBe(false);
@@ -61,7 +61,7 @@ describe("handleVoteSyncMessage - cross-tab vote sync trust gate", () => {
 
   it("accepts the unreact shape (null reaction) for a known target", () => {
     const cb = vi.fn();
-    setVoteListener(KEY, cb);
+    subscribeMount(KEY, target, cb);
 
     expect(handleVoteSyncMessage(voteSync(null, "👍"), sender(RUNTIME_ID), RUNTIME_ID)).toBe(true);
     expect(cb).toHaveBeenCalledWith({ target, reaction: null, prevReaction: "👍" });
