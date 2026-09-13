@@ -121,8 +121,8 @@ jobs:
         shell: bash
         run: bash scripts/scan-extension-artifact.sh .output/chrome-mv3
 
-      # The MV2 bundle is signed into an .xpi and shipped to AMO by release.yml,
-      # so it gates on exactly the same rules as the MV3 one.
+      # The MV2 bundle is the AMO upload, so it gates on exactly the same rules as
+      # the MV3 one.
       - name: Scan generated Firefox extension files
         shell: bash
         run: bash scripts/scan-extension-artifact.sh .output/firefox-mv2

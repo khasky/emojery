@@ -172,6 +172,13 @@ gh api -X POST repos/<owner>/<repo>/rulesets --input - <<'EOF'
 EOF
 ```
 
-## Signed Firefox `.xpi` (optional, self-distribution)
+## Submitting to the stores
 
-The workflow can also attach a signed, directly-installable Firefox `.xpi`. It stays dormant until 2 repo secrets exist — `AMO_JWT_ISSUER` and `AMO_JWT_SECRET` (an AMO API key pair from <https://addons.mozilla.org/developers/addon/api/key/>). Without them the signing steps skip and the release still succeeds. With them set, `web-ext sign --channel=unlisted` signs `.output/firefox-mv2` and attaches `emojery-v<version>-firefox-mv2.xpi`. Each version signs once — re-signing the same tag returns HTTP 409.
+The workflow builds and attaches the packages; uploading them is manual, one dashboard each. The listing copy, permission justifications and reviewer notes live in [store-listing-copy.md](store-listing-copy.md).
+
+| Package | Dashboard |
+| --- | --- |
+| `emojery-v<version>-chrome-mv3.zip` | [Chrome Web Store](https://chrome.google.com/webstore/devconsole) and [Edge Add-ons](https://partner.microsoft.com/dashboard/microsoftedge) — the same zip goes to both |
+| `emojery-v<version>-firefox-mv2.zip`, with `emojery-v<version>-sources.zip` as the review copy | [AMO](https://addons.mozilla.org/developers/addons), listed channel |
+
+Each store updates installed copies from its own endpoint, so no build carries an `update_url` — Firefox finds the new version through AMO by the id in `browser_specific_settings.gecko`, and a manifest submitted to AMO may not carry one at all.

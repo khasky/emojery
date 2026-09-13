@@ -5,11 +5,11 @@
 
 [[IgnoredVulns]]
 id = "GHSA-w3rx-r6r6-pgpr"
-reason = "image-size ICNS DoS via web-ext>addons-linter: dev-only, parses this repo's own icon assets during `web-ext sign`; no patched release on npm. Accepted 2026-08-07, revisit 2026-11."
+reason = "image-size ICNS DoS via web-ext>addons-linter: dev-only, parses this repo's own icon assets during `web-ext lint`; no patched release on npm. Accepted 2026-08-07, revisit 2026-11."
 
 [[IgnoredVulns]]
 id = "GHSA-5p2g-fcmc-qvqq"
-reason = "image-size JXL/HEIF DoS via web-ext>addons-linter: dev-only, parses this repo's own icon assets during `web-ext sign`; no patched release on npm. Accepted 2026-08-07, revisit 2026-11."
+reason = "image-size JXL/HEIF DoS via web-ext>addons-linter: dev-only, parses this repo's own icon assets during `web-ext lint`; no patched release on npm. Accepted 2026-08-07, revisit 2026-11."
 
 [[IgnoredVulns]]
 id = "GHSA-vwc7-r8mq-g2x9"

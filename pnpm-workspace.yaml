@@ -39,7 +39,7 @@ allowBuilds:
 #
 # image-size <=2.0.2 (via web-ext>addons-linter): DoS via crafted ICNS/JXL/HEIF.
 # Dev-only - addons-linter parses this repo's own icon assets during
-# `web-ext sign`, so there is no attacker-controlled input. The advisories name
+# `web-ext lint`, so there is no attacker-controlled input. The advisories name
 # >=2.0.3 as patched but no such version exists on npm; drop both entries (and
 # the osv-scanner.toml ones) once a fixed release ships and resolves here.
 # Revisit 2026-11: re-check npm for a patched image-size, or re-accept with a new
