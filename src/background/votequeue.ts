@@ -39,6 +39,10 @@ export interface QueuedVote {
   optimisticHistoryId?: string;
   /** Page title at click time - stored device-locally for the History list. */
   title?: string;
+  /** Idempotency key sent with every attempt. It must stay identical across retries, 
+   * and the row id is an autoincrement that restarts at 1 whenever the store is recreated. 
+   * Missing on pre-field rows, which fall back to the id+ts derivation at send time. */
+  nonce?: string;
   /** Epoch-ms before which this vote's own retry must not run. Missing (legacy
    * rows and fresh enqueues) means eligible now. Per-vote so one failing vote
    * backs itself off without blocking the rest of the queue. */

@@ -84,6 +84,7 @@ export async function enqueueVote(record: { target: TargetRef; reaction: Reactio
       reaction: record.reaction,
       ts: record.ts,
       attempts: 0,
+      nonce: randomId(),
       userId: auth.userId,
       analyticsConsent,
       lang,
@@ -303,7 +304,9 @@ async function drainQueuedVotes(): Promise<void> {
           ts: vote.ts,
           analyticsConsent,
           ...(lang ? { lang } : {}),
-          nonce: `${vote.id}:${vote.ts}`,
+          // Stable across retries either way. The stored key for rows written since
+          // enqueue started stamping one, the id+ts derivation for older rows.
+          nonce: vote.nonce ?? `${vote.id}:${vote.ts}`,
         },
         keepalive: true,
       });

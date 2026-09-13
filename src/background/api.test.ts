@@ -94,6 +94,7 @@ describe("enqueueVote", () => {
       reaction: "❤️",
       ts: 100,
       attempts: 0,
+      nonce: expect.any(String),
       userId: "u1",
       analyticsConsent: true,
       lang: "uk-UA",
@@ -111,6 +112,7 @@ describe("enqueueVote", () => {
       reaction: "❤️",
       ts: 100,
       attempts: 0,
+      nonce: expect.any(String),
       userId: "u1",
       analyticsConsent: true,
       lang: "uk-UA",
@@ -128,6 +130,7 @@ describe("enqueueVote", () => {
       reaction: null,
       ts: 100,
       attempts: 0,
+      nonce: expect.any(String),
       userId: "u1",
       analyticsConsent: true,
       lang: "uk-UA",
@@ -152,6 +155,7 @@ describe("enqueueVote", () => {
       reaction: "❤️",
       ts: 100,
       attempts: 0,
+      nonce: expect.any(String),
       userId: "u1",
       analyticsConsent: false,
       historyReaction: "❤️",
@@ -159,6 +163,19 @@ describe("enqueueVote", () => {
       optimisticHistoryId: expect.any(String),
     });
     expectHistoryPushedWithEnqueuedId("❤️", "add");
+  });
+
+  it("stamps each queued vote with its own nonce", async () => {
+    // The nonce must not be derived from the row id at send time: IndexedDB hands
+    // out ids from 1 again whenever the store is recreated, which would replay a
+    // key the server has already consumed.
+    await enqueueVote({ target, reaction: "❤️", prevReaction: null, ts: 100 });
+    await enqueueVote({ target, reaction: "👍", prevReaction: null, ts: 100 });
+
+    const nonces = vi.mocked(enqueue).mock.calls.map(([vote]) => (vote as { nonce: string }).nonce);
+    expect(nonces).toHaveLength(2);
+    expect(nonces[0]).toEqual(expect.any(String));
+    expect(nonces[0]).not.toBe(nonces[1]);
   });
 
   it("drops the vote instead of queueing it unowned when signed out", async () => {
@@ -192,6 +209,7 @@ describe("enqueueVote", () => {
       reaction: "❤️",
       ts: 100,
       attempts: 0,
+      nonce: expect.any(String),
       userId: "u1",
       analyticsConsent: false,
       historyReaction: "❤️",
@@ -237,6 +255,18 @@ describe("flushVotes", () => {
     expect(init.headers).toMatchObject({ "accept-language": "uk-UA" });
     expect(deleteById).toHaveBeenCalledWith(7);
   }
+
+  it("sends the nonce stored on the queued vote, not one derived from its row id", async () => {
+    vi.mocked(peekNextEligible)
+      .mockResolvedValueOnce(queued({ nonce: "queued-nonce" }))
+      .mockResolvedValueOnce(undefined);
+    const fetchMock = stubFetchJson(200, { accepted: true });
+
+    await flushVotes();
+
+    const [, init] = lastFetchCall(fetchMock);
+    expect(JSON.parse(init.body as string)).toMatchObject({ nonce: "queued-nonce" });
+  });
 
   it("sends opt-out votes without JSON language fallback", async () => {
     vi.mocked(peekNextEligible)
