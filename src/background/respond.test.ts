@@ -6,7 +6,7 @@ vi.mock("./debug", () => ({ logBackgroundError: vi.fn() }));
 
 import type { RuntimeResponse } from "../shared/messages";
 import { getAuth } from "./identity";
-import { errorResponse, respondAuthed } from "./respond";
+import { errorResponse, respondAuthed, respondWith } from "./respond";
 
 const EMPTY: RuntimeResponse = { type: "history:stats", stats: { total: 0, byEmoji: {}, bySite: {} }, authed: false };
 
@@ -49,6 +49,33 @@ describe("respondAuthed", () => {
     );
 
     await expect(settled).resolves.toEqual({ type: "error", code: "unavailable", message: "operation failed" });
+  });
+});
+
+describe("respondWith", () => {
+  it("answers what the work resolves to", async () => {
+    const { sendResponse, settled } = captureResponse();
+    respondWith(sendResponse, "auth:delete", async () => ({ type: "ok" }));
+    await expect(settled).resolves.toEqual({ type: "ok" });
+  });
+
+  it("answers an error for a rejection, classified by the caller when it can", async () => {
+    const plain = captureResponse();
+    respondWith(plain.sendResponse, "auth:delete", async () => {
+      throw new Error("boom");
+    });
+    await expect(plain.settled).resolves.toEqual({ type: "error", code: "unavailable", message: "operation failed" });
+
+    const classified = captureResponse();
+    respondWith(
+      classified.sendResponse,
+      "fetchCount",
+      async () => {
+        throw new Error("http 429");
+      },
+      () => "rate_limited",
+    );
+    await expect(classified.settled).resolves.toEqual({ type: "error", code: "rate_limited", message: "rate limited" });
   });
 });
 

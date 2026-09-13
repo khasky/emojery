@@ -23,18 +23,27 @@ export function errorResponse(code: RuntimeErrorCode, scope: string, cause?: unk
   return { type: "error", code, message: ERROR_MESSAGES[code] };
 }
 
+type SendResponse = (response: RuntimeResponse) => void;
+
+/**
+ * Answer with whatever `work` resolves to; a rejection answers `error` under
+ * `scope`, classified by `classify` (every failure is `unavailable` unless the
+ * caller can tell more, as the count read does with apiErrorCode).
+ */
+export function respondWith(sendResponse: SendResponse, scope: string, work: () => Promise<RuntimeResponse>, classify: (error: unknown) => RuntimeErrorCode = () => "unavailable"): void {
+  work()
+    .then(sendResponse)
+    .catch((error: unknown) => sendResponse(errorResponse(classify(error), scope, error)));
+}
+
 /**
  * Run `work` under the signed-in account. A signed-out session answers with the
  * caller's empty payload (`authed: false`); a FAILED one answers `error`, so the
  * popup shows "could not load" rather than a sign-in prompt to a signed-in user.
  */
-export function respondAuthed(sendResponse: (response: RuntimeResponse) => void, emptyResponse: RuntimeResponse, work: (userId: string) => Promise<RuntimeResponse>, scope: string): void {
-  (async () => {
+export function respondAuthed(sendResponse: SendResponse, emptyResponse: RuntimeResponse, work: (userId: string) => Promise<RuntimeResponse>, scope: string): void {
+  respondWith(sendResponse, scope, async () => {
     const auth = await getAuth();
-    if (!auth) {
-      sendResponse(emptyResponse);
-      return;
-    }
-    sendResponse(await work(auth.userId));
-  })().catch((error: unknown) => sendResponse(errorResponse("unavailable", scope, error)));
+    return auth ? work(auth.userId) : emptyResponse;
+  });
 }

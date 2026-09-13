@@ -19,7 +19,7 @@ import { exportHistory, getHistoryPage, getHistoryStats, importHistory } from ".
 import { clearAuth, deleteAccount, getAuth, requestOtp, revokeSessionServerSide, verifyOtp } from "./identity";
 import { isExtensionPageSender, parseRuntimeMessage } from "./message-guard";
 import { reportProblem } from "./reports";
-import { errorResponse, respondAuthed } from "./respond";
+import { errorResponse, respondAuthed, respondWith } from "./respond";
 import { setInjectedBadge } from "./toolbar-badge";
 import { broadcastVoteDelta } from "./vote-sync";
 import { listQueuedVotes, VOTE_QUEUE_MAX } from "./votequeue";
@@ -68,7 +68,7 @@ const HANDLERS: HandlerTable = {
   },
 
   vote: (msg, { sender, sendResponse }) => {
-    (async () => {
+    respondWith(sendResponse, "vote", async () => {
       const queued = await enqueueVote(
         defined({
           target: msg.target,
@@ -82,10 +82,7 @@ const HANDLERS: HandlerTable = {
       // A DROPPED vote (signed out between the tab's auth gate and this
       // message) answers "error", not "ok": on "ok" the sending tab keeps an
       // optimistic reaction the server will never see.
-      if (!queued) {
-        sendResponse(errorResponse("unavailable", "vote"));
-        return;
-      }
+      if (!queued) return errorResponse("unavailable", "vote");
       // Only after the vote is durably queued: the sending tab rolls its own
       // optimistic state back on the error response above, but that rollback
       // is local to that tab - a delta already fanned out to the others would
@@ -95,40 +92,35 @@ const HANDLERS: HandlerTable = {
         reaction: msg.reaction,
         prevReaction: msg.prevReaction,
       });
-      const ok: RuntimeResponse = { type: "ok" };
-      sendResponse(ok);
-    })().catch((error: unknown) => sendResponse(errorResponse("unavailable", "vote", error)));
+      return { type: "ok" };
+    });
     return ANSWER_LATER;
   },
 
   fetchCount: (msg, { sendResponse }) => {
     const requestedAt = Date.now();
-    fetchCount(msg.target, msg.limit)
-      .then(async (data) => {
+    respondWith(
+      sendResponse,
+      "fetchCount",
+      async () => {
+        const data = await fetchCount(msg.target, msg.limit);
         const key = targetKey(msg.target);
         const myReaction: string | null = data.myReaction ?? null;
         await setCachedCounts({ [key]: { value: data, myReaction } }, { skipIfCachedAfter: requestedAt });
-        const resp: RuntimeResponse = { type: "count", data };
-        sendResponse(resp);
-      })
-      .catch((error: unknown) => sendResponse(errorResponse(apiErrorCode(error), "fetchCount", error)));
+        return { type: "count", data };
+      },
+      apiErrorCode,
+    );
     return ANSWER_LATER;
   },
 
   report: (msg, { sendResponse }) => {
     // The response is deferred until the POST settles: answering "ok" before it landed showed
     // the user a sent report that never reached the server.
-    reportProblem(
-      defined({
-        site: msg.site,
-        host: msg.host,
-        url: msg.url,
-        targetCount: msg.targetCount,
-        note: msg.note,
-      }),
-    )
-      .then((sent) => sendResponse(sent ? { type: "ok" } : errorResponse("unavailable", "report")))
-      .catch((error: unknown) => sendResponse(errorResponse("unavailable", "report", error)));
+    respondWith(sendResponse, "report", async () => {
+      const sent = await reportProblem(defined({ site: msg.site, host: msg.host, url: msg.url, targetCount: msg.targetCount, note: msg.note }));
+      return sent ? { type: "ok" } : errorResponse("unavailable", "report");
+    });
     return ANSWER_LATER;
   },
 
@@ -169,17 +161,16 @@ const HANDLERS: HandlerTable = {
   },
 
   "queue:snapshot": (_msg, { sendResponse }) => {
-    Promise.all([listQueuedVotes(VOTE_QUEUE_MAX), getFlushState()])
-      .then(([votes, flush]) =>
-        sendResponse({
-          type: "queue:snapshot",
-          // Rebuilt field by field: a queued vote also carries its owner, the page
-          // title and the language, none of which the Debug tab prints.
-          votes: votes.map((vote) => defined({ id: vote.id, target: vote.target, reaction: vote.reaction, attempts: vote.attempts, nextAttemptAt: vote.nextAttemptAt })),
-          flush: { nextAttemptAt: flush.nextAttemptAt, consecutiveFailures: flush.consecutiveFailures },
-        }),
-      )
-      .catch((error: unknown) => sendResponse(errorResponse("unavailable", "queue:snapshot", error)));
+    respondWith(sendResponse, "queue:snapshot", async () => {
+      const [votes, flush] = await Promise.all([listQueuedVotes(VOTE_QUEUE_MAX), getFlushState()]);
+      return {
+        type: "queue:snapshot",
+        // Rebuilt field by field: a queued vote also carries its owner, the page
+        // title and the language, none of which the Debug tab prints.
+        votes: votes.map((vote) => defined({ id: vote.id, target: vote.target, reaction: vote.reaction, attempts: vote.attempts, nextAttemptAt: vote.nextAttemptAt })),
+        flush: { nextAttemptAt: flush.nextAttemptAt, consecutiveFailures: flush.consecutiveFailures },
+      };
+    });
     return ANSWER_LATER;
   },
 
@@ -213,16 +204,10 @@ const HANDLERS: HandlerTable = {
     // Content scripts only need the authed flag; the email stays on the
     // extension's own pages.
     const includeEmail = isExtensionPageSender(sender, extensionBaseUrl);
-    getAuth()
-      .then((auth) => {
-        sendResponse({
-          type: "auth:status",
-          authed: auth !== null,
-          userId: auth?.userId ?? null,
-          email: includeEmail ? (auth?.email ?? null) : null,
-        });
-      })
-      .catch((error: unknown) => sendResponse(errorResponse("unavailable", "auth:status", error)));
+    respondWith(sendResponse, "auth:status", async () => {
+      const auth = await getAuth();
+      return { type: "auth:status", authed: auth !== null, userId: auth?.userId ?? null, email: includeEmail ? (auth?.email ?? null) : null };
+    });
     return ANSWER_LATER;
   },
 
@@ -233,16 +218,14 @@ const HANDLERS: HandlerTable = {
   },
 
   "auth:returnToOrigin": (_msg, { sender, sendResponse }) => {
-    returnToAuthOrigin(sender.tab?.id)
-      .then((returned) => sendResponse(returned ? { type: "ok" } : errorResponse("unavailable", "auth:returnToOrigin")))
-      .catch((error: unknown) => sendResponse(errorResponse("unavailable", "auth:returnToOrigin", error)));
+    respondWith(sendResponse, "auth:returnToOrigin", async () => ((await returnToAuthOrigin(sender.tab?.id)) ? { type: "ok" } : errorResponse("unavailable", "auth:returnToOrigin")));
     return ANSWER_LATER;
   },
 
   "auth:signOut": (_msg, { sendResponse }) => {
     // Flush queued votes under the still-valid token first, so a vote cast just before sign-out
     // isn't dropped as "ownership changed" at the next flush.
-    (async () => {
+    respondWith(sendResponse, "auth:signOut", async () => {
       await flushOwnedVotesForSignOut().catch((error: unknown) => logBackgroundError("signOutFlush", error));
       // Then kill the session server-side, while the token is still readable. Best-effort: a
       // failure here must not strand the user signed in, so the local clear below runs either
@@ -253,42 +236,33 @@ const HANDLERS: HandlerTable = {
         if (!revoked) logBackgroundError("signOutRevoke", new Error("server-side session revocation failed"));
       }
       await clearAuth();
-    })()
-      .then(() => sendResponse({ type: "ok" }))
-      .catch((error: unknown) => sendResponse(errorResponse("unavailable", "auth:signOut", error)));
+      return { type: "ok" };
+    });
     return ANSWER_LATER;
   },
 
   "auth:delete": (_msg, { sendResponse }) => {
-    deleteAccount()
-      .then((ok) => sendResponse(ok ? { type: "ok" } : errorResponse("unavailable", "auth:delete")))
-      .catch((error: unknown) => sendResponse(errorResponse("unavailable", "auth:delete", error)));
+    respondWith(sendResponse, "auth:delete", async () => ((await deleteAccount()) ? { type: "ok" } : errorResponse("unavailable", "auth:delete")));
     return ANSWER_LATER;
   },
 
   "auth:requestOtp": (msg, { sendResponse }) => {
-    requestOtp(msg.email)
-      .then((res) => sendResponse({ type: "auth:otpRequested", ...res }))
-      .catch((error: unknown) => sendResponse(errorResponse("unavailable", "auth:requestOtp", error)));
+    respondWith(sendResponse, "auth:requestOtp", async () => ({ type: "auth:otpRequested", ...(await requestOtp(msg.email)) }));
     return ANSWER_LATER;
   },
 
   "auth:verifyOtp": (msg, { sendResponse }) => {
-    verifyOtp(msg.email, msg.code)
-      // Rebuilt field by field, never spread: keeps the response to exactly these
-      // fields even if VerifyOtpResult grows. The session lives in storage.local
-      // (read by getAuth) and is never forwarded here.
-      .then(async (res) => {
-        if (!res.ok) {
-          sendResponse({ type: "auth:otpVerified", ok: false, refusal: res.refusal });
-          return;
-        }
-        // A failed lookup must not fail the sign-in that already succeeded - it
-        // costs the return offer, nothing more.
-        const returnsToPage = await hasAuthOrigin().catch(() => false);
-        sendResponse(returnsToPage ? { type: "auth:otpVerified", ok: true, returnsToPage: true } : { type: "auth:otpVerified", ok: true });
-      })
-      .catch((error: unknown) => sendResponse(errorResponse("unavailable", "auth:verifyOtp", error)));
+    // Rebuilt field by field, never spread: keeps the response to exactly these
+    // fields even if VerifyOtpResult grows. The session lives in storage.local
+    // (read by getAuth) and is never forwarded here.
+    respondWith(sendResponse, "auth:verifyOtp", async () => {
+      const res = await verifyOtp(msg.email, msg.code);
+      if (!res.ok) return { type: "auth:otpVerified", ok: false, refusal: res.refusal };
+      // A failed lookup must not fail the sign-in that already succeeded - it
+      // costs the return offer, nothing more.
+      const returnsToPage = await hasAuthOrigin().catch(() => false);
+      return returnsToPage ? { type: "auth:otpVerified", ok: true, returnsToPage: true } : { type: "auth:otpVerified", ok: true };
+    });
     return ANSWER_LATER;
   },
 };
