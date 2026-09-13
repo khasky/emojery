@@ -6,7 +6,7 @@
 
 A free, open source browser extension that turns Likes, Stars and upvotes into the full emoji set on GitHub, Reddit, YouTube, Amazon, Facebook, Instagram and more.
 
-[![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-green.svg)](LICENSE) [![Version](https://img.shields.io/github/package-json/v/khasky/emojery?color=blue)](./package.json) [![GitHub issues](https://img.shields.io/github/issues/khasky/emojery)](https://github.com/khasky/emojery/issues) [![Downloads](https://img.shields.io/github/downloads/khasky/emojery/total)](https://github.com/khasky/emojery/releases) [![CI](https://github.com/khasky/emojery/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/khasky/emojery/actions/workflows/ci.yml) [![Security](https://github.com/khasky/emojery/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/khasky/emojery/actions/workflows/security.yml) [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-coming%20soon-lightgrey.svg?logo=googlechrome&logoColor=white)](#install) [![Firefox Add-ons](https://img.shields.io/badge/Firefox%20Add--ons-coming%20soon-lightgrey.svg?logo=firefoxbrowser&logoColor=white)](#install) [![Edge Add-ons](https://img.shields.io/badge/Edge%20Add--ons-coming%20soon-lightgrey.svg?logo=microsoftedge&logoColor=white)](#install) [![Sponsor](https://img.shields.io/badge/sponsor-%E2%9D%A4-ea4aaa.svg?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/khasky) [![Emojery](https://api.emojery.app/badge/github/khasky/emojery.svg)](https://emojery.app/react?t=github/khasky/emojery)
+[![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-green.svg)](LICENSE) [![Version](https://img.shields.io/github/package-json/v/khasky/emojery?color=blue)](./package.json) [![GitHub issues](https://img.shields.io/github/issues/khasky/emojery)](https://github.com/khasky/emojery/issues) [![Downloads](https://img.shields.io/github/downloads/khasky/emojery/total)](https://github.com/khasky/emojery/releases) [![CI](https://github.com/khasky/emojery/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/khasky/emojery/actions/workflows/ci.yml) [![Security](https://github.com/khasky/emojery/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/khasky/emojery/actions/workflows/security.yml) [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-install-4285F4.svg?logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/emojery/nlkebphkgappggophjobchogdmdiaajd) [![Firefox Add-ons](https://img.shields.io/badge/Firefox%20Add--ons-install-FF7139.svg?logo=firefoxbrowser&logoColor=white)](https://addons.mozilla.org/firefox/addon/emojery/) [![Edge Add-ons](https://img.shields.io/badge/Edge%20Add--ons-install-0078D7.svg?logo=microsoftedge&logoColor=white)](https://microsoftedge.microsoft.com/addons/detail/emojery/jbmbhihbhpnidhfmepifgkeblikjdpcp) [![Sponsor](https://img.shields.io/badge/sponsor-%E2%9D%A4-ea4aaa.svg?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/khasky) [![Emojery](https://api.emojery.app/badge/github/khasky/emojery.svg)](https://emojery.app/react?t=github/khasky/emojery)
 
 [What it looks like](#what-using-emojery-looks-like) · [Features](#features) · [Supported sites](#supported-sites) · [Install](#install) · [Build from source](#build-from-source-and-development) · [Contributing](#contributing) · [Security](#security) · [Support](#support) · [Sponsors](#sponsors) · [Credits](#credits) · [License](#license)
 
@@ -220,11 +220,16 @@ Installing an extension is an act of trust. These questions get straight answers
 
 ### From the stores
 
-Chrome Web Store, Firefox Add-ons, and Edge Add-ons listings are **coming soon**.
+| Store | Covers |
+| --- | --- |
+| [Chrome Web Store](https://chromewebstore.google.com/detail/emojery/nlkebphkgappggophjobchogdmdiaajd) | Chrome · Brave · Vivaldi · Opera · Arc · Yandex · and any other Chromium-based desktop browser |
+| [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/emojery/) | Firefox 128+ on desktop and Android · LibreWolf and other forks built on ESR 128 or newer |
+| [Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/emojery/jbmbhihbhpnidhfmepifgkeblikjdpcp) | Microsoft Edge — also installs from the Chrome Web Store |
+| Safari | Coming soon |
 
 ### From source
 
-Emojery is in public-unlisted beta. Until the stores go live, build it from source and load it as an unpacked add-on — see [Build from source and development](#build-from-source-and-development) below.
+Emojery is in public beta. You can also build it from source and load it as an unpacked add-on — see [Build from source and development](#build-from-source-and-development) below.
 
 ## Build from source and development
 
