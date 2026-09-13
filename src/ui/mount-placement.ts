@@ -6,6 +6,7 @@
 // is unit-tested and measured here while mount.ts (live-page orchestration,
 // e2e's to cover) is coverage-excluded.
 import type { PickerInsertionPoint } from "../shared/adapter";
+import { defined } from "../shared/defined";
 import { PLACEMENT_ATTR } from "../shared/dom";
 import { hostElementOfMount } from "./mount-registry";
 
@@ -40,16 +41,10 @@ export function resolveResponsivePlacement(point: PickerInsertionPoint): PickerI
   if (!primaryContainer || isRendered(primaryContainer)) return point;
   const fbContainer = insertionContainer(fb.anchor, fb.position);
   if (!fbContainer || !isRendered(fbContainer)) return point;
-  const swapped: PickerInsertionPoint = {
-    ...point,
-    anchor: fb.anchor,
-    position: fb.position,
-  };
-  if (fb.wrapper) swapped.wrapper = fb.wrapper;
-  else delete swapped.wrapper;
-  if (fb.triggerLayout) swapped.triggerLayout = fb.triggerLayout;
-  else delete swapped.triggerLayout;
-  return swapped;
+  // The fallback's four placement fields replace the primary's wholesale: one the
+  // fallback leaves out is dropped, not inherited.
+  const { anchor: _anchor, position: _position, wrapper: _wrapper, triggerLayout: _layout, ...rest } = point;
+  return defined({ ...rest, anchor: fb.anchor, position: fb.position, wrapper: fb.wrapper, triggerLayout: fb.triggerLayout });
 }
 
 // True when a mounted host's recorded placement mode (primary/fallback) no longer

@@ -4,7 +4,6 @@ import type { PickerInsertionPoint, SiteAdapter } from "../shared/adapter";
 import { AUTH_KEY } from "../shared/auth-session";
 import { HIDDEN_SELECTOR, HOST_CLASS, LAYOUT_ATTR, PLACEMENT_ATTR } from "../shared/dom";
 import { ensureEnLoaded } from "../shared/emoji-meta";
-import type { VoteBroadcast } from "../shared/messages";
 import { markCoachSeen } from "../shared/onboarding";
 import { isSiteEnabled, resolveSettings, type Settings, type TargetKey, targetKey } from "../shared/storage";
 import { setThemePreference } from "../shared/theme";
@@ -32,7 +31,6 @@ import {
   reconcileScanMounts,
   registerMountNode,
   reuseMountNode,
-  setRefreshCallback,
   subscribeMount,
   teardownAllMounts,
   wrapHost,
@@ -313,13 +311,8 @@ async function renderPicker(host: HTMLElement, point: PickerInsertionPoint, key:
 
   const initial = await loadInitial(point, initialAuth);
 
-  let updateFromBroadcast: ((b: VoteBroadcast) => void) | null = null;
-
   const onPick = createOnPick({ point, settings });
 
-  subscribeMount(key, point.target, (b) => {
-    updateFromBroadcast?.(b);
-  });
   installAuthChangeListener();
 
   const onSignIn = (): void => {
@@ -352,12 +345,7 @@ async function renderPicker(host: HTMLElement, point: PickerInsertionPoint, key:
       // A function, not the node, so a detached overlay host can't strand the
       // popover - see the portalRoot prop's JSDoc.
       portalRoot: () => getOverlayRoot(),
-      bindBroadcast: (cb) => {
-        updateFromBroadcast = cb;
-      },
-      bindRefresh: (cb) => {
-        setRefreshCallback(key, cb);
-      },
+      subscribe: ({ onVote, onRefresh }) => subscribeMount(key, point.target, onVote, onRefresh),
     }),
     shadow,
   );

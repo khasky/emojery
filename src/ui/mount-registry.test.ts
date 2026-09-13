@@ -430,8 +430,8 @@ describe("dispatchVoteSync - routes a broadcast to its target's listener only", 
   it("invokes the matching listener and nobody else", () => {
     const mine = vi.fn();
     const other = vi.fn();
-    subscribeMount(tk("x:1"), TARGET_X1, mine);
-    subscribeMount(tk("x:2"), { ...TARGET_X1, targetId: "2" }, other);
+    subscribeMount(tk("x:1"), TARGET_X1, mine, vi.fn());
+    subscribeMount(tk("x:2"), { ...TARGET_X1, targetId: "2" }, other, vi.fn());
 
     const broadcast = { target: TARGET_X1, reaction: "❤️" as const, prevReaction: null };
     dispatchVoteSync(broadcast);
@@ -457,7 +457,7 @@ describe("destroyMount - a mount leaves every registry at once", () => {
     const cb = vi.fn();
     const node = makeHost();
     registerMountNode(key, node);
-    subscribeMount(key, TARGET_X1, cb);
+    subscribeMount(key, TARGET_X1, cb, vi.fn());
 
     destroyMount(key, node);
 

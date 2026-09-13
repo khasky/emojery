@@ -76,7 +76,7 @@ function mountSignedOutPicker(onSignIn: () => void, opts: { autoOpen?: boolean; 
       onPick: opts.onPick ?? (() => true),
       onSignIn,
       ...(opts.autoOpen ? { autoOpen: true } : {}),
-      ...(opts.captureRefresh ? { bindRefresh: opts.captureRefresh } : {}),
+      ...(opts.captureRefresh ? { subscribe: (listeners: { onRefresh: RefreshPush }) => opts.captureRefresh?.(listeners.onRefresh) } : {}),
       portalRoot,
     }),
     container,
@@ -158,8 +158,8 @@ describe("Picker - WebKit render", () => {
         onPick: () => true,
         onSignIn: () => {},
         portalRoot,
-        bindRefresh: (cb) => {
-          pushRefresh = cb;
+        subscribe: ({ onRefresh }) => {
+          pushRefresh = onRefresh;
         },
       }),
       container,

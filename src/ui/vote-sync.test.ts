@@ -28,7 +28,7 @@ afterEach(() => {
 describe("handleVoteSyncMessage - cross-tab vote sync trust gate", () => {
   it("dispatches a voteSync from our own extension to the target's picker", () => {
     const cb = vi.fn();
-    subscribeMount(KEY, target, cb);
+    subscribeMount(KEY, target, cb, vi.fn());
 
     const handled = handleVoteSyncMessage(voteSync("👍"), sender(RUNTIME_ID), RUNTIME_ID);
 
@@ -39,7 +39,7 @@ describe("handleVoteSyncMessage - cross-tab vote sync trust gate", () => {
 
   it("ignores a voteSync whose sender is NOT our extension (spoof attempt)", () => {
     const cb = vi.fn();
-    subscribeMount(KEY, target, cb);
+    subscribeMount(KEY, target, cb, vi.fn());
 
     expect(handleVoteSyncMessage(voteSync("😡"), sender("evil-extension"), RUNTIME_ID)).toBe(false);
     expect(handleVoteSyncMessage(voteSync("😡"), sender(undefined), RUNTIME_ID)).toBe(false);
@@ -49,7 +49,7 @@ describe("handleVoteSyncMessage - cross-tab vote sync trust gate", () => {
 
   it("ignores non-voteSync and malformed messages without throwing", () => {
     const cb = vi.fn();
-    subscribeMount(KEY, target, cb);
+    subscribeMount(KEY, target, cb, vi.fn());
 
     expect(handleVoteSyncMessage({ type: "vote" }, sender(RUNTIME_ID), RUNTIME_ID)).toBe(false);
     expect(handleVoteSyncMessage(null, sender(RUNTIME_ID), RUNTIME_ID)).toBe(false);
@@ -61,7 +61,7 @@ describe("handleVoteSyncMessage - cross-tab vote sync trust gate", () => {
 
   it("accepts the unreact shape (null reaction) for a known target", () => {
     const cb = vi.fn();
-    subscribeMount(KEY, target, cb);
+    subscribeMount(KEY, target, cb, vi.fn());
 
     expect(handleVoteSyncMessage(voteSync(null, "👍"), sender(RUNTIME_ID), RUNTIME_ID)).toBe(true);
     expect(cb).toHaveBeenCalledWith({ target, reaction: null, prevReaction: "👍" });

@@ -16,7 +16,7 @@ import { type CachedTarget, getCachedCounts, getOwnReaction, setCachedCounts, ta
 import { maybePlayPublicReactionIntro } from "./animations";
 import { sendMessage } from "./messaging";
 import { clearCachedCountsPrime, hydrateDeferredCounts, loadInitial, pickAggregateCounts, primeCachedCounts, refreshTarget } from "./mount-counts";
-import { resetMountRegistryForTests, setRefreshCallback } from "./mount-registry";
+import { resetMountRegistryForTests, subscribeMount } from "./mount-registry";
 
 const point: PickerInsertionPoint = {
   anchor: document.createElement("div"),
@@ -180,7 +180,7 @@ describe("hydrateDeferredCounts", () => {
     const clicked: CachedTarget = { counts: { "❤️": 1 }, total: 1, loaded: 1, hasMore: false, myReaction: "❤️", fetchedAt: 5_000 };
     vi.mocked(getCachedCounts).mockResolvedValue({ hits: { [key]: clicked }, misses: [] });
     const cb = vi.fn();
-    setRefreshCallback(key, cb);
+    subscribeMount(key, point.target, vi.fn(), cb);
     await hydrateDeferredCounts(point, key, null, true, false);
     const merged = { counts: { "👍": 2, "❤️": 1 }, total: 3, loaded: 2, hasMore: false };
     expect(cb).toHaveBeenCalledWith({ value: merged, myReaction: "❤️", authed: true });
@@ -192,7 +192,7 @@ describe("hydrateDeferredCounts", () => {
     const cleared: CachedTarget = { counts: {}, total: 0, loaded: 0, hasMore: false, myReaction: null, fetchedAt: 5_000 };
     vi.mocked(getCachedCounts).mockResolvedValue({ hits: { [key]: cleared }, misses: [] });
     const cb = vi.fn();
-    setRefreshCallback(key, cb);
+    subscribeMount(key, point.target, vi.fn(), cb);
     await hydrateDeferredCounts(point, key, "👍", true, false);
     expect(cb).toHaveBeenCalledWith({ value: { counts: { "👍": 1 }, total: 1, loaded: 1, hasMore: false }, myReaction: null, authed: true });
   });
@@ -201,7 +201,7 @@ describe("hydrateDeferredCounts", () => {
     vi.mocked(sendMessage).mockResolvedValue(countResponse);
     vi.mocked(getCachedCounts).mockResolvedValue({ hits: { [key]: { ...countPayload, fetchedAt: 5_000 } }, misses: [] });
     const cb = vi.fn();
-    setRefreshCallback(key, cb);
+    subscribeMount(key, point.target, vi.fn(), cb);
     await hydrateDeferredCounts(point, key, null, true, false);
     expect(cb).toHaveBeenCalledWith({ value: aggregate, myReaction: "👍", authed: true });
     expect(setCachedCounts).not.toHaveBeenCalled();
@@ -210,7 +210,7 @@ describe("hydrateDeferredCounts", () => {
   it("applies through a registered refresh callback", async () => {
     vi.mocked(sendMessage).mockResolvedValue(countResponse);
     const cb = vi.fn();
-    setRefreshCallback(key, cb);
+    subscribeMount(key, point.target, vi.fn(), cb);
     await hydrateDeferredCounts(point, key, null, true, false);
     expect(sendMessage).toHaveBeenCalledWith({ type: "fetchCount", target: point.target, limit: DEFAULT_BREAKDOWN_LIMIT });
     expect(cb).toHaveBeenCalledWith({ value: aggregate, myReaction: "👍", authed: true });
@@ -220,7 +220,7 @@ describe("hydrateDeferredCounts", () => {
   it("uses fallbackMine when the server carries no myReaction", async () => {
     vi.mocked(sendMessage).mockResolvedValue({ type: "count", data: aggregate } as RuntimeResponse);
     const cb = vi.fn();
-    setRefreshCallback(key, cb);
+    subscribeMount(key, point.target, vi.fn(), cb);
     await hydrateDeferredCounts(point, key, "🎉", false, false);
     expect(cb).toHaveBeenCalledWith({ value: aggregate, myReaction: "🎉", authed: false });
   });
@@ -230,7 +230,7 @@ describe("hydrateDeferredCounts", () => {
     vi.mocked(sendMessage).mockResolvedValue(countResponse);
     await hydrateDeferredCounts(point, key, null, true, false);
     const cb = vi.fn();
-    setRefreshCallback(key, cb);
+    subscribeMount(key, point.target, vi.fn(), cb);
     vi.advanceTimersByTime(50);
     expect(cb).toHaveBeenCalledTimes(1);
   });
@@ -238,14 +238,14 @@ describe("hydrateDeferredCounts", () => {
   it("a failed fetch applies nothing", async () => {
     vi.mocked(sendMessage).mockRejectedValue(new Error("net"));
     const cb = vi.fn();
-    setRefreshCallback(key, cb);
+    subscribeMount(key, point.target, vi.fn(), cb);
     await hydrateDeferredCounts(point, key, null, true, false);
     expect(cb).not.toHaveBeenCalled();
   });
 
   it("the animations flag gates the public-reaction intro", async () => {
     vi.mocked(sendMessage).mockResolvedValue(countResponse);
-    setRefreshCallback(key, vi.fn());
+    subscribeMount(key, point.target, vi.fn(), vi.fn());
     await hydrateDeferredCounts(point, key, null, true, true);
     expect(maybePlayPublicReactionIntro).toHaveBeenCalledWith(aggregate);
   });

@@ -61,6 +61,11 @@ interface Initial {
   isAuthed: boolean;
 }
 
+export interface PickerListeners {
+  onVote: (b: VoteBroadcast) => void;
+  onRefresh: (next: CountsRefresh) => void;
+}
+
 interface Props {
   initial: Initial;
   typography?: PickerTypography;
@@ -77,9 +82,9 @@ interface Props {
    *  navigation that detached the previous container (FB reels rebuilding <body>)
    *  can't strand it. */
   portalRoot: HTMLElement | (() => HTMLElement);
-  bindBroadcast?: (cb: (b: VoteBroadcast) => void) => void;
-  /** Pushes fresh counts without remounting. */
-  bindRefresh?: (cb: (next: CountsRefresh) => void) => void;
+  /** Registers the picker's two inbound channels with the host, once, after the first
+   *  paint: another tab's vote delta and a counts refresh (a server read, an auth change). */
+  subscribe?: (listeners: PickerListeners) => void;
   /**
    * /react deep-link: when true, the picker opens itself once on mount, exactly
    * as a trigger click would - the popover, signed in or not. Set by the mount
@@ -113,7 +118,7 @@ function useReactionState(initial: Initial) {
   return { counts: aggregate.counts, total: aggregate.total, mine, applyDelta, applySnapshot };
 }
 
-export function Picker({ initial, typography, onPick, onSignIn, portalRoot, bindBroadcast, bindRefresh, autoOpen, onOpenChange }: Props) {
+export function Picker({ initial, typography, onPick, onSignIn, portalRoot, subscribe, autoOpen, onOpenChange }: Props) {
   const { counts, total, mine, applyDelta, applySnapshot } = useReactionState(initial);
   const [authed, setAuthed] = useState<boolean>(initial.isAuthed);
   const [open, setOpen] = useState(false);
@@ -184,11 +189,14 @@ export function Picker({ initial, typography, onPick, onSignIn, portalRoot, bind
   }, []);
 
   useEffect(() => {
-    bindRefresh?.((next) => {
-      applySnapshot(next.value, next.myReaction);
-      if (typeof next.authed === "boolean") setAuthed(next.authed);
+    subscribe?.({
+      onVote: (b) => applyDelta(b.prevReaction, b.reaction),
+      onRefresh: (next) => {
+        applySnapshot(next.value, next.myReaction);
+        if (typeof next.authed === "boolean") setAuthed(next.authed);
+      },
     });
-  }, [bindRefresh]);
+  }, [subscribe]);
 
   // The ref keeps the /react deep-link's auto-open to one fire even if `authed` flips and
   // re-runs the effect. Signed-out it opens too - onto the palette; the gate arrives only
@@ -198,12 +206,6 @@ export function Picker({ initial, typography, onPick, onSignIn, portalRoot, bind
     autoOpenedRef.current = true;
     setOpen(true);
   }, [autoOpen]);
-
-  useEffect(() => {
-    bindBroadcast?.((b) => {
-      applyDelta(b.prevReaction, b.reaction);
-    });
-  }, [bindBroadcast]);
 
   useEffect(() => {
     if (!open) return;
@@ -326,7 +328,7 @@ export function Picker({ initial, typography, onPick, onSignIn, portalRoot, bind
   };
 
   // Sign-in landed while the gate held a pick: honour the gate's promise and cast
-  // it. `authed` only ever flips through the background's auth-change push (bindRefresh), so
+  // it. `authed` only ever flips through the background's auth-change push (subscribe), so
   // the page cannot forge this - the trusted click that chose the emoji still gates it.
   useEffect(() => {
     if (!authed || !pendingReaction) return;

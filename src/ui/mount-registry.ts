@@ -51,27 +51,20 @@ export function mountedNode(key: TargetKey): Node | undefined {
 }
 
 /** Record the node just inserted for `key`. The rest of the mount's entries are
- *  registered as the render reaches them (subscribeMount /
- *  setRefreshCallback); `dropMount` clears all of them together. */
+ *  registered when the picker's first paint reaches subscribeMount; `dropMount`
+ *  clears all of them together. */
 export function registerMountNode(key: TargetKey, node: Node): void {
   mountedTargets.set(key, node);
 }
 
-// What a rendering mount subscribes in one step: the broadcast listener and the
-// target its auth-change refetch needs. Registered together because a mount with
-// one and not the other either misses another tab's votes or is skipped by
-// authRefreshEntries.
-export function subscribeMount(key: TargetKey, target: PickerInsertionPoint["target"], onVote: (b: VoteBroadcast) => void): void {
-  setVoteListener(key, onVote);
+// What a rendered picker subscribes in one step: the broadcast listener, the
+// refresh callback and the target its auth-change refetch needs. Registered
+// together because a mount with some and not the rest either misses another
+// tab's votes, cannot take a counts update, or is skipped by authRefreshEntries.
+export function subscribeMount(key: TargetKey, target: PickerInsertionPoint["target"], onVote: (b: VoteBroadcast) => void, onRefresh: RefreshCallback): void {
+  voteListeners.set(key, onVote);
+  refreshCallbacks.set(key, onRefresh);
   refreshTargets.set(key, target);
-}
-
-function setVoteListener(key: TargetKey, listener: (b: VoteBroadcast) => void): void {
-  voteListeners.set(key, listener);
-}
-
-export function setRefreshCallback(key: TargetKey, cb: RefreshCallback): void {
-  refreshCallbacks.set(key, cb);
 }
 
 /** Push a counts update into a mounted picker. False when that key has no
