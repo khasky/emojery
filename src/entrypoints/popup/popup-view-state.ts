@@ -16,6 +16,23 @@ export type View = (typeof VIEWS)[number];
 // control is an icon in the header (main.tsx) rather than a fifth tab.
 export const TAB_VIEWS: readonly View[] = VIEWS.filter((view) => view !== "debug");
 
+// The help article the header's Help link points at, per view. Keyed by View for the same
+// reason as the labels below: a new panel fails to compile until somebody has decided what
+// help means for it, rather than silently inheriting the hub.
+//
+// One link whose target follows the open tab, rather than a link per row: every visible
+// string in this popup is translated into every locale the extension ships, so an
+// affordance that costs 1 string is the one that can carry contextual targets at all.
+// Settings is the exception that points at the hub - it holds 4 separate articles' worth of
+// switches, and guessing which one the reader came for would be wrong 3 times out of 4.
+export const HELP_URL_BY_VIEW: Record<View, string> = {
+  settings: "https://emojery.app/help",
+  history: "https://emojery.app/help/browse-your-reaction-history",
+  account: "https://emojery.app/help/sign-in-with-a-code",
+  report: "https://emojery.app/help/button-missing-on-a-site",
+  debug: "https://emojery.app/help",
+};
+
 // Keyed by View (not a parallel array), so a new view fails to compile until it has a label.
 // Debug reuses the Settings row's own label: both name the same thing, and one key keeps the
 // header's toggle and the setting that reveals it from drifting apart per locale.

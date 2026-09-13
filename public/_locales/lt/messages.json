@@ -26,6 +26,9 @@
   "tabReport": {
     "message": "Pranešti"
   },
+  "helpLink": {
+    "message": "Pagalba"
+  },
   "settingEnabled": {
     "message": "Įjungta"
   },

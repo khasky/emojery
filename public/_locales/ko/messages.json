@@ -26,6 +26,9 @@
   "tabReport": {
     "message": "신고"
   },
+  "helpLink": {
+    "message": "도움말"
+  },
   "settingEnabled": {
     "message": "사용"
   },

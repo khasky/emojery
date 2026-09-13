@@ -26,6 +26,9 @@
   "tabReport": {
     "message": "回報"
   },
+  "helpLink": {
+    "message": "說明"
+  },
   "settingEnabled": {
     "message": "已啟用"
   },

@@ -881,7 +881,10 @@ h1 {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 0;
+  /* The auto right margin owns the free space, so the controls after it group at the right
+     edge no matter how many are rendered. `justify-content: space-between` alone would
+     spread 3 children across the row and push Help into the middle of it. */
+  margin: 0 auto 0 0;
   line-height: 1.25;
   /* Positioning context for the two sparkles below. */
   position: relative;
@@ -971,9 +974,10 @@ h1 {
   color: var(--khasky-emojery-muted);
 }
 
-/* Out of the flow while switched off, so the header stays a plain two-end row: title left,
-   build stamp hard right. Switching Debug on makes it a three-end row, which slides the
-   stamp inward; nothing moves vertically, since the button is the logo's own height. */
+/* Out of the flow while switched off. The title takes the slack (`.brand-title` below), so
+   whatever is present - build stamp, Help, Debug - stays grouped hard right and switching
+   Debug on adds a control rather than moving the others around. Nothing moves vertically:
+   both buttons are the logo's own height. */
 .debug-toggle-off {
   display: none;
 }
@@ -981,6 +985,31 @@ h1 {
 .debug-toggle-active {
   border-color: var(--khasky-emojery-accent);
   color: var(--khasky-emojery-link);
+}
+
+/* Opens the help article for the open tab, on emojery.app. Same 24px square and border as
+   the Debug toggle beside it, so the header reads as one row of controls rather than a
+   button and a link that happen to be adjacent. The accessible name is the aria-label. */
+.help-link {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--khasky-emojery-border-soft);
+  border-radius: 6px;
+  color: var(--khasky-emojery-muted);
+}
+
+.help-link:is(:hover, :focus-visible) {
+  border-color: var(--khasky-emojery-accent);
+  color: var(--khasky-emojery-link);
+}
+
+.help-link-icon {
+  width: 16px;
+  height: 16px;
 }
 
 .debug-toggle-icon {

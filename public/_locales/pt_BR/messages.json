@@ -26,6 +26,9 @@
   "tabReport": {
     "message": "Relatar"
   },
+  "helpLink": {
+    "message": "Ajuda"
+  },
   "settingEnabled": {
     "message": "Ativado"
   },

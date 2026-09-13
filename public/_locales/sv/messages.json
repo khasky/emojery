@@ -26,6 +26,9 @@
   "tabReport": {
     "message": "Rapportera"
   },
+  "helpLink": {
+    "message": "Hjälp"
+  },
   "settingEnabled": {
     "message": "Aktiverad"
   },

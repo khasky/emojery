@@ -26,6 +26,9 @@
   "tabReport": {
     "message": "Jelentés"
   },
+  "helpLink": {
+    "message": "Súgó"
+  },
   "settingEnabled": {
     "message": "Engedélyezve"
   },

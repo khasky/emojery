@@ -26,6 +26,9 @@
   "tabReport": {
     "message": "Повідомити"
   },
+  "helpLink": {
+    "message": "Довідка"
+  },
   "settingEnabled": {
     "message": "Увімкнено"
   },

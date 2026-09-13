@@ -26,6 +26,9 @@
   "tabReport": {
     "message": "Segnala"
   },
+  "helpLink": {
+    "message": "Guida"
+  },
   "settingEnabled": {
     "message": "Attivo"
   },

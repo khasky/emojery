@@ -26,6 +26,9 @@
   "tabReport": {
     "message": "Melden"
   },
+  "helpLink": {
+    "message": "Help"
+  },
   "settingEnabled": {
     "message": "Ingeschakeld"
   },

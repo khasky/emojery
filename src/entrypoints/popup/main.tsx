@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+import type { ComponentChild } from "preact";
 import { render } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { effectiveAnalyticsConsent } from "../../shared/data-consent";
@@ -8,6 +9,7 @@ import { bootstrapPage } from "../../shared/page-bootstrap";
 import { BUILD_INFO_CLASS, DEBUG_TAB_ID, POPUP_CLASS, TAB_ID_PREFIX, TAB_PANEL_ID } from "../../shared/page-dom";
 import { DEFAULT_SETTINGS, getSettings, mergeSettings, type Settings, setSettings } from "../../shared/storage";
 import { applyDocumentTheme } from "../../shared/theme";
+import { withExtensionUtm } from "../../shared/tracking-links";
 import { applyEmojiSpriteHost } from "../../ui/emoji-sprite";
 import { AccountView } from "./popup-account";
 import { HistoryView } from "./popup-history";
@@ -15,7 +17,7 @@ import { QueueView } from "./popup-queue";
 import { ReportView } from "./popup-report";
 import { ICON_BUG, SettingsView } from "./popup-settings";
 import { BUILD_VERSION, svgIcon, useActiveTabUrl } from "./popup-shared";
-import { nextViewForKey, rememberView, resolveShownView, storedView, TAB_VIEWS, tabAnchorFor, VIEW_LABEL_KEYS, type View } from "./popup-view-state";
+import { HELP_URL_BY_VIEW, nextViewForKey, rememberView, resolveShownView, storedView, TAB_VIEWS, tabAnchorFor, VIEW_LABEL_KEYS, type View } from "./popup-view-state";
 
 // The stored Theme setting lands later, from the effect in App.
 bootstrapPage(t("popupTitle"));
@@ -23,6 +25,9 @@ bootstrapPage(t("popupTitle"));
 // `__EM_BUILD_TIME__` is injected at build time by wxt.config.ts.
 declare const __EM_BUILD_TIME__: string;
 const BUILD_TIME = typeof __EM_BUILD_TIME__ !== "undefined" ? __EM_BUILD_TIME__ : "";
+
+// Question mark in a circle, drawn to the same 24px grid and 1.8 stroke as ICON_BUG beside it.
+const ICON_HELP: ComponentChild[] = [<circle cx="12" cy="12" r="9" />, <path d="M9.6 9.6a2.5 2.5 0 1 1 3.2 2.8c-.5.2-.8.7-.8 1.2v.5" />, <path d="M12 17.3h.01" />];
 
 function App() {
   const [view, setViewState] = useState<View>(storedView);
@@ -87,6 +92,11 @@ function App() {
             <span>{t("popupHeading")}</span>
           </h1>
           <BuildInfo showStamp={settings.debugMode} />
+          {/* Opens the help article for the tab that is open, on emojery.app. The target
+              lives with the rest of the per-view decisions in popup-view-state.ts. */}
+          <a class="help-link" href={withExtensionUtm(HELP_URL_BY_VIEW[shown], { campaign: "popup_help", content: shown })} target="_blank" rel="noopener noreferrer" aria-label={t("helpLink")} title={t("helpLink")}>
+            {svgIcon(ICON_HELP, "help-link-icon")}
+          </a>
           {/* Debug rides in the header rather than as a fifth tab - popup-view-state.ts's
               TAB_VIEWS says why; the layout contract lives with .debug-toggle-off in popup.css. */}
           <button id={DEBUG_TAB_ID} class={debugToggleClass} type="button" aria-pressed={shown === "debug" ? "true" : "false"} aria-controls={TAB_PANEL_ID} aria-label={t("settingDebug")} title={t("settingDebug")} onClick={() => setView(shown === "debug" ? "settings" : "debug")}>

@@ -26,6 +26,9 @@
   "tabReport": {
     "message": "Laporan"
   },
+  "helpLink": {
+    "message": "Bantuan"
+  },
   "settingEnabled": {
     "message": "Didayakan"
   },

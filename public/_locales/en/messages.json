@@ -35,6 +35,10 @@
     "message": "Report",
     "description": "Popup tab label — bug report form."
   },
+  "helpLink": {
+    "message": "Help",
+    "description": "Accessible name and tooltip for the header link that opens the help article for the tab currently open."
+  },
   "settingEnabled": {
     "message": "Enabled",
     "description": "Label for the master on/off toggle."

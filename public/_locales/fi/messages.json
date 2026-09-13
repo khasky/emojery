@@ -26,6 +26,9 @@
   "tabReport": {
     "message": "Ilmoita"
   },
+  "helpLink": {
+    "message": "Ohje"
+  },
   "settingEnabled": {
     "message": "Käytössä"
   },

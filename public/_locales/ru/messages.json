@@ -26,6 +26,9 @@
   "tabReport": {
     "message": "Помощь"
   },
+  "helpLink": {
+    "message": "Справка"
+  },
   "settingEnabled": {
     "message": "Активно"
   },

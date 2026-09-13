@@ -26,6 +26,9 @@
   "tabReport": {
     "message": "報告"
   },
+  "helpLink": {
+    "message": "ヘルプ"
+  },
   "settingEnabled": {
     "message": "有効"
   },
