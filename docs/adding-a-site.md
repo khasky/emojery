@@ -37,13 +37,14 @@ Adding a site is almost entirely the top 2 boxes — a registry row, an adapter,
 
 ## The files a new site touches
 
-The full scope before the prose: steps 1–2 decide what to build and step 10 runs the gates; every file in between is guarded, so a skipped row fails a command rather than shipping a gap. Each step below is a section of this document.
+The full scope before the prose: steps 1–2 decide what to build and step 10 runs the gates. Most rows are guarded, so a skipped one fails a command rather than shipping a gap; where the right-hand column names no command, the row is left to you and to review. Each step below is a section of this document.
 
 | Step | You edit | Skipping it fails |
 | --- | --- | --- |
 | [3](#3-register-the-site-single-source-of-truth) | `src/shared/sites.ts` — the registry row | — (the source everything below derives from) |
 | [3](#3-register-the-site-single-source-of-truth) | `src/ui/brand-icons.ts` — the brand glyph | `pnpm compile` (total `Record<SupportedSite, ...>`) |
 | [4](#4-write-the-adapter-with-definesiteadapter) | `src/adapters/<site>.ts` — the adapter | — (the work itself) |
+| [4](#4-write-the-adapter-with-definesiteadapter) | `src/adapters/page-visibility.ts` — a detector for the site's private pages, wired as the adapter's `isPrivatePage` — **only when the site has private content** | nothing — the trigger then mounts on pages an anonymous visitor can't read (see [Design invariants](#design-invariants)) |
 | [5](#5-the-canonical-id-is-a-wire-contract) | `src/adapters/target-contract.ts` — a `URL_DERIVABLE_SITES` entry + a `deriveTargetFromUrl` case (URL-derivable sites only) | `pnpm test` (`lockstep.test.ts`) |
 | [5](#5-the-canonical-id-is-a-wire-contract) | a row in `src/adapters/__data__/target-vectors.json` (or a `notUrlDerivable` entry) | `pnpm test` (`lockstep.test.ts` coverage guard) |
 | [6](#6-add-the-content-entrypoint) | `src/entrypoints/<site>.content.ts` | `pnpm test` (`content-matches.test.ts`) |
@@ -51,7 +52,11 @@ The full scope before the prose: steps 1–2 decide what to build and step 10 ru
 | [8](#8-adapter-unit-tests-required) | `src/adapters/<site>.test.ts` | — (no gate catches a missing adapter test; it is a review requirement) |
 | [9](#9-add-an-e2e-scenario) | `e2e/supported-sites.ts` + `E2E_URL_*` in `.env.e2e.example` | `pnpm test` (`e2e-site-coverage.test.ts`) |
 | [9](#9-add-an-e2e-scenario) | the DEEP/SMOKE tier + URLs in `e2e/site-auth/scenarios.ts` | `pnpm test` (`e2e-site-coverage.test.ts`) |
+| [9](#9-add-an-e2e-scenario) | `e2e/private-pages.spec.ts` — a live probe for the detector above — same condition as its row | nothing — the detector then ships with no live check |
+| [10](#10-run-the-gates-must-be-green) | `commitlint.config.js` — the site id as a commit scope | nothing — commitlint warns on an unlisted scope and lets the commit through ([CONTRIBUTING](../CONTRIBUTING.md)) |
 | [11](#11-manual-smoke-on-the-live-site--against-the-staging-api) | — (the staging round-trip) | nothing — manual; note the result in the PR |
+
+That is the whole list. Grepping an existing site id turns up several times as many files, because the sites already here are named in comments, in test fixtures, and in the suites that iterate `ALL_SITES` — a new site edits none of those. Past the brand glyph it adds nothing to `src/ui/` and nothing at all to `src/background/`: everything the mount layer needs travels through the `PickerInsertionPoint` the adapter returns (see the next section).
 
 ## Design invariants
 
