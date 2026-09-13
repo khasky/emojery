@@ -2,40 +2,20 @@
 //
 // Facebook adapter wiring: the scan/observe spec, the post-container search that
 // turns an accepted Like into the element the target is mined from, and the
-// per-scan bookkeeping (action memo, shared-photo collision handling, photo
-// click context). The two halves it orchestrates live next door -
+// per-scan bookkeeping (the verdict cache's lifetime, shared-photo collision
+// handling, photo click context). The two halves it orchestrates live next door -
 // facebook-post-row.ts decides WHICH control is a post Like, facebook-target.ts
 // decides WHAT that post is.
 
 import type { TargetRef } from "../shared/adapter";
 import { queryAll, queryFirst } from "../shared/dom-query";
-import {
-  actionLabel,
-  actionRowSlot,
-  fbLikePressed,
-  findFacebookVisualActionSlot,
-  findFbReactionsMenu,
-  findLocalStoryContainer,
-  isFilledChipRow,
-  isInMessengerThread,
-  isInNestedArticle,
-  isNonPostActionRow,
-  isPostActionLikeButton,
-  looksLikeCommentRow,
-  MODAL_SELECTOR,
-  REEL_ACTION_COLUMN_DEPTH,
-  resetPostActionLikeCache,
-  rowHasPostSibling,
-  SCAN_SELECTORS,
-  widenToPostUnit,
-} from "./facebook-post-row";
+import { fbLikePressed, findFbReactionsMenu, findLocalStoryContainer, MODAL_SELECTOR, type PostRowVerdicts, postRowVerdicts, resolvePostAction, SCAN_SELECTORS, widenToPostUnit } from "./facebook-post-row";
 import { extractTarget, findGroupStoryPermalinkNear, recordClickedPhotoStory } from "./facebook-target";
 import { currentPagePostUrl, extractPhotoFbid, isStandalonePhotoViewerPage, isStandaloneReelViewerPage, normalizePhotoHref } from "./facebook-urls";
 import { defineSiteAdapter, type ScanContext } from "./framework";
 import { lazyHoverPriming } from "./observer-plugins";
 import { ancestors, closestAny, orderModalFirst } from "./runtime";
 import type { ObserverPlugin } from "./scan-observer";
-import { isRenderableInPageLayout } from "./visual-action-row";
 
 // Re-exports so the tests reach the URL / target / label helpers through the
 // adapter they exercise. The e2e auto-press probes consume only the label
@@ -56,18 +36,6 @@ const LAZY_LINK_SELECTOR = 'a[role="link"], a[href*="__cft__"], a[href*="__tn__"
 
 const POST_CONTAINER_SELECTORS = ['[role="article"]', '[data-pagelet^="FeedUnit"]'];
 
-interface ActionMatch {
-  slot: HTMLElement;
-  row: HTMLElement | null;
-  /** Set when the action "row" is the reel viewer's VERTICAL column - the
-   *  binding then opts the trigger into the round icon-column form. */
-  rail?: boolean;
-  /** Set when the match came from the language-blind geometry fallback rather
-   *  than a readable action label - such a match must also prove a real post
-   *  container (see findPostContainer). */
-  geometry?: boolean;
-}
-
 function photoClickContextCapture(): ObserverPlugin {
   return {
     attach() {
@@ -80,10 +48,9 @@ function photoClickContextCapture(): ObserverPlugin {
         if (!photoUrl) return;
         const fbid = extractPhotoFbid(photoUrl);
         if (!fbid) return;
-        // Outside a scan, so the memo holds the last scan's verdicts - stale by
-        // now if the user reacted since. widenToPostUnit reads it heavily.
-        resetPostActionLikeCache();
-        const story = findGroupStoryPermalinkNear(widenToPostUnit(anchor, anchor), null);
+        // Outside a scan: fresh verdicts, since a Like relabels itself the moment
+        // the user reacts. widenToPostUnit reads them heavily.
+        const story = findGroupStoryPermalinkNear(widenToPostUnit(anchor, anchor, postRowVerdicts()), null);
         if (story) recordClickedPhotoStory(fbid, story);
       };
       document.addEventListener("click", onClick, true);
@@ -97,16 +64,13 @@ const facebookAdapter = defineSiteAdapter({
   // Global [role="button"] scan. The action row sometimes renders in a sibling
   // React subtree, not inside the post's [role="article"], so searching all
   // buttons and walking up to a container is symmetric across layouts.
-  findCandidates: ({ root }) => {
-    // First callback of every scan: the verdict memo must not outlive a pass.
-    resetPostActionLikeCache();
-    return orderModalFirst(queryAll<HTMLElement>(root, SCAN_SELECTORS));
-  },
-  resolveRow: resolvePostAction,
+  findCandidates: ({ root }) => orderModalFirst(queryAll<HTMLElement>(root, SCAN_SELECTORS)),
+  resolveRow: (btn, ctx) => resolvePostAction(btn, verdictsFor(ctx)),
   resolveTarget: (btn, ctx, action) => {
-    const container = findPostContainer(btn, action.row, action.geometry ?? false);
+    const verdicts = verdictsFor(ctx);
+    const container = findPostContainer(btn, action.row, action.geometry ?? false, verdicts);
     if (!container) return null;
-    const target = extractTarget(container, action.row);
+    const target = extractTarget(container, action.row, verdicts);
     if (!target) return null;
     if (ctx.seenTargets.has(target.targetId) && !hasOpenDialog()) return rekeyPastSharedPhoto(target, container, action.row, ctx);
     targetContainers(ctx).set(target.targetId, container);
@@ -167,7 +131,7 @@ function rekeyPastSharedPhoto(target: TargetRef, container: HTMLElement, row: HT
   // second picker under a divergent key, so return the duplicate and let the
   // per-target dedupe drop it.
   if (targetContainers(ctx).get(target.targetId) === container) return target;
-  const distinct = extractTarget(container, row, { skipSharedPhoto: true });
+  const distinct = extractTarget(container, row, verdictsFor(ctx), { skipSharedPhoto: true });
   if (!distinct || ctx.seenTargets.has(distinct.targetId)) return target;
   targetContainers(ctx).set(distinct.targetId, container);
   return distinct;
@@ -177,6 +141,14 @@ function rekeyPastSharedPhoto(target: TargetRef, container: HTMLElement, row: HT
 // handler above tell two DIFFERENT posts falling back to one photo id (re-key the
 // second) apart from one post matching twice (same container - a true duplicate).
 const TARGET_CONTAINERS_KEY = {};
+
+// One verdict cache per scan: every callback of the pass shares it, and it dies
+// with the pass - a Like relabels itself the moment the user reacts, so a verdict
+// must not outlive the scan that took it.
+const VERDICTS_KEY = {};
+function verdictsFor(ctx: ScanContext): PostRowVerdicts {
+  return ctx.memo(VERDICTS_KEY, postRowVerdicts);
+}
 
 function targetContainers(ctx: ScanContext): Map<string, HTMLElement> {
   return ctx.memo(TARGET_CONTAINERS_KEY, () => new Map<string, HTMLElement>());
@@ -188,58 +160,6 @@ function isOnPostDetailPage(): boolean {
   return currentPagePostUrl() !== null || isStandalonePhotoViewerPage() || isStandaloneReelViewerPage();
 }
 
-function resolvePostAction(btn: HTMLElement): ActionMatch | null {
-  // Structural comment rejection FIRST - covers every branch below (labeled,
-  // reel, geometry). See isInNestedArticle for why the label guards alone
-  // cannot keep a comment's reaction cluster out.
-  if (isInNestedArticle(btn)) return null;
-  if (isPostActionLikeButton(btn)) {
-    // The Messenger popup's composer toolbar pairs a thumbs-up Like with a Send
-    // button, which reads as a post Like - but a conversation is never a post.
-    if (isInMessengerThread(btn)) return null;
-    const slot = actionRowSlot(btn);
-    if (!slot) return null;
-    const row = slot.parentElement;
-    if (row && isNonPostActionRow(row)) return null;
-    return { slot, row };
-  }
-
-  // Reel viewer: the controls are a VERTICAL column (Like/Comment/Share stacked)
-  // whose Comment/Share sit beyond the shallow sibling window checked above, and
-  // the geometry fallback below is tuned for horizontal rows. Accept the reel's
-  // Like by its action COLUMN instead: a shallow actionRowSlot carrying
-  // Comment/Share. The shallow depth + Comment/Share requirement keep it off
-  // comment-row Likes (which pair with Reply, never Comment/Share).
-  if (isStandaloneReelViewerPage() && actionLabel(btn) === "Like" && isRenderableInPageLayout(btn) && !isInMessengerThread(btn)) {
-    const slot = actionRowSlot(btn, REEL_ACTION_COLUMN_DEPTH);
-    const row = slot?.parentElement ?? null;
-    if (slot && row && rowHasPostSibling(row) && !isNonPostActionRow(row)) {
-      return { slot, row, rail: true };
-    }
-  }
-
-  // The geometry fallback exists ONLY for locales whose labels we can't read
-  // (see findFacebookVisualActionSlot). A readable label is either the post Like
-  // (handled above) or a recognized non-Like action - never a reason to run the
-  // expensive per-ancestor getBoundingClientRect sweep. Gating on unreadable
-  // labels is the other half of the crowded-feed delay fix: the sweep no longer
-  // runs for every comment Like / Comment / Share / "See more" button.
-  if (actionLabel(btn) !== null) return null;
-
-  const visual = findFacebookVisualActionSlot(btn);
-  if (visual?.index !== 0) return null;
-  // A row we CAN read as plainly a comment row (Reply, no Comment/Share/Send) is
-  // still rejected - otherwise a wide localized comment row passes the geometry
-  // test and the trigger lands on comments.
-  if (looksLikeCommentRow(visual.row)) return null;
-  // The Messenger popup's per-message hover actions / header button rows can
-  // also satisfy the geometry test; reject anything inside a chat thread.
-  if (isInMessengerThread(btn)) return null;
-  if (isNonPostActionRow(visual.row)) return null;
-  if (isFilledChipRow(visual.slots)) return null;
-  return { slot: visual.slot, row: visual.row, geometry: true };
-}
-
 // Feed-path ceiling: how far up from the button to look for an ancestor holding
 // a post/permalink link before giving up.
 const POST_CONTAINER_WALK_DEPTH = 20;
@@ -248,7 +168,7 @@ const POST_CONTAINER_WALK_DEPTH = 20;
 // (POST_CONTAINER_SELECTORS) first, else walk up to an ancestor holding a
 // date/permalink link - logged-in feed layouts can render the action row outside
 // `[role="article"]` but adjacent to the post body that holds the date link.
-function findPostContainer(btn: HTMLElement, actionRow: HTMLElement | null, viaGeometryFallback = false): HTMLElement | null {
+function findPostContainer(btn: HTMLElement, actionRow: HTMLElement | null, viaGeometryFallback: boolean, verdicts: PostRowVerdicts): HTMLElement | null {
   // A modal confirmation dialog (Messenger/Marketplace "Delete chat", ...) renders
   // a two-button Cancel/Confirm row the geometry fallback can mistake for a post
   // action row. The dialog holds no post, so the container search must NOT climb
@@ -274,7 +194,7 @@ function findPostContainer(btn: HTMLElement, actionRow: HTMLElement | null, viaG
   // walks are safe there; a geometry-fallback match has NOT - it must sit in a
   // standard post container (language-independent markup), or it is page chrome.
   if (viaGeometryFallback) return null;
-  const local = findLocalStoryContainer(actionRow ?? btn);
+  const local = findLocalStoryContainer(actionRow ?? btn, verdicts);
   if (within(local)) return local;
   for (const node of ancestors(btn, POST_CONTAINER_WALK_DEPTH)) {
     if (queryFirst(node, POST_LINK_SELECTORS)) return node;

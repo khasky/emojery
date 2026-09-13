@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // Facebook: is this control a POST action row's Like, and which row is it in?
-// Everything here answers that one question - the localized label registry, the
-// language-blind geometry fallback, the rejections (comment rows, profile and
-// page headers, the composer, admin tools, Messenger threads), and the two
-// ancestor walks that bound a single post unit. It reads the DOM and returns
-// verdicts; it never builds a target or a placement.
+// Everything here answers that one question - resolvePostAction is the entry, over
+// the localized label registry, the language-blind geometry fallback, the
+// rejections (comment rows, profile and page headers, the composer, admin tools,
+// Messenger threads), and the two ancestor walks that bound a single post unit.
+// It reads the DOM and returns verdicts; it never builds a target or a placement.
 //
 // Leaf module: it imports no other facebook module except the pure URL helpers.
 
@@ -13,7 +13,7 @@ import { OWN_NODES_SELECTOR } from "../shared/dom";
 import { type ActionKind, defineLabelRegistry, isCountSummary, STEM, STEM_PARTS, stem } from "./action-labels";
 import { rejectCommentRow } from "./action-row";
 import { isPaintedFill } from "./css-alpha";
-import { normalizeCftHref, normalizePhotoHref, normalizePostHref } from "./facebook-urls";
+import { isStandaloneReelViewerPage, normalizeCftHref, normalizePhotoHref, normalizePostHref } from "./facebook-urls";
 import { ancestors, collapseWhitespace, textOf } from "./runtime";
 import { findVisualActionSlot, isRenderableInPageLayout, isStructuralRoot, type VisualActionSlot } from "./visual-action-row";
 
@@ -287,26 +287,94 @@ const SIBLING_DOWN_DEPTH = 4;
 // The trailing `\w+` lets the suffix be any noun word, not just an enumerated list.
 const POST_LIKE_ARIA = /^Like\s.+['’]s\s+\w+/i;
 
-// Per-scan memo. `countPostActionLikeButtons` runs the verdict over every
-// [role="button"] in a subtree, and the two ancestor walks that call it
-// (findLocalStoryContainer, widenToPostUnit) repeat that over up to
-// STORY_CONTAINER_WALK_DEPTH growing ancestors - so one post otherwise pays the getBoundingClientRect +
-// getComputedStyle walk below hundreds of times, which is the same cost the
-// label-first rejection in the verdict was added to avoid. Reset per scan and
-// per photo click (both in facebook.ts): a Like relabels itself the moment the
-// user reacts, so a verdict must not outlive the pass that took it.
-let postActionLikeCache = new WeakMap<HTMLElement, boolean>();
-
-export function resetPostActionLikeCache(): void {
-  postActionLikeCache = new WeakMap<HTMLElement, boolean>();
+// The memoized Like verdict for one pass over the page. `countPostActionLikeButtons`
+// runs the verdict over every [role="button"] in a subtree, and the two ancestor
+// walks that call it (findLocalStoryContainer, widenToPostUnit) repeat that over up
+// to STORY_CONTAINER_WALK_DEPTH growing ancestors - so one post otherwise pays the
+// getBoundingClientRect + getComputedStyle walk below hundreds of times, which is
+// the same cost the label-first rejection in the verdict was added to avoid. A
+// caller owns the lifetime by owning the object: the scan keeps one per pass, a
+// photo click makes a fresh one - a Like relabels itself the moment the user
+// reacts, so a verdict must not outlive the pass that took it.
+export interface PostRowVerdicts {
+  isPostActionLikeButton(btn: HTMLElement): boolean;
 }
 
-export function isPostActionLikeButton(btn: HTMLElement): boolean {
-  const cached = postActionLikeCache.get(btn);
-  if (cached !== undefined) return cached;
-  const verdict = readPostActionLikeButton(btn);
-  postActionLikeCache.set(btn, verdict);
-  return verdict;
+export function postRowVerdicts(): PostRowVerdicts {
+  const cache = new WeakMap<HTMLElement, boolean>();
+  return {
+    isPostActionLikeButton(btn) {
+      const cached = cache.get(btn);
+      if (cached !== undefined) return cached;
+      const verdict = readPostActionLikeButton(btn);
+      cache.set(btn, verdict);
+      return verdict;
+    },
+  };
+}
+
+export interface ActionMatch {
+  slot: HTMLElement;
+  row: HTMLElement | null;
+  /** Set when the action "row" is the reel viewer's VERTICAL column - the
+   *  binding then opts the trigger into the round icon-column form. */
+  rail?: boolean;
+  /** Set when the match came from the language-blind geometry fallback rather
+   *  than a readable action label - such a match must also prove a real post
+   *  container (facebook.ts findPostContainer). */
+  geometry?: boolean;
+}
+
+export function resolvePostAction(btn: HTMLElement, verdicts: PostRowVerdicts): ActionMatch | null {
+  // Structural comment rejection FIRST - covers every branch below (labeled,
+  // reel, geometry). See isInNestedArticle for why the label guards alone
+  // cannot keep a comment's reaction cluster out.
+  if (isInNestedArticle(btn)) return null;
+  if (verdicts.isPostActionLikeButton(btn)) {
+    // The Messenger popup's composer toolbar pairs a thumbs-up Like with a Send
+    // button, which reads as a post Like - but a conversation is never a post.
+    if (isInMessengerThread(btn)) return null;
+    const slot = actionRowSlot(btn);
+    if (!slot) return null;
+    const row = slot.parentElement;
+    if (row && isNonPostActionRow(row)) return null;
+    return { slot, row };
+  }
+
+  // Reel viewer: the controls are a VERTICAL column (Like/Comment/Share stacked)
+  // whose Comment/Share sit beyond the shallow sibling window checked above, and
+  // the geometry fallback below is tuned for horizontal rows. Accept the reel's
+  // Like by its action COLUMN instead: a shallow actionRowSlot carrying
+  // Comment/Share. The shallow depth + Comment/Share requirement keep it off
+  // comment-row Likes (which pair with Reply, never Comment/Share).
+  if (isStandaloneReelViewerPage() && actionLabel(btn) === "Like" && isRenderableInPageLayout(btn) && !isInMessengerThread(btn)) {
+    const slot = actionRowSlot(btn, REEL_ACTION_COLUMN_DEPTH);
+    const row = slot?.parentElement ?? null;
+    if (slot && row && rowHasPostSibling(row) && !isNonPostActionRow(row)) {
+      return { slot, row, rail: true };
+    }
+  }
+
+  // The geometry fallback exists ONLY for locales whose labels we can't read
+  // (see findFacebookVisualActionSlot). A readable label is either the post Like
+  // (handled above) or a recognized non-Like action - never a reason to run the
+  // expensive per-ancestor getBoundingClientRect sweep. Gating on unreadable
+  // labels is the other half of the crowded-feed delay fix: the sweep no longer
+  // runs for every comment Like / Comment / Share / "See more" button.
+  if (actionLabel(btn) !== null) return null;
+
+  const visual = findFacebookVisualActionSlot(btn);
+  if (visual?.index !== 0) return null;
+  // A row we CAN read as plainly a comment row (Reply, no Comment/Share/Send) is
+  // still rejected - otherwise a wide localized comment row passes the geometry
+  // test and the trigger lands on comments.
+  if (looksLikeCommentRow(visual.row)) return null;
+  // The Messenger popup's per-message hover actions / header button rows can
+  // also satisfy the geometry test; reject anything inside a chat thread.
+  if (isInMessengerThread(btn)) return null;
+  if (isNonPostActionRow(visual.row)) return null;
+  if (isFilledChipRow(visual.slots)) return null;
+  return { slot: visual.slot, row: visual.row, geometry: true };
 }
 
 // Facebook renders the action Like in several label shapes (enumerated on
@@ -509,20 +577,20 @@ export function findFacebookVisualActionSlot(btn: HTMLElement): VisualActionSlot
 // before crossing into a neighbouring post.
 const STORY_CONTAINER_WALK_DEPTH = 16;
 
-export function findLocalStoryContainer(start: HTMLElement): HTMLElement | null {
+export function findLocalStoryContainer(start: HTMLElement, verdicts: PostRowVerdicts): HTMLElement | null {
   for (const node of ancestors(start, STORY_CONTAINER_WALK_DEPTH)) {
     if (isStructuralRoot(node)) return null;
-    if (countPostActionLikeButtons(node) === 1 && hasLocalStoryMarker(node)) {
+    if (countPostActionLikeButtons(node, verdicts) === 1 && hasLocalStoryMarker(node)) {
       return node;
     }
   }
   return null;
 }
 
-function countPostActionLikeButtons(root: ParentNode): number {
+function countPostActionLikeButtons(root: ParentNode, verdicts: PostRowVerdicts): number {
   let count = 0;
   for (const button of root.querySelectorAll<HTMLElement>('[role="button"]')) {
-    if (isPostActionLikeButton(button)) count += 1;
+    if (verdicts.isPostActionLikeButton(button)) count += 1;
   }
   return count;
 }
@@ -544,11 +612,11 @@ function hasLocalStoryMarker(root: ParentNode): boolean {
 // then key on its pfbid, diverging from the feed/photo-viewer's `photo:<media>`).
 // Stopping at a second post-action Like guarantees we never cross into a
 // neighbouring (e.g. "Suggested") post.
-export function widenToPostUnit(actionRow: HTMLElement, fallback: HTMLElement): HTMLElement {
+export function widenToPostUnit(actionRow: HTMLElement, fallback: HTMLElement, verdicts: PostRowVerdicts): HTMLElement {
   let widest: HTMLElement | null = null;
   for (const node of ancestors(actionRow, STORY_CONTAINER_WALK_DEPTH)) {
     if (isStructuralRoot(node)) break;
-    const likes = countPostActionLikeButtons(node);
+    const likes = countPostActionLikeButtons(node, verdicts);
     if (likes > 1) break;
     if (likes === 1) widest = node;
   }

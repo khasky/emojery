@@ -12,7 +12,7 @@
 
 import type { TargetRef } from "../shared/adapter";
 import { canonicalPostIdForPhoto, photoIsAmbiguous, postUrlForPhoto } from "./facebook-photo-identity";
-import { widenToPostUnit } from "./facebook-post-row";
+import { type PostRowVerdicts, widenToPostUnit } from "./facebook-post-row";
 import {
   canonicalizeFbUrl,
   currentPagePhotoUrl,
@@ -190,11 +190,11 @@ function resolveGroupStoryTarget(article: HTMLElement, actionRow: HTMLElement | 
 // widen to the full post unit when no photo is found - on a permalink page
 // findPostContainer resolves to the date-link wrapper, which sits below the
 // photo and hides it. The lazy widen keeps the extra scan off the hot feed path.
-function resolvePhotoTarget(article: HTMLElement, actionRow: HTMLElement | null, opts: { skipSharedPhoto?: boolean }): TargetRef | null {
+function resolvePhotoTarget(article: HTMLElement, actionRow: HTMLElement | null, verdicts: PostRowVerdicts, opts: { skipSharedPhoto?: boolean }): TargetRef | null {
   if (opts.skipSharedPhoto) return null;
   let mediaTarget = findPhotoTargetNear(article, actionRow);
   if (!mediaTarget && actionRow) {
-    const wider = widenToPostUnit(actionRow, article);
+    const wider = widenToPostUnit(actionRow, article, verdicts);
     if (wider !== article) mediaTarget = findPhotoTargetNear(wider, actionRow);
   }
   return mediaTarget;
@@ -241,17 +241,17 @@ function resolveCftFallbackTarget(article: HTMLElement, actionRow: HTMLElement |
 // with the vote and stored in local history, so every stage's result is canonicalized
 // here - one choke point instead of a rule each resolver has to remember. Target IDS
 // are computed BEFORE this and stay untouched.
-export function extractTarget(article: HTMLElement, actionRow: HTMLElement | null, opts: { skipSharedPhoto?: boolean } = {}): TargetRef | null {
-  const target = resolveTargetStage(article, actionRow, opts);
+export function extractTarget(article: HTMLElement, actionRow: HTMLElement | null, verdicts: PostRowVerdicts, opts: { skipSharedPhoto?: boolean } = {}): TargetRef | null {
+  const target = resolveTargetStage(article, actionRow, verdicts, opts);
   return target ? { ...target, url: canonicalizeFbUrl(target.url) } : null;
 }
 
-function resolveTargetStage(article: HTMLElement, actionRow: HTMLElement | null, opts: { skipSharedPhoto?: boolean }): TargetRef | null {
+function resolveTargetStage(article: HTMLElement, actionRow: HTMLElement | null, verdicts: PostRowVerdicts, opts: { skipSharedPhoto?: boolean }): TargetRef | null {
   return (
     resolveReelViewerTarget(article, actionRow) ??
     resolveMediaViewerTarget(article) ??
     resolveGroupStoryTarget(article, actionRow) ??
-    resolvePhotoTarget(article, actionRow, opts) ??
+    resolvePhotoTarget(article, actionRow, verdicts, opts) ??
     resolveOwnPermalinkTarget(article, actionRow) ??
     resolveCurrentPhotoTarget(opts) ??
     // Feed reel: a reel card's date link is a lazy `__cft__` placeholder and it
