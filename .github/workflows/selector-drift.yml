@@ -111,5 +111,7 @@ jobs:
         run: |
           set -euo pipefail
           [ -n "${WEBHOOK:-}" ] || exit 0
+          # flags 4 is Discord SUPPRESS_EMBEDS: the run URL posts as plain text, not
+          # as a link card whose repo title and image bury the alert line.
           curl -sS -X POST -H "content-type: application/json" \
-            -d "{\"content\":\"Selector drift FAILED: ${RUN_URL}\"}" "$WEBHOOK" > /dev/null
+            -d "{\"content\":\"Selector drift FAILED: ${RUN_URL}\",\"flags\":4}" "$WEBHOOK" > /dev/null
