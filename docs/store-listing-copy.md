@@ -85,7 +85,7 @@ Used to retain the user's local reaction history in IndexedDB as it grows beyond
 ## alarms justification
 
 ```text
-Used to schedule short background tasks that retry queued reactions after temporary connection failures and refresh cached reaction counts. This lets pending submissions resume without keeping the extension's background service worker continuously running.
+Used to schedule short background tasks that retry queued reactions after temporary connection failures and periodically refresh the list of most-used emoji shown at the top of the picker. This lets pending submissions resume without keeping the extension's background service worker continuously running.
 ```
 
 ## activeTab justification
