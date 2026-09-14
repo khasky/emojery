@@ -108,7 +108,8 @@ test("account switching isolates history and the own reaction", async () => {
         .signIn(session.context, emailA)
         .then(async () => {
           const page = await ext.openGithub(session.context);
-          await ext.clearReaction(page);
+          const unreactFlushed = ext.watchNextVoteFlush(session.context);
+          if (await ext.clearReaction(page)) await unreactFlushed();
         })
         .catch(() => {});
     }
@@ -165,7 +166,13 @@ test("signing in with the same email from a fresh profile restores the reaction"
     const history = await historyState(second.context, "github.com");
     expect(history.empty, "history is local: a fresh profile starts empty even for a recovered account").toBe(true);
 
-    await ext.clearReaction(page);
+    // The un-react needs the same wire wait as the react above, and for the same
+    // reason: this profile (and its durable queue) dies next. Unflushed, the
+    // reaction either stays on the shared target for good or lands late - moving
+    // the public count under the settled baseline the next test in this file
+    // reads, whose absolute base+1 expectations then never converge.
+    const unreactFlushed = ext.watchNextVoteFlush(second.context);
+    if (await ext.clearReaction(page)) await unreactFlushed();
   } finally {
     await ext.ensureSignedOut(second.context).catch(() => {});
     await ext.closeSession(second);
@@ -261,14 +268,18 @@ test("two accounts raise and lower the shared counter independently", async () =
     // expectations below (including the COUNT_CACHE_WAIT_MS cross-session poll) can then never
     // converge. Same rendered-counter wait the deletion spec uses.
     const base = await ext.waitForSettledTotal(pageA);
+    const voteFlushed = ext.watchNextVoteFlush(sessionA.context);
     await ext.reactWith(pageA, ext.REACTIONS.heart);
     reactedAsA = true;
     await expect.poll(() => ext.hasOwnReaction(pageA)).toBe(true);
     await expect.poll(async () => (await ext.readCounter(pageA)).total ?? 0, { message: "account A's reaction should raise the counter by one" }).toBe(base + 1);
+    // That counter is A's own optimistic render; this is the wire. A vote still
+    // sitting in the queue would otherwise surface 210s later as account B's
+    // "the public counter never moved", pointing at the read path instead.
+    await voteFlushed();
 
-    // Account B observes A's vote purely through the public counter. Reaching
-    // base+1 here also proves A's vote arrived server-side - A's session stays
-    // open, so the queue flushes on its own schedule with nothing to race.
+    // Account B observes A's vote purely through the public counter - already on
+    // the wire above, so this waits out read propagation alone.
     const pageB = await ext.openGithub(sessionB.context);
     await expect
       .poll(async () => (await ext.reloadAndReadTotal(pageB)) ?? 0, {
