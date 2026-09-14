@@ -67,7 +67,13 @@ Emojery is an independent project. All product names, logos and trademarks are t
 ## Single purpose description
 
 ```text
-Emojery lets people react to web content with a full emoji palette and see aggregate reaction counts contributed by email-verified users, shown inline next to the existing Like / Star / vote buttons on a fixed list of supported sites. Every permission and every host exists to render that one reaction control and sync its counts.
+Emojery adds 600+ emoji reactions beside the Like, Star and vote buttons on supported websites. Go beyond the built-in reaction menu, choose a more specific response and see what other users selected. Free, open source, no ads, no tracking.
+```
+
+## AMO summary (250 characters)
+
+```text
+Emojery adds 600+ emoji reactions beside the Like, Star and vote buttons on supported websites. Go beyond the built-in reaction menu, choose a more specific response and see what other users selected. Free, open source, no ads, no tracking.
 ```
 
 ## storage justification
@@ -217,11 +223,7 @@ To test reacting: open the extension popup, choose Sign in, enter any real email
 "Auto-press original buttons" is off by default. Turning it on in the popup makes the emoji you pick also press the site's own control on the page you are looking at, under your own account; removing the reaction releases only what the extension pressed.
 ```
 
-## AMO summary (250 characters)
 
-```text
-Emoji reactions next to the Like, Star and vote buttons you already use, on Facebook, Instagram, Reddit, YouTube, X, Threads, GitHub, GitLab and Amazon. Counts are public, recorded in a tamper-evident log and recountable by an open-source verifier.
-```
 
 ## Category and tags
 
