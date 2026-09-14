@@ -43,12 +43,20 @@ export const WALL_SENTENCES_RE =
 // reload can't silently blank the answer either.
 export async function wallReason(page: Page): Promise<string | null> {
   if (isBlockUrl(page.url())) return `anti-bot wall URL: ${page.url()}`;
+  const text = await wallSentence(page);
+  return text === null ? null : `anti-bot interstitial: "${text}"`;
+}
+
+// The sentence half on its own, for a caller that must NOT act on the URL half:
+// Reddit keeps `?js_challenge=` in the address while serving the real feed, so a
+// re-navigation driven by the URL gate would re-navigate a healthy page.
+export async function wallSentence(page: Page): Promise<string | null> {
   const text = await page
     .getByText(WALL_SENTENCES_RE)
     .first()
     .textContent({ timeout: 2_000 })
     .catch(() => null);
-  return text === null ? null : `anti-bot interstitial: "${text.replace(/\s+/g, " ").trim().slice(0, 160)}"`;
+  return text === null ? null : text.replace(/\s+/g, " ").trim().slice(0, 160);
 }
 
 // Body-text phrases of an anti-bot / transient-error interstitial that no normal

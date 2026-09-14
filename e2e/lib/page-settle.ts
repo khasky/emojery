@@ -221,27 +221,35 @@ export async function settlePage(page: Page, site: SupportedSiteScenario): Promi
   // appears. settleMs is only the CEILING, paid in full solely by pages that
   // never render one (walls, slow SSR).
   const settleStart = Date.now();
-  await page
-    .waitForFunction(
-      ({ nativeSelectors, hostSelector }) => {
-        if (document.querySelector(hostSelector)) return true;
-        return nativeSelectors.some((sel) => {
-          try {
-            return document.querySelector(sel) !== null;
-          } catch {
-            return false;
-          }
-        });
-      },
-      { nativeSelectors: site.nativeSelectors, hostSelector: HOST_SELECTOR },
-      { timeout: settleMs },
-    )
-    .catch(() => {});
+  await page.waitForFunction(hasActionSurfaceInPage, { nativeSelectors: site.nativeSelectors, hostSelector: HOST_SELECTOR }, { timeout: settleMs }).catch(() => {});
   // Floor: see SETTLE_FLOOR_MS.
   const elapsed = Date.now() - settleStart;
   if (elapsed < SETTLE_FLOOR_MS) await page.waitForTimeout(SETTLE_FLOOR_MS - elapsed);
   await handleKnownInterstitials(page, site);
   await dismissLoginWalls(page);
+}
+
+// Anything to mount on: our own host, or one of the site's own action controls.
+// Serialized into the page by both the settle wait above and the one-shot read
+// below, so the two can't drift.
+function hasActionSurfaceInPage({ nativeSelectors, hostSelector }: { nativeSelectors: string[]; hostSelector: string }): boolean {
+  if (document.querySelector(hostSelector)) return true;
+  return nativeSelectors.some((sel) => {
+    try {
+      return document.querySelector(sel) !== null;
+    } catch {
+      return false;
+    }
+  });
+}
+
+// Whether the settled page rendered an action surface at all. Cheap, and it
+// guards the wall probe in lib/site-session.ts: a locator read for a sentence a
+// healthy page never carries pays its whole timeout on every such page.
+// Unreadable (a context torn down mid-navigation) counts as rendered, so nothing
+// re-navigates on a blank answer.
+export function rendersActionSurface(page: Page, site: SupportedSiteScenario): Promise<boolean> {
+  return page.evaluate(hasActionSurfaceInPage, { nativeSelectors: site.nativeSelectors, hostSelector: HOST_SELECTOR }).catch(() => true);
 }
 
 export async function handleKnownInterstitials(page: Page, site: SupportedSiteScenario): Promise<void> {

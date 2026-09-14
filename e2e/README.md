@@ -252,7 +252,7 @@ What headless would genuinely buy is a run that neither steals window focus nor 
 
 ## Known caveat: logged-out social sites can be bot-blocked
 
-Logged-out **social** sites (Facebook/Instagram/X/Reddit/Threads) gate or bot-challenge automated browsers, so their live unauth runs can be flaky or blocked in some environments (Reddit network blocks, X login wall). The login-free sites (GitHub, GitLab, Amazon, YouTube) run reliably. This is an environment/anti-bot limitation, not an extension bug; re-run or use a dedicated `E2E_USER_DATA_DIR`. Deterministic logged-in coverage lives in `site-auth/`.
+Logged-out **social** sites (Facebook/Instagram/X/Reddit/Threads) gate or bot-challenge automated browsers, so their live unauth runs can be flaky or blocked in some environments (Reddit network blocks, X login wall). The login-free sites (GitHub, GitLab, Amazon, YouTube) run reliably. This is an environment/anti-bot limitation, not an extension bug. Reddit's is the one a second navigation clears: it answers every cold profile with a challenge shell, and each `isolatedContext` scenario mints a cold profile, so the settle ladder re-asks once before believing the wall (`settleAndRequireMount` in `lib/site-session.ts`). Past that, re-run or use a dedicated `E2E_USER_DATA_DIR`. Deterministic logged-in coverage lives in `site-auth/`.
 
 ## Engine component tests (not e2e)
 

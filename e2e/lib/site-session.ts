@@ -6,10 +6,10 @@
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import { launchRealisticContext, resolveExtensionPath, resolveUserDataDir } from "./browser-session";
 import { extensionLaunchArgs, realisticClientEnabled } from "./launch-args";
-import { debugEvidence, handleKnownInterstitials, isNoActionSurface, settleFullLoad, settlePage, waitForMountEvidence } from "./page-settle";
+import { debugEvidence, handleKnownInterstitials, isNoActionSurface, rendersActionSurface, safeGoto, settleFullLoad, settlePage, waitForMountEvidence } from "./page-settle";
 import { OWN_NODES_SELECTOR } from "./selectors";
 import type { MountEvidence, SupportedSiteScenario } from "./site-evidence";
-import { dismissInterstitialsInitScript } from "./site-walls";
+import { dismissInterstitialsInitScript, wallSentence } from "./site-walls";
 
 interface LaunchE2eOptions {
   locale?: string;
@@ -100,6 +100,36 @@ export async function skipWithShot(page: Page, site: SupportedSiteScenario, cond
   test.skip(true, reason);
 }
 
+// How many times a walled page is re-asked for before its wall is believed. A
+// cold profile's FIRST navigation to a site can land on a one-shot challenge
+// shell that no amount of waiting clears - reddit answers a fresh profile with
+// "Prove your humanity" and goes on rendering it, while the very next navigation
+// serves the real feed. Every reddit scenario runs isolatedContext, so that
+// first navigation is the only one the test makes, and every reddit case of
+// site-injection.spec.ts skipped as walled; glyph-size.spec.ts shares one
+// session across its scenarios and skipped only the first. The cost is paid
+// solely by a page that is walled already and would otherwise skip.
+const CHALLENGE_RENAVIGATIONS = 1;
+
+async function settleSurface(page: Page, site: SupportedSiteScenario): Promise<void> {
+  await settleFullLoad(page);
+  await handleKnownInterstitials(page, site);
+  await settlePage(page, site);
+}
+
+// Ask the site again for a page that rendered nothing to mount on AND carries a
+// wall sentence. Not wallReason: its URL half fires on reddit's healthy
+// `?js_challenge=` feed too, and re-navigating a working page is how the Amazon
+// throttle was once walked into (site-walls.ts clickAmazonContinueShopping).
+async function renavigatePastChallenge(page: Page, site: SupportedSiteScenario): Promise<void> {
+  for (let attempt = 0; attempt < CHALLENGE_RENAVIGATIONS; attempt += 1) {
+    if (await rendersActionSurface(page, site)) return;
+    if ((await wallSentence(page)) === null) return;
+    if (!(await safeGoto(page, site.url))) return;
+    await settleSurface(page, site);
+  }
+}
+
 // A stale `mountKeyPattern` fails as an EMPTY matchingAnchorKeys - byte for byte what
 // "nothing mounted" looks like. The keys the page actually derived, next to the pattern
 // that rejected them, is what tells the two apart: facebook and gitlab are excluded from
@@ -111,20 +141,20 @@ export function keyMatchDiagnostic(site: SupportedSiteScenario, evidence: MountE
 
 // The settle -> wall-skip -> assert-mounted ladder every navigation-owning leg repeats
 // (site-injection's legs and glyph-size's opener - the per-suite copies had drifted).
-// The caller owns its safeGoto/safeReload and passes the result as `navOk`. `phase`
+// The caller owns its safeGoto/safeReload and passes the result as `navOk`; a page that
+// settles onto a challenge shell is re-asked for here (renavigatePastChallenge). `phase`
 // only chooses how the two skips read; `skipLabelPrefix` keeps each suite's screenshot
 // names apart; `requireMatchingKeys: false` is for the caller that only needs a visible
 // host (glyph-size), where a key assert would widen what that suite fails on.
 export async function settleAndRequireMount(page: Page, site: SupportedSiteScenario, opts: { navOk: boolean; phase: "initial" | "after-signin"; skipLabelPrefix?: string; requireMatchingKeys?: boolean; expectHiddenNative?: boolean }): Promise<MountEvidence> {
   const afterSignIn = opts.phase === "after-signin";
   const prefix = opts.skipLabelPrefix ?? "";
-  await settleFullLoad(page);
-  await handleKnownInterstitials(page, site);
-  await settlePage(page, site);
+  await settleSurface(page, site);
   // A social platform can block navigation outright (anti-bot HTTP error) -
   // there is then no page to test, so skip rather than fail on the raw error.
   const navReason = afterSignIn ? `Navigation blocked on ${site.site} after sign-in (anti-bot / HTTP error)` : `Navigation blocked on ${site.site} (anti-bot / HTTP error)`;
   await skipWithShot(page, site, !opts.navOk, navReason, afterSignIn ? `${prefix}nav-blocked-after-signin` : `${prefix}nav-blocked`);
+  await renavigatePastChallenge(page, site);
 
   const evidence = await waitForMountEvidence(page, site, opts.expectHiddenNative ?? false);
   // Nothing to mount on - a wall URL, no visible native controls, or unambiguous interstitial
