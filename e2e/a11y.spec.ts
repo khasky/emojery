@@ -233,7 +233,10 @@ test("keyboard: popup tab order, roving tablist and a visible panel focus ring",
   await page.reload();
   await expect(page.getByRole("tab", { name: "Settings" })).toHaveAttribute("aria-selected", "true");
 
-  // The tablist is a single Tab stop (roving tabindex).
+  // The header's help link sits above the tab strip in reading order, so it takes
+  // the first stop; the tablist behind it is a single stop (roving tabindex).
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("link", { name: "Help" })).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(page.getByRole("tab", { name: "Settings" })).toBeFocused();
 
