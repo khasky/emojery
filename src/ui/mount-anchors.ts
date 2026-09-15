@@ -60,6 +60,12 @@ export function observePendingAnchor(key: TargetKey, anchor: Element): void {
     pendingVisibleHandler?.(key);
     return;
   }
+  // The live observation of this exact anchor is already the one we want. Tearing it
+  // down to re-add it restarts intersection delivery, and delivery costs a frame: on a
+  // page whose frames are seconds apart, the next re-scan arrives first and restarts it
+  // again, so the anchor can sit in view for seconds while its mount waits for a signal
+  // that keeps being cancelled. Re-scans hand back the same anchor constantly.
+  if (pendingAnchorByKey.get(key) === anchor) return;
   pendingVisibility ??= new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
