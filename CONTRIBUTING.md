@@ -99,18 +99,17 @@ pnpm test:coverage     # vitest run plus the coverage report - informational, no
 pnpm test:e2e:hermetic # the one e2e project that needs neither a browser nor the network
 pnpm test:browser      # the WebKit + Firefox component tests (one-time: pnpm exec playwright install webkit firefox)
 pnpm build             # wxt build, chrome + firefox
-pnpm check:bundle      # per-content-script byte budget + no English message dictionary in a bundle
-pnpm zip                # wxt zip, chrome + firefox
-pnpm zip:production     # the two store archives, what CI and the release run
+pnpm zip:production    # the two store archives, what CI and the release run
+pnpm check:bundle      # per-content-script byte budget over what zip:production wrote + no English message dictionary in a bundle
 ```
 
 `pnpm format` (`biome format --write .`) fixes what `pnpm lint` reports as formatting; it is not part of the gate, and `pnpm lint` still has to pass after it.
 
 `pnpm test:browser` dying in seconds with `page.goto: Page crashed` / `Browser connection was closed while running tests` and `Tests no tests` is a stale WebKit binary, not a broken suite — the `webkit-<rev>` under the Playwright browsers directory no longer matches the pinned `playwright`. Re-run `pnpm exec playwright install webkit`. A WebKit that launches and loads an ordinary page proves nothing here: only a bundle as heavy as the Vitest tester page crashes the mismatched build (seen on Windows with WebKit v2311, fixed by v2336). The pinned `firefox-<rev>` binary can go stale the same way — `pnpm exec playwright install firefox`.
 
-`pnpm test` (plain `vitest run`) is the fast inner loop, not the gate: it excludes the browser-mode specs (`*.browser.test.*`, which run under `test:browser` in real WebKit and Firefox), so a green `pnpm test` says nothing about them. `test:coverage` adds the report and nothing else — `vitest.config.ts` sets no thresholds, so coverage never fails a run either way. Same for `pnpm build` / `pnpm zip` — CI builds and packages both browsers.
+`pnpm test` (plain `vitest run`) is the fast inner loop, not the gate: it excludes the browser-mode specs (`*.browser.test.*`, which run under `test:browser` in real WebKit and Firefox), so a green `pnpm test` says nothing about them. `test:coverage` adds the report and nothing else — `vitest.config.ts` sets no thresholds, so coverage never fails a run either way. Same for `pnpm build` / `pnpm zip:production` — CI builds and packages both browsers.
 
-3 CI steps have no local equivalent and need nothing from you: after the build it scans the generated Chrome output, the generated Firefox output, and the AMO source archive for committed secrets (`scripts/scan-extension-artifact.sh`, `scripts/scan-source-archive.sh`).
+4 CI steps have no local equivalent: after the build it fails if anything under `public/emoji-data` or `src/shared/__generated__` was committed stale, and scans the generated Chrome output, the generated Firefox output, and the AMO source archive for committed secrets (`scripts/scan-extension-artifact.sh`, `scripts/scan-source-archive.sh`).
 
 The commit hooks are the other half. `commit-msg` runs commitlint; `pre-commit` runs [gitleaks](https://github.com/gitleaks/gitleaks) over the staged diff, but only when the binary is on `PATH` — an absent one skips silently rather than making the repo uncommittable, so a machine without it commits with that filter off. Install it to get the local half; `security.yml` scans the full history on every PR either way, and rotating a leaked key beats rewriting the history that carries it.
 

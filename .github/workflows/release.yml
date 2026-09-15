@@ -83,11 +83,12 @@ jobs:
       - name: Setup Node and pnpm
         uses: ./.github/actions/setup-node-pnpm
 
-      # What follows is ci.yml's gate minus 3 steps, deliberately: `pnpm test:browser`
+      # What follows is ci.yml's gate minus 4 steps, deliberately: `pnpm test:browser`
       # (downloading WebKit and Gecko costs more than this whole job, and a tag is cut
       # from main, where ci.yml already ran it), `pnpm lint:docs` (Markdown cannot
-      # change a shipped artifact) and `pnpm build` (`zip:production` below builds what it
-      # would). Everything that can still differ at a tag is repeated here.
+      # change a shipped artifact), `pnpm build` (`zip:production` below builds what it
+      # would) and the generated-assets diff (same reason as test:browser - ci.yml held
+      # main to it). Everything that can still differ at a tag is repeated here.
       - name: Typecheck
         run: pnpm compile
 

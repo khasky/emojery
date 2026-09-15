@@ -210,7 +210,7 @@ Automated validation reports 0 errors and 12 warnings. All 12 are expected.
 
 10 x UNSAFE_VAR_ASSIGNMENT ("unsafe assignment to innerHTML") - one per bundle that carries Preact: the 9 site content scripts and the shared tracking-links chunk. Every hit is inside Preact's own diff routine, its dangerouslySetInnerHTML branch (f.__html == e.innerHTML || (e.innerHTML = f.__html)), which is inlined into each content script separately because content scripts are built as standalone bundles with no shared chunk.
 
-Nothing in this add-on reaches that branch, and the attached source archive shows it: "grep -rn dangerouslySetInnerHTML src" returns nothing, and "grep -rn innerHTML src" returns two lines, both in src/test/setup.ts - a vitest DOM reset that ships in no artifact. The content scripts render through Preact components only.
+Nothing in this add-on reaches that branch, and the attached source archive shows it: "grep -rn dangerouslySetInnerHTML src" returns nothing, and every "grep -rn innerHTML src" hit is in a test file - the vitest DOM reset and the unit tests, none of which ship in an artifact. The content scripts render through Preact components only.
 
 2 x KEY_FIREFOX_UNSUPPORTED_BY_MIN_VERSION (desktop and Android) - strict_min_version is 128.0, below the 140/142 that introduced data_collection_permissions, so installs on the previous ESR keep working.
 ```

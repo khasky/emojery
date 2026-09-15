@@ -256,7 +256,7 @@ cd emojery
 pnpm install
 ```
 
-The `postinstall` hook runs `wxt prepare` and copies the bundled emoji locales into `public/emoji-data/` — no extra step required.
+The `postinstall` hook runs `wxt prepare`, and the bundled emoji locales under `public/emoji-data/` are committed — no extra step required.
 
 ### Build for your browser
 
@@ -294,7 +294,7 @@ Reproducing the Firefox package for AMO review? See [docs/amo-reviewer-build.md]
 **Firefox:**
 
 1. Open `about:debugging#/runtime/this-firefox`.
-2. Click **Load Temporary Add-on...** and pick any file inside `.output/firefox-mv2/` (e.g. `manifest.json`).
+2. Click **Load Temporary Add-on...** and pick any file inside `.output/firefox-mv2-staging/` (e.g. `manifest.json`).
 3. The add-on stays loaded until you restart Firefox — repeat after every restart while side-loading.
 
 > Don't use **Install Add-on From File...** with the packaged Firefox zip: release/beta Firefox reject unsigned packages ("could not be verified"). Load the unpacked folder as a temporary add-on instead.
