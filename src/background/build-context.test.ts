@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { BUILD_ID_HEADER, BUILD_INDEX_PATH, BUILD_PROOF_HEADER, buildRequestProof } from "../shared/build-context";
+import { BUILD_ID_HEADER, BUILD_INDEX_PATH, BUILD_TAG_HEADER, buildRequestTag } from "../shared/build-context";
 import { installFakeChrome, stubFetch } from "../test/fixtures";
-import { buildProofHeaders, rememberBuildChallenge, resetBuildContext } from "./build-context";
+import { buildTagHeaders, rememberBuildRef, resetBuildContext } from "./build-context";
 
 const ID = "a".repeat(64);
 const PACKAGE: Record<string, string> = {
@@ -13,7 +13,7 @@ const INDEX = JSON.stringify({ format: 1, id: ID, files: [BUILD_INDEX_PATH, ...O
 
 const URL_UNDER_TEST = "https://api.emojery.app/reactions/vote";
 
-function challengeFor(secondsFromNow: number): string {
+function refFor(secondsFromNow: number): string {
   const payload = btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + secondsFromNow, n: "00" }));
   return `v1.${payload.replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "")}.mac`;
 }
@@ -36,7 +36,7 @@ function stubPackage(overrides: Record<string, string> = {}): { reads: string[] 
  *  nothing. */
 async function settledHeaders(url = URL_UNDER_TEST, method = "POST", authorization = ""): Promise<Record<string, string>> {
   for (let attempt = 0; attempt < 20; attempt++) {
-    const headers = await buildProofHeaders(url, method, authorization);
+    const headers = await buildTagHeaders(url, method, authorization);
     if (headers[BUILD_ID_HEADER]) return headers;
   }
   return {};
@@ -53,33 +53,33 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("buildProofHeaders", () => {
-  it("sends nothing until a response has handed out a challenge", async () => {
+describe("buildTagHeaders", () => {
+  it("sends nothing until a response has handed one out", async () => {
     stubPackage();
-    expect(await buildProofHeaders(URL_UNDER_TEST, "POST", "")).toEqual({});
+    expect(await buildTagHeaders(URL_UNDER_TEST, "POST", "")).toEqual({});
   });
 
-  it("answers the challenge with the measured package", async () => {
+  it("answers with the measured package", async () => {
     stubPackage();
-    rememberBuildChallenge(challengeFor(600));
+    rememberBuildRef(refFor(600));
     const headers = await settledHeaders();
     expect(headers[BUILD_ID_HEADER]).toBe(ID);
-    const [challenge, proof] = (headers[BUILD_PROOF_HEADER] ?? "").split("~");
-    expect(proof).toMatch(/^[a-f0-9]{64}$/);
-    expect(challenge).toBe(challengeFor(600));
+    const [ref, tag] = (headers[BUILD_TAG_HEADER] ?? "").split("~");
+    expect(tag).toMatch(/^[a-f0-9]{64}$/);
+    expect(ref).toBe(refFor(600));
   });
 
   it("binds the answer to the request it rides on", async () => {
     stubPackage();
-    rememberBuildChallenge(challengeFor(600));
+    rememberBuildRef(refFor(600));
     const vote = await settledHeaders();
-    const read = await buildProofHeaders("https://api.emojery.app/reactions/count", "GET", "");
-    expect(read[BUILD_PROOF_HEADER]).not.toBe(vote[BUILD_PROOF_HEADER]);
+    const read = await buildTagHeaders("https://api.emojery.app/reactions/count", "GET", "");
+    expect(read[BUILD_TAG_HEADER]).not.toBe(vote[BUILD_TAG_HEADER]);
   });
 
   it("measures the package once per session and re-answers from the cache", async () => {
     const { reads } = stubPackage();
-    rememberBuildChallenge(challengeFor(600));
+    rememberBuildRef(refFor(600));
     await settledHeaders();
     const afterFirst = reads.length;
     expect(afterFirst).toBeGreaterThan(1);
@@ -87,34 +87,34 @@ describe("buildProofHeaders", () => {
     // A restarted service worker keeps storage.session, so the second pass reads only
     // the index.
     resetBuildContext();
-    rememberBuildChallenge(challengeFor(600));
+    rememberBuildRef(refFor(600));
     await settledHeaders();
     expect(reads.slice(afterFirst)).toEqual([BUILD_INDEX_PATH]);
   });
 
-  it("stops answering once the challenge expires", async () => {
+  it("stops answering once the ref expires", async () => {
     stubPackage();
-    rememberBuildChallenge(challengeFor(600));
+    rememberBuildRef(refFor(600));
     await settledHeaders();
     vi.useFakeTimers();
     vi.setSystemTime(Date.now() + 600_000);
-    expect(await buildProofHeaders(URL_UNDER_TEST, "POST", "")).toEqual({});
+    expect(await buildTagHeaders(URL_UNDER_TEST, "POST", "")).toEqual({});
     vi.useRealTimers();
   });
 
   it.each([
     ["one already spent", -10],
     ["one dated further ahead than the server would issue", 7200],
-  ])("ignores a challenge %s", async (_name, seconds) => {
+  ])("ignores a ref %s", async (_name, seconds) => {
     stubPackage();
-    rememberBuildChallenge(challengeFor(seconds));
-    expect(await buildProofHeaders(URL_UNDER_TEST, "POST", "")).toEqual({});
+    rememberBuildRef(refFor(seconds));
+    expect(await buildTagHeaders(URL_UNDER_TEST, "POST", "")).toEqual({});
     expect(session).toEqual({});
   });
 
   it("stays quiet when the package carries no index", async () => {
     stubFetch(async () => new Response("", { status: 404 }));
-    rememberBuildChallenge(challengeFor(600));
+    rememberBuildRef(refFor(600));
     expect(await settledHeaders()).toEqual({});
   });
 
@@ -125,25 +125,25 @@ describe("buildProofHeaders", () => {
       const body = files[path];
       return body === undefined ? new Response("", { status: 404 }) : new Response(body);
     });
-    rememberBuildChallenge(challengeFor(600));
+    rememberBuildRef(refFor(600));
     expect(await settledHeaders()).toEqual({});
   });
 
   it("re-measures rather than trusting a cached digest from another build", async () => {
     session.build_measurement_v1 = { id: ID, root: "c".repeat(64) };
     const { reads } = stubPackage();
-    rememberBuildChallenge(challengeFor(600));
+    rememberBuildRef(refFor(600));
     const headers = await settledHeaders();
     // The cached digest is keyed by the index id, so this one is used as-is...
     expect(reads).toEqual([BUILD_INDEX_PATH]);
-    const expected = await buildRequestProof(ID, "c".repeat(64), challengeFor(600), URL_UNDER_TEST, "POST", "");
-    expect(headers[BUILD_PROOF_HEADER]).toBe(`${challengeFor(600)}~${expected}`);
+    const expected = await buildRequestTag(ID, "c".repeat(64), refFor(600), URL_UNDER_TEST, "POST", "");
+    expect(headers[BUILD_TAG_HEADER]).toBe(`${refFor(600)}~${expected}`);
 
     // ...and a package whose index names a different build is measured again.
     resetBuildContext();
     const other = JSON.stringify({ format: 1, id: "d".repeat(64), files: [BUILD_INDEX_PATH, ...Object.keys(PACKAGE)].sort() });
     const second = stubPackage({ [BUILD_INDEX_PATH]: other });
-    rememberBuildChallenge(challengeFor(600));
+    rememberBuildRef(refFor(600));
     expect((await settledHeaders())[BUILD_ID_HEADER]).toBe("d".repeat(64));
     expect(second.reads.length).toBeGreaterThan(1);
   });

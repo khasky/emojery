@@ -10,14 +10,14 @@
 // is given); a GET carries only the client identity headers. A bearer token
 // rides on either.
 
-import { BUILD_CHALLENGE_HEADER } from "../shared/build-context";
+import { BUILD_REF_HEADER } from "../shared/build-context";
 import { API_BASE, API_TIMEOUT_MS } from "../shared/config";
 import { deadlineSignal } from "../shared/fetch-deadline";
 import { normalizeLanguageTag } from "../shared/language-tag";
 import type { RuntimeErrorCode } from "../shared/messages";
 import { randomId } from "../shared/random-id";
 import { storageLocalGet, storageLocalSet } from "../shared/webext";
-import { buildProofHeaders, rememberBuildChallenge } from "./build-context";
+import { buildTagHeaders, rememberBuildRef } from "./build-context";
 import { logApiExchange, logBackgroundError } from "./debug";
 
 // Injected by wxt.config.ts: false under the dev server, where the whole exchange folds
@@ -52,7 +52,7 @@ export async function apiRequest(path: string, options: ApiRequestOptions): Prom
   const url = `${API_BASE}${path}`;
   const headers = options.method === "POST" ? await jsonHeaders(options) : clientHeaders(options);
   if (BUILD_CONTEXT_ENABLED) {
-    Object.assign(headers, await buildProofHeaders(url, options.method, headers.authorization ?? ""));
+    Object.assign(headers, await buildTagHeaders(url, options.method, headers.authorization ?? ""));
   }
   const init: RequestInit = {
     method: options.method,
@@ -74,7 +74,7 @@ export async function apiRequest(path: string, options: ApiRequestOptions): Prom
     logApiExchange(url, init, { error }, startedAt);
     throw error;
   }
-  if (BUILD_CONTEXT_ENABLED) rememberBuildChallenge(response.headers.get(BUILD_CHALLENGE_HEADER));
+  if (BUILD_CONTEXT_ENABLED) rememberBuildRef(response.headers.get(BUILD_REF_HEADER));
   const retryAfterSeconds = parseRetryAfterSeconds(response.headers.get("retry-after"));
   const text = await response.text();
   let body: unknown = null;

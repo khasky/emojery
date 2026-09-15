@@ -3,7 +3,7 @@
 // The client half of the build measurement; shared/build-context.ts says what the
 // result shows. Nothing here issues a request of its own, and no API call waits on it.
 
-import { BUILD_ID_HEADER, BUILD_INDEX_PATH, BUILD_PROOF_HEADER, buildRequestProof, challengeExpiryMs, measureBuild, parseBuildIndex } from "../shared/build-context";
+import { BUILD_ID_HEADER, BUILD_INDEX_PATH, BUILD_TAG_HEADER, buildRefExpiryMs, buildRequestTag, measureBuild, parseBuildIndex } from "../shared/build-context";
 import { storageSessionGet, storageSessionSet } from "../shared/webext";
 import { logBackgroundError } from "./debug";
 
@@ -17,30 +17,30 @@ interface StoredMeasurement {
   root?: unknown;
 }
 
-let challenge = "";
-let challengeExpiresAt = 0;
+let ref = "";
+let refExpiresAt = 0;
 let measurement: Promise<{ id: string; root: string } | null> | undefined;
 
 /** Called for every API response, failures included - a client that only ever sees a
- *  refusal still needs a challenge. */
-export function rememberBuildChallenge(value: string | null): void {
-  if (!value || value.length > 2048 || value === challenge) return;
-  const expiresAt = challengeExpiryMs(value);
+ *  refusal still needs a fresh one. */
+export function rememberBuildRef(value: string | null): void {
+  if (!value || value.length > 2048 || value === ref) return;
+  const expiresAt = buildRefExpiryMs(value);
   // Spent, or dated far enough ahead to be another clock.
   if (expiresAt === null || expiresAt <= Date.now() + EXPIRY_MARGIN_MS || expiresAt > Date.now() + 60 * 60_000) return;
-  challenge = value;
-  challengeExpiresAt = expiresAt - EXPIRY_MARGIN_MS;
+  ref = value;
+  refExpiresAt = expiresAt - EXPIRY_MARGIN_MS;
   if (!measurement) measurement = measurePackage();
 }
 
-export async function buildProofHeaders(url: string, method: string, authorization: string): Promise<Record<string, string>> {
-  if (!measurement || Date.now() >= challengeExpiresAt) return {};
-  const held = challenge;
+export async function buildTagHeaders(url: string, method: string, authorization: string): Promise<Record<string, string>> {
+  if (!measurement || Date.now() >= refExpiresAt) return {};
+  const held = ref;
   const measured = await measurement;
-  // The challenge may have expired or been replaced while the measurement ran.
-  if (!measured || held !== challenge || Date.now() >= challengeExpiresAt) return {};
-  const proof = await buildRequestProof(measured.id, measured.root, held, url, method, authorization);
-  return { [BUILD_ID_HEADER]: measured.id, [BUILD_PROOF_HEADER]: `${held}~${proof}` };
+  // The ref may have expired or been replaced while the measurement ran.
+  if (!measured || held !== ref || Date.now() >= refExpiresAt) return {};
+  const tag = await buildRequestTag(measured.id, measured.root, held, url, method, authorization);
+  return { [BUILD_ID_HEADER]: measured.id, [BUILD_TAG_HEADER]: `${held}~${tag}` };
 }
 
 async function measurePackage(): Promise<{ id: string; root: string } | null> {
@@ -73,7 +73,7 @@ async function measurePackage(): Promise<{ id: string; root: string } | null> {
 
 /** Test seam. */
 export function resetBuildContext(): void {
-  challenge = "";
-  challengeExpiresAt = 0;
+  ref = "";
+  refExpiresAt = 0;
   measurement = undefined;
 }

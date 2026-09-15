@@ -6,8 +6,8 @@
 
 export const BUILD_INDEX_PATH = "build-context.json";
 export const BUILD_ID_HEADER = "x-emojery-build-id";
-export const BUILD_PROOF_HEADER = "x-emojery-build-proof";
-export const BUILD_CHALLENGE_HEADER = "x-emojery-build-challenge";
+export const BUILD_TAG_HEADER = "x-emojery-build-tag";
+export const BUILD_REF_HEADER = "x-emojery-build-ref";
 
 export interface BuildIndex {
   format: 1;
@@ -76,16 +76,16 @@ export async function measureBuild(index: BuildIndex, read: (path: string) => Pr
   return hashText(JSON.stringify(entries));
 }
 
-// What the server recomputes. One answer is good for one request shape, until the
-// challenge expires.
-export async function buildRequestProof(id: string, root: string, challenge: string, url: string, method: string, authorization: string): Promise<string> {
-  return hashText(JSON.stringify(["emojery-build-v1", id, root, challenge, new URL(url).href, method, await hashText(authorization)]));
+// What the server recomputes. One value is good for one request shape, until the ref
+// it was built on expires.
+export async function buildRequestTag(id: string, root: string, ref: string, url: string, method: string, authorization: string): Promise<string> {
+  return hashText(JSON.stringify(["emojery-build-v1", id, root, ref, new URL(url).href, method, await hashText(authorization)]));
 }
 
-// `<version>.<payload base64url>.<mac hex>`, not a JWT, so a session token can never
-// be presented as a challenge or the reverse. The mac is the server's to check.
-export function challengeExpiryMs(challenge: string): number | null {
-  const payload = challenge.split(".")[1];
+// `<version>.<payload base64url>.<mac hex>`, a shape of its own so a session token can
+// never be presented in its place or the reverse. The mac is the server's to check.
+export function buildRefExpiryMs(ref: string): number | null {
+  const payload = ref.split(".")[1];
   if (!payload) return null;
   try {
     const claims = JSON.parse(atob(payload.replaceAll("-", "+").replaceAll("_", "/")));

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { describe, expect, it } from "vitest";
-import { BUILD_INDEX_PATH, buildRequestProof, challengeExpiryMs, measureBuild, measuredBytes, parseBuildIndex } from "./build-context";
+import { BUILD_INDEX_PATH, buildRefExpiryMs, buildRequestTag, measureBuild, measuredBytes, parseBuildIndex } from "./build-context";
 
 const ID = "a".repeat(64);
 
@@ -72,34 +72,34 @@ describe("measureBuild", () => {
   });
 });
 
-describe("challengeExpiryMs", () => {
-  const challenge = (claims: unknown) => `v1.${btoa(JSON.stringify(claims)).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "")}.mac`;
+describe("buildRefExpiryMs", () => {
+  const ref = (claims: unknown) => `v1.${btoa(JSON.stringify(claims)).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "")}.mac`;
 
   it("reads the expiry out of the payload", () => {
-    expect(challengeExpiryMs(challenge({ exp: 1_700_000_000, n: "00" }))).toBe(1_700_000_000_000);
+    expect(buildRefExpiryMs(ref({ exp: 1_700_000_000, n: "00" }))).toBe(1_700_000_000_000);
   });
 
   it.each([
     ["a token with no payload", "v1"],
     ["a payload that is not JSON", "v1.bm90LWpzb24.mac"],
-    ["a payload with no expiry", challenge({ n: "00" })],
+    ["a payload with no expiry", ref({ n: "00" })],
   ])("reads %s as no expiry", (_name, value) => {
-    expect(challengeExpiryMs(value)).toBeNull();
+    expect(buildRefExpiryMs(value)).toBeNull();
   });
 });
 
 // The backend pins the same vector. A red test here means the two halves have to ship
 // together, never that the value needs regenerating.
-describe("buildRequestProof", () => {
+describe("buildRequestTag", () => {
   it("pins the serialization shared with the backend", async () => {
-    const proof = await buildRequestProof(ID, "b".repeat(64), "v1.fixed-challenge.mac", "https://api.emojery.app/reactions/vote", "POST", "");
-    expect(proof).toBe("ffc5978f15cf8978f3af112a5c29fc2955b5a7c89e7a135d36896dcd7933348a");
+    const tag = await buildRequestTag(ID, "b".repeat(64), "v1.fixed-ref.mac", "https://api.emojery.app/reactions/vote", "POST", "");
+    expect(tag).toBe("47337d4e93fecf4f5e9f4c361e4a513b0f5c09c2181cf29c2ca5adee31fcb6eb");
   });
 
-  it("differs per challenge, per endpoint, per method and per token", async () => {
+  it("differs per ref, per endpoint, per method and per token", async () => {
     const base = ["v1.c.mac", "https://api.emojery.app/reactions/vote", "POST", ""] as const;
-    const proof = (...args: [string, string, string, string]) => buildRequestProof(ID, "b".repeat(64), ...args);
-    const [answer, other, elsewhere, read, authed] = await Promise.all([proof(...base), proof("v1.d.mac", base[1], base[2], base[3]), proof(base[0], "https://api.emojery.app/reactions/count", base[2], base[3]), proof(base[0], base[1], "GET", base[3]), proof(base[0], base[1], base[2], "Bearer token")]);
+    const tag = (...args: [string, string, string, string]) => buildRequestTag(ID, "b".repeat(64), ...args);
+    const [answer, other, elsewhere, read, authed] = await Promise.all([tag(...base), tag("v1.d.mac", base[1], base[2], base[3]), tag(base[0], "https://api.emojery.app/reactions/count", base[2], base[3]), tag(base[0], base[1], "GET", base[3]), tag(base[0], base[1], base[2], "Bearer token")]);
     expect(new Set([answer, other, elsewhere, read, authed]).size).toBe(5);
   });
 });
