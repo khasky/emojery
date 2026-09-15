@@ -56,6 +56,62 @@ describe("FB_LOCALIZED_ACTION_LABELS", () => {
   });
 });
 
+// The aria Facebook puts on a post's Like and its Comment, one row per shipped UI
+// locale, captured live (2026-09) on the watch page and on the feed - the same
+// strings on both. The feed renders a COUNT as those buttons' text, so the aria is
+// all a row can be read by, and a locale whose Comment phrase neither the table nor
+// a stem covers leaves the Like with no readable sibling: it is rejected as a
+// comment control and that locale mounts nothing anywhere (verified live - de, sv,
+// fr, es, pt, it, et, lt, fi, id, ms, vi, bn sat picker-less, and pl, nl, ja had
+// gone stale on the Like form itself).
+describe("live post-row aria is readable in every shipped locale", () => {
+  const forms = new Map(FB_LOCALIZED_ACTION_LABELS);
+  const key = (label: string) => label.normalize("NFC").toLowerCase();
+  // The aria half of localizedActionLabel + the stem fallback behind it: table
+  // equality first, then the EN/RU/UA roots.
+  const readable = (aria: string, action: "Like" | "Comment"): boolean => {
+    if ((forms.get(action) ?? []).some((form) => key(form) === key(aria))) return true;
+    return (action === "Like" ? FB_STEMS.like : FB_STEMS.comment).test(aria);
+  };
+
+  const ROWS: ReadonlyArray<readonly [locale: string, like: string, comment: string]> = [
+    ["en", "Like", "Leave a comment"],
+    ["pt", "Curtir", "Deixe um comentário"],
+    ["de", "Gefällt mir", "Kommentar hinterlassen"],
+    ["sv", "Gilla", "Kommentera"],
+    ["fr", "J’aime", "Laissez un commentaire"],
+    ["nb", "Liker", "Skriv en kommentar"],
+    ["da", "Synes godt om", "Skriv en kommentar"],
+    ["es", "Me gusta", "Dejar un comentario"],
+    ["et", "Meeldib", "Jäta kommentaar"],
+    ["it", "Mi piace", "Lascia un commento"],
+    ["lt", "Patinka", "Parašykite komentarą"],
+    ["pl", "Lubię to!", "Dodaj komentarz"],
+    ["id", "Suka", "Beri komentar"],
+    ["ms", "Suka", "Tinggalkan komen"],
+    ["hu", "Tetszik", "Hozzászólás írása"],
+    ["vi", "Thích", "Viết bình luận"],
+    ["fi", "Tykkää", "Jätä kommentti"],
+    ["nl", "Leuk", "Opmerking plaatsen"],
+    ["hi", "लाइक करें", "कमेंट करें"],
+    ["bn", "লাইক করুন", "একটি কমেন্ট করুন"],
+    ["ja", "いいね！", "コメントする"],
+    ["ru", "Нравится", "Оставьте комментарий"],
+    ["uk", "Подобається", "Залишити коментар"],
+    ["th", "ถูกใจ", "แสดงความคิดเห็น"],
+    ["ko", "좋아요", "댓글 남기기"],
+    ["zh-Hant", "讚", "留言"],
+    ["zh-Hans", "赞", "发表评论"],
+  ];
+
+  for (const [locale, like, comment] of ROWS) {
+    it(`${locale}: both controls of one post row are readable`, () => {
+      expect(readable(like, "Like"), `${locale} Like: ${like}`).toBe(true);
+      expect(readable(comment, "Comment"), `${locale} Comment: ${comment}`).toBe(true);
+    });
+  }
+});
+
 describe("COMPOSER_ACTION_STEM (composer rows are never post action rows)", () => {
   // Live-verified composer button labels per UI language. The UA profile
   // composer ("Ефір / Світлина/відео / Життєва подія") matched NONE of the old

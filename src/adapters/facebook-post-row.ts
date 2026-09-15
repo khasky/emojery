@@ -40,43 +40,104 @@ const ACTION_LABELS: readonly string[] = Object.values(FB_ACTION_LABEL);
 
 // Facebook's OWN Like/Comment button labels in all 26 shipped UI locales, read
 // off facebook.com one locale per page load - never translated. Exact forms
-// rather than stems: Facebook ships one string per action per locale, so
-// equality carries the locale with no substring risk, and the 3 label shapes
+// rather than stems: every entry is a string Facebook itself ships, so equality
+// carries the locale with no substring risk, and the 3 label shapes
 // matchesActionLabel documents are handled by localizedActionLabel below.
+// A locale takes as many forms as it renders: Comment usually needs TWO - the
+// short one the button prints ("Kommentieren") and the phrase it puts in the
+// aria ("Kommentar hinterlassen"). The aria is the one that decides a row: on
+// the feed those buttons print the reaction COUNT instead of a label, leaving
+// the phrase as the only readable signal (which is why 13 locales mounted no
+// picker anywhere until their phrases landed here).
 // Only these 2 are readable without a session - a logged-out post renders no
 // Share/Send button - so those stay on the EN list plus the EN/RU/UA stems.
 // Why the pair is worth it: resolvePostAction drops to the geometry fallback
 // ONLY for labels it cannot read, and findPostContainer then refuses to walk out
 // to a permalink (`viaGeometryFallback`), so in an unreadable locale every post
 // whose action row sits outside `[role="article"]` gets no picker at all.
+// Japanese carries two Like forms: the logged-in UI renders the bare
+// "いいね！" (verified live on the feed and the watch page, where the bracketed
+// form alone left the locale unreadable), the bracketed "「いいね！」" is the
+// logged-out one.
 export const FB_LOCALIZED_ACTION_LABELS: ReadonlyArray<readonly [string, readonly string[]]> = [
-  ["Like", ["Like", "Curtir", "Gefällt mir", "Gilla", "J’aime", "Liker", "Me gusta", "Meeldib", "Mi piace", "Patinka", "Polub", "Suka", "Synes godt om", "Tetszik", "Thích", "Tykkää", "Vind ik leuk", "Подобається", 'Поставить "Нравится"', "लाइक करें", "লাইক করুন", "ถูกใจ", "좋아요", "「いいね！」", "讚", "赞"]],
+  [
+    "Like",
+    [
+      "Like",
+      "Curtir",
+      "Gefällt mir",
+      "Gilla",
+      "J’aime",
+      "Leuk",
+      "Liker",
+      "Lubię to!",
+      "Me gusta",
+      "Meeldib",
+      "Mi piace",
+      "Patinka",
+      "Polub",
+      "Suka",
+      "Synes godt om",
+      "Tetszik",
+      "Thích",
+      "Tykkää",
+      "Vind ik leuk",
+      "Подобається",
+      'Поставить "Нравится"',
+      "लाइक करें",
+      "লাইক করুন",
+      "ถูกใจ",
+      "좋아요",
+      "いいね！",
+      "「いいね！」",
+      "讚",
+      "赞",
+    ],
+  ],
   [
     "Comment",
     [
       "Comment",
+      "Beri komentar",
       "Bình luận",
       "Comentar",
       "Commenta",
       "Commenter",
+      "Deixe um comentário",
+      "Dejar un comentario",
+      "Dodaj komentarz",
       "Hozzászólás",
+      "Hozzászólás írása",
+      "Jäta kommentaar",
+      "Jätä kommentti",
       "Komen",
       "Komentuoti",
       "Kommentar",
+      "Kommentar hinterlassen",
+      "Kommentera",
       "Kommenteeri",
       "Kommenter",
       "Kommentieren",
       "Kommentoi",
+      "Laissez un commentaire",
+      "Lascia un commento",
       "Opmerking plaatsen",
+      "Parašykite komentarą",
       "Skomentuj",
+      "Skriv en kommentar",
+      "Tinggalkan komen",
+      "Viết bình luận",
       "Коментувати",
       "Комментировать",
       "कमेंट करें",
+      "একটি কমেন্ট করুন",
       "কমেন্ট করুন",
       "แสดงความคิดเห็น",
       "댓글",
+      "댓글 남기기",
       "コメントする",
       "留言",
+      "发表评论",
       "评论",
     ],
   ],
