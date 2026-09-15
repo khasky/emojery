@@ -6,8 +6,10 @@
 # (.output/chrome-mv3 and .output/firefox-mv2) by the CI and release workflows, so both
 # gate on exactly the same rules.
 #
-# Only ever point this at a PRODUCTION build: the staging backend is a forbidden pattern
-# here, and a staging build legitimately contains it.
+# Only ever point this at a PRODUCTION build - one built by `pnpm build:production` or
+# `zip:production*`, the mode that compiles in the production origin (wxt.config.ts). The
+# staging backend is a forbidden pattern here, and every other build, the default
+# `pnpm build` included, legitimately contains it.
 #
 #   bash scripts/scan-extension-artifact.sh [artifact-dir]   (default .output/chrome-mv3)
 

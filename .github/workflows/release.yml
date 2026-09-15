@@ -86,7 +86,7 @@ jobs:
       # What follows is ci.yml's gate minus 3 steps, deliberately: `pnpm test:browser`
       # (downloading WebKit and Gecko costs more than this whole job, and a tag is cut
       # from main, where ci.yml already ran it), `pnpm lint:docs` (Markdown cannot
-      # change a shipped artifact) and `pnpm build:all` (`zip:all` below builds what it
+      # change a shipped artifact) and `pnpm build` (`zip:production` below builds what it
       # would). Everything that can still differ at a tag is repeated here.
       - name: Typecheck
         run: pnpm compile
@@ -111,14 +111,14 @@ jobs:
         run: pnpm test:e2e:hermetic
 
       - name: Build browser packages
-        run: pnpm zip:all
+        run: pnpm zip:production
 
-      # Its own step, not folded into `zip:all`: that script is what ci.yml runs on
-      # every PR, and Safari is release-only. Which also means a tag is the first
-      # place a Safari-specific build break can surface - fold it into `zip:all` the
-      # day Safari stops being a side target.
+      # Its own step, not folded into `zip:production`: that script is what ci.yml runs
+      # on every PR, and Safari is release-only. Which also means a tag is the first
+      # place a Safari-specific build break can surface - fold it into `zip:production`
+      # the day Safari stops being a side target.
       - name: Build Safari package
-        run: pnpm zip:safari
+        run: pnpm zip:production:safari
 
       # The shipped bundles carry no `sourceMappingURL` (scan-extension-artifact.sh
       # enforces that) and wxt.config.ts's `build:done` hook lifts the maps out of

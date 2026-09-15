@@ -8,5 +8,5 @@
 
 export const PRODUCTION_API_BASE = "https://api.emojery.app";
 
-// `pnpm build:staging` targets this origin with no env file.
+// Every build but `--mode production` targets this origin with no env file.
 export const STAGING_API_BASE = "https://api-staging.emojery.app";

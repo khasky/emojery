@@ -43,7 +43,7 @@ The same Vitest run also covers the build/maintainer scripts: `vitest.config.ts`
 
 ### Debugging placement on a live page
 
-Build and load the extension (`pnpm build`, or `pnpm build:staging` when you also need to sign in), open the site, and inspect with DevTools. 2 things to know first:
+Build and load the extension (`pnpm build:chrome`), open the site, and inspect with DevTools. 2 things to know first:
 
 - **The picker lives in an open shadow root.** Plain `document.querySelector` does not see inside it — query the light-DOM markers below to count mounts, and go through the host's `.shadowRoot` to reach the trigger/picker internals. All names come from `src/shared/dom.ts`:
 
@@ -66,7 +66,7 @@ When placement looks right but behavior is wrong, check the mounted key first: a
 
 ## Branches and pull requests
 
-`main` is the permanent branch and carries the next line: every change lands there first, experiments included, and every minor release is tagged on it, so anything merged there has already passed the [gates below](#pre-pr-gates). There is no `develop` branch — a second integration branch would only double the merge work for no isolation gained. Staging is a build mode (`pnpm build:staging`) of `main` against the staging API, not a branch; the version already in the stores lives on its `release/X.Y` branch (below).
+`main` is the permanent branch and carries the next line: every change lands there first, experiments included, and every minor release is tagged on it, so anything merged there has already passed the [gates below](#pre-pr-gates). There is no `develop` branch — a second integration branch would only double the merge work for no isolation gained. Staging is what a default build of `main` targets, not a branch; the version already in the stores lives on its `release/X.Y` branch (below).
 
 Outside contributors work in a fork; the branches in this repo belong to the maintainer and to Dependabot. The flow is the same either way:
 
@@ -98,9 +98,10 @@ pnpm lint:docs         # markdownlint over every tracked .md (biome does not rea
 pnpm test:coverage     # vitest run plus the coverage report - informational, no thresholds
 pnpm test:e2e:hermetic # the one e2e project that needs neither a browser nor the network
 pnpm test:browser      # the WebKit + Firefox component tests (one-time: pnpm exec playwright install webkit firefox)
-pnpm build:all         # wxt build, chrome + firefox
+pnpm build             # wxt build, chrome + firefox
 pnpm check:bundle      # per-content-script byte budget + no English message dictionary in a bundle
-pnpm zip:all           # wxt zip, chrome + firefox
+pnpm zip                # wxt zip, chrome + firefox
+pnpm zip:production     # the two store archives, what CI and the release run
 ```
 
 `pnpm format` (`biome format --write .`) fixes what `pnpm lint` reports as formatting; it is not part of the gate, and `pnpm lint` still has to pass after it.

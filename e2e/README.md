@@ -17,8 +17,8 @@
 This file documents the **unauthenticated** suite. It runs against the public **staging** backend by default and loads `.output/chrome-mv3-staging` (via `E2E_EXTENSION_PATH` in `.env.e2e.example`). Build the staging extension first:
 
 ```bash
-pnpm run build:staging       # -> .output/chrome-mv3-staging
-pnpm run test:e2e            # full matrix (build:staging must have run first)
+pnpm run build:chrome    # -> .output/chrome-mv3-staging
+pnpm run test:e2e            # full matrix (build must have run first)
 pnpm run test:e2e:ci         # signed-out placement + auth-click loop only
 pnpm run test:e2e:hermetic   # the browser-free project; runs on every PR
 # a single file or subset: pnpm exec playwright test -c e2e/playwright.config.ts persistence.spec.ts
@@ -31,7 +31,7 @@ pnpm run test:e2e:hermetic   # the browser-free project; runs on every PR
 The same suite runs in Playwright's Firefox: the firefox build is installed as a **temporary add-on** over the remote debugging protocol at launch (`lib/firefox-addon.ts` — Firefox has no `--load-extension`), with the `moz-extension://` UUID pinned by pref so extension URLs are deterministic.
 
 ```bash
-pnpm run build:staging:firefox   # -> .output/firefox-mv2-staging
+pnpm run build:firefox   # -> .output/firefox-mv2-staging
 E2E_BROWSER=firefox pnpm run test:e2e   # (or set E2E_BROWSER in .env.e2e.local)
 # one-time prereq: pnpm exec playwright install firefox
 ```

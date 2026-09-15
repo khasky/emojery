@@ -260,24 +260,26 @@ The `postinstall` hook runs `wxt prepare` and copies the bundled emoji locales i
 
 ### Build for your browser
 
-Pick the target that matches your browser. `pnpm dev` runs a live HMR watcher, `pnpm build` makes an unpacked production build, and `pnpm zip` packages it for upload.
+`pnpm build` and `pnpm zip` cover Chrome and Firefox in one go; the per-browser scripts below build one target each, and `pnpm dev` runs a live HMR watcher.
 
 ```bash
 # Chrome / Edge / Brave / Arc / Opera / any Chromium fork (MV3)
 pnpm dev          # dev with HMR, opens a Chrome dev profile
-pnpm build        # production build → .output/chrome-mv3
-pnpm zip          # package          → .output/emojery-v<version>-chrome-mv3.zip
+pnpm build:chrome # unpacked build   → .output/chrome-mv3-staging
+pnpm zip:chrome   # package          → .output/emojery-v<version>-chrome-mv3-staging.zip
 
 # Firefox / Firefox-based browsers (Manifest V2)
 pnpm dev:firefox       # dev with HMR
-pnpm build:firefox     # → .output/firefox-mv2
-pnpm zip:firefox       # → .output/emojery-v<version>-firefox-mv2.zip
+pnpm build:firefox     # → .output/firefox-mv2-staging
+pnpm zip:firefox       # → .output/emojery-v<version>-firefox-mv2-staging.zip
 
 # Safari (requires macOS + Xcode)
-pnpm build:safari      # → .output/safari-mv2
-pnpm zip:safari        # → .output/emojery-v<version>-safari-mv2.zip
-# Then wrap .output/safari-mv2 with Xcode's "Safari Web Extension" template
+pnpm build:safari      # → .output/safari-mv2-staging
+pnpm zip:safari        # → .output/emojery-v<version>-safari-mv2-staging.zip
+# Then wrap .output/safari-mv2-staging with Xcode's "Safari Web Extension" template
 ```
+
+**Which backend your build talks to.** Every build from this source targets the staging API at `https://api-staging.emojery.app` — a public testing environment whose data is reset periodically. That is deliberate: the hosted production service at `https://api.emojery.app` serves the extension published in the stores, and a build nobody published should not land in its counts. Point your own build at your own backend with `WXT_API_BASE=https://your-host.example pnpm build`. The `pnpm build:production` / `pnpm zip:production*` scripts are the ones that compile in the production origin, and they are what the release workflow runs. Running a modified extension against the hosted production API is not one of the things the [acceptable use policy](https://emojery.app/acceptable-use) allows, and the [API page](https://emojery.app/api#third-party-clients) says how to ask for access if a fork needs it.
 
 Reproducing the Firefox package for AMO review? See [docs/amo-reviewer-build.md](docs/amo-reviewer-build.md).
 
@@ -312,11 +314,11 @@ pnpm test:coverage                 # unit coverage report (informational, no thr
 **End-to-end tests** ([Playwright](https://playwright.dev/)) drive the _built_ extension against the real sites. They need a Chromium download and, for the signed-in flows, test credentials, so they live apart from the fast unit loop. The suites load `.output/chrome-mv3-staging`, so build it first — without that folder every browser run fails at launch:
 
 ```bash
-pnpm build:staging                 # required first: the build the suites load
+pnpm build:chrome          # required first: the build the suites load
 pnpm test:e2e                      # full E2E suite (live sites)
 pnpm test:e2e:ci                   # signed-out placement + auth-click loop (no credentials)
 pnpm test:e2e:hermetic             # the browser-free project (runs on every PR; needs no build)
-pnpm build:staging:firefox         # then E2E_BROWSER=firefox pnpm test:e2e — the same suite in Firefox
+pnpm build:firefox         # then E2E_BROWSER=firefox pnpm test:e2e — the same suite in Firefox
 ```
 
 See [e2e/README.md](e2e/README.md) for E2E setup, [docs/adding-a-site.md](docs/adding-a-site.md) for how to write adapter tests, and [CONTRIBUTING.md](./CONTRIBUTING.md#pre-pr-gates) for the full pre-PR gates (`pnpm check`).

@@ -100,7 +100,7 @@ jobs:
         run: pnpm test:browser
 
       - name: Build unpacked extensions (chrome + firefox)
-        run: pnpm build:all
+        run: pnpm build
 
       # The build above re-ran `prepare:assets`, so anything it rewrote here was
       # committed stale - and every gate in this job ran against the stale copy.
@@ -111,11 +111,18 @@ jobs:
           git add --intent-to-add -- public/emoji-data src/shared/__generated__
           git diff --exit-code -- public/emoji-data src/shared/__generated__
 
+      # The production mode, because the artifact scans below refuse the staging
+      # origin every other build carries (wxt.config.ts). The unpacked build above
+      # stays on the default mode on purpose: that is what a contributor's
+      # `pnpm build` does, and it has to keep working too.
+      - name: Package browser zips (chrome + firefox)
+        run: pnpm zip:production
+
+      # After the packaging step, which is what writes .output/chrome-mv3: the
+      # budget is about the bundle that ships, and the default build writes to
+      # .output/chrome-mv3-staging instead.
       - name: Content-script weight budget
         run: pnpm check:bundle
-
-      - name: Package browser zips (chrome + firefox)
-        run: pnpm zip:all
 
       - name: Scan generated Chrome extension files
         shell: bash

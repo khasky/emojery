@@ -49,7 +49,7 @@ const WRONG_BUILD_HINT = `The Chrome under test must run ${STAGING_BUILD_DIR}, l
 function stagingBuildProblem(): string | null {
   const manifestPath = resolve(extensionRoot, STAGING_BUILD_DIR, "manifest.json");
   if (!existsSync(manifestPath)) {
-    return `No staging build at ${STAGING_BUILD_DIR} - nothing to load in Chrome. Run "pnpm run build:staging", load it unpacked, then re-run.`;
+    return `No staging build at ${STAGING_BUILD_DIR} - nothing to load in Chrome. Run "pnpm run build:chrome", load it unpacked, then re-run.`;
   }
   const apiOrigin = targetApiOrigin();
   if (!apiOrigin) {
@@ -57,7 +57,7 @@ function stagingBuildProblem(): string | null {
   }
   const hosts = (JSON.parse(readFileSync(manifestPath, "utf8")) as { host_permissions?: string[] }).host_permissions ?? [];
   if (!hosts.some((host) => host.startsWith(apiOrigin))) {
-    return `${STAGING_BUILD_DIR} targets a different backend than ${apiOrigin} (stale or production output in that folder) - rebuild it with "pnpm run build:staging" and reload the extension in Chrome.`;
+    return `${STAGING_BUILD_DIR} targets a different backend than ${apiOrigin} (stale or production output in that folder) - rebuild it with "pnpm run build:chrome" and reload the extension in Chrome.`;
   }
   return null;
 }

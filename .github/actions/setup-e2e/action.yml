@@ -19,7 +19,7 @@ inputs:
     required: false
     default: "true"
   build:
-    description: Run `pnpm build:staging` after setup ("true"/"false")
+    description: Run `pnpm build:chrome` after setup ("true"/"false")
     required: false
     default: "true"
 
@@ -70,5 +70,5 @@ runs:
 
     - name: Build extension for e2e (staging)
       if: inputs.build == 'true'
-      run: pnpm build:staging
+      run: pnpm build:chrome
       shell: bash

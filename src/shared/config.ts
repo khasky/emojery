@@ -1,22 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Endpoints. Both defines below are injected by wxt.config.ts, which owns the
-// build-time WXT_API_BASE override rules; the origins themselves come from
-// shared/api-origins.ts, which that config reads too.
+// Endpoints. The define below is injected by wxt.config.ts, which owns which
+// backend a build talks to - the production origin only in the `production` build
+// mode, a WXT_API_BASE override otherwise, staging as the default; the origins
+// themselves come from shared/api-origins.ts, which that config reads too.
 
-import { PRODUCTION_API_BASE, STAGING_API_BASE } from "./api-origins";
+import { STAGING_API_BASE } from "./api-origins";
 
-declare const __EM_STAGING_BUILD__: boolean;
-declare const __EM_API_BASE_OVERRIDE__: string;
+declare const __EM_API_BASE__: string;
 
-// True only in a `--mode staging` build. Folds to a literal at build time, so a
-// branch behind it drops out of the production bundle along with the module it
-// reaches. Currently only picks the API base below.
-const IS_STAGING_BUILD: boolean = typeof __EM_STAGING_BUILD__ !== "undefined" && __EM_STAGING_BUILD__;
-
-const DEFAULT_API_BASE = IS_STAGING_BUILD ? STAGING_API_BASE : PRODUCTION_API_BASE;
-
-export const API_BASE: string = (typeof __EM_API_BASE_OVERRIDE__ !== "undefined" && __EM_API_BASE_OVERRIDE__) || DEFAULT_API_BASE;
+// Staging is also the fallback outside a WXT build (vitest, where the define is
+// undefined): a test that reaches the network at all must not reach production.
+export const API_BASE: string = (typeof __EM_API_BASE__ !== "undefined" && __EM_API_BASE__) || STAGING_API_BASE;
 
 // TTL for the local read-through counts cache (see shared/counts-cache.ts getCachedCounts).
 export const READ_CACHE_TTL_MS = 60_000;

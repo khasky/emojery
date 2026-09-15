@@ -17,7 +17,7 @@ Every other scenario is passive: navigate, click the Emojery trigger, read the D
 
 ## One-time setup
 
-1. `pnpm run build:staging` → `.output/chrome-mv3-staging` — the build this suite drives.
+1. `pnpm run build:chrome` → `.output/chrome-mv3-staging` — the build this suite drives.
 2. In Chrome (not Brave): install the Playwright Extension (Web Store) and **Load unpacked** the Emojery build above (`chrome://extensions` → **Developer mode**).
 3. In that Chrome, log into the platforms, then sign Emojery in through its own popup. The sign-in is manual, because the bridge attaches to a single tab and can't open `chrome-extension://` pages. Which account the suite expects is resolved by `e2e/lib/test-config.ts`; the keys it reads are listed in `.env.e2e.example`.
 4. Copy the token from the Playwright Extension popup (per browser profile).
@@ -80,7 +80,7 @@ pnpm exec vitest run -c e2e/site-auth/vitest.config.ts precheck
 - FAIL: "bridge launched a throwaway browser" → the token/extension is wrong; the server didn't attach (your real tabs should be visible, not one `about:blank`).
 - FAIL: "Emojery picker grid did not open" → finish the Emojery OTP in that Chrome.
 - FAIL: "Emojery is SIGNED OUT" → the Emojery popup in that Chrome is signed out. Sign in there by hand and re-run.
-- FAIL: "pointed at the WRONG BUILD" → the loaded build is not the one this suite drives. Rebuild with `pnpm run build:staging` and load `.output/chrome-mv3-staging` unpacked ("Emojery (Staging)" on `chrome://extensions`).
+- FAIL: "pointed at the WRONG BUILD" → the loaded build is not the one this suite drives. Rebuild with `pnpm run build:chrome` and load `.output/chrome-mv3-staging` unpacked ("Emojery (Staging)" on `chrome://extensions`).
 
 Connecting to an already-running server instead of the in-process one — start it in a separate terminal, passing the 2 flags the in-process bridge sets for itself (see `E2E_MCP_SETTLE_MS` below; without them every round-trip costs ~0.5–1 s instead of ~8 ms):
 

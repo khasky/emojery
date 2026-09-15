@@ -256,7 +256,7 @@ The unauthenticated e2e suite (`e2e/site-injection.spec.ts`) is what keeps provi
 
 `src/shared/e2e-site-coverage.test.ts` fails `pnpm test` for a registered site with no scenario, and for one missing from both site-auth tiers — so a site can't ship with zero live coverage.
 
-Run it against your staging build: `pnpm run build:staging`, then `pnpm exec playwright test -c e2e/playwright.config.ts site-injection.spec.ts --grep "<label>"`. See `e2e/README.md` for setup and the anti-bot caveat — on bot-walled sites a `skip` is expected and is not a failure.
+Run it against your staging build: `pnpm run build:chrome`, then `pnpm exec playwright test -c e2e/playwright.config.ts site-injection.spec.ts --grep "<label>"`. See `e2e/README.md` for setup and the anti-bot caveat — on bot-walled sites a `skip` is expected and is not a failure.
 
 ## 10. Run the gates (must be green)
 
@@ -274,7 +274,7 @@ A new-site PR is judged on 2 things you can verify yourself: the **adapter's cli
 Build against staging and load it unpacked:
 
 ```bash
-pnpm build:staging   # emits .output/chrome-mv3-staging, targeting the staging API
+pnpm build:chrome   # emits .output/chrome-mv3-staging, targeting the staging API
 ```
 
 Sign in with a real, permanent email address and open the live site. Staging is a separate environment: its accounts and reactions are isolated from production, and **staging data is reset periodically** — so don't be surprised when your test reactions vanish; that's the reset, not a bug.

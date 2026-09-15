@@ -247,7 +247,7 @@ function assertExtensionManifestAllowsApiBase(extensionPath: string, apiBase: st
     host_permissions?: string[];
   };
   if (!manifest.host_permissions?.includes(expected)) {
-    throw new Error(`Built extension manifest is missing host permission ${expected}. ` + `Rebuild with "pnpm run build:staging" (or WXT_API_BASE=${apiBase}).`);
+    throw new Error(`Built extension manifest is missing host permission ${expected}. ` + `Rebuild with "pnpm run build:chrome" (or WXT_API_BASE=${apiBase}).`);
   }
 }
 

@@ -73,7 +73,7 @@ export function resolveExtensionPath(): string {
   const extensionPath = isFirefoxRun() ? resolve(process.env.E2E_FIREFOX_EXTENSION_PATH ?? resolve(EXTENSION_ROOT, ".output", "firefox-mv2-staging")) : resolve(process.env.E2E_EXTENSION_PATH ?? resolve(EXTENSION_ROOT, ".output", "chrome-mv3-staging"));
   const manifestPath = resolve(extensionPath, "manifest.json");
   if (!existsSync(manifestPath)) {
-    throw new Error(`Missing built extension at ${manifestPath}. Build it first: "pnpm run build:staging${isFirefoxRun() ? ":firefox" : ""}".`);
+    throw new Error(`Missing built extension at ${manifestPath}. Build it first: "pnpm run build:${isFirefoxRun() ? "firefox" : "chrome"}".`);
   }
   return extensionPath;
 }

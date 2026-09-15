@@ -23,10 +23,16 @@ function resolveBuildMode(): string {
   if (next) return next;
   const inline = argv.find((a) => a.startsWith("--mode="));
   if (inline) return inline.slice("--mode=".length);
-  // Never from NODE_ENV. The mode below decides which WXT_API_BASE is accepted and whether
-  // the debug channel folds away, so an ambient env var must not be able to turn `wxt build`
-  // into a development build. The subcommand is what the operator typed: `wxt` on its own
-  // (or with only flags) is the dev server, anything else builds.
+  // Never from NODE_ENV. The mode below decides which backend is compiled in, which
+  // WXT_API_BASE is accepted and whether the debug channel folds away, so an ambient env
+  // var must not be able to change any of that. The subcommand is what the operator typed:
+  // `wxt` on its own (or with only flags) is the dev server, anything else builds.
+  //
+  // The fallback has to be WXT's own default for a bare `wxt build`, because WXT resolves
+  // the mode independently for the manifest and the output directory: a different guess
+  // here would compile one backend into the bundle while the manifest allows the other.
+  // What makes staging the default for a person is the scripts - `pnpm build` passes
+  // `--mode staging`, and only the `:production` ones leave it out (package.json).
   const subcommand = argv[2];
   return subcommand === undefined || subcommand.startsWith("-") ? "development" : "production";
 }
@@ -40,12 +46,12 @@ function readEnvFile(rel: string): Record<string, string> {
   }
 }
 
-// Build-time API-base override, injected into the bundle as
-// __EM_API_BASE_OVERRIDE__ (see src/shared/config.ts) and mirrored in the
-// manifest host permission. A production build takes no override at all - it
-// always compiles in PRODUCTION_API_BASE, so no env var can retarget a store
-// artifact. Another backend is reached through a non-production mode:
-// `--mode staging`, or WXT_API_BASE / .env.<mode> in dev and staging builds.
+// Build-time API-base override, folded into __EM_API_BASE__ below (see
+// src/shared/config.ts) and mirrored in the manifest host permission and the CSP.
+// A production build takes no override at all, so nothing outside the build can
+// retarget a store artifact at a host of its own; every other build reads one
+// from WXT_API_BASE or .env.<mode>, which is how a fork points its build at its
+// own backend.
 function resolveApiBaseOverride(mode: string): string {
   if (mode === "production") return "";
   const envOverride = process.env.WXT_API_BASE || "";
@@ -53,15 +59,19 @@ function resolveApiBaseOverride(mode: string): string {
 }
 const API_BASE_OVERRIDE = resolveApiBaseOverride(BUILD_MODE);
 
-// The single API origin this build talks to - the source for both the manifest
-// host permission and the CSP `connect-src` below, so the two can never drift.
+// The single API base this build talks to, compiled into the bundle as
+// __EM_API_BASE__ (shared/config.ts) and, as its origin, into the manifest host
+// permission and the CSP `connect-src` below - one function, so a bundle can
+// never fetch an origin the manifest does not allow.
+function resolveApiBase(mode: string | undefined): string {
+  return API_BASE_OVERRIDE || (mode === "production" ? PRODUCTION_API_BASE : STAGING_API_BASE);
+}
+
 function resolveApiOrigin(mode: string | undefined): string {
-  const modeDefault = mode === "staging" ? STAGING_API_BASE : PRODUCTION_API_BASE;
-  const raw = API_BASE_OVERRIDE || modeDefault;
   try {
-    return new URL(raw).origin;
+    return new URL(resolveApiBase(mode)).origin;
   } catch {
-    return modeDefault;
+    return STAGING_API_BASE;
   }
 }
 
@@ -80,8 +90,7 @@ export default defineConfig({
   publicDir: resolve(__dirname, "public"),
   vite: (env) => ({
     define: {
-      __EM_STAGING_BUILD__: JSON.stringify(BUILD_MODE === "staging"),
-      __EM_API_BASE_OVERRIDE__: JSON.stringify(API_BASE_OVERRIDE),
+      __EM_API_BASE__: JSON.stringify(resolveApiBase(BUILD_MODE)),
       // Console debug channels (background/debug.ts). `false` in a production
       // build, so the channels AND their redactor tree-shake out of the shipped
       // bundle. This replaced a runtime "is this unpacked?" guess (no `update_url`
@@ -118,9 +127,13 @@ export default defineConfig({
   }),
   manifest: ({ browser, mode }) => ({
     default_locale: "en",
-    // Staging builds get a literal name suffix (the `__MSG_extName__` token is still
-    // i18n-substituted) so staging and prod are distinguishable when loaded side by side.
-    name: mode === "staging" ? "__MSG_extName__ (Staging)" : "__MSG_extName__",
+    // Any build that is not the production one gets a literal name suffix (the
+    // `__MSG_extName__` token is still i18n-substituted), so a local build and the
+    // installed store version are distinguishable when loaded side by side. Keyed on
+    // the backend rather than the mode: a plain `pnpm build` talks to staging, and a
+    // build carrying the store name while answering from another backend is the
+    // confusing one.
+    name: resolveApiOrigin(mode) === PRODUCTION_API_BASE ? "__MSG_extName__" : "__MSG_extName__ (Staging)",
     // A literal rather than `__MSG_extShortName__`: Opera's uploader measures the raw
     // token against the 12-character `short_name` limit instead of substituting it first.
     // Every locale spelled it "Emojery" anyway.
@@ -212,12 +225,16 @@ export default defineConfig({
   }),
   zip: {
     compressionLevel: 0,
-    artifactTemplate: "{{name}}-v{{version}}-{{browser}}-{{manifestVersion}}.zip",
+    // {{modeSuffix}} is empty for a production build, so the store upload keeps the
+    // name it has always had. Without it a `pnpm zip` of the staging build writes
+    // over the store archive under that same name, since the mode is the only thing
+    // that differs between the two.
+    artifactTemplate: "{{name}}-v{{version}}-{{browser}}-{{manifestVersion}}{{modeSuffix}}.zip",
     // No `{{browser}}` here on purpose - the archive is browser-independent. Which is
     // also why `zipSources` is left at the WXT default (firefox + opera only, see
-    // resolveZipConfig): forcing it on for every target made `zip:all` build the same
+    // resolveZipConfig): forcing it on for every target made `zip` build the same
     // archive twice, the second run overwriting the first under this one name.
-    sourcesTemplate: "{{name}}-v{{version}}-sources.zip",
+    sourcesTemplate: "{{name}}-v{{version}}-sources{{modeSuffix}}.zip",
     // Keep the AMO source archive to actual build inputs - drop build/test artifacts so a
     // reviewer gets sources + lockfile only (they run the build themselves).
     excludeSources: [".env", ".env.*", ".output/**", "test-results/**", "e2e/test-results/**", "playwright-report/**", "coverage/**", ".playwright/**", ".playwright-mcp/**", "assets/**", "**/*.zip"],

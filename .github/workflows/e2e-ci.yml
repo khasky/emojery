@@ -150,7 +150,7 @@ jobs:
           build: "false"
 
       - name: Build extension for e2e (firefox staging)
-        run: pnpm build:staging:firefox
+        run: pnpm build:firefox
 
       - name: Run e2e (signed-out subset, Firefox)
         env:

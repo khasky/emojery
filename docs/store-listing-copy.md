@@ -67,7 +67,7 @@ Emojery is an independent project. All product names, logos and trademarks are t
 ## Single purpose description
 
 ```text
-Emojery adds 600+ emoji reactions beside the Like, Star and vote buttons on supported websites. Go beyond the built-in reaction menu, choose a more specific response and see what other users selected. Free, open source, no ads, no tracking.
+Emojery adds 600+ emoji reactions beside the Like, Star and vote buttons on supported websites. Go beyond the built-in reaction menu, choose a more specific response and see what other users selected. Reading the counts needs no account. The extension's single purpose is that reaction control, and every permission and host it requests exists to serve it.
 ```
 
 ## AMO summary (250 characters)
@@ -188,11 +188,11 @@ From the unzipped source archive:
 
 corepack enable
 pnpm install --frozen-lockfile
-pnpm run zip:firefox
+pnpm run zip:production:firefox
 
 This emits .output/firefox-mv2/ (the unpacked extension), .output/emojery-v1.0.0-firefox-mv2.zip and .output/emojery-v1.0.0-sources.zip. Compare the rebuilt .output/firefox-mv2/ directory with the contents of the submitted package.
 
-5 values are inlined at build time, all defined in wxt.config.ts: __EM_API_BASE_OVERRIDE__ (empty in a release build, so the bundle uses the compiled-in production API origin), __EM_STAGING_BUILD__ (false), __EM_DEBUG_LOG__ (false), __EM_I18N_FALLBACK__ (false) and __EM_BUILD_TIME__, a YYYY-MM UTC stamp shown in the popup header. The first four are constant for a release build, so the stamp is the only value that changes between rebuilds: a rebuild in the same calendar month reproduces the submitted files exactly, and a rebuild in a later month differs only in that string.
+4 values are inlined at build time, all defined in wxt.config.ts: __EM_API_BASE__ (the API origin this build talks to, a literal from src/shared/api-origins.ts), __EM_DEBUG_LOG__ (false), __EM_I18N_FALLBACK__ (false) and __EM_BUILD_TIME__, a YYYY-MM UTC stamp shown in the popup header. The first three are constant for a production build, so the stamp is the only value that changes between rebuilds: a rebuild in the same calendar month reproduces the submitted files exactly, and a rebuild in a later month differs only in that string.
 
 HOW TO EXERCISE THE ADD-ON
 

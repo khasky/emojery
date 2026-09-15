@@ -16,7 +16,7 @@ From the unzipped source archive:
 ```bash
 corepack enable
 pnpm install --frozen-lockfile
-pnpm run zip:firefox
+pnpm run zip:production:firefox
 ```
 
 ## Output and verification
@@ -29,9 +29,9 @@ The build emits:
 
 To verify the submitted add-on, compare the rebuilt `.output/firefox-mv2/` directory with the contents of the submitted Firefox extension zip.
 
-5 values are inlined at build time, all defined in `wxt.config.ts`: `__EM_API_BASE_OVERRIDE__` (empty in a release build, so the bundle uses the compiled-in production API origin), `__EM_STAGING_BUILD__` (`false` in a release build), `__EM_DEBUG_LOG__` (`false` in a release build, so the console debug channels and their redactor are dead code and drop out of the bundle), `__EM_I18N_FALLBACK__` (`false` in every build, so the English fallback dictionary that exists only for the unit-test environment drops out of the bundle), and `__EM_BUILD_TIME__` — a `YYYY-MM` (UTC) build stamp shown in the popup header.
+4 values are inlined at build time, all defined in `wxt.config.ts`: `__EM_API_BASE__` (the API origin this build talks to, a literal from `src/shared/api-origins.ts`), `__EM_DEBUG_LOG__` (`false` in a store build, so the console debug channels and their redactor are dead code and drop out of the bundle), `__EM_I18N_FALLBACK__` (`false` in every build, so the English fallback dictionary that exists only for the unit-test environment drops out of the bundle), and `__EM_BUILD_TIME__` — a `YYYY-MM` (UTC) build stamp shown in the popup header.
 
-The first 4 are constant for a given release build, so the stamp is the only value that changes between rebuilds: a rebuild in the same calendar month is byte-identical to the submitted package; a rebuild in a later month differs only in that string.
+The first 3 are constant for a given production build, so the stamp is the only value that changes between rebuilds: a rebuild in the same calendar month is byte-identical to the submitted package; a rebuild in a later month differs only in that string.
 
 ## Linter warnings
 
