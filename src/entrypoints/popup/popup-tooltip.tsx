@@ -21,7 +21,7 @@ const FALLBACK_VIEWPORT_HEIGHT_PX = 480;
 
 // Floating tooltip anchored to its trigger. `position: fixed` (computed from the trigger's viewport rect)
 // escapes the tab-panel's `overflow: auto` clipping without a portal - the panel establishes no containing
-// block for fixed descendants. `content` is a THUNK, not a node: a history page renders 100 rows and only
+// block for fixed descendants. `content` is a THUNK, not a node: a history page renders HISTORY_PAGE rows and only
 // the hovered one ever shows its tooltip, so building each row's content eagerly (renderUrlParts parses
 // the whole URL) was work thrown away on every re-render.
 type TooltipProps =

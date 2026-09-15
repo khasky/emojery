@@ -114,7 +114,7 @@ const AccountView = ({ settings, update }: { settings: Settings; update: (patch:
 
   if (!authed) {
     // Analytics consent stays hidden until sign-in: the toggle governs data
-    // tied to the signed-in identity, so showing it here was misleading.
+    // tied to the signed-in identity, so it has nothing to govern here.
     return <SignInPrompt message={t("signInMsgAccount")} />;
   }
 

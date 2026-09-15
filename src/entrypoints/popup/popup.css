@@ -641,7 +641,7 @@ body {
 }
 .tt-proto,
 .tt-sep {
-  /* #9aa0a6 was 2.6:1 on white; this matches the popup's secondary text (5.7:1). */
+  /* #9aa0a6 fails 4.5:1 on white; this matches the popup's secondary text. */
   color: var(--khasky-emojery-url-dim);
 }
 .tt-host {
@@ -1157,8 +1157,8 @@ h1 {
   padding-left: 26px;
   font-size: 12px;
   font-weight: 600;
-  /* Darker than the fixed danger red: 12px text on the pale red track needs 4.5:1
-     and #d93025 only reaches 4.1:1 (axe); #c0271d clears it at 5.1:1. */
+  /* Darker than the fixed danger red: 12px text on the pale red track needs 4.5:1,
+     which #d93025 misses (axe); #c0271d clears it. */
   color: var(--khasky-emojery-slide-label);
   white-space: nowrap;
   pointer-events: none;

@@ -3,7 +3,7 @@
 // The shipped bundles do not carry the picker stylesheet as authored: wxt.config.ts runs it
 // through scripts/lib/shrink-raw-css.ts at build time, because the sheet travels as a STRING
 // (the picker mounts into a shadow root) and is inlined into every site content script,
-// where its rationale comments measured ~24 kB per bundle.
+// where its rationale comments would cost kilobytes per bundle.
 //
 // That transform is only allowed to remove bytes a parser discards, so a REAL engine
 // decides: both forms are parsed and the resulting rules compared. A unit test cannot do

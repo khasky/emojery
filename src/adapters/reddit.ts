@@ -131,9 +131,9 @@ function findRootVoteBlock(post: HTMLElement, postThingId: string | null): HTMLE
 }
 
 function findFallbackActionElement(post: HTMLElement): HTMLElement | null {
-  // ONE shadow-piercing walk for all fallback selectors (it used to be a full
-  // subtree walk per selector); selector order still decides priority, so the
-  // resolved element is unchanged. `post` itself leads the
+  // ONE shadow-piercing walk collects the candidates for all fallback selectors; they are
+  // then tried in selector order, so the earliest selector with a renderable match wins.
+  // `post` itself leads the
   // candidate list: querySelectorAll never matches its own root, so the
   // trailing `shreddit-post[...]` last-resort selectors would otherwise only
   // ever hit a NESTED post (a crosspost embed), never this one.

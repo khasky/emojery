@@ -5,10 +5,9 @@
 // install id, the deadline, `Retry-After`, the JSON body read - happens here, so
 // no caller assembles a request or casts a response.
 //
-// Two header shapes, matching the two the API gates on: a POST carries the
-// JSON headers (content-type, the install id, accept-language when a language
-// is given); a GET carries only the client identity headers. A bearer token
-// rides on either.
+// Two header shapes the client sends: a POST carries the JSON headers
+// (content-type, the install id, accept-language when a language is given); a
+// GET carries only the client identity headers. A bearer token rides on either.
 
 import { BUILD_REF_HEADER } from "../shared/build-context";
 import { API_BASE, API_TIMEOUT_MS } from "../shared/config";

@@ -124,7 +124,7 @@ export function peekNext(): Promise<StoredVote | undefined> {
   );
 }
 
-/** First vote (in id order) whose own backoff has expired, or undefined. */
+// First vote in id order whose own backoff has expired, or undefined.
 export function peekNextEligible(now: number): Promise<StoredVote | undefined> {
   return runQueueTx<StoredVote | undefined>(
     "readonly",

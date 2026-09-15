@@ -3,9 +3,11 @@
  * Design tokens shared by the extension's own pages (popup, auth, onboarding).
  *
  * Only custom properties and named `@keyframes` are hoisted here - they carry no
- * cascade order. Plain RULES are not: `.sr-only`, the `a` pair and the two
- * `.primary` state rules stay byte-identical in auth.css and popup.css, because
- * hoisting would move them ahead of each page's own rules.
+ * cascade order. Plain RULES are not: `.sr-only`, `a:hover` and the two `.primary`
+ * state rules stay byte-identical in auth.css and popup.css, because hoisting would
+ * move them ahead of each page's own rules. The bare `a` rule is the exception: popup.css
+ * does not import styles/page-surface.css, so it restates the link colour that sheet
+ * gives auth.
  *
  * The in-page picker cannot import this file - it renders in a shadow root on a
  * foreign page and carries its own palette on `:host` (ui/picker.css) - so the two

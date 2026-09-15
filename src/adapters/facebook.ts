@@ -3,7 +3,7 @@
 // Facebook adapter wiring: the scan/observe spec, the post-container search that
 // turns an accepted Like into the element the target is mined from, and the
 // per-scan bookkeeping (the verdict cache's lifetime, shared-photo collision
-// handling, photo click context). The two halves it orchestrates live next door -
+// handling, photo click context). The two halves it runs live next door -
 // facebook-post-row.ts decides WHICH control is a post Like, facebook-target.ts
 // decides WHAT that post is.
 

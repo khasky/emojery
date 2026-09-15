@@ -93,7 +93,7 @@ input:focus {
   color: var(--khasky-emojery-link);
   cursor: pointer;
   font: inherit;
-  /* Secondary-text size, not the inherited 14px body size. */
+  /* Sized as secondary text. */
   font-size: 12px;
   /* Padding grows the control to the WCAG target size. Only the BOTTOM half is
      cancelled by the negative margin, so the control does not push what follows it; the

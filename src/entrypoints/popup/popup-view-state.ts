@@ -23,8 +23,8 @@ export const TAB_VIEWS: readonly View[] = VIEWS.filter((view) => view !== "debug
 // One link whose target follows the open tab, rather than a link per row: every visible
 // string in this popup is translated into every locale the extension ships, so an
 // affordance that costs 1 string is the one that can carry contextual targets at all.
-// Settings is the exception that points at the hub - it holds 4 separate articles' worth of
-// switches, and guessing which one the reader came for would be wrong 3 times out of 4.
+// Settings is the exception that points at the hub - its switches span several articles, and
+// guessing which one the reader came for would usually be wrong.
 export const HELP_URL_BY_VIEW: Record<View, string> = {
   settings: "https://emojery.app/help",
   history: "https://emojery.app/help/browse-your-reaction-history",

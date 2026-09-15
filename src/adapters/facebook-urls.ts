@@ -151,7 +151,7 @@ export function normalizeCftHref(href: string): string | null {
 }
 
 // Two ID shapes Facebook serves today:
-//   /<page>/posts/pfbid0XYZ...   - modern, base58-ish, ~60 chars after "pfbid"
+//   /<page>/posts/pfbid0XYZ...   - modern, a long alphanumeric run after "pfbid"
 //   /<page>/posts/1234567890     - legacy numeric
 // `permalink`, `videos` and `reel` use the same two shapes; `?story_fbid=` is the
 // rare legacy query-string form. The bare `?fbid=` query is a photo-viewer link,

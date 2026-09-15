@@ -108,7 +108,6 @@ it("a FAILED stats read prints an unknown count and keeps Export reachable", asy
   expect(actionRowCount()).toBe(2);
 });
 
-// The panel is painted by the danger tokens, not a colour literal.
 it("paints the confirm panel from the danger tokens, so it follows the theme", async () => {
   install({ type: "history:stats", authed: true, stats: { total: 5, bySite: {}, byEmoji: {} } });
   await mountAndSettle();

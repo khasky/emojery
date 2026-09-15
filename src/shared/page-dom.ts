@@ -14,8 +14,7 @@
 
 export const POPUP_CLASS = "popup";
 export const POPUP_SELECTOR = `.${POPUP_CLASS}`;
-// Version (and, in Debug mode, the build stamp): masked in visual baselines,
-// since it changes every release.
+// The version line in the popup header; in Debug mode it carries the build stamp too.
 export const BUILD_INFO_CLASS = "build-info";
 export const BUILD_INFO_SELECTOR = `.${BUILD_INFO_CLASS}`;
 // Each tab button's id is this prefix plus the view name; the roving-tabindex
@@ -60,7 +59,7 @@ export const IMPORT_CONFIRM_COUNT_SELECTOR = `.${IMPORT_CONFIRM_COUNT_CLASS}`;
 
 // --- Settings rows (entrypoints/popup/popup-settings.tsx) ---
 
-// The Theme row's dropdown - the popup's only <select>.
+// The Theme row's dropdown; the History facet dropdowns carry their own class.
 export const ROW_SELECT_CLASS = "row-select";
 export const ROW_SELECT_SELECTOR = `select.${ROW_SELECT_CLASS}`;
 

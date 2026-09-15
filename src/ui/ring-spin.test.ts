@@ -4,8 +4,8 @@ import { HOST_CLASS } from "../shared/dom";
 import { ANIMATE_ATTR, RING_SPIN_WINDOW_MS, setRingAnimation } from "./ring-spin";
 
 // The ring's spin is the extension's single most expensive idle cost: a masked, clipped box the
-// GPU re-rasters every frame - eight visible triggers on an otherwise idle tab measured 17.5%
-// of one core against 0.1% with it off. A regression here is silent (the button looks right,
+// GPU re-rasters every frame - a few visible triggers on an otherwise idle tab burn a real share
+// of a core, against next to nothing with it off. A regression here is silent (the button looks right,
 // the battery drains), so the window and its re-arm are pinned. jsdom has no
 // IntersectionObserver, so setRingAnimation takes its spin-straight-away branch; the observer
 // path runs the same startRingSpin call.

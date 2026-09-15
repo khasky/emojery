@@ -2,8 +2,8 @@
 //
 // Minimal in-memory `chrome` WebExtension shim. Pick between this and src/test/fixtures.ts
 // by CAPABILITY, not engine: this one stubs the seams the rendered UI reaches chrome.* through
-// (shared/webext.ts, sendMessage in ui/messaging.ts, a background-shaped `auth:status` answer,
-// bundled-English i18n); fixtures.ts trades that for `vi.fn` spies and the Firefox permissions surface.
+// (shared/webext.ts, sendMessage in ui/messaging.ts, a background-shaped `auth:status` answer);
+// fixtures.ts trades that for `vi.fn` spies and the Firefox permissions surface.
 
 import { AUTH_KEY, isAuthSessionLive } from "../shared/auth-session";
 import { storageGetKeys } from "./storage-keys";

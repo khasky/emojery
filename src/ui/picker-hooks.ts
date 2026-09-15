@@ -64,7 +64,7 @@ export function useGridRovingFocus({ open, itemSetKey, popRef }: { open: boolean
   };
 
   // Whenever the grid's item set changes (open, search, recents/popular arriving,
-  // locale), ensure exactly one item is Tab-reachable.
+  // locale), keep exactly one item Tab-reachable.
   useEffect(() => {
     if (!open) return;
     const items = gridItems();
