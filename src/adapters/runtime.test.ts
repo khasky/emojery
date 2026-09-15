@@ -320,6 +320,52 @@ describe("createScanObserver", () => {
     expect(onUpdate).not.toHaveBeenCalled();
   });
 
+  // Both cases below turn on how long the page has been quiet, read off
+  // performance.now() - which vi.useFakeTimers() advances along with the timers.
+  const DEBOUNCE = 40;
+
+  it("scans on arrival once the page has been quiet for the debounce window", () => {
+    vi.useFakeTimers();
+    const { onUpdate } = makeObserver({ debounceMs: DEBOUNCE, triggerEvents: [TRIGGER_EVENT] });
+    vi.advanceTimersByTime(DEBOUNCE); // the initial scan
+    vi.advanceTimersByTime(DEBOUNCE); // then a full window with nothing happening
+
+    window.dispatchEvent(new Event(TRIGGER_EVENT));
+    // No advance: a trigger arriving on a quiet page pays no debounce, because the
+    // debounce is there to coalesce a burst and there is no burst to coalesce.
+    expect(onUpdate).toHaveBeenCalledTimes(2);
+  });
+
+  it("owes one more scan to a page mutation that lands while a scan is pending", async () => {
+    vi.useFakeTimers();
+    const { onUpdate } = makeObserver({ debounceMs: DEBOUNCE });
+    vi.advanceTimersByTime(DEBOUNCE * 2); // the initial scan, then a quiet window
+    // Mutation records are delivered on a microtask, which the fake clock leaves alone.
+    const mutationsDelivered = () => Promise.resolve();
+
+    document.body.append(document.createElement("div")); // quiet page: scans on arrival
+    await mutationsDelivered();
+    expect(onUpdate).toHaveBeenCalledTimes(2);
+
+    document.body.append(document.createElement("div")); // within the debounce: schedules the next scan
+    await mutationsDelivered();
+    document.body.append(document.createElement("div")); // lands while that scan is still pending
+    await mutationsDelivered();
+    expect(onUpdate).toHaveBeenCalledTimes(2);
+
+    vi.advanceTimersByTime(DEBOUNCE);
+    expect(onUpdate).toHaveBeenCalledTimes(3);
+    // The batch that landed mid-flight is owed a look of its own: the scan it
+    // arrived behind may have read the row a tick before the site finished
+    // rendering it, and nothing else would schedule another.
+    vi.advanceTimersByTime(DEBOUNCE);
+    expect(onUpdate).toHaveBeenCalledTimes(4);
+
+    // One more look, after which the run settles.
+    vi.advanceTimersByTime(DEBOUNCE * 10);
+    expect(onUpdate).toHaveBeenCalledTimes(4);
+  });
+
   it("primes a re-scan when a link matching linkPrimeSelectors is clicked", () => {
     vi.useFakeTimers();
     const link = document.createElement("a");

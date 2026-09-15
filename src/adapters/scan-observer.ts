@@ -67,7 +67,10 @@ export function isOnlyOwnMutations(records: readonly MutationRecord[]): boolean 
 
 // The debounced scan defers to an idle slot when the engine offers one, but
 // never past this cap - a busy feed would otherwise starve the scan forever.
-const IDLE_SCAN_TIMEOUT_MS = 500;
+// On a page that holds the idle queue - a content blocker sweeping the feed for
+// elements to hide keeps hold of it - every scan waits out the whole cap, so it
+// is sized as latency the user pays on each one.
+const IDLE_SCAN_TIMEOUT_MS = 100;
 
 // A click on a permalink-shaped link is the earliest navigation signal: re-check
 // the URL shortly after (the SPA may not have committed it yet), then run the
@@ -83,6 +86,15 @@ export function createScanObserver(opts: ScanObserverOptions): () => void {
   // A hidden tab runs no scans: mutations mark this instead, and the catch-up
   // scan runs on the next visibilitychange back to visible.
   let pendingWhileHidden = false;
+  // A page-originated mutation batch that arrived while a scan was already in
+  // flight. The scan it arrived behind may have read the row one tick before the
+  // site finished rendering it, and nothing else would schedule another look
+  // until the site happened to mutate again.
+  let rescanAfterRun = false;
+  // Seeded at creation so the FIRST scan still waits out the full debounce (the
+  // page has rendered nothing worth scanning yet); every later one is free to
+  // run on arrival once the page has been quiet that long.
+  let lastRunAt = performance.now();
   let lastNav = navKey ? location[navKey] : "";
 
   const runScan = (): void => {
@@ -94,26 +106,45 @@ export function createScanObserver(opts: ScanObserverOptions): () => void {
     onUpdate(scan());
   };
 
+  const startScan = (): void => {
+    const finish = (): void => {
+      lastRunAt = performance.now();
+      runScan();
+      if (!rescanAfterRun) return;
+      rescanAfterRun = false;
+      trigger();
+    };
+    if (typeof window.requestIdleCallback === "function") {
+      idleHandle = window.requestIdleCallback(
+        () => {
+          idleHandle = 0;
+          finish();
+        },
+        { timeout: IDLE_SCAN_TIMEOUT_MS },
+      );
+      return;
+    }
+    finish();
+  };
+
   const trigger = (): void => {
-    if (scheduled || idleHandle) return;
+    if (scheduled || idleHandle) {
+      rescanAfterRun = true;
+      return;
+    }
     if (document.hidden) {
       pendingWhileHidden = true;
       return;
     }
+    const quietFor = performance.now() - lastRunAt;
+    if (quietFor >= debounceMs) {
+      startScan();
+      return;
+    }
     scheduled = window.setTimeout(() => {
       scheduled = 0;
-      if (typeof window.requestIdleCallback === "function") {
-        idleHandle = window.requestIdleCallback(
-          () => {
-            idleHandle = 0;
-            runScan();
-          },
-          { timeout: IDLE_SCAN_TIMEOUT_MS },
-        );
-      } else {
-        runScan();
-      }
-    }, debounceMs);
+      startScan();
+    }, debounceMs - quietFor);
   };
 
   const onVisibilityChange = (): void => {
@@ -151,10 +182,11 @@ export function createScanObserver(opts: ScanObserverOptions): () => void {
   // the page - or an ad blocker mutating the DOM continuously - is already doing.
   // Any batch that touches a page node still triggers, so new posts are not missed.
   const observer = new MutationObserver((records) => {
-    // A scan is already pending (or queued behind a hidden tab): skip the
-    // own-mutation walk entirely - it descends every added subtree and the
-    // scheduled scan covers this batch anyway.
-    if (scheduled || idleHandle || pendingWhileHidden) return;
+    // Queued behind a hidden tab: the catch-up scan on visibilitychange covers it.
+    if (pendingWhileHidden) return;
+    // The own-mutation walk descends every added subtree, and a pending scan that
+    // already owes a follow-up cannot be asked for more than that one.
+    if (rescanAfterRun && (scheduled || idleHandle)) return;
     if (isOnlyOwnMutations(records)) return;
     trigger();
   });
