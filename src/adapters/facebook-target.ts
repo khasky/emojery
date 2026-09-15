@@ -2,7 +2,8 @@
 //
 // Facebook: given a post container and its action row, what is the target?
 // The ordered resolution pipeline (reel viewer -> media viewer -> group story ->
-// photo -> own permalink -> current photo -> feed reel -> page post -> CFT hash)
+// photo -> own permalink -> current photo -> watch link -> feed reel -> page post
+// -> CFT hash)
 // plus everything it needs to mine an identity out of the DOM: the permalink and
 // photo candidate collectors, the React-fiber href recovery for lazy date links,
 // and the id-to-TargetRef builders.
@@ -31,6 +32,7 @@ import {
   normalizeCftHref,
   normalizePhotoHref,
   normalizePostHref,
+  normalizeWatchHref,
   pcbPostIdFromPhotoUrl,
 } from "./facebook-urls";
 import { ancestors, precedes, textOf } from "./runtime";
@@ -158,8 +160,16 @@ function resolveReelViewerTarget(article: HTMLElement, actionRow: HTMLElement | 
 // `location` FIRST: the DOM/React permalink scan latches onto the parent post's
 // `/posts/` link or the video's `/reel/` permalink and drops the query,
 // collapsing every photo onto a bare `.../photo/` and every video onto a reel URL.
-function resolveMediaViewerTarget(article: HTMLElement): TargetRef | null {
+function resolveMediaViewerTarget(article: HTMLElement, actionRow: HTMLElement | null): TargetRef | null {
   if (article.closest('[role="article"]')) return null;
+  // A watch page is a viewer with a FEED of further videos under it, and those
+  // cards render outside `[role="article"]` too - so this stage handed every one
+  // of them the page's own video and the page deduped to a SINGLE picker, under
+  // the top player (verified live). A card names its own video in its date link;
+  // the viewer's own unit names none, or names the page's.
+  const pageWatch = currentPageWatchUrl();
+  const named = pageWatch ? findWatchPermalinkNear(article, actionRow) : null;
+  if (named && named !== pageWatch) return null;
   return currentPageViewerTarget();
 }
 
@@ -219,6 +229,16 @@ function resolveCurrentPhotoTarget(opts: { skipSharedPhoto?: boolean }): TargetR
   return currentPhoto ? targetFromPhotoUrl(currentPhoto) : null;
 }
 
+// The unit's OWN `/watch/?v=<id>` date link. A video card on the watch surface
+// ships no `/posts/` or `/videos/` permalink at all, so without this it fell to
+// the volatile `url:<cft-hash>` and its reaction did not survive a reload. Below
+// the permalink stages on purpose: a unit that HAS a permalink keys on that, and
+// a watch link quoted in a post's body stays a last-resort identity.
+function resolveWatchLinkTarget(article: HTMLElement, actionRow: HTMLElement | null): TargetRef | null {
+  const watchUrl = findWatchPermalinkNear(article, actionRow);
+  return watchUrl ? targetFromWatchUrl(watchUrl) : null;
+}
+
 // Last resort for a detail page's OWN post whose date link wasn't found and
 // which carries no photo identity: the page URL itself.
 function resolvePagePostTarget(): TargetRef | null {
@@ -249,11 +269,12 @@ export function extractTarget(article: HTMLElement, actionRow: HTMLElement | nul
 function resolveTargetStage(article: HTMLElement, actionRow: HTMLElement | null, verdicts: PostRowVerdicts, opts: { skipSharedPhoto?: boolean }): TargetRef | null {
   return (
     resolveReelViewerTarget(article, actionRow) ??
-    resolveMediaViewerTarget(article) ??
+    resolveMediaViewerTarget(article, actionRow) ??
     resolveGroupStoryTarget(article, actionRow) ??
     resolvePhotoTarget(article, actionRow, verdicts, opts) ??
     resolveOwnPermalinkTarget(article, actionRow) ??
     resolveCurrentPhotoTarget(opts) ??
+    resolveWatchLinkTarget(article, actionRow) ??
     // Feed reel: a reel card's date link is a lazy `__cft__` placeholder and it
     // carries no `/reel/<id>` link. Key on the player's data-video-id (stable, ==
     // the reel viewer's id) instead of the volatile `url:<cft-hash>` fallback - that
@@ -475,6 +496,14 @@ function findPhotoTargetNear(container: HTMLElement, actionRow: HTMLElement | nu
 
 function collectPhotoCandidates(container: HTMLElement): Array<{ link: HTMLAnchorElement; url: string }> {
   return collectAnchorTargets(container, (link) => normalizePhotoHref(link.getAttribute("href") || link.href));
+}
+
+function findWatchPermalinkNear(container: HTMLElement, actionRow: HTMLElement | null): string | null {
+  return nearestCandidate(collectWatchCandidates(container), actionRow)?.url ?? null;
+}
+
+function collectWatchCandidates(container: HTMLElement): Array<{ link: HTMLAnchorElement; url: string }> {
+  return collectAnchorTargets(container, (link) => normalizeWatchHref(link.getAttribute("href") || link.href));
 }
 
 function findCftTargetUrlNear(container: HTMLElement, actionRow: HTMLElement | null): string | null {

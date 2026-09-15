@@ -69,6 +69,14 @@ export function authFacebookGroupPostUrl(): string {
   return requiredEnvUrl("E2E_AUTHURL_FACEBOOK_GROUP_DETAIL");
 }
 
+// Facebook WATCH page (`/watch/?v=<id>`): the video viewer plus the feed of
+// further videos it stacks underneath - the surface where each card carries only
+// its own `/watch/?v=` date link, so a card keyed from the page URL collapses
+// onto the viewer's video.
+export function authFacebookWatchUrl(): string {
+  return requiredEnvUrl("E2E_AUTHURL_FACEBOOK_WATCH");
+}
+
 // Threads REPLY-PREVIEW surface: a profile's replies tab, where every unit is an
 // original post plus that account's reply as SIBLING pressables - the shape the
 // reply-preview check hunts. The home feed carries it too, but far too rarely to

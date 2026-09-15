@@ -50,7 +50,10 @@ export function isStandaloneReelViewerPage(): boolean {
   return currentPageReelUrl() !== null;
 }
 
-function normalizeWatchHref(href: string): string | null {
+// The watch surface's video URL. Read from `location` for the viewer's own
+// video and, on a video card, from the date link the card ships instead of a
+// `/posts/` permalink.
+export function normalizeWatchHref(href: string): string | null {
   return parseSiteHref(href, "facebook", (url) => {
     if (url.pathname !== "/watch" && url.pathname !== "/watch/") return null;
     const videoId = url.searchParams.get("v");

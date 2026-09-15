@@ -7,7 +7,7 @@ import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { HOST_SELECTOR, MOUNTED_SELECTOR } from "../lib/selectors";
 import { bridgeFixture, gotoSettled, noHostMounted, PERMALINK_HOST_WAIT_MS, PERMALINK_TEST_TIMEOUT_MS, readEvidence, SETUP_HOOK_TIMEOUT_MS, scrollAndCountHosts, siteAuthEnabled, triggerStillClickable, usedHeapMb, waitForHost, wheelBySrc } from "./harness";
 import { DQ_SRC, postSurfaceHosts } from "./probes";
-import { ALL_SITES, authContentUrl, authFacebookGroupUrl, authFeedUrl, authInstagramCarouselUrl, authThreadsRepliesUrl, DEEP_SITES } from "./scenarios";
+import { ALL_SITES, authContentUrl, authFacebookGroupUrl, authFacebookWatchUrl, authFeedUrl, authInstagramCarouselUrl, authThreadsRepliesUrl, DEEP_SITES } from "./scenarios";
 import { applyWarmups, LIFECYCLE_WARMUPS, type Undo } from "./warmup";
 
 const fx = bridgeFixture();
@@ -105,6 +105,26 @@ const DEEP_SCROLL_TIMEOUT_MS = 420_000;
     // post - point E2E_AUTHURL_FACEBOOK at your page/group to exercise it.
     expect(ev.multiAnchorPostCount, "a post must never mount two pickers (e.g. one in the admin View insights / Boost post row)").toBe(0);
   });
+
+  // The watch page is a video viewer with a FEED of further videos under it, and
+  // a card down there ships no `/posts/` permalink at all - only its own
+  // `/watch/?v=` date link. Keyed from the page URL instead, every card resolved
+  // to the VIEWER's video and deduped away, leaving the whole page one picker
+  // under the top player (reported live). So: more than one target key must come
+  // out of the scroll.
+  test(
+    "facebook: the videos under the watch player key on their own ids",
+    async () => {
+      const b = fx.need();
+      await gotoSettled(b, authFacebookWatchUrl(), 4500);
+      expect(await waitForHost(b, "facebook", PERMALINK_HOST_WAIT_MS), noHostMounted("facebook")).toBeGreaterThan(0);
+      const { maxVisible, sawDuplicate, distinctKeys } = await scrollAndCountHosts(b, "facebook", 6);
+      expect(maxVisible, noHostMounted("facebook")).toBeGreaterThan(0);
+      expect(sawDuplicate, "two videos must not share one target key").toBe(false);
+      expect(distinctKeys.length, `each video under the player must key on its own id, not the page's. Keys seen: ${JSON.stringify(distinctKeys)}`).toBeGreaterThan(1);
+    },
+    PERMALINK_TEST_TIMEOUT_MS,
+  );
 
   test("facebook: hovering post dates does not flip the host or pop a tooltip", async () => {
     const b = fx.need();

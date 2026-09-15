@@ -245,9 +245,13 @@ export function wheelBySrc(deltaExpr: string): string {
 // Re-reads evidence each step, covering virtualization and lazy IntersectionObserver
 // mounting. Zero hosts across every step with a recognized wall on screen throws the
 // wall verdict, so the caller's "log into <site>" assert never fires.
-export async function scrollAndCountHosts(bridge: Bridge, site: SiteId, steps: number): Promise<{ maxVisible: number; sawDuplicate: boolean }> {
+export async function scrollAndCountHosts(bridge: Bridge, site: SiteId, steps: number): Promise<{ maxVisible: number; sawDuplicate: boolean; distinctKeys: string[] }> {
   let maxVisible = 0;
   let sawDuplicate = false;
+  // Union over the walk, not a single read: a virtualized feed drops the anchors
+  // of the units it recycles, so "how many targets did this surface produce"
+  // cannot be counted at the end.
+  const keysSeen = new Set<string>();
   let failedReads = 0;
   let consecutiveFails = 0;
   let lastError: unknown = null;
@@ -272,6 +276,7 @@ export async function scrollAndCountHosts(bridge: Bridge, site: SiteId, steps: n
     }
     consecutiveFails = 0;
     maxVisible = Math.max(maxVisible, ev.visibleHostCount);
+    for (const key of ev.mountKeys) keysSeen.add(key);
     // Confirm a duplicate persists before counting it: a re-render can briefly leave
     // two anchors on one key mid-mutation, which would otherwise flake.
     if (ev.duplicateKeys.length > 0) {
@@ -304,7 +309,7 @@ export async function scrollAndCountHosts(bridge: Bridge, site: SiteId, steps: n
     const wall = await bridgeWallReason(bridge);
     if (wall) throw wallFailure(site, wall);
   }
-  return { maxVisible, sawDuplicate };
+  return { maxVisible, sawDuplicate, distinctKeys: [...keysSeen] };
 }
 
 // A read that THROWS means a dead tab, a crashed page or a bridge -32001 that survived

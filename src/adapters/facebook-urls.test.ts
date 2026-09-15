@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { describe, expect, it } from "vitest";
-import { canonicalizeFbUrl, extractPhotoFbid, fbUrlFallbackId, groupStoryPermalinkFromPhotoUrl, hashUrl, isFacebookHost, isGroupStoryPermalink, normalizeCftHref, normalizePhotoHref, normalizePostHref, pcbPostIdFromPhotoUrl } from "./facebook-urls";
+import { canonicalizeFbUrl, extractPhotoFbid, fbUrlFallbackId, groupStoryPermalinkFromPhotoUrl, hashUrl, isFacebookHost, isGroupStoryPermalink, normalizeCftHref, normalizePhotoHref, normalizePostHref, normalizeWatchHref, pcbPostIdFromPhotoUrl } from "./facebook-urls";
 
 describe("isFacebookHost", () => {
   it("accepts only the exact Facebook hosts", () => {
@@ -37,6 +37,29 @@ describe("normalizePostHref host gate", () => {
 
   it("does not execute a javascript: URL that smuggles the post pattern", () => {
     expect(normalizePostHref("javascript:/*/posts/*/alert(1)")).toBeNull();
+  });
+});
+
+// The watch page's own video and, in the feed of further videos it stacks
+// underneath, each card's date link - the only per-video identity those cards
+// carry. The path gate is what keeps them apart from the channel link rendered
+// beside it: `/watch/<vanity>/` shares the prefix, and a card keyed on it would
+// merge every video of that channel into one target.
+describe("normalizeWatchHref", () => {
+  it("canonicalizes a video URL and drops the tracking params", () => {
+    expect(normalizeWatchHref("https://www.facebook.com/watch/?v=873610923268231&__cft__[0]=AZx&__tn__=F")).toBe("https://www.facebook.com/watch/?v=873610923268231");
+    expect(normalizeWatchHref("https://www.facebook.com/watch?v=873610923268231")).toBe("https://www.facebook.com/watch/?v=873610923268231");
+  });
+
+  it("rejects a channel watch page and a video-less watch URL", () => {
+    expect(normalizeWatchHref("https://www.facebook.com/watch/gettishow/?__cft__[0]=AZx")).toBeNull();
+    expect(normalizeWatchHref("https://www.facebook.com/watch/")).toBeNull();
+    expect(normalizeWatchHref("https://www.facebook.com/watch/?v=live")).toBeNull();
+  });
+
+  it("rejects an off-Facebook host wearing the watch shape", () => {
+    expect(normalizeWatchHref("https://evil.com/watch/?v=873610923268231")).toBeNull();
+    expect(normalizeWatchHref("https://www.facebook.com.evil.com/watch/?v=873610923268231")).toBeNull();
   });
 });
 
