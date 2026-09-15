@@ -109,10 +109,11 @@ export default defineConfig({
       // Vitest/jsdom, where this constant is undefined. `src/shared/i18n.test.ts`
       // pins the runtime behaviour; `scripts/check-bundle-budget.mjs` pins the drop.
       __EM_I18N_FALLBACK__: JSON.stringify(false),
-      // Build stamp shown next to the version in the popup header. Staging keeps a
-      // full ISO instant for debugging; production is truncated to YYYY-MM (UTC) so
-      // an AMO reviewer's rebuild is byte-identical within the same calendar month.
-      __EM_BUILD_TIME__: JSON.stringify(BUILD_MODE === "staging" ? new Date().toISOString() : new Date().toISOString().slice(0, 7)),
+      // Build stamp shown next to the version in the popup header, for a dev or staging
+      // build to say which one it is. Empty in production, which leaves the bundle with
+      // nothing that changes between two builds of the same source: an AMO reviewer's
+      // rebuild is byte-identical whenever it is run.
+      __EM_BUILD_TIME__: JSON.stringify(BUILD_MODE === "production" ? "" : new Date().toISOString()),
     },
     // The `?raw` stylesheets ship whitespace-minified (scripts/lib/shrink-raw-css.ts). Build
     // only: `pnpm dev` keeps the readable text in the browser's Sources panel.

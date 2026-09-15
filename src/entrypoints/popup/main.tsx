@@ -145,9 +145,9 @@ const TabBtn = ({ id, active, anchor, onClick, label }: { id: View; active: bool
   </button>
 );
 
-// Production ships a month-only stamp (reproducible builds); staging a full UTC instant, rendered in local time.
+// A UTC instant from a dev or staging build, rendered in local time. Production carries
+// no stamp at all, so BuildInfo renders the version alone there.
 const formatBuildStamp = (iso: string): string => {
-  if (!iso.includes("T")) return iso;
   const builtAt = new Date(iso);
   if (Number.isNaN(builtAt.getTime())) return "";
   const pad = (n: number) => String(n).padStart(2, "0");
