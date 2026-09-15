@@ -363,8 +363,8 @@ test("a reaction in flight survives a reload (slow network)", async () => {
     await ext.ensureNoOwnReaction(session.context, page);
 
     // Hold the vote POST open so it is mid-flight at reload (the background service worker
-    // sends it; context.route intercepts service-worker requests too). Robust
-    // either way: if it still completes fast, the durable queue makes it persist.
+    // sends it; context.route intercepts service-worker requests too). If it still
+    // completes fast, the durable queue makes it persist either way.
     await session.context.route("**/reactions/vote", async (route) => {
       await new Promise((r) => setTimeout(r, 4_000));
       // The reload this test performs can cancel the held request; continuing a

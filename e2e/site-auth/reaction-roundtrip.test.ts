@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Flow 1 - the core proof that an authenticated reaction round-trips: a real
+// The core proof that an authenticated reaction round-trips: a real
 // signed-in user clicks the Emojery trigger, picks an emoji, the trigger shows
 // emoji+count, and the pick PERSISTS across a reload. Runs (lightly) on all 9
 // sites; cross-tab sync (brokered by the service worker) is checked once on a stable target.

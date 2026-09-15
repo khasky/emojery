@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// The Gecko half of the accessibility gate: the axe, reflow and text-spacing
-// layers of a11y.spec.ts, run against the extension's own pages in Playwright's
-// Firefox. Those pages are unreachable for Playwright there, so each one is
-// opened as its own sized window through firefox-bridge.ts and judged by
-// functions evaluated in it - which is all the three layers ever needed.
-// The other two layers (aria snapshots, the keyboard walk) need Playwright's
-// own page machinery and stay Chromium-only in a11y.spec.ts.
+// The Gecko half of the accessibility gate: the logged-out axe scans (every popup
+// tab, the auth page, onboarding) plus the reflow and text-spacing layers of
+// a11y.spec.ts, run against the extension's own pages in Playwright's Firefox.
+// Those pages are unreachable for Playwright there, so each one is opened as its
+// own sized window through firefox-bridge.ts and judged by functions evaluated in
+// it - which is all these layers ever needed. What stays Chromium-only in
+// a11y.spec.ts: the aria snapshots and the keyboard walk, which need Playwright's
+// own page machinery, and the two axe scans no Gecko case covers - the opt-in
+// Debug panel and the signed-in Account tab.
 //
 // Colour scheme is a launch pref on Firefox (the pages the bridge opens follow
 // the OS setting, not Playwright's emulation), so the schemes are two sessions

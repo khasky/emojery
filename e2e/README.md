@@ -62,7 +62,7 @@ The **When CI runs it** column is the honest map of what a green pipeline has ac
 | `layout.spec.ts` | The open picker popover staying on-screen under a ~400px window and 50% / 200% zoom | Yes | Manual only |
 | `onboarding.spec.ts` | Fresh-install onboarding on a throwaway profile per test: the onboarding tab + toolbar dot and their restart behavior, the Try-it-live deep link auto-opening the picker, the one-shot coach-mark, and the first-reaction journey that retires the dot | Only the gate sign-in leg | Manual only |
 | `a11y.spec.ts` | Accessibility of all three extension pages — popup, auth, onboarding (axe, aria snapshots, keyboard walk, reflow, text spacing) — `pnpm test:a11y` | Partly | Every other day (`a11y.yml`) |
-| `a11y-firefox.spec.ts` | The axe, reflow and text-spacing layers of `a11y.spec.ts` on Gecko: each extension page opened as a sized window through the bridge, both colour schemes as launch prefs | No | Every scheduled slot (`e2e-ci.yml`, firefox job) |
+| `a11y-firefox.spec.ts` | The logged-out axe scans plus the reflow and text-spacing layers of `a11y.spec.ts` on Gecko: each extension page opened as a sized window through the bridge, both colour schemes as launch prefs | No | Every scheduled slot (`e2e-ci.yml`, firefox job) |
 | `private-pages.spec.ts` | The `isPrivatePage` gate, as an A/B pair on one public URL with the visibility marker rewritten | No | Every other day (`e2e-ci.yml`) |
 | `coexistence.spec.ts` | Mounting next to other content-manipulating extensions. Needs `E2E_COEXT_SOURCES`; skips (and downloads nothing) without it | No | Manual only |
 | `coext-source.spec.ts` | Pure self-check of `lib/coext-source` (source classification, crx→zip slicing). No browser, no network — its own zero-retry `hermetic` project | No | **Every PR** (`ci.yml`) + `pnpm check` |
@@ -84,6 +84,7 @@ The helpers are layered, lowest first, so a spec is a table of scenarios plus th
 | `lib/firefox-bridge.ts` | The firefox run's way into the extension's own contexts over that same protocol: evaluate in the background page, open extension pages as tabs or sized windows and evaluate in them, find the tabs the extension opened. `extension-pages.ts` / `popup-settings.ts` / `popup-probes.ts` branch onto it under `isFirefoxRun()` |
 | `lib/axe.ts` | What the two a11y specs share: the axe-core source, the WCAG rule tags, the violation format, the text-spacing overrides |
 | `lib/browser-reaper.ts` | The global setup/teardown that reaps phantom browsers a SIGKILL'd runner left holding a `.playwright/` profile |
+| `lib/extension-snapshot.ts` | The run-private copy of the built extension the Playwright config makes before any fixture exists, so a rebuild that overlaps a running suite (`wxt build` empties its output dir first) cannot yank `manifest.json` out from under a launch. Same `.playwright/` run-dir shape the reaper already cleans up |
 | `lib/probe-src.ts` · `lib/selectors.ts` | The canonical shadow-piercing walk and the selectors, as source strings a `page.evaluate` body can interpolate |
 | `lib/site-evidence.ts` | The shapes the suites pass around (`SupportedSiteScenario`, `MountEvidence`) |
 | `lib/site-walls.ts` · `lib/page-settle.ts` · `lib/reload-settle.ts` | Getting a live third-party page into a state worth asserting on, turning it into one evidence record, and the fixed beat a post-reload remount needs (it exposes no event to await) |
@@ -162,7 +163,7 @@ For **every site registered in `SUPPORTED_SITES`** (`SUPPORTED_SITE_SCENARIOS` i
 
 ### Evidence on failure
 
-`collectMountEvidence` attaches compact JSON to every assertion: mounted keys, host samples (rect/visibility/zero-size-ancestor), visible native counts, placement reason, plus visual-correctness signals — `duplicateMatchingKeys`, `maxHostNativeOverlapRatio`, `clippedMatchingCount`, `matchingInsideHiddenAncestorCount`, `roleTooltipVisibleCount`. (Only the duplicate-key signal is hard-asserted; the rest are diagnostics — the per-site `nativeSelectors` are too coarse to base a non-flaky overlap/clipping assert on.)
+`collectMountEvidence` attaches compact JSON to every assertion: mounted keys, host samples (rect/visibility/zero-size-ancestor), visible native counts, placement reason, plus visual-correctness signals — `duplicateMatchingKeys`, `maxHostNativeOverlapRatio`, `clippedMatchingCount`, `matchingInsideHiddenAncestorCount`, `roleTooltipVisibleCount`. (Two are hard-asserted — `duplicateMatchingKeys` and `clippedMatchingCount`, the pair that reads only our own host; the rest are diagnostics — the per-site `nativeSelectors` are too coarse to base a non-flaky overlap assert on.)
 
 ## Theme & contrast
 
@@ -230,6 +231,8 @@ The rest are waits and per-spec knobs that only matter on a slow machine or when
 | `E2E_OVERLAY_MOUNT_TIMEOUT_MS` [25s] | `overlay-freeze.spec.ts`: mount budget before the overlay-freeze scenario starts. |
 | `E2E_FB_INJECT_MOUNT_TIMEOUT_MS` [30s] · `E2E_FB_INJECT_SETTLE_MS` [8s / 12s] | The 2 Facebook injection specs (`facebook-comment-injection`, `facebook-group-row-injection`): mount budget and post-injection settle (the group-row spec settles 12s). |
 | `E2E_COEXT_PATH` | A single local coexistence-extension folder; merged with `E2E_COEXT_SOURCES` / `E2E_COEXT_PATHS`. |
+
+One more is not yours to set: the runner exports `E2E_EXTENSION_SNAPSHOT_DIR` at config load, pointing at the run-private copy of the build (`lib/extension-snapshot.ts`), and the worker processes read it back to know the copy already exists. It has no default — unset means no snapshot has been taken yet.
 
 That is every `E2E_*` the specs and helpers in this folder read. 2 more layers carry their own:
 

@@ -274,7 +274,7 @@ test("two accounts raise and lower the shared counter independently", async () =
     await expect.poll(() => ext.hasOwnReaction(pageA)).toBe(true);
     await expect.poll(async () => (await ext.readCounter(pageA)).total ?? 0, { message: "account A's reaction should raise the counter by one" }).toBe(base + 1);
     // That counter is A's own optimistic render; this is the wire. A vote still
-    // sitting in the queue would otherwise surface 210s later as account B's
+    // sitting in the queue would otherwise surface a cache wait later as account B's
     // "the public counter never moved", pointing at the read path instead.
     await voteFlushed();
 

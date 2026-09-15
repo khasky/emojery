@@ -11,11 +11,11 @@
 // both numbers together.
 //
 // The regression it exists for: the per-site glyph memory used to outrank a row's own
-// measurement, so one visit to a surface with larger icons (YouTube's Shorts rail draws
-// 24px where its watch row draws 18px) resized the trigger across that platform for a 24h
-// TTL. That needs state carried BETWEEN pages, which the per-site loop cannot produce -
-// hence the two cases after it: a planted stale size (deterministic) and the surface order
-// a user walks (only fails when the surfaces differ).
+// measurement, so one visit to a surface with larger icons (YouTube's Shorts rail against
+// its watch row, on a day when the two really differ) resized the trigger across that
+// platform for a 24h TTL. That needs state carried BETWEEN pages, which the per-site loop
+// cannot produce - hence the two cases after it: a planted stale size (deterministic) and
+// the surface order a user walks (only fails when the surfaces differ).
 
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import { closeSession, envUrl, evalInBackground } from "./lib/extension";

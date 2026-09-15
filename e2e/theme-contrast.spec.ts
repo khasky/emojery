@@ -118,8 +118,8 @@ test.beforeAll(async () => {
   // The active-phase check needs a reaction to stick, and only a signed-in
   // Emojery user gets an active trigger - sign in when the test account is
   // configured. Emojery auth is independent of the host platforms, which stay
-  // logged out. Firefox cannot sign in (auth.html is unreachable from
-  // Playwright), so there the active phase self-reports "not measured".
+  // logged out. auth.html is unreachable from Playwright Firefox, so signIn()
+  // routes that run through the extension bridge instead - both browsers sign in.
   if (authConfigured()) {
     await signIn(context);
   }
@@ -170,12 +170,12 @@ for (const scenario of scenarios) {
           assertLegible(active, scenario, scheme, "active");
           await attachScreenshot(page, testInfo, `${scenario.site}-${scheme}-active`);
         } else {
-          // No pick landed. Unconfigured is the expected, documented path - and so
-          // is firefox, where beforeAll never signs in (auth.html is unreachable
-          // from Playwright). Configured => a pick MUST land: an annotation is not
-          // a skip and not a failure, so without this assert the whole active phase
-          // used to pass on a broken picker. Surface the reason in the log and the
-          // report next to the measurements.
+          // No pick landed. Unconfigured is the expected, documented path, and the
+          // only one: firefox signs in too, over the extension bridge that stands in
+          // for the Playwright-unreachable auth.html. Configured => a pick MUST land:
+          // an annotation is not a skip and not a failure, so without this assert the
+          // whole active phase used to pass on a broken picker. Surface the reason in
+          // the log and the report next to the measurements.
           const reason = authConfigured() ? `signed in, but ${pickFailure}` : "no sign-in resolver configured (E2E_SIGNIN_RESOLVER)";
           console.log(`[theme] ${scenario.site} ${scheme}/active: not measured - ${reason}`);
           testInfo.annotations.push({ type: "active-phase-not-measured", description: `${scenario.label} (${scheme}): ${reason}` });

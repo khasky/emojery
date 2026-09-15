@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Flow 4 - localized (RU/UA) logged-in labels. Opportunistic: Facebook's UI
+// Localized (RU/UA) logged-in labels. Opportunistic: Facebook's UI
 // language follows the *account*, not the browser locale, so this only runs when
 // the signed-in FB account renders RU/UA; otherwise it skips with a note. The
 // durable stem-matching contract lives in the adapter unit tests

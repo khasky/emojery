@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Flow 2 - feed / lifecycle stability on the bot-sensitive, feed-heavy sites.
+// Feed / lifecycle stability on the bot-sensitive, feed-heavy sites.
 // These are the invariants the recent logged-in bug classes violated; they are
 // chosen to be robustly checkable black-box (no fragile per-post targeting).
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
