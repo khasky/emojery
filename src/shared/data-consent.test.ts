@@ -7,13 +7,17 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+const stub = (permissions: unknown, manifest: unknown = firefoxDataConsentManifest) => {
+  vi.stubGlobal("chrome", {
+    runtime: { getManifest: () => manifest },
+    permissions,
+  });
+};
+
 describe("technical and interaction data consent", () => {
   it("keeps analytics enabled when Firefox data consent is not declared", async () => {
     const request = vi.fn();
-    vi.stubGlobal("chrome", {
-      runtime: { getManifest: () => ({}) },
-      permissions: { request },
-    });
+    stub({ request }, {});
 
     await expect(technicalAndInteractionConsentGranted()).resolves.toBe(true);
     await expect(requestTechnicalAndInteractionConsent()).resolves.toBe(true);
@@ -21,17 +25,14 @@ describe("technical and interaction data consent", () => {
   });
 
   it("requires the Firefox optional data permission when declared", async () => {
-    vi.stubGlobal("chrome", {
-      runtime: { getManifest: () => firefoxDataConsentManifest },
-      permissions: {
-        getAll: vi.fn((done) =>
-          done({
-            permissions: [],
-            origins: [],
-            data_collection: ["technicalAndInteraction"],
-          }),
-        ),
-      },
+    stub({
+      getAll: vi.fn((done) =>
+        done({
+          permissions: [],
+          origins: [],
+          data_collection: ["technicalAndInteraction"],
+        }),
+      ),
     });
 
     await expect(technicalAndInteractionConsentGranted()).resolves.toBe(true);
@@ -40,12 +41,7 @@ describe("technical and interaction data consent", () => {
   });
 
   it("treats a missing declared optional permission as denied", async () => {
-    vi.stubGlobal("chrome", {
-      runtime: { getManifest: () => firefoxDataConsentManifest },
-      permissions: {
-        getAll: vi.fn((done) => done({ permissions: [], origins: [], data_collection: [] })),
-      },
-    });
+    stub({ getAll: vi.fn((done) => done({ permissions: [], origins: [], data_collection: [] })) });
 
     await expect(technicalAndInteractionConsentGranted()).resolves.toBe(false);
     await expect(effectiveAnalyticsConsent(true)).resolves.toBe(false);
@@ -54,10 +50,7 @@ describe("technical and interaction data consent", () => {
   it("requests and removes the declared Firefox data permission", async () => {
     const request = vi.fn((_permissions, done: (granted: boolean) => void) => done(true));
     const remove = vi.fn((_permissions, done: (removed: boolean) => void) => done(true));
-    vi.stubGlobal("chrome", {
-      runtime: { getManifest: () => firefoxDataConsentManifest },
-      permissions: { request, remove },
-    });
+    stub({ request, remove });
 
     await expect(requestTechnicalAndInteractionConsent()).resolves.toBe(true);
     await expect(removeTechnicalAndInteractionConsent()).resolves.toBe(true);
@@ -67,13 +60,6 @@ describe("technical and interaction data consent", () => {
 });
 
 describe("legacy data consent notice", () => {
-  const stub = (permissions: unknown, manifest: unknown = firefoxDataConsentManifest) => {
-    vi.stubGlobal("chrome", {
-      runtime: { getManifest: () => manifest },
-      permissions,
-    });
-  };
-
   it("is not needed on a build that declares no Firefox data collection", async () => {
     stub({ getAll: vi.fn((done) => done({ permissions: [], origins: [] })) }, {});
 

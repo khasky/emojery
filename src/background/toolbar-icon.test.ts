@@ -33,7 +33,7 @@ describe("applyToolbarIconForTab - per-tab icon choice", () => {
     vi.clearAllMocks();
   });
 
-  function lastIconDetails(): chrome.action.TabIconDetails {
+  function firstIconDetails(): chrome.action.TabIconDetails {
     const call = vi.mocked(setToolbarIcon).mock.calls[0];
     expect(call).toBeDefined();
     return call![0];
@@ -44,7 +44,7 @@ describe("applyToolbarIconForTab - per-tab icon choice", () => {
   it("shows the homepage icon on the extension's own site", async () => {
     applyToolbarIconForTab(7, "https://emojery.app/faq");
     await vi.waitFor(() => expect(setToolbarIcon).toHaveBeenCalledTimes(1));
-    const details = lastIconDetails();
+    const details = firstIconDetails();
     expect(details.tabId).toBe(7);
     expect((details.path as Record<number, string>)[16]).toBe("icons/icon-home-16.png");
   });
@@ -52,7 +52,7 @@ describe("applyToolbarIconForTab - per-tab icon choice", () => {
   it("shows the full-color icon on a supported site", async () => {
     applyToolbarIconForTab(3, "https://x.com/home");
     await vi.waitFor(() => expect(setToolbarIcon).toHaveBeenCalled());
-    const details = lastIconDetails();
+    const details = firstIconDetails();
     expect(details.tabId).toBe(3);
     expect((details.path as Record<number, string>)[48]).toBe("icons/icon-48.png");
   });
@@ -60,7 +60,7 @@ describe("applyToolbarIconForTab - per-tab icon choice", () => {
   it("falls back to the color icon when greyscale can't be produced (never blank)", async () => {
     applyToolbarIconForTab(9, "https://example.com/");
     await vi.waitFor(() => expect(setToolbarIcon).toHaveBeenCalled());
-    const details = lastIconDetails();
+    const details = firstIconDetails();
     expect(details.tabId).toBe(9);
     expect((details.path as Record<number, string>)[128]).toBe("icons/icon-128.png");
     expect("imageData" in details).toBe(false);
@@ -69,6 +69,6 @@ describe("applyToolbarIconForTab - per-tab icon choice", () => {
   it("treats a redacted (unreadable) url as unsupported, not the homepage", async () => {
     applyToolbarIconForTab(1, undefined);
     await vi.waitFor(() => expect(setToolbarIcon).toHaveBeenCalled());
-    expect((lastIconDetails().path as Record<number, string>)[16]).toBe("icons/icon-16.png");
+    expect((firstIconDetails().path as Record<number, string>)[16]).toBe("icons/icon-16.png");
   });
 });

@@ -187,7 +187,7 @@ describe("findVisualActionSlot", () => {
   });
 
   describe("row-shape filters", () => {
-    it("rejects a row with fewer slots than minSlots (default 2)", () => {
+    it("rejects a row with fewer slots than minSlots (default 3)", () => {
       layoutPage();
       const { buttons } = buildRow({ widths: [40] });
       expect(findVisualActionSlot(buttons[0]!)).toBeNull();

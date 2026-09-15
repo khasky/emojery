@@ -859,23 +859,30 @@ describe("Picker - signed-out gate", () => {
     await expect.poll(() => portalRoot.querySelector('[role="dialog"]')).toBeNull();
   });
 
-  it("signing in casts the reaction the gate was holding", async () => {
-    let pushRefresh: RefreshPush | null = null;
+  // A signed-out picker whose refresh push is reachable and whose casts are recorded:
+  // the three gate cases below differ only in what they do once the gate is up.
+  function mountGateCapture(): { pushRefresh: () => RefreshPush; picked: (string | null)[] } {
+    let captured: RefreshPush | null = null;
     const picked: (string | null)[] = [];
     mountSignedOutPicker(() => {}, {
       captureRefresh: (cb) => {
-        pushRefresh = cb;
+        captured = cb;
       },
       onPick: (reaction) => {
         picked.push(reaction);
         return true;
       },
     });
+    return { pushRefresh: () => captured!, picked };
+  }
+
+  it("signing in casts the reaction the gate was holding", async () => {
+    const { pushRefresh, picked } = mountGateCapture();
 
     const emoji = await pickWhileSignedOut();
     await pollForElement(() => portalRoot.querySelector<HTMLElement>(`.${GATE_CLASS}`));
 
-    pushRefresh!({ myReaction: null, authed: true });
+    pushRefresh()({ myReaction: null, authed: true });
 
     // The pick survives the trip through the auth tab and is cast on return.
     await expect.poll(() => picked).toEqual([emoji]);
@@ -883,17 +890,7 @@ describe("Picker - signed-out gate", () => {
   });
 
   it("holds the held pick until the tab is on screen again", async () => {
-    let pushRefresh: RefreshPush | null = null;
-    const picked: (string | null)[] = [];
-    mountSignedOutPicker(() => {}, {
-      captureRefresh: (cb) => {
-        pushRefresh = cb;
-      },
-      onPick: (reaction) => {
-        picked.push(reaction);
-        return true;
-      },
-    });
+    const { pushRefresh, picked } = mountGateCapture();
 
     const emoji = await pickWhileSignedOut();
     await pollForElement(() => portalRoot.querySelector<HTMLElement>(`.${GATE_CLASS}`));
@@ -903,7 +900,7 @@ describe("Picker - signed-out gate", () => {
     const real = Object.getOwnPropertyDescriptor(Document.prototype, "visibilityState");
     Object.defineProperty(document, "visibilityState", { configurable: true, get: () => "hidden" });
     try {
-      pushRefresh!({ myReaction: null, authed: true });
+      pushRefresh()({ myReaction: null, authed: true });
       // Casting here would spend the reaction's animation on a tab nobody is looking at.
       await new Promise((resolve) => setTimeout(resolve, 150));
       expect(picked).toEqual([]);
@@ -920,23 +917,13 @@ describe("Picker - signed-out gate", () => {
   });
 
   it("a cancelled gate forgets the pick, so a later sign-in casts nothing", async () => {
-    let pushRefresh: RefreshPush | null = null;
-    const picked: (string | null)[] = [];
-    mountSignedOutPicker(() => {}, {
-      captureRefresh: (cb) => {
-        pushRefresh = cb;
-      },
-      onPick: (reaction) => {
-        picked.push(reaction);
-        return true;
-      },
-    });
+    const { pushRefresh, picked } = mountGateCapture();
 
     await pickWhileSignedOut();
     const cancel = await pollForElement(() => portalRoot.querySelector<HTMLButtonElement>(`.${GATE_CANCEL_CLASS}`));
     await userEvent.click(cancel);
 
-    pushRefresh!({ myReaction: null, authed: true });
+    pushRefresh()({ myReaction: null, authed: true });
 
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     expect(picked).toEqual([]);

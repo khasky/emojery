@@ -19,6 +19,10 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+// The jwt.io sample token, signed with the string "secret".
+// nosemgrep: generic.secrets.security.detected-jwt-token.detected-jwt-token
+const SAMPLE_JWT = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U";
+
 describe("debug API logging", () => {
   it("logs API exchanges in a dev build", async () => {
     const { logApiExchange } = await importDebug();
@@ -101,11 +105,8 @@ describe("debug API logging", () => {
   it("redacts the failure message on the rejected-fetch arm, like the success arm", async () => {
     const { logApiExchange } = await importDebug();
     const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
-    // The jwt.io sample token, signed with the string "secret".
-    // nosemgrep: generic.secrets.security.detected-jwt-token.detected-jwt-token
-    const jwt = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U";
 
-    logApiExchange("https://api.test/reactions/vote", { method: "POST", body: "{}" }, { error: new Error(jwt) }, Date.now());
+    logApiExchange("https://api.test/reactions/vote", { method: "POST", body: "{}" }, { error: new Error(SAMPLE_JWT) }, Date.now());
 
     expect(info).toHaveBeenCalledWith(
       "[emojery:api]",
@@ -139,11 +140,8 @@ describe("debug API logging", () => {
   it("redacts JWT-shaped values regardless of the key name", async () => {
     const { logApiExchange } = await importDebug();
     const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
-    // The jwt.io sample token, signed with the string "secret".
-    // nosemgrep: generic.secrets.security.detected-jwt-token.detected-jwt-token
-    const jwt = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U";
 
-    logApiExchange("https://api.test/reactions/mine", { method: "GET" }, { status: 200, body: { data: jwt, note: "eyJnot.a.jwt but text" } }, Date.now());
+    logApiExchange("https://api.test/reactions/mine", { method: "GET" }, { status: 200, body: { data: SAMPLE_JWT, note: "eyJnot.a.jwt but text" } }, Date.now());
 
     expect(info).toHaveBeenCalledWith(
       "[emojery:api]",

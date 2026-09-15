@@ -13,12 +13,6 @@ vi.mock("./votequeue", () => ({
 vi.mock("./identity", () => ({
   getAuth: vi.fn(),
   clearAuth: vi.fn(),
-  extensionClientHeaders: () => ({}),
-  jsonApiHeaders: async (opts: { token?: string; lang?: string } = {}) => ({
-    "content-type": "application/json",
-    ...(opts.token ? { authorization: `Bearer ${opts.token}` } : {}),
-    ...(opts.lang ? { "accept-language": opts.lang } : {}),
-  }),
 }));
 vi.mock("./history", () => ({
   pushHistory: vi.fn().mockResolvedValue(undefined),
@@ -793,7 +787,7 @@ describe("fetchCount", () => {
     const read = fetchCount(target, 6);
     // The count read going out means the /reactions/mine batch is open behind it
     // (fetchTargetCountsAndOwnReaction starts both in the same tick). Poll every
-    // 1ms, not the waitFor default of 50ms: the batch window is 25ms, so a slower poll
+    // 1ms, not the waitFor default of 50ms: that overshoots MINE_BATCH_WINDOW_MS, so a slower poll
     // lets it flush on its own and the reset under test is never exercised.
     await vi.waitFor(() => expect(fetchMock).toHaveBeenCalled(), { interval: 1, timeout: 1_000 });
     clearPendingMineBatch();
