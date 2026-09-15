@@ -231,6 +231,10 @@ function loadLocaleMap(key: string, kind: LoadKind): Promise<Map<string, EmojiIn
     if (kind === "primary") {
       primaryLocaleMap = map;
       primaryLocaleKey = key;
+      // Subscribers that never await ensureLocaleLoaded (the popup reaches this
+      // module through getEmojiLabel alone) have no other signal that labels moved
+      // off the English floor.
+      notifyLocaleChanged();
     } else {
       searchExtraMaps.set(key, map);
     }

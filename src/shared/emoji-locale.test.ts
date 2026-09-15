@@ -73,6 +73,26 @@ describe("emoji locale routing", () => {
     expect(getEmojiLabel("❤️")).toBe("алое сердце");
   });
 
+  // getEmojiLabel's own kick-off is the popup's only load path, and the popup
+  // redraws on onLocalesChanged rather than on the promise. English and the browser
+  // locale are fetched together, so whenever the locale loses that race the English
+  // notification was the last one - and the popup stayed on the CLDR English name.
+  it("announces the browser locale that settles after English", async () => {
+    const servesFromDisk = globalThis.fetch;
+    vi.stubGlobal("fetch", async (...args: Parameters<typeof fetch>) => {
+      if (String(args[0]).includes("emoji-data/de.json")) await new Promise((settleAfterEnglish) => setTimeout(settleAfterEnglish, 120));
+      return servesFromDisk(...args);
+    });
+    vi.stubGlobal("navigator", { languages: ["de-DE"] });
+    const { getEmojiLabel, onLocalesChanged } = await import("./emoji-meta");
+
+    const announced: string[] = [];
+    onLocalesChanged(() => announced.push(getEmojiLabel("❤️")));
+    getEmojiLabel("❤️");
+
+    await vi.waitFor(() => expect(announced).toContain("rotes Herz"), { timeout: 3_000 });
+  });
+
   // The locale load is memoized by key. A fetch that loses the race against
   // service-worker start resolves null, and memoizing THAT stranded the browser
   // locale for the page's lifetime - labels fell back to English forever.
