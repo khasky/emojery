@@ -8,7 +8,7 @@
 import type { Page } from "@playwright/test";
 import { DEEP_QUERY_ALL_SRC, IS_VISIBLE_RECT_SRC, MOUNTED_KEY_OF_SRC, RECT_GEOMETRY_SRC } from "./probe-src";
 import { HIDDEN_SELECTOR, HOST_SELECTOR, MOUNT_ATTR, MOUNTED_SELECTOR, TRIGGER_SELECTOR } from "./selectors";
-import { DEFAULT_SCROLL_STEPS, type MountEvidence, type SupportedSiteScenario } from "./site-evidence";
+import { DEFAULT_MAX_HORIZONTAL_DISTANCE_PX, DEFAULT_MAX_VERTICAL_DISTANCE_PX, DEFAULT_SCROLL_STEPS, type MountEvidence, type SupportedSiteScenario } from "./site-evidence";
 import { clickAmazonContinueShopping, dismissDialogWall, dismissLoginWalls, INTERSTITIAL_PHRASES, interstitialTextRe, isBlockUrl } from "./site-walls";
 export async function safeGoto(page: Page, url: string): Promise<boolean> {
   try {
@@ -289,6 +289,9 @@ async function recoverFromTransientInterstitial(page: Page): Promise<void> {
       await page.reload({ waitUntil: "domcontentloaded" }).catch(() => {});
     }
     await page.waitForLoadState("load", { timeout: 12_000 }).catch(() => {});
+    // A Retry click re-renders in place and navigates nowhere, so the load wait above
+    // returns at once on that branch - this beat is what lets the replacement paint
+    // before the next attempt re-reads the body text.
     await page.waitForTimeout(1_500);
   }
 }
@@ -303,8 +306,8 @@ export async function collectMountEvidence(page: Page, site: SupportedSiteScenar
     nativeSelectors: site.nativeSelectors,
     containerSelectors: site.containerSelectors,
     requiredHostAncestorSelectors: site.requiredHostAncestorSelectors ?? [],
-    maxY: site.maxVerticalDistance ?? 160,
-    maxX: site.maxHorizontalDistance ?? 700,
+    maxY: site.maxVerticalDistance ?? DEFAULT_MAX_VERTICAL_DISTANCE_PX,
+    maxX: site.maxHorizontalDistance ?? DEFAULT_MAX_HORIZONTAL_DISTANCE_PX,
   });
 
   return page.evaluate<MountEvidence>(`(() => {

@@ -271,7 +271,7 @@ export async function expectHistorySearchFiltersReaction(browserContext: Browser
     // beat after fill - counting rows here would snapshot the pre-filter list.
     // Wait until no visible row shows another reaction (only true once the
     // filtered result rendered), then require a non-empty match.
-    const rowEmojis = popup.locator(".history li .history-emoji");
+    const rowEmojis = popup.locator(`${HISTORY_ROW_SELECTOR} ${HISTORY_EMOJI_SELECTOR}`);
     await expect(rowEmojis.filter({ hasNotText: reaction })).toHaveCount(0);
     await expect
       .poll(() => rows.count(), {
@@ -347,7 +347,7 @@ export async function openLatestHistoryReactionPage(browserContext: BrowserConte
   }
 }
 
-// --- The firefox run: the popup as a bridge tab, history through its runtime channel ---
+// The firefox run: the popup as a bridge tab, history through its runtime channel
 //
 // Playwright cannot attach to the popup on Firefox, so the helpers above read
 // history the way the popup's own view does - the `history:page` message from an

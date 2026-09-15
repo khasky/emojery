@@ -111,6 +111,9 @@ export async function signInThroughAuthPage(context: BrowserContext, extensionId
     for (let attempt = 0; attempt < 3; attempt += 1) {
       try {
         if (await requestAndVerifyOtp(authPage, opts.email, opts.code, locale)) return;
+        // Backoff between exchanges: a failed pass leaves the page on whichever step
+        // broke, with nothing on it that settles into a retryable state - the next
+        // attempt reloads into a fresh exchange regardless.
         await authPage.waitForTimeout(1_500);
       } catch (err) {
         // A headed Chrome renderer occasionally crashes under full-suite load
@@ -147,6 +150,7 @@ export async function verifyOtpOnAuthPage(authPage: Page, opts: AuthSignInOption
   const locale = opts.locale ?? "en";
   for (let attempt = 0; attempt < 3; attempt += 1) {
     if (await requestAndVerifyOtp(authPage, opts.email, opts.code, locale)) return;
+    // The same backoff signInThroughAuthPage's loop takes.
     await authPage.waitForTimeout(1_500);
   }
   await expect(authPage.getByRole("heading", { name: localeMessage(locale, "authDoneTitle") }), "sign-in never completed in the gate's own auth tab").toBeVisible();

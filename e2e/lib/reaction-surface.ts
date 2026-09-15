@@ -175,7 +175,7 @@ export async function readSettledTotal(page: Page, graceMs = COUNTER_GRACE_MS): 
 }
 
 // Drop the extension's read-through counts cache (`cache:` keys, TTL
-// READ_CACHE_TTL_MS = 60s, defined in src/shared/config.ts and applied by
+// READ_CACHE_TTL_MS, defined in src/shared/config.ts and applied by
 // src/shared/counts-cache.ts) as the extension does on sign-in/out. Without it a
 // reload is NOT a refetch - loadInitial renders a cache hit, so two
 // "consecutive" settle reads can be one stale snapshot.
@@ -201,6 +201,8 @@ export async function reloadAndReadTotal(page: Page): Promise<number | null> {
   const deadline = Date.now() + 15_000;
   while (Date.now() < deadline) {
     if ((await visibleHostCount(page).catch(() => 0)) > 0) break;
+    // Poll interval, bounded by the deadline above: the mount is IntersectionObserver-driven,
+    // so there is no event to await - only the host appearing.
     await page.waitForTimeout(750);
   }
   // Null after the grace is passed through, not flattened to 0: waitForSettledTotal

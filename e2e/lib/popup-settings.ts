@@ -69,6 +69,9 @@ export async function setPopupTheme(context: BrowserContext, choice: PopupThemeC
     await popup.waitForTimeout(300);
     for (let attempt = 0; attempt < 5; attempt += 1) {
       await select.selectOption(choice);
+      // Same beat as in setPopupCheckbox: the write goes to storage and comes back as a
+      // re-render, and nothing resolves when it lands - settle before re-reading and let
+      // the attempt loop cover a slow one.
       await popup.waitForTimeout(250);
       if ((await select.inputValue()) === choice) break;
     }

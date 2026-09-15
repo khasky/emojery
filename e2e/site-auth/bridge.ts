@@ -171,9 +171,9 @@ const RELAY_TAB_SWEEP_SRC = `const relays = ctx.pages().filter((p) => { const u 
 //    that hold becomes an open ceiling.
 //  - snapshot.mode builds an accessibility snapshot for the reply, which
 //    parseSentinel throws away, at a cost that grows with the DOM it walks.
-// Median round-trip over 12 sequential no-op evaluates per site: defaults 545ms
-// (github) / 523ms (x) / 1003ms (facebook); with both off, 8 / 8 / 7ms. The suite
-// makes thousands of calls. Settle stays tunable per run.
+// Measured over sequential no-op evaluates: a round-trip costs hundreds of milliseconds
+// with both defaults on and single-digit milliseconds with them off. The suite makes
+// thousands of calls. Settle stays tunable per run.
 const MCP_SPEED = {
   snapshot: { mode: "none" },
   timeouts: { settle: Number(process.env.E2E_MCP_SETTLE_MS ?? 0) },

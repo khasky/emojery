@@ -15,6 +15,15 @@ export type SupportedSiteScenario = SiteScenarioSpec & { url: string };
 // the disabled-site wait all scroll the same page, and a per-caller copy is a
 // silent drift.
 export const DEFAULT_SCROLL_STEPS = [0, 450, 900, 1350];
+
+// How far the trigger may sit from the site's own control and still count as "in
+// the same action row", for a scenario that pins neither distance itself. Wide -
+// a row can carry several controls between the two - because the assertion that
+// matters is that they are in one row at all. One definition: the mount-evidence
+// probe and the localized-placement probe fall back from the same scenario
+// fields, and a per-caller copy is a silent drift.
+export const DEFAULT_MAX_HORIZONTAL_DISTANCE_PX = 700;
+export const DEFAULT_MAX_VERTICAL_DISTANCE_PX = 160;
 export interface PickedReaction {
   reaction: string;
   targetKey: string;

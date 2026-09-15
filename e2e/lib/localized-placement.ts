@@ -9,14 +9,7 @@ import { expect, type Page } from "@playwright/test";
 import { debugEvidence } from "./page-settle";
 import { DEEP_QUERY_ALL_SRC, IS_VISIBLE_RECT_SRC, MOUNTED_KEY_OF_SRC, RECT_GEOMETRY_SRC } from "./probe-src";
 import { HOST_SELECTOR, OWN_NODES_SELECTOR } from "./selectors";
-import type { MountEvidence, Rect, SupportedSiteScenario } from "./site-evidence";
-
-// Fallbacks for a scenario that pins neither distance itself: how far the
-// trigger may sit from the localized native control and still count as "in the
-// same action row". Wide - a row can carry several controls between
-// the two - the assertion that matters is that they are in one row at all.
-const DEFAULT_MAX_HORIZONTAL_DISTANCE_PX = 700;
-const DEFAULT_MAX_VERTICAL_DISTANCE_PX = 160;
+import { DEFAULT_MAX_HORIZONTAL_DISTANCE_PX, DEFAULT_MAX_VERTICAL_DISTANCE_PX, type MountEvidence, type Rect, type SupportedSiteScenario } from "./site-evidence";
 
 export interface I18nLocaleCase {
   locale: "ru" | "de" | "ja";

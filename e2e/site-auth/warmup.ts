@@ -150,6 +150,11 @@ const darkRendering: WarmupStep = {
 const threadsSettingsUrl = (): string => `${new URL(authFeedUrl("threads")).origin}/settings/account`;
 const THREADS_COUNTS_SWITCH = `page.getByRole('switch', { name: /count/i }).first()`;
 
+// Both halves of this step settle by time, twice each: bridge.goto only commits, so the
+// settings page paints its switch rows after the navigation call returns, and a click on
+// the switch round-trips to Threads before aria-checked carries the new value. Neither
+// beat has a state the bridge could await instead.
+
 // Turn the hide-counts switch back OFF if it is on. Idempotent: shared by the
 // in-run undo and the crashed-run recovery.
 async function undoThreadsHideCounts(bridge: Bridge): Promise<void> {
@@ -201,6 +206,10 @@ const threadsHideCounts: WarmupStep = {
 // in no active group. When set, the run joins the group (if not already a member)
 // and LEAVES it on teardown. A group needing admin approval won't grant membership
 // in time (the check still skips); the pending request is cancelled the same way.
+//
+// Both halves below open the group page and settle by time first, for the same reason
+// the Threads step does: bridge.goto only commits, and the membership button ("Join",
+// "Joined", "Cancel request") that each half reads is rendered after that.
 
 // Leave the configured group (or cancel a pending request). Idempotent: shared
 // by the in-run undo and the crashed-run recovery; the URL comes from config,
