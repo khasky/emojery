@@ -33,7 +33,7 @@ const triggerIn = (host) => {
 };
 `;
 
-interface HostInfo {
+export interface HostInfo {
   visible: boolean;
   top: number;
   width: number;
@@ -45,6 +45,11 @@ interface HostInfo {
   label: string | null; // trigger aria-label (e.g. "1 reactions — ...")
   isCounter: boolean; // true when the trigger has reacted (shows a count)
   text: string; // trigger visible text (e.g. "🔥1")
+  // The target key of the anchor this host was mounted against, null when the
+  // walk below cannot reach one. Best effort, and never the source of truth for
+  // identity (mountKeys is) - a caller uses it to come back to ONE host it
+  // already measured, and must tolerate the null.
+  key: string | null;
 }
 
 export interface MountEvidence {
@@ -73,6 +78,23 @@ export interface MountEvidence {
 export function evidenceProbe(mountKeyPattern: string): string {
   return `${DQ_SRC}
 const re = new RegExp(${JSON.stringify(mountKeyPattern)});
+// The mount registry inserts the node BEFORE, AFTER or INSIDE the keyed anchor
+// (src/ui/mount-registry.ts), so the anchor is a sibling or the parent of the
+// mounted node - never an ancestor of the host, which is why \`closest\` alone
+// reads null. The node is the host or a thin adapter wrapper around it, so the
+// host, its parent and its grandparent cover every shape; stopping there keeps a
+// feed's NEXT post out of the answer.
+const MOUNT_WALK_DEPTH = 3;
+const keyOfHost = (h) => {
+  let node = h;
+  for (let depth = 0; depth < MOUNT_WALK_DEPTH && node; depth++, node = node.parentElement) {
+    for (const near of [node.previousElementSibling, node.nextElementSibling, node.parentElement]) {
+      const k = near && near.getAttribute ? near.getAttribute('${MOUNT_ATTR}') : null;
+      if (k) return k;
+    }
+  }
+  return null;
+};
 const hosts = dq('${HOST_SELECTOR}');
 const info = hosts.map((h) => {
   const r = h.getBoundingClientRect();
@@ -86,6 +108,7 @@ const info = hosts.map((h) => {
     width: Math.round(r.width),
     height: Math.round(r.height),
     inDialog: !!(h.closest && h.closest('[role="dialog"], [role="alertdialog"]')),
+    key: keyOfHost(h),
     label, isCounter, text,
   };
 });

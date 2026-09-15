@@ -7,11 +7,11 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { SITE_LABELS } from "../../src/shared/sites";
-import { GRID_ITEM_SELECTOR, HOST_SELECTOR, MOUNTED_SELECTOR, SEARCH_INPUT_SELECTOR, TRIGGER_SELECTOR } from "../lib/selectors";
+import { GRID_ITEM_SELECTOR, HOST_SELECTOR, MOUNT_ATTR, MOUNTED_SELECTOR, SEARCH_INPUT_SELECTOR, TRIGGER_SELECTOR } from "../lib/selectors";
 import { BLOCK_URL_RE, WALL_SENTENCES_RE } from "../lib/site-walls";
 import { SUPPORTED_SITE_SCENARIOS } from "../supported-sites";
 import { type Bridge, connectBridge, isBridgeError } from "./bridge";
-import { evidenceProbe, type MountEvidence, type PickerState, pickerStateProbe } from "./probes";
+import { evidenceProbe, type HostInfo, type MountEvidence, type PickerState, pickerStateProbe } from "./probes";
 import { authContentUrl, type SiteId } from "./scenarios";
 
 export { GRID_ITEM_SELECTOR, TRIGGER_SELECTOR };
@@ -155,6 +155,26 @@ export async function gotoSettled(bridge: Bridge, url: string, settleMs = 3500):
 
 export async function readEvidence(bridge: Bridge, site: SiteId): Promise<MountEvidence> {
   return bridge.evaluate<MountEvidence>(evidenceProbe(mountKeyPattern(site)));
+}
+
+// A painted host is not a counted one yet: the counts (and the user's own pick) arrive
+// with the fetch the mount fires, so a read taken the moment the host appears sees the
+// bare trigger. Polls one named target - or, with no key to name it, any visible counter,
+// which is what a caller that cannot resolve one had before - and hands back the last
+// host it read either way, so a caller's assertion reports the state instead of a
+// timeout. Under the permalink budget: this waits on a fetch, not on a page load.
+const COUNTER_SETTLE_MS = 10_000;
+const COUNTER_POLL_MS = 500;
+
+export async function waitForCounterOn(bridge: Bridge, site: SiteId, key: string | null): Promise<HostInfo | null> {
+  const deadline = Date.now() + COUNTER_SETTLE_MS;
+  let last: HostInfo | null = null;
+  for (;;) {
+    const evidence = await readEvidence(bridge, site);
+    last = evidence.hosts.find((h) => h.visible && (key === null ? h.isCounter : h.key === key)) ?? last;
+    if (last?.isCounter || Date.now() >= deadline) return last;
+    await bridge.waitMs(COUNTER_POLL_MS);
+  }
 }
 
 // The bridge twin of site-walls.ts wallReason, as serialized source because the
@@ -485,15 +505,30 @@ export async function closeSpawnedAuthTabs(bridge: Bridge): Promise<number> {
 const DIALOG_TRIGGER_SELECTOR = TRIGGER_SELECTOR.split(",")
   .map((sel) => `[role="dialog"] ${sel.trim()}`)
   .join(", ");
-const RESOLVE_TRIGGER = `const inDialog = page.locator(${JSON.stringify(DIALOG_TRIGGER_SELECTOR)}).filter({ visible: true });
-   const trigger = (await inDialog.count()) > 0 ? inDialog.first() : page.locator(${JSON.stringify(TRIGGER_SELECTOR)}).filter({ visible: true }).first();`;
+// A key narrows that rule to ONE target: the mount anchor carrying it sits beside the
+// host (src/ui/mount-registry.ts places the node before, after or inside the anchor), so
+// the anchor's parent holds both. Give it to re-open the picker on a target already
+// measured - the alternative, "whichever trigger is first now", reads another post the
+// moment the surface reorders. Unresolvable key falls through to the rule above.
+function keyedTriggerSrc(key: string): string {
+  const anchor = JSON.stringify(`[${MOUNT_ATTR}=${JSON.stringify(key)}]`);
+  return `page.locator(${anchor}).locator('xpath=..').locator(${JSON.stringify(TRIGGER_SELECTOR)}).filter({ visible: true })`;
+}
+
+function resolveTriggerSrc(key?: string | null): string {
+  return `const keyed = ${key ? keyedTriggerSrc(key) : "null"};
+   const inDialog = page.locator(${JSON.stringify(DIALOG_TRIGGER_SELECTOR)}).filter({ visible: true });
+   const trigger = keyed && (await keyed.count()) > 0
+     ? keyed.first()
+     : (await inDialog.count()) > 0 ? inDialog.first() : page.locator(${JSON.stringify(TRIGGER_SELECTOR)}).filter({ visible: true }).first();`;
+}
 
 // Clicks that trigger, then reports whether the emoji grid (authed) or a sign-in CTA
 // (unauthed) is shown. force skips the actionability wait the site's own overlays block.
-export async function openPickerState(bridge: Bridge): Promise<PickerState> {
+export async function openPickerState(bridge: Bridge, key?: string | null): Promise<PickerState> {
   await dismissBlockingDialogs(bridge); // clear any modal that would eat the click
   const before = await bridge.run<string>(`return page.url();`).catch(() => null);
-  await bridge.act(`${RESOLVE_TRIGGER} await trigger.click({ force: true, timeout: 8000 }).catch(() => {});`);
+  await bridge.act(`${resolveTriggerSrc(key)} await trigger.click({ force: true, timeout: 8000 }).catch(() => {});`);
   // The popover needs a beat to render before the one-shot state probe below.
   await bridge.waitMs(1200);
   // Safety net for any layout where a forced click still lands on a link on top of the
@@ -514,7 +549,7 @@ export async function openPickerState(bridge: Bridge): Promise<PickerState> {
   // coordinate click (Facebook photo permalinks): open via keyboard, focus + Enter.
   if (!st.gridVisible && !st.authTabHint) {
     await bridge.act(
-      `${RESOLVE_TRIGGER}
+      `${resolveTriggerSrc(key)}
        await trigger.scrollIntoViewIfNeeded().catch(() => {});
        await trigger.focus().catch(() => {});
        await page.keyboard.press('Enter').catch(() => {});`,

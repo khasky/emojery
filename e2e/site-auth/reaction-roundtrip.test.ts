@@ -23,6 +23,7 @@ import {
   siteAuthEnabled,
   TRIGGER_SELECTOR,
   visibleGridCount,
+  waitForCounterOn,
   waitForHost,
   zeroHostEvidence,
 } from "./harness";
@@ -76,14 +77,25 @@ async function ensureLiveTrigger(b: Bridge, site: SiteId) {
         expect(counter, "trigger should become a counter after reacting").toBeTruthy();
         expect(/\d/.test(counter?.text ?? ""), "counter should show a count").toBe(true);
 
-        // Reload: the pick must persist (server round-trip, not just optimistic UI).
-        await b.reload();
+        // Load the fixture again rather than reloading whatever the tab settled on: a
+        // Threads post permalink 302s a signed-in load to the home feed with the post
+        // injected at the top (`/?injected_media_ids=[...]`), and the app then drops that
+        // query - so a reload re-requests the bare feed, which reorders, and every read
+        // below lands on a different post. Requesting the fixture URL puts the target
+        // back; on a site that stayed on its permalink this IS the reload.
+        await gotoSettled(b, authContentUrl(site), 4000);
         await waitForHost(b, site, PERMALINK_HOST_WAIT_MS);
+        // The pick must persist (server round-trip, not just optimistic UI) on the target
+        // it was made on. Anything else measures a neighbour: on a feed-shaped surface the
+        // first trigger belongs to whichever post the site put first this time.
+        const reactedKey = counter?.key ?? null;
+        const persisted = await waitForCounterOn(b, site, reactedKey);
+        expect(persisted?.isCounter, `${site}: the target reacted on (${reactedKey ?? "unkeyed host"}) came back without its count - the surface no longer carries it.`).toBe(true);
         // Re-open through the SAME FB-hardened helper the pre-reload half uses, not
         // a raw first()-click: a FB permalink carries a second, off-screen host and
         // an overlapping post photo, so `.first()` + the actionability wait times
         // out (see openPickerState).
-        await openPickerState(b);
+        await openPickerState(b, reactedKey);
         const sel = await b.evaluate<SelectedReaction>(selectedReactionProbe());
         await b.press("Escape");
         expect(sel.hasSelection, "the user's reaction should still be selected after reload").toBe(true);

@@ -194,7 +194,7 @@ export type RuntimeErrorCode =
 // status or the API's machine string. `unavailable` is the generic bucket: an
 // unexpected status, a session body the client could not read.
 export type OtpRequestRefusal =
-  // Too many codes for this address or source; `retryAfterSeconds` says how long.
+  // Too many code requests.
   | "rate_limited"
   // The address did not parse.
   | "invalid_email"

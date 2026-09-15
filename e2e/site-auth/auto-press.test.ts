@@ -182,7 +182,7 @@ const SCOPE_TO_HOST_ROW = `
     // the first in DOM order belongs to a different post. Both sides must land on the
     // same host, or the case reacts to one post and measures another.
     const hosts = Array.from(document.querySelectorAll('${HOST_SELECTOR}'));
-    // openPickerState clicks the first VISIBLE trigger (harness.ts RESOLVE_TRIGGER), so
+    // openPickerState clicks the first VISIBLE trigger (harness.ts resolveTriggerSrc), so
     // the probe has to resolve the same one - on a feed the first host in DOM order can
     // be a card scrolled out of view, which would measure a post nobody reacted to.
     const onScreen = (el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
