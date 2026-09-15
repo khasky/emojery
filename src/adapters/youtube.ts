@@ -11,9 +11,11 @@ const ACTION_ROW_SELECTORS = ["#menu.ytd-watch-metadata #top-level-buttons-compu
 // Shorts (YouTube's reel format) renders a VERTICAL action column to the right of
 // the player - like / dislike / comment / share / more stacked - instead of the
 // horizontal watch-page row. Its host element holds those controls as direct
-// children, so resolveSegmentedGroup finds the like/dislike there too. (The watch
-// row, `#top-level-buttons-computed`, is still in the DOM on a Shorts page but
-// collapsed to zero width with no like control, so it never wins the candidate.)
+// children, so resolveSegmentedGroup finds the like/dislike there too. (A Shorts
+// page reached through YouTube's router keeps the whole watch page mounted under
+// `ytd-watch-flexy[hidden]`, its `#top-level-buttons-computed` and like/dislike
+// included - the rendered filter in findCandidates is what keeps that row from
+// winning the priority order over this rail.)
 const SHORTS_ACTION_BAR_SELECTORS = ["reel-action-bar-view-model", ".ytwReelActionBarViewModelHost"];
 
 const SHARE_BUTTON_SELECTORS = ['yt-button-view-model button[aria-label^="Share" i]', 'yt-button-view-model button[title^="Share" i]', 'ytd-button-renderer button[aria-label^="Share" i]', 'ytd-button-renderer button[title^="Share" i]', 'button[aria-label^="Share" i]', 'button[title^="Share" i]'];
@@ -44,9 +46,14 @@ const youtubeAdapter = defineSiteAdapter({
   // produces no binding.
   findCandidates: (ctx) => {
     // `accept` is not handed the ctx, so the memo closes over this scan's own.
-    const accept = (candidate: HTMLElement): HTMLElement | null => (memoBinding(candidate, ctx) ? candidate : null);
+    // A candidate must be RENDERED (`offsetParent`) as well as bindable: the watch
+    // row left behind on a Shorts page still resolves a binding, and mounting on it
+    // hides the trigger in a `display: none` subtree where mount.ts's
+    // IntersectionObserver waits for a visibility that never comes. github.ts
+    // filters its narrow-header candidates the same way.
+    const accept = (candidate: HTMLElement): HTMLElement | null => (candidate.offsetParent !== null && memoBinding(candidate, ctx) ? candidate : null);
     // Watch row first, Shorts rail second - findFirstAnchor walks the list in
-    // priority order, so a page carrying both keeps the watch row.
+    // priority order, so a page RENDERING both keeps the watch row.
     const bar = findFirstAnchor(ctx.root, [
       { selectors: ACTION_ROW_SELECTORS, accept },
       { selectors: SHORTS_ACTION_BAR_SELECTORS, accept },

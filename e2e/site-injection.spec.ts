@@ -434,6 +434,86 @@ test("instagram: shipped action-icon paths still match the live post", async () 
   }
 });
 
+function youtubeScenario(urlKey: "YOUTUBE" | "YOUTUBE_SHORTS"): SupportedSiteScenario {
+  const site = supportedSiteScenarios.find((scenario) => scenario.urlKey === urlKey);
+  if (!site) throw new Error(`Missing the ${urlKey} scenario - supported-sites.ts changed`);
+  return site;
+}
+
+// The guide's Shorts entry carries no href - it is a router command, so the hop is a
+// click on the entry, and logged out a watch page renders no guide entries until the
+// drawer is opened, hence the guide button first. "Shorts" is a product name YouTube
+// leaves untranslated. Null once the router has landed on a Short, else why it could not.
+async function hopToShortsFromGuide(page: Page): Promise<string | null> {
+  // Forced, because the guide button sits under the player's own animations and never
+  // reports stable. The synthetic one behind it is what Chromium's Polymer answers when
+  // the forced click lands on an overlay instead; Gecko takes only the real one.
+  await page
+    .locator("#guide-button button")
+    .first()
+    .click({ force: true, timeout: 5_000 })
+    .catch(() => {});
+  await page.evaluate(() => {
+    document.querySelector<HTMLElement>("#guide-button button, #guide-button")?.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true, cancelable: true }));
+  });
+  const entry = page.locator('ytd-guide-entry-renderer:has-text("Shorts"), ytd-mini-guide-entry-renderer:has-text("Shorts")').first();
+  const entryReady = await entry.waitFor({ state: "attached", timeout: 15_000 }).then(
+    () => true,
+    () => false,
+  );
+  if (!entryReady) {
+    const guide = await page.evaluate(() => ({ button: !!document.querySelector("#guide-button"), entries: document.querySelectorAll("ytd-guide-entry-renderer, ytd-mini-guide-entry-renderer").length }));
+    return `no Shorts entry in the guide (guide button ${guide.button ? "present" : "missing"}, ${guide.entries} entries rendered)`;
+  }
+  const clicked = await page.evaluate(() => {
+    const entries = Array.from(document.querySelectorAll<HTMLElement>("ytd-guide-entry-renderer, ytd-mini-guide-entry-renderer"));
+    const target = entries.find((candidate) => (candidate.textContent ?? "").trim().startsWith("Shorts"))?.querySelector<HTMLElement>("a, tp-yt-paper-item");
+    if (!target) return false;
+    target.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true, cancelable: true }));
+    return true;
+  });
+  if (!clicked) return "the guide's Shorts entry went away before the click";
+  return await page.waitForURL(/\/shorts\//, { timeout: 30_000 }).then(
+    () => null,
+    () => `the router never landed on a Short (still ${page.url()})`,
+  );
+}
+
+// An in-page hop to a Short leaves the WHOLE watch page mounted under
+// `ytd-watch-flexy[hidden]`, `#top-level-buttons-computed` and its like/dislike included.
+// That row still resolves a binding, so a candidate order that does not check whether a
+// row is rendered prefers it over the Shorts rail and mounts the trigger inside a
+// `display: none` subtree - the Short then shows no button at all (reported against
+// 1.0.0, both engines). Every other YouTube case here opens its surface directly, where
+// no watch page exists to be left behind, which is how the suite stayed green through it.
+test("youtube: an in-page hop from the watch page to Shorts mounts on the Shorts rail", async () => {
+  test.slow();
+  const watch = youtubeScenario("YOUTUBE");
+  const shorts = youtubeScenario("YOUTUBE_SHORTS");
+  const page = await context.newPage();
+  try {
+    const navOk = await safeGoto(page, watch.url);
+    await settleAndRequireMount(page, watch, { navOk, phase: "initial", skipLabelPrefix: "youtube-hop-" });
+
+    await page.evaluate(() => {
+      (window as Window & { __emojeryHopMarker?: string }).__emojeryHopMarker = "watch";
+    });
+    const hopFailure = await hopToShortsFromGuide(page);
+    await skipWithShot(page, shorts, hopFailure !== null, `YouTube offered no in-page hop to Shorts from ${page.url()}: ${hopFailure}`, "youtube-hop-unavailable");
+
+    // The surviving watch page IS the condition under test: a full load would clear it,
+    // and what follows would then pass as an ordinary direct Shorts visit.
+    const marker = await page.evaluate(() => (window as Window & { __emojeryHopMarker?: string }).__emojeryHopMarker ?? null);
+    expect(marker, "the hop reloaded the page instead of routing in place, so the watch page YouTube leaves behind is gone and this case no longer covers it").toBe("watch");
+
+    const railScenario: SupportedSiteScenario = { ...shorts, url: page.url(), requiredHostAncestorSelectors: ["reel-action-bar-view-model"] };
+    const evidence = await settleAndRequireMount(page, railScenario, { navOk: true, phase: "initial", skipLabelPrefix: "youtube-hop-" });
+    expect(evidence.missingRequiredHostAncestors, `the trigger is not in the Shorts rail after the hop - the hidden watch row won the candidate order (or YouTube renamed the rail element, which src/adapters/youtube.ts would name too). ${debugEvidence(evidence)}`).toHaveLength(0);
+  } finally {
+    await page.close().catch(() => {});
+  }
+});
+
 // Always-on unauth coverage - the state a real default visitor gets: default
 // settings (`replaceNative=false`), no platform login, no Emojery sign-in.
 // Asserts the trigger mounts in the right place (no duplicate) AND that
