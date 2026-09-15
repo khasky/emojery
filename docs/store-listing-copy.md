@@ -192,7 +192,9 @@ pnpm run zip:production:firefox
 
 This emits .output/firefox-mv2/ (the unpacked extension), .output/emojery-v1.0.0-firefox-mv2.zip and .output/emojery-v1.0.0-sources.zip. Compare the rebuilt .output/firefox-mv2/ directory with the contents of the submitted package.
 
-4 values are inlined at build time, all defined in wxt.config.ts: __EM_API_BASE__ (the API origin this build talks to, a literal from src/shared/api-origins.ts), __EM_DEBUG_LOG__ (false), __EM_I18N_FALLBACK__ (false) and __EM_BUILD_TIME__, a YYYY-MM UTC stamp shown in the popup header. The first three are constant for a production build, so the stamp is the only value that changes between rebuilds: a rebuild in the same calendar month reproduces the submitted files exactly, and a rebuild in a later month differs only in that string.
+5 values are inlined at build time, all defined in wxt.config.ts: __EM_API_BASE__ (the API origin this build talks to, a literal from src/shared/api-origins.ts), __EM_DEBUG_LOG__ (false), __EM_I18N_FALLBACK__ (false), __EM_BUILD_CONTEXT__ (true in any packaged build) and __EM_BUILD_TIME__, a YYYY-MM UTC stamp shown in the popup header. The first four are constant for a production build, so the stamp is the only value that changes between rebuilds: a rebuild in the same calendar month reproduces the submitted files exactly, and a rebuild in a later month differs only in that string.
+
+The package also carries one generated file, build-context.json, holding the sorted path of every file in the package and an id for the build. At run time the background reads those files back, hashes their contents and sends the result to the API, which can then tell which build a request came from. No user data is involved, nothing is fetched to produce it, and a build that fails to measure itself sends nothing.
 
 HOW TO EXERCISE THE ADD-ON
 
@@ -222,8 +224,6 @@ To test reacting: open the extension popup, choose Sign in, enter any real email
 
 "Auto-press original buttons" is off by default. Turning it on in the popup makes the emoji you pick also press the site's own control on the page you are looking at, under your own account; removing the reaction releases only what the extension pressed.
 ```
-
-
 
 ## Category and tags
 

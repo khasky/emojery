@@ -26,12 +26,19 @@ The build emits:
 - `.output/firefox-mv2/` — the unpacked extension
 - `.output/emojery-v<version>-firefox-mv2.zip` — the packaged extension
 - `.output/emojery-v<version>-sources.zip` — the source archive
+- `.output/build-records/firefox-mv2/<id>.json` — the digest of the package, outside it
 
 To verify the submitted add-on, compare the rebuilt `.output/firefox-mv2/` directory with the contents of the submitted Firefox extension zip.
 
-4 values are inlined at build time, all defined in `wxt.config.ts`: `__EM_API_BASE__` (the API origin this build talks to, a literal from `src/shared/api-origins.ts`), `__EM_DEBUG_LOG__` (`false` in a store build, so the console debug channels and their redactor are dead code and drop out of the bundle), `__EM_I18N_FALLBACK__` (`false` in every build, so the English fallback dictionary that exists only for the unit-test environment drops out of the bundle), and `__EM_BUILD_TIME__` — a `YYYY-MM` (UTC) build stamp shown in the popup header.
+5 values are inlined at build time, all defined in `wxt.config.ts`: `__EM_API_BASE__` (the API origin this build talks to, a literal from `src/shared/api-origins.ts`), `__EM_DEBUG_LOG__` (`false` in a production build, so the console debug channels and their redactor are dead code and drop out of the bundle), `__EM_I18N_FALLBACK__` (`false` in every build, so the English fallback dictionary that exists only for the unit-test environment drops out of the bundle), `__EM_BUILD_CONTEXT__` (`true` in any packaged build, `false` under the dev server, which has no package to measure), and `__EM_BUILD_TIME__` — a `YYYY-MM` (UTC) build stamp shown in the popup header.
 
-The first 3 are constant for a given production build, so the stamp is the only value that changes between rebuilds: a rebuild in the same calendar month is byte-identical to the submitted package; a rebuild in a later month differs only in that string.
+The first 4 are constant for a given production build, so the stamp is the only value that changes between rebuilds: a rebuild in the same calendar month is byte-identical to the submitted package; a rebuild in a later month differs only in that string.
+
+### `build-context.json`
+
+The package carries one generated file, `build-context.json`, holding the sorted path of every file in the package and an id for the build. At run time the background reads those files back, hashes their contents and sends the result to the API, which can then tell which build a request came from. The digest the API compares against is written outside the package (`.output/build-records/`) and never ships.
+
+No user data is involved and nothing is fetched to produce it. The whole exchange is 2 request headers and 1 response header (`x-emojery-build-*`), all generated from files already in the package, and a build that fails to measure itself sends none of them. The file is written after the bundle it describes, so a rebuild regenerates it from the rebuilt output and the comparison above still holds.
 
 ## Linter warnings
 
