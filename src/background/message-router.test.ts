@@ -52,7 +52,7 @@ vi.mock("./identity", () => ({
   getAuth: vi.fn(async () => ({ userId: "u1", email: "e2e@example.test", token: "tok" })),
   requestOtp: vi.fn(async () => ({ ok: true })),
   revokeSessionServerSide: vi.fn(async () => true),
-  // Deliberately WIDER than the real VerifyOtpResult, which carries no AuthState
+  // WIDER than the real VerifyOtpResult, which carries no AuthState
   // (identity.ts says so at the type). The handler must forward only ok/status/error,
   // and a mock that cannot hand it a token proves nothing about that.
   verifyOtp: vi.fn(async () => ({ ok: true, auth: { userId: "u1", token: "tok", expiresAt: 1, email: "e2e@example.test" } })),
@@ -93,7 +93,7 @@ import { addAlarmListener, createTab, setToolbarBadgeText } from "../shared/webe
 import * as api from "./api";
 import * as apiRead from "./api-read";
 import { hasAuthOrigin, rememberAuthOrigin, returnToAuthOrigin } from "./auth-return";
-import { getHistoryPage } from "./history";
+import { getHistoryPage, getHistoryStats } from "./history";
 import * as identity from "./identity";
 import { isExtensionPageSender } from "./message-guard";
 import { ensurePopularFresh } from "./popular";
@@ -145,7 +145,7 @@ beforeEach(async () => {
   storageChanged = onStorage[0] as Listener;
   expect(route).toBeTypeOf("function");
   // Wait for the startup chores' terminal signal (scheduleFlush fires in
-  // migrateLegacyHistory's finally, the longest chain), then count only what
+  // the finally in migrateLegacyHistory, the longest chain), then count only what
   // each test does - a raced setTimeout(0) here depended on scheduler luck.
   await vi.waitFor(() => expect(api.scheduleFlush).toHaveBeenCalled());
   vi.clearAllMocks();
@@ -187,7 +187,7 @@ describe("message router", () => {
     expect(broadcastVoteDelta).not.toHaveBeenCalled();
   });
 
-  // Re-deriving prevReaction in the SW would read an already-mutated cache and
+  // Re-deriving prevReaction in the service worker would read an already-mutated cache and
   // corrupt the unreact history entry - the content script owns the optimistic
   // write, so the vote handler must never touch the counts cache itself.
   it("vote never re-applies the optimistic reaction or writes the counts cache", async () => {
@@ -243,6 +243,15 @@ describe("message router", () => {
     await expect(dispatch({ type: "history:stats" }).response).resolves.toEqual({ type: "history:stats", stats: { total: 1, byEmoji: { "👍": 1 }, bySite: { github: 1 } }, authed: true });
     vi.mocked(identity.getAuth).mockResolvedValueOnce(null);
     await expect(dispatch({ type: "history:stats" }).response).resolves.toEqual({ type: "history:stats", stats: EMPTY_HISTORY_STATS, authed: false });
+  });
+
+  it("history:stats carries the facets through, and an unfiltered one carries none", async () => {
+    await dispatch({ type: "history:stats", site: "github", emoji: "👍", since: 1000, query: "repo" }).response;
+    expect(getHistoryStats).toHaveBeenLastCalledWith("u1", { site: "github", emoji: "👍", since: 1000, query: "repo" });
+    // An absent facet is dropped rather than sent as undefined - the store reads
+    // "no bound" off the key being missing.
+    await dispatch({ type: "history:stats" }).response;
+    expect(getHistoryStats).toHaveBeenLastCalledWith("u1", {});
   });
 
   it("history:import forwards the rows and echoes the tally", async () => {
@@ -323,7 +332,7 @@ describe("message router", () => {
     });
   });
 
-  // The verify response is the one place a freshly minted bearer token could leak
+  // The verify response is the one place a freshly created bearer token could leak
   // onto the runtime channel. It is already stored by the worker; the page only
   // needs to know it worked.
   it("auth:verifyOtp answers the outcome only, never the minted session", async () => {
@@ -400,7 +409,7 @@ describe("background wiring beyond the router", () => {
 
   // The presence port carries no payload, so the sender check is the whole guard:
   // a content script can open a port under any name it likes. Which URLs pass is
-  // message-guard's own test; this one pins that the verdict is honoured at all.
+  // message-guard's own test; this one pins that the verdict is applied at all.
   it("shows the dot for a page port, and ignores one the sender check rejects", () => {
     const pagePort = { name: "emojery:page-open", sender: { id: "ext-id", url: "chrome-extension://ext-id/popup.html" }, onDisconnect: { addListener: vi.fn() } } as unknown as chrome.runtime.Port;
     vi.mocked(isExtensionPageSender).mockReturnValueOnce(true);

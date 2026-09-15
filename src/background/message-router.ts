@@ -147,12 +147,12 @@ const HANDLERS: HandlerTable = {
     return ANSWER_LATER;
   },
 
-  "history:stats": (_msg, { sendResponse }) => {
+  "history:stats": (msg, { sendResponse }) => {
     respondAuthed(
       sendResponse,
       { type: "history:stats", stats: EMPTY_HISTORY_STATS, authed: false },
       async (userId) => {
-        const stats = await getHistoryStats(userId);
+        const stats = await getHistoryStats(userId, defined({ query: msg.query, site: msg.site, emoji: msg.emoji, since: msg.since }));
         return { type: "history:stats", stats, authed: true };
       },
       "history:stats",
@@ -227,7 +227,7 @@ const HANDLERS: HandlerTable = {
     // isn't dropped as "ownership changed" at the next flush.
     respondWith(sendResponse, "auth:signOut", async () => {
       await flushOwnedVotesForSignOut().catch((error: unknown) => logBackgroundError("signOutFlush", error));
-      // Then kill the session server-side, while the token is still readable. Best-effort: a
+      // Then kill the session server-side, while the token is still readable. A
       // failure here must not strand the user signed in, so the local clear below runs either
       // way.
       const auth = await getAuth().catch(() => null);

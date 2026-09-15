@@ -65,7 +65,7 @@ describe("isTrustedSender", () => {
   it("accepts content-script messages only when tab-bound", () => {
     for (const type of CONTENT_SCRIPT_TYPES) {
       expect(isTrustedSender(type, tabSender(), RUNTIME_ID, EXT_BASE)).toBe(true);
-      // Same extension but no tab, so it looks like a forged page-to-SW message.
+      // Same extension but no tab, so it looks like a forged page-to-worker message.
       expect(isTrustedSender(type, sender(), RUNTIME_ID, EXT_BASE)).toBe(false);
     }
   });
@@ -108,9 +108,9 @@ describe("isTrustedSender", () => {
 
 // A web page controls its own URL - path, query and fragment - and the content script the
 // extension injects into a supported site messages with THAT url as `sender.url`. So a page
-// can put the extension's own base anywhere but the front, and a check that merely looked
+// can put the extension's own base anywhere but the front, and a check that only looked
 // for the base somewhere in the string would hand it the extension-page types: `report`,
-// the history store, and the OTP pair that MINTS a credential.
+// the history store, and the OTP pair that CREATES a credential.
 describe("isExtensionPageSender is anchored at the start of the URL", () => {
   const smuggled = [
     `https://www.facebook.com/watch/?u=${EXT_BASE}popup.html`,
@@ -329,6 +329,11 @@ describe("parseRuntimeMessage", () => {
     expect(parseRuntimeMessage({ type: "history:page", site: "bank" }, pageSender(), RUNTIME_ID, EXT_BASE)).toBeNull();
     expect(parseRuntimeMessage({ type: "history:page", since: -1 }, pageSender(), RUNTIME_ID, EXT_BASE)).toBeNull();
     expect(parseRuntimeMessage({ type: "history:stats" }, pageSender(), RUNTIME_ID, EXT_BASE)).toEqual({ type: "history:stats" });
+    // The aggregates take the same facets as the page, under the same bounds - they have to,
+    // or the facet bar's counts stop answering for the list the page returns.
+    expect(parseRuntimeMessage({ type: "history:stats", site: "github", emoji: "❤️", since: 1000, query: "repo" }, pageSender(), RUNTIME_ID, EXT_BASE)).toEqual({ type: "history:stats", site: "github", emoji: "❤️", since: 1000, query: "repo" });
+    expect(parseRuntimeMessage({ type: "history:stats", site: "bank" }, pageSender(), RUNTIME_ID, EXT_BASE)).toBeNull();
+    expect(parseRuntimeMessage({ type: "history:stats", since: -1 }, pageSender(), RUNTIME_ID, EXT_BASE)).toBeNull();
   });
 
   it("accepts a valid history import and rejects any malformed row", () => {
@@ -386,7 +391,7 @@ describe("parseRuntimeMessage", () => {
     }
   });
 
-  // The OTP pair is the one exchange that mints a session, so the sender gate
+  // The OTP pair is the one exchange that creates a session, so the sender gate
   // matters more here than anywhere else: a compromised content script that could
   // drive it would be requesting and redeeming codes for arbitrary addresses.
   it("accepts the OTP exchange from the auth page and refuses it from a content script", () => {

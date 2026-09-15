@@ -195,6 +195,58 @@ describe("history - stats", () => {
     await expect(getHistoryStats("nobody")).resolves.toMatchObject({ total: 0, byEmoji: {}, bySite: {} });
   });
 
+  // The facet bar is a set of switches, so each count has to be the list the user lands on
+  // after taking that switch - counted under every OTHER filter already standing, with the
+  // switch's own axis lifted. Read off the whole history instead, a chip promises rows a
+  // site or date filter has already excluded and the click lands on "no matches".
+  it("counts each distribution under the other filters, with its own axis lifted", async () => {
+    const now = Date.now();
+    const DAY = 86_400_000;
+    await importHistoryRows([
+      { userId: USER, target: { site: "github", targetId: "a", url: "https://github.com/a" }, reaction: "❤️", ts: now, action: "add" },
+      { userId: USER, target: { site: "github", targetId: "b", url: "https://github.com/b" }, reaction: "🔥", ts: now, action: "add" },
+      { userId: USER, target: { site: "reddit", targetId: "c", url: "https://www.reddit.com/c" }, reaction: "❤️", ts: now, action: "add" },
+      // Older than the day window below, so a date filter alone drops it.
+      { userId: USER, target: { site: "reddit", targetId: "d", url: "https://www.reddit.com/d" }, reaction: "👍", ts: now - 3 * DAY, action: "add" },
+    ]);
+
+    const bySiteOnly = await getHistoryStats(USER, { site: "reddit" });
+    expect(bySiteOnly.total).toBe(2);
+    // Only what reddit holds - 🔥 lives on github alone and must not be offered here.
+    expect(bySiteOnly.byEmoji).toEqual({ "❤️": 1, "👍": 1 });
+    // The site axis is lifted, so the dropdown still offers github to switch to.
+    expect(bySiteOnly.bySite).toEqual({ github: 2, reddit: 2 });
+
+    const bySinceOnly = await getHistoryStats(USER, { since: now - DAY });
+    expect(bySinceOnly.total).toBe(3);
+    expect(bySinceOnly.byEmoji).toEqual({ "❤️": 2, "🔥": 1 });
+    expect(bySinceOnly.bySite).toEqual({ github: 2, reddit: 1 });
+
+    const stacked = await getHistoryStats(USER, { site: "reddit", since: now - DAY, emoji: "❤️" });
+    expect(stacked.total).toBe(1);
+    // Emoji axis lifted, site + date still applied: 👍 is reddit's but 3 days old.
+    expect(stacked.byEmoji).toEqual({ "❤️": 1 });
+    // Site axis lifted, emoji + date still applied.
+    expect(stacked.bySite).toEqual({ github: 1, reddit: 1 });
+
+    // The search box narrows the facets too, or the same trap reopens through it.
+    const searched = await getHistoryStats(USER, { query: "github.com" });
+    expect(searched.total).toBe(2);
+    expect(searched.byEmoji).toEqual({ "❤️": 1, "🔥": 1 });
+    expect(searched.bySite).toEqual({ github: 2 });
+  });
+
+  it("keeps the cached aggregates for the unfiltered read only", async () => {
+    await pushHistory(USER, target, "❤️", { historyId: "c1", ts: 1 });
+    await pushHistory(USER, { site: "github", targetId: "o/r", url: "https://github.com/o/r" }, "🔥", { historyId: "c2", ts: 2 });
+    await getHistoryStats(USER);
+
+    // A filtered read may not answer out of the unfiltered cache, and may not
+    // leave its own narrowed numbers behind for the next unfiltered one.
+    expect(await getHistoryStats(USER, { site: "github" })).toEqual({ total: 1, byEmoji: { "🔥": 1 }, bySite: { facebook: 1, github: 1 } });
+    expect(await getHistoryStats(USER)).toEqual({ total: 2, byEmoji: { "❤️": 1, "🔥": 1 }, bySite: { facebook: 1, github: 1 } });
+  });
+
   it("keeps the aggregates exact across add, remove and a confirmed duplicate", async () => {
     await pushHistory(USER, target, "❤️", { historyId: "s1", ts: 1 });
     await pushHistory(USER, { site: "github", targetId: "o/r", url: "https://github.com/o/r" }, "🔥", { historyId: "s2", ts: 2 });

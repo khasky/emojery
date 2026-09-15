@@ -21,8 +21,8 @@ const VERSION = 1;
 // IndexedDB injects the generated id into the value before populating indexes,
 // so a compound index on it is valid.
 const USER_INDEX = "byUserAndId";
-// Optimistic-row dedupe/rollback lookups; rows without a historyId are simply
-// absent from this index.
+// Optimistic-row dedupe/rollback lookups; rows without a historyId are absent
+// from this index.
 const HISTORY_ID_INDEX = "byHistoryId";
 
 // The pre-IndexedDB storage.local keys migrateLegacyHistory() consumes.
@@ -308,20 +308,26 @@ export async function getHistoryPage(userId: string, opts: { limit: number; curs
 }
 
 // One full scan of an account's history into device-local aggregates for the History tab's
-// facet distributions. O(history), but cached in worker memory and rerun only after a history
-// write.
-export async function getHistoryStats(userId: string): Promise<HistoryStats> {
+// facet controls, scoped to `opts` the way getHistoryPage scopes its rows. Each distribution
+// lifts its own axis out of the filter first (HistoryStats says why), so the three tallies
+// come off the same pass over the same rows. O(history); the unfiltered result is cached in
+// worker memory and rerun only after a history write, a filtered one is always rescanned.
+export async function getHistoryStats(userId: string, opts: { query?: string; site?: SupportedSite; emoji?: Reaction; since?: number } = {}): Promise<HistoryStats> {
   const db = await openDb();
+  const filter: ResolvedHistoryFilter = { query: opts.query?.trim().toLowerCase() ?? "", site: opts.site, emoji: opts.emoji, since: opts.since };
+  const cacheable = !(filter.query || filter.site || filter.emoji || filter.since != null);
   const tx = db.transaction(STORE, "readonly");
   const index = tx.objectStore(STORE).index(USER_INDEX);
   const ids = await getUserIdList(index, userId);
-  if (statsCache && statsCache.userId === userId && statsCache.count === ids.length) {
+  if (cacheable && statsCache && statsCache.userId === userId && statsCache.count === ids.length) {
     return statsCache.stats;
   }
   // Freshly built, not the shared EMPTY_HISTORY_STATS const - the caller owns
   // the object it gets back, and that const's maps must stay empty.
   if (ids.length === 0) return { total: 0, byEmoji: {}, bySite: {} };
 
+  const anyEmoji: ResolvedHistoryFilter = { ...filter, emoji: undefined };
+  const anySite: ResolvedHistoryFilter = { ...filter, site: undefined };
   const byEmoji: Record<string, number> = {};
   const bySite: Record<string, number> = {};
   let total = 0;
@@ -331,14 +337,14 @@ export async function getHistoryStats(userId: string): Promise<HistoryStats> {
     const batchRange = IDBKeyRange.bound([userId, ids[start]!], [userId, ids[end - 1]!]);
     const rows = (await requestAsPromise(index.getAll(batchRange))) as ReactionHistoryItem[];
     for (const row of rows) {
-      total++;
-      byEmoji[row.reaction] = (byEmoji[row.reaction] ?? 0) + 1;
-      bySite[row.target.site] = (bySite[row.target.site] ?? 0) + 1;
+      if (passesHistoryFilter(row, anyEmoji)) byEmoji[row.reaction] = (byEmoji[row.reaction] ?? 0) + 1;
+      if (passesHistoryFilter(row, anySite)) bySite[row.target.site] = (bySite[row.target.site] ?? 0) + 1;
+      if (passesHistoryFilter(row, filter)) total++;
     }
   }
 
   const stats = { total, byEmoji, bySite };
-  statsCache = { userId, stats, count: ids.length };
+  if (cacheable) statsCache = { userId, stats, count: ids.length };
   return stats;
 }
 

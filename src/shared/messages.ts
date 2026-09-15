@@ -18,9 +18,9 @@ export const NOTE_MAX = 500;
 // transaction the popup blocks on, which is why it is not larger.
 export const HISTORY_IMPORT_MAX = 100_000;
 
-// Bounds on the two OTP fields. Length only, on purpose: what makes an address or
-// a code VALID is the server's call (the auth page pre-empts nothing beyond an
-// obviously malformed address), so the guard holds them to a size, not a shape.
+// Bounds on the two OTP fields. Length only: what makes an address or
+// a code VALID is the server's call - the auth page pre-empts nothing beyond an
+// obviously malformed address - so the guard holds them to a size alone.
 // The email ceiling comfortably exceeds any deliverable address.
 export const EMAIL_MAX = 320;
 export const OTP_CODE_MAX = 12;
@@ -59,9 +59,11 @@ export type RuntimeMessage =
   // it in the background (AND) - the popup never holds more than the pages it
   // fetched. `since` is an epoch-ms lower bound on `ts`.
   | { type: "history:page"; cursor?: number; limit?: number; query?: string; site?: SupportedSite; emoji?: Reaction; since?: number }
-  // Device-local aggregates over the account's whole history for the History
-  // tab's facet chips - computed on demand, nothing leaves the device.
-  | { type: "history:stats" }
+  // Device-local aggregates for the History tab's facet chips - computed on
+  // demand, nothing leaves the device. The optional fields are the same filter
+  // `history:page` takes and scope the aggregates to it, so a chip's count is
+  // what clicking it would actually list; omit them for the whole history.
+  | { type: "history:stats"; query?: string; site?: SupportedSite; emoji?: Reaction; since?: number }
   // Export dumps the account's history as portable rows for a local JSON
   // download; import REPLACES the account's history with the file's rows
   // (deduped within the file, re-homed to the importing account).
@@ -81,7 +83,7 @@ export type RuntimeMessage =
   | { type: "auth:delete" }
   // The email-code sign-in exchange, sent by the extension's auth page and by
   // nothing else. It runs in the service worker rather than on the page so the
-  // session token `verify` mints is written where it is used - it never travels
+  // session token `verify` creates is written where it is used - it never travels
   // back over this channel (see the auth:otpVerified response, which has no
   // token field, and the router handler that drops it).
   | { type: "auth:requestOtp"; email: string }
@@ -128,7 +130,7 @@ export const HISTORY_EXPORT_SCHEMA_VERSION = 1;
 
 // The JSON shape of the download file. `format` is a magic marker so an import
 // can reject unrelated JSON before touching stored history; `app` is
-// informational provenance. Deliberately no device/browser fields: the file is
+// informational provenance. No device/browser fields: the file is
 // meant to be moved between machines and shared for support, so it must not
 // carry a fingerprint the restore path never reads.
 export interface HistoryExportFile {
@@ -139,9 +141,12 @@ export interface HistoryExportFile {
   reactions: PortableHistoryRow[];
 }
 
-// Device-local aggregates over one account's whole reaction history. `total`
-// is every history row; `byEmoji`/`bySite` are the full per-key distributions
-// for the History-tab facet chips.
+// Device-local aggregates over one account's reaction history, scoped to the
+// filter the request carried. `total` counts the rows that pass every part of
+// it. Each distribution drops its OWN part first: `byEmoji` counts under the
+// site/date/search filter with any emoji selection lifted, `bySite` under the
+// emoji/date/search filter with any site selection lifted - so every key is a
+// switch the user can take, and its number is the list they land on.
 export interface HistoryStats {
   total: number;
   byEmoji: Record<string, number>;
@@ -191,7 +196,6 @@ export type RuntimeErrorCode =
 export type OtpRequestRefusal =
   // Too many codes for this address or source; `retryAfterSeconds` says how long.
   | "rate_limited"
-  // The address did not parse.
   | "invalid_email"
   // The address's provider cannot receive the code.
   | "email_rejected"
@@ -226,7 +230,7 @@ export type RuntimeResponse =
       email: string | null;
     }
   // A refused exchange names why (see the refusal types above); neither answer
-  // carries the minted session - see the auth:verifyOtp note above.
+  // carries the new session - see the auth:verifyOtp note above.
   | { type: "auth:otpRequested"; ok: true }
   | { type: "auth:otpRequested"; ok: false; refusal: OtpRequestRefusal; retryAfterSeconds?: number }
   // `returnsToPage` is not about the exchange: it is what the done step does next.

@@ -7,13 +7,13 @@ import { normalizeLanguageTag } from "../shared/language-tag";
 import { EMAIL_MAX, HISTORY_IMPORT_MAX, NOTE_MAX, OTP_CODE_MAX, type PortableHistoryRow, REACTION_BYTES_MAX, type ReactionAction, type RuntimeMessage, TITLE_MAX } from "../shared/messages";
 import { ALL_SITES, detectSupportedSite, type SupportedSite, targetUrlBelongsToSite } from "../shared/sites";
 
-// The three sets below are exported for the same reason as the four limits further down:
+// The sets below are exported for the same reason as the limits further down:
 // message-guard.test.ts and message-guard.fuzz.test.ts drive every boundary case from them,
 // and a hand-copied list keeps passing while quietly leaving whatever it forgot untested.
 export const CONTENT_SCRIPT_MESSAGE_TYPES: ReadonlySet<RuntimeMessage["type"]> = new Set(["vote", "fetchCount", "ui:injected"]);
 
 // Types only the extension's own pages (popup/auth) send - never content scripts.
-// The OTP pair matters most: it is the one exchange that MINTS a credential, so a
+// The OTP pair matters most: it is the one exchange that CREATES a credential, so a
 // content script on any supported site must never be able to drive it.
 export const EXTENSION_PAGE_MESSAGE_TYPES: ReadonlySet<RuntimeMessage["type"]> = new Set(["report", "history:page", "history:stats", "history:export", "history:import", "queue:snapshot", "auth:signOut", "auth:delete", "auth:requestOtp", "auth:verifyOtp", "auth:returnToOrigin"]);
 
@@ -25,7 +25,7 @@ const SITE_IDS: ReadonlySet<string> = new Set(ALL_SITES);
 const TARGET_ID_MAX = 512;
 const URL_MAX = 2048;
 const HOST_MAX = 256;
-// The four exported below are read by message-guard.test.ts, which probes each
+// The limits exported below are read by message-guard.test.ts, which probes each
 // boundary as `limit + 1`. A hand-copied number there keeps passing while quietly
 // testing nothing the day a limit shrinks under it.
 export const TARGET_COUNT_MAX = 10_000;
@@ -125,8 +125,17 @@ export function parseRuntimeMessage(raw: unknown, sender: chrome.runtime.Message
       if (!email || !code) return null;
       return { type, email, code };
     }
+    case "history:stats": {
+      // Same four facets as history:page, parsed by the same bounds - the aggregates
+      // answer for exactly the filter the list is showing.
+      const query = parseOptionalString(raw.query, HISTORY_QUERY_MAX);
+      const site = parseOptionalSite(raw.site);
+      const emoji = parseOptionalReaction(raw.emoji);
+      const since = parseOptionalInt(raw.since, 0, Number.MAX_SAFE_INTEGER);
+      if (query === null || site === null || emoji === null || since === null) return null;
+      return defined({ type, query, site, emoji, since });
+    }
     case "history:export":
-    case "history:stats":
     case "queue:snapshot":
     case "auth:status":
     case "auth:openTab":
@@ -160,7 +169,7 @@ function senderSite(sender: chrome.runtime.MessageSender): SupportedSite | null 
 }
 
 // Every target-bearing message comes from a per-site content script, so the claimed
-// `site` must be the one the sender actually runs on - otherwise a content script
+// `site` must be the one the sender runs on - otherwise a content script
 // compromised on one site could write votes and counts attributed to any other. The
 // URL is held to the same claim (adapters only emit canonical on-site URLs), so a
 // stored target can never point off-site. This is the runtime gate for every site;

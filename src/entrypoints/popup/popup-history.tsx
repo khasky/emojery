@@ -26,7 +26,8 @@ type HistoryRange = (typeof HISTORY_RANGES)[number];
 
 // Emoji chips shown before the strip is expanded. It is a per-emoji tally as much as a
 // filter row, so the rest stay one click away rather than silently cut: a truncated strip
-// sums to less than the account's history and reads as reactions that went missing.
+// sums to less than what the other filters left in scope, and reads as reactions that
+// went missing.
 const HISTORY_FACET_EMOJI_LIMIT = 10;
 
 const DAY_MS = 86_400_000;
@@ -66,17 +67,31 @@ function rangeLabel(range: HistoryRange): string {
   }
 }
 
-function facetEntries(distribution: Record<string, number>): [string, number][] {
-  return Object.entries(distribution).sort((a, b) => b[1] - a[1]);
+// Sorted by count, descending. A `selected` key the other filters have emptied is kept
+// at zero rather than dropped: the control that clears a selection is the selection
+// itself, so a key that disappears strands the user on an empty list.
+function facetEntries(distribution: Record<string, number>, selected: string | null): [string, number][] {
+  const entries: [string, number][] = Object.entries(distribution);
+  if (selected && !(selected in distribution)) entries.push([selected, 0]);
+  return entries.sort((a, b) => b[1] - a[1]);
 }
 
-// Counts come from the global distribution - they reflect the whole history,
-// not the currently-stacked filters.
+// The collapsed strip gives up its last slot to the selected chip when that chip ranks
+// past the limit - behind "Show more" it is a selection the user cannot see or undo.
+function collapseChips(all: [string, number][], selected: string | null): [string, number][] {
+  const top = all.slice(0, HISTORY_FACET_EMOJI_LIMIT);
+  if (!selected || top.some(([em]) => em === selected)) return top;
+  const picked = all.find(([em]) => em === selected);
+  return picked ? [...top.slice(0, HISTORY_FACET_EMOJI_LIMIT - 1), picked] : top;
+}
+
+// Counts answer for the filters stacked around them: each control's own axis is lifted
+// first (see HistoryStats), so a chip reading 3 lists 3 rows and never an empty result.
 const FacetBar = ({ stats, emoji, site, range, onEmoji, onSite, onRange }: { stats: HistoryStats; emoji: string | null; site: SupportedSite | null; range: HistoryRange; onEmoji: (next: string | null) => void; onSite: (next: SupportedSite | null) => void; onRange: (next: HistoryRange) => void }) => {
   const [allEmojiShown, setAllEmojiShown] = useState(false);
-  const allEmojiChips = facetEntries(stats.byEmoji);
-  const emojiChips = allEmojiShown ? allEmojiChips : allEmojiChips.slice(0, HISTORY_FACET_EMOJI_LIMIT);
-  const siteOptions = facetEntries(stats.bySite);
+  const allEmojiChips = facetEntries(stats.byEmoji, emoji);
+  const emojiChips = allEmojiShown ? allEmojiChips : collapseChips(allEmojiChips, emoji);
+  const siteOptions = facetEntries(stats.bySite, site);
   return (
     <div class="history-facets">
       <div class="facet-selects">
@@ -175,7 +190,7 @@ const HistoryList = ({ items }: { items: ReactionHistoryItem[] }) => {
 };
 
 const HistoryView = () => {
-  // Pages fetched so far (already background-filtered) + the cursor for the next "Show more".
+  // Pages fetched (already background-filtered) + the cursor for the next "Show more".
   const [items, setItems] = useState<ReactionHistoryItem[]>([]);
   const [cursor, setCursor] = useState<number | null>(null);
   const [query, setQuery] = useState("");
@@ -191,9 +206,11 @@ const HistoryView = () => {
   // Null when the last read succeeded; otherwise the background's classification, so the
   // banner can say "offline" or "slow down" instead of one generic line (shared/error-copy.ts).
   const [failed, setFailed] = useState<RuntimeErrorCode | null>(null);
-  // Monotonic request stamp: a slow earlier page/search response must never
-  // overwrite the state a newer request produced.
+  // Monotonic request stamps: a slow earlier page/search response must never
+  // overwrite the state a newer request produced. The facet aggregates get their
+  // own stamp because "Show more" refetches rows without refetching them.
   const requestSeq = useRef(0);
+  const statsSeq = useRef(0);
 
   const loadPage = (opts: { reset: boolean; cursor: number | null; query: string; emoji: string | null; site: SupportedSite | null; since: number | undefined }) => {
     const seq = ++requestSeq.current;
@@ -226,25 +243,38 @@ const HistoryView = () => {
       });
   };
 
-  // What the background matches against; it trims + lowercases again anyway.
-  const normalizedQuery = query.trim().toLowerCase();
-
-  // Stats are fetched once per HistoryView mount. main.tsx renders the view conditionally, so
-  // switching tabs unmounts it and coming back re-sends history:stats.
-  useEffect(() => {
-    void sendRuntimeMessage({ type: "history:stats" })
+  // The facet aggregates for the filter currently applied, so every count on the bar
+  // is reachable from the list beneath it.
+  const loadStats = (opts: { query: string; emoji: string | null; site: SupportedSite | null; since: number | undefined }) => {
+    const seq = ++statsSeq.current;
+    void sendRuntimeMessage({
+      type: "history:stats",
+      ...(opts.query ? { query: opts.query } : {}),
+      ...(opts.emoji ? { emoji: opts.emoji } : {}),
+      ...(opts.site ? { site: opts.site } : {}),
+      ...(opts.since != null ? { since: opts.since } : {}),
+    })
       .then((resp) => {
+        if (statsSeq.current !== seq) return;
         if (resp?.type === "history:stats" && resp.authed) setStats(resp.stats);
       })
       // Swallowed: stats only feed the facet bar, which stays hidden while `stats`
       // is null - the list is the primary content and reports its own load errors.
       .catch(() => {});
-  }, []);
+  };
 
-  // Debounced while the search box has text (every keystroke is an IndexedDB scan);
-  // with it empty, a facet toggle applies on the next tick.
+  // What the background matches against; it trims + lowercases again anyway.
+  const normalizedQuery = query.trim().toLowerCase();
+
+  // Rows and aggregates are requested together off the same filter, debounced while the
+  // search box has text (every keystroke is an IndexedDB scan); with it empty, a facet
+  // toggle applies on the next tick.
   useEffect(() => {
-    const run = () => loadPage({ reset: true, cursor: null, query: normalizedQuery, emoji, site, since: rangeSince(range) });
+    const run = () => {
+      const since = rangeSince(range);
+      loadPage({ reset: true, cursor: null, query: normalizedQuery, emoji, site, since });
+      loadStats({ query: normalizedQuery, emoji, site, since });
+    };
     const timer = setTimeout(run, normalizedQuery ? HISTORY_SEARCH_DEBOUNCE_MS : 0);
     return () => clearTimeout(timer);
   }, [normalizedQuery, emoji, site, range]);
@@ -272,9 +302,10 @@ const HistoryView = () => {
     );
   }
 
-  // Facets show whenever the account has any history, so a filter that empties
-  // the list still leaves the controls to clear it.
-  const facets = stats && stats.total > 0 ? <FacetBar stats={stats} emoji={emoji} site={site} range={range} onEmoji={setEmoji} onSite={setSite} onRange={setRange} /> : null;
+  // `total` is scoped to the active filter, so it answers "has any history" only while
+  // nothing is filtered; under a filter the bar shows unconditionally, since a filter
+  // that empties the list still has to leave the controls that clear it.
+  const facets = stats && (hasFilter || stats.total > 0) ? <FacetBar stats={stats} emoji={emoji} site={site} range={range} onEmoji={setEmoji} onSite={setSite} onRange={setRange} /> : null;
 
   const search = (
     <Fragment>
