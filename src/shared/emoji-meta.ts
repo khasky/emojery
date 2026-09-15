@@ -118,8 +118,9 @@ function normalizeKey(raw: string): string | null {
 
 function detectLocaleKey(): string | null {
   if (typeof navigator === "undefined") return null;
-  const candidates = navigator.languages?.length ? navigator.languages : navigator.language ? [navigator.language] : [];
+  const candidates = navigator.languages?.length ? navigator.languages : [navigator.language];
   for (const cand of candidates) {
+    if (!cand) continue;
     const key = normalizeKey(cand);
     if (key) return key;
   }

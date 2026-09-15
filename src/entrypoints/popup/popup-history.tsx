@@ -307,13 +307,19 @@ const HistoryView = () => {
   // that empties the list still has to leave the controls that clear it.
   const facets = stats && (hasFilter || stats.total > 0) ? <FacetBar stats={stats} emoji={emoji} site={site} range={range} onEmoji={setEmoji} onSite={setSite} onRange={setRange} /> : null;
 
+  // Empty while loading or unfiltered, so plain browsing stays quiet.
+  const filterAnnouncement = (): string => {
+    if (loading || !hasFilter) return "";
+    if (items.length === 0) return t("historyNoMatches");
+    return t("searchResultsCount", String(items.length));
+  };
+
   const search = (
     <Fragment>
       <SearchField wrapClass="history-search" inputClass={HISTORY_SEARCH_INPUT_CLASS} placeholder={t("historySearchPlaceholder")} value={query} onInput={setQuery} />
-      {/* Screen-reader announcement of filter results (only while a filter is active,
-          so plain browsing stays quiet); the list itself is not live. */}
+      {/* Screen-reader announcement of filter results; the list itself is not live. */}
       <span class="sr-only" role="status">
-        {loading || !hasFilter ? "" : items.length === 0 ? t("historyNoMatches") : t("searchResultsCount", String(items.length))}
+        {filterAnnouncement()}
       </span>
     </Fragment>
   );

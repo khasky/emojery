@@ -400,49 +400,58 @@ export function Picker({ initial, typography, onPick, onSignIn, portalRoot, subs
   const hasReactions = displayTotal > 0;
   const renderBreakdown = () => (hasReactions ? <ReactionBreakdown entries={visibleBreakdownEntries} mine={mine} showToggle={showToggle} expanded={isExpanded} onToggle={handleToggleMore} onPick={(r, ev) => void handlePick(r, ev)} /> : null);
 
+  // Empty text while not searching so plain browsing stays quiet.
+  const searchAnnouncement = (): string => {
+    if (!filteredEmojis) return "";
+    if (filteredEmojis.length === 0) return t("pickerNoMatches", query);
+    return t("searchResultsCount", String(filteredEmojis.length));
+  };
+
+  const renderSearchResults = (matches: string[]) =>
+    matches.length === 0 ? (
+      <div class={EMPTY_CLASS}>{t("pickerNoMatches", query)}</div>
+    ) : (
+      // biome-ignore lint/a11y/useSemanticElements: a fieldset would drag form semantics/styling into the shadow-DOM picker; role="group" on a div is intentional
+      <div class={GRID_CLASS} role="group" aria-label={t("pickerSearchResultsGroupAria")}>
+        {matches.map(renderEmoji)}
+      </div>
+    );
+
+  const renderBrowseSections = () => (
+    <>
+      {recent.length > 0 && (
+        <EmojiSection
+          headingId={`${sectionIdPrefix}-recent`}
+          heading={t("pickerRecentlyUsed")}
+          action={
+            <button type="button" class={SECTION_CLEAR_CLASS} onClick={handleClearRecent}>
+              {t("pickerClearRecent")}
+            </button>
+          }
+        >
+          {recent.map(renderEmoji)}
+        </EmojiSection>
+      )}
+      {popular.length > 0 && (
+        <EmojiSection headingId={`${sectionIdPrefix}-popular`} heading={t("pickerPopular")}>
+          {popular.map(renderEmoji)}
+        </EmojiSection>
+      )}
+      {CATEGORIES.map((cat, i) => (
+        <EmojiSection key={cat.nameKey} headingId={`${sectionIdPrefix}-cat-${i}`} heading={t(cat.nameKey)} categoryIndex={i}>
+          {cat.emojis.map(renderEmoji)}
+        </EmojiSection>
+      ))}
+    </>
+  );
+
   const renderGrid = () => (
     <>
-      {/* Search-result announcement for screen readers; empty text while not searching
-          so plain browsing stays quiet. The visible list itself is not live. */}
+      {/* The visible list itself is not live; only this announcement is. */}
       <div class={SR_ONLY_CLASS} role="status">
-        {filteredEmojis ? (filteredEmojis.length === 0 ? t("pickerNoMatches", query) : t("searchResultsCount", String(filteredEmojis.length))) : ""}
+        {searchAnnouncement()}
       </div>
-      {filteredEmojis ? (
-        filteredEmojis.length === 0 ? (
-          <div class={EMPTY_CLASS}>{t("pickerNoMatches", query)}</div>
-        ) : (
-          // biome-ignore lint/a11y/useSemanticElements: a fieldset would drag form semantics/styling into the shadow-DOM picker; role="group" on a div is intentional
-          <div class={GRID_CLASS} role="group" aria-label={t("pickerSearchResultsGroupAria")}>
-            {filteredEmojis.map(renderEmoji)}
-          </div>
-        )
-      ) : (
-        <>
-          {recent.length > 0 && (
-            <EmojiSection
-              headingId={`${sectionIdPrefix}-recent`}
-              heading={t("pickerRecentlyUsed")}
-              action={
-                <button type="button" class={SECTION_CLEAR_CLASS} onClick={handleClearRecent}>
-                  {t("pickerClearRecent")}
-                </button>
-              }
-            >
-              {recent.map(renderEmoji)}
-            </EmojiSection>
-          )}
-          {popular.length > 0 && (
-            <EmojiSection headingId={`${sectionIdPrefix}-popular`} heading={t("pickerPopular")}>
-              {popular.map(renderEmoji)}
-            </EmojiSection>
-          )}
-          {CATEGORIES.map((cat, i) => (
-            <EmojiSection key={cat.nameKey} headingId={`${sectionIdPrefix}-cat-${i}`} heading={t(cat.nameKey)} categoryIndex={i}>
-              {cat.emojis.map(renderEmoji)}
-            </EmojiSection>
-          ))}
-        </>
-      )}
+      {filteredEmojis ? renderSearchResults(filteredEmojis) : renderBrowseSections()}
     </>
   );
 
