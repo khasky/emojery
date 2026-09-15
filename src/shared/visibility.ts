@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// "Do it once the tab is actually on screen." Four surfaces owe the user that
-// wait - the coach-mark's one-shot claim, the picker's post-sign-in cast, and the
-// onboarding checklist's arming and its confetti - and each of them was spelling
-// the same listener dance out for itself.
+// "Do it once the tab is on screen." The surfaces that owe the user that wait -
+// the coach-mark's one-shot claim, the picker's post-sign-in cast, and the
+// onboarding checklist's arming and its confetti - were each spelling the same
+// listener dance out for themselves.
 //
 // Tab visibility is all this answers. The visible tab of an unfocused window
 // counts here; the stricter question - is a trigger in front of a person right

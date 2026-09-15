@@ -68,7 +68,7 @@ export function logDebug(channel: DebugChannel, payload: unknown): void {
   }
 }
 
-/** Trace for a failure the caller deliberately absorbs (best-effort background work, a
+/** Trace for a failure the caller absorbs (background work nothing waits on, a
  *  fire-and-forget task). Silent absorption is how a stalled queue - or a mount that
  *  never appears - hides. Dev/staging only, so a shipped build stays quiet.
  *

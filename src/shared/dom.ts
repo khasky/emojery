@@ -5,11 +5,8 @@
 // e2e selector strings spell them out literally, so every name here must match those.
 //
 // NOT every name we stamp: one written and read inside a single module stays next to its
-// writer, exported from there for that module's own test rather than copied - mount-style.ts's
-// sizing/filled marks, ring-spin.ts's animate mark, native-compact.ts's saved count,
-// mount-registry.ts's wrapper spec, emoji-sprite.ts's sprite-mode attr, themed-hosts.ts's
-// data-theme, picker.tsx's measured head height and category count. Add a name here only
-// when a second module needs it.
+// writer and is exported from there for that module's own test. Add a name here only when a
+// second module needs it.
 
 // Prefix every injected class and attribute shares. Author-scoped so it can't
 // collide with a host page's own names.
@@ -121,15 +118,15 @@ export const COACH_BODY_CLASS = `${NS}-coach-body`;
 // --- Reaction animations, appended to the page (animations.ts) ---
 
 // The fixed overlay div the keyframes and particle rules render into, and the <style>
-// that carries them. The id doubles as the sprite scope and as animations.css's
-// `#khasky-emojery-reaction-animations` selector.
+// that carries them. The id doubles as the sprite scope and as the
+// `#khasky-emojery-reaction-animations` selector in animations.css.
 export const ANIMATION_LAYER_ID = `${NS}-reaction-animations`;
 export const ANIMATION_STYLE_ID = `${ANIMATION_LAYER_ID}-style`;
 export const CLICK_FLOAT_CLASS = `${NS}-reaction-click-float`;
 export const INTRO_PARTICLE_CLASS = `${NS}-reaction-intro-particle`;
 // Carried by the host only while the drop-in plays; mount-style.ts reads it to skip
 // its flank probe (detaching the host would restart the animation). Styled in
-// animations.css, which spells the class and its 360ms duration out literally.
+// animations.css, which spells the class and its duration out literally.
 export const BUTTON_DROP_CLASS = `${NS}-button-drop`;
 export const BUTTON_DUST_CLASS = `${NS}-button-dust`;
 

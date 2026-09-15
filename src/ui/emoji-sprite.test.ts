@@ -22,8 +22,8 @@ async function loadSpriteAt(extensionOrigin: string) {
 }
 
 // The re-serve path the extension-origin browsers take: a content-script fetch of the
-// packaged sheet, handed to createObjectURL. `mintedOrigin` is what the engine mints it
-// against - the page on Gecko/WebKit, which is the whole point of the detour.
+// packaged sheet, handed to createObjectURL. `mintedOrigin` is the origin the engine
+// builds it against - the page on Gecko/WebKit, which is the whole point of the detour.
 function stubSheetMint(mintedOrigin: string) {
   const revoked: string[] = [];
   vi.stubGlobal(

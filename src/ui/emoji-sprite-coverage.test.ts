@@ -16,7 +16,7 @@ import { REACTIONS } from "../shared/reactions";
 import { SPRITE_COLS, SPRITE_PALETTE_SIGNATURE, SPRITE_PALETTE_SIZE, SPRITE_ROWS } from "./__generated__/emoji-sprite-map";
 import { emojiSpriteCell } from "./emoji-sprite";
 
-/** Mirrors paletteSignature() in scripts/build-emoji-sprite.mjs. Order-sensitive by design. */
+/** Mirrors paletteSignature() in scripts/build-emoji-sprite.mjs. Order-sensitive. */
 function paletteSignature(emojis: readonly string[]): string {
   let hash = 0x811c9dc5;
   for (const unit of emojis.join(" ")) {
@@ -32,7 +32,7 @@ describe("emoji sprite sheet", () => {
   });
 
   it("was rasterized from this palette, in this order", () => {
-    // The check the derived index actually depends on: a reorder keeps the size identical
+    // The check the derived index depends on: a reorder keeps the size identical
     // and shifts every cell after the moved emoji.
     expect(paletteSignature(REACTIONS), "palette contents or order changed - run `pnpm run gen:emoji-sprite`").toBe(SPRITE_PALETTE_SIGNATURE);
   });

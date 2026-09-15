@@ -2,7 +2,7 @@
 //
 // Every custom property a page stylesheet READS has to be defined somewhere
 // that sheet can see - its own rules or the tokens it imports. An undefined
-// `var()` is not a CSS error: the declaration is simply dropped, so the element
+// `var()` is not a CSS error: the declaration is dropped, so the element
 // paints with nothing at all. That is how the onboarding page shipped an unpainted
 // progress fill and an unpainted primary button (both read a `-fixed-primary`
 // that only popup.css declared).
@@ -15,7 +15,7 @@ import { SPRITE_COL_VAR, SPRITE_COLS_VAR, SPRITE_ROW_VAR, SPRITE_ROWS_VAR } from
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SRC = resolve(HERE, "..");
 
-// The extension's own pages. The in-page picker is deliberately absent: it
+// The extension's own pages. The in-page picker is absent: it
 // renders in a shadow root inside a foreign page and carries its whole palette
 // on `:host` (ui/picker.css), importing nothing.
 const PAGE_SHEETS = ["entrypoints/popup/popup.css", "entrypoints/auth/auth.css", "entrypoints/onboarding/onboarding.css"];

@@ -32,9 +32,9 @@ const GLYPH_REMEASURE_EVERY_MS = 800;
 const GLYPH_REMEASURE_UNTIL_MS = 10_000;
 
 export function scheduleStyleReblend(host: HTMLElement, point: PickerInsertionPoint): void {
-  // Tracked per host so removeMountNode cancels them: a feed that mounts and
-  // recycles 30 cards used to keep 150 live timers, each forcing layout on an
-  // already-detached (or soon-detached) host.
+  // Tracked per host so removeMountNode cancels them: a recycling feed otherwise
+  // leaves this schedule's timers running on already-detached (or soon-detached)
+  // hosts, each one forcing layout.
   scheduleReblendStep(host, point, 0, hostShapeSignature(host), 0);
   trackHostTimer(
     host,
@@ -81,7 +81,7 @@ function scheduleReblendStep(host: HTMLElement, point: PickerInsertionPoint, ind
   );
 }
 
-// Self-rescheduling rather than an interval, so the chain simply stops on the tick that
+// Self-rescheduling rather than an interval, so the chain stops on the tick that
 // reads the row's own icon (or when the host goes away / the window closes).
 function remeasureGlyphUntilFinal(host: HTMLElement, point: PickerInsertionPoint, deadline: number): void {
   trackHostTimer(

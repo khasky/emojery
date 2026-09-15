@@ -36,8 +36,8 @@ interface SiteDescriptorInput {
 }
 
 // Best-guess mapping from a UI language tag to an Amazon regional storefront.
-// The lookup tries the full tag before the bare base subtag; deliberately no
-// bare "en" entry - "en" alone must not default to .co.uk.
+// The lookup tries the full tag before the bare base subtag. No bare "en" entry:
+// "en" alone must not default to .co.uk.
 const AMAZON_LOCALE_MAP: Record<string, string> = {
   "en-GB": "www.amazon.co.uk",
   "en-CA": "www.amazon.ca",

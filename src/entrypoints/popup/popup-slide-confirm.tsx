@@ -33,7 +33,7 @@ const SLIDE_POST_DRAG_CLICK_MS = 250;
 // Slide-to-confirm: the deliberate drag replaces a confirm() dialog for a destructive action - a stray tap
 // can't fire it, releasing early springs the thumb back, and `onConfirm` fires exactly once when the thumb lands.
 // Exposed as an ARIA slider (Arrow/End keys work). Dragging is never the only pointer path
-// (WCAG 2.5.7): clicking the track advances the thumb a step at a time, with an auto-reset, so
+// (WCAG): clicking the track advances the thumb a step at a time, with an auto-reset, so
 // single-tap AT (voice/head pointer) can confirm while a lone stray tap still can't.
 export const SlideToConfirm = ({ label, autoFocus, onConfirm }: { label: string; autoFocus?: boolean; onConfirm: () => void }) => {
   const trackRef = useRef<HTMLDivElement | null>(null);
@@ -107,7 +107,7 @@ export const SlideToConfirm = ({ label, autoFocus, onConfirm }: { label: string;
     else setSlideProgress(0);
   };
 
-  // Non-drag pointer path: each track click advances the thumb a quarter of the
+  // Non-drag pointer path: each track click advances the thumb one step of the
   // travel; inactivity springs it back, so the confirm still takes deliberate,
   // repeated input. Clicks on the thumb (or synthesized after a drag) are ignored.
   const onTrackClick = (e: Event) => {

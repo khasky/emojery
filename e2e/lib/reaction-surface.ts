@@ -17,7 +17,7 @@ import { DEEP_QUERY_ALL_SRC, FIRST_VISIBLE_TRIGGER_SRC } from "./probe-src";
 import { COUNTER_CLASS, GRID_ITEM_SELECTOR, HIDDEN_SELECTOR, HOST_SELECTOR, MOUNT_ATTR, MOUNTED_SELECTOR, POPOVER_CLASS, SEARCH_INPUT_SELECTOR, TRIGGER_BUTTON_SELECTOR, TRIGGER_SELECTOR } from "./selectors";
 import { githubUrl, searchTermFor } from "./test-config";
 
-// Open `url` and wait for an Emojery host to actually mount, retrying the
+// Open `url` and wait for an Emojery host to mount, retrying the
 // nav so a transient blank/slow load self-heals. Login-free repo/project
 // surfaces (GitHub/GitLab) mount the picker without any platform login - the
 // safe reaction target for authed checks.
@@ -35,7 +35,7 @@ export async function openSite(context: BrowserContext, url: string, opts: { req
       await page.goto(url, { waitUntil: "domcontentloaded" }).catch(() => {});
       await page.waitForLoadState("load", { timeout: 30_000 }).catch(() => {});
       // Click-ready = visible box AND a trigger rendered in the shadow root.
-      // Plain `querySelectorAll` on purpose: the host sits in the LIGHT DOM. A
+      // Plain `querySelectorAll`: the host sits in the LIGHT DOM. A
       // serialized typed callback cannot close over the shared selectors either,
       // so they are handed in as the evaluate argument.
       const ready = await page
@@ -71,7 +71,7 @@ export async function openSite(context: BrowserContext, url: string, opts: { req
     }
   }
   if (opts.requireHost === false) return page;
-  // Left open on purpose: the session teardown closes it, and Playwright's
+  // Left open: the session teardown closes it, and Playwright's
   // failure screenshot then still captures what the page was showing.
   throw new Error(`No click-ready Emojery host on ${url} after 3 attempts (last seen: ${lastHostState}).`);
 }
@@ -192,8 +192,8 @@ async function clearCountsCache(page: Page): Promise<void> {
 
 // Reload and read the PUBLIC aggregate total off the rendered counter (shadow
 // DOM via `readCounter`) - the VISUAL way to observe a server-confirmed count,
-// no direct API read. Drops the local counts cache first so the reload really
-// re-fetches through the SW; returns null when no counter is shown (0 reactions).
+// no direct API read. Drops the local counts cache first so the reload re-fetches
+// through the service worker; returns null when no counter is shown (0 reactions).
 export async function reloadAndReadTotal(page: Page): Promise<number | null> {
   await clearCountsCache(page);
   await page.reload({ waitUntil: "domcontentloaded" }).catch(() => {});
@@ -240,8 +240,8 @@ export async function hasOwnReaction(page: Page): Promise<boolean> {
   })()`);
 }
 
-// The single-target twin of picker-probes.ts's findVisibleEmojiGridOption, and it uses the
-// looser `width > 0` rather than that one's full isVisibleRect on purpose: these specs open
+// The single-target twin of findVisibleEmojiGridOption in picker-probes.ts. It uses the
+// looser `width > 0` in place of that one's full isVisibleRect: these specs open
 // the picker on a login-free repo page where the grid is the only thing on screen, so the
 // off-viewport and clipped cases isVisibleRect exists for cannot arise, and the stricter
 // read only adds a way for a correctly rendered option to go unfound. Keep them separate.
@@ -315,7 +315,7 @@ async function waitForCountsHydrated(page: Page): Promise<void> {
 // picker never surfaces it. The returned handle is a probe, not a click target.
 async function surfaceEmojiOption(page: Page, emoji: string) {
   const grid = page.locator(GRID_ITEM_SELECTOR).filter({ visible: true }).first();
-  // Space on the trigger toggles: only press it while the grid is really gone.
+  // Space on the trigger toggles: only press it while the grid is gone.
   if (!(await grid.isVisible().catch(() => false))) {
     await openPickerTray(page);
     await expect(grid).toBeVisible({ timeout: 8_000 });
@@ -402,7 +402,7 @@ export function watchNextVoteFlush(context: BrowserContext, timeoutMs = 60_000):
 
 // Toggle OFF whatever reaction is currently selected, so a test starts a
 // counter delta from a known "no own reaction" baseline. Returns whether a
-// selected reaction was actually cleared (false = nothing was selected), so
+// selected reaction was cleared (false = nothing was selected), so
 // callers know if an un-react vote is now in the queue.
 export async function clearReaction(page: Page): Promise<boolean> {
   // Two passes, because `mine` arrives with the counts fetch: a tray opened
@@ -479,7 +479,7 @@ export async function isReactionChecked(page: Page, emoji: string): Promise<bool
   await openPickerTray(page);
   await expect(page.locator(GRID_ITEM_SELECTOR).filter({ visible: true }).first()).toBeVisible({ timeout: 8_000 });
   await page.locator(SEARCH_INPUT_SELECTOR).filter({ visible: true }).first().fill(searchTermFor(emoji));
-  // Wait for the debounced grid to actually render the option before reading its
+  // Wait for the debounced grid to render the option before reading its
   // pressed state: a fixed sleep can read an un-rendered grid, which is
   // indistinguishable from a genuinely unselected reaction.
   const option = await waitForEmojiOption(page, emoji);

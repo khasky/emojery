@@ -24,7 +24,7 @@ type Step = "email" | "code" | "done";
 type OtpRequested = Extract<RuntimeResponse, { type: "auth:otpRequested" }>;
 type OtpVerified = Extract<RuntimeResponse, { type: "auth:otpVerified" }>;
 
-// The copy each named refusal gets. `rate_limited` is absent on purpose: it arms a
+// The copy each named refusal gets. `rate_limited` is absent because it arms a
 // cooldown instead of a line (see requestCode). `client_outdated` is the one
 // refusal whose fix is on the user's side (update from the store), so it gets its
 // own line instead of the generic fallback.
@@ -119,7 +119,7 @@ function CodeStep({ email, code, error, busy, remainingSec, cooldown, onVerify, 
 
 // Long enough to read "You're signed in" and see where the tab is going, short
 // enough that the reaction waiting on the other tab is still what the user is
-// thinking about. "Stay here" turns it off (WCAG 2.2.1), and "Back to the page"
+// thinking about. "Stay here" turns it off (WCAG), and "Back to the page"
 // skips the wait entirely.
 const RETURN_DELAY_SECONDS = 10;
 
@@ -211,7 +211,7 @@ type EmailStepProps = {
 };
 
 function EmailStep({ email, error, busy, accepted, remainingSec, cooldown, onSendCode, onEnterPendingCode, setEmail, setAccepted }: EmailStepProps) {
-  // One-shot screen-reader text, frozen at cooldown start (deps deliberately omit
+  // One-shot screen-reader text, frozen at cooldown start (the dependency array omits
   // `email`/time): the visible countdown re-renders every second, and a live region
   // tracking it would announce each tick.
   const cooldownAnnouncement = useMemo(() => (cooldown ? t(cooldownMessageKey(cooldown, email), formatCountdown(Math.max(0, Math.ceil((cooldown.until - Date.now()) / 1000)))) : ""), [cooldown]);
@@ -422,7 +422,7 @@ function App() {
 }
 
 // Shown ahead of the sign-in form on browsers that never prompted for data collection themselves.
-// Read-only by design: the only toggleable bucket is `technicalAndInteraction`, and pre-140 Firefox
+// Read-only: the only toggleable bucket is `technicalAndInteraction`, and pre-140 Firefox
 // rejects `permissions.request({ data_collection })`, so analytics is already forced off there
 // (shared/data-consent.ts) and a toggle here could only ever fail.
 function ConsentGate() {

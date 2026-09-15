@@ -25,7 +25,7 @@ export async function broadcastVoteDelta(senderTabId: number | undefined, delta:
   const msg: VoteSyncMessage = { type: "voteSync", ...delta };
   for (const tab of tabs) {
     if (tab.id === undefined || tab.id === senderTabId) continue;
-    // Deliberately unlogged: a matching tab that has not injected the content
+    // Unlogged: a matching tab that has not injected the content
     // script (still loading, restored-but-discarded) rejects every send, so a
     // trace here would fire on ordinary browsing, once per tab per vote.
     void sendMessageToTab(tab.id, msg).catch(() => {});

@@ -5,9 +5,9 @@
 // only while every URL variant of that item derives the SAME key - and both
 // ends of the wire must derive that key from the same URLs. The vectors are
 // data (`__data__/target-vectors.json`), not a table in this file, so each
-// side pins its derivation against the same rows. This test replays every
-// vector through the shipped parsers. Pure
-// URL/string parsing; no supported-site DOM (an e2e concern per CONTRIBUTING.md).
+// side pins its derivation against the same rows. This test replays every vector
+// through the shipped parsers. Pure URL/string parsing; no supported-site DOM
+// (an e2e concern per CONTRIBUTING.md).
 import { describe, expect, it } from "vitest";
 import { ALL_SITES } from "../shared/sites";
 import vectors from "./__data__/target-vectors.json";

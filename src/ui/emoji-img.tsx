@@ -12,7 +12,7 @@ interface Props {
  *  the stylesheet hides it and crops the matching cell out of the sheet <img>
  *  instead; emoji outside the sheet keep the glyph.
  *
- *  While the sheet URL is still resolving (Firefox/Safari mint it asynchronously)
+ *  While the sheet URL is still resolving (Firefox/Safari resolve it asynchronously)
  *  the <img> renders src-less and registered, so the settled probe can back-fill
  *  it - without this, an early render (counter chip on a warm load) kept the OS
  *  glyph forever. */

@@ -3,7 +3,7 @@
 // The extension's injected DOM names, for BOTH e2e routes. Re-exported from the
 // extension's own `src/shared/dom.ts` rather than spelled out again: a renamed class
 // then breaks `pnpm compile:e2e` instead of quietly matching nothing on a live page.
-// Dependency-free on purpose (that module is plain string constants) - the site-auth
+// Dependency-free (that module is plain string constants) - the site-auth
 // bridge suite runs under vitest and must not pull `@playwright/test` in through
 // `lib/extension.ts` just to reach a selector.
 //

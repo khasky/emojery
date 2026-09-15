@@ -4,8 +4,8 @@
 // blends into each site's local action surface and stays legible in whatever theme the
 // live site renders. Every color expectation is RELATIVE and derived from the page at
 // runtime - the trigger color tracks the extension's computed `--khasky-emojery-site-fg`,
-// and that color clears a WCAG contrast threshold against the background it actually
-// renders on - so the test survives site restyles.
+// and that color clears a WCAG contrast threshold against the background it renders
+// on - so the test survives site restyles.
 //
 // Theme coverage: light/dark are forced via Playwright `emulateMedia`. Sites that follow
 // the system scheme when logged out (YouTube, GitHub, Instagram, Threads, GitLab)
@@ -137,7 +137,7 @@ for (const scenario of scenarios) {
       // default budget, and under load the "trace recording" fixture setup eats
       // into it before the test body starts. 3x leaves room without masking a hang.
       test.slow();
-      // test.info() instead of the `({}, testInfo)` callback params: the empty
+      // test.info() instead of the `({}, testInfo)` callback parameters: the empty
       // fixture destructuring trips biome's noEmptyPattern.
       const testInfo = test.info();
       const page = await context.newPage();
@@ -182,10 +182,10 @@ for (const scenario of scenarios) {
           expect(authConfigured(), `${scenario.label} (${scheme}/active): ${reason}`).toBe(false);
         }
       } finally {
-        // Best-effort: these are shared PUBLIC targets, so the run's account should not be
+        // These are shared PUBLIC targets, so the run's account should not be
         // left holding a reaction on them - the sibling authed specs clear theirs too. Only
         // after the LAST scheme (the dark pass measures the reaction the light pass left)
-        // and only when one is actually held, so a walled scenario doesn't pay the picker's
+        // and only when one is held, so a walled scenario doesn't pay the picker's
         // focus timeout for nothing.
         const lastScheme = scenario.schemes[scenario.schemes.length - 1];
         if (scheme === lastScheme && (await triggerState(page).catch(() => ({ visible: false, active: false }))).active) {
@@ -271,7 +271,7 @@ async function blockedReason(page: Page, scenario: ThemeScenario): Promise<strin
 
 // Amazon served an anti-bot page instead of the requested product: the final URL
 // left the product path (bare homepage or a robot-check). Guarded on the fixture
-// actually being a product URL, so a genuinely missing trigger on a real product
+// being a product URL, so a genuinely missing trigger on a real product
 // page still fails loudly. A real product page carries /dp/ or /gp/product/.
 function amazonRedirectedAwayFromProduct(page: Page, scenario: ThemeScenario): boolean {
   let finalUrl: URL;
@@ -336,7 +336,7 @@ function triggerState(page: Page): Promise<{ visible: boolean; active: boolean }
 }
 
 // The first host whose shadow trigger paints a box, through the same walk.
-// Resolved as an element HANDLE so measureTrigger's colour math stays a
+// Resolved as an element HANDLE so the colour math in measureTrigger stays a
 // type-checked callback instead of re-declaring the walk inline.
 async function firstPaintedTriggerHost(page: Page) {
   const handle = await page.evaluateHandle<HTMLElement | null>(`(() => {
@@ -517,7 +517,7 @@ async function pickFirstReaction(page: Page): Promise<string | null> {
   return active ? null : "the clicked reaction never turned the trigger active";
 }
 
-// Consent/ads dialogs only. Amazon's throttle page is deliberately NOT in this list:
+// Consent/ads dialogs only. Amazon's throttle page is NOT in this list:
 // its button label also appears in a healthy product page's out-of-stock widget, so
 // matching the bare phrase clicks the page off-product. clickAmazonContinueShopping
 // (lib/site-walls.ts) is the one that presses it, gated on the full throttle sentence,

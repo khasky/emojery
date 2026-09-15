@@ -74,7 +74,7 @@ const CACHE_SWEEP_AT_KEY = "cache_swept_at_v1";
 const CACHE_SWEEP_INTERVAL_MS = 30 * 60 * 1000;
 
 // Sweep at most twice an hour. The background calls this on every service-worker start, and
-// the worker starts on essentially every burst of extension use.
+// the worker starts on nearly every burst of extension use.
 export async function maybeSweepCountsCache(): Promise<void> {
   const stored = await storageLocalGet([CACHE_SWEEP_AT_KEY]);
   const last = stored[CACHE_SWEEP_AT_KEY];

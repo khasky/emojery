@@ -47,7 +47,7 @@ describe("gitlabVisibilityFromIconHref", () => {
   });
 
   // `\b` is what stops this: a word character right after the name is not a boundary, so an
-  // unrelated id that merely starts with one of the three does not borrow its meaning.
+  // unrelated id that only starts with one of the three does not borrow its meaning.
   it("does not match an id that only begins with a visibility name", () => {
     expect(gitlabVisibilityFromIconHref("/assets/icons.svg#earthquake")).toBeNull();
     expect(gitlabVisibilityFromIconHref("/assets/icons.svg#shielded")).toBeNull();

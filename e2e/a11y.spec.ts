@@ -7,7 +7,7 @@
 //      page, in both color schemes;
 //   2. aria-snapshot structure asserts - a roles/names/levels regression guard;
 //   3. keyboard walk: tab order, roving tablist, visible tabpanel focus ring;
-//   4. reflow and text-spacing overflow checks (WCAG 1.4.10 / 1.4.12).
+//   4. reflow and text-spacing overflow checks.
 // The in-page picker has real-focus and virtual-screen-reader coverage in
 // src/ui/*.browser.test.tsx; site-mounted trigger contrast is covered live by
 // theme-contrast.spec.ts.
@@ -77,7 +77,7 @@ test("axe: every popup tab is WCAG A/AA clean in both color schemes", async () =
     await openPerSiteList(page);
     for (const tab of POPUP_TABS) {
       await page.getByRole("tab", { name: tab }).click();
-      // Anchor on the tab actually being selected and its panel rendered: a fixed beat
+      // Anchor on the tab being selected and its panel rendered: a fixed beat
       // fails OPEN here - axe over a not-yet-rendered panel finds zero violations and
       // the scan silently checks nothing.
       await expect(page.getByRole("tab", { name: tab })).toHaveAttribute("aria-selected", "true");
@@ -91,7 +91,7 @@ test("axe: every popup tab is WCAG A/AA clean in both color schemes", async () =
 
 // The fifth panel, reached from the header button rather than the strip: five translated
 // labels do not fit the popup's tab strip, so Debug opens from an icon-only toggle and its
-// panel is a region, not a tabpanel. Both of those are the parts axe can actually judge.
+// panel is a region, not a tabpanel. Both of those are the parts axe can judge.
 test("axe: the opt-in Debug panel is WCAG A/AA clean, and costs the tab strip nothing", async () => {
   const page = await openA11yPage();
   const violations: string[] = [];
@@ -100,14 +100,14 @@ test("axe: the opt-in Debug panel is WCAG A/AA clean, and costs the tab strip no
     await page.goto(popupUrl());
     await page.getByRole("tab", { name: "Settings" }).click();
     const setting = page.getByRole("checkbox", { name: "Debug" });
-    // The toggle takes the build stamp's rightmost slice by design, but it is sized to the
+    // The toggle takes the build stamp's rightmost slice, but it is sized to the
     // logo so it must cost no HEIGHT: a 26px button grew the brand row and pushed the strip
     // and the whole panel down 2px every time Debug was switched.
     const verticals = () =>
       page.evaluate(() =>
         [".brand-row", ".tabs", ".tab-panel"].map((sel) => {
           const box = document.querySelector(sel)?.getBoundingClientRect();
-          // Rounded on purpose: sub-pixel reflow is not movement, and the regression this
+          // Rounded: sub-pixel reflow is not movement, and the regression this
           // guards pushed the strip and the panel down by whole pixels.
           return box ? `${sel} top=${Math.round(box.top)} height=${Math.round(box.height)}` : sel;
         }),
@@ -240,8 +240,8 @@ test("keyboard: popup tab order, roving tablist and a visible panel focus ring",
   await page.keyboard.press("Tab");
   await expect(page.getByRole("tab", { name: "Settings" })).toBeFocused();
 
-  // The tabpanel is a deliberate second stop per the ARIA tabs pattern; its
-  // keyboard focus ring must be visible (WCAG 2.4.7).
+  // The tabpanel is a second stop per the ARIA tabs pattern; its
+  // keyboard focus ring must be visible (WCAG).
   await page.keyboard.press("Tab");
   const panel = page.getByRole("tabpanel");
   await expect(panel).toBeFocused();

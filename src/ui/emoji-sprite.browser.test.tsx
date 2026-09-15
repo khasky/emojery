@@ -64,7 +64,7 @@ describe("emoji sprite - WebKit probe", () => {
 
   // The crop rules are GENERATED (emojiSpriteCss) for two scopes - the picker's shadow root
   // and the animation layer. A malformed selector would parse away silently and ship an
-  // uncropped sheet, so assert the picker scope actually applies in both modes.
+  // uncropped sheet, so assert the picker scope applies in both modes.
   it("crops the sheet only while the host is in sprite mode", () => {
     const shadow = host.attachShadow({ mode: "open" });
     const style = document.createElement("style");

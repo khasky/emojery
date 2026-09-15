@@ -456,7 +456,7 @@ for (const site of supportedSiteScenarios) {
 // Running the real feed in several languages keeps detection from regressing to an
 // enumerated-language list (verified live on x.com/romero: ru/uk/de/ja/zh all mount on
 // icon-heart). The CJK pair is the load-bearing half - unit coverage proves the stems miss
-// there by design (action-labels.test.ts), so a mount here is the icon path's doing.
+// there (action-labels.test.ts), so a mount here is the icon path's doing.
 function xProfileFeedScenario(): SupportedSiteScenario {
   const site = supportedSiteScenarios.find((scenario) => scenario.site === "x" && scenario.label === "X profile feed");
   if (!site) throw new Error("Missing X profile feed scenario");
@@ -519,7 +519,7 @@ for (const site of supportedSiteScenarios) {
 // assert, the `replacedNativeInvisibleSelectors` check and the
 // restore-after-off leg all sit behind `expectHiddenNative`. So a total
 // replace-native regression on that scenario would not turn this test red;
-// the Amazon US scenario is the one that actually pins replacement.
+// the Amazon US scenario is the one that pins replacement.
 for (const site of supportedSiteScenarios) {
   test(`${site.site}: ${site.label} replaces native buttons after popup toggle`, async () => {
     const isolatedSession = process.env.E2E_USER_DATA_DIR ? null : await launchE2eBrowserSession();

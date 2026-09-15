@@ -3,7 +3,7 @@
 // The content script's one settings read. Every consumer in the page goes
 // through it: the mount burst (many points per scan), the vote path, and the
 // auto-press engine - each of which used to issue its own `storage.sync` round
-// trip, so a single pick paid three.
+// trip on a single pick.
 
 import { getSettings, type Settings } from "../shared/storage";
 import { setThemePreference } from "../shared/theme";

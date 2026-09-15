@@ -11,7 +11,7 @@ const IDENTITY_QUERY_PARAMS: Partial<Record<SupportedSite, readonly string[]>> =
 };
 
 /** The page URL a problem report shows and submits: origin + path, plus only
- *  the site's identity-bearing query params - without them a YouTube report
+ *  the site's identity-bearing query parameters - without them a YouTube report
  *  pointed at a bare `/watch` with no video id. */
 export function reportPageUrl(pageUrl: URL, site: SupportedSite): string {
   const kept = new URLSearchParams();

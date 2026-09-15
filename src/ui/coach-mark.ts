@@ -4,7 +4,7 @@
 // plus a small tooltip in the overlay root, shown once per install (a
 // storage.local latch - shared/onboarding.ts) and never again after any
 // dismissal. This is injected UI on a foreign page, so every boundary is
-// deliberately tight: one shot, quiet animation (none under reduced-motion),
+// tight: one shot, quiet animation (none under reduced-motion),
 // and it yields to a click, Escape, a scroll, or a timeout.
 
 import { COACH_ATTR, COACH_BODY_CLASS, COACH_CLOSE_CLASS, COACH_TIP_CLASS, COACH_TITLE_CLASS, COUNTER_CLASS, TRIGGER_CLASS } from "../shared/dom";
@@ -13,10 +13,10 @@ import { claimCoachMark } from "../shared/onboarding";
 import { whenVisible } from "../shared/visibility";
 import { getOverlayRoot } from "./mount-shadow";
 
-// Let mount-reblend.ts's early re-blend passes land before pointing at the trigger.
-// Deliberately SHORTER than its SIZING_REVEAL_DEADLINE_MS forced reveal, so a host
+// Let the early re-blend passes in mount-reblend.ts land before pointing at the trigger.
+// SHORTER than its SIZING_REVEAL_DEADLINE_MS forced reveal, so a host
 // still held invisible by SIZING_ATTR can be pointed at: the only visibility guard on
-// that path is maybeShowCoachMark's zero-rect check before it calls showCoachMark,
+// that path is the zero-rect check maybeShowCoachMark runs before it calls showCoachMark,
 // and `visibility: hidden` does not produce a zero rect.
 const COACH_SHOW_DELAY_MS = 800;
 // The mark is only a hint: it leaves on its own.
@@ -28,8 +28,8 @@ const COACH_TIP_WIDTH_PX = 260;
 const COACH_TIP_GAP_PX = 10;
 const COACH_VIEWPORT_MARGIN_PX = 8;
 
-// One attempt per page load, whatever the outcome - a feed mounting 30 triggers
-// must not race 30 claims.
+// One attempt per page load, whatever the outcome - a feed mounting dozens of
+// triggers must not race dozens of claims.
 let attemptedOnThisPage = false;
 
 export function __resetCoachMarkForTest(): void {

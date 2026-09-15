@@ -56,7 +56,7 @@ const DEEP_SCROLL_TIMEOUT_MS = 420_000;
 
   // Heavy feed: a long scroll over the feed-heavy sites must stay stable -
   // no duplicate keys accumulate and a trigger stays clickable at the end. Memory
-  // is logged as a best-effort heuristic (not asserted).
+  // is logged as a heuristic (not asserted).
   for (const site of DEEP_SITES) {
     test(
       `${site}: heavy feed stays stable across a deep scroll`,

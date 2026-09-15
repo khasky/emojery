@@ -31,7 +31,7 @@ function fakeBridge(evaluate: (source: string) => Promise<unknown>, run?: () => 
   } as unknown as Bridge;
 }
 
-// bridge.ts mints every failed call as a BridgeError, so a helper can tell "the
+// bridge.ts wraps every failed call as a BridgeError, so a helper can tell "the
 // bridge said nothing" from "the page said no". A plain Error here would be a probe
 // that threw in the page, which these helpers must never swallow.
 const BRIDGE_FAILURE = "MCP error -32001: Request timed out";
@@ -177,7 +177,7 @@ describe("waitForHost", () => {
   });
 });
 
-// Pins the shared wall fixtures to the walls the live suites actually met: the two
+// Pins the shared wall fixtures to the walls the live suites met: the two
 // Reddit served this suite's own fixture URLs - the js_challenge redirect into the
 // network-security block, and the "Prove your humanity" reCAPTCHA on a CLEAN URL,
 // which is why the text set exists - and the Cloudflare challenge X now fronts its

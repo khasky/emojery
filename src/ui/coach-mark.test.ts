@@ -141,13 +141,13 @@ describe("maybeShowCoachMark", () => {
   it("waits for the tab to be looked at before claiming anything", async () => {
     setVisibility("hidden");
 
-    // Not awaited: while the tab is hidden the call is parked on purpose.
+    // Not awaited: while the tab is hidden the call is parked.
     void maybeShowCoachMark(host);
     await vi.advanceTimersByTimeAsync(2000);
 
     expect(tip()).toBeNull();
     expect(host.hasAttribute(COACH_ATTR)).toBe(false);
-    // Unspent: the claim is still there for the first tab the user actually opens.
+    // Unspent: the claim is still there for the first tab the user opens.
     expect(await claimCoachMark()).toBe(true);
   });
 

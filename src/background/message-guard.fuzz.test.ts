@@ -157,7 +157,7 @@ describe("parseRuntimeMessage under generated input", () => {
   });
 
   // The gate that keeps one compromised site from writing votes attributed to another: an
-  // accepted target always names the site the sender actually runs on, over https, on a host
+  // accepted target always names the site the sender runs on, over https, on a host
   // that belongs to that site.
   it("only accepts a target the sender is entitled to speak for", () => {
     let withTarget = 0;

@@ -20,8 +20,8 @@ const POST_LINK_SELECTORS = ['a[href*="/p/"]', 'a[href*="/reel/"]', 'a[href*="/t
 const TARGET_PATH_RE = /^\/(?:(?:[A-Za-z0-9._]+)\/)?(p|reel|reels|tv)\/([A-Za-z0-9_-]+)(?:\/|$)/;
 const ROW_WALK_DEPTH = 10;
 // Post-action markers beyond Like - a post action bar carries at least one.
-// `comment` is in SIBLING_KINDS on purpose: it is a genuine post action. Comment
-// rows are rejected by isCommentRow's Reply check, never by this set.
+// `comment` is in SIBLING_KINDS because it is a genuine post action. Comment
+// rows are rejected by the Reply check in isCommentRow, never by this set.
 const SIBLING_KINDS = new Set<ActionKind>(["comment", "share", "send", "repost"]);
 // Menu labels on a comment's hover kebab ("Comment Options", "More options" and
 // their localized forms) match the Comment stem; a menu is never a post action,
@@ -51,7 +51,7 @@ export const IG_STEMS = {
 // viewBox is NOT (the same repost glyph ships 22x22 and 24x24), so match the path
 // and never the box. Like carries 2 variants because the glyph doubles as the
 // liked-state read below: outline heart idle, filled heart liked.
-// Share/Send is deliberately unregistered - Instagram serves the paper plane with
+// Share/Send is unregistered: Instagram serves the paper plane with
 // a byte-identical `d` for the post's Share and the nav's Messages, and `comment`
 // alone already proves a post row for SIBLING_KINDS.
 const IDLE_LIKE_ICON_PATH_PREFIX = "M16.792 3.904";
@@ -62,7 +62,7 @@ const REPOST_ICON_PATH_PREFIX = "M19.998 9.497";
 // Pinned against the live post by the e2e suite: a glyph redesign would strand
 // every locale the EN/RU/UA stems don't cover, silently. Only the pair a
 // LOGGED-OUT post renders is checkable there - the liked heart needs a session
-// and Repost needs the feed, so those 2 ride on the site-auth suite instead.
+// and Repost needs the feed, so those ride on the site-auth suite instead.
 export const IG_PUBLIC_ACTION_ICON_PATH_PREFIXES = [IDLE_LIKE_ICON_PATH_PREFIX, COMMENT_ICON_PATH_PREFIX];
 
 // Liked-state read for auto-press. IG ships EN/RU/UA; the unlike aria starts
@@ -112,8 +112,8 @@ const igLabels = defineLabelRegistry(
     controlSelector: '[role="button"]',
   },
 );
-// `comment` is deliberately absent from isCommentRow's marker list below (unlike
-// SIBLING_KINDS above): the per-comment hover kebab carries the LOCALIZED word
+// `comment` is absent from the isCommentRow marker list below, unlike
+// SIBLING_KINDS above: the per-comment hover kebab carries the LOCALIZED word
 // "comment" (EN "Comment options", RU «Действия с комментарием», UA «Параметри
 // коментаря» - verified live), so counting it made a hovered comment row read as
 // a post action bar and the picker jumped onto the comment. COMMENT_MENU_STEM
@@ -134,11 +134,11 @@ const LIKE_TAIL_MAX = 24;
 
 // The magnitude suffix is localized too: EN "1.2K", ru «41 тыс.», de «1,2 Mio.»,
 // ja「1.2万」. An unmatched suffix left the reels-feed like count visible beside
-// the trigger while replace-native had already hidden its heart button. Rather
-// than hand-maintaining a per-language table, generate the suffix set for every
-// shipped locale from the browser's own CLDR data (Intl compact notation) -
-// magnitudes 1e3..1e12 cover each locale's full tier set. Longest-first so
-// "Mrd." strips before "M"; dotted forms also add their dot-less variant.
+// the trigger while replace-native had already hidden its heart button. The
+// suffix set is generated for every shipped locale from the browser's own CLDR
+// data (Intl compact notation) - magnitudes 1e3..1e12 cover each locale's full
+// tier set. Longest-first so "Mrd." strips before "M"; dotted forms also add
+// their dot-less variant.
 // The unit suite pins this list against the shipped public/_locales folders.
 export const COUNTER_LOCALES = ["bn", "da", "de", "en", "es", "et", "fi", "fr", "hi", "hu", "it", "ja", "ko", "lt", "ms", "nb", "nl", "pl", "pt-BR", "ru", "sv", "th", "uk", "vi", "zh-CN", "zh-TW"] as const;
 
@@ -164,10 +164,10 @@ function buildCompactCountSuffixes(): string[] {
 }
 
 // Built on first use, not at module load: it constructs one Intl.NumberFormat per
-// shipped locale and calls formatToParts across a magnitude ladder for each, which is
-// tens of milliseconds of main-thread work - and as a module-level const every
-// instagram.com page load paid it at document_start. The plain-digit fast path below
-// answers most counters without ever needing the table.
+// shipped locale and calls formatToParts across a magnitude ladder for each, which
+// is enough main-thread work to be worth deferring - as a module-level const every
+// instagram.com page load paid it at document_start. The plain-digit fast path
+// below answers most counters without ever needing the table.
 let compactCountSuffixes: string[] | null = null;
 function compactCountSuffixList(): string[] {
   compactCountSuffixes ??= buildCompactCountSuffixes();
@@ -189,10 +189,10 @@ export function isBareCountText(raw: string): boolean {
 }
 
 // The standalone like-count line under a post: EN "1,234 likes" (exact legacy
-// form - the like STEM's \b never matches "likes"), or a bare count followed by
+// form - the \b in the like STEM never matches "likes"), or a bare count followed by
 // a SHORT like-word tail in a locale whose Like stem we ship
 // («2 534 отметки "Нравится"», UA «2 534 вподобання»). The tail-length cap and
-// full anchoring keep captions that merely mention numbers and liking out.
+// full anchoring keep out captions that only mention numbers and liking.
 export function isStandaloneLikeCountText(raw: string): boolean {
   const text = raw.trim();
   if (LIKE_COUNTER_RE.test(text)) return true;
@@ -384,10 +384,10 @@ function isOnReelViewerPage(): boolean {
 
 // A vertical action rail is a NARROW column of icon buttons: taller than it is
 // wide, tall enough not to be a stray two-icon stack, and no wider than an icon
-// slot (~60px measured live; 120 leaves zoom/font headroom). The width cap is
-// load-bearing: a /reel/<sc>/ permalink or modal can render the POST-detail
-// layout, whose ~500px comments pane also reads taller-than-wide and carries
-// like hearts + action markers - without the cap the rail walk latched it and
+// slot plus headroom for zoom and font scaling. The width cap is load-bearing: a
+// /reel/<sc>/ permalink or modal can render the POST-detail layout, whose
+// comments pane also reads taller-than-wide and carries like hearts + action
+// markers - without the cap the rail walk latched it and
 // the picker mounted above the first comment instead of beside the Like.
 const RAIL_MAX_WIDTH = 120;
 const RAIL_MIN_HEIGHT = 120;
@@ -398,9 +398,8 @@ function isVerticalRail(el: HTMLElement): boolean {
 
 // The active reel's rail is the one in the viewport; the feed's off-screen
 // neighbours are skipped so the location-derived target only mounts on the reel
-// the URL actually points at. Pre-paint scans (no geometry) can't gate, so allow.
-// The rail counts as active when it overlaps the middle band of the viewport:
-// top above 70% of the height, bottom below 30%.
+// the URL points at. Pre-paint scans (no geometry) can't gate, so allow.
+// The rail counts as active when it overlaps the middle band of the viewport.
 const ACTIVE_RAIL_TOP_MAX_VH = 0.7;
 const ACTIVE_RAIL_BOTTOM_MIN_VH = 0.3;
 function isActiveReelRail(el: HTMLElement): boolean {

@@ -30,7 +30,7 @@ interface EmojiInfo {
 // entries' `unicode`, while our reactions catalog uses the canonical
 // short forms for some of those - so a direct `Map.get(emoji)` misses. Register
 // every entry under BOTH the original and the VS-16-stripped key; both point at
-// the same `EmojiInfo` object, no memory overhead.
+// the same `EmojiInfo` object.
 function addEntry(map: Map<string, EmojiInfo>, key: string | undefined, info: EmojiInfo): void {
   if (!key) return;
   map.set(key, info);
@@ -96,10 +96,10 @@ const searchExtraMaps = new Map<string, Map<string, EmojiInfo>>();
 const inflightLoads = new Map<string, Promise<Map<string, EmojiInfo> | null>>();
 
 // Locales we ship emoji metadata for, from the one list the generator reads too
-// (__data__/emoji-locales.json). `en` is absent on purpose - it loads through
-// ensureEnLoaded() as the universal fallback, not through this set, so the
-// generator adds it on its side; regional near-duplicates fall back to the base
-// language via normalizeKey().
+// (__data__/emoji-locales.json). `en` is absent here: it loads through
+// ensureEnLoaded() as the universal fallback, and the generator adds it on its
+// own side. Regional near-duplicates fall back to the base language via
+// normalizeKey().
 const SUPPORTED_LOCALE_KEYS: ReadonlySet<string> = new Set(detectableLocaleKeys);
 
 // Traditional Chinese reaches us as a region tag (zh-TW/HK/MO) far more often than as an
@@ -154,7 +154,7 @@ function localesForQuery(query: string): string[] {
 
 function getResourceUrl(path: string): string | null {
   // Guarded because this module also runs under Vitest/node, where `chrome` is
-  // undefined (same reason as shared/i18n.ts's fallback).
+  // undefined (same reason as the fallback in shared/i18n.ts).
   try {
     if (typeof chrome !== "undefined" && chrome.runtime?.getURL) {
       return chrome.runtime.getURL(path);
@@ -176,8 +176,8 @@ async function fetchLocaleData(key: string): Promise<CompactEmoji[] | null> {
   } catch {
     // Localized emoji names are an enhancement - readers fall back to the emoji
     // character until the English map lands (also fetched, see the header). This
-    // runs in a content script, so the failure stays unlogged rather than
-    // writing into the host page's console.
+    // runs in a content script, so the failure stays unlogged: a log would write
+    // into the host page's console.
     return null;
   }
 }
@@ -216,7 +216,7 @@ function loadLocaleMap(key: string, kind: LoadKind): Promise<Map<string, EmojiIn
     return inflight;
   }
   const pending = (async () => {
-    // Memoized forever on purpose: an unsupported locale never becomes supported.
+    // Memoized forever: an unsupported locale never becomes supported.
     if (!SUPPORTED_LOCALE_KEYS.has(key)) return null;
     const data = await fetchLocaleData(key);
     if (!data) {
@@ -256,9 +256,8 @@ export async function ensureLocaleLoaded(): Promise<Map<string, EmojiInfo> | nul
 
 /**
  * Localized name for an emoji: primary browser-locale map, then English, then
- * the emoji character itself. Search-extra locales are intentionally NOT
- * consulted - displayed labels follow the browser language, not what the user
- * happens to be typing.
+ * the emoji character itself. Search-extra locales are not consulted: displayed
+ * labels follow the browser language, whatever the user happens to be typing.
  */
 export function getEmojiLabel(emoji: string): string {
   // ensureLocaleLoaded, not ensureEnLoaded: the popup enters this module through

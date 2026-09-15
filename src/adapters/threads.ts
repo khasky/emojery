@@ -9,8 +9,8 @@ import { ancestors, compactElements, precedes, slotOrSelf } from "./runtime";
 import { parseSiteHref } from "./url-target";
 import { findVisualActionSlot, isStructuralRoot, pageHasLayout } from "./visual-action-row";
 
-// One generic selector on purpose: Like/Liked/Unlike variants are strict
-// subsets of it, and queryAll dedupes, so listing them added nothing.
+// One generic selector: Like/Liked/Unlike variants are strict subsets of it,
+// and queryAll dedupes, so listing them adds nothing.
 // closestActionButton + the label registry do the actual classification.
 const LIKE_ICON_SELECTORS = ['svg[role="img"][aria-label]'];
 const REPLY_ICON_SELECTORS = ['svg[aria-label="Reply"][role="img"]', 'svg[aria-label="Comment"][role="img"]'];
@@ -146,7 +146,7 @@ function linkBelongsToRowPost(link: Element, row: HTMLElement): boolean {
 
 function findActionRow(candidate: HTMLElement): ActionRow | null {
   // The icon-strip defaults fit: a real Threads post action row exposes at least
-  // Like, Comment and Repost (Share too), and the 3-slot floor rejects the post
+  // Like, Comment and Repost (Share too), and the slot floor rejects the post
   // HEADER cluster - the pencil (Edit) + "..." (More) pair - which the
   // locale-independent catch-all `svg[role="img"][aria-label]` scan would
   // otherwise treat as an action row, mounting a stray trigger in the top-right
@@ -199,7 +199,7 @@ function findActionRow(candidate: HTMLElement): ActionRow | null {
 // only the idle one was registered, requiring Repost dropped the reposted
 // post's picker on every surface - and any future unregistered variant would
 // again. Share has no such state-dependent glyph, so either action proves the
-// row. (Anchoring on the Reply slot is resolveBinding's story, above.)
+// row. (Anchoring on the Reply slot belongs to resolveBinding, above.)
 function buildActionRow(row: HTMLElement, slots: HTMLElement[]): ActionRow | null {
   const replyIdx = slots.findIndex((slot) => threadsLabels.matchAction(slot, "reply"));
   if (replyIdx < 0) return null;
@@ -220,14 +220,14 @@ function buildActionRow(row: HTMLElement, slots: HTMLElement[]): ActionRow | nul
 // makes the trigger engine decline to press at all: auto-press was silently dead
 // outside English. Captured live on a RU feed: unliked `fill: rgba(0, 0, 0, 0)`
 // (`--x-fill: transparent`), liked `color(display-p3 1 0.18 0.25)`
-// (`--x-fill: currentColor`). Reading the paint rather than the icon's path data
-// also survives an icon redesign, unlike the path prefixes in the registry below.
+// (`--x-fill: currentColor`). Reading the paint also survives an icon redesign,
+// which the path prefixes in the registry below do not.
 function threadsLikePressed(likeButton: HTMLElement): boolean | null {
   const icon = likeButton.querySelector("svg[aria-label]");
   return icon ? isPaintedFill(getComputedStyle(icon).fill) : null;
 }
 
-// Re-exported, not re-implemented: the paint read lives in css-alpha.ts, shared with the
+// Re-exported here: the paint read lives in css-alpha.ts, shared with the
 // Facebook filled-chip probe. It travels out through this module because the site-auth
 // bridge serializes the pressed-state reader from here (e2e/site-auth/auto-press.test.ts
 // takes both symbols off this adapter), so the export site is part of that contract.
@@ -246,8 +246,8 @@ function actionButtonInSlot(slot: HTMLElement): HTMLElement | undefined {
 // (captured live), with the English aria-label stems as a LAST resort (the
 // registry tries exact -> data-icon -> icon path -> stems); Like by its exact aria.
 // If Threads redesigns an icon these prefixes must be refreshed - the English
-// labels keep unlocalized UIs working in the meantime. NOTE: the Share prefix
-// must stay precise enough not to match the sidebar Messages icon, whose path
+// labels keep unlocalized UIs working in the meantime. The Share prefix must
+// stay precise enough not to match the sidebar Messages icon, whose path
 // starts "M7.24745 1.49856" (one more digit).
 const REPLY_ICON_PATH_PREFIX = "M12 3C7.02944 3 3 7.02944 3 12";
 // Two path variants: idle loop and the "you reposted" active glyph

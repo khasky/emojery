@@ -31,7 +31,7 @@ export const PICKER_SPRITE_SCOPE: SpriteCssScope = { base: "", sprite: `:host([$
  *  downscales sharper than a background-image - and sr-hides the glyph character,
  *  which stays in the DOM for accessibility, copy/paste and e2e textContent
  *  selectors. Both rules require the <img>: an emoji rendered before the sheet URL
- *  resolved (Firefox/Safari mint theirs asynchronously, see below) keeps its glyph
+ *  resolved (Firefox/Safari resolve theirs asynchronously, see below) keeps its glyph
  *  rather than clipping an empty box. */
 export function emojiSpriteCss(scope: SpriteCssScope): string {
   return `
@@ -86,7 +86,7 @@ interface EmojiSpriteCell {
 // settled, new hosts are stamped with the final mode directly and no longer tracked.
 const spriteHosts = new Set<HTMLElement>();
 // Sheet <img>s created before the URL resolved. Chrome resolves it synchronously
-// (chrome-extension:// passes the allowlist), but Firefox/Safari mint a page-origin
+// (chrome-extension:// passes the allowlist), but Firefox/Safari build a page-origin
 // blob ASYNCHRONOUSLY - and a counter chip rendered from cached counts beats that
 // resolution on every warm load. Such an emoji got no <img> at all, so the sprite
 // CSS (keyed on `:has(> img)`) could never apply and it stayed an OS-font glyph
@@ -107,7 +107,7 @@ let resolvedUrl: string | undefined;
 // instead of leaking: the document's own origin (extension pages - the popup renders the
 // sheet on every browser, no web page can read its DOM), Chrome/Edge's chrome-extension://
 // id (the same for every install, and the injected khasky-emojery-* markup already announces
-// the extension), a blob minted against the document's own origin (see mintPageOriginUrl),
+// the extension), a blob built against the document's own origin (see mintPageOriginUrl),
 // and origin-less data: URLs.
 function pageSafeSpriteUrl(url: string): boolean {
   return url.startsWith(`${location.origin}/`) || url.startsWith(`blob:${location.origin}/`) || url.startsWith("chrome-extension://") || url.startsWith("data:");
@@ -128,7 +128,7 @@ function extensionSpriteUrl(): string | null {
 function spriteImageUrl(): string | null {
   if (resolvedUrl === undefined) {
     const packaged = extensionSpriteUrl();
-    // Deliberately NOT settled to "" when the packaged URL fails the allowlist: preloadEmojiSprite
+    // NOT settled to "" when the packaged URL fails the allowlist: preloadEmojiSprite
     // fills in a page-origin blob for that case, and it has not run yet.
     if (packaged && pageSafeSpriteUrl(packaged)) resolvedUrl = packaged;
   }
@@ -137,9 +137,9 @@ function spriteImageUrl(): string | null {
 
 // Where the packaged URL is an install fingerprint, the content script re-serves the sheet
 // under the PAGE's origin instead: a content-script fetch keeps extension privileges (the
-// page's CSP does not gate it), and the object URL Gecko mints from the result is
-// `blob:<page origin>/<random>` - verified in Firefox 153 - so the page reads back nothing
-// that is stable across sites or installs. Awaited once, by the probe.
+// page's CSP does not gate it), and the object URL Gecko builds from the result is
+// `blob:<page origin>/<random>`, so the page reads back nothing that is stable across
+// sites or installs. Awaited once, by the probe.
 async function mintPageOriginUrl(): Promise<string | null> {
   const packaged = extensionSpriteUrl();
   if (!packaged || typeof fetch === "undefined" || typeof URL?.createObjectURL !== "function") return null;
@@ -148,7 +148,7 @@ async function mintPageOriginUrl(): Promise<string | null> {
     if (!res.ok) return null;
     const url = URL.createObjectURL(await res.blob());
     if (pageSafeSpriteUrl(url)) return url;
-    // An engine that mints the blob against the EXTENSION's origin would leak the very
+    // An engine that builds the blob against the EXTENSION's origin would leak the very
     // identifier this path exists to hide; drop it and keep the OS-font glyphs.
     URL.revokeObjectURL(url);
     return null;
@@ -157,7 +157,7 @@ async function mintPageOriginUrl(): Promise<string | null> {
   }
 }
 
-// emoji -> linear cell index, derived rather than shipped: the sheet is rasterized in
+// emoji -> linear cell index, derived at runtime: the sheet is rasterized in
 // palette order (scripts/build-emoji-sprite.mjs reads the same categories file), so the
 // index IS the position in REACTIONS. Built once, lazily, and only from data every bundle
 // that renders emoji already carries - a shipped table would be a second copy of every
@@ -237,7 +237,7 @@ function settleProbe(next: Mode): void {
 
 // Kick off the fetch+decode as soon as a page is known to want a trigger (mount.ts, right after the
 // settings gate). Idempotent. Later - at the first host's applyEmojiSpriteHost - races the paint and
-// visibly swaps glyphs a beat later; earlier - at content-script startup - pays the ~1 MB decode on
+// visibly swaps glyphs a beat later; earlier - at content-script startup - pays the sheet decode on
 // every page of every supported host, including pages with no target at all.
 // applyEmojiSpriteHost calls this too, as the backstop for a host that never passed the
 // mount gate (the animation layer).
@@ -245,7 +245,7 @@ function settleProbe(next: Mode): void {
 // Probes the sheet once. A bare Image() load runs under the same page CSP the sprite will
 // face, so onload/onerror is the authoritative gate: onerror (CSP-blocked / asset missing)
 // keeps text mode, onload proves the sheet is usable. decode() is only a refinement on top -
-// the sheet is a ~1 MB WebP, and flipping the instant onload fires flashed an empty trigger
+// the sheet is a large WebP, and flipping the instant onload fires flashed an empty trigger
 // for a frame while the first paint was still rasterizing, so we prefer to wait for decode().
 // But decode() rejects spuriously in some engines (WebKit rejects it with EncodingError even
 // for a good, fully-loaded image); a rejection here must NOT fall back to text, since onload

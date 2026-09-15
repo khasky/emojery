@@ -2,7 +2,7 @@
 //
 // Minimal in-memory `chrome` WebExtension shim. Pick between this and src/test/fixtures.ts
 // by CAPABILITY, not engine: this one stubs the seams the rendered UI reaches chrome.* through
-// (shared/webext.ts, ui/messaging.ts's sendMessage, a background-shaped `auth:status` answer,
+// (shared/webext.ts, sendMessage in ui/messaging.ts, a background-shaped `auth:status` answer,
 // bundled-English i18n); fixtures.ts trades that for `vi.fn` spies and the Firefox permissions surface.
 
 import { AUTH_KEY, isAuthSessionLive } from "../shared/auth-session";
@@ -16,7 +16,7 @@ export interface ChromeShimHandle {
   /** Live view of chrome.storage.local - assert/seed directly in a test. */
   local: Store;
   /** Fire a storage.onChanged event to registered listeners (e.g. to drive
-   *  mount.ts's live enable/auth watchers from a test). */
+   *  the live enable/auth watchers in mount.ts from a test). */
   emitChanged: (area: "local" | "sync", changes: Record<string, { newValue?: unknown; oldValue?: unknown }>) => void;
   /** Remove the shim from globalThis. Call in afterEach. */
   uninstall: () => void;
@@ -32,7 +32,7 @@ export function makeLiveAuthSession(): { userId: string; expiresAt: number } {
 // makes. `auth:status` has to be answered here: the picker resolves the signed-in
 // account through the background (ui/messaging.ts activeUserId) rather than
 // reading the token-bearing auth record itself, so a shim that answers
-// `undefined` renders every per-account section empty. Mirrors getAuth's EXPIRY
+// `undefined` renders every per-account section empty. Mirrors the EXPIRY
 // check only (background/identity.ts), not its record-shape check: a test can seed
 // a token-less `{ userId, expiresAt }` here and still read as signed in.
 function respondAsBackground(local: Store, msg: unknown): unknown {
@@ -72,7 +72,7 @@ export function installChromeShim(
   const sync: Store = new Map();
   const changedListeners = new Set<Listener>();
 
-  // Each method supports BOTH calling styles webext.ts's callChrome accepts:
+  // Each method supports BOTH calling styles callChrome in webext.ts accepts:
   // the callback (`done`) and a returned promise. Callback alone is enough.
   const makeArea = (store: Store) => ({
     get: (keys: unknown, cb?: (items: Items) => void) => {

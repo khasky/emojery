@@ -3,7 +3,7 @@
 // How the History tab turns a timestamp into text: the day a row is filed under, that day's
 // heading, and the exact date behind the relative label. Kept out of popup-history.tsx so the
 // decisions can be asserted without rendering the list - same split as popup-view-state.ts.
-// Everything here is local-time on purpose: a row is filed under the day the USER reacted.
+// Everything here is local-time: a row is filed under the day the USER reacted.
 
 import { t } from "../../shared/i18n";
 

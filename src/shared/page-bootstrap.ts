@@ -4,7 +4,7 @@
 // The order is load-bearing: the static HTML ships an English <title> and no theme,
 // so the localized title and the browser's own preference have to be stamped here,
 // before the first paint - the stored Theme setting can only arrive after an async
-// storage read. `lang` follows the UI locale (WCAG 3.1.1); a hardcoded "en" makes
+// storage read. `lang` follows the UI locale (WCAG); a hardcoded "en" makes
 // screen readers read localized text with English pronunciation rules.
 import { announcePageOpen } from "./page-presence";
 import { getSettings } from "./storage";

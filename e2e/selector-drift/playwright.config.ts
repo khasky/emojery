@@ -18,7 +18,7 @@ for (const [key, value] of Object.entries(loadE2eEnvFiles(extensionRoot))) {
 export default defineConfig({
   testDir: ".",
   testMatch: /selector-drift\.spec\.ts/,
-  // This probe mints no `run-*` profile of its own (no extension, no persistent
+  // This probe creates no `run-*` profile of its own (no extension, no persistent
   // context), so the reaper never has one of ITS browsers to bury - it is wired
   // here so that whichever suite runs next is the one that clears a phantom the
   // main suite left behind. See lib/browser-reaper.ts.

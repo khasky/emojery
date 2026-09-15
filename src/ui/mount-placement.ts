@@ -26,7 +26,6 @@ export function insertionContainer(anchor: HTMLElement, position: PickerInsertio
   return position === "append" ? anchor : anchor.parentElement;
 }
 
-// A placement is "on its fallback" when its active anchor is the fallback anchor.
 export function isFallbackPlacement(point: PickerInsertionPoint): boolean {
   return !!point.fallback && point.anchor === point.fallback.anchor;
 }

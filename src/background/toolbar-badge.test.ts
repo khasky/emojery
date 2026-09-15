@@ -2,8 +2,8 @@
 //
 // The per-tab injected-count badge. Every write is tab-scoped: a badge painted
 // without a tabId becomes the extension's GLOBAL badge, so one supported page
-// would leave its count on the toolbar over every other tab. The one deliberate
-// global badge is the open-page dot, tested at the bottom.
+// would leave its count on the toolbar over every other tab. The only global
+// badge is the open-page dot, tested at the bottom.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { type ChromeShimHandle, installChromeShim } from "../test/chrome-shim";
 

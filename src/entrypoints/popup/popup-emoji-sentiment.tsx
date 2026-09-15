@@ -18,7 +18,6 @@ import { SearchField } from "./popup-shared";
 
 // First page of the neutral grid.
 const NEUTRAL_PAGE = 64;
-// Each "Show more" adds four more pages.
 const NEUTRAL_SHOW_MORE_STEP = NEUTRAL_PAGE * 4;
 
 export const EmojiSentimentEditor = ({ settings, update }: { settings: Settings; update: (patch: Partial<Settings>) => Promise<void> }) => {

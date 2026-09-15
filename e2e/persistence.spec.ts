@@ -57,7 +57,7 @@ test("settings: changed values survive a full browser restart", async () => {
 // afterwards: it persisted SERVER-SIDE, not just in a local cache.
 //
 // Caveat on "still signed in": --load-extension re-fires onInstalled("install")
-// on every launch, and the extension deliberately clears the local session
+// on every launch, and the extension clears the local session
 // (installFreshInstallAuthReset). That is a HARNESS artifact - a store-installed
 // extension does NOT re-install on a restart and keeps you signed in. So
 // session 2 re-signs in, then verifies the pre-restart reaction is intact.
@@ -117,7 +117,7 @@ test("a reaction survives a full browser restart", async () => {
   }
 });
 
-// Caveat: this models "first install on a clean profile". A true
+// This models "first install on a clean profile". A true
 // uninstall/reinstall on a Chrome profile signed into Chrome Sync can restore
 // synced settings instead - a mechanism --load-extension can't reproduce; that
 // edge stays a manual check.

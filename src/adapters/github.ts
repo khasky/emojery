@@ -34,7 +34,7 @@ const ACTION_LIST_WRAPPER = { tagName: "li" };
 // match is filtered to a RENDERED one (`offsetParent`) before the next selector
 // gets its turn: `#code-view-repo-link` stays in the DOM but `hidden` on a narrow
 // viewport, and a hidden match would win by priority and mount on an anchor that
-// never becomes visible, stalling mount.ts's IntersectionObserver forever.
+// never becomes visible, stalling the IntersectionObserver in mount.ts forever.
 const NARROW_HEADER_ANCHOR_CANDIDATES = [
   {
     selectors: ["#code-view-repo-link", "a[data-testid='repo-name-link']", "#repository-container-header strong[itemprop='name']", "#repository-container-header #repo-title-component"],
@@ -45,7 +45,7 @@ const NARROW_HEADER_ANCHOR_CANDIDATES = [
 // Pressed-state read for auto-press: on the 2025 Primer-React header the
 // aria-label is the ONLY thing that flips (`Star owner/repo` <-> `Unstar ...`) -
 // no `aria-pressed`, no `/star` form, and `data-testid` stays `star-button` in
-// BOTH states, so readPressed's generic signals cannot answer. Any other shape
+// BOTH states, so the generic signals readPressed reads cannot answer. Any other shape
 // reads UNKNOWN (null) - see the likePressed contract in shared/adapter.ts.
 export function githubStarLabelPressed(label: string): boolean | null {
   if (/^unstar\s/i.test(label)) return true;
@@ -197,7 +197,7 @@ export function repoRefFromPathname(pathname: string): { owner: string; repo: st
 
 // Parse an href to its owner/repo ref. Gated to github.com so a stray
 // cross-origin link can't be read as the repo target (the adapter only runs on
-// github.com, so in practice this is always the page URL). Exported for
+// github.com and only ever hands it the page URL). Exported for
 // `target-contract.ts`, which derives from a bare URL and needs that host gate.
 export function repoRefFromHref(href: string): { owner: string; repo: string } | null {
   return parseSiteHref(href, "github", (url) => repoRefFromPathname(url.pathname));

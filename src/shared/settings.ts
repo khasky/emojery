@@ -43,8 +43,8 @@ export interface Settings {
   analyticsConsent: boolean;
   /**
    * Reveal the popup's Debug tab (the pending reaction queue and the flush
-   * loop's state). Off by default, and shipped in every build - a user setting,
-   * not a build mode.
+   * loop's state). Off by default, and shipped in every build - a user setting
+   * the build mode does not control.
    */
   debugMode: boolean;
   sites: Record<SupportedSite, boolean>;
@@ -66,8 +66,8 @@ export const DEFAULT_SETTINGS: Settings = {
 };
 
 // storage.sync holds user-syncable data, so a stored field can be any JSON value
-// (or a shape from another extension version). Every scalar is re-derived below
-// rather than trusted from the spread.
+// (or a shape from another extension version). Every scalar below is re-derived
+// from the raw value before use.
 function storedBoolean(value: unknown, fallback: boolean): boolean {
   return typeof value === "boolean" ? value : fallback;
 }
@@ -128,9 +128,9 @@ export function isSiteEnabled(settings: Settings, site: SupportedSite): boolean 
   return settings.enabled && settings.sites[site];
 }
 
-/** Lay a patch over a full Settings. `sites` is the one field that must merge
- *  rather than replace - it is a record of per-site toggles and a patch carries
- *  only the ones that changed, so a plain spread would drop every other site.
+/** Lay a patch over a full Settings. `sites` is the one field that must be
+ *  merged: it is a record of per-site toggles and a patch carries only the ones
+ *  that changed, so a plain spread would drop every other site.
  *  The one place that rule is written for patches; the storage write below and
  *  the popup's local mirror both route here. (The content script never patches -
  *  it reads whole snapshots via getSettings.) */

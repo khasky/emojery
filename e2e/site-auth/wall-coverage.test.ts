@@ -45,7 +45,7 @@ interface WallPost {
 }
 
 // In-page audit of every TOP-LEVEL post article whose Like control is well
-// inside the viewport (past the IO pending margin: likeTop < vh - 250, and not
+// inside the viewport (past the IntersectionObserver pending margin: likeTop < vh - 250, and not
 // scrolled out: likeTop > -150). Nested articles are comments and never count;
 // units without a post Like (people-you-may-know, join prompts) are skipped.
 // The id prefers the post's own permalink (stable across steps), falling back
@@ -88,7 +88,7 @@ return posts;`;
 // Scroll the wall in steps and track each audited post's BEST observed state:
 // a post that ever reports a placed host is good for the run; one that never
 // does is a real miss. A bad step re-reads once after a settle first, so a
-// mount racing the audit (the IO callback fires between wheel and read) never
+// mount racing the audit (the IntersectionObserver callback fires between wheel and read) never
 // records a false miss.
 async function auditWall(b: Bridge, url: string, keyName: string): Promise<void> {
   await gotoSettled(b, url, 4500);
@@ -106,7 +106,7 @@ async function auditWall(b: Bridge, url: string, keyName: string): Promise<void>
       if (!prev || (p.placed && !prev.placed)) best.set(p.id, p);
     }
     // 1000ms per screen: the walk samples what is mounted after each scroll, and a feed
-    // that has not finished hydrating reports posts as unplaced that simply are not there yet.
+    // that has not finished hydrating reports posts as unplaced that are not there yet.
     await b.act(`${wheelBySrc("Math.round((page.viewportSize()?.height || 800) * 0.7)")} await page.waitForTimeout(1000);`);
   }
 

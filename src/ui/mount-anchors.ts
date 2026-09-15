@@ -48,7 +48,7 @@ const pendingAnchorByKey = new Map<TargetKey, Element>();
 const pendingKeyByAnchor = new Map<Element, TargetKey>();
 
 // Registered once by the mount layer, which owns what "this anchor is in range"
-// means. Kept out of observePendingAnchor's signature: the observer is a single
+// means. Kept out of the observePendingAnchor signature: the observer is a single
 // shared instance, so a per-call handler could only ever be the same one.
 export function setPendingAnchorHandler(onVisible: (key: TargetKey) => void): void {
   pendingVisibleHandler = onVisible;
@@ -134,7 +134,7 @@ export function cancelPendingMountOnAnchor(key: TargetKey, anchor: HTMLElement):
   if (pendingMounts.get(key)?.anchor === anchor) cancelPendingMount(key);
 }
 
-/** Test seam. The shared observer and its anchor maps are deliberately left standing,
+/** Test seam. The shared observer and its anchor maps are left standing,
  *  the same way resetMountRegistryForTests leaves the rest of the module state. */
 export function clearPendingMountsForTests(): void {
   pendingMounts.clear();

@@ -4,7 +4,7 @@
 // reaction glyphs the authed flows react with. `load-env.ts` puts the dotenv
 // files into `process.env`; this module is what reads them back.
 //
-// A LEAF on purpose - no Playwright, no page, no browser. Anything here that grew
+// A LEAF - no Playwright, no page, no browser. Anything here that grew
 // a `Page` parameter would belong in reaction-surface.ts instead.
 
 import { createRequire } from "node:module";

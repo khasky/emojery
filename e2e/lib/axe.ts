@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // What the two accessibility specs share: the axe-core source they inject, the
-// rule tags they scan for, how a violation is reported, and the WCAG 1.4.12
+// rule tags they scan for, how a violation is reported, and the WCAG
 // text-spacing overrides. a11y.spec.ts scans through Playwright pages (Chromium);
 // a11y-firefox.spec.ts scans the same pages through firefox-bridge.ts.
 import { readFileSync } from "node:fs";
@@ -26,7 +26,7 @@ export function formatViolations(label: string, violations: AxeViolation[]): str
   return violations.map((v) => `${label}: [${v.impact}] ${v.id} (${v.help}) at ${v.nodes.map((n) => n.target.join(" ")).join("; ")}`);
 }
 
-// WCAG 1.4.12 user style overrides. Elements that truncate BY DESIGN (history
+// Text-spacing user style overrides. Elements MEANT to truncate (history
 // URLs, hints with text-overflow) are exempt; the checked selectors are the
 // always-visible reading surfaces that must never clip under these overrides.
 export const TEXT_SPACING_CSS = `

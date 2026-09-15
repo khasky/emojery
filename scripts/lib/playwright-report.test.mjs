@@ -23,7 +23,7 @@ describe("forEachTest", () => {
     expect(collect([suite("a.spec.ts", { specs: [spec("mounts")] })])).toEqual(["a.spec.ts > mounts"]);
   });
 
-  // The shape the e2e config actually produces: project > file > describe > spec.
+  // The shape the e2e config produces: project > file > describe > spec.
   it("descends through project and describe levels, accumulating the trail", () => {
     const report = [
       suite("live", {

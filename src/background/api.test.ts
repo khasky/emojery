@@ -77,7 +77,7 @@ afterEach(() => {
 });
 
 // Locks the optimistic-vote ownership contract: the content script computes
-// `prevReaction` (ui/vote-client.ts) and the SW only enqueues it - never
+// `prevReaction` (ui/vote-client.ts) and the service worker only enqueues it - never
 // re-derives it. See the unreact case especially.
 describe("enqueueVote", () => {
   // The optimistic history row must carry the same generated id the queue entry
@@ -394,7 +394,7 @@ describe("flushVotes", () => {
   });
 
   it("keeps the vote a 401 refused and stops the drain on the cleared session", async () => {
-    // clearAuth really does end the session, so the mock does too: without that the
+    // clearAuth does end the session, so the mock does too: without that the
     // next lap would re-send the same vote under a token the API just refused.
     vi.mocked(clearAuth).mockImplementationOnce(async () => {
       vi.mocked(getAuth).mockResolvedValue(null);
@@ -491,7 +491,7 @@ describe("flushVotes", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const first = flushVotes();
-    const second = flushVotes(); // voteB's flush arrives while voteA is mid-send
+    const second = flushVotes(); // the flush for voteB arrives while voteA is mid-send
     releaseFetch();
     await Promise.all([first, second]);
 
@@ -793,7 +793,7 @@ describe("fetchCount", () => {
     const read = fetchCount(target, 6);
     // The count read going out means the /reactions/mine batch is open behind it
     // (fetchTargetCountsAndOwnReaction starts both in the same tick). Poll every
-    // 1ms, not waitFor's default 50ms: the batch window is 25ms, so a slower poll
+    // 1ms, not the waitFor default of 50ms: the batch window is 25ms, so a slower poll
     // lets it flush on its own and the reset under test is never exercised.
     await vi.waitFor(() => expect(fetchMock).toHaveBeenCalled(), { interval: 1, timeout: 1_000 });
     clearPendingMineBatch();

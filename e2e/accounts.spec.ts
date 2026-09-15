@@ -4,7 +4,7 @@
 // independent counter moves per account, email-based account recovery, and
 // the wrong-code path of the sign-in form. All flows run on
 // GitHub (login-free mount surface) and read only what a user sees: the
-// shadow-hosted trigger/counter, the popup History tab, and auth.html's visible errors.
+// shadow-hosted trigger/counter, the popup History tab, and the visible errors on auth.html.
 import { expect, test } from "@playwright/test";
 import * as ext from "./lib/extension";
 import { historyPageOverBridge, openHistoryTab, withPopupOverBridge } from "./lib/popup-probes";
@@ -15,8 +15,8 @@ const REQUIRES_OTP = ext.otpSkipReason("multi-account e2e checks");
 
 // A queued vote survives a sign-out now (see flushVotes), but not the throwaway
 // profile it lives in, so a vote followed by teardown must first reach the server:
-// the main flows await ext.watchNextVoteFlush; this budget serves the best-effort
-// cleanup paths only.
+// the main flows await ext.watchNextVoteFlush; this budget serves the cleanup
+// paths only, which tolerate a miss.
 const VOTE_FLUSH_MS = Number(process.env.E2E_VOTE_FLUSH_MS ?? 5_000);
 
 // The view shows the empty state while its storage read is still in flight, so
@@ -103,7 +103,7 @@ test("account switching isolates history and the own reaction", async () => {
     cleanupAsA = false;
   } finally {
     if (cleanupAsA) {
-      // Best-effort: leave the shared staging target without this run's vote.
+      // Clear this run's vote off the shared staging target when the clear can be made.
       await ext
         .signIn(session.context, emailA)
         .then(async () => {
@@ -121,7 +121,7 @@ test("account switching isolates history and the own reaction", async () => {
 // The account (and its reactions) is recoverable by email alone: wipe the
 // profile ("uninstall + reinstall"), sign in with the SAME address from a
 // brand-new profile, and the previously picked emoji is selected again while the
-// local history starts empty (history is device-local by design).
+// local history starts empty (history is device-local).
 test("signing in with the same email from a fresh profile restores the reaction", async () => {
   test.skip(!ext.authConfigured(), REQUIRES_OTP);
   const email = ext.authEmail("recover");
@@ -319,7 +319,7 @@ test("two accounts raise and lower the shared counter independently", async () =
       })
       .toBe(base);
   } finally {
-    // Best-effort: leave the shared staging target without this run's votes.
+    // Clear this run's votes off the shared staging target.
     // Each account's session is still signed in, so clear directly; the flush
     // wait matters here - closing the browser next takes a queued un-react with it.
     const cleanup = async (session: ext.Session | undefined, reacted: boolean) => {

@@ -95,10 +95,10 @@ input:focus {
   font: inherit;
   /* Secondary-text size, not the inherited 14px body size. */
   font-size: 12px;
-  /* Padding grows the control to the WCAG 2.5.8 target size. Only the BOTTOM half is
+  /* Padding grows the control to the WCAG target size. Only the BOTTOM half is
      cancelled by the negative margin, so the control does not push what follows it; the
-     top padding is real spacing under the field above. (popup.css's `.linkish` cancels
-     both sides - it sits in a row where any added height would shift the layout.) */
+     top padding is real spacing under the field above. (The `.linkish` rule in popup.css
+     cancels both sides - it sits in a row where any added height would shift the layout.) */
   padding: 8px 0 4px;
   margin-bottom: -4px;
 }

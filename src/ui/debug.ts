@@ -7,7 +7,7 @@
 import { logScopedError } from "../shared/debug-log";
 
 /**
- * Trace for a mount-side failure the caller deliberately absorbs. The content script
+ * Trace for a mount-side failure the caller absorbs. The content script
  * runs inside someone else's page, so it may not write to that page's console in a
  * shipped build - and it does not: `logScopedError` folds to nothing when
  * `__EM_DEBUG_LOG__` is false, which is every production build.

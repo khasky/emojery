@@ -40,7 +40,7 @@ interface HostInfo {
   height: number;
   // Inside an open [role="dialog"] - FB renders a DIRECT permalink load as the
   // profile page with the post in a dialog on top, so the dialog is the surface
-  // that actually holds the post (the page behind it keeps its own feed hosts).
+  // that holds the post (the page behind it keeps its own feed hosts).
   inDialog: boolean;
   label: string | null; // trigger aria-label (e.g. "1 reactions — ...")
   isCounter: boolean; // true when the trigger has reacted (shows a count)
@@ -117,7 +117,7 @@ return {
 };`;
 }
 
-// The surface that actually holds a permalink's post and its comment area. FB
+// The surface that holds a permalink's post and its comment area. FB
 // renders a DIRECT permalink load as the profile page with the post in a dialog
 // on top (verified live on the default zuck post), and the profile feed behind
 // the dialog legitimately mounts its own pickers - so single-picker contracts
@@ -146,7 +146,7 @@ return { gridVisible: grid.length > 0, authTabHint: false };`;
 
 // Whether the CLOSED trigger still carries the user's own reaction. `mine`
 // arrives with the counts fetch, so this read - unlike a glance at a freshly
-// opened grid - only turns false once the clear actually landed.
+// opened grid - only turns false once the clear landed.
 export function ownReactionProbe(): string {
   return `${DQ_SRC}
 const t = dq('${HOST_SELECTOR}')

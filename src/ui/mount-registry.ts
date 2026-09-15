@@ -100,8 +100,8 @@ export function dispatchVoteSync(b: VoteBroadcast): void {
 }
 
 /** Test seam: the registries below are module state and outlive a single test's setup.
- *  Only the per-key registries are cleared - every other piece of module state is
- *  deliberately left standing (the shared pending-anchor observer and its maps, the shown
+ *  Only the per-key registries are cleared - every other piece of module state is left
+ *  standing (the shared pending-anchor observer and its maps, the shown
  *  and placed target sets, the last reported route href, the prune clock). */
 export function resetMountRegistryForTests(): void {
   mountedTargets.clear();
@@ -305,7 +305,7 @@ function isMountNode(node: Node): boolean {
   return false;
 }
 
-// The wrapper spec a mount was built with, stamped verbatim (see wrapHost below).
+// The wrapper spec a mount was built with, stamped unchanged (see wrapHost below).
 // Compared as the RAW spec string - the browser-normalized style.cssText formats
 // differently and would flag a phantom change on every scan (a permanent remount loop).
 // The mark and its key are written (wrapHost) and read (wrapperSpecChanged) here only.
@@ -315,8 +315,8 @@ function wrapperSpecKey(wrapper: NonNullable<PickerInsertionPoint["wrapper"]>): 
   return [wrapper.tagName, wrapper.className ?? "", wrapper.style ?? ""].join("|");
 }
 
-// Builds the node that actually gets inserted: the bare host, or the adapter's
-// wrapper around it carrying the verbatim spec stamp wrapperSpecChanged reads back.
+// Builds the node that gets inserted: the bare host, or the adapter's
+// wrapper around it carrying the raw spec stamp wrapperSpecChanged reads back.
 // Lives here, next to that stamp, so the two cannot drift.
 //
 // The wrapper gets EXACTLY ONE child. mount-style's isOwnMountNode is the one "is this

@@ -52,8 +52,8 @@ function chipIn(dest: string, emoji: string): HTMLButtonElement | null {
 
 // Select a chip and wait for the re-render to commit. Native click, not
 // userEvent: the chip's aria-label swaps from the emoji char to its localized
-// name when the lazy emoji-meta load lands, and userEvent's element->locator
-// conversion (by label) loses that race. Preact renders async, so the selected
+// name when the lazy emoji-meta load lands, and the element->locator conversion
+// userEvent does (by label) loses that race. Preact renders async, so the selected
 // state is polled rather than read right after the click.
 async function selectChip(dest: string, emoji: string): Promise<void> {
   const chip = chipIn(dest, emoji);

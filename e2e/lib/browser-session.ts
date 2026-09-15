@@ -2,7 +2,7 @@
 //
 // Launching the Chrome the autonomous specs drive, and tearing it down: where the
 // built extension is, which profile dir a run gets (and who owns deleting it),
-// and which browser binary actually runs.
+// and which browser binary runs.
 //
 // Knows nothing about Emojery's UI - it hands back a BrowserContext and stops.
 // The extension's own pages are extension-pages.ts; the injected picker is
@@ -88,7 +88,7 @@ export async function makeRunProfileDir(name: string): Promise<string> {
   await mkdir(base, { recursive: true });
   // A crashed or Ctrl-C'd run leaks its profile (the delete runs only on the
   // normal exit path), so prune siblings older than a day here - the one place
-  // every suite passes through. Best-effort: a locked dir never blocks launch.
+  // every suite passes through. A locked dir never blocks launch.
   // E2E_KEEP_PROFILE also shields a kept post-mortem profile from this prune,
   // same as removeProfileUnlessKept and the reaper honor it.
   const cutoffMs = Date.now() - 24 * 60 * 60 * 1000;
@@ -120,7 +120,7 @@ export async function removeProfileUnlessKept(dir: string): Promise<void> {
 }
 
 // One resolver for every suite that launches its own Chrome: an explicit dir is
-// reused as-is (no cleanup), otherwise a throwaway profile is minted and
+// reused as-is (no cleanup), otherwise a throwaway profile is created and
 // reported as generated, which is what makes the close helper delete it.
 // `useGenerated` forces a throwaway even when an explicit dir is configured.
 export async function resolveUserDataDir(name: string, opts: { explicitDir?: string | undefined; useGenerated?: boolean | undefined } = {}): Promise<{ dir: string; generatedUserDataDir: string | null }> {
@@ -150,11 +150,11 @@ interface RealisticContextOptions {
   keepOnboardingTab?: boolean;
 }
 
-// DEFAULTS to Playwright's bundled Chromium on purpose: recent real Chrome
+// DEFAULTS to Playwright's bundled Chromium: recent real Chrome
 // blocks CLI `--load-extension` (verified - channel:chrome loads zero service
 // workers, so the extension id never resolves), which would break every
 // extension spec. Target sites don't bot-block bundled Chromium anyway. An
-// explicit E2E_CHROME_CHANNEL / E2E_BROWSER_EXECUTABLE_PATH is still honored.
+// explicit E2E_CHROME_CHANNEL / E2E_BROWSER_EXECUTABLE_PATH is still applied.
 //
 // This is the ONE seam every launcher goes through, so E2E_BROWSER=firefox
 // branches here: same profile-dir and teardown rules, Firefox launch + install.
@@ -191,7 +191,7 @@ function suppressOnboardingTab(context: BrowserContext): void {
 // by the debugger-server arg the temporary-addon install needs; the build to
 // load always comes from resolveExtensionPath (no caller loads anything else on
 // firefox - the coexistence suite, which loads extras, is chromium-only).
-// E2E_CHROME_CHANNEL / E2E_BROWSER_EXECUTABLE_PATH are ignored on purpose:
+// E2E_CHROME_CHANNEL / E2E_BROWSER_EXECUTABLE_PATH are ignored:
 // Playwright only drives its own patched Firefox build, never a stock install.
 async function launchFirefoxContext(userDataDir: string, baseOptions: Parameters<typeof chromium.launchPersistentContext>[1]): Promise<BrowserContext> {
   const extensionPath = resolveExtensionPath();

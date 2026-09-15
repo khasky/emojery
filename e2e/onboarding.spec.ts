@@ -46,7 +46,7 @@ interface OnboardingSession {
 
 // The shared launcher plus this file's one requirement: a profile dir that is always
 // fresh (onboarding only ever fires on a first install) and named for this suite. The
-// dir is minted here, so the caller's closeSession() is what removes it again.
+// dir is created here, so the caller's closeSession() is what removes it again.
 async function launchFreshInstall(opts: { keepOnboardingTab: boolean }): Promise<OnboardingSession> {
   const userDataDir = await makeRunProfileDir("onboarding");
   const { context } = await launchSession({ userDataDir, locale: "en-US", keepOnboardingTab: opts.keepOnboardingTab });
@@ -309,7 +309,7 @@ test("signing in from the gate casts the held reaction and ticks the last step",
   }
 });
 
-// Engine-neutral on purpose: the coach-mark is content-script UI, which the
+// Engine-neutral: the coach-mark is content-script UI, which the
 // firefox run drives for real (the onboarding tab plays no part here).
 test("the coach-mark shows once on the first live trigger, then never again", async () => {
   const session = await launchFreshInstall({ keepOnboardingTab: false });

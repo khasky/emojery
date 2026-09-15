@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// The four first-run steps and the listener that fires them. Production reaches
+// The first-run steps and the listener that fires them. Production reaches
 // every one of them through `installFreshInstallAuthReset` at the bottom.
 
 import { needsLegacyDataConsentNotice } from "../shared/data-consent";
@@ -74,7 +74,7 @@ export async function openOnboardingPage(details: chrome.runtime.InstalledDetail
 export function installFreshInstallAuthReset(): void {
   chrome.runtime.onInstalled.addListener((details) => {
     if (details.reason !== "install") return;
-    // The three chained below either write an onboarding latch (the first-reaction
+    // The ones chained below either write an onboarding latch (the first-reaction
     // step, the checklist page arming its own step) or set off a write (a replayed
     // content script), so each waits for the wipe. Started alongside it, the wipe
     // could land last and undo them. A failed reset still lets them run - a first

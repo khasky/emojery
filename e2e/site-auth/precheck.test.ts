@@ -4,7 +4,7 @@
 // flow would fail noisily - so we assert them once, with actionable messages.
 //
 // fx.setup already throws on these same invariants, so these tests cannot go
-// red while it does its job - they are deliberate backstops that keep the
+// red while it does its job - they are backstops that keep the
 // invariants asserted should setup's own checks ever weaken.
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { bridgeFixture, gotoSettled, openPickerState, SETUP_HOOK_TIMEOUT_MS, siteAuthEnabled } from "./harness";
@@ -12,7 +12,7 @@ import { authContentUrl } from "./scenarios";
 
 const fx = bridgeFixture();
 
-// retry: 0 - these are deliberately fail-fast setup checks; retrying them only
+// retry: 0 - these are fail-fast setup checks; retrying them only
 // delays the actionable "not attached / not signed in" message by 3x.
 (siteAuthEnabled() ? describe : describe.skip)("site-auth: precheck", { retry: 0 }, () => {
   beforeAll(fx.setup, SETUP_HOOK_TIMEOUT_MS);

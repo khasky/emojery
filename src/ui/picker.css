@@ -5,7 +5,7 @@
  * `<div class="khasky-emojery-overlay-host">` on <body> owning the floating popover.
  *
  * Both hosts inherit `font-family`/`font-size`/`color` from their DOM context (we
- * deliberately do NOT use `all: initial`, so inheritable values flow through the shadow
+ * do NOT use `all: initial`, so inheritable values flow through the shadow
  * boundary); the picker sizes in `em`, with a `clamp` on `:host` guarding extreme bases.
  *
  * `data-theme="light|dark"` is stamped on the host from the page's detected mode. Accent
@@ -45,7 +45,7 @@
   --khasky-emojery-ring-stops: #f00, #f80, #ff0, #0f0, #0ff, #08f, #80f, #f08, #f00;
 
   /* One focus indicator for every focusable control in the picker. Each use site keeps
-     its own `outline-offset` - the popover's is inset on purpose (see the note there). */
+     its own `outline-offset` - the popover's is inset (see the note there). */
   --khasky-emojery-focus-ring: 2px solid var(--khasky-emojery-accent);
 
   /* The counter trio renders slightly under the trigger's glyph so the stack stays compact
@@ -124,14 +124,14 @@
   min-height: var(--khasky-emojery-base-h);
   min-width: max(40px, calc(var(--khasky-emojery-trio-scale) * var(--khasky-emojery-glyph) + 0.3em + 1ch + 2 * var(--khasky-emojery-site-pad-x, 0.75em)));
   padding-block: 0.3em;
-  /* `--khasky-emojery-site-*` are stamped on the host by mount-style.ts's
-     applySiteButtonStyle from the page's own action buttons so the trigger blends into each
+  /* `--khasky-emojery-site-*` are stamped on the host by applySiteButtonStyle in
+     mount-style.ts, from the page's own action buttons so the trigger blends into each
      site; fall back to our defaults. clampRadius already floors a simple px radius at 6px. */
   border-radius: var(--khasky-emojery-site-radius, 6px);
   background-color: var(--khasky-emojery-site-bg, transparent);
   color: var(--khasky-emojery-site-fg, inherit);
   font: inherit;
-  /* The native button's own horizontal padding, mirrored by mount-style.ts's applySitePadding -
+  /* The native button's own horizontal padding, mirrored by applySitePadding in mount-style.ts -
      most sites space a flush action row by button padding, not margins. */
   padding-inline: var(--khasky-emojery-site-pad-x, 0.75em);
   line-height: 1.4;
@@ -356,7 +356,7 @@
   /* 18em ~ 252-324px depending on inherited base - wide enough for the breakdown
      labels without dominating the viewport on big-font pages.
      The floor keeps the category bar on ONE row: its targets are pinned at 24 CSS px
-     (WCAG 2.5.8) while everything around them scales with the font, so at the 14px
+     (WCAG) while everything around them scales with the font, so at the 14px
      font floor 18em is ~15px too narrow for the last category. Terms, outside-in:
      the popover's 2 x 0.6em padding, the scroller's 0.15em padding-right, the bar's
      2 x 0.15em padding, then the targets and their 0.1em gaps - plus 20px for the
@@ -475,7 +475,7 @@
   cursor: pointer;
   position: relative;
   flex: 1 1 0;
-  /* WCAG 2.5.8 target size. `flex: 1 1 0` divides the bar by the category count, so the
+  /* WCAG target size. `flex: 1 1 0` divides the bar by the category count, so the
      floor is what stops a future category from shrinking every button below 24 CSS px;
      the popover's width floor is derived from it, which is what keeps the bar one row
      at the 14px font floor. Pinned at that font floor by picker.browser.test.tsx. */
@@ -518,7 +518,7 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  /* WCAG 2.4.11: the sticky head below is opaque and sits INSIDE this scroller, so a
+  /* Focus not obscured (WCAG): the sticky head below is opaque and sits INSIDE this scroller, so a
      focused emoji scrolled to the container edge lands underneath it. The variable is
      the head's measured height, written by picker.tsx; 0 until it is measured. */
   scroll-padding-top: var(--khasky-emojery-head-h, 0px);
@@ -743,7 +743,7 @@
 }
 
 /* Lives in the overlay root's shadow (same sheet as the popover), positioned
-   by coach-mark.ts. Fixed px font on purpose: no page font is stamped here. */
+   by coach-mark.ts. Fixed px font: no page font is stamped here. */
 .khasky-emojery-coach-tip {
   position: fixed;
   background: var(--khasky-emojery-bg);
@@ -797,7 +797,7 @@
 .khasky-emojery-gate {
   display: flex;
   flex-direction: column;
-  /* Stretch, not center: the buttons below are full-width by design. */
+  /* Stretch, not center: the buttons below are full-width. */
   align-items: stretch;
   text-align: center;
   gap: 0.45em;

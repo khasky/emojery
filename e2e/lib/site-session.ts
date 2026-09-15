@@ -16,7 +16,7 @@ interface LaunchE2eOptions {
   incognito?: boolean;
   useGeneratedUserDataDir?: boolean;
   /** Names the throwaway profile dir, so an orphan left by a crashed run says which
-   *  suite minted it. */
+   *  suite created it. */
   profileName?: string;
   /** How the wall-dismissing init script behaves. The default suits the suites that
    *  drive a site and want the unwall hook; a suite measuring a mounted trigger inside
@@ -26,7 +26,7 @@ interface LaunchE2eOptions {
 
 interface E2eBrowserSession {
   context: BrowserContext;
-  /** Non-null only when the launch minted a throwaway profile - the caller
+  /** Non-null only when the launch created a throwaway profile - the caller
    *  removes it, so a crashed run leaves at most one behind. */
   generatedUserDataDir: string | null;
 }
@@ -131,7 +131,7 @@ async function renavigatePastChallenge(page: Page, site: SupportedSiteScenario):
 }
 
 // A stale `mountKeyPattern` fails as an EMPTY matchingAnchorKeys - byte for byte what
-// "nothing mounted" looks like. The keys the page actually derived, next to the pattern
+// "nothing mounted" looks like. The keys the page derived, next to the pattern
 // that rejected them, is what tells the two apart: facebook and gitlab are excluded from
 // the registry's unit guard (src/shared/e2e-site-coverage.test.ts) because their keys need
 // page state, so their patterns are the ones that can drift unnoticed.

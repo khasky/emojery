@@ -192,7 +192,7 @@ function extensionRuntimeOrigin(runtime: typeof chrome.runtime | undefined): str
 // storage.local is not a trusted store: an older build, a synced profile or a
 // hand-edited one can leave anything under this key, and the id goes straight
 // out as a request header. The readback rejects whatever the generator could not
-// have produced and mints a fresh id.
+// have produced and generates a fresh id.
 const SECURITY_CONTEXT_KEY = "security_context_v1";
 
 interface StoredSecurityContext {

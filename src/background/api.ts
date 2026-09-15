@@ -30,7 +30,7 @@ const SIGNOUT_FLUSH_MAX_ROUNDS = 20;
 const SIGNOUT_FLUSH_BUDGET_MS = 4_000;
 
 // Wakes the service worker to retry a queued vote whose backoff outlives the worker
-// itself (up to VOTE_FLUSH_MAX_RETRY_MS, plus the +/-25% jitter voteRetryDelayMs
+// itself (up to VOTE_FLUSH_MAX_RETRY_MS, plus the jitter voteRetryDelayMs
 // applies after the cap). Created only while the queue has work.
 export const VOTE_WAKE_ALARM = "vote-flush-wake";
 const VOTE_WAKE_PERIOD_MINUTES = 5;
@@ -138,7 +138,7 @@ export function voteRetryDelayMs(consecutiveFailures: number, retryAfterSec?: nu
   const jitter = exp * 0.25 * (random() * 2 - 1);
   let delay = Math.max(VOTE_FLUSH_MIN_RETRY_MS, Math.floor(exp + jitter));
   if (retryAfterSec !== undefined && retryAfterSec > 0) {
-    // Honored only up to the ceiling above: the value comes from whatever answered
+    // Applied only up to the ceiling above: the value comes from whatever answered
     // the request, and an hours-long one would park the whole queue until then.
     delay = Math.max(delay, Math.min(retryAfterSec * 1000, VOTE_FLUSH_MAX_RETRY_MS));
   }
@@ -241,8 +241,8 @@ export async function flushVotes(): Promise<void> {
 }
 
 // Drain this account's queued votes before sign-out so they land under a valid
-// token instead of being dropped later as "ownership changed". Best-effort,
-// bounded by drain ROUNDS and a wall-clock budget checked between rounds.
+// token instead of being dropped later as "ownership changed". Bounded by drain
+// ROUNDS and a wall-clock budget checked between rounds.
 export async function flushOwnedVotesForSignOut(): Promise<void> {
   const auth = await getAuth();
   if (!auth) return;
@@ -356,7 +356,7 @@ async function handleVoteResponse(reply: ApiReply, vote: StoredVote, auth: AuthS
   // the field is optional, so ours stays when it comes back without one.
   const target = storedTargetId && storedTargetId !== vote.target.targetId ? { ...vote.target, targetId: storedTargetId } : vote.target;
   if (vote.historyReaction) {
-    // A corrected key cannot reuse the optimistic row (pushHistory's historyId path
+    // A corrected key cannot reuse the optimistic row (the historyId path in pushHistory
     // confirms a duplicate rather than re-targeting it): drop it, add a fresh row keeping
     // the click's ts. The own-reaction entry stays under OUR key - the page's trigger
     // looks it up by the same derivation.

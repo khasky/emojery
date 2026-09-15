@@ -1,18 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // The URL->target-id derivation as a pure function, for the sites whose id is
-// URL-derivable. Every row pairs the adapter's OWN exported parser with its OWN
+// URL-derivable. Every row calls the adapter's own exported parser and its own
 // `<site>TargetFromRef` (the ref->target half of the wire contract) - the two
-// functions the shipped scan runs - so this can
-// be exercised without a page while staying incapable of drifting from what a
-// real page emits.
+// functions the shipped scan runs - so this can be exercised without a page and
+// cannot drift from what a real page emits.
 //
 // Test-only: nothing in the shipped bundle imports this, and a drift between the
 // switch/host-gating here and the adapters fails lockstep.test.ts.
 //
-// GitLab and Facebook are absent by design: their canonical id depends on page
+// GitLab and Facebook are absent because their canonical id depends on page
 // state beyond the URL (GitLab's numeric project id, Facebook's DOM-resolved
-// photo/lazy-permalink identity), so it cannot be derived from the URL alone.
+// photo/lazy-permalink identity).
 import type { TargetRef } from "../shared/adapter";
 import { detectSupportedSite } from "../shared/sites";
 import { amazonTargetFromAsin, asinFromPathname } from "./amazon";

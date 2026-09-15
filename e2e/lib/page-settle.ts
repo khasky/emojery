@@ -4,7 +4,7 @@
 // that tolerates a dead URL, the per-site interstitial and login-wall
 // dismissals, and the single deep DOM probe that turns the settled page into a
 // MountEvidence record. lib/picker-probes.ts shares it; theme-contrast keeps
-// its own lighter settle on purpose.
+// its own lighter settle.
 import type { Page } from "@playwright/test";
 import { DEEP_QUERY_ALL_SRC, IS_VISIBLE_RECT_SRC, MOUNTED_KEY_OF_SRC, RECT_GEOMETRY_SRC } from "./probe-src";
 import { HIDDEN_SELECTOR, HOST_SELECTOR, MOUNT_ATTR, MOUNTED_SELECTOR, TRIGGER_SELECTOR } from "./selectors";
@@ -54,7 +54,7 @@ export async function gotoSettled(page: Page, url: string, opts: { tolerateNavEr
 
 export function isNoActionSurface(evidence: MountEvidence): boolean {
   // Trust a real, visible, correctly-placed host over the URL: if our trigger
-  // actually mounted next to the native action, the page rendered a usable
+  // mounted next to the native action, the page rendered a usable
   // surface, so an anti-bot token in the URL must NOT skip the run. Reddit's
   // js_challenge shell still SSRs the real post and its vote row (verified by
   // screenshot - our trigger mounts on it). This runs BEFORE isBlockUrl so such a
@@ -175,7 +175,7 @@ export async function waitForMountEvidence(page: Page, site: SupportedSiteScenar
         last = await collectMountEvidence(page, site);
       }
       // When the caller expects native replacement, also wait for the natives to
-      // actually be hidden - the host mounts as soon as its row is found, but the
+      // be hidden - the host mounts as soon as its row is found, but the
       // hide can land a beat later, so returning on placement alone races it.
       // On a block / anti-bot challenge shell native-hiding may never land (the
       // shell displaces the real control), so a good mount is enough to stop
@@ -255,8 +255,8 @@ export function rendersActionSurface(page: Page, site: SupportedSiteScenario): P
 export async function handleKnownInterstitials(page: Page, site: SupportedSiteScenario): Promise<void> {
   if (site.site === "amazon") await clickAmazonContinueShopping(page, site.url);
   await dismissDialogWall(page, site.site);
-  // Threads ONLY: recover from its full-page anti-bot interstitial. Deliberately
-  // NOT generalized - other sites carry the same wording in ordinary content
+  // Threads ONLY: recover from its full-page anti-bot interstitial. NOT
+  // generalized - other sites carry the same wording in ordinary content
   // (Amazon "temporarily unavailable" / "try again"), and a global check
   // false-matched and reloaded healthy pages into their robot wall
   // (Amazon/YouTube went red). Elsewhere a genuine wall is handled by the skip.
@@ -269,7 +269,7 @@ export async function handleKnownInterstitials(page: Page, site: SupportedSiteSc
 // (a long retry loop once tipped a rate-limited run into the 120s timeout). A
 // hard login wall carries no such error text and is left for the caller's
 // isNoActionSurface skip - reloading can't reveal a post that requires signing in.
-// Narrower than INTERSTITIAL_TEXT on purpose: a rate-limit page is not something a
+// Narrower than INTERSTITIAL_TEXT: a rate-limit page is not something a
 // Retry click or a reload fixes, so this matches the shared phrase set with no extras.
 async function recoverFromTransientInterstitial(page: Page): Promise<void> {
   for (let attempt = 0; attempt < 2; attempt++) {

@@ -19,7 +19,7 @@ import { GRID_ITEM_SELECTOR, HISTORY_EMOJI_SELECTOR, HISTORY_LINK_SELECTOR, HIST
 
 // Tracing OFF for this file, on every attempt. The snapshotter re-serializes the
 // picker's ~600-button grid after each action, which costs seconds per pick (the
-// measurement behind playwright.config.ts's `on-first-retry` default): a burst
+// measurement behind the `on-first-retry` default in playwright.config.ts): a burst
 // that slow never draws a 429 at all, so a traced run of the refusal path
 // would go red for a reason that is purely the harness. Failure screenshots are
 // unaffected.
@@ -129,7 +129,7 @@ async function pickEmoji(page: Page, emoji: string): Promise<void> {
   await option.dispose().catch(() => {});
 }
 
-// The glyphs the picker actually renders, read from the open tray: a hardcoded
+// The glyphs the picker renders, read from the open tray: a hardcoded
 // list would go stale the day the palette changes, and a burst only needs "N
 // different emoji the user can see". Selected ones are skipped so every pick is
 // a switch, never a toggle-off.
@@ -277,7 +277,7 @@ test("a burst that meets a 429 is re-sent - no reaction is lost", async () => {
 
     // The click count alone cannot say why no 429 came: a burst that never
     // reached the wire and one answered 200 throughout look identical from
-    // it. Report what the wire actually carried, and over how long.
+    // it. Report what the wire carried, and over how long.
     const wireSummary = (): string => {
       const seen = responses.slice(sinceBurst);
       const spanSec = seen.length > 1 ? Math.round((seen[seen.length - 1]!.at - seen[0]!.at) / 100) / 10 : 0;

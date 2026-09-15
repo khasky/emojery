@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // The vote interaction owned by the content script: auth gate, optimistic cache update,
-// cross-tab broadcast, and the vote message to the SW. Kept separate from the mount
+// cross-tab broadcast, and the vote message to the service worker. Kept separate from the mount
 // lifecycle so ownership of optimistic state (the content script computes `prevReaction`;
-// the SW only enqueues it) stays obvious and testable.
+// the service worker only enqueues it) stays obvious and testable.
 import type { PickerInsertionPoint } from "../shared/adapter";
 import { type RuntimeResponse, TITLE_MAX } from "../shared/messages";
 import type { Reaction } from "../shared/reactions";
@@ -41,7 +41,7 @@ export function createOnPick(ctx: { point: PickerInsertionPoint; settings: Setti
     // auto-press setting is on; never blocks or fails the vote itself).
     autoPressNative(point, reaction, userId);
     void maybePlayClickReactionAnimation(reaction, origin, settings.reactionAnimations);
-    // The SW fans this delta out to other tabs (see background/vote-sync.ts) once it
+    // The service worker fans this delta out to other tabs (see background/vote-sync.ts) once it
     // receives the `vote` below - no page-reachable channel is used.
     const lang = languageFallback();
     // Same bound the background's message guard enforces - over it, the whole

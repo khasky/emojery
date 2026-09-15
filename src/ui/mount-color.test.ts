@@ -90,7 +90,7 @@ describe("bestTextColor - the legible one of the picker's two text colours", () 
 
   // Known ceiling: with only two text colours, a mid-tone surface cannot reach
   // AA either way (#1a73e8 tops out at ~3.7:1). AA is guaranteed on the light
-  // and dark canvases the picker actually renders against; widening it would
+  // and dark canvases the picker renders against; widening it would
   // need a computed text colour, not a two-colour pick.
   it("clears AA body text (4.5:1) on the light and dark canvases", () => {
     for (const bg of [WHITE, BLACK, [24, 25, 26]] as Rgb[]) {

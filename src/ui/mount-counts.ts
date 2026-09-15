@@ -135,7 +135,7 @@ export async function hydrateDeferredCounts(point: PickerInsertionPoint, key: Ta
   // so the cache disagreeing with the answer IS the click. Re-apply it on top of the
   // server aggregate - painting the answer as-is would show the pre-pick state over the
   // user's click while the vote is still on its way. A fresh read, not the scan prime:
-  // the prime predates the click by design.
+  // the prime predates the click.
   const cached = (await getCachedCounts([point.target]).catch(() => null))?.hits[key];
   if (cached && cached.myReaction !== (serverCounts.myReaction ?? null)) {
     const clicked = cached.myReaction;

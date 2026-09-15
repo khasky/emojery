@@ -177,7 +177,7 @@ test("account deletion: signs out and reverses its reactions", async () => {
     // the retry, which re-reads a settled baseline (seen live: 82 vs 81).
     for (const { page, mountKey, minimum } of reacted) {
       // pollForValue, not expect.poll: the assertion below is `>=`, but the drop check
-      // after the deletion needs the value this actually settled on.
+      // after the deletion needs the value this settled on.
       const countWith = await pollForValue(
         async () => (await ext.reloadAndReadTotal(page)) ?? 0,
         (total) => total >= minimum,
@@ -351,7 +351,7 @@ test("rapid reaction switching settles on the last pick without corrupting the c
 });
 
 // The vote POST is delayed (slow network) so it is unfinished at F5; the durable
-// IndexedDB queue must carry it across the navigation and the SW re-flushes it.
+// IndexedDB queue must carry it across the navigation and the service worker re-flushes it.
 test("a reaction in flight survives a reload (slow network)", async () => {
   test.skip(!ext.authConfigured(), REQUIRES_OTP);
   const session = await ext.launchSession();
@@ -362,7 +362,7 @@ test("a reaction in flight survives a reload (slow network)", async () => {
     // holds the un-react and the heart vote queues behind it into the reload.
     await ext.ensureNoOwnReaction(session.context, page);
 
-    // Hold the vote POST open so it is mid-flight at reload (the background SW
+    // Hold the vote POST open so it is mid-flight at reload (the background service worker
     // sends it; context.route intercepts service-worker requests too). Robust
     // either way: if it still completes fast, the durable queue makes it persist.
     await session.context.route("**/reactions/vote", async (route) => {

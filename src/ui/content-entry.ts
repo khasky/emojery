@@ -18,7 +18,7 @@ export function contentEntryMain(adapter: SiteAdapter): void {
   installVoteSyncListener();
   // Before the first scan, so the matching mount can consume the hint.
   armReactHint();
-  // The emoji sheet is deliberately NOT preloaded here: ~1 MB, and this runs on every page
+  // The emoji sheet is NOT preloaded here: it is large, and this runs on every page
   // of every supported host. mount.ts starts it at the first settings-allowed mount (see schedulePendingMount).
 
   // Seeded before the first scan so a reload inherits the last blended look.

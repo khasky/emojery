@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // Every shipped locale, on the extension's own three pages: the translation is
-// actually substituted, no message key leaks through as raw text, and nothing
+// substituted, no message key leaks through as raw text, and nothing
 // overruns the popup's real width. `i18n-locales.test.ts` already checks the
 // placeholder definitions in the catalogs and the translation backlog - it
 // never loads the pages, so a string that fits the catalog but not the layout
@@ -102,7 +102,7 @@ for (const locale of sweptLocales()) {
   test(`${locale}: popup, sign-in and onboarding render translated and fit`, async () => {
     const messages = catalog(locale);
     // keepOnboardingTab: the launcher closes any page that navigates to
-    // onboarding.html, and this case navigates to it on purpose.
+    // onboarding.html, which is the very page this case needs open.
     const session = await ext.launchSession({ locale: langTag(locale), keepOnboardingTab: true });
     try {
       const extensionId = await ext.resolveExtensionId(session.context);

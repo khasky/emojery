@@ -11,20 +11,18 @@ export interface TargetRef {
 }
 
 /**
- * Native controls that the "Auto-press original buttons" setting may press for
- * this point. Semantic, unlike `nativeElement` (which is "what to hide"): `like` /
- * `dislike` are the actual clickable controls. Adapters fill what the site
- * has; an absent field means the site offers no such action here.
+ * Native controls the "Auto-press original buttons" setting may press for this
+ * point. Separate from `nativeElement`, which names what to hide. Adapters fill
+ * what the site has; an absent field means the site offers no such action here.
  */
 export interface NativeVoteActions {
   like?: HTMLElement;
   dislike?: HTMLElement;
   /**
-   * Site-specific pressed-state read for `like` where no generic signal
-   * (aria-pressed / data-testid / form action) exists - an adapter supplies it
-   * wherever the pressed state is only readable from a site-specific label or
-   * icon. `null` = unknown; the trigger engine then refuses to press rather
-   * than risk toggling a manual like off.
+   * Site-specific pressed-state read for `like`, for the sites where no generic
+   * signal (aria-pressed / data-testid / form action) exposes it. `null` =
+   * unknown, and the trigger engine then refuses to press: pressing on an
+   * unknown state can toggle a manual like off.
    */
   likePressed?: () => boolean | null;
   /**
@@ -77,10 +75,10 @@ export interface PickerInsertionPoint {
   /**
    * Trigger form. Omitted (or "row") renders the default horizontal form; an
    * adapter binding a vertical icon rail (FB/IG reel viewers, YouTube Shorts)
-   * opts in with "icon-column" for the round rail-matching form. Deliberately
-   * explicit, no auto-detection: ordinary pages stack wide links vertically
-   * too, so only an opt-in keeps every non-rail placement horizontal (see
-   * mount-style.ts readActionLayout).
+   * opts in with "icon-column" for the round rail-matching form. No
+   * auto-detection: ordinary pages stack wide links vertically too, so only an
+   * opt-in keeps every non-rail placement horizontal (see mount-style.ts
+   * readActionLayout).
    */
   triggerLayout?: "row" | "icon-column";
   /**
@@ -94,7 +92,6 @@ export interface PickerInsertionPoint {
   fallback?: Pick<PickerInsertionPoint, "anchor" | "position" | "wrapper" | "triggerLayout">;
 }
 
-/** Normalize the `nativeElement` / `replaceElement` union above to a list. */
 export function elementsToArray(elements: HTMLElement | HTMLElement[] | undefined): HTMLElement[] {
   if (!elements) return [];
   return Array.isArray(elements) ? elements : [elements];

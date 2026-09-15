@@ -64,7 +64,7 @@ describe("normalizeWatchHref", () => {
 });
 
 // A multi-photo post's `set=pcb.<postId>` is the post's own id - it must survive
-// normalization (tracking params and album sets are dropped) so the target can
+// normalization (tracking parameters and album sets are dropped) so the target can
 // key on the post instead of the per-photo media id.
 describe("normalizePhotoHref identity sets", () => {
   it("keeps a pcb set and drops tracking params", () => {

@@ -10,7 +10,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { installFakeChrome } from "../test/fixtures";
 import { randomId } from "./random-id";
 
-// The readback validation in background/client-security.ts, verbatim.
+// The same readback validation normalizeStoredId applies in background/api-client.ts.
 const STORED_ID_RE = /^[A-Za-z0-9_-]{16,128}$/;
 
 afterEach(() => {

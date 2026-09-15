@@ -11,7 +11,7 @@
 // Only the ORIGIN tab's id and window are remembered, never its URL: the id is all
 // the return needs, and storage.session is trusted-contexts-only but still storage.
 // Tab ids are handed out monotonically per browser session, so a closed origin tab
-// cannot be impersonated by a later one - a stale id simply fails to resolve.
+// cannot be impersonated by a later one - a stale id fails to resolve.
 
 import { focusWindow, getTab, removeTab, storageSessionGet, storageSessionRemove, storageSessionSet, updateTab } from "../shared/webext";
 import { logBackgroundError } from "./debug";

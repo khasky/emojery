@@ -140,7 +140,7 @@ function landedOnTarget(landed: string, wanted: string): boolean {
 export async function gotoSettled(bridge: Bridge, url: string, settleMs = 3500): Promise<void> {
   await bridge.goto(url);
   await bridge.waitFor(HOST_PAINTED, settleMs);
-  // bridge.goto swallows its own failure by design, so a navigation that never
+  // bridge.goto swallows its own failure, so a navigation that never
   // committed leaves the bridge measuring the PREVIOUS page - or the blank tab it
   // opened to work in, which reads perfectly and has no Emojery in it. Every later
   // read then looks like "this site mounted nothing". One ~8ms read per navigation.

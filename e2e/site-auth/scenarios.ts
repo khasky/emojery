@@ -91,7 +91,7 @@ export function authThreadsRepliesUrl(): string {
 // Instagram CAROUSEL (multi-image) post. There is no stable public default that
 // is guaranteed to stay a carousel, so the check runs only when the tester
 // points `E2E_AUTHURL_INSTAGRAM_CAROUSEL` at one; it also verifies the Next
-// arrow is actually present and skips (with a note) when it isn't.
+// arrow is present and skips (with a note) when it isn't.
 export function authInstagramCarouselUrl(): string | null {
   return process.env.E2E_AUTHURL_INSTAGRAM_CAROUSEL?.trim() || null;
 }

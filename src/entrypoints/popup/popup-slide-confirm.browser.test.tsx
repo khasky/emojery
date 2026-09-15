@@ -2,8 +2,8 @@
 //
 // Slide-to-confirm mechanics (the deliberate-input gate before account
 // deletion): ARIA-slider keyboard steps, End/Home jumps, the step-click
-// fallback (WCAG 2.5.7), and that a lone tap on the thumb can never confirm.
-// The 3s step-click spring-back timer is deliberately untested (wall-clock).
+// fallback (WCAG), and that a lone tap on the thumb can never confirm.
+// The step-click spring-back timer is untested: it runs on wall-clock time.
 import { h, render } from "preact";
 import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 import { userEvent } from "vitest/browser";

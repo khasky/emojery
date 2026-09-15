@@ -40,8 +40,8 @@ interface RedditMatch {
 
 const redditAdapter = defineSiteAdapter({
   site: "reddit",
-  // Candidates = root posts only. Reddit reactions are post-only; profile
-  // comment cards (Overview/Comments tabs) are intentionally NOT candidates.
+  // Candidates = root posts only. Reddit reactions are post-only, so profile
+  // comment cards (Overview/Comments tabs) are NOT candidates.
   findCandidates: ({ root }) => queryAll<HTMLElement>(root, POST_SELECTORS),
   resolveRow: resolveReddit,
   resolveTarget: (_el, _ctx, match) => match.target,
@@ -132,8 +132,8 @@ function findRootVoteBlock(post: HTMLElement, postThingId: string | null): HTMLE
 
 function findFallbackActionElement(post: HTMLElement): HTMLElement | null {
   // ONE shadow-piercing walk for all fallback selectors (it used to be a full
-  // subtree walk per selector, eight per post); selector order still decides
-  // priority, so the resolved element is unchanged. `post` itself leads the
+  // subtree walk per selector); selector order still decides priority, so the
+  // resolved element is unchanged. `post` itself leads the
   // candidate list: querySelectorAll never matches its own root, so the
   // trailing `shreddit-post[...]` last-resort selectors would otherwise only
   // ever hit a NESTED post (a crosspost embed), never this one.

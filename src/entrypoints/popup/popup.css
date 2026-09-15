@@ -83,7 +83,7 @@
 }
 
 /* Chrome popup quirk: an unpainted transparent strip can appear on the right edge (the
-   window ends up wider than <html>'s declared width). Three defenses:
+   window ends up wider than <html>'s declared width). Defenses:
    (1) html/body stretch to 100vw/100vh;
    (2) body's oversized outline paints any sub-pixel gap without affecting layout;
    (3) scrolling lives on `.tab-panel`, so no scrollbar gutter sits in body's painted area. */
@@ -158,8 +158,8 @@ body {
 
 /* `overflow-y: auto` makes the panel programmatically focusable, and Chrome would paint a
    focus ring around the whole content area on mouse interaction; suppress that, but keep a
-   visible inset ring for keyboard focus - the panel is a deliberate Tab stop (role=tabpanel,
-   tabIndex 0 per the ARIA tabs pattern), so its focus must stay visible (WCAG 2.4.7). */
+   visible inset ring for keyboard focus - the panel is a Tab stop (role=tabpanel,
+   tabIndex 0 per the ARIA tabs pattern), so its focus must stay visible (WCAG). */
 .tab-panel:focus {
   outline: none;
 }
@@ -956,7 +956,7 @@ h1 {
 }
 
 /* Opens the Debug panel. Icon-only and in the header rather than a fifth tab - see
-   popup-view-state.ts's TAB_VIEWS for why; the accessible name comes from aria-label.
+   TAB_VIEWS in popup-view-state.ts for why; the accessible name comes from aria-label.
    Square at the logo's 24px so the row keeps its height whether or not Debug is on. */
 .debug-toggle {
   appearance: none;
@@ -1218,7 +1218,7 @@ a:hover {
   background: transparent;
   border: 0;
   /* Vertical padding cancelled by the negative margin: ~24px hit target
-     (WCAG 2.5.8) with zero layout shift. */
+     (WCAG) with zero layout shift. */
   padding: 4px 0;
   margin: -4px 0;
   color: var(--khasky-emojery-link);

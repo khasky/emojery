@@ -5,7 +5,7 @@
 // imports. Each seam asserts its OWN contract against it (reject, or accept-and-bound) - the
 // shared part is the list, so a vector added here is immediately tried everywhere.
 //
-// Kept out of any single test file on purpose: these strings are cheap to write once and
+// Kept out of any single test file: these strings are cheap to write once and
 // expensive to remember per file, and a seam that only ever saw its author's imagination is
 // the one that breaks on the input nobody pictured.
 

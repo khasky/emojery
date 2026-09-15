@@ -196,6 +196,7 @@ export type RuntimeErrorCode =
 export type OtpRequestRefusal =
   // Too many codes for this address or source; `retryAfterSeconds` says how long.
   | "rate_limited"
+  // The address did not parse.
   | "invalid_email"
   // The address's provider cannot receive the code.
   | "email_rejected"

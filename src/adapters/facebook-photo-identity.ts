@@ -33,8 +33,8 @@ const parsedDataScripts = new WeakSet<Element>();
 // streams a few media ids per post.
 const IDENTITY_MAP_MAX_ENTRIES = 5_000;
 
-// At the cap, stop learning NEW ids but keep updating known ones. Deliberately
-// not oldest-first eviction: an entry can be the `null` that marks a reshared
+// At the cap, stop learning NEW ids but keep updating known ones. No
+// oldest-first eviction: an entry can be the `null` that marks a reshared
 // photo AMBIGUOUS, and dropping that would let two distinct posts merge onto one
 // `photo:<media>` key - the exact split this module exists to prevent. An id that
 // is never recorded behaves like one whose JSON was never on the page, which is
@@ -191,7 +191,7 @@ function recordNumeric(key: string, pid: string): void {
 }
 
 // Marks a photo ambiguous (null) only on a genuinely DIFFERENT story: comparison
-// is by story id, not raw URL, so one post seen through different url params
+// is by story id, not raw URL, so one post seen through different url parameters
 // (attachment `wwwURL` vs `creation_story` url, +/- `comment_id`) is not mistaken
 // for two posts. A truly reshared image (two distinct stories) still nulls out.
 function recordPhotoStory(photoId: string, storyUrl: string): void {

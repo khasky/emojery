@@ -13,7 +13,7 @@
 // regex once read `rgba(0, 0, 0, 0.0)` and the `/`-separated syntax as filled,
 // and a trailing-zero regex read opaque `rgb(0, 0, 0)` as an outline. A value
 // carrying no readable alpha (3-component `rgb()`, `color()` without `/`,
-// keywords, unknown syntaxes) is assumed painted rather than guessed away.
+// keywords, unknown syntaxes) is assumed painted.
 //
 // Self-contained by contract: the site-auth suite injects this function into
 // live pages via String(fn), so it must not close over module helpers.

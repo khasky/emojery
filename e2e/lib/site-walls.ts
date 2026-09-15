@@ -19,7 +19,7 @@ export function isBlockUrl(url: string): boolean {
   return BLOCK_URL_RE.test(url);
 }
 
-// EXACT sentences a known anti-bot wall renders - a deliberately DISJOINT set
+// EXACT sentences a known anti-bot wall renders - a DISJOINT set
 // from INTERSTITIAL_PHRASES below: these appear ONLY on a wall, never in
 // ordinary post content, so they are safe to match on ANY site with no mount
 // evidence to disambiguate. Reddit serves two walls: a hard IP block ("You've

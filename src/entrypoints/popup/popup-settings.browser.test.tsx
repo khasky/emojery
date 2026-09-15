@@ -38,7 +38,7 @@ function generalToggle(label: string): HTMLInputElement {
 
 beforeEach(() => {
   // The popup reads the active tab to point each per-site link at the right
-  // regional storefront; an Amazon tab is the case where that actually varies.
+  // regional storefront; an Amazon tab is the case where that varies.
   chromeShim = installChromeShim({ activeTab: { url: "https://www.amazon.de/dp/B00ZV9RDKK", id: 1 } });
   update = vi.fn(async () => {});
   container = mountContainer();

@@ -11,7 +11,7 @@
 //
 // TWO rules find an orphan, because the suites launch browsers two ways:
 //
-//   1. Stamped profile. `makeRunProfileDir` writes the minting pid into each
+//   1. Stamped profile. `makeRunProfileDir` writes the owning pid into each
 //      `.playwright/<name>/run-*`, and the profile is an orphan only when that
 //      pid is GONE. Covers everything that goes through `launchRealisticContext`
 //      - the whole Playwright e2e suite, chromium and firefox alike.
@@ -51,8 +51,8 @@ function profileRoot(): string {
   return resolve(process.cwd(), ".playwright");
 }
 
-/** Stamp a freshly minted profile with the pid that owns it. Best-effort: a
- *  profile that fails to stamp is simply never reaped. */
+/** Stamp a freshly created profile with the pid that owns it. A profile that
+ *  fails to stamp is never reaped. */
 export async function markProfileOwner(dir: string): Promise<void> {
   await writeFile(resolve(dir, OWNER_FILE), String(process.pid), "utf8").catch(() => {});
 }
@@ -86,8 +86,8 @@ async function orphanProfileDirs(): Promise<string[]> {
   return orphans;
 }
 
-// `<pid> <command line>`, one process per line, on both platforms. Deliberately
-// NOT ConvertTo-Json: Windows PowerShell serializes the table through the console
+// `<pid> <command line>`, one process per line, on both platforms. NOT
+// ConvertTo-Json: Windows PowerShell serializes the table through the console
 // encoding and a single command line with an unpaired surrogate or a stray quote
 // takes the whole parse down with it (observed: `Unexpected token in JSON`, and
 // with it every reap). A pid, a tab and the rest of the line cannot fail that way.

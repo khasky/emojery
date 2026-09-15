@@ -25,7 +25,7 @@ const INTRO_PARTICLES_PER_EMOJI = 3;
 // escape class when its reduced-motion wrapper is active.
 const PAGE_ANIMATION_ESCAPE_CLASS = "always-enable-animations";
 // When the button hits the ground and the dust puffs: the 55% impact keyframe of
-// animations.css's khasky-emojery-button-drop.
+// khasky-emojery-button-drop in animations.css.
 const BUTTON_DROP_IMPACT_MS = 200;
 const DUST_PARTICLE_COUNT = 7;
 

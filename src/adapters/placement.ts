@@ -4,8 +4,8 @@
 // strictly visual geometry (that lives in visual-action-row.ts). A strategy
 // earns its place here on a second consumer or a shared invariant worth
 // pinning; a single-caller DOM walk stays next to its caller in that adapter.
-// `slotAction` is counted with `findSiblingAction`, not against the rule: it
-// builds that function's arguments and has no meaning apart from it.
+// `slotAction` belongs to `findSiblingAction`: it builds that function's
+// arguments and has no meaning apart from it.
 import { queryAll, queryFirst } from "../shared/dom-query";
 import { slotOrSelf } from "./runtime";
 

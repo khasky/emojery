@@ -62,7 +62,7 @@ export async function clearRecentEmojis(userId: string): Promise<void> {
       return true;
     });
   } catch {
-    // Storage read/write failed - the list simply isn't cleared. The picker
+    // Storage read/write failed - the list isn't cleared. The picker
     // already dropped it optimistically for the current open.
   }
 }

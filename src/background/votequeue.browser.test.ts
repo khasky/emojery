@@ -109,7 +109,7 @@ describe("vote queue - FIFO on real IndexedDB", () => {
   });
 
   it("refuses to grow past VOTE_QUEUE_MAX", { timeout: 60_000 }, async () => {
-    // Parallel on purpose: readwrite transactions on one store serialize, so the
+    // Parallel: readwrite transactions on one store serialize, so the
     // count-then-add check stays race-safe AND this fills 500 rows in test time.
     const ids = await Promise.all(Array.from({ length: VOTE_QUEUE_MAX }, (_, i) => enqueue(vote(i))));
     await expect(enqueue(vote(VOTE_QUEUE_MAX))).rejects.toThrow("vote queue full");

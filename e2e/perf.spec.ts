@@ -4,7 +4,7 @@
 //
 // MEMORY, differentially: deep-scroll a heavy virtualized feed with the extension loaded
 // and FAIL when the renderer heap crosses the budget - the deterministic counterpart of the
-// bridge suite's best-effort heap log. Long tasks are collected and attached as evidence
+// bridge suite's advisory heap log. Long tasks are collected and attached as evidence
 // only: no assert until a few weekly runs establish a stable baseline to set the threshold
 // from. Opt-in (E2E_PERF=1): heap numbers vary across machines, so only the weekly CI
 // environment - where the budget is being calibrated - runs it by default.
@@ -38,7 +38,7 @@ test("a deep feed scroll stays under the heap budget", async () => {
   test.skip(isFirefoxRun(), "heap/trace measurement runs over CDP - chromium-only");
   test.skip(candidates.length === 0, "no candidate scenario registered");
   test.setTimeout(300_000);
-  // test.info() instead of the `({}, testInfo)` callback params: the empty
+  // test.info() instead of the `({}, testInfo)` callback parameters: the empty
   // fixture destructuring trips biome's noEmptyPattern, and requesting the
   // `browser` fixture just to dodge it launches a second Chromium this test
   // never uses (it drives its own context via launchSession).
@@ -71,7 +71,7 @@ test("a deep feed scroll stays under the heap budget", async () => {
       // A rendered feed is what this measurement needs, and that is a stronger
       // signal than the URL: Reddit keeps `?js_challenge=` in the address after
       // its own JS has cleared the challenge, while serving the real feed. Take
-      // the surface when its native controls are actually on the page.
+      // the surface when its native controls are on the page.
       const rendered = navOk ? await page.evaluate((selectors) => selectors.some((sel) => document.querySelector(sel) !== null), candidate.nativeSelectors).catch(() => false) : false;
       if (rendered) {
         scenario = candidate;
@@ -94,7 +94,7 @@ test("a deep feed scroll stays under the heap budget", async () => {
     const steps = Number(process.env.E2E_PERF_SCROLL_STEPS ?? 25);
     for (let i = 0; i < steps; i++) {
       await page.mouse.wheel(0, 1_200);
-      // The measurement needs the feed to actually virtualize between steps: scrolling
+      // The measurement needs the feed to virtualize between steps: scrolling
       // faster than the site recycles rows measures the scroll, not the extension.
       await page.waitForTimeout(700);
     }
@@ -117,7 +117,7 @@ test("a deep feed scroll stays under the heap budget", async () => {
 
     // The whole renderer is measured, so the budget bounds "extension leak on
     // top of a heavy feed", not the extension alone. A local 12-step run on X
-    // settled at 25-30 MB; the default is 25 steps, so 200 MB is deliberate slack
+    // settled at 25-30 MB; the default is 25 steps, so 200 MB is slack
     // until the persisted perf-metrics.json gives a p95 for the real depth.
     const limitMb = Number(process.env.E2E_PERF_HEAP_LIMIT_MB ?? 200);
     expect(after, `renderer heap after ${steps}-step deep scroll: ${after} MB (before: ${before} MB, budget: ${limitMb} MB)`).toBeLessThan(limitMb);
@@ -134,8 +134,8 @@ test("a deep feed scroll stays under the heap budget", async () => {
 // busier day - measured across four runs of the same page it moved more than the extension's
 // entire contribution. Hence a budget on what our stacks caused, not a differential.
 //
-// GitHub on purpose: it serves an automated browser without an anti-bot wall, so unlike the
-// feed budget above this one actually runs, and its repo header mounts exactly one trigger -
+// GitHub: it serves an automated browser without an anti-bot wall, so unlike the
+// feed budget above this one runs, and its repo header mounts exactly one trigger -
 // making the numbers a PER-TRIGGER budget.
 const RENDER_TRACE_CATEGORIES = ["devtools.timeline", "disabled-by-default-devtools.timeline", "disabled-by-default-devtools.timeline.stack"];
 // The window the trigger's post-mount re-blend schedule and glyph re-measure chain run in.

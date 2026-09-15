@@ -26,8 +26,8 @@ export { extractFbId, fbUrlFallbackId, groupStoryPermalinkFromPhotoUrl } from ".
 
 // A real post-permalink href contains one of these path/query shapes. Facebook
 // can render timestamp anchors as `?__cft__=...` placeholders until hover/focus,
-// so placeholder hrefs intentionally do not match. Photo-viewer links (`/photo/`,
-// `/photo.php`, bare `?fbid=`) are deliberately NOT post permalinks: the lightbox
+// so placeholder hrefs do not match. Photo-viewer links (`/photo/`,
+// `/photo.php`, bare `?fbid=`) are NOT post permalinks: the lightbox
 // is not a post, and capturing those URLs saved spurious `.../photo/` reaction
 // entries. Real photo posts still resolve via their `/posts/...` date link.
 const POST_LINK_SELECTORS = ['a[href*="/posts/"]', 'a[href*="/permalink/"]', 'a[href*="story_fbid="]', 'a[href*="/videos/"]', 'a[href*="/reel/"]', 'a[href*="/story.php"]'];
@@ -105,7 +105,7 @@ const facebookAdapter = defineSiteAdapter({
   // No History-API hook - Facebook feeds mutate in place. Beyond the standard
   // mutation watch (aria-label/href) it primes lazy date-link permalinks on a
   // trusted hover/focus and records which post a photo was opened from.
-  // The hover must be the USER's: a link is deliberately NOT synthetically
+  // The hover must be the USER's: a link is never synthetically
   // hovered, because Facebook isTrusted-gates the hydration (verified live -
   // synthetic events do NOT resolve the href) and they only pop FB's date
   // tooltip over the posts below. The plugin just re-scans after a real one.

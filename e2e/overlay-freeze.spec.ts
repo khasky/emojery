@@ -80,7 +80,7 @@ test("a threads /media overlay cycle leaves the mounts untouched", async () => {
     expect(before.length, "the fixture post must mount its trigger first").toBeGreaterThan(0);
 
     // "Open the lightbox": only the pathname changes, exactly like the real
-    // click. The overlay id is a DIFFERENT post's on purpose - the bug's shape
+    // click. The overlay id is a DIFFERENT post's - the bug's shape
     // is a reply page whose lightbox belongs to the PARENT post (the photo
     // owner), so the overlay URL must not match the page's own target: the
     // pre-fix scan then unmounted the focal trigger for the overlay's id.

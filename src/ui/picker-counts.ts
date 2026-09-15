@@ -23,7 +23,7 @@ export function deriveOwnReactionDisplay(counts: ReactionCounts, total: number, 
 }
 
 // Rounds to nearest with 1 decimal (picker UI convention) - unlike
-// native-compact.ts's compactCountText, which floors to mirror how the
+// compactCountText in native-compact.ts, which floors to mirror how the
 // platforms themselves truncate native counters. The two must stay separate.
 // Tier bounds sit at 999,950 (not 1,000,000): toFixed(1) rounds anything above
 // them up to "1000.0", which must render as the next tier ("1M", not "1000K").

@@ -3,7 +3,7 @@
 // Coexistence with other content-manipulating extensions. Each
 // configured extension gets its OWN browser launch with Emojery loaded
 // next to it, and the trigger must still mount on a stable surface (GitHub) plus
-// the ad-heavy ones a blocker or site tweaker actually rewrites (YouTube, Reddit).
+// the ad-heavy ones a blocker or site tweaker rewrites (YouTube, Reddit).
 //
 // Configure via E2E_COEXT_SOURCES (`;`-separated GitHub release .zip/.crx
 // URLs, Chrome Web Store URLs / 32-char ids, or local unpacked folders);
@@ -26,7 +26,7 @@ import { SUPPORTED_SITE_SCENARIOS } from "./supported-sites";
 // more than the default per-test timeout; cached runs are fast.
 const COEXT_TEST_TIMEOUT_MS = Number(process.env.E2E_COEXT_TEST_TIMEOUT_MS ?? 300_000);
 
-// Count the extensions Chrome actually loaded, so "the other extension failed to
+// Count the extensions Chrome loaded, so "the other extension failed to
 // load" cannot silently degrade this test into a plain single-extension run. Polled
 // by the caller: chrome://extensions paints its cards asynchronously, and a
 // one-shot read of a slow render blamed the co-extension for a rendering delay.
@@ -45,7 +45,7 @@ async function loadedExtensionCount(context: BrowserContext): Promise<number> {
   }
 }
 
-// Logged-out surfaces a co-extension actually rewrites. GitHub is the wall-free
+// Logged-out surfaces a co-extension rewrites. GitHub is the wall-free
 // hard assert; the others can serve a consent/anti-bot page with no action row
 // at all - those legs are passed over by the nativeSurface guard instead of
 // false-failing (a bare `continue` plus a `coext-surface-skipped` annotation,
@@ -76,7 +76,7 @@ async function assertMountsWithCoext(context: BrowserContext, coextLabel: string
       if (surface.nativeSurface) {
         // Presence alone is not enough: an anti-bot response can ship the DOM
         // shell while painting a blank page (seen live on reddit) - require the
-        // native surface to actually be VISIBLE before holding Emojery to it. A shell
+        // native surface to be VISIBLE before holding Emojery to it. A shell
         // can even keep layout-visible natives while rendering no real content
         // (seen live: blank reddit challenge page, clean URL, zero mounts) - so
         // also require the page to carry meaningful text before asserting.

@@ -26,7 +26,7 @@ interface Options {
   deleteReply?: unknown;
 }
 
-// Stateful on purpose: the view re-reads auth:status after sign-out and after a
+// Stateful: the view re-reads auth:status after sign-out and after a
 // delete, so the answer has to change the way the background's would.
 function install({ authed = true, email = "user@example.com", deleteReply = { type: "ok" } }: Options = {}): void {
   sent = [];
@@ -63,11 +63,11 @@ const button = (label: string): HTMLButtonElement => {
 // Account messages only: the History section mounted alongside does its own reads.
 const sentTypes = (): string[] => sent.map((m) => (m as { type: string }).type).filter((type) => type.startsWith("auth:"));
 
-// Arm the confirm and wait for the slide thumb to actually HOLD focus. WebKit
+// Arm the confirm and wait for the slide thumb to HOLD focus. WebKit
 // finishes its own click focus handling after the arming effect ran (measured:
 // activeElement is <body> right after the click there, the thumb only once it
 // settles), so a keystroke sent immediately goes to <body> and the slide never
-// happens - a CI-only red on the slower runner. Also the WCAG 2.4.3 assert:
+// happens - a CI-only red on the slower runner. Also the focus-order assert:
 // the arming button unmounts, so the thumb has to take the focus it left.
 async function armDeleteConfirm(): Promise<void> {
   await userEvent.click(button("Delete"));
@@ -148,7 +148,7 @@ describe("AccountView - deleting the account", () => {
     install();
     await mountAndSettle();
     await armDeleteConfirm();
-    // End is the slider's keyboard path to a full slide (WCAG 2.1.1).
+    // End is the slider's keyboard path to a full slide (WCAG).
     await userEvent.keyboard("{End}");
 
     await vi.waitFor(() => expect(container.querySelector(SIGNIN_PROMPT_MSG_SELECTOR)).not.toBeNull());

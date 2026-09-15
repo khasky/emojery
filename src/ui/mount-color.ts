@@ -80,9 +80,9 @@ export function parseRgb(value: string | undefined): Rgb | null {
   return [color.r, color.g, color.b];
 }
 
-// A native control is a real "filled" surface only when its background is actually painted
-// (alpha above a hair); transparent icon buttons report rgba(...,0) - see picker.css's hit-box
-// note for why the trigger must not size to their box.
+// A native control is a real "filled" surface only when its background is painted
+// (alpha above a hair); transparent icon buttons report rgba(...,0) - see the hit-box
+// note in picker.css for why the trigger must not size to their box.
 export function isSolidFill(bg: string | undefined): boolean {
   const color = parseRgba(bg);
   return !!color && color.a > 0.02;

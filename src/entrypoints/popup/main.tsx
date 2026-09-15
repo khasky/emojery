@@ -97,8 +97,8 @@ function App() {
           <a class="help-link" href={withExtensionUtm(HELP_URL_BY_VIEW[shown], { campaign: "popup_help", content: shown })} target="_blank" rel="noopener noreferrer" aria-label={t("helpLink")} title={t("helpLink")}>
             {svgIcon(ICON_HELP, "help-link-icon")}
           </a>
-          {/* Debug rides in the header rather than as a fifth tab - popup-view-state.ts's
-              TAB_VIEWS says why; the layout contract lives with .debug-toggle-off in popup.css. */}
+          {/* Debug rides in the header rather than as a fifth tab - TAB_VIEWS in
+              popup-view-state.ts says why; the layout contract lives with .debug-toggle-off in popup.css. */}
           <button id={DEBUG_TAB_ID} class={debugToggleClass} type="button" aria-pressed={shown === "debug" ? "true" : "false"} aria-controls={TAB_PANEL_ID} aria-label={t("settingDebug")} title={t("settingDebug")} onClick={() => setView(shown === "debug" ? "settings" : "debug")}>
             {svgIcon(ICON_BUG, "debug-toggle-icon")}
           </button>
@@ -113,7 +113,7 @@ function App() {
           ))}
         </nav>
       </header>
-      {/* The panel is a deliberate Tab stop per the WAI-ARIA tabs pattern - it scrolls, so
+      {/* The panel is a Tab stop per the WAI-ARIA tabs pattern - it scrolls, so
           keyboard users must reach it. Debug is opened by the header button rather than a
           tab, so for it the panel drops to a plain region: calling it a tabpanel while no
           tab is selected would be a lie. */}

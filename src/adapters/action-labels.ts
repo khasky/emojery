@@ -49,7 +49,7 @@ export interface LabelRegistry {
 
 // Stem vocabulary decomposed per locale/synonym so each word lives in ONE place.
 // Adapters compose only the parts they want via `stem(...)` - omitting a locale
-// narrows matching intentionally:
+// narrows matching:
 //   - Instagram/Facebook ship EN/RU/UA only (German `gefällt`/`teilen` would
 //     over-match FB's own German UI) and skip the retweet/reshare synonyms.
 //   - X exposes Repost/Retweet but never "Reshare".
@@ -92,10 +92,9 @@ export const STEM = {
 } as const;
 
 // Narrower than the same-named constant in visual-action-row.ts, which also takes
-// `a[href]`. Deliberate, not drift: this one classifies LABELLED ACTIONS, where a link
-// is usually navigation rather than an action; that one finds the visual slot in a row,
-// and there a link can be the control (GitHub's Star is an `<a href>` - see github.ts).
-// Keep them apart.
+// `a[href]`. The two differ because this one classifies LABELLED ACTIONS, where a link
+// is usually navigation; that one finds the visual slot in a row, and there a link can
+// be the control (GitHub's Star is an `<a href>` - see github.ts). Keep them apart.
 const DEFAULT_CONTROL_SELECTOR = 'button, [role="button"]';
 
 // A reaction-count summary ("Like: 68 people") rather than an action control.

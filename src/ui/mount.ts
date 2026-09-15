@@ -65,7 +65,7 @@ function installAuthChangeListener(): void {
     void (async () => {
       const { authed: nowAuthed } = await authStatus();
       const queue = authRefreshEntries().values();
-      // One shared iterator, four workers - each entry is taken by exactly one.
+      // One shared iterator, one worker per slot - each entry is taken by exactly one.
       await Promise.all(
         Array.from({ length: AUTH_REFRESH_CONCURRENCY }, async () => {
           for (const { cb, target } of queue) {
@@ -213,7 +213,7 @@ async function schedulePendingMount(point: PickerInsertionPoint, key: TargetKey)
     cancelPendingMount(key);
     return;
   }
-  // Earliest point the ~1 MB sheet is known to be needed, and still ahead of the paint - this
+  // Earliest point the sprite sheet is known to be needed, and still ahead of the paint - this
   // mount is usually still waiting on its IntersectionObserver. Same timing for the lazy EN
   // label map the trigger's aria-label reads.
   preloadEmojiSprite();

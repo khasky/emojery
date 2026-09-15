@@ -40,14 +40,14 @@ import { CategoryBar, EmojiButton, EmojiSection, PickerTrigger, ReactionBreakdow
 // Newest-clicked lands at index 0 (lastUsed-first sort in `shared/recents.ts`); the 19th
 // unique pick evicts the bottom-right cell.
 const RECENT_LIMIT = 18;
-// Breakdown pagination: 3 rows first to keep the popover compact; "Show more"
-// expands to a 10-row cap, and the same button toggles back as "Show less".
+// Breakdown pagination: a short first page keeps the popover compact; "Show more"
+// expands to the larger cap, and the same button toggles back as "Show less".
 const BREAKDOWN_INITIAL = 3;
 const BREAKDOWN_EXPANDED = 10;
 // Measured height of the sticky head, published to picker.css as the scroll-padding that
 // keeps a keyboard-focused emoji out from under it. Read by
 // `.khasky-emojery-popover-scroll`, which spells the name out literally; 0 when the head
-// has not been measured yet, which costs the WCAG 2.4.11 padding for that render rather
+// has not been measured yet, which costs the focus-not-obscured padding for that render rather
 // than breaking the layout.
 const HEAD_HEIGHT_VAR = "--khasky-emojery-head-h";
 
@@ -263,7 +263,7 @@ export function Picker({ initial, typography, onPick, onSignIn, portalRoot, subs
 
   useCategoryScrollSpy({ open, query, recentLength: recent.length, total, mine, breakdownDisplayLimit, placedAbove, scrollRef, stickyHeadRef, setCategoryColor });
 
-  // WCAG 2.4.11 (focus not obscured). Arrow keys move focus with a plain `focus()`
+  // Focus not obscured (WCAG). Arrow keys move focus with a plain `focus()`
   // (picker-hooks.ts useGridRovingFocus), so the browser scrolls the cell to the
   // scrollport EDGE - which is under the opaque sticky head. `scroll-padding` moves that
   // edge past it, and the height comes from the same `offsetHeight` read `scrollToCategory`
@@ -502,7 +502,7 @@ export function Picker({ initial, typography, onPick, onSignIn, portalRoot, subs
             class={POPOVER_CLASS}
             role="dialog"
             // Focus is trapped inside (usePopoverDismiss) and an outside click closes it, so
-            // the popover really is modal - without this, AT still offers the page behind it.
+            // the popover is modal - without this, AT still offers the page behind it.
             aria-modal="true"
             aria-label={pendingReaction ? t("gateTitle") : t("pickerDialogAria")}
             // Roving tabindex means Tab reaches the grid as ONE stop; the arrow-key model

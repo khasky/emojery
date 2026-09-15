@@ -78,7 +78,7 @@ export function normalizePhotoHref(href: string): string | null {
     // Preserve the identity-bearing sets so targetFromPhotoUrl can key the post
     // on its per-post id instead of the per-photo media id: a group set
     // (`set=gm.<storyId>` + its group) and a timeline multi-photo set
-    // (`set=pcb.<postId>`). Everything else (albums, tracking params) is dropped
+    // (`set=pcb.<postId>`). Everything else (albums, tracking parameters) is dropped
     // so the photo URL stays a stable de-dupe key.
     const set = url.searchParams.get("set");
     const group = url.searchParams.get("idorvanity");
@@ -155,7 +155,7 @@ export function normalizeCftHref(href: string): string | null {
 //   /<page>/posts/1234567890     - legacy numeric
 // `permalink`, `videos` and `reel` use the same two shapes; `?story_fbid=` is the
 // rare legacy query-string form. The bare `?fbid=` query is a photo-viewer link,
-// not a post, so it is intentionally not read here.
+// not a post, so it is not read here.
 export function extractFbId(href: string): string | null {
   try {
     const parsed = new URL(href);
@@ -170,8 +170,8 @@ export function extractFbId(href: string): string | null {
 // Four decorrelated 32-bit FNV-1a lanes (distinct seed AND multiplier each,
 // murmur3's fmix32 avalanche on the way out) concatenated as base36 - ~128 bits
 // of output. Width is the point: a single 32-bit lane puts the birthday bound
-// at ~77k keys, well inside one site's key volume. Deliberately not
-// cryptographic - `resolveTarget` is synchronous, so Web Crypto is out.
+// at ~77k keys, well inside one site's key volume. Not cryptographic:
+// `resolveTarget` is synchronous, so Web Crypto is out.
 const HASH_LANES = [
   { seed: 0x811c9dc5, mul: 0x01000193 },
   { seed: 0x9e3779b9, mul: 0x85ebca77 },
@@ -201,13 +201,13 @@ export function hashUrl(url: string): string {
   return lanes.map((lane) => fmix32(lane).toString(36).padStart(7, "0")).join("");
 }
 
-// The only query params that carry post/page/video identity on a permalink;
+// The only query parameters that carry post/page/video identity on a permalink;
 // everything else (fbclid, mibextid, ref*, __tn__, __cft__, comment_id, ...) is
 // tracking/render noise that must not change the target key.
 const FB_KEEP_PARAMS = new Set(["story_fbid", "fbid", "id", "v"]);
 
 // Canonicalize a permalink: force the www host, drop the fragment, keep only
-// identity-bearing query params (sorted). Two callers, both required:
+// identity-bearing query parameters (sorted). Two callers, both required:
 // `fbUrlFallbackId` (so variant URLs of one permalink hash to one key) and the
 // adapter's `extractTarget`, which runs every resolved target's `url` through it
 // so a raw href's tracking blobs (`__cft__`, `fbclid`) never reach the vote

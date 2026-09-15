@@ -44,7 +44,7 @@ async function pickEmoji(b: Bridge, emoji: string): Promise<void> {
 }
 
 // Open the picker and toggle the currently selected emoji off. Returns whether
-// a reaction was actually there to remove; an empty picker is NOT an error -
+// a reaction was there to remove; an empty picker is NOT an error -
 // the cleanup below runs it on posts that may already be clean, and the
 // `finally` of a case that failed before reacting reaches it too. (The former
 // unconditional click failed the run with a locator timeout, which then hid

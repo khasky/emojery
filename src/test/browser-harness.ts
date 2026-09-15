@@ -2,13 +2,13 @@
 //
 // Shared core for the *.browser.test.tsx suites: the query-or-throw lookup and the
 // render-then-wait mount step. Each suite keeps its own install() - the mock contracts
-// differ per view, and unifying them would blur what each test actually arranges.
+// differ per view, and unifying them would blur what each test arranges.
 import { type ComponentChild, render } from "preact";
 import { expect, vi } from "vitest";
 
 /** Fresh render target on <body>. Paired with `unmountContainer` - creating one
  *  without the matching teardown leaves the preact tree (and its effect cleanups)
- *  subscribed for the rest of the file. Not a `beforeEach` hook on purpose: the
+ *  subscribed for the rest of the file. Not a `beforeEach` hook: the
  *  suites install their chrome shim in the same block and the order matters. */
 export function mountContainer(): HTMLDivElement {
   const container = document.createElement("div");

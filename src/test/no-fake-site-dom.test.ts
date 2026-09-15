@@ -13,9 +13,9 @@
 //      `defineSiteAdapter({` and so are invisible to gate 1, and every element they accept is
 //      Facebook's own markup - there is no generic tree worth handing them.
 //
-// Deliberately NOT a blanket ban on `createElement` / `innerHTML`: generic sentinels,
+// NOT a blanket ban on `createElement` / `innerHTML`: generic sentinels,
 // Emojery's own UI, the SHARED toolkit (visual-action-row, placement, action-labels) and
-// framework.test.ts's own-callback `scan()` all stay legal.
+// the own-callback `scan()` in framework.test.ts all stay legal.
 import { readdirSync, readFileSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";

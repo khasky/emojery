@@ -21,7 +21,7 @@ export function targetKey(t: TargetRef): TargetKey {
 }
 
 // Pre-account-scoping store (no owner) - entries can't be attributed to an
-// account, so the background drops the key at SW startup instead of migrating.
+// account, so the background drops the key at service-worker startup instead of migrating.
 export const LEGACY_OWN_REACTIONS_KEY = "own_reactions_v1";
 
 // Both durable per-target stores below are one storage.local key holding

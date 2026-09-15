@@ -13,10 +13,10 @@ const TOOLTIP_FLIP_VIEWPORT_FRACTION = 0.55;
 // within the grace delay below.
 const TOOLTIP_TRIGGER_GAP_PX = 6;
 // Grace delay so the pointer can cross that gap without the tooltip vanishing -
-// hoverable per WCAG 1.4.13.
+// hoverable per WCAG.
 const TOOLTIP_HIDE_GRACE_MS = 150;
-// `window.innerHeight` is 0 in no-layout environments (the popup's own default height
-// is 480px); only the flip side of an unmeasurable viewport rides on this.
+// `window.innerHeight` is 0 in no-layout environments; the fallback below is the popup's
+// own default height, and only the flip side of an unmeasurable viewport rides on it.
 const FALLBACK_VIEWPORT_HEIGHT_PX = 480;
 
 // Floating tooltip anchored to its trigger. `position: fixed` (computed from the trigger's viewport rect)
@@ -64,7 +64,7 @@ export const HoverTooltip = (props: TooltipProps) => {
   const selfHide = useRef<() => void>(() => {});
   const [tip, setTip] = useState<{ above: boolean; offset: number } | null>(null);
   // Stable id so the trigger can reference the open tooltip via aria-describedby -
-  // without it screen readers never surface the tooltip content (WCAG 1.3.1).
+  // without it screen readers never surface the tooltip content (WCAG).
   const tipId = useId();
 
   const cancelHide = () => {
@@ -110,7 +110,7 @@ export const HoverTooltip = (props: TooltipProps) => {
     onMouseLeave: hide,
     onFocus: show,
     onBlur: hideNow,
-    // Dismissible per WCAG 1.4.13: Escape hides the tooltip without moving focus.
+    // Dismissible per WCAG: Escape hides the tooltip without moving focus.
     onKeyDown: (e: KeyboardEvent) => {
       if (e.key === "Escape") hideNow();
     },

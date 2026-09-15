@@ -35,7 +35,7 @@ const COMPACT_TIERS: readonly { unit: number; suffix: string }[] = [
 ];
 
 // "327 555" -> "327K" (truncated, mirroring how platforms round counters down). Null when
-// the text isn't a plain counter or the compact form wouldn't actually be shorter.
+// the text isn't a plain counter or the compact form wouldn't be shorter.
 export function compactCountText(raw: string): string | null {
   const text = raw.trim();
   const cyrillic = text.match(CYRILLIC_COMPACT_RE);
@@ -73,7 +73,7 @@ export function compactQuotedLabelText(raw: string): string | null {
 // scrollWidth alone never does.
 const OVERFLOW_EPSILON_PX = 2;
 
-// Compact only when the row - or a native control itself - actually overflows
+// Compact only when the row - or a native control itself - overflows
 // BECAUSE OF the trigger; a roomy row keeps the site's own full text. The
 // second measurement with the host hidden is the attribution: some Threads
 // feed cards report a constant ~24px ancestor overflow with no trigger at all

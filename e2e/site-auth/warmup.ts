@@ -8,7 +8,7 @@
 // membership - is provisioned HERE at the start of the run and UNWOUND at the
 // end, so nothing the account had before a run is left changed.
 //
-// Every step that touches ACCOUNT state is best-effort and VERIFICATION-GATED: it
+// Every step that touches ACCOUNT state may fail and is VERIFICATION-GATED: it
 // reads the real state, acts only to reach the wanted state, confirms the change
 // took, and records an undo ONLY for a change it confirmed. A step that can't drive
 // a site's UI (markup drift, non-English account UI) leaves the account untouched.
@@ -66,7 +66,7 @@ function clearJournal(journalFile: string): void {
   try {
     rmSync(journalFile, { force: true });
   } catch {
-    // best-effort; a stale journal is replayed (idempotently) next run
+    // a stale journal is replayed (idempotently) next run
   }
 }
 
@@ -197,7 +197,7 @@ const threadsHideCounts: WarmupStep = {
 // Facebook group membership for the group-feed check. Gated behind an EXPLICIT
 // group URL: joining is a real social action (admin approval, notifications), so
 // the run never picks a group on its own - with no E2E_WARMUP_FACEBOOK_GROUP
-// set nothing is joined and the group-feed check simply skips when the account is
+// set nothing is joined and the group-feed check skips when the account is
 // in no active group. When set, the run joins the group (if not already a member)
 // and LEAVES it on teardown. A group needing admin approval won't grant membership
 // in time (the check still skips); the pending request is cancelled the same way.

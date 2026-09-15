@@ -50,7 +50,7 @@ function cacheEntry(fetchedAt: number): CachedTarget {
 
 // Freeze ONLY the clock (not timers): the TTL-boundary fixtures below are built
 // relative to `Date.now()`, which must be a constant for `TTL - 1` / `TTL + 1`
-// to actually sit on the boundary instead of drifting with the wall clock.
+// to sit on the boundary instead of drifting with the wall clock.
 const FROZEN_NOW = Date.UTC(2026, 0, 1);
 
 beforeEach(() => {
@@ -63,7 +63,7 @@ afterEach(() => {
 });
 
 // The optimistic-counts math + prevReaction: the source of truth for the picker, the cross-tab
-// broadcast, and the SW vote.
+// broadcast, and the service-worker vote.
 describe("applyOptimisticReaction", () => {
   it("new reaction: adds the emoji, increments total, prevReaction null", async () => {
     mockCache({

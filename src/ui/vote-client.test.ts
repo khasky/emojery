@@ -41,8 +41,8 @@ function mockAuthedSend(status: Partial<{ authed: boolean; userId: string | null
 }
 
 beforeEach(() => {
-  // clearAllMocks keeps the factory mock implementations (getSettings' resolved value);
-  // restoreAllMocks would strip them and break later tests, so it is intentionally not used.
+  // clearAllMocks keeps the factory mock implementations (the resolved value of
+  // getSettings); restoreAllMocks would strip them and break later tests, so it is not used.
   vi.clearAllMocks();
   document.documentElement.lang = "uk-UA";
   // The content-script settings read is TTL-cached module state, so a value

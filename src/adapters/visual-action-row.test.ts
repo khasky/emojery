@@ -6,7 +6,7 @@
 // Everything below is built from GENERIC divs/buttons with stamped boxes: this
 // pins the module's own decision logic (slot count, size and variance
 // filtering, boundary and depth limits, the hidden-placeholder index
-// contract). It deliberately models NO supported site's markup - which row of
+// contract). It models NO supported site's markup - which row of
 // which site the heuristic finds on a live page stays an e2e question.
 import { afterEach, describe, expect, it } from "vitest";
 import { HIDDEN_ATTR, HOST_CLASS } from "../shared/dom";

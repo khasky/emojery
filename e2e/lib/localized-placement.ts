@@ -13,7 +13,7 @@ import type { MountEvidence, Rect, SupportedSiteScenario } from "./site-evidence
 
 // Fallbacks for a scenario that pins neither distance itself: how far the
 // trigger may sit from the localized native control and still count as "in the
-// same action row". Wide on purpose - a row can carry several controls between
+// same action row". Wide - a row can carry several controls between
 // the two - the assertion that matters is that they are in one row at all.
 const DEFAULT_MAX_HORIZONTAL_DISTANCE_PX = 700;
 const DEFAULT_MAX_VERTICAL_DISTANCE_PX = 160;

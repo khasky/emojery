@@ -10,15 +10,15 @@ import type { Reaction } from "../shared/reactions";
 import { CATEGORIES } from "../shared/reactions";
 
 // The emoji grid is a roving tabindex: exactly one button is Tab-reachable and the
-// arrows move that one. Columns must match picker.css's grid so ArrowUp/Down land a row away.
+// arrows move that one. Columns must match the grid in picker.css so ArrowUp/Down land a row away.
 const GRID_COLUMNS = 6;
 const SCROLL_SELECTOR = `.${POPOVER_SCROLL_CLASS}`;
 
-// WCAG 2.4.11 (focus not obscured). picker.css declares `scroll-padding` on the scroll
+// Focus not obscured (WCAG). picker.css declares `scroll-padding` on the scroll
 // container so the opaque sticky head never covers the focused cell - but the browser's
 // OWN focus scrolling ignores that padding: measured in both WebKit and Firefox, arrowing
-// back up left the cell 5px inside the scrollport and 67px under the head, with the
-// scroll position unchanged. So correct it by hand, reading the very padding the
+// back up left the cell just inside the scrollport and under the head, with the scroll
+// position unchanged. So correct it by hand, reading the very padding the
 // stylesheet declares (picker.tsx feeds it the head's measured height), which keeps one
 // source of truth for the offset and still lets an engine that honours it do the work
 // first - this then finds nothing to do.
@@ -42,8 +42,9 @@ type GridFocusMode = "first" | "last" | "next" | "previous" | "rowNext" | "rowPr
 // ARIA grid pattern; Home/End ignore the current item, hence the `current`-free branches below.
 const GRID_KEY_MODES: Readonly<Record<string, GridFocusMode>> = { ArrowRight: "next", ArrowLeft: "previous", ArrowDown: "rowNext", ArrowUp: "rowPrev", Home: "first", End: "last" };
 
-// Px fallbacks for the pre-measure pass only (`el.offsetWidth || POPOVER_W`): picker.css's
-// `width: 18em` / `max-height: 28em` at a 16px base. Only used before the popover has laid out.
+// Px fallbacks for the pre-measure pass only (`el.offsetWidth || POPOVER_W`): the
+// `width: 18em` / `max-height: 28em` picker.css declares, at a 16px base. Only
+// used before the popover has laid out.
 const POPOVER_W = 288;
 const POPOVER_MAX_H = 448;
 // Gap kept between the popover and both the trigger and the viewport edges.

@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// The one place that decides the user has actually LOOKED at a trigger, for the
+// The one place that decides the user has LOOKED at a trigger, for the
 // onboarding checklist's "spot the button" step.
 //
-// Deliberately stricter than the coach-mark's own latch. A fresh install replays
+// Stricter than the coach-mark's own latch. A fresh install replays
 // the content scripts into every already-open supported tab, and `visibilityState`
 // alone calls the active tab of a second, unfocused window "visible" - so that
 // latch gets spent, and the step used to tick, without a button ever being in front
-// of anyone. Four conditions have to hold TOGETHER, and hold for LOOKED_AT_MS
+// of anyone. The conditions have to hold TOGETHER, and hold for LOOKED_AT_MS
 // without a break: the step is armed (shared/onboarding.ts - the checklist page has
 // been on screen), the tab is visible, the window has focus, and a trigger is
 // intersecting the viewport at a size the user can see.
@@ -115,7 +115,7 @@ function looking(): boolean {
   if (document.visibilityState !== "visible" || !document.hasFocus()) return false;
   for (const host of onScreen) {
     // IntersectionObserver sees `visibility: hidden` as visible, and a host is held
-    // exactly that way (mount-style.ts's sizing attribute) until its glyph is measured.
+    // exactly that way (the sizing attribute in mount-style.ts) until its glyph is measured.
     if (host.isConnected && getComputedStyle(host).visibility !== "hidden") return true;
   }
   return false;

@@ -4,10 +4,10 @@
 // the page's selectors, its shipped button labels, and the request-code/verify
 // exchange with the retries that make it survive a real backend.
 //
-// A LEAF module, and deliberately so: it is also loaded directly under plain
-// Node, where types are stripped at load and imports resolve by Node's own
-// rules. So: no relative imports, nothing outside `node:*` and
-// `@playwright/test` - and keep the export shape stable.
+// A LEAF module: it is also loaded directly under plain Node, where types are
+// stripped at load and imports resolve by Node's own rules. So: no relative
+// imports, nothing outside `node:*` and `@playwright/test` - and keep the export
+// shape stable.
 
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -81,7 +81,7 @@ function authPageUrl(extensionId: string): string {
 
 // A crashed/torn-down page: Playwright throws "Page crashed" (renderer OOM/crash)
 // or "Target closed". Environmental, not a test assertion - callers reopen + retry.
-// Shared with lib/reaction-surface.ts's openSite, which self-heals the same way.
+// Shared with openSite in lib/reaction-surface.ts, which self-heals the same way.
 export function isPageCrash(err: unknown): boolean {
   return err instanceof Error && /page crashed|target (page,? )?closed|crashed/i.test(err.message);
 }

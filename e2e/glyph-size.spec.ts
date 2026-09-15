@@ -15,7 +15,7 @@
 // 24px where its watch row draws 18px) resized the trigger across that platform for a 24h
 // TTL. That needs state carried BETWEEN pages, which the per-site loop cannot produce -
 // hence the two cases after it: a planted stale size (deterministic) and the surface order
-// a user actually walks (only fails when the surfaces really differ).
+// a user walks (only fails when the surfaces differ).
 
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import { closeSession, envUrl, evalInBackground } from "./lib/extension";
@@ -37,15 +37,15 @@ import { SUPPORTED_SITE_SCENARIOS } from "./supported-sites";
 const MEASURED_BAND = { min: 0.75, max: 1.3 };
 const FALLBACK_BAND = { min: 0.55, max: 1.65 };
 
-// A real action-row icon, in CSS px. Wider than mount-style's own band on purpose: this is
+// A real action-row icon, in CSS px. Wider than mount-style's own band: this is
 // the test's independent opinion of "an icon", not a copy of the implementation's.
 const ICON_SIDE_MIN_PX = 8;
 const ICON_SIDE_MAX_PX = 64;
 
 // How long a trigger is watched before its size is judged, and how often it is re-read
 // while waiting. Only the LAST read is judged - see measureGlyph for why the intermediate
-// ones are deliberately discarded. The window has to outlast mount.ts's own re-measure
-// chain (GLYPH_REMEASURE_UNTIL_MS).
+// ones are discarded. The window has to outlast the re-measure chain mount.ts starts
+// (GLYPH_REMEASURE_UNTIL_MS in mount-reblend.ts).
 const MEASURE_SETTLE_MS = Number(process.env.E2E_GLYPH_SETTLE_MS ?? 13_000);
 
 // How many of the nearest native matches contribute icons to the reference median.
@@ -72,7 +72,7 @@ interface GlyphMeasurement {
   measuredGlyphPx: number | null;
   /** Median icon side inside the native control NEAREST our host, CSS px. */
   nativeIconPx: number | null;
-  /** That control's icon sides, so a failure shows what the row actually contains. */
+  /** That control's icon sides, so a failure shows what the row contains. */
   nativeIconSides: number[];
 }
 

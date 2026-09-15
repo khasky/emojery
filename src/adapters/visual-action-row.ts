@@ -15,9 +15,9 @@ export interface VisualActionSlot {
   slots: HTMLElement[];
 }
 
-// The defaults describe an ICON action strip (Instagram, Threads): 3 to 5 icon
-// slots of at least 16px in a row no taller than 96px, up to 10 ancestors above the
-// control. 3 is the floor that keeps a 2-button header cluster (edit + more) from
+// The defaults below describe an ICON action strip (Instagram, Threads): a few icon
+// slots of a minimum size, in a row of bounded height, within a bounded walk above the
+// control. The slot floor is what keeps a 2-button header cluster (edit + more) from
 // reading as a row. A wide labelled row (Facebook's Like / Comment / Share) sets its
 // own shape; the per-site floors that differ (a row's minimum width, what counts as
 // a control, where the walk stops) stay with the adapter.
@@ -38,9 +38,9 @@ interface VisualActionRowOptions {
 const ICON_STRIP = { maxDepth: 10, minSlots: 3, maxSlots: 5, maxRowHeight: 96, minSlotWidth: 16, minSlotHeight: 16 } as const;
 
 // Wider than the same-named constant in action-labels.ts, which omits `a[href]`.
-// Deliberate, not drift: slot discovery has to accept a link, because GitHub's Star IS
-// an `<a href>` wrapping the counter (see github.ts); label classification must not,
-// or every nav link in a row reads as an action. Keep them apart.
+// The two differ because slot discovery has to accept a link: GitHub's Star IS an
+// `<a href>` wrapping the counter (see github.ts), while label classification must
+// not, or every nav link in a row reads as an action. Keep them apart.
 const DEFAULT_CONTROL_SELECTOR = 'button, [role="button"], a[href]';
 
 export function pageHasLayout(): boolean {
@@ -142,7 +142,7 @@ function collectVisualActionSlots(row: HTMLElement, options: VisualActionRowOpti
     // Keep a hidden control's slot at its original index, as a placeholder exempt
     // from the size/variance filters: renumbering the row would slide a visible
     // sibling (e.g. Instagram's Comment) into slot 0 and re-anchor the picker past
-    // it. findVisualActionSlot admits a hidden control on purpose, so a re-scan
+    // it. findVisualActionSlot admits a hidden control, so a re-scan
     // that arrives on one still resolves to this slot.
     if (control.closest(HIDDEN_SELECTOR)) {
       out.push({ slot: child, control, width: 0, hidden: true });

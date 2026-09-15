@@ -6,10 +6,10 @@
 // navigation. renderPicker consumes it: the matching target (or the first, for the
 // keyless form) auto-opens its picker exactly once.
 //
-// Deliberate: ANY inbound link can carry the hint (a referrer check would be
-// spoofable anyway), so a third-party link may open the picker uninvited. The
-// blast radius is bounded by design - opening is all it does; a vote still
-// needs a real user click inside the picker, and a reaction is reversible.
+// ANY inbound link can carry the hint (a referrer check would be spoofable
+// anyway), so a third-party link may open the picker uninvited. The blast radius
+// is bounded: opening is all it does; a vote still needs a real user click
+// inside the picker, and a reaction is reversible.
 
 import { parseReactHint, type ReactHint } from "../shared/deep-link";
 import type { TargetKey } from "../shared/storage";
@@ -23,7 +23,7 @@ export function armReactHint(): void {
   pending = hint;
   try {
     history.replaceState(history.state, "", location.pathname + location.search);
-  } catch {} // best-effort: the hint is already remembered; a failure only leaves the hash
+  } catch {} // the hint is already remembered; a failure only leaves the hash
 }
 
 // A keyed hint matches only its own `site:targetId`; a keyless one matches the first target to ask.

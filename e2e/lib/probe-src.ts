@@ -2,7 +2,7 @@
 //
 // Canonical in-page probe helpers as JS *source strings*, composed into
 // `page.evaluate` bodies by template interpolation - the same pattern as
-// site-auth/probes.ts's DQ_SRC. One definition here, used by every probe in this
+// the DQ_SRC in site-auth/probes.ts. One definition here, used by every probe in this
 // folder: an evaluate callback is serialized, so it cannot close over an imported
 // function - source strings are the only way to share one. A probe that must stay
 // a TYPE-CHECKED callback takes the element it works on as an ElementHandle
@@ -14,7 +14,7 @@
 // backslash doubled (`/\\s+/g` emits `/\s+/g`; a single one is dropped by the
 // template literal, which biome's noUselessEscapeInString flags).
 //
-// NOTE: site-auth/probes.ts keeps its own DQ_SRC on purpose - its `dq` bundles
+// site-auth/probes.ts keeps its own DQ_SRC - its `dq` bundles
 // that suite's own `triggerIn` helper into the same string, and the bridge suite
 // runs under vitest, sharing only lib's leaf constants and config with this
 // folder instead of its @playwright/test-bound probe helpers.

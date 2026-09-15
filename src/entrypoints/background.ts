@@ -15,7 +15,7 @@ import { PAGE_PRESENCE_PORT } from "../shared/page-presence";
 import { clearCountsCache, LEGACY_OWN_REACTIONS_KEY, maybeSweepCountsCache } from "../shared/storage";
 import { addAlarmListener, createAlarm, getTab, queryActiveTab, setUninstallURL, storageLocalRemove } from "../shared/webext";
 
-// Opened by the browser when the extension is removed. First-party on purpose: a
+// Opened by the browser when the extension is removed. First-party: a
 // third-party form host would receive the user's IP and User-Agent at uninstall,
 // which is not something the privacy policy discloses and not something an
 // uninstalled extension should still be arranging.

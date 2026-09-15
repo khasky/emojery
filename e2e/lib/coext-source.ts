@@ -137,8 +137,8 @@ function verifyDigest(ref: string, raw: Buffer, expected: string | null): void {
 // Entries are keyed by the SOURCE STRING, so editing an E2E_COEXT_SOURCES URL
 // orphans the extension unpacked under the old key forever - and these are
 // hundreds of MB each. Drop entries no run has touched in a week (`keepDir` is
-// this run's own, and reuse stamps it above). Best-effort, like
-// makeRunProfileDir in browser-session.ts: a locked dir never blocks the run.
+// this run's own, and reuse stamps it above). Like makeRunProfileDir in
+// browser-session.ts, a locked dir never blocks the run.
 const CACHE_ENTRY_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const CACHE_ENTRY_NAME_RE = /^[0-9a-f]{16}$/;
 

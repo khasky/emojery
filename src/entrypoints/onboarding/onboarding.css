@@ -24,7 +24,7 @@
   max-width: 860px;
 }
 
-/* The shared card, laid out as two columns. Deliberately NOT `overflow: hidden`
+/* The shared card, laid out as two columns. NOT `overflow: hidden`
    on it or on `.wrap`: that box is exactly the card's box, so clipping cut its
    shadow to four corner wedges that read as square corners. The confetti stays
    off the scrollbars by being `position: fixed` instead. */

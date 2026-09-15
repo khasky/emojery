@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // The Debug tab (Settings -> Debug reveals it, in every build): what the durable vote queue
-// holds and why it is sending nothing. Deliberately un-i18n'd - it prints raw queue internals
+// holds and why it is sending nothing. Un-i18n'd - it prints raw queue internals
 // for whoever is diagnosing them, and a translated `4 queued · hold 154s` helps nobody - and
 // without CSS of its own (it borrows the History tab's rows). It asks the background for a
 // snapshot over the message channel, like every other popup view: the queue is the

@@ -74,7 +74,7 @@ describe("isMediaViewerPath - the /media lightbox overlay", () => {
     expect(isMediaViewerPath(`/@${HANDLE}`)).toBe(false);
     expect(isMediaViewerPath("/")).toBe(false);
     expect(isMediaViewerPath("/media")).toBe(false);
-    // A postId that merely ENDS in "media" is a post page, not the overlay.
+    // A postId that only ENDS in "media" is a post page, not the overlay.
     expect(isMediaViewerPath(`/@${HANDLE}/post/${POST_ID}media`)).toBe(false);
   });
 });

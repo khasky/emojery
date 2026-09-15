@@ -47,8 +47,8 @@ const TIMESTAMP_TEXT_STEM = /\b(?:just now|yesterday|today|\d+\s*(?:m|min|h|hr|d
 // clicked photo -> the origin unit's group story permalink (module state
 // survives the SPA transition into the viewer), and targetFromPhotoUrl keys the
 // viewer on it. A direct URL open (new tab, cold load) has no click context and
-// keeps the photo-entity key. Written by facebook.ts's photoClickContextCapture
-// observer plugin, which owns the click listener that records the context.
+// keeps the photo-entity key. Written by photoClickContextCapture in facebook.ts,
+// the observer plugin that owns the click listener recording the context.
 export const clickedPhotoStoryUrls = new Map<string, string>();
 
 // Hard ceiling with oldest-first eviction, like the other long-lived module maps
@@ -132,7 +132,7 @@ function isLikelyLazyDateLink(link: HTMLAnchorElement, rawHref: string): boolean
 
 // A timestamp label is short in every shipped locale even at its most verbose
 // ("Yesterday at 11:32 PM" plus an audience suffix); past this the text is a caption
-// that merely mentions a time, so its link is not the post's date link.
+// that only mentions a time, so its link is not the post's date link.
 const TIMESTAMP_TEXT_MAX = 96;
 
 // Whether a link reads as a post timestamp, and so qualifies as a CFT fallback
@@ -232,7 +232,7 @@ function resolveCurrentPhotoTarget(opts: { skipSharedPhoto?: boolean }): TargetR
 // The unit's OWN `/watch/?v=<id>` date link. A video card on the watch surface
 // ships no `/posts/` or `/videos/` permalink at all, so without this it fell to
 // the volatile `url:<cft-hash>` and its reaction did not survive a reload. Below
-// the permalink stages on purpose: a unit that HAS a permalink keys on that, and
+// the permalink stages: a unit that HAS a permalink keys on that, and
 // a watch link quoted in a post's body stays a last-resort identity.
 function resolveWatchLinkTarget(article: HTMLElement, actionRow: HTMLElement | null): TargetRef | null {
   const watchUrl = findWatchPermalinkNear(article, actionRow);
@@ -294,8 +294,8 @@ function targetFromPostUrl(url: string): TargetRef {
   return { site: "facebook", targetId: id, url };
 }
 
-// A bare numeric post id (the canonical, surface-stable identity) - as opposed
-// to a `pfbid...`, `photo:<media>`, or `url:<hash>` token.
+// A bare numeric post id: the canonical, surface-stable identity, distinct from
+// a `pfbid...`, `photo:<media>` or `url:<hash>` token.
 function isCanonicalNumericId(targetId: string): boolean {
   return FB_NUMERIC_ID_RE.test(targetId);
 }

@@ -38,18 +38,18 @@ type FbPostActionKind = keyof typeof FB_ACTION_LABEL;
 // the rest, and actionLabel walks this list in order.
 const ACTION_LABELS: readonly string[] = Object.values(FB_ACTION_LABEL);
 
-// Facebook's OWN Like/Comment button labels in all 26 shipped UI locales, read
-// off facebook.com one locale per page load - never translated. Exact forms
-// rather than stems: every entry is a string Facebook itself ships, so equality
-// carries the locale with no substring risk, and the 3 label shapes
-// matchesActionLabel documents are handled by localizedActionLabel below.
+// Facebook's OWN Like/Comment button labels in every shipped UI locale, read
+// off facebook.com one locale per page load - never translated. Every entry is
+// a string Facebook itself ships, so equality carries the locale with no
+// substring risk, and the label shapes matchesActionLabel documents are handled
+// by localizedActionLabel below.
 // A locale takes as many forms as it renders: Comment usually needs TWO - the
 // short one the button prints ("Kommentieren") and the phrase it puts in the
 // aria ("Kommentar hinterlassen"). The aria is the one that decides a row: on
 // the feed those buttons print the reaction COUNT instead of a label, leaving
 // the phrase as the only readable signal (which is why 13 locales mounted no
 // picker anywhere until their phrases landed here).
-// Only these 2 are readable without a session - a logged-out post renders no
+// Only Like and Comment are readable without a session - a logged-out post renders no
 // Share/Send button - so those stay on the EN list plus the EN/RU/UA stems.
 // Why the pair is worth it: resolvePostAction drops to the geometry fallback
 // ONLY for labels it cannot read, and findPostContainer then refuses to walk out
@@ -151,15 +151,14 @@ function normalizeLabel(label: string): string {
   return collapseWhitespace(label).normalize("NFC").toLowerCase();
 }
 
-// Normalized label -> canonical action, so a button costs one map lookup rather
-// than a walk over 50 strings. The global `[role="button"]` sweep visits hundreds
-// of buttons per re-scan; see the cost note on readPostActionLikeButton.
+// Normalized label -> canonical action: one map lookup per button. The global
+// `[role="button"]` sweep visits hundreds of buttons per re-scan; see the cost
+// note on readPostActionLikeButton.
 const LOCALIZED_LABEL_KIND: ReadonlyMap<string, string> = new Map(FB_LOCALIZED_ACTION_LABELS.flatMap(([canonical, forms]) => forms.map((form) => [normalizeLabel(form), canonical] as const)));
 
 // The label asymmetry every post-vs-comment verdict in this module rests on: a
 // post action row pairs Like with Comment/Share/Send, a comment row pairs it with
-// Reply alone. Stated once here; the readers below reference it rather than
-// restate it.
+// Reply alone.
 const ROW_SIBLING_KINDS: readonly FbPostActionKind[] = (Object.keys(FB_ACTION_LABEL) as FbPostActionKind[]).filter((kind) => kind !== "like");
 const ROW_SIBLING_LABELS_SET: ReadonlySet<string> = new Set(ROW_SIBLING_KINDS.map((kind) => FB_ACTION_LABEL[kind]));
 
@@ -168,7 +167,7 @@ const ROW_SIBLING_LABELS_SET: ReadonlySet<string> = new Set(ROW_SIBLING_KINDS.ma
 // of its action buttons, so English-only signals (POST_LIKE_ARIA, exact "Like")
 // never fire on a RU/UA UI - the adapter would fall back to fragile geometry and
 // mount on comment rows / skip posts. Our FB stems cover EN/RU/UA only (no
-// German), composed narrowed from STEM_PARTS rather than the wider STEM union.
+// German), composed from STEM_PARTS, narrower than the STEM union.
 // The exact EN `ACTION_LABELS` are still checked FIRST in actionLabel
 // (their prefix-aware match - "Like Mark's post" -> "Like" - is not expressible as
 // the registry's exact equality), so an exact English label always wins.
@@ -325,7 +324,7 @@ export const COMPOSER_ACTION_STEM = /\banonymous post\b|\bfeeling\s*\/\s*activit
 // post action row.
 const OWNER_TOOLS_STEM = /\binsights\b|\bboost\b|\bpromote\b|\bcreate ad\b|статистик|объявлени|оголошен|продвига|просува|реклам/iu;
 
-// actionRowSlot's upward walk: 10 levels is safe because the FIRST ancestor with
+// The upward walk in actionRowSlot: the depth is safe because the FIRST ancestor with
 // >=2 action labels wins (no "escape" risk for that walk).
 const ROW_WALK_DEPTH = 10;
 
@@ -444,16 +443,17 @@ export function resolvePostAction(btn: HTMLElement, verdicts: PostRowVerdicts): 
 // icon (`aria-label="Like: 68 people"`) also exists atop the comments and must be
 // rejected.
 //
-// Detection is intentionally selector-light, on the two signals stable across
+// Detection is selector-light, on the two signals stable across
 // every redeploy since 2017 because they're accessibility-required:
 // `role="button"` and `aria-label="Like"` (else visible text exactly "Like").
 // Post-row vs comment-row is then decided by the ROW_SIBLING_LABELS_SET
 // asymmetry, read within a shallow sibling window (see SIBLING_UP_DEPTH).
 function readPostActionLikeButton(btn: HTMLElement): boolean {
   // Cheap label/aria rejection FIRST: the global `[role="button"]` scan visits
-  // hundreds of buttons per re-scan, and paying isRenderableInPageLayout's rect +
-  // computed-style walk on each was a primary cause of the "button appears with a
-  // growing delay" bug. Renderability is still required for every ACCEPTED button.
+  // hundreds of buttons per re-scan, and paying the rect + computed-style walk in
+  // isRenderableInPageLayout on each was a primary cause of the "button appears
+  // with a growing delay" bug. Renderability is still required for every ACCEPTED
+  // button.
   const aria = btn.getAttribute("aria-label");
   // Reaction-count summaries read "Like: 68 people" - reject. (A localized
   // post-Like aria without a count, e.g. "Нравится", still reaches the stem
@@ -474,9 +474,9 @@ function readPostActionLikeButton(btn: HTMLElement): boolean {
 // FILLED pills. The text guards in isNonPostActionRow enumerate wording, so any
 // language or copy Facebook ships next slips through them (verified live: the
 // UA header's "Стежити" and a questionless EN AI-prompt row both mounted);
-// the fill probe is their language-independent counterpart. Two filled slots
-// are required so a hover overlay caught mid-scan on ONE real action button
-// can't reject a genuine row.
+// the fill probe is their language-independent counterpart. A single filled slot
+// is not enough: a hover overlay caught mid-scan on ONE real action button must
+// not reject a genuine row.
 const FILLED_SLOT_REJECT_COUNT = 2;
 
 // The pill's fill can sit on an inner wrapper rather than on the
@@ -562,7 +562,7 @@ const MESSENGER_WALK_DEPTH = 25;
 // Signature (verified live on a Marketplace popup): a `position: fixed` floating
 // surface (the in-page feed never is) containing a `role="region"` message
 // composer. Post-in-a-dialog (photo viewer / permalink modal) is `role="dialog"`
-// and handled by findPostContainer's modal containment, so dialogs are excluded
+// and handled by the modal containment in findPostContainer, so dialogs are excluded
 // here to avoid rejecting real posts.
 export function isInMessengerThread(el: HTMLElement): boolean {
   for (const node of ancestors(el, MESSENGER_WALK_DEPTH)) {
@@ -709,7 +709,7 @@ export function actionLabel(el: Element): string | null {
   for (const lbl of ACTION_LABELS) {
     if (matchesActionLabel(el, lbl)) return lbl;
   }
-  // Then the shipped string for this locale - a label Facebook actually renders
+  // Then the shipped string for this locale - a label Facebook renders
   // is a stronger signal than a morphological root.
   const localized = localizedActionLabel(el);
   if (localized) return localized;
@@ -722,9 +722,9 @@ export function actionLabel(el: Element): string | null {
   return isChevronPairedLike(el) ? "Like" : null;
 }
 
-// matchesActionLabel's 3 shapes against LOCALIZED_LABEL_KIND, reading the aria
-// and the text ONCE - the same lookup done per candidate label would re-read
-// textContent 50 times per button.
+// The matchesActionLabel shapes against LOCALIZED_LABEL_KIND, reading the aria and
+// the text ONCE - the same lookup done per candidate label would re-read
+// textContent once per table entry.
 function localizedActionLabel(el: Element): string | null {
   const aria = el.getAttribute("aria-label");
   if (aria?.includes(":")) return null;
@@ -747,7 +747,7 @@ function localizedActionText(el: Element): string {
   return (el.textContent || "").trim();
 }
 
-// The three label shapes Facebook ships today:
+// The label shapes Facebook ships today:
 //   1. `aria-label="Like"` - exact (comment rows, simple variants).
 //   2. `aria-label="Like Mark Zuckerberg's post"` - modern post row; the visible
 //      text is still just "Like" (Comment/Share/Send use the same suffix form).
@@ -760,7 +760,7 @@ function matchesActionLabel(el: Element, label: string): boolean {
   const text = (el.textContent || "").trim();
   if (!aria) return text === label;
   // Owner-suffix aria ("Like Mark's post"): confirm via visible text so unrelated
-  // buttons whose aria-label merely starts with the word aren't picked up.
+  // buttons whose aria-label only starts with the word aren't picked up.
   if (aria.startsWith(`${label} `)) return text === label;
   return false;
 }

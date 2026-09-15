@@ -3,7 +3,7 @@
 // The extension's OWN surfaces: resolving its id, opening the popup, and driving
 // the Account tab to a known auth state. Everything here talks to
 // `chrome-extension://<id>/...` pages - never a site page, which is
-// reaction-surface.ts's half.
+// the half in reaction-surface.ts.
 //
 // The OTP exchange itself is `auth-signin.ts`, a leaf plain Node can also load;
 // this module only supplies the id.
@@ -111,7 +111,7 @@ async function extensionIdFromExtensionsPage(context: BrowserContext): Promise<s
   }
 }
 
-// Fail loud instead of a 60s goto timeout - see isFirefoxRun's note in
+// Fail loud instead of a 60s goto timeout - see the isFirefoxRun note in
 // browser-session.ts for why extension pages are unreachable there.
 function requireExtensionPageAccess(what: string): void {
   if (isFirefoxRun()) throw new Error(`${what} needs an extension page, which Playwright Firefox cannot reach - guard the spec with test.skip(isFirefoxRun(), ...)`);
@@ -129,7 +129,7 @@ export async function openPopup(context: BrowserContext): Promise<Page> {
 }
 
 // Sign in by opening auth.html directly. Defaults to the primary test account;
-// `locale` as documented on auth-signin.ts's AuthSignInOptions. The exchange
+// `locale` as documented on AuthSignInOptions in auth-signin.ts. The exchange
 // itself lives in `auth-signin.ts`.
 export async function signIn(context: BrowserContext, email: string = authEmail(), code: string = authCode(email), locale = "en"): Promise<void> {
   if (isFirefoxRun()) return signInOverBridge(context, email, code);
@@ -166,7 +166,7 @@ export async function isSignedIn(context: BrowserContext): Promise<boolean> {
 }
 
 // Idempotent: drives the popup Account tab to a signed-out state. `locale` as
-// documented on auth-signin.ts's AuthSignInOptions. The sign-out wait falls
+// documented on AuthSignInOptions in auth-signin.ts. The sign-out wait falls
 // back to reloading the popup when NEITHER button renders: a popup opened
 // mid-sign-out can stall buttonless until a fresh load.
 export async function ensureSignedOut(context: BrowserContext, locale = "en"): Promise<void> {

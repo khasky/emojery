@@ -3,7 +3,7 @@
 // Drift guard for docs/adding-a-site.md step 9: a registered site with no e2e
 // scenario ships with ZERO live coverage while every other gate stays green, and
 // the e2e suites can't catch it - they iterate their own tables. Reaches into
-// `e2e/` on purpose: both scenario modules are data-only (no Playwright import,
+// `e2e/` because both scenario modules are data-only (no Playwright import,
 // no env read at module load), precisely so this import stays cheap.
 
 import { readFileSync } from "node:fs";

@@ -12,8 +12,8 @@ const COACH_SEEN_KEY = "coach_seen_v1";
 // key is kept under its old name so an install part-way through onboarding does not
 // lose its progress. Three states: absent = not in play, true = owed, false = done.
 const FIRST_REACTION_KEY = "onboarding_badge_v1";
-// The checklist's "spot the button" step, kept apart from the coach-mark latch
-// on purpose: that one is spent by the FIRST mount of the install, including the
+// The checklist's "spot the button" step, kept apart from the coach-mark latch:
+// that one is spent by the FIRST mount of the install, including the
 // ones the install replays into tabs nobody is looking at, which ticked the step
 // for a button the user never saw. Three states, like the latch above:
 // absent = not in play, false = armed (the checklist has been on screen), true =

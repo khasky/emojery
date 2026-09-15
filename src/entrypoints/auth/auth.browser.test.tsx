@@ -13,14 +13,14 @@ import { type ChromeShimHandle, installChromeShim } from "../../test/chrome-shim
 import { OTP_COOLDOWN_KEY, type OtpCooldown } from "./otp-cooldown";
 
 // CONSENT_ONLY is read off location.search at import, so the consent test rewrites
-// the URL - restored verbatim between tests, because the runner's own query string
+// the URL - restored unchanged between tests, because the runner's own query string
 // is what later dynamic imports resolve against.
 const PAGE_URL = location.href;
 const EMAIL = "user@example.com";
 const OK_REQUEST = { type: "auth:otpRequested", ok: true };
 const OK_VERIFY = { type: "auth:otpVerified", ok: true };
 // In production the background closes this tab on an "ok", so nothing repaints
-// after it - here the page simply stays put, which is what the asserts read.
+// after it - here the page stays put, which is what the asserts read.
 const OK_RETURN = { type: "ok" };
 
 let shim: ChromeShimHandle;
@@ -230,7 +230,7 @@ describe("auth page - the code step", () => {
     await vi.waitFor(() => expect(errorText()).not.toBe(""));
     expect(errorText()).toBe(copy);
     expect(heading()).toBe("Enter your code");
-    // aria wiring for the message the screen reader has to reach (WCAG 3.3.1).
+    // aria wiring for the message the screen reader has to reach (WCAG).
     expect(codeField().getAttribute("aria-describedby")).toBe(AUTH_ERROR_ID);
     expect(codeField().getAttribute("aria-invalid")).toBe("true");
   });

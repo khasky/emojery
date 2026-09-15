@@ -4,8 +4,8 @@
  *
  * Only custom properties and named `@keyframes` are hoisted here - they carry no
  * cascade order. Plain RULES are not: `.sr-only`, the `a` pair and the two
- * `.primary` state rules stay byte-identical in auth.css and popup.css on purpose,
- * because hoisting would move them ahead of each page's own rules.
+ * `.primary` state rules stay byte-identical in auth.css and popup.css, because
+ * hoisting would move them ahead of each page's own rules.
  *
  * The in-page picker cannot import this file - it renders in a shadow root on a
  * foreign page and carries its own palette on `:host` (ui/picker.css) - so the two

@@ -11,7 +11,7 @@ import { fmtExactDate, historyDayKey, historyDayLabel } from "./popup-history-da
 
 allowColdModuleReset();
 
-// A Wednesday, deliberately mid-month and mid-year so no case straddles a month or year end
+// A Wednesday, mid-month and mid-year so no case straddles a month or year end
 // by accident.
 const TODAY = { y: 2026, m: 5, d: 17 } as const;
 const at = (day: { y: number; m: number; d: number }, hours: number, minutes = 0): number => new Date(day.y, day.m, day.d, hours, minutes).getTime();

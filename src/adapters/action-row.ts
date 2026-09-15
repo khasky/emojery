@@ -4,7 +4,7 @@
 // the post markers (Comment/Share/Send/Repost), so the picker never mounts on a
 // comment. Recognition is POSITIVE - an unreadable locale (no recognizable Reply)
 // returns false, keeping a geometry-detected post bar in a language we can't read.
-// Deliberately no shared findActionRow here: each adapter keeps its bespoke row
+// No shared findActionRow here: each adapter keeps its bespoke row
 // walk (see docs/adding-a-site.md).
 import type { ActionKind, LabelRegistry } from "./action-labels";
 

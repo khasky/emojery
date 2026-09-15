@@ -548,7 +548,7 @@ describe("Picker - keyboard a11y (real focus)", () => {
     await userEvent.keyboard("{ArrowRight}");
     const items = Array.from(portalRoot.querySelectorAll<HTMLButtonElement>(GRID_ITEM_SELECTOR));
     const second = document.activeElement as HTMLElement;
-    // The NEXT item, not merely a different one: "moved somewhere" passed even
+    // The NEXT item, not just a different one: "moved somewhere" passed even
     // with the step size wrong (see picker-hooks.test.ts gridTargetIndex).
     expect(second).toBe(items[items.indexOf(first as HTMLButtonElement) + 1]);
     // ...and the roving tabindex followed it, so Tab still has exactly one stop here.
@@ -556,10 +556,11 @@ describe("Picker - keyboard a11y (real focus)", () => {
     expect(second.tabIndex).toBe(0);
   });
 
-  // WCAG 2.4.11 Focus Not Obscured. The sticky head (search + category bar) is opaque and
+  // Focus Not Obscured (WCAG). The sticky head (search + category bar) is opaque and
   // lives INSIDE the scroll container, so the browser's own "scroll the focused element to
-  // the scrollport edge" puts a cell arrowed-to from below underneath it. picker.css's
-  // scroll-padding, fed the head's measured height by picker.tsx, moves that edge down.
+  // the scrollport edge" puts a cell arrowed-to from below underneath it. The
+  // scroll-padding picker.css declares, fed the head's measured height by picker.tsx,
+  // moves that edge down.
   it("arrowing back up never leaves the focused emoji under the sticky head", async () => {
     mountPicker();
     await userEvent.click(container.querySelector<HTMLButtonElement>(`.${TRIGGER_CLASS}`)!);
@@ -568,7 +569,7 @@ describe("Picker - keyboard a11y (real focus)", () => {
     search.focus();
     await userEvent.keyboard("{ArrowDown}");
 
-    // Deep enough that the grid has really scrolled, then back up one row at a time:
+    // Deep enough that the grid has scrolled, then back up one row at a time:
     // each of those steps scrolls a row IN from above, which is the obscured case.
     await userEvent.keyboard("{ArrowDown>60/}");
     for (let step = 0; step < 6; step++) {
@@ -654,7 +655,7 @@ describe("Picker - site dark theme (trigger inherits the site fg)", () => {
 // One shortcut per category; clicking one smooth-scrolls the grid to that section.
 // (The grayscale->colour scroll-spy is geometry-driven and verified live, not here.)
 describe("Picker - category nav bar", () => {
-  // WCAG 2.5.8 Target Size (Minimum). `flex: 1 1 0` divides the bar by the category count,
+  // Target Size, Minimum (WCAG). `flex: 1 1 0` divides the bar by the category count,
   // so every category added shrinks all of them; at the stylesheet's 14px font floor the
   // present set clears 24 CSS px by a fraction of a pixel. Asserted at that floor on
   // purpose: at the test page's own font size the buttons are comfortably wide and the
@@ -956,7 +957,7 @@ describe("Picker - signed-out gate", () => {
   });
 });
 
-// Deliberately NOT mount-color.ts's parseRgb: that one answers `null` for an unpaintable
+// NOT parseRgb from mount-color.ts: that one answers `null` for an unpaintable
 // colour, which is the right production behaviour and the wrong test behaviour - a computed
 // style this cannot read means the assertion below never ran, and it has to say so.
 function parseRgb(value: string): [number, number, number] {

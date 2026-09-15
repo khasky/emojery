@@ -11,9 +11,9 @@ export const VIEWS = ["settings", "history", "account", "report", "debug"] as co
 export type View = (typeof VIEWS)[number];
 
 // Declaration order IS the tab-bar order, and nextViewForKey walks this array - so the tab
-// bar is rendered from it rather than from a second hand-ordered list. Debug is absent by
-// design: five labels overflow the popup's 360px strip in the longer locales, so its opt-in
-// control is an icon in the header (main.tsx) rather than a fifth tab.
+// bar is rendered from it rather than from a second hand-ordered list. Debug is absent
+// because a label for every view overflows the popup's strip in the longer locales, so its
+// opt-in control is an icon in the header (main.tsx) rather than a fifth tab.
 export const TAB_VIEWS: readonly View[] = VIEWS.filter((view) => view !== "debug");
 
 // The help article the header's Help link points at, per view. Keyed by View for the same
@@ -75,7 +75,7 @@ function isView(value: string | null): value is View {
   return value !== null && (VIEWS as readonly string[]).includes(value);
 }
 
-/** The panel a stored view actually resolves to. Debug is remembered like any other
+/** The panel a stored view resolves to. Debug is remembered like any other
  *  view but lives outside the strip, so it falls back for THIS render only when it is
  *  switched off - leaving the stored value alone means turning Debug back on returns
  *  to it. */

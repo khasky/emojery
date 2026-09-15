@@ -11,7 +11,7 @@ import { parseSiteHref } from "./url-target";
 // incognito visitor on x.com/romero) drops every data-testid and renders the
 // tweet as `<article data-tweet-id="...">` (a Tailwind frontend), with a bare
 // `<article>` as the final fallback. The candidate filter (`tweetActionRow`)
-// keeps only articles that actually hold a Like + action row, so the broad
+// keeps only articles that hold a Like + action row, so the broad
 // fallback is safe.
 const TWEET_SELECTORS = ['article[data-testid="tweet"]', "article[data-tweet-id]", "article"];
 // The action row is the `role="group"` wrapping the reply/retweet/like/...
@@ -20,8 +20,7 @@ const TWEET_SELECTORS = ['article[data-testid="tweet"]', "article[data-tweet-id]
 // counts in a separate bar and leaves the action group with NO aria-label, so
 // requiring `[aria-label]` left that post with no picker. `findActionRow` walks
 // UP from the Like button, so the bare `div[role="group"]` still resolves to
-// the nearest group - the action row - never an unrelated one. (A stricter
-// `[aria-label]` variant adds nothing: the bare form matches everything it did.)
+// the nearest group - the action row - never an unrelated one.
 const ACTION_ROW_SELECTORS = ['div[role="group"]'];
 const LIKE_BUTTON_SELECTORS = ['button[data-testid="like"]', 'button[data-testid="unlike"]', 'button[aria-label$=". Like" i]', 'button[aria-label$=". Unlike" i]'];
 const VIEW_LINK_SELECTORS = ['a[aria-label*="View post analytics" i]', 'a[href*="/status/"][href$="/analytics"]', 'a[href*="/status/"][aria-label*="views" i]'];
@@ -37,7 +36,7 @@ const xAdapter = defineSiteAdapter({
   resolveRow: tweetActionRow,
   resolveTarget: (tweet, ctx) => {
     // Both are loop-invariant for the scan, so they share one entry memoized on the scan
-    // root - per candidate the root-tweet lookup alone was 3 document-wide queries per
+    // root - per candidate the root-tweet lookup alone ran document-wide queries per
     // tweet, O(N^2) per scan. Only the ROOT tweet (first in the document, over ALL tweets)
     // may fall back to the page URL.
     const scan = ctx.memo(ctx.root, () => {
@@ -84,7 +83,7 @@ function findActionRow(likeButton: HTMLElement, tweet: HTMLElement): HTMLElement
 }
 
 // Logged-out X drops the `role="group"` wrapper and every data-testid (verified
-// live in incognito on x.com/romero: a bare 518px <div> holding the five action
+// live in incognito on x.com/romero: a bare <div> holding the five action
 // slots). Fall back to the lowest ancestor of the Like holding >=3 DISTINCT
 // action controls - specific enough that the tweet body can't match.
 function findActionClusterRow(likeButton: HTMLElement, tweet: HTMLElement): HTMLElement | null {
@@ -137,14 +136,14 @@ function findPlacementAnchor(row: HTMLElement): { anchor: HTMLElement; position:
 // the flex default `auto`: with `min-width: 0` the column shrinks below our
 // counter (far wider than a native icon+count) and the nowrap text spills over
 // the next action - the native slots carry their own `min-width: 0` and absorb
-// the squeeze instead. The 32px trailing margin reproduces a native slot's gap,
-// tuned against live X.
+// the squeeze instead. The trailing margin reproduces a native slot's gap, tuned
+// against live X.
 const GROW_SLOT_WRAPPER = { tagName: "div", style: "display: flex; align-items: center; flex: 1 1 0%; margin-inline-end: 32px;" };
 
-// In status photo view the action row is much narrower (~300px) and, verified
-// live, `flex-wrap: nowrap` - an "own flex line" wrapper (`flex: 1 0 100%`) then
+// In status photo view the action row is much narrower and, verified live,
+// `flex-wrap: nowrap` - an "own flex line" wrapper (`flex: 1 0 100%`) then
 // monopolizes the row and squeezes every native slot to zero width. Join as an
-// equal grow column instead, minus the timeline wrapper's 32px trailing margin:
+// equal grow column instead, minus the timeline wrapper's trailing margin:
 // the narrow row's space-between distribution supplies the gaps.
 const PHOTO_VIEW_WRAPPER = { tagName: "div", style: "display: flex; align-items: center; flex: 1 1 0%;" };
 

@@ -75,7 +75,7 @@ function usePinnedState(): boolean | null {
 }
 
 // Opens the window for the "spot the button" step, on the first render this page
-// is actually looked at. Until this lands, a trigger mounting somewhere - including
+// is looked at. Until this lands, a trigger mounting somewhere - including
 // the tabs the install replays its content scripts into - ticks nothing.
 function useArmedChecklist(): void {
   useEffect(() => onceVisible(() => void armTriggerSeen().catch(() => {})), []);
@@ -181,7 +181,7 @@ export function App() {
             <li class="more">{t("onboardingSitesMore")}</li>
           </ul>
           {/* Inside the step it ticks, so the button reads as the way to do this step.
-              A new tab on purpose: this page is a live checklist, and following the
+              A new tab: this page is a live checklist, and following the
               link in place would throw away the very progress the visit is about to
               tick off. */}
           <a class="primary" href={TRY_IT_LIVE_URL} target="_blank" rel="noreferrer">

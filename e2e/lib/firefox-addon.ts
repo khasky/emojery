@@ -14,7 +14,7 @@ import { readFileSync } from "node:fs";
 import { connect, type Socket } from "node:net";
 import { resolve } from "node:path";
 
-// The internal UUID Firefox mints per profile for `moz-extension://<uuid>/...`
+// The internal UUID Firefox generates per profile for `moz-extension://<uuid>/...`
 // URLs, pinned via the `extensions.webextensions.uuids` pref so extension pages
 // are addressable without asking the browser. Any fixed UUID works.
 export const FIREFOX_EXTENSION_UUID = "6e2e7e2e-0e2e-4e2e-8e2e-e2e7e2e7e2e7";
@@ -97,7 +97,7 @@ export class RdpConnection {
         const [waiter] = this.waiters.splice(index, 1);
         waiter?.resolve(packet);
       }
-      // Unsolicited packets (tab lists, actor events) are dropped on purpose.
+      // Unsolicited packets (tab lists, actor events) are dropped.
     }
   }
 
@@ -147,7 +147,7 @@ async function connectWithRetry(port: number, timeoutMs = 20_000): Promise<Socke
 }
 
 // Install the unpacked build as a temporary add-on: hello -> getRoot for the
-// addons actor -> installTemporaryAddon. Errors from the actor surface verbatim.
+// addons actor -> installTemporaryAddon. Errors from the actor surface unchanged.
 export async function installTemporaryAddon(port: number, addonPath: string): Promise<void> {
   const socket = await connectWithRetry(port);
   const rdp = new RdpConnection(socket);

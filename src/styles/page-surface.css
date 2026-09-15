@@ -4,7 +4,7 @@
  * card, the palette it paints on and the heading pair inside it. Values live here
  * once so the two pages cannot drift apart - they are meant to read as one surface.
  *
- * The popup deliberately does not import this: it is a fixed-size panel with no
+ * The popup does not import this: it is a fixed-size panel with no
  * canvas of its own, and it re-points `--khasky-emojery-bg` / `-heading` to panel
  * values in its own sheet.
  *

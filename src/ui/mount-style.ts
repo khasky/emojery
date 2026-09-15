@@ -64,7 +64,7 @@ export function readSiteButtonStyle(point: PickerInsertionPoint): SiteButtonStyl
   if (entries.length === 0) return rememberedSiteStyle() ?? {};
 
   const radius = pickRepresentativeRadius(entries.map((entry) => entry.borderRadius));
-  // Fill/text come from a control that actually has the chosen shape.
+  // Fill/text come from a control that has the chosen shape.
   const surface = entries.find((entry) => entry.borderRadius === radius) ?? entries[0]!;
 
   const style: SiteButtonStyle = {};
@@ -206,7 +206,7 @@ function resolveControl(el: HTMLElement): HTMLElement | null {
 }
 
 // Skips hidden and zero-size controls (collapsed wrappers, off-screen placeholders) -
-// their computed surface isn't what the user actually sees.
+// their computed surface isn't what the user sees.
 function isVisibleControl(el: HTMLElement, probes: ProbeCache): boolean {
   const { cs, rect } = probeBox(el, probes);
   if (cs.display === "none" || cs.visibility === "hidden") return false;
@@ -426,7 +426,7 @@ function hostFlanks(host: HTMLElement, point: PickerInsertionPoint): { left: HTM
       };
 }
 
-// Nearest sibling that actually takes part in the row's layout: skip our own nodes (a stale
+// Nearest sibling that takes part in the row's layout: skip our own nodes (a stale
 // host would feed us margins we set ourselves) and boxless elements (hidden natives, <slot>).
 function usableFlank(start: Element | null, dir: "previousElementSibling" | "nextElementSibling"): HTMLElement | null {
   // `dir` is a literal union and the walk only reads DOM siblings.
@@ -441,7 +441,7 @@ function usableFlank(start: Element | null, dir: "previousElementSibling" | "nex
   return null;
 }
 
-// Relies on mount-registry.ts's wrapHost giving a wrapper EXACTLY ONE child, which is why the
+// Relies on wrapHost in mount-registry.ts giving a wrapper EXACTLY ONE child, which is why the
 // exactly-one-child test is safe here. It is the tightest of the three "is this ours"
 // predicates (mount-registry's hostElementOfMount and isMountNode are looser); a wrapper that
 // ever gains a second child makes this one return false, and usableFlank would then sample OUR
@@ -453,11 +453,11 @@ function isOwnMountNode(el: HTMLElement): boolean {
 }
 
 // Re-apply only the trigger's SIZE + SHAPE from the page's *current* styling, on a short
-// schedule after mount (see mount-reblend.ts) - Reddit hydrates its buttons a beat late. Colours are
-// intentionally NOT re-stamped on this host: a later re-read risks capturing a neighbour's
+// schedule after mount (see mount-reblend.ts) - Reddit hydrates its buttons a beat late. Colours
+// are NOT re-stamped on this host: a later re-read risks capturing a neighbour's
 // hover/active fill. The read itself still refreshes the session's remembered site surface
 // (readSiteButtonStyle -> rememberSiteStyle), which mounts with an unreadable row fall back to.
-// Returns applyHostRowHeight's "this row's own glyph was measured" verdict, so the caller's
+// Returns the "this row's own glyph was measured" verdict from applyHostRowHeight, so the caller's
 // re-blend schedule can tell a settled trigger from one still wearing a stand-in.
 export function reapplyHostShape(host: HTMLElement, point: PickerInsertionPoint): boolean {
   // Both reads first. Writing the typography before reading the surface invalidated
@@ -503,7 +503,7 @@ export function hostShapeSignature(host: HTMLElement): string {
 // The host is invisible (CSS: [data-khasky-emojery-sizing]) until its glyph size is
 // known - the trigger must first paint at its exact size, never resize in front of the
 // user (YouTube's watch row hydrates its icons a beat late). Revealed on the first
-// successful glyph resolve, or unconditionally by mount-reblend.ts's bounded deadline.
+// successful glyph resolve, or unconditionally by the bounded deadline in mount-reblend.ts.
 const SIZING_ATTR = "data-khasky-emojery-sizing";
 const revealedHosts = new WeakSet<HTMLElement>();
 
@@ -517,9 +517,9 @@ export function revealHost(host: HTMLElement): void {
 // see picker.css) and its visible GLYPH height as --khasky-emojery-glyph-h. Zero measurements
 // are skipped so a good earlier value survives. Returns whether THIS row's own icon was
 // measured, i.e. whether the size is final: a false return means the trigger wears a stand-in
-// and the caller owes it another measurement - a row that hydrates its icon past mount-reblend.ts's
-// 2.4s reblend window (YouTube's watch row) would otherwise keep the stand-in for the life of
-// the page.
+// and the caller owes it another measurement - a row that hydrates its icon past the reblend
+// window in mount-reblend.ts (YouTube's watch row) would otherwise keep the stand-in for
+// the life of the page.
 export function applyHostRowHeight(host: HTMLElement, point: PickerInsertionPoint): boolean {
   const ref = elementsToArray(point.nativeElement)[0];
   if (!ref?.isConnected) return false;
@@ -555,7 +555,7 @@ const GLYPH_SIDE_MIN_PX = 10;
 const GLYPH_SIDE_MAX_PX = 40;
 
 // The native control's visible icon (svg / img / css-sprite <i>), as distinct from its hit-box
-// - the wrong size cue on transparent icon buttons (see picker.css's hit-box note). Each
+// - the wrong size cue on transparent icon buttons (see the hit-box note in picker.css). Each
 // candidate contributes its smaller side; only sides inside the band above count, and the
 // largest of those is the icon.
 function nativeGlyphHeight(ref: HTMLElement): number | null {

@@ -71,7 +71,7 @@ export const SearchField = ({ wrapClass, inputClass, placeholder, ariaLabel, val
 
 // Focus a ref once `active` turns true. Every call site is a transient panel whose
 // appearance unmounts the control that held focus, so without this the browser drops
-// focus to <body> (WCAG 2.4.3).
+// focus to <body> (WCAG).
 export const useAutoFocus = (ref: { current: HTMLElement | null }, active = true): void => {
   useEffect(() => {
     if (active) ref.current?.focus();

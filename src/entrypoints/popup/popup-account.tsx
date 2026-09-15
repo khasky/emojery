@@ -41,7 +41,7 @@ const DeleteAccountRow = ({ refresh }: { refresh: () => void }) => {
   const wasArmed = useRef(false);
 
   // Cancelling unmounts the slide control that held focus, so it would fall to <body>; hand it
-  // back to the button that armed the confirm (WCAG 2.4.3). Nothing armed the first render.
+  // back to the button that armed the confirm (WCAG). Nothing armed the first render.
   useEffect(() => {
     if (!armed && wasArmed.current) armButtonRef.current?.focus();
     wasArmed.current = armed;

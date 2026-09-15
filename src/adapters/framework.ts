@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Adapter framework: a thin, declarative-first skeleton every site adapter
-// shares. `defineSiteAdapter()` returns a plain `SiteAdapter`: each
-// `entrypoints/*.content.ts` hands it to `ui/content-entry.ts`, which calls
-// `observe()`; its points mount via `mountAll`/`mountAt`.
-// All site-specific knowledge stays in callbacks; `resolveBinding` returns a
-// ready `PickerInsertionPoint` minus its `target`, so the framework never
+// Adapter framework: the skeleton every site adapter shares.
+// `defineSiteAdapter()` returns a plain `SiteAdapter`, which each
+// `entrypoints/*.content.ts` hands to `ui/content-entry.ts`; that calls
+// `observe()` and mounts its points via `mountAll`/`mountAt`. Site-specific
+// knowledge stays in the callbacks: `resolveBinding` returns a ready
+// `PickerInsertionPoint` minus its `target`, so the framework never
 // reinterprets a site's placement.
 import type { PickerInsertionPoint, SiteAdapter, SupportedSite, TargetRef } from "../shared/adapter";
 import { detectSupportedSite } from "../shared/sites";
@@ -13,14 +13,13 @@ import { createScanObserver, type ScanObserverOptions } from "./scan-observer";
 
 export interface ScanContext {
   root: ParentNode;
-  // Per-scan target dedupe, owned by the framework - read by Facebook's
-  // shared-photo collision handler, never a callback's to mutate. The container
-  // dedupe stays private to the scan loop; no callback needs it.
+  // Per-scan target dedupe owned by the framework: Facebook's shared-photo
+  // collision handler reads it, and no callback may mutate it.
   seenTargets: Set<string>;
-  // Memoize a derived value for the current scan. Caches `null` / falsy results
-  // too (via cache.has), so a negative lookup isn't recomputed. For a value the
-  // whole scan shares (a parse of the page URL, keyed on `root`); a per-candidate
-  // lookup goes through `resolveRow` instead.
+  // Memoize a derived value for the current scan. Falsy results are cached too,
+  // so a negative lookup isn't recomputed. For a value the whole scan shares (a
+  // parse of the page URL, keyed on `root`); a per-candidate lookup goes through
+  // `resolveRow`.
   memo<T>(key: object, compute: () => T): T;
 }
 
@@ -30,13 +29,12 @@ type ScanObserverProfile = Omit<ScanObserverOptions, "onUpdate" | "scan">;
 
 export interface SiteAdapterSpec<Row = null> {
   site: SupportedSite;
-  // Page-level privacy gate. When true the scan yields NO points - the extension
-  // never shows on a page whose content isn't viewable by an anonymous public
-  // visitor (private repos / projects / groups / accounts): a reaction can only
-  // be recorded for a publicly addressable target. Runs once per scan, before
-  // any candidate work. See page-visibility.ts.
+  // Page-level privacy gate, run once per scan before any candidate work. When
+  // true the scan yields no points: a reaction can only be recorded for a
+  // publicly addressable target, so the extension stays off pages an anonymous
+  // visitor cannot see (private repos / projects / groups / accounts). See
+  // page-visibility.ts.
   isPrivatePage?(ctx: ScanContext): boolean;
-  // The DOM elements a binding starts from.
   findCandidates(ctx: ScanContext): Iterable<HTMLElement>;
   // The per-candidate lookup the three callbacks below share - typically the
   // action row the candidate sits in. Run once per candidate per scan and handed
@@ -47,8 +45,8 @@ export interface SiteAdapterSpec<Row = null> {
   // Container-level dedupe (e.g. one point per visual action row). Returning
   // null or an already-seen container drops the candidate before target work.
   dedupeContainer?(candidate: HTMLElement, ctx: ScanContext, row: Row): HTMLElement | null;
-  // Observer: standard re-scan options, extended per site via plugins - Reddit's
-  // shadow roots and Facebook's hover priming both ride on those.
+  // Standard re-scan options, extended per site via plugins: Reddit's shadow
+  // roots and Facebook's hover priming ride on those.
   observer?: ScanObserverProfile;
 }
 

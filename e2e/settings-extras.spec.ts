@@ -96,7 +96,7 @@ test("an already-open second popup shows stale settings until reopened", async (
       await firstEnabled.setChecked(false);
       await expect(firstEnabled).not.toBeChecked();
 
-      // The whole point of the case is that nothing arrives. Generous on purpose:
+      // The whole point of the case is that nothing arrives. Generous:
       // this is the window a live-sync would have propagated in, so a shorter wait
       // would make the assertion pass for the wrong reason.
       await second.waitForTimeout(2_000);
@@ -323,7 +323,7 @@ test("the Theme setting drives the extension pages, and System follows the brows
 // The Debug panel ships in every build behind the setting (docs/development.md).
 // The header's bug button is in the DOM either way and `display: none` until the
 // setting is on (.debug-toggle-off), so "revealed" is a visibility assertion. The
-// panel's summary is deliberately un-i18n'd (popup-queue.tsx): the text below is
+// panel's summary is un-i18n'd (popup-queue.tsx): the text below is
 // the queue's own state, not a translation.
 test("Debug mode reveals the queue panel and hides it again", async () => {
   test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);

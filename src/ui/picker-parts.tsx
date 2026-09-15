@@ -56,7 +56,7 @@ export const EmojiButton = ({ emoji, selected, onPick, onKeyDown }: { emoji: str
 // A labelled `role="group"`, not a bare <section>: an unnamed <section> carries no role at all,
 // so a screen reader read the whole palette as one flat run with no idea which block it was in.
 // `role="group"` + aria-labelledby names each block without making it a landmark (a NAMED
-// <section> would - nine categories, nine landmarks).
+// <section> would, one landmark per category).
 //
 // The buttons stay <button aria-pressed> rather than becoming a role="grid"/"gridcell" tree:
 // the visual grid is a flat CSS `repeat(6, 1fr)` with no per-row element the grid role

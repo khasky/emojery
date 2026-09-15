@@ -110,7 +110,7 @@ const ReportView = () => {
   const trimmedNote = note.trim();
   const canSubmit = tab.state === "supported" && trimmedNote.length >= MIN_REPORT_NOTE_CHARS;
   // The placeholder states the length rule but vanishes on the first keystroke - exactly when
-  // the rule starts to bite - so repeat it under the field until the note is long enough (WCAG 3.3.2).
+  // the rule starts to bite - so repeat it under the field until the note is long enough (WCAG).
   const noteTooShort = trimmedNote.length > 0 && trimmedNote.length < MIN_REPORT_NOTE_CHARS;
 
   const submit = () => {
@@ -127,7 +127,7 @@ const ReportView = () => {
     })
       .then((resp) => {
         // A failed submit must not fail silently - the note stays in the form,
-        // the error explains why nothing happened (WCAG 3.3.1). The background's
+        // the error explains why nothing happened (WCAG). The background's
         // classification decides HOW it explains it; anything that is not an error
         // response falls back to the generic report wording.
         if (resp?.type === "ok") setSent(true);

@@ -13,7 +13,8 @@ declare const __EM_API_BASE__: string;
 // undefined): a test that reaches the network at all must not reach production.
 export const API_BASE: string = (typeof __EM_API_BASE__ !== "undefined" && __EM_API_BASE__) || STAGING_API_BASE;
 
-// TTL for the local read-through counts cache (see shared/counts-cache.ts getCachedCounts).
+// TTL for the local read-through counts cache, read by getCachedCounts in
+// shared/counts-cache.ts.
 export const READ_CACHE_TTL_MS = 60_000;
 
 // Deadline for a single outbound fetch. Every caller sits under a memoized promise, so a
@@ -22,7 +23,7 @@ export const API_TIMEOUT_MS = 10_000;
 
 // Deadline for any page -> background round trip: content scripts, and the popup and auth
 // page through sendRuntimeMessage. The background can be a cold service worker doing
-// IndexedDB work, so this is deliberately looser than the API one.
+// IndexedDB work, so this is looser than the API one.
 export const RUNTIME_MESSAGE_TIMEOUT_MS = 15_000;
 
 // How long a whole counts read gets, retry included. Derived from the wait above so the

@@ -5,9 +5,8 @@
 // copy; the codes a user can act on (`network`, `rate_limited`, `server`) override it
 // with copy that says which one it is.
 //
-// `unavailable` deliberately has no copy of its own: it IS the generic case, so it falls
-// through to the caller's fallback rather than inventing a second way to say "something
-// went wrong".
+// `unavailable` has no copy of its own: it IS the generic case, so it falls through to
+// the caller's fallback instead of a second way to say "something went wrong".
 
 import type { I18nKey } from "./i18n";
 import type { RuntimeErrorCode, RuntimeResponse } from "./messages";

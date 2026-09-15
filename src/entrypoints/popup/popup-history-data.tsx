@@ -66,10 +66,10 @@ export const HistoryDataSection = () => {
   const wasPending = useRef(false);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
-  // Three states, because import REPLACES the stored history and the confirm below
-  // prints this number as "what you are about to lose": `undefined` = the first read
-  // is still in flight, `null` = the read FAILED (or came back unauthed), a number =
-  // known. A failed read must not fall back to 0 - that reads as "nothing to lose"
+  // Import REPLACES the stored history, and the confirm below prints this number as
+  // "what you are about to lose": `undefined` = the first read is still in flight,
+  // `null` = the read FAILED (or came back unauthed), a number = known. A failed
+  // read must not fall back to 0 - that reads as "nothing to lose"
   // and is exactly the reassurance the user must not be given.
   const [storedRowCount, setStoredRowCount] = useState<number | null>();
   const [pendingImportRows, setPendingImportRows] = useState<PortableHistoryRow[] | null>(null);
@@ -87,7 +87,7 @@ export const HistoryDataSection = () => {
 
   // Picking a file disables the Import button that armed this confirm, so the browser
   // drops focus to <body>; move it onto the confirm instead - and back onto Import when
-  // the confirm goes away, since it takes the focused button with it (WCAG 2.4.3).
+  // the confirm goes away, since it takes the focused button with it (WCAG).
   useEffect(() => {
     if (pendingImportRows) confirmRef.current?.focus();
     else if (wasPending.current) importButtonRef.current?.focus();

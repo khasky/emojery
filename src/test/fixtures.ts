@@ -13,7 +13,7 @@ type Items = Record<string, unknown>;
 
 // A stateful chrome.storage area over a plain object. get/set/remove/clear are
 // `vi.fn` spies (so tests can assert calls) that honour BOTH the callback and
-// promise styles webext.ts's callChrome accepts. Reads reflect prior writes.
+// promise styles callChrome in webext.ts accepts. Reads reflect prior writes.
 function storageArea(store: Items) {
   return {
     get: vi.fn((keys?: unknown, done?: (items: Items) => void) => {
@@ -84,8 +84,8 @@ export function installFakeChrome(options: FakeChromeOptions = {}): FakeChrome {
       getAll: vi.fn().mockResolvedValue({ permissions: [], origins: [], data_collection: options.dataCollection }),
     };
   }
-  // Via stubGlobal so `vi.unstubAllGlobals()` in a suite's afterEach really
-  // removes the stub - a bare `globalThis.chrome =` assignment outlived tests.
+  // Via stubGlobal so `vi.unstubAllGlobals()` in a suite's afterEach removes the
+  // stub - a bare `globalThis.chrome =` assignment outlived tests.
   vi.stubGlobal("chrome", chromeStub);
   return { local, sync, session };
 }
@@ -138,7 +138,7 @@ const EMOJI_DATA_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "../../p
 
 // Stub the pair emoji-meta.ts resolves its locale files through at runtime -
 // chrome.runtime.getURL + fetch - serving the REAL shipped `public/emoji-data`
-// straight off disk. Returns the live list of locale keys fetched so far, in
+// straight off disk. Returns the live list of locale keys fetched, in
 // order, for tests that assert on WHICH locale got routed to. Restore with
 // vi.unstubAllGlobals().
 export function stubEmojiDataFetch(): string[] {

@@ -9,7 +9,7 @@ import { AGREE_CHECKBOX_SELECTOR, CODE_INPUT_SELECTOR, EMAIL_INPUT_SELECTOR } fr
 // Whole file drives auth.html/popup.html, which Playwright Firefox cannot reach.
 test.skip(isFirefoxRun(), FIREFOX_NO_EXTENSION_PAGES);
 
-// No hardcoded origin fallback, the rule lib/test-config.ts's requiredEnvUrl states: an unset
+// No hardcoded origin fallback, the rule requiredEnvUrl in lib/test-config.ts states: an unset
 // key must fail naming the key. A production default checked a STAGING build against the
 // production origin and threw "manifest is missing host permission", sending the reader to
 // rebuild instead of to the env file. Resolved in beforeAll, past the not-configured skip.

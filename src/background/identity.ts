@@ -82,7 +82,7 @@ export async function requestOtp(email: string): Promise<RequestOtpResult> {
   };
 }
 
-// Deliberately carries no AuthState: the session (bearer token included) is
+// Carries no AuthState: the session (bearer token included) is
 // already persisted via setAuth and read back through getAuth, so returning it
 // would only widen the credential's exposure surface.
 export type VerifyOtpResult = { ok: true } | { ok: false; refusal: OtpVerifyRefusal };
@@ -108,8 +108,8 @@ export async function verifyOtp(email: string, code: string): Promise<VerifyOtpR
 
 // End this account's session server-side; clearing the local token alone does not.
 //
-// Best-effort by design: the caller clears local state regardless, because a
-// sign-out that fails when the network is down would strand the user signed in.
+// The caller clears local state regardless of the answer: a sign-out that fails
+// when the network is down would strand the user signed in.
 // `keepalive` so the request survives the popup closing right after the click.
 export async function revokeSessionServerSide(token: string): Promise<boolean> {
   try {

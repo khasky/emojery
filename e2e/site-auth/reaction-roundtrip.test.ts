@@ -3,7 +3,7 @@
 // Flow 1 - the core proof that an authenticated reaction round-trips: a real
 // signed-in user clicks the Emojery trigger, picks an emoji, the trigger shows
 // emoji+count, and the pick PERSISTS across a reload. Runs (lightly) on all 9
-// sites; cross-tab sync (SW-brokered) is checked once on a stable target.
+// sites; cross-tab sync (brokered by the service worker) is checked once on a stable target.
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { COUNTER_CLASS, GRID_ITEM_SELECTOR, HOST_SELECTOR, MOUNTED_SELECTOR } from "../lib/selectors";
 import type { Bridge } from "./bridge";
@@ -161,7 +161,7 @@ async function ensureLiveTrigger(b: Bridge, site: SiteId) {
       await ensureLiveTrigger(b, "youtube");
 
       // Open a second tab on the same URL BEFORE reacting, so the update can only
-      // arrive via the SW-brokered cross-tab push (not a fresh fetch on load).
+      // arrive via the service-worker-brokered cross-tab push (not a fresh fetch on load).
       await b.openTab(url);
       await b.waitMs(3500);
       // Mute every tab's media so the duplicate YouTube tab doesn't blast audio.
@@ -203,7 +203,7 @@ async function ensureLiveTrigger(b: Bridge, site: SiteId) {
       // This click bypasses openPickerState, so sweep any auth tab a signed-out
       // trigger click just spawned (and count it toward the abort cap).
       await closeSpawnedAuthTabs(b);
-      // The second tab is only allowed to learn the new count through the SW's
+      // The second tab is only allowed to learn the new count through the service worker's
       // cross-tab push, which is a full vote round-trip plus a broadcast - so this
       // wait is the push's budget, not a render settle.
       await b.waitMs(2500);

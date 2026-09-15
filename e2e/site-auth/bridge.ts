@@ -231,7 +231,7 @@ export async function connectBridge(): Promise<Bridge> {
   const ATTEMPTS = 2;
   const RETRY_PAUSE_MS = 1_500;
 
-  // The ONE place a bridge failure is minted, so no caller can receive a raw McpError
+  // The ONE place a bridge failure is created, so no caller can receive a raw McpError
   // and mistake it for something the page said.
   const call = async (code: string): Promise<string> => {
     let last: unknown;

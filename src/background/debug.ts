@@ -23,8 +23,8 @@ export function logApiExchange(url: string, init: RequestInit, outcome: ApiExcha
   });
 }
 
-// Trace for a failure the caller deliberately absorbs (best-effort background
-// work, a fire-and-forget task). Silent absorption is how a stalled queue hides;
+// Trace for a failure the caller absorbs (background work nothing waits on, a
+// fire-and-forget task). Silent absorption is how a stalled queue hides;
 // dev/staging-only, like every other channel here, so a shipped build stays quiet.
 export function logBackgroundError(scope: string, error: unknown): void {
   logScopedError("error", scope, error);

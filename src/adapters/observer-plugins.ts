@@ -10,7 +10,7 @@ export function shadowRootDiscovery(opts: { attributeFilter: readonly string[] }
       const observedRoots = new WeakSet<ParentNode>();
       // Added subtrees awaiting the shadow-root walk. Discovery is a full `*` walk per added
       // node, so it runs in its own task instead of inside the observer callback, and a burst
-      // of batches (a feed page appending cards) is walked once rather than per batch.
+      // of batches (a feed page appending cards) is walked once.
       let pendingScopes: Element[] = [];
       let discoveryTimer = 0;
       const scheduleDiscovery = (): void => {

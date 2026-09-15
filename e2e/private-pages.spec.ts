@@ -146,7 +146,7 @@ test.describe("private-page gate", () => {
       const probe = await githubProbe(priv);
       expect(countRewrites(), "meta should be stripped and the lock injected").toBeGreaterThan(0);
       expect(probe.metaPublic, JSON.stringify(probe)).toBeNull();
-      // The meta is stripped here by design, so the rewrite count is what proves a
+      // The meta is stripped here, so the rewrite count is what proves a
       // real repo document came back.
       requireStarControl(probe, countRewrites() > 0, "GitHub");
       await expectNoHostMount(priv);
