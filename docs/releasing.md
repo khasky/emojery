@@ -37,7 +37,7 @@ The extension's `major.minor` is the API line it is built for: a `1.2.x` build t
 
 The 1.0.0 release predates this procedure, so `release/1.0` was created after the fact (2026-09-10) from the existing `v1.0.0` tag.
 
-**The 1.0.1 exception.** 1.0.1 replaces the email-code sign-in with the provider sign-in, which the API had to grow first (the OIDC, epoch-key and signed-vote endpoints), so it is a patch that needs the other side after all: it is released only once that API is live, the way a minor is. It is tagged on `main` with `pnpm exec commit-and-tag-version --release-as 1.0.1` rather than cherry-picked onto the branch, and `release/1.0` is then fast-forwarded to the tag (`git branch -f release/1.0 v1.0.1`) so the line still ends at what shipped. The API keeps serving 1.0.0's email-code sign-in until 1.0.1 has been in every store for a while; after that cutover 1.0.0 gets `403 client_outdated` and the update prompt.
+**The 1.0.1 exception.** 1.0.1 replaces the email-code sign-in with the provider sign-in, which the API had to grow first (the OIDC, epoch-key and signed-vote endpoints), so it is a patch that needs the other side after all: it is released only once that API is live, the way a minor is. It is tagged on `main` with `pnpm exec commit-and-tag-version --release-as 1.0.1` rather than cherry-picked onto the branch, and `release/1.0` is then fast-forwarded to the tag (`git branch -f release/1.0 v1.0.1`) so the line still ends at what shipped. Once the API retires the email-code sign-in, 1.0.0 gets `403 client_outdated` and the update prompt.
 
 ## The first release
 
