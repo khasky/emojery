@@ -37,8 +37,11 @@ const REFUSAL_COPY: Record<SignInRefusal, I18nKey> = {
 // here: the identity window is opened from there, and whatever it comes back with
 // belongs where it is used. An answer that is not the exchange's own envelope
 // (the background's generic error, a dropped channel) reads as the generic refusal.
+// No deadline: the answer waits on the provider's window (the user's own pace) and
+// on a first sign-in's enrollment, both longer than the round-trip timeout allows;
+// a background that dies still rejects through the closed channel.
 async function askSignIn(provider: OidcProvider): Promise<SignedIn> {
-  const res = await sendRuntimeMessage({ type: "auth:signIn", provider }).catch(() => undefined);
+  const res = await sendRuntimeMessage({ type: "auth:signIn", provider }, null).catch(() => undefined);
   return res?.type === "auth:signedIn" ? res : { type: "auth:signedIn", ok: false, refusal: "unavailable" };
 }
 

@@ -196,12 +196,13 @@ export function getTab(tabId: number): Promise<chrome.tabs.Tab | null> {
 // Bounded by a deadline: a background handler that never calls sendResponse (a service
 // worker evicted mid-request, a downstream fetch that hangs) would otherwise leave the
 // caller's promise - and everything it holds - pending for the life of the page.
-export function sendRuntimeMessage(msg: RuntimeMessage): Promise<RuntimeResponse | undefined> {
-  return withDeadline(
-    callChrome<RuntimeResponse | undefined>((done) => chrome.runtime.sendMessage(msg, (response) => done(response))),
-    RUNTIME_MESSAGE_TIMEOUT_MS,
-    `runtime message timed out: ${msg.type}`,
-  );
+// `deadlineMs` null waits for the channel itself: Chrome rejects the callback when
+// the background goes away, so a message whose answer waits on the user (the
+// identity window) needs no timer of its own.
+export function sendRuntimeMessage(msg: RuntimeMessage, deadlineMs: number | null = RUNTIME_MESSAGE_TIMEOUT_MS): Promise<RuntimeResponse | undefined> {
+  const answered = callChrome<RuntimeResponse | undefined>((done) => chrome.runtime.sendMessage(msg, (response) => done(response)));
+  if (deadlineMs === null) return answered;
+  return withDeadline(answered, deadlineMs, `runtime message timed out: ${msg.type}`);
 }
 
 function withDeadline<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {

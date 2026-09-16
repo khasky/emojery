@@ -156,6 +156,26 @@ describe("webext helpers", () => {
     }
   });
 
+  // The sign-in answer arrives when the identity window closes, which a first
+  // sign-in's enrollment alone pushes past the round-trip deadline (measured live:
+  // the page reported "Something went wrong" while the background went on to store
+  // the session). A null deadline keeps the caller waiting for the channel.
+  it("waits past the deadline for a message sent without one", async () => {
+    vi.useFakeTimers();
+    try {
+      let answer: ((response: unknown) => void) | undefined;
+      vi.stubGlobal("chrome", { runtime: { lastError: undefined, sendMessage: vi.fn((_msg, done: (response: unknown) => void) => (answer = done)) } });
+      let settled = false;
+      const pending = sendRuntimeMessage({ type: "auth:signIn", provider: "test" }, null).finally(() => (settled = true));
+      await vi.advanceTimersByTimeAsync(RUNTIME_MESSAGE_TIMEOUT_MS * 4);
+      expect(settled).toBe(false);
+      answer?.({ type: "auth:signedIn", ok: true });
+      await expect(pending).resolves.toEqual({ type: "auth:signedIn", ok: true });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("uses alarm APIs when available and no-ops when unavailable", () => {
     const create = vi.fn((_name, _info, done?: () => void) => done?.());
     const addListener = vi.fn();
