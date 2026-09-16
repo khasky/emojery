@@ -101,7 +101,10 @@ test.describe("extension account auth", () => {
     const windowToAccept = await identityWindowAfter(authPage, () => testButton.click());
     expect(windowToAccept, "the identity window should open on the third click").not.toBeNull();
     await completeSignIn(windowToAccept!, testAccount);
-    await expect(authPage.getByRole("heading", { name: enMessage("authDoneTitle") })).toBeVisible();
+    // A first sign-in enrolls the account before the window comes back (measured on
+    // staging: 14-23 s, more when the prover starts cold); the default wait is too
+    // short for it.
+    await expect(authPage.getByRole("heading", { name: enMessage("authDoneTitle") })).toBeVisible({ timeout: 60_000 });
 
     await authPage.close();
     await popup.close();
