@@ -50,7 +50,7 @@ The **When CI runs it** column is the honest map of what a green pipeline has ac
 | `overlay-freeze.spec.ts` | Threads' URL-addressed photo lightbox: a `/media` overlay open/close cycle (pushState/back, no real click needed) must leave the mounts untouched — no blink, no stale wrong-post trigger | No | Manual only |
 | `facebook-comment-injection.spec.ts` | A comment's reaction cluster never becomes a mount: injects the vulnerable A/B-served comment shape next to a live post's own counts row and asserts nothing mounts on or inside it | No | Manual only |
 | `facebook-group-row-injection.spec.ts` | The icon-only Comment/Send action row (the group photo-post shape, which live sits behind a group login) still mounts a trigger: injects the captured row beside a live public post | No | Manual only |
-| `auth.spec.ts` | The provider sign-in through the staging test issuer: consent gating the buttons, a cancelled window, a refused secret, sign-in/out, the localized provider step | Yes | Manual only |
+| `auth.spec.ts` | The provider sign-in through the staging test provider: consent gating the buttons, a cancelled window, a refused sign-in, sign-in/out, the localized provider step | Yes | Manual only |
 | `accounts.spec.ts` | Multi-account: identity isolation across switches, independent counter moves, provider-account recovery (all on GitHub) | Yes | Manual only |
 | `authed-extras.spec.ts` | Master toggle, react/un-react counter math, offline queue flush, account deletion, the Report tab, rapid reaction switching, an in-flight vote surviving a reload, the analytics-consent default | Yes | Manual only |
 | `reaction-burst.spec.ts` | A fast burst of reactions: every accepted click is counted and listed in History; a refused one is re-sent by the durable queue, losing nothing | Yes | Manual only |
@@ -92,7 +92,7 @@ The helpers are layered, lowest first, so a spec is a table of scenarios plus th
 | `lib/reaction-actions.ts` · `lib/reaction-surface.ts` | One target, one reaction: pick, clear, assert what came back — and the single-target live surfaces (GitHub, GitLab) the autonomous specs read it through |
 | `lib/mount-wait.ts` | The gate the 2 Facebook injection specs share: the page's own post must mount before a synthetic row is injected, and a page that never mounts is a wall (skip), not a regression |
 | `lib/extension-pages.ts` · `lib/popup-probes.ts` · `lib/popup-settings.ts` | The extension's own `chrome-extension://` surfaces — resolving its id, opening the popup, the History tab, driving the Settings/Account toggles to a target state |
-| `lib/auth-signin.ts` | Driving `auth.html` through the test-issuer sign-in (the identity window the provider button opens), with the retries a live backend needs |
+| `lib/auth-signin.ts` | Driving `auth.html` through the test-provider sign-in (the identity window the provider button opens, completed by the out-of-tree resolver), with the retries a live backend needs |
 | `lib/site-session.ts` · `lib/localized-placement.ts` | The browser session and skip diagnostics; the other-language placement check |
 | `lib/coext-source.ts` | Resolving a coexistence-test extension source (folder, zip/crx URL, Web Store id) to a cached unpacked folder |
 | `lib/extension.ts` | Barrel for the autonomous specs, kept for import stability — it re-exports the modules above under one path and owns no work of its own. New code imports the specific module. |
@@ -143,7 +143,7 @@ Every spec marked "Yes" above covers the gaps the site loops don't, **autonomous
   - The other keeps clicking until a refusal comes back. Nothing extra may be counted while it does, and the durable queue must re-send every refused click afterwards, so History still holds exactly 1 row per click.
 - **`persistence.spec.ts`** — changed settings survive a full browser restart; a reaction made before a restart is still the user's reaction afterwards (re-login: `--load-extension` clears the session each launch, unlike a store install); a fresh profile starts from defaults.
 
-The sign-in flow itself (consent gating, a cancelled window, a refused secret, sign-in/out, the localized provider step) is in `auth.spec.ts`; history round-trip, emoji search (incl. localized queries), per-site toggle, replace-native, cross-tab and react/un-react are already covered by the gated authed loop in `site-injection.spec.ts`.
+The sign-in flow itself (consent gating, a cancelled window, a refused sign-in, sign-in/out, the localized provider step) is in `auth.spec.ts`; history round-trip, emoji search (incl. localized queries), per-site toggle, replace-native, cross-tab and react/un-react are already covered by the gated authed loop in `site-injection.spec.ts`.
 
 ## What the unauthenticated suite covers (every supported site)
 

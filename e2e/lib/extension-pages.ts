@@ -13,7 +13,7 @@ import { isFirefoxRun } from "./browser-session";
 import { FIREFOX_EXTENSION_UUID } from "./firefox-addon";
 import { firefoxBridge } from "./firefox-bridge";
 import { DEEP_QUERY_ALL_SRC } from "./probe-src";
-import { authSubject, issuerSecret } from "./test-config";
+import { authAccount, completeSignIn } from "./test-config";
 
 // The background worker - the one context that can write extension storage. It
 // starts with the first extension page/content script, so callers open a tab first.
@@ -102,7 +102,7 @@ export async function openPopup(context: BrowserContext): Promise<Page> {
   return popup;
 }
 
-// Sign in by opening auth.html directly. Defaults to the primary test subject;
+// Sign in by opening auth.html directly. Defaults to the primary test account;
 // `locale` as documented on AuthSignInOptions in auth-signin.ts. The sign-in
 // itself lives in `auth-signin.ts`.
 //
@@ -110,12 +110,12 @@ export async function openPopup(context: BrowserContext): Promise<Page> {
 // Playwright Firefox neither opens for a temporary add-on nor reports - the
 // bridge reaches the background page, not a window the browser owns. A spec that
 // signs in guards itself with `test.skip(isFirefoxRun(), ...)`.
-export async function signIn(context: BrowserContext, subject: string = authSubject(), locale = "en"): Promise<void> {
+export async function signIn(context: BrowserContext, account: string = authAccount(), locale = "en"): Promise<void> {
   if (isFirefoxRun()) throw new Error("signIn is chromium-only: the identity window is unreachable from Playwright Firefox - guard the spec with test.skip(isFirefoxRun(), ...)");
   const extensionId = await resolveExtensionId(context);
   expect(extensionId, "Emojery must be loaded before signing in").not.toBeNull();
   if (!extensionId) throw new Error("Missing Emojery extension id");
-  await signInThroughAuthPage(context, extensionId, { subject, secret: issuerSecret(), locale });
+  await signInThroughAuthPage(context, extensionId, { completeSignIn: (window) => completeSignIn(window, account), locale });
 }
 
 type AccountState = "signed-in" | "signed-out" | "loading";

@@ -141,7 +141,7 @@ test("account deletion: signs out and reverses its reactions", async () => {
   const reacted: Array<{ page: Page; mountKey: string; minimum: number }> = [];
   const withVote: Array<{ page: Page; mountKey: string; countWith: number }> = [];
   try {
-    await ext.signIn(session.context, ext.authSubject("delete"));
+    await ext.signIn(session.context, ext.authAccount("delete"));
 
     // React on a couple of login-free repo/project surfaces; keep each page open
     // so its RENDERED counter can be re-read after the counts settle.

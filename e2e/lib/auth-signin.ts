@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Driving the extension's OWN auth page (auth.html) with the test issuer: the
-// page's selectors, its shipped button labels, and the provider sign-in that runs
-// through the browser's identity window, with the retries that make it survive a
-// real backend.
+// Driving the extension's OWN auth page (auth.html) through the staging test
+// provider: the page's selectors, its shipped button labels, and the provider
+// sign-in that runs through the browser's identity window, with the retries that
+// make it survive a real backend. What happens INSIDE that window is the caller's
+// `completeSignIn` (the out-of-tree sign-in resolver, see lib/test-config.ts).
 //
 // A LEAF module: it is also loaded directly under plain Node, where types are
 // stripped at load and imports resolve by Node's own rules. So: no relative
@@ -19,13 +20,8 @@ import { AGREE_CHECKBOX_SELECTOR, AUTH_ERROR_SELECTOR, providerButtonSelector } 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 export const EXTENSION_ROOT = resolve(__dirname, "..", "..");
 
-// The provider the staging API lists for the suites: its "login page" is the
-// API's own test issuer, a form of two fields that any subject can sign in as.
+// The provider the staging build lists for the suites.
 export const TEST_PROVIDER = "test";
-// The issuer page's field names, as the API renders them.
-const ISSUER_SUBJECT_SELECTOR = 'input[name="sub"]';
-const ISSUER_SECRET_SELECTOR = 'input[name="secret"]';
-const ISSUER_SUBMIT_SELECTOR = 'button[type="submit"]';
 
 const localeMessageCache = new Map<string, Record<string, { message?: string }>>();
 
@@ -96,10 +92,8 @@ export function isPageCrash(err: unknown): boolean {
 }
 
 interface AuthSignInOptions {
-  /** The test issuer's subject: the account to sign in as. */
-  subject: string;
-  /** The test issuer's shared secret, which any sign-in through it must present. */
-  secret: string;
+  /** Completes the sign-in inside the identity window the provider button opened. */
+  completeSignIn: (window: Page) => Promise<void>;
   /** Matches a `--lang=<locale>` browser, so the auth page's button labels
    *  resolve to that language's shipped copy. */
   locale?: string;
@@ -118,10 +112,10 @@ export async function signInThroughAuthPage(context: BrowserContext, extensionId
     await opts.prepare?.(authPage);
     await authPage.goto(authUrl);
     // Retry the whole sign-in: a first pass occasionally fails transiently
-    // (the identity window closing early, a slow issuer), and a fresh one clears it.
+    // (the identity window closing early, a slow provider), and a fresh one clears it.
     for (let attempt = 0; attempt < 3; attempt += 1) {
       try {
-        if (await signInWithTestIssuer(authPage, opts, locale)) return;
+        if (await signInThroughTestProvider(authPage, opts, locale)) return;
         // Backoff between passes: a failed one leaves the page with its refusal
         // shown; the next attempt reloads into a fresh pass regardless.
         await authPage.waitForTimeout(1_500);
@@ -159,36 +153,39 @@ export async function signInThroughAuthPage(context: BrowserContext, extensionId
 export async function signInOnAuthPage(authPage: Page, opts: AuthSignInOptions): Promise<void> {
   const locale = opts.locale ?? "en";
   for (let attempt = 0; attempt < 3; attempt += 1) {
-    if (await signInWithTestIssuer(authPage, opts, locale)) return;
+    if (await signInThroughTestProvider(authPage, opts, locale)) return;
     // The same backoff signInThroughAuthPage's loop takes.
     await authPage.waitForTimeout(1_500);
   }
   await expect(authPage.getByRole("heading", { name: localeMessage(locale, "authDoneTitle") }), "sign-in never completed in the gate's own auth tab").toBeVisible();
 }
 
+// The identity window is a browser window of its own (identity.launchWebAuthFlow),
+// which Playwright surfaces as the next page event on the context. Registered
+// BEFORE the click so a window that opens at once is not missed; null when none
+// opens within the timeout.
+export function identityWindowAfter(authPage: Page, open: () => Promise<void>): Promise<Page | null> {
+  const opened = authPage
+    .context()
+    .waitForEvent("page", { timeout: 30_000 })
+    .catch(() => null);
+  return open().then(() => opened);
+}
+
 // One sign-in pass. Returns true once "You're signed in" shows; false if the
 // page reported a refusal (the caller re-runs the pass). Structural failures -
 // never reaching the provider list, the identity window never opening - still throw.
-//
-// The identity window is a browser window of its own (identity.launchWebAuthFlow),
-// which Playwright surfaces as a page on the same context; it is found by the
-// issuer's URL rather than by order, since the auth tab itself is a page too.
-async function signInWithTestIssuer(authPage: Page, opts: AuthSignInOptions, locale: string): Promise<boolean> {
+async function signInThroughTestProvider(authPage: Page, opts: AuthSignInOptions, locale: string): Promise<boolean> {
   await authPage.reload();
   const providerButton = authPage.locator(providerButtonSelector(TEST_PROVIDER));
-  await expect(providerButton, "the staging API should list the test provider").toBeVisible({ timeout: 30_000 });
+  await expect(providerButton, "the staging build should list the test provider").toBeVisible({ timeout: 30_000 });
   // The Terms/Privacy box ships unchecked, so consent is a required step of
   // every sign-in, and every provider button stays disabled until it is ticked.
   await authPage.locator(AGREE_CHECKBOX_SELECTOR).check();
   await expect(providerButton).toBeEnabled();
 
-  const issuerPromise = authPage
-    .context()
-    .waitForEvent("page", { predicate: (page) => page.url().includes("/test-oidc/"), timeout: 30_000 })
-    .catch(() => null);
-  await providerButton.click();
-  const issuer = await issuerPromise;
-  if (!issuer) {
+  const window = await identityWindowAfter(authPage, () => providerButton.click());
+  if (!window) {
     // The window never opened, or opened somewhere Playwright does not report:
     // that is the page-level failure, and it carries the auth page's own refusal
     // if there is one.
@@ -197,13 +194,9 @@ async function signInWithTestIssuer(authPage: Page, opts: AuthSignInOptions, loc
       .first()
       .innerText()
       .catch(() => "");
-    throw new Error(`the identity window for the test issuer never appeared${reported ? ` - the auth page reported: ${reported}` : ""}`);
+    throw new Error(`the identity window never appeared${reported ? ` - the auth page reported: ${reported}` : ""}`);
   }
-  // The issuer's form may still be navigating in from the API's start redirect.
-  await expect(issuer.locator(ISSUER_SUBJECT_SELECTOR)).toBeVisible({ timeout: 30_000 });
-  await issuer.locator(ISSUER_SUBJECT_SELECTOR).fill(opts.subject);
-  await issuer.locator(ISSUER_SECRET_SELECTOR).fill(opts.secret);
-  await issuer.locator(ISSUER_SUBMIT_SELECTOR).click();
+  await opts.completeSignIn(window);
 
   // The window closes itself once the API redirects it back; the auth page then
   // exchanges the code and lands on the done step, or shows its refusal.

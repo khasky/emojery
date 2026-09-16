@@ -4,12 +4,14 @@
 // reaction glyphs the authed flows react with. `load-env.ts` puts the dotenv
 // files into `process.env`; this module is what reads them back.
 //
-// A LEAF - no Playwright, no page, no browser. Anything here that grew
-// a `Page` parameter would belong in reaction-surface.ts instead.
+// A LEAF - no Playwright at runtime, no page, no browser. Anything here that
+// grew a `Page` parameter would belong in reaction-surface.ts instead; the one
+// below is a type, handed straight through to the sign-in resolver.
 
 import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import type { Page } from "@playwright/test";
 
 // Picker emoji glyphs the authed flows react with. ❤️ is U+2764 + VS16 - the
 // exact sequence the picker renders.
@@ -60,17 +62,22 @@ export function gitlabUrl(): string {
 
 // Sign-in fixtures come from a resolver module outside the tree: E2E_SIGNIN_RESOLVER
 // names a CommonJS or ES module (absolute, or relative to the repo root) exporting
-//   signInSubject(purpose: string): string - the test issuer's subject for the flow
-//                                             named by `purpose`, distinct per purpose
-//                                             and per process, so a spec that destroys
-//                                             its account never touches a sibling's;
-//   issuerSecret(): string                  - the shared secret the staging test issuer
-//                                             asks for beside the subject.
+//   signInAccount(purpose: string): string - the account the flow named by `purpose`
+//                                            signs in as, distinct per purpose and per
+//                                            process, so a spec that destroys its
+//                                            account never touches a sibling's;
+//   completeSignIn(window, account, outcome) - drives the staging test provider's
+//                                            window (the page identity.launchWebAuthFlow
+//                                            opened) to "accepted" or "refused" for
+//                                            that account; what the window asks for
+//                                            is the resolver's business.
 // Unset => every authed spec skips. Set but unloadable => the run fails naming the
 // path; the module is never committed (keep it under .playwright/ or outside the repo).
+export type SignInOutcome = "accepted" | "refused";
+
 interface SignInResolver {
-  signInSubject(purpose: string): string;
-  issuerSecret(): string;
+  signInAccount(purpose: string): string;
+  completeSignIn(window: Page, account: string, outcome: SignInOutcome): Promise<void>;
 }
 
 const nodeRequire = createRequire(import.meta.url);
@@ -88,31 +95,29 @@ function signInResolver(): SignInResolver {
   const modulePath = resolve(REPO_ROOT, configured);
   const loaded: unknown = nodeRequire(modulePath);
   const exported = (loaded as { default?: unknown }).default ?? loaded;
-  if (!isSignInResolver(exported)) throw new Error(`E2E_SIGNIN_RESOLVER (${modulePath}) must export signInSubject(purpose) and issuerSecret().`);
+  if (!isSignInResolver(exported)) throw new Error(`E2E_SIGNIN_RESOLVER (${modulePath}) must export signInAccount(purpose) and completeSignIn(window, account, outcome).`);
   loadedResolver = exported;
   return exported;
 }
 
 function isSignInResolver(value: unknown): value is SignInResolver {
   const candidate = value as Partial<SignInResolver> | null;
-  return typeof candidate?.signInSubject === "function" && typeof candidate?.issuerSecret === "function";
+  return typeof candidate?.signInAccount === "function" && typeof candidate?.completeSignIn === "function";
 }
 
-// The test issuer's secret. Every caller sits behind authConfigured(), so a
-// missing resolver here is a misconfigured run, not a skipped one - it fails loud
-// rather than typing "" into the form.
-export function issuerSecret(): string {
-  const secret = signInResolver().issuerSecret();
-  if (!secret) throw new Error("The sign-in resolver returned no issuer secret.");
-  return secret;
+// Drives the test provider's window to `outcome` for `account`. Every caller sits
+// behind authConfigured(), so a missing resolver here is a misconfigured run, not
+// a skipped one - it fails loud rather than leaving the window open.
+export function completeSignIn(window: Page, account: string, outcome: SignInOutcome = "accepted"): Promise<void> {
+  return signInResolver().completeSignIn(window, account, outcome);
 }
 
-// One subject per purpose. Playwright restarts the worker after a failure, so a
+// One account per purpose. Playwright restarts the worker after a failure, so a
 // retried run resolves fresh values through the resolver.
-export function authSubject(purpose = "primary"): string {
-  const subject = signInResolver().signInSubject(purpose).trim();
-  if (!subject) throw new Error(`The sign-in resolver returned no subject for "${purpose}".`);
-  return subject;
+export function authAccount(purpose = "primary"): string {
+  const account = signInResolver().signInAccount(purpose).trim();
+  if (!account) throw new Error(`The sign-in resolver returned no account for "${purpose}".`);
+  return account;
 }
 
 export function signInSkipReason(what: string): string {

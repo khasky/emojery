@@ -24,7 +24,7 @@ import { AGREE_CHECKBOX_SELECTOR, HISTORY_EMOJI_SELECTOR, HISTORY_LINK_SELECTOR,
 import type { PickedReaction, SupportedSiteScenario } from "./site-evidence";
 import { siteLabel } from "./site-evidence";
 import { dismissLoginWalls } from "./site-walls";
-import { authSubject } from "./test-config";
+import { authAccount } from "./test-config";
 
 // How long a queued vote may take to reach local history. Covers a cold service
 // worker doing IndexedDB work on a feed-heavy page, not a healthy flush.
@@ -70,7 +70,7 @@ export async function authPageFromUserAction(browserContext: BrowserContext, loa
 
 // The caller closes the auth tab the unauth click opened; signIn works in a tab of its own.
 export async function signInTestAccount(browserContext: BrowserContext, locale = "en"): Promise<void> {
-  await signIn(browserContext, authSubject(), locale);
+  await signIn(browserContext, authAccount(), locale);
 }
 
 export async function setReplaceNativeFromPopup(browserContext: BrowserContext, desired: boolean): Promise<void> {

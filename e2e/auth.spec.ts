@@ -3,9 +3,9 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
-import { TEST_PROVIDER } from "./lib/auth-signin";
-import { authConfigured, authSubject, closeSession, enMessage, extensionPageUrl, FIREFOX_NO_EXTENSION_PAGES, isFirefoxRun, issuerSecret, launchSession, localeMessage, removeProfileUnlessKept, resolveExtensionId, resolveExtensionPath, signInSkipReason } from "./lib/extension";
-import { AGREE_CHECKBOX_SELECTOR, PROVIDER_BTN_SELECTOR, providerButtonSelector } from "./lib/selectors";
+import { identityWindowAfter, TEST_PROVIDER } from "./lib/auth-signin";
+import { authAccount, authConfigured, closeSession, completeSignIn, enMessage, extensionPageUrl, FIREFOX_NO_EXTENSION_PAGES, isFirefoxRun, launchSession, localeMessage, removeProfileUnlessKept, resolveExtensionId, resolveExtensionPath, signInSkipReason } from "./lib/extension";
+import { AGREE_CHECKBOX_SELECTOR, PROVIDER_BUTTON_SELECTOR, providerButtonSelector } from "./lib/selectors";
 
 // Whole file drives auth.html/popup.html, which Playwright Firefox cannot reach.
 test.skip(isFirefoxRun(), FIREFOX_NO_EXTENSION_PAGES);
@@ -25,7 +25,7 @@ function requireAuthApiBase(): string {
 
 let authApiBase: string;
 // Resolved in beforeAll, behind the sign-in gate: the resolver throws when unset.
-let testSubject: string;
+let testAccount: string;
 const localizedAuthLocales = ["ru", "de", "ja"] as const;
 
 // The auth page is a narrow card; shooting it at the suite default would frame mostly
@@ -42,7 +42,7 @@ test.describe("extension account auth", () => {
   test.beforeAll(async () => {
     const extensionPath = resolveExtensionPath();
     authApiBase = requireAuthApiBase();
-    testSubject = authSubject();
+    testAccount = authAccount();
     assertExtensionManifestAllowsApiBase(extensionPath, authApiBase);
     await assertApiReachable(authApiBase);
 
@@ -60,7 +60,7 @@ test.describe("extension account auth", () => {
     if (generatedUserDataDir) await removeProfileUnlessKept(generatedUserDataDir);
   });
 
-  test("signs in from popup account tab through the test issuer and signs out again", async () => {
+  test("signs in from popup account tab through the test provider and signs out again", async () => {
     const popup = await openPopupPage();
     await popup.getByRole("tab", { name: enMessage("tabAccount") }).click();
     await expect(popup.getByText(enMessage("signInMsgAccount"))).toBeVisible();
@@ -70,39 +70,37 @@ test.describe("extension account auth", () => {
     const authPage = await authPagePromise;
     await authPage.waitForURL(extensionPageUrl(extensionId, "auth.html"));
 
-    // The provider list is the API's: the staging build lists the test issuer
-    // beside the real providers, and every button waits for the consent box.
+    // The provider list is the API's: the staging build lists the test provider
+    // beside the real ones, and every button waits for the consent box.
     const testButton = authPage.locator(providerButtonSelector(TEST_PROVIDER));
     await expect(testButton).toBeVisible();
     await expect(testButton).toHaveText(enMessage("authProviderBtn", TEST_PROVIDER));
     const agreeCheckbox = authPage.locator(AGREE_CHECKBOX_SELECTOR);
     await expect(agreeCheckbox).not.toBeChecked();
-    for (const button of await authPage.locator(PROVIDER_BTN_SELECTOR).all()) await expect(button).toBeDisabled();
+    for (const button of await authPage.locator(PROVIDER_BUTTON_SELECTOR).all()) await expect(button).toBeDisabled();
     await agreeCheckbox.check();
     await expect(testButton).toBeEnabled();
 
-    // Closing the identity window before the issuer answers is the cancelled
+    // Closing the identity window before the provider answers is the cancelled
     // refusal: the page says so and hands the list back, consent kept.
-    const cancelledWindow = context.waitForEvent("page", { predicate: (page) => page.url().includes("/test-oidc/") });
-    await testButton.click();
-    const issuerToCancel = await cancelledWindow;
-    await issuerToCancel.close();
+    const windowToCancel = await identityWindowAfter(authPage, () => testButton.click());
+    expect(windowToCancel, "the identity window should open on the first click").not.toBeNull();
+    await windowToCancel!.close();
     await expect(authPage.getByText(enMessage("authErrCancelled"), { exact: true })).toBeVisible();
     await expect(agreeCheckbox).toBeChecked();
     await expect(testButton).toBeEnabled();
 
-    // A wrong secret is refused by the issuer itself; the auth page then reports
-    // the provider's refusal rather than signing in.
-    const refusedWindow = context.waitForEvent("page", { predicate: (page) => page.url().includes("/test-oidc/") });
-    await testButton.click();
-    const issuerToRefuse = await refusedWindow;
-    await fillIssuer(issuerToRefuse, testSubject, `${issuerSecret()}-wrong`);
+    // A sign-in the provider refuses: the auth page reports the provider's
+    // refusal rather than signing in.
+    const windowToRefuse = await identityWindowAfter(authPage, () => testButton.click());
+    expect(windowToRefuse, "the identity window should open on the second click").not.toBeNull();
+    await completeSignIn(windowToRefuse!, testAccount, "refused");
     await expect(authPage.getByText(enMessage("authErrProviderDenied"), { exact: true })).toBeVisible();
     await expect(authPage.getByRole("heading", { name: enMessage("authDoneTitle") })).toHaveCount(0);
 
-    const signedInWindow = context.waitForEvent("page", { predicate: (page) => page.url().includes("/test-oidc/") });
-    await testButton.click();
-    await fillIssuer(await signedInWindow, testSubject, issuerSecret());
+    const windowToAccept = await identityWindowAfter(authPage, () => testButton.click());
+    expect(windowToAccept, "the identity window should open on the third click").not.toBeNull();
+    await completeSignIn(windowToAccept!, testAccount);
     await expect(authPage.getByRole("heading", { name: enMessage("authDoneTitle") })).toBeVisible();
 
     await authPage.close();
@@ -111,9 +109,9 @@ test.describe("extension account auth", () => {
     const signedInPopup = await openPopupPage();
     await signedInPopup.getByRole("tab", { name: enMessage("tabAccount") }).click();
     await expect(signedInPopup.getByText(enMessage("signedInLabel"), { exact: true })).toBeVisible();
-    // The account is named by its provider, never by anything the issuer knows.
+    // The account is named by its provider, never by anything the provider knows.
     await expect(signedInPopup.getByText(enMessage("signedInVia", TEST_PROVIDER), { exact: true })).toBeVisible();
-    await expect(signedInPopup.getByText(testSubject)).toHaveCount(0);
+    await expect(signedInPopup.getByText(testAccount)).toHaveCount(0);
 
     await signedInPopup.getByRole("button", { name: enMessage("signOutBtn") }).click();
     await expect(signedInPopup.getByText(enMessage("signInMsgAccount"))).toBeVisible();
@@ -149,11 +147,10 @@ test.describe("extension account auth", () => {
         await authPage.locator(AGREE_CHECKBOX_SELECTOR).check();
         await expect(testButton).toBeEnabled();
 
-        const issuerWindow = session.context.waitForEvent("page", { predicate: (page) => page.url().includes("/test-oidc/") });
-        await testButton.click();
+        const window = await identityWindowAfter(authPage, () => testButton.click());
         await expect(authPage.getByText(localeMessage(locale, "authSigningInWith", TEST_PROVIDER), { exact: true })).toBeVisible();
-        const issuer = await issuerWindow;
-        await issuer.close();
+        expect(window, `the identity window should open in ${locale}`).not.toBeNull();
+        await window!.close();
         await expect(
           authPage.getByText(localeMessage(locale, "authErrCancelled"), {
             exact: true,
@@ -166,15 +163,6 @@ test.describe("extension account auth", () => {
     });
   }
 });
-
-// The test issuer's form: subject, secret, submit. The window closes itself once
-// the API has redirected it back to the extension.
-async function fillIssuer(issuer: Page, subject: string, secret: string): Promise<void> {
-  await expect(issuer.locator('input[name="sub"]')).toBeVisible();
-  await issuer.locator('input[name="sub"]').fill(subject);
-  await issuer.locator('input[name="secret"]').fill(secret);
-  await issuer.locator('button[type="submit"]').click();
-}
 
 interface AuthBrowserSession {
   context: BrowserContext;

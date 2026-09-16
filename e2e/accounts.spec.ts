@@ -56,8 +56,8 @@ async function historyState(context: Parameters<typeof ext.openPopup>[0], host: 
 test("account switching isolates history and the own reaction", async () => {
   test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_SIGN_IN);
   test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
-  const subjectA = ext.authSubject("switch-a");
-  const subjectB = ext.authSubject("switch-b");
+  const subjectA = ext.authAccount("switch-a");
+  const subjectB = ext.authAccount("switch-b");
   const session = await ext.launchSession();
   let cleanupAsA = false;
   try {
@@ -125,7 +125,7 @@ test("account switching isolates history and the own reaction", async () => {
 test("signing in as the same subject from a fresh profile restores the reaction", async () => {
   test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_SIGN_IN);
   test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
-  const subject = ext.authSubject("recover");
+  const subject = ext.authAccount("recover");
   const first = await ext.launchSession();
   try {
     await ext.signIn(first.context, subject);
@@ -192,8 +192,8 @@ test("two accounts raise and lower the shared counter independently", async () =
   // Generous: two separate waits for the public count to settle.
   test.setTimeout(Number(process.env.E2E_TWO_ACCOUNT_TEST_TIMEOUT_MS ?? 600_000));
   const CACHE_WAIT = ext.COUNT_CACHE_WAIT_MS;
-  const subjectA = ext.authSubject("count-a");
-  const subjectB = ext.authSubject("count-b");
+  const subjectA = ext.authAccount("count-a");
+  const subjectB = ext.authAccount("count-b");
   // Launched sequentially INSIDE the try: with a parallel Promise.all outside it,
   // a throw from the second launch discards the first session's browser and its
   // run-* profile, leaking both for the rest of the run.
