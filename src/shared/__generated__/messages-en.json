@@ -125,6 +125,15 @@
  "signedInLabel": {
   "message": "Signed in"
  },
+ "signedInVia": {
+  "message": "via $PROVIDER$",
+  "placeholders": {
+   "provider": {
+    "content": "$1",
+    "example": "Google"
+   }
+  }
+ },
  "signOutBtn": {
   "message": "Sign out"
  },
@@ -387,9 +396,6 @@
  "authPageTitle": {
   "message": "Emojery — Sign in"
  },
- "authCodePageTitle": {
-  "message": "Emojery — Enter your code"
- },
  "authDonePageTitle": {
   "message": "Emojery — You're signed in"
  },
@@ -397,16 +403,28 @@
   "message": "Sign in to react"
  },
  "authSignInTagline": {
-  "message": "We will email you a verification code"
+  "message": "Continue with an account you already have. Emojery never sees your password."
  },
- "authEmailLabel": {
-  "message": "Email"
+ "authProviderBtn": {
+  "message": "Continue with $PROVIDER$",
+  "placeholders": {
+   "provider": {
+    "content": "$1",
+    "example": "Google"
+   }
+  }
  },
- "authSendCodeBtn": {
-  "message": "Send code"
+ "authSigningInWith": {
+  "message": "Signing in with $PROVIDER$...",
+  "placeholders": {
+   "provider": {
+    "content": "$1",
+    "example": "Google"
+   }
+  }
  },
- "authSendingBtn": {
-  "message": "Sending..."
+ "authRetryBtn": {
+  "message": "Try again"
  },
  "authAgreeIntro": {
   "message": "I agree to the "
@@ -422,30 +440,6 @@
  },
  "authAgreeOutro": {
   "message": "."
- },
- "authCodeTitle": {
-  "message": "Enter your code"
- },
- "authCodeTagline": {
-  "message": "We sent a code to $EMAIL$. It expires in 10 minutes.",
-  "placeholders": {
-   "email": {
-    "content": "$1",
-    "example": "alex@example.com"
-   }
-  }
- },
- "authCodeLabel": {
-  "message": "Verification code"
- },
- "authVerifyingBtn": {
-  "message": "Verifying..."
- },
- "authVerifyBtn": {
-  "message": "Sign in"
- },
- "authUseDifferentEmail": {
-  "message": "Use a different email"
  },
  "authDoneTitle": {
   "message": "You're signed in"
@@ -463,7 +457,7 @@
   "message": "What Emojery sends"
  },
  "dataConsentBody": {
-  "message": "Emojery sends the address of the page you react on, a random install identifier, and your email once at sign-in; only a one-way hash of it is kept. Optional context stays off in this browser."
+  "message": "Emojery sends the address of the page you react on, a random install identifier, and a one-time sign-in token from the provider you choose; only a one-way hash of your account id is kept. Optional context stays off in this browser."
  },
  "dataConsentPolicyLink": {
   "message": "Privacy Policy."
@@ -471,59 +465,17 @@
  "dataConsentContinueBtn": {
   "message": "Continue"
  },
- "authSendThrottle": {
-  "message": "You recently requested a code. You can request another in $TIME$.",
-  "placeholders": {
-   "time": {
-    "content": "$1",
-    "example": "0:47"
-   }
-  }
- },
- "authResendCooldown": {
-  "message": "We already sent a code to this address. You can request a new one in $TIME$.",
-  "placeholders": {
-   "time": {
-    "content": "$1",
-    "example": "0:47"
-   }
-  }
- },
- "authEnterPendingCode": {
-  "message": "Enter the code we sent to $EMAIL$",
-  "placeholders": {
-   "email": {
-    "content": "$1",
-    "example": "alex@example.com"
-   }
-  }
- },
- "authResendBtn": {
-  "message": "Resend code"
- },
- "authResendInBtn": {
-  "message": "Resend code in $TIME$",
-  "placeholders": {
-   "time": {
-    "content": "$1",
-    "example": "0:47"
-   }
-  }
- },
- "authErrRateLimit": {
-  "message": "Too many requests. Please wait a few minutes and try again."
- },
- "authErrUndeliverable": {
-  "message": "Could not deliver the email. Try again or check the address."
- },
- "authErrEmailDomainUndeliverable": {
-  "message": "That email domain can't receive mail. Check the address for a typo, or try another one."
- },
- "authErrBadEmail": {
-  "message": "That doesn't look like a valid email address."
- },
  "authErrUnknown": {
   "message": "Something went wrong. Please try again."
+ },
+ "authErrCancelled": {
+  "message": "Sign-in was cancelled. Try again when you're ready."
+ },
+ "authErrProviderDenied": {
+  "message": "The provider did not complete the sign-in. Try again or choose another account."
+ },
+ "authErrEnrollFailed": {
+  "message": "Could not register your account right now. Please try again in a minute."
  },
  "authErrOutdated": {
   "message": "This version of Emojery is out of date. Update it to sign in."
@@ -539,15 +491,6 @@
  },
  "errServerBusy": {
   "message": "The server is having trouble. Try again in a minute."
- },
- "authErrTooManyTries": {
-  "message": "Too many wrong codes. Try again later."
- },
- "authErrCodeInvalid": {
-  "message": "That code is incorrect or has expired."
- },
- "authErrVerifyFailed": {
-  "message": "Verification failed. Please try again."
  },
  "searchResultsCount": {
   "message": "$COUNT$ results",
@@ -614,7 +557,7 @@
   "message": "Last step"
  },
  "gateBody": {
-  "message": "Sign in with your email to make your reaction count."
+  "message": "Sign in with an account you already have to make your reaction count."
  },
  "gateSignInBtn": {
   "message": "Sign in"

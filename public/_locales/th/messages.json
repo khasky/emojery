@@ -125,6 +125,15 @@
   "signedInLabel": {
     "message": "เข้าสู่ระบบแล้ว"
   },
+  "signedInVia": {
+    "message": "ผ่าน $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
   "signOutBtn": {
     "message": "ออกจากระบบ"
   },
@@ -387,9 +396,6 @@
   "authPageTitle": {
     "message": "Emojery — เข้าสู่ระบบ"
   },
-  "authCodePageTitle": {
-    "message": "Emojery — ป้อนรหัสของคุณ"
-  },
   "authDonePageTitle": {
     "message": "Emojery — คุณเข้าสู่ระบบแล้ว"
   },
@@ -397,16 +403,28 @@
     "message": "เข้าสู่ระบบเพื่อแสดงความรู้สึก"
   },
   "authSignInTagline": {
-    "message": "เราจะส่งรหัสยืนยันไปยังอีเมลของคุณ"
+    "message": "ดำเนินการต่อด้วยบัญชีที่คุณมีอยู่แล้ว Emojery ไม่เห็นรหัสผ่านของคุณ"
   },
-  "authEmailLabel": {
-    "message": "อีเมล"
+  "authProviderBtn": {
+    "message": "ดำเนินการต่อด้วย $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendCodeBtn": {
-    "message": "ส่งรหัส"
+  "authSigningInWith": {
+    "message": "กำลังลงชื่อเข้าใช้ด้วย $PROVIDER$...",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendingBtn": {
-    "message": "กำลังส่ง..."
+  "authRetryBtn": {
+    "message": "ลองอีกครั้ง"
   },
   "authAgreeIntro": {
     "message": "ฉันยอมรับ"
@@ -422,30 +440,6 @@
   },
   "authAgreeOutro": {
     "message": "."
-  },
-  "authCodeTitle": {
-    "message": "ป้อนรหัสของคุณ"
-  },
-  "authCodeTagline": {
-    "message": "เราได้ส่งรหัสไปที่ $EMAIL$ จะหมดอายุใน 10 นาที",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authCodeLabel": {
-    "message": "รหัสยืนยัน"
-  },
-  "authVerifyingBtn": {
-    "message": "กำลังตรวจสอบ..."
-  },
-  "authVerifyBtn": {
-    "message": "เข้าสู่ระบบ"
-  },
-  "authUseDifferentEmail": {
-    "message": "ใช้อีเมลอื่น"
   },
   "authDoneTitle": {
     "message": "คุณเข้าสู่ระบบแล้ว"
@@ -463,7 +457,7 @@
     "message": "ข้อมูลที่ Emojery ส่ง"
   },
   "dataConsentBody": {
-    "message": "Emojery จะส่งที่อยู่ของหน้าที่คุณรีแอ็ก ตัวระบุการติดตั้งแบบสุ่ม และอีเมลของคุณเพียงครั้งเดียวเมื่อลงชื่อเข้าใช้ โดยเก็บไว้เพียงแฮชทางเดียวของอีเมลเท่านั้น ข้อมูลบริบทที่ไม่บังคับจะยังคงปิดอยู่ในเบราว์เซอร์นี้"
+    "message": "Emojery จะส่งที่อยู่ของหน้าที่คุณรีแอค ตัวระบุการติดตั้งแบบสุ่ม และโทเค็นลงชื่อเข้าใช้แบบใช้ครั้งเดียวจากผู้ให้บริการที่คุณเลือก โดยเก็บไว้เพียงแฮชทางเดียวของรหัสบัญชีของคุณเท่านั้น บริบทเพิ่มเติมจะยังคงปิดอยู่ในเบราว์เซอร์นี้"
   },
   "dataConsentPolicyLink": {
     "message": "นโยบายความเป็นส่วนตัว"
@@ -471,59 +465,17 @@
   "dataConsentContinueBtn": {
     "message": "ดำเนินการต่อ"
   },
-  "authSendThrottle": {
-    "message": "คุณเพิ่งขอรหัสไป คุณสามารถขออีกครั้งได้ใน $TIME$",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authResendCooldown": {
-    "message": "เราได้ส่งรหัสไปยังที่อยู่นี้แล้ว คุณสามารถขอรหัสใหม่ได้ใน $TIME$",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authEnterPendingCode": {
-    "message": "ป้อนรหัสที่เราส่งไปยัง $EMAIL$",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authResendBtn": {
-    "message": "ส่งรหัสอีกครั้ง"
-  },
-  "authResendInBtn": {
-    "message": "ส่งรหัสอีกครั้งใน $TIME$",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authErrRateLimit": {
-    "message": "คำขอมากเกินไป โปรดรอสักครู่แล้วลองอีกครั้ง"
-  },
-  "authErrUndeliverable": {
-    "message": "ไม่สามารถส่งอีเมลได้ ลองอีกครั้งหรือตรวจสอบที่อยู่"
-  },
-  "authErrEmailDomainUndeliverable": {
-    "message": "โดเมนอีเมลนี้ไม่สามารถรับอีเมลได้ ตรวจสอบที่อยู่ว่าพิมพ์ถูกต้องหรือใช้ที่อยู่อื่น"
-  },
-  "authErrBadEmail": {
-    "message": "นี่ไม่ใช่ที่อยู่อีเมลที่ถูกต้อง"
-  },
   "authErrUnknown": {
     "message": "เกิดข้อผิดพลาดบางอย่าง โปรดลองอีกครั้ง"
+  },
+  "authErrCancelled": {
+    "message": "ยกเลิกการลงชื่อเข้าใช้แล้ว ลองอีกครั้งเมื่อคุณพร้อม"
+  },
+  "authErrProviderDenied": {
+    "message": "ผู้ให้บริการไม่ได้ดำเนินการลงชื่อเข้าใช้จนเสร็จ ลองอีกครั้งหรือเลือกบัญชีอื่น"
+  },
+  "authErrEnrollFailed": {
+    "message": "ไม่สามารถลงทะเบียนบัญชีของคุณได้ในขณะนี้ โปรดลองอีกครั้งในอีกสักครู่"
   },
   "authErrOutdated": {
     "message": "Emojery เวอร์ชันนี้ล้าสมัยแล้ว โปรดอัปเดตเพื่อลงชื่อเข้าใช้"
@@ -539,15 +491,6 @@
   },
   "errServerBusy": {
     "message": "เซิร์ฟเวอร์มีปัญหา ลองใหม่ในอีกสักครู่"
-  },
-  "authErrTooManyTries": {
-    "message": "รหัสผิดมากเกินไป โปรดลองอีกครั้งในภายหลัง"
-  },
-  "authErrCodeInvalid": {
-    "message": "รหัสไม่ถูกต้องหรือหมดอายุแล้ว"
-  },
-  "authErrVerifyFailed": {
-    "message": "การตรวจสอบล้มเหลว โปรดลองอีกครั้ง"
   },
   "searchResultsCount": {
     "message": "ผลลัพธ์ $COUNT$ รายการ",
@@ -614,7 +557,7 @@
     "message": "ขั้นตอนสุดท้าย"
   },
   "gateBody": {
-    "message": "เข้าสู่ระบบด้วยอีเมล เพื่อให้ความรู้สึกของคุณถูกนับ"
+    "message": "ลงชื่อเข้าใช้ด้วยบัญชีที่มีอยู่แล้วเพื่อให้รีแอคชันของคุณถูกนับ"
   },
   "gateSignInBtn": {
     "message": "เข้าสู่ระบบ"

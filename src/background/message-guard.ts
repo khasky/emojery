@@ -4,7 +4,8 @@
 import type { TargetRef } from "../shared/adapter";
 import { defined } from "../shared/defined";
 import { normalizeLanguageTag } from "../shared/language-tag";
-import { EMAIL_MAX, HISTORY_IMPORT_MAX, NOTE_MAX, OTP_CODE_MAX, type PortableHistoryRow, REACTION_BYTES_MAX, type ReactionAction, type RuntimeMessage, TITLE_MAX } from "../shared/messages";
+import { HISTORY_IMPORT_MAX, NOTE_MAX, type PortableHistoryRow, REACTION_BYTES_MAX, type ReactionAction, type RuntimeMessage, TITLE_MAX } from "../shared/messages";
+import { isProviderId } from "../shared/oidc-providers";
 import { ALL_SITES, detectSupportedSite, type SupportedSite, targetUrlBelongsToSite } from "../shared/sites";
 
 // The sets below are exported for the same reason as the limits further down:
@@ -13,9 +14,10 @@ import { ALL_SITES, detectSupportedSite, type SupportedSite, targetUrlBelongsToS
 export const CONTENT_SCRIPT_MESSAGE_TYPES: ReadonlySet<RuntimeMessage["type"]> = new Set(["vote", "fetchCount", "ui:injected"]);
 
 // Types only the extension's own pages (popup/auth) send - never content scripts.
-// The OTP pair matters most: it is the one exchange that CREATES a credential, so a
-// content script on any supported site must never be able to drive it.
-export const EXTENSION_PAGE_MESSAGE_TYPES: ReadonlySet<RuntimeMessage["type"]> = new Set(["report", "history:page", "history:stats", "history:export", "history:import", "queue:snapshot", "auth:signOut", "auth:delete", "auth:requestOtp", "auth:verifyOtp", "auth:returnToOrigin"]);
+// `auth:signIn` matters most: it is the one exchange that CREATES a credential (it
+// opens the browser's identity window), so a content script on any supported site
+// must never be able to drive it.
+export const EXTENSION_PAGE_MESSAGE_TYPES: ReadonlySet<RuntimeMessage["type"]> = new Set(["report", "history:page", "history:stats", "history:export", "history:import", "queue:snapshot", "auth:signOut", "auth:delete", "auth:providers", "auth:signIn", "auth:returnToOrigin"]);
 
 // Every type the guard will accept at all. The suites cover this set exhaustively, so a type
 // added here fails them until it is classified as content-script, extension-page or either.
@@ -115,15 +117,10 @@ export function parseRuntimeMessage(raw: unknown, sender: chrome.runtime.Message
       }
       return { type, rows };
     }
-    case "auth:requestOtp": {
-      const email = parseString(raw.email, EMAIL_MAX);
-      return email ? { type, email } : null;
-    }
-    case "auth:verifyOtp": {
-      const email = parseString(raw.email, EMAIL_MAX);
-      const code = parseString(raw.code, OTP_CODE_MAX);
-      if (!email || !code) return null;
-      return { type, email, code };
+    case "auth:signIn": {
+      // The id goes into a URL the identity window opens, so it is held to the
+      // slug shape the API spells its providers in, not just to a length.
+      return isProviderId(raw.provider) ? { type, provider: raw.provider } : null;
     }
     case "history:stats": {
       // Same four facets as history:page, parsed by the same bounds - the aggregates
@@ -137,6 +134,7 @@ export function parseRuntimeMessage(raw: unknown, sender: chrome.runtime.Message
     }
     case "history:export":
     case "queue:snapshot":
+    case "auth:providers":
     case "auth:status":
     case "auth:openTab":
     case "auth:returnToOrigin":

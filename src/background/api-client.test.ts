@@ -21,13 +21,13 @@ describe("request shape", () => {
   it("a POST carries the JSON headers, the install id and the encoded body", async () => {
     const fetchMock = stubFetch(async () => new Response("", { status: 202 }));
 
-    await apiRequest("/auth/request-otp", { method: "POST", token: "tok", lang: "uk-UA", body: { email: "a@b.com" }, keepalive: true });
+    await apiRequest("/auth/oidc/exchange", { method: "POST", token: "tok", lang: "uk-UA", body: { code: "c1" }, keepalive: true });
 
     const [url, init] = lastFetchCall(fetchMock);
-    expect(url).toMatch(/\/auth\/request-otp$/);
+    expect(url).toMatch(/\/auth\/oidc\/exchange$/);
     expect(init.method).toBe("POST");
     expect(init.keepalive).toBe(true);
-    expect(init.body).toBe(JSON.stringify({ email: "a@b.com" }));
+    expect(init.body).toBe(JSON.stringify({ code: "c1" }));
     expect(init.headers).toEqual({
       "content-type": "application/json",
       authorization: "Bearer tok",

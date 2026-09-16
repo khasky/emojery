@@ -125,6 +125,15 @@
   "signedInLabel": {
     "message": "Log masuk"
   },
+  "signedInVia": {
+    "message": "melalui $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
   "signOutBtn": {
     "message": "Log keluar"
   },
@@ -387,9 +396,6 @@
   "authPageTitle": {
     "message": "Emojery — Log masuk"
   },
-  "authCodePageTitle": {
-    "message": "Emojery — Masukkan kod anda"
-  },
   "authDonePageTitle": {
     "message": "Emojery — Anda telah log masuk"
   },
@@ -397,16 +403,28 @@
     "message": "Log masuk untuk bertindak balas"
   },
   "authSignInTagline": {
-    "message": "Kami akan menghantar kod pengesahan melalui e-mel"
+    "message": "Teruskan dengan akaun yang anda sudah ada. Emojery tidak pernah melihat kata laluan anda."
   },
-  "authEmailLabel": {
-    "message": "E-mel"
+  "authProviderBtn": {
+    "message": "Teruskan dengan $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendCodeBtn": {
-    "message": "Hantar kod"
+  "authSigningInWith": {
+    "message": "Log masuk dengan $PROVIDER$...",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendingBtn": {
-    "message": "Menghantar..."
+  "authRetryBtn": {
+    "message": "Cuba lagi"
   },
   "authAgreeIntro": {
     "message": "Saya bersetuju dengan "
@@ -422,30 +440,6 @@
   },
   "authAgreeOutro": {
     "message": "."
-  },
-  "authCodeTitle": {
-    "message": "Masukkan kod anda"
-  },
-  "authCodeTagline": {
-    "message": "Kami menghantar kod ke $EMAIL$. Ia akan tamat dalam 10 minit.",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authCodeLabel": {
-    "message": "Kod pengesahan"
-  },
-  "authVerifyingBtn": {
-    "message": "Mengesahkan..."
-  },
-  "authVerifyBtn": {
-    "message": "Log masuk"
-  },
-  "authUseDifferentEmail": {
-    "message": "Gunakan e-mel lain"
   },
   "authDoneTitle": {
     "message": "Anda telah log masuk"
@@ -463,7 +457,7 @@
     "message": "Apa yang Emojery hantar"
   },
   "dataConsentBody": {
-    "message": "Emojery menghantar alamat halaman yang anda beri tindak balas, satu pengecam pemasangan rawak, serta e-mel anda sekali sahaja semasa log masuk; hanya cincangan sehala bagi e-mel itu disimpan. Konteks pilihan kekal dimatikan dalam pelayar ini."
+    "message": "Emojery menghantar alamat halaman tempat anda bertindak balas, pengecam pemasangan rawak dan token log masuk sekali guna daripada penyedia yang anda pilih; hanya cincangan sehala id akaun anda disimpan. Konteks pilihan kekal dimatikan dalam pelayar ini."
   },
   "dataConsentPolicyLink": {
     "message": "Dasar Privasi."
@@ -471,59 +465,17 @@
   "dataConsentContinueBtn": {
     "message": "Teruskan"
   },
-  "authSendThrottle": {
-    "message": "Anda baru sahaja meminta kod. Anda boleh meminta yang lain dalam $TIME$.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authResendCooldown": {
-    "message": "Kami telah menghantar kod ke alamat ini. Anda boleh meminta yang baharu dalam $TIME$.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authEnterPendingCode": {
-    "message": "Masukkan kod yang kami hantar ke $EMAIL$",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authResendBtn": {
-    "message": "Hantar semula kod"
-  },
-  "authResendInBtn": {
-    "message": "Hantar semula kod dalam $TIME$",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authErrRateLimit": {
-    "message": "Terlalu banyak permintaan. Sila tunggu beberapa minit dan cuba lagi."
-  },
-  "authErrUndeliverable": {
-    "message": "Tidak dapat menghantar e-mel. Cuba lagi atau semak alamat."
-  },
-  "authErrEmailDomainUndeliverable": {
-    "message": "Domain e-mel ini tidak boleh menerima mel. Semak alamat untuk kesilapan taip atau gunakan yang lain."
-  },
-  "authErrBadEmail": {
-    "message": "Ini tidak kelihatan seperti alamat e-mel yang sah."
-  },
   "authErrUnknown": {
     "message": "Sesuatu yang tidak kena. Sila cuba lagi."
+  },
+  "authErrCancelled": {
+    "message": "Log masuk dibatalkan. Cuba lagi apabila anda bersedia."
+  },
+  "authErrProviderDenied": {
+    "message": "Penyedia tidak melengkapkan log masuk. Cuba lagi atau pilih akaun lain."
+  },
+  "authErrEnrollFailed": {
+    "message": "Akaun anda tidak dapat didaftarkan sekarang. Sila cuba lagi seminit lagi."
   },
   "authErrOutdated": {
     "message": "Versi Emojery ini sudah lapuk. Kemas kini untuk log masuk."
@@ -539,15 +491,6 @@
   },
   "errServerBusy": {
     "message": "Pelayan menghadapi masalah. Cuba lagi dalam seminit."
-  },
-  "authErrTooManyTries": {
-    "message": "Terlalu banyak kod salah. Cuba lagi kemudian."
-  },
-  "authErrCodeInvalid": {
-    "message": "Kod itu tidak betul atau telah tamat tempoh."
-  },
-  "authErrVerifyFailed": {
-    "message": "Pengesahan gagal. Sila cuba lagi."
   },
   "searchResultsCount": {
     "message": "$COUNT$ hasil",
@@ -614,7 +557,7 @@
     "message": "Langkah terakhir"
   },
   "gateBody": {
-    "message": "Log masuk dengan e-mel anda supaya reaksi anda dikira."
+    "message": "Log masuk dengan akaun sedia ada supaya reaksi anda dikira."
   },
   "gateSignInBtn": {
     "message": "Log masuk"

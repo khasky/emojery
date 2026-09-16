@@ -165,6 +165,16 @@
     "message": "Signed in",
     "description": "Label on the Account tab indicating the user is currently signed in."
   },
+  "signedInVia": {
+    "message": "via $PROVIDER$",
+    "description": "Hint under the Account tab's signed-in row, naming the provider the account came from. $PROVIDER$ is the provider's name.",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
   "signOutBtn": {
     "message": "Sign out",
     "description": "Button that ends the current session."
@@ -495,10 +505,6 @@
     "message": "Emojery — Sign in",
     "description": "<title> for the auth page."
   },
-  "authCodePageTitle": {
-    "message": "Emojery — Enter your code",
-    "description": "<title> for the auth page while it waits for the emailed code."
-  },
   "authDonePageTitle": {
     "message": "Emojery — You're signed in",
     "description": "<title> for the auth page once the sign-in has landed."
@@ -508,20 +514,32 @@
     "description": "Heading on the auth page, email step."
   },
   "authSignInTagline": {
-    "message": "We will email you a verification code",
-    "description": "Subheading on the auth page, email step."
+    "message": "Continue with an account you already have. Emojery never sees your password.",
+    "description": "Subheading on the auth page, provider step: the account is one the user already has elsewhere."
   },
-  "authEmailLabel": {
-    "message": "Email",
-    "description": "Label for the email input field on the auth page."
+  "authProviderBtn": {
+    "message": "Continue with $PROVIDER$",
+    "description": "One sign-in button per provider on the auth page. $PROVIDER$ is the provider's name (Google, Apple, ...).",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendCodeBtn": {
-    "message": "Send code",
-    "description": "Submit button on the email step of the auth page."
+  "authSigningInWith": {
+    "message": "Signing in with $PROVIDER$...",
+    "description": "Status line on the auth page while the provider's sign-in window is open. $PROVIDER$ is the provider's name.",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendingBtn": {
-    "message": "Sending...",
-    "description": "Submit button label while the OTP request is in flight."
+  "authRetryBtn": {
+    "message": "Try again",
+    "description": "Auth page: button that re-requests the provider list after it could not be loaded."
   },
   "authAgreeIntro": {
     "message": "I agree to the ",
@@ -542,36 +560,6 @@
   "authAgreeOutro": {
     "message": ".",
     "description": "End of the consent checkbox label, after the Privacy Policy link."
-  },
-  "authCodeTitle": {
-    "message": "Enter your code",
-    "description": "Heading on the auth page, code step."
-  },
-  "authCodeTagline": {
-    "message": "We sent a code to $EMAIL$. It expires in 10 minutes.",
-    "description": "Subheading on the auth page after the OTP email is sent. $EMAIL$ is the user's address.",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authCodeLabel": {
-    "message": "Verification code",
-    "description": "Label for the 6-digit OTP input."
-  },
-  "authVerifyingBtn": {
-    "message": "Verifying...",
-    "description": "Submit button label while the OTP verification is in flight."
-  },
-  "authVerifyBtn": {
-    "message": "Sign in",
-    "description": "Submit button on the code step of the auth page."
-  },
-  "authUseDifferentEmail": {
-    "message": "Use a different email",
-    "description": "Secondary action on the code step — go back to the email step."
   },
   "authDoneTitle": {
     "message": "You're signed in",
@@ -594,7 +582,7 @@
     "description": "Heading of the data-collection disclosure shown on first install in browsers without Firefox's built-in consent screen."
   },
   "dataConsentBody": {
-    "message": "Emojery sends the address of the page you react on, a random install identifier, and your email once at sign-in; only a one-way hash of it is kept. Optional context stays off in this browser.",
+    "message": "Emojery sends the address of the page you react on, a random install identifier, and a one-time sign-in token from the provider you choose; only a one-way hash of your account id is kept. Optional context stays off in this browser.",
     "description": "Body of the data-collection disclosure shown on first install in browsers without Firefox's built-in consent screen."
   },
   "dataConsentPolicyLink": {
@@ -605,69 +593,21 @@
     "message": "Continue",
     "description": "Button that dismisses the data-collection disclosure and reveals the sign-in form."
   },
-  "authSendThrottle": {
-    "message": "You recently requested a code. You can request another in $TIME$.",
-    "description": "Auth notice shown when another code was requested recently. $TIME$ is mm:ss.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authResendCooldown": {
-    "message": "We already sent a code to this address. You can request a new one in $TIME$.",
-    "description": "Auth notice: a code was already sent to this address; resend is on a short cooldown. $TIME$ is mm:ss.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authEnterPendingCode": {
-    "message": "Enter the code we sent to $EMAIL$",
-    "description": "Auth: link back to the code step from the email step while a code is still outstanding. $EMAIL$ is the address it was sent to.",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authResendBtn": {
-    "message": "Resend code",
-    "description": "Auth: code-step button to email a fresh code."
-  },
-  "authResendInBtn": {
-    "message": "Resend code in $TIME$",
-    "description": "Auth: code-step resend button while on cooldown. $TIME$ is mm:ss.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authErrRateLimit": {
-    "message": "Too many requests. Please wait a few minutes and try again.",
-    "description": "Auth error: HTTP 429 from the server."
-  },
-  "authErrUndeliverable": {
-    "message": "Could not deliver the email. Try again or check the address.",
-    "description": "Auth error: HTTP 502 (email delivery failed) from the server."
-  },
-  "authErrEmailDomainUndeliverable": {
-    "message": "That email domain can't receive mail. Check the address for a typo, or try another one.",
-    "description": "Auth error: HTTP 422 — the sign-in code cannot be sent to that address."
-  },
-  "authErrBadEmail": {
-    "message": "That doesn't look like a valid email address.",
-    "description": "Auth error: HTTP 400 (server rejected the email format)."
-  },
   "authErrUnknown": {
     "message": "Something went wrong. Please try again.",
     "description": "Auth error: generic fallback when no specific status applies."
+  },
+  "authErrCancelled": {
+    "message": "Sign-in was cancelled. Try again when you're ready.",
+    "description": "Auth error: the user closed the provider's sign-in window before finishing."
+  },
+  "authErrProviderDenied": {
+    "message": "The provider did not complete the sign-in. Try again or choose another account.",
+    "description": "Auth error: the provider refused the sign-in or its answer could not be validated."
+  },
+  "authErrEnrollFailed": {
+    "message": "Could not register your account right now. Please try again in a minute.",
+    "description": "Auth error: the provider accepted the sign-in, but the account could not be registered right now."
   },
   "authErrOutdated": {
     "message": "This version of Emojery is out of date. Update it to sign in.",
@@ -688,18 +628,6 @@
   "errServerBusy": {
     "message": "The server is having trouble. Try again in a minute.",
     "description": "Error copy for RuntimeErrorCode 'server' (HTTP 5xx)."
-  },
-  "authErrTooManyTries": {
-    "message": "Too many wrong codes. Try again later.",
-    "description": "Auth error: HTTP 423, shown as the too-many-wrong-codes message."
-  },
-  "authErrCodeInvalid": {
-    "message": "That code is incorrect or has expired.",
-    "description": "Auth error: HTTP 401 (wrong or expired OTP code)."
-  },
-  "authErrVerifyFailed": {
-    "message": "Verification failed. Please try again.",
-    "description": "Auth error: generic fallback for OTP verification failures."
   },
   "searchResultsCount": {
     "message": "$COUNT$ results",
@@ -782,7 +710,7 @@
     "description": "Title of the sign-in gate shown after a signed-out user picks a reaction."
   },
   "gateBody": {
-    "message": "Sign in with your email to make your reaction count.",
+    "message": "Sign in with an account you already have to make your reaction count.",
     "description": "Body of the sign-in gate: what signing in takes and why it matters."
   },
   "gateSignInBtn": {

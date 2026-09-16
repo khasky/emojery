@@ -104,23 +104,25 @@ export const TOOLTIP_POP_SELECTOR = `.${TOOLTIP_POP_CLASS}`;
 
 // --- Auth page (entrypoints/auth/main.tsx) ---
 
-export const EMAIL_INPUT_ID = "email-input";
-export const EMAIL_INPUT_SELECTOR = `#${EMAIL_INPUT_ID}`;
-export const CODE_INPUT_ID = "code-input";
-export const CODE_INPUT_SELECTOR = `#${CODE_INPUT_ID}`;
+// The provider list and its buttons; each button carries its provider id in
+// `data-provider`, which is how a test picks one without reading its label.
+export const PROVIDER_LIST_CLASS = "providers";
+export const PROVIDER_LIST_SELECTOR = `.${PROVIDER_LIST_CLASS}`;
+export const PROVIDER_BTN_CLASS = "provider-btn";
+export const PROVIDER_BTN_SELECTOR = `button.${PROVIDER_BTN_CLASS}`;
+export function providerButtonSelector(provider: string): string {
+  return `${PROVIDER_BTN_SELECTOR}[data-provider="${provider}"]`;
+}
 export const AUTH_ERROR_ID = "auth-error";
 export const AUTH_ERROR_CLASS = "error";
 // The class sits on every error banner the page can raise; the id marks the one
-// the email and code fields point at through aria-describedby.
+// the provider list points at through aria-describedby.
 export const AUTH_ERROR_SELECTOR = `.${AUTH_ERROR_CLASS}`;
-// The terms/privacy consent row; its checkbox gates the send-code button.
+// The terms/privacy consent row; its checkbox gates the provider buttons.
 export const AGREE_CLASS = "agree";
 export const AGREE_SELECTOR = `.${AGREE_CLASS}`;
 export const AGREE_CHECKBOX_SELECTOR = `.${AGREE_CLASS} input[type=checkbox]`;
-// The throttle/cooldown banner above the form.
-export const NOTICE_CLASS = "notice";
-export const NOTICE_SELECTOR = `.${NOTICE_CLASS}`;
-// The resend timer beside the code field.
+// The return-to-page timer on the done step.
 export const COUNTDOWN_CLASS = "countdown";
 export const COUNTDOWN_SELECTOR = `.${COUNTDOWN_CLASS}`;
 

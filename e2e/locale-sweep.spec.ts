@@ -127,7 +127,8 @@ for (const locale of sweptLocales()) {
       try {
         await page.goto(ext.extensionPageUrl(extensionId, "auth.html"));
         await expect(page.getByRole("heading", { name: messageFor(messages, "authSignInTitle") })).toBeVisible();
-        await expect(page.getByRole("button", { name: messageFor(messages, "authSendCodeBtn") })).toBeVisible();
+        // The provider buttons need the API; the consent row is the page's own.
+        await expect(page.getByRole("checkbox", { name: messageFor(messages, "authTermsLinkLabel") })).toBeVisible();
         await expectNoRawMessageKeys(page, `${locale} auth`);
 
         await page.goto(ext.extensionPageUrl(extensionId, "onboarding.html"));

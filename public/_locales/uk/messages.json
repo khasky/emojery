@@ -125,6 +125,15 @@
   "signedInLabel": {
     "message": "Ви ввійшли"
   },
+  "signedInVia": {
+    "message": "через $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
   "signOutBtn": {
     "message": "Вийти"
   },
@@ -387,9 +396,6 @@
   "authPageTitle": {
     "message": "Emojery — вхід"
   },
-  "authCodePageTitle": {
-    "message": "Emojery — Введіть код"
-  },
   "authDonePageTitle": {
     "message": "Emojery — Ви ввійшли"
   },
@@ -397,16 +403,28 @@
     "message": "Увійти, щоб відреагувати"
   },
   "authSignInTagline": {
-    "message": "Надішлемо вам код підтвердження на email"
+    "message": "Увійдіть через акаунт, який у вас уже є. Emojery не бачить ваш пароль."
   },
-  "authEmailLabel": {
-    "message": "Email"
+  "authProviderBtn": {
+    "message": "Продовжити з $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendCodeBtn": {
-    "message": "Надіслати код"
+  "authSigningInWith": {
+    "message": "Вхід через $PROVIDER$...",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendingBtn": {
-    "message": "Надсилання..."
+  "authRetryBtn": {
+    "message": "Спробувати ще раз"
   },
   "authAgreeIntro": {
     "message": "Я приймаю "
@@ -422,30 +440,6 @@
   },
   "authAgreeOutro": {
     "message": "."
-  },
-  "authCodeTitle": {
-    "message": "Введіть код"
-  },
-  "authCodeTagline": {
-    "message": "Ми надіслали код на $EMAIL$. Він діє 10 хвилин.",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authCodeLabel": {
-    "message": "Код підтвердження"
-  },
-  "authVerifyingBtn": {
-    "message": "Перевірка..."
-  },
-  "authVerifyBtn": {
-    "message": "Увійти"
-  },
-  "authUseDifferentEmail": {
-    "message": "Використати інший email"
   },
   "authDoneTitle": {
     "message": "Ви ввійшли"
@@ -463,7 +457,7 @@
     "message": "Що надсилає Emojery"
   },
   "dataConsentBody": {
-    "message": "Emojery надсилає адресу сторінки, де ви поставили реакцію, випадковий ідентифікатор встановлення, а під час входу — один раз ваш email; від нього зберігається лише односторонній хеш. Необов’язковий контекст у цьому браузері лишається вимкненим."
+    "message": "Emojery надсилає адресу сторінки, на якій ви ставите реакцію, випадковий ідентифікатор встановлення та одноразовий токен входу від вибраного провайдера; зберігається лише односторонній хеш ідентифікатора акаунта. Необов'язкові дані в цьому браузері залишаються вимкненими."
   },
   "dataConsentPolicyLink": {
     "message": "Політика приватності."
@@ -471,59 +465,17 @@
   "dataConsentContinueBtn": {
     "message": "Продовжити"
   },
-  "authSendThrottle": {
-    "message": "Ви нещодавно запитували код. Запросити ще один можна через $TIME$.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authResendCooldown": {
-    "message": "Ми вже надіслали код на цю адресу. Запросити новий можна через $TIME$.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authEnterPendingCode": {
-    "message": "Ввести код, надісланий на $EMAIL$",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authResendBtn": {
-    "message": "Надіслати код повторно"
-  },
-  "authResendInBtn": {
-    "message": "Надіслати код повторно через $TIME$",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authErrRateLimit": {
-    "message": "Забагато запитів. Зачекайте кілька хвилин і спробуйте знову."
-  },
-  "authErrUndeliverable": {
-    "message": "Не вдалося доставити листа. Спробуйте знову або перевірте адресу."
-  },
-  "authErrEmailDomainUndeliverable": {
-    "message": "Цей домен не приймає пошту. Перевірте адресу на помилку або вкажіть іншу."
-  },
-  "authErrBadEmail": {
-    "message": "Це не схоже на коректну email-адресу."
-  },
   "authErrUnknown": {
     "message": "Щось пішло не так. Спробуйте знову."
+  },
+  "authErrCancelled": {
+    "message": "Вхід скасовано. Спробуйте ще раз, коли будете готові."
+  },
+  "authErrProviderDenied": {
+    "message": "Провайдер не завершив вхід. Спробуйте ще раз або виберіть інший акаунт."
+  },
+  "authErrEnrollFailed": {
+    "message": "Не вдалося зареєструвати акаунт. Спробуйте ще раз за хвилину."
   },
   "authErrOutdated": {
     "message": "Ця версія Emojery застаріла. Оновіть її, щоб увійти."
@@ -539,15 +491,6 @@
   },
   "errServerBusy": {
     "message": "На сервері негаразди. Спробуйте за хвилину."
-  },
-  "authErrTooManyTries": {
-    "message": "Забагато неправильних кодів. Спробуйте пізніше."
-  },
-  "authErrCodeInvalid": {
-    "message": "Код неправильний або прострочений."
-  },
-  "authErrVerifyFailed": {
-    "message": "Не вдалося підтвердити. Спробуйте знову."
   },
   "searchResultsCount": {
     "message": "Результатів: $COUNT$",
@@ -614,7 +557,7 @@
     "message": "Останній крок"
   },
   "gateBody": {
-    "message": "Увійдіть за допомогою електронної пошти, щоб вашу реакцію зарахували."
+    "message": "Увійдіть через наявний акаунт, щоб реакцію було зараховано."
   },
   "gateSignInBtn": {
     "message": "Увійти"

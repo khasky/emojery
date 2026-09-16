@@ -2,11 +2,14 @@
 // Extension-local auth session state.
 
 import { AUTH_KEY, isAuthSessionLive } from "../shared/auth-session";
-import type { OtpRequestRefusal, OtpVerifyRefusal } from "../shared/messages";
+import { API_BASE } from "../shared/config";
+import type { SignInRefusal } from "../shared/messages";
+import { isProviderId, type OidcProvider } from "../shared/oidc-providers";
 import { clearAutoNativesForUser, clearOwnReactionsForUser } from "../shared/storage";
-import { storageLocalGet, storageLocalRemove, storageLocalSet, storageSessionGet, storageSessionRemove, storageSessionSet } from "../shared/webext";
-import { type ApiReply, apiErrorString, apiRequest, isRecord, requestLanguage } from "./api-client";
+import { identityRedirectUrl, launchWebAuthFlow, storageLocalGet, storageLocalRemove, storageLocalSet, storageSessionGet, storageSessionRemove, storageSessionSet } from "../shared/webext";
+import { apiErrorString, apiRequest, isRecord, requestLanguage } from "./api-client";
 import { logBackgroundError } from "./debug";
+import { clearEpochKeysForUser } from "./epoch-keys";
 import { clearHistory, clearHistoryForUser } from "./history";
 import { clearQueuedVotes } from "./votequeue";
 
@@ -15,18 +18,23 @@ export interface AuthState {
   token: string;
   /** Seconds-epoch expiry. */
   expiresAt: number;
-  /** Sign-in email, stored locally so the popup can label the account. Optional for older sessions. */
-  email?: string;
+  /** The provider the account signed in with; the popup labels the account by it. */
+  provider: OidcProvider;
+  /** Length of one key epoch in ms, as the API stated it at sign-in - the drain
+   *  derives the epoch number of every vote from it (background/epoch-keys.ts). */
+  epochMs: number;
 }
 
 // Every field the rest of the extension relies on, checked before the record is
-// trusted: shared/auth-session.ts reads a non-finite `expiresAt` as expired, and
+// trusted: shared/auth-session.ts reads a non-finite `expiresAt` as expired,
 // `userId` scopes the own-reaction and auto-native stores, so a missing one would
-// silently widen their lookups across accounts.
+// silently widen their lookups across accounts, and a session without `epochMs`
+// cannot sign a vote. A record the email-code builds wrote lacks the last two,
+// so it reads as signed out and the account signs in again through a provider.
 function isStoredAuthState(value: unknown): value is AuthState {
   if (!value || typeof value !== "object") return false;
   const record = value as Record<string, unknown>;
-  return typeof record.token === "string" && record.token.length > 0 && typeof record.userId === "string" && record.userId.length > 0 && typeof record.expiresAt === "number" && Number.isFinite(record.expiresAt);
+  return typeof record.token === "string" && record.token.length > 0 && typeof record.userId === "string" && record.userId.length > 0 && typeof record.expiresAt === "number" && Number.isFinite(record.expiresAt) && isProviderId(record.provider) && typeof record.epochMs === "number" && record.epochMs > 0;
 }
 
 export async function getAuth(): Promise<AuthState | null> {
@@ -53,57 +61,81 @@ export async function clearAuth(): Promise<void> {
   await storageLocalRemove([AUTH_KEY]);
 }
 
-export type RequestOtpResult =
-  | { ok: true }
-  // `retryAfterSeconds` comes from the `retry-after` header alone, the only source
-  // of a delay; absent, the auth page falls back to its own cooldown.
-  | { ok: false; refusal: OtpRequestRefusal; retryAfterSeconds?: number };
+export type SignInResult = { ok: true } | { ok: false; refusal: SignInRefusal };
 
-// Where an HTTP status becomes a named refusal. The API's `error` string is a
-// machine diagnostic that stays in the background's request log; the one it
-// selects on is `client_outdated`, the only refusal whose fix is on the user's side.
-const REQUEST_OTP_REFUSALS: Record<number, OtpRequestRefusal> = { 429: "rate_limited", 400: "invalid_email", 422: "email_rejected", 502: "delivery_failed" };
-const VERIFY_OTP_REFUSALS: Record<number, OtpVerifyRefusal> = { 401: "code_invalid", 423: "locked" };
+// What the API's `#error=` fragment becomes on screen. The API's `error` string
+// is a machine diagnostic that stays in the background's request log; the ones
+// matched below are the refusals whose copy differs from the generic one.
+const CALLBACK_REFUSALS: Record<string, SignInRefusal> = {
+  access_denied: "provider_denied",
+  oidc_upstream_failed: "provider_denied",
+  oidc_token_invalid: "provider_denied",
+  enroll_unavailable: "enrollment_failed",
+};
 
-function otpRefusal<R extends OtpRequestRefusal | OtpVerifyRefusal>(reply: ApiReply, byStatus: Record<number, R>): R | "client_outdated" | "unavailable" {
-  if (reply.status === 403 && apiErrorString(reply.body) === "client_outdated") return "client_outdated";
-  return byStatus[reply.status] ?? "unavailable";
+// The identity window rejects with a message rather than a code. A closed window
+// (Chrome: "The user did not approve access.", Firefox: "User cancelled or denied
+// access.") is the user's choice; anything else is the flow failing to run.
+function launchRefusal(error: unknown): SignInRefusal {
+  const message = error instanceof Error ? error.message : String(error);
+  return /approve|cancel|denied|closed/i.test(message) ? "cancelled" : "unavailable";
 }
 
-export async function requestOtp(email: string): Promise<RequestOtpResult> {
-  const lang = requestLanguage();
-  const reply = await apiRequest("/auth/request-otp", { method: "POST", lang, body: { email, ...(lang ? { lang } : {}) } });
-
-  if (reply.ok) return { ok: true };
-  return {
-    ok: false,
-    refusal: otpRefusal(reply, REQUEST_OTP_REFUSALS),
-    ...(reply.retryAfterSeconds !== undefined ? { retryAfterSeconds: reply.retryAfterSeconds } : {}),
-  };
-}
-
-// Carries no AuthState: the session (bearer token included) is
-// already persisted via setAuth and read back through getAuth, so returning it
-// would only widen the credential's exposure surface.
-export type VerifyOtpResult = { ok: true } | { ok: false; refusal: OtpVerifyRefusal };
-
-export async function verifyOtp(email: string, code: string): Promise<VerifyOtpResult> {
-  const reply = await apiRequest("/auth/verify-otp", { method: "POST", lang: requestLanguage(), body: { email, code } });
-  if (reply.ok) {
-    // The wire field is `expiresAtSec` (seconds). The stored AuthState keeps its
-    // own `expiresAt` name (documented as seconds), so no migration of a saved
-    // `auth_v1` record is needed.
-    const session = reply.body;
-    if (!isRecord(session) || typeof session.userId !== "string" || !session.userId || typeof session.token !== "string" || !session.token || typeof session.expiresAtSec !== "number" || !Number.isFinite(session.expiresAtSec)) {
-      // A 2xx without a usable session is a contract break, not a wrong code.
-      logBackgroundError("verifyOtp.session", new Error("malformed session body"));
-      return { ok: false, refusal: "unavailable" };
-    }
-    const authState: AuthState = { userId: session.userId, token: session.token, expiresAt: session.expiresAtSec, email };
-    await setAuth(authState);
-    return { ok: true };
+// The `#code=` / `#error=` fragment the API redirects the identity window to.
+function parseCallbackFragment(responseUrl: string): { code: string } | { error: string } {
+  let params: URLSearchParams;
+  try {
+    params = new URLSearchParams(new URL(responseUrl).hash.replace(/^#/, ""));
+  } catch {
+    return { error: "malformed_callback" };
   }
-  return { ok: false, refusal: otpRefusal(reply, VERIFY_OTP_REFUSALS) };
+  const code = params.get("code");
+  if (code) return { code };
+  return { error: params.get("error") || "malformed_callback" };
+}
+
+// Carries no AuthState: the session (bearer token included) is already persisted
+// via setAuth and read back through getAuth, so returning it would only widen the
+// credential's exposure surface.
+export async function signInWithProvider(provider: OidcProvider): Promise<SignInResult> {
+  const redirect = identityRedirectUrl();
+  if (!redirect) return { ok: false, refusal: "unavailable" };
+  const startUrl = `${API_BASE}/auth/oidc/start?provider=${encodeURIComponent(provider)}&redirect=${encodeURIComponent(redirect)}`;
+
+  let responseUrl: string | null;
+  try {
+    responseUrl = await launchWebAuthFlow(startUrl);
+  } catch (error) {
+    return { ok: false, refusal: launchRefusal(error) };
+  }
+  if (!responseUrl) return { ok: false, refusal: "cancelled" };
+
+  const callback = parseCallbackFragment(responseUrl);
+  if ("error" in callback) return { ok: false, refusal: CALLBACK_REFUSALS[callback.error] ?? "unavailable" };
+
+  const reply = await apiRequest("/auth/oidc/exchange", { method: "POST", lang: requestLanguage(), body: { code: callback.code } });
+  if (!reply.ok) {
+    if (reply.status === 403 && apiErrorString(reply.body) === "client_outdated") return { ok: false, refusal: "client_outdated" };
+    return { ok: false, refusal: "unavailable" };
+  }
+  // The wire field is `expiresAtSec` (seconds). The stored AuthState keeps its own
+  // `expiresAt` name (documented as seconds).
+  const session = reply.body;
+  if (!isRecord(session) || typeof session.userId !== "string" || !session.userId || typeof session.token !== "string" || !session.token || typeof session.expiresAtSec !== "number" || !Number.isFinite(session.expiresAtSec) || typeof session.epochMs !== "number" || !(session.epochMs > 0)) {
+    // A 2xx without a usable session is a contract break, not a refused code.
+    logBackgroundError("signInWithProvider.session", new Error("malformed session body"));
+    return { ok: false, refusal: "unavailable" };
+  }
+  await setAuth({ userId: session.userId, token: session.token, expiresAt: session.expiresAtSec, provider, epochMs: session.epochMs });
+  return { ok: true };
+}
+
+// The providers the API offers this build, in the order the page shows them. An
+// unreadable list rejects: the page has nothing to render without it.
+export async function listSignInProviders(): Promise<OidcProvider[]> {
+  const reply = await apiRequest("/auth/oidc/providers", { method: "GET", cache: "no-store" });
+  if (!reply.ok || !isRecord(reply.body) || !Array.isArray(reply.body.providers)) throw new Error(`providers list unavailable: http ${reply.status}`);
+  return reply.body.providers.filter(isProviderId);
 }
 
 // End this account's session server-side; clearing the local token alone does not.
@@ -130,10 +162,6 @@ interface DeletionPending {
    *  Absent on a marker written before this field existed - see
    *  clearLocalAccountStateAfterDeletion. */
   userId?: string;
-  /** Sign-in address, carried so a deletion that only completes on a later retry
-   *  still sends it. Absent for a session signed in before the address was stored
-   *  locally. */
-  email?: string;
   /** The token's own seconds-epoch expiry, copied from AuthState. This record is
    *  the one place a bearer token outlives clearAuth(), so a marker whose token has
    *  already expired is dropped rather than kept around. Absent on a marker written
@@ -142,8 +170,8 @@ interface DeletionPending {
   expiresAt?: number;
 }
 
-async function setDeletionPending(token: string, userId: string, email: string | undefined, expiresAt: number): Promise<void> {
-  await storageSessionSet({ [DELETION_PENDING_KEY]: { token, userId, ...(email ? { email } : {}), expiresAt } satisfies DeletionPending });
+async function setDeletionPending(token: string, userId: string, expiresAt: number): Promise<void> {
+  await storageSessionSet({ [DELETION_PENDING_KEY]: { token, userId, expiresAt } satisfies DeletionPending });
 }
 
 async function getDeletionPending(): Promise<DeletionPending | null> {
@@ -165,7 +193,6 @@ async function getDeletionPending(): Promise<DeletionPending | null> {
   }
   const out: DeletionPending = { token: pending.token };
   if (typeof pending.userId === "string" && pending.userId) out.userId = pending.userId;
-  if (typeof pending.email === "string" && pending.email) out.email = pending.email;
   return out;
 }
 
@@ -177,11 +204,10 @@ export async function clearPendingDeletion(): Promise<void> {
   await storageLocalRemove([DELETION_PENDING_KEY]);
 }
 
-// `email` is optional; the deletion does not depend on it.
-async function requestAccountDeletion(token: string, email: string | undefined): Promise<boolean> {
+async function requestAccountDeletion(token: string): Promise<boolean> {
   try {
     const lang = requestLanguage();
-    const reply = await apiRequest("/auth/delete", { method: "POST", token, lang, body: { ...(email ? { email } : {}), ...(lang ? { lang } : {}) }, keepalive: true });
+    const reply = await apiRequest("/auth/delete", { method: "POST", token, lang, body: { ...(lang ? { lang } : {}) }, keepalive: true });
     return reply.ok || reply.status === 401;
   } catch (error) {
     logBackgroundError("requestAccountDeletion", error);
@@ -200,6 +226,8 @@ async function clearLocalAccountStateAfterDeletion(userId: string | undefined): 
     await clearHistoryForUser(userId);
     await clearOwnReactionsForUser(userId);
     await clearAutoNativesForUser(userId);
+    // The signing keys go with the account and only with it (background/epoch-keys.ts).
+    await clearEpochKeysForUser(userId);
   } else {
     await clearHistory();
   }
@@ -215,8 +243,8 @@ async function clearLocalAccountStateAfterDeletion(userId: string | undefined): 
 export async function deleteAccount(): Promise<boolean> {
   const auth = await getAuth();
   if (!auth) return finishPendingDeletion();
-  await setDeletionPending(auth.token, auth.userId, auth.email, auth.expiresAt);
-  const done = await requestAccountDeletion(auth.token, auth.email);
+  await setDeletionPending(auth.token, auth.userId, auth.expiresAt);
+  const done = await requestAccountDeletion(auth.token);
   if (done) await clearLocalAccountStateAfterDeletion(auth.userId);
   return done;
 }
@@ -224,7 +252,7 @@ export async function deleteAccount(): Promise<boolean> {
 export async function finishPendingDeletion(): Promise<boolean> {
   const pending = await getDeletionPending();
   if (!pending) return false;
-  const done = await requestAccountDeletion(pending.token, pending.email);
+  const done = await requestAccountDeletion(pending.token);
   if (done) await clearLocalAccountStateAfterDeletion(pending.userId);
   return done;
 }

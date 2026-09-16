@@ -16,7 +16,7 @@
 import { expect, test } from "@playwright/test";
 import { type AxeViolation, axeSource, COLOR_SCHEMES, formatViolations, POPUP_TABS, TEXT_SPACING_CSS, WCAG_TAGS } from "./lib/axe";
 import { closeSession, enMessage, type FirefoxExtensionTab, firefoxBridge, isFirefoxRun, launchSession } from "./lib/extension";
-import { AGREE_SELECTOR, CARD_SELECTOR, EMAIL_INPUT_SELECTOR, TAGLINE_SELECTOR } from "./lib/selectors";
+import { AGREE_CHECKBOX_SELECTOR, AGREE_SELECTOR, CARD_SELECTOR, TAGLINE_SELECTOR } from "./lib/selectors";
 
 test.skip(!isFirefoxRun(), "the Chromium run scans these pages through Playwright pages in a11y.spec.ts");
 // Browser-local: no network, no account - a red run here is a product bug.
@@ -92,7 +92,7 @@ for (const scheme of COLOR_SCHEMES) {
 
       const auth = await openSizedPage(session.context, "auth.html", { width: 380, height: 560 }, scheme);
       try {
-        await waitInPage(auth, (selector) => document.querySelector(selector) !== null, EMAIL_INPUT_SELECTOR, "the auth email step should render");
+        await waitInPage(auth, (selector) => document.querySelector(selector) !== null, AGREE_CHECKBOX_SELECTOR, "the auth provider step should render");
         violations.push(...(await runAxe(auth, `auth (${scheme})`)));
       } finally {
         await auth.close();
@@ -120,7 +120,7 @@ test("reflow: no horizontal scrolling at narrow widths (WCAG 1.4.10)", async () 
     // breakpoint applies as-is; the popup is fixed-size browser chrome with a
     // declared 360px floor (popup.css min-width).
     const checks: Array<{ path: string; width: number; ready: (arg: string) => boolean; arg: string }> = [
-      { path: "auth.html", width: 320, ready: (selector) => document.querySelector(selector) !== null, arg: EMAIL_INPUT_SELECTOR },
+      { path: "auth.html", width: 320, ready: (selector) => document.querySelector(selector) !== null, arg: AGREE_CHECKBOX_SELECTOR },
       { path: "onboarding.html", width: 320, ready: () => document.querySelector("h1") !== null, arg: "" },
       { path: "popup.html", width: 360, ready: (tab) => Array.from(document.querySelectorAll('[role="tab"]')).some((el) => (el.textContent ?? "").includes(tab)), arg: "Settings" },
     ];

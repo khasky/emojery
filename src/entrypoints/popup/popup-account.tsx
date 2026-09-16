@@ -3,6 +3,7 @@ import { type ComponentChild, Fragment } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { removeTechnicalAndInteractionConsent, requestTechnicalAndInteractionConsent } from "../../shared/data-consent";
 import { t } from "../../shared/i18n";
+import { providerLabel } from "../../shared/oidc-providers";
 import { ACCOUNT_LIST_CLASS, DELETE_CONFIRM_WARN_CLASS } from "../../shared/page-dom";
 import type { Settings } from "../../shared/storage";
 import { sendRuntimeMessage } from "../../shared/webext";
@@ -92,7 +93,7 @@ const DeleteAccountRow = ({ refresh }: { refresh: () => void }) => {
 const AccountView = ({ settings, update }: { settings: Settings; update: (patch: Partial<Settings>) => Promise<void> }) => {
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const [email, setEmail] = useState<string | null>(null);
+  const [provider, setProvider] = useState<string | null>(null);
 
   const refresh = () => {
     void sendRuntimeMessage({ type: "auth:status" })
@@ -100,7 +101,7 @@ const AccountView = ({ settings, update }: { settings: Settings; update: (patch:
         if (resp?.type === "auth:status") {
           setAuthed(resp.authed);
           setUserId(resp.userId);
-          setEmail(resp.email);
+          setProvider(resp.provider);
         } else {
           setAuthed(false);
         }
@@ -118,12 +119,14 @@ const AccountView = ({ settings, update }: { settings: Settings; update: (patch:
     return <SignInPrompt message={t("signInMsgAccount")} />;
   }
 
-  // A session carrying no email shows a short id prefix instead. The empty tail is
-  // unreachable - a signed-in session always has an id - but `hint` takes a string.
-  const subtitle = email ?? (userId ? `id: ${userId.slice(0, 8)}...` : "");
+  // The account is named by the provider it came from - nothing else about it is
+  // stored locally. A session carrying no provider shows a short id prefix instead.
+  // The empty tail is unreachable - a signed-in session always has an id - but
+  // `hint` takes a string.
+  const subtitle = provider ? t("signedInVia", providerLabel(provider)) : userId ? `id: ${userId.slice(0, 8)}...` : "";
   return (
     <div class={ACCOUNT_LIST_CLASS}>
-      <IconRow rowClass="row arow" icon={ICON_USER} label={t("signedInLabel")} hint={subtitle} hintTitle={email ?? undefined}>
+      <IconRow rowClass="row arow" icon={ICON_USER} label={t("signedInLabel")} hint={subtitle}>
         <button
           class="linkish"
           type="button"

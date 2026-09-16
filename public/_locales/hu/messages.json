@@ -125,6 +125,15 @@
   "signedInLabel": {
     "message": "Bejelentkezve"
   },
+  "signedInVia": {
+    "message": "$PROVIDER$ fiókkal",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
   "signOutBtn": {
     "message": "Kijelentkezés"
   },
@@ -387,9 +396,6 @@
   "authPageTitle": {
     "message": "Emojery — Bejelentkezés"
   },
-  "authCodePageTitle": {
-    "message": "Emojery — Adja meg a kódját"
-  },
   "authDonePageTitle": {
     "message": "Emojery — Bejelentkezett"
   },
@@ -397,16 +403,28 @@
     "message": "Jelentkezzen be a reagáláshoz"
   },
   "authSignInTagline": {
-    "message": "Ellenőrző kódot küldünk e-mailben"
+    "message": "Folytasd egy meglévő fiókoddal. Az Emojery sosem látja a jelszavadat."
   },
-  "authEmailLabel": {
-    "message": "E-mail"
+  "authProviderBtn": {
+    "message": "Folytatás ezzel: $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendCodeBtn": {
-    "message": "Kód küldése"
+  "authSigningInWith": {
+    "message": "Bejelentkezés ezzel: $PROVIDER$...",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendingBtn": {
-    "message": "Küldés..."
+  "authRetryBtn": {
+    "message": "Próbáld újra"
   },
   "authAgreeIntro": {
     "message": "Elfogadom a "
@@ -422,30 +440,6 @@
   },
   "authAgreeOutro": {
     "message": "."
-  },
-  "authCodeTitle": {
-    "message": "Adja meg a kódját"
-  },
-  "authCodeTagline": {
-    "message": "Kódot küldtünk a $EMAIL$ címre. 10 perc múlva lejár.",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authCodeLabel": {
-    "message": "Ellenőrző kód"
-  },
-  "authVerifyingBtn": {
-    "message": "Ellenőrzés..."
-  },
-  "authVerifyBtn": {
-    "message": "Bejelentkezés"
-  },
-  "authUseDifferentEmail": {
-    "message": "Másik e-mail használata"
   },
   "authDoneTitle": {
     "message": "Bejelentkezett"
@@ -463,7 +457,7 @@
     "message": "Mit küld az Emojery"
   },
   "dataConsentBody": {
-    "message": "Az Emojery elküldi annak az oldalnak a címét, amelyen reagál, egy véletlenszerű telepítési azonosítót, valamint bejelentkezéskor egyszer az e-mail-címét; ebből csak egy egyirányú kivonatot tárolunk. A választható környezeti adat ebben a böngészőben kikapcsolva marad."
+    "message": "Az Emojery elküldi annak az oldalnak a címét, amelyen reagálsz, egy véletlen telepítési azonosítót és a választott szolgáltató egyszeri bejelentkezési tokenjét; csak a fiókazonosítód egyirányú hash-e marad meg. Az opcionális kontextus ebben a böngészőben kikapcsolva marad."
   },
   "dataConsentPolicyLink": {
     "message": "Adatvédelmi szabályzat."
@@ -471,59 +465,17 @@
   "dataConsentContinueBtn": {
     "message": "Tovább"
   },
-  "authSendThrottle": {
-    "message": "Nemrég kért egy kódot. $TIME$ múlva kérhet másikat.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authResendCooldown": {
-    "message": "Már küldtünk egy kódot erre a címre. $TIME$ múlva kérhet újat.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authEnterPendingCode": {
-    "message": "Adja meg a(z) $EMAIL$ címre küldött kódot",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authResendBtn": {
-    "message": "Kód újraküldése"
-  },
-  "authResendInBtn": {
-    "message": "Kód újraküldése $TIME$ múlva",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authErrRateLimit": {
-    "message": "Túl sok kérés. Várjon néhány percet, és próbálja újra."
-  },
-  "authErrUndeliverable": {
-    "message": "Nem sikerült kézbesíteni az e-mailt. Próbálja újra, vagy ellenőrizze a címet."
-  },
-  "authErrEmailDomainUndeliverable": {
-    "message": "Ez az e-mail domain nem tud üzenetet fogadni. Ellenőrizze a címet, vagy használjon másikat."
-  },
-  "authErrBadEmail": {
-    "message": "Ez nem tűnik érvényes e-mail címnek."
-  },
   "authErrUnknown": {
     "message": "Valami elromlott. Próbálja újra."
+  },
+  "authErrCancelled": {
+    "message": "A bejelentkezés megszakadt. Próbáld újra, ha készen állsz."
+  },
+  "authErrProviderDenied": {
+    "message": "A szolgáltató nem fejezte be a bejelentkezést. Próbáld újra, vagy válassz másik fiókot."
+  },
+  "authErrEnrollFailed": {
+    "message": "A fiókodat most nem sikerült regisztrálni. Próbáld újra egy perc múlva."
   },
   "authErrOutdated": {
     "message": "Az Emojery ezen verziója elavult. A bejelentkezéshez frissítse."
@@ -539,15 +491,6 @@
   },
   "errServerBusy": {
     "message": "A kiszolgálón hiba történt. Próbáld újra egy perc múlva."
-  },
-  "authErrTooManyTries": {
-    "message": "Túl sok hibás kód. Próbálja újra később."
-  },
-  "authErrCodeInvalid": {
-    "message": "A kód hibás vagy lejárt."
-  },
-  "authErrVerifyFailed": {
-    "message": "Az ellenőrzés sikertelen. Próbálja újra."
   },
   "searchResultsCount": {
     "message": "$COUNT$ találat",
@@ -614,7 +557,7 @@
     "message": "Utolsó lépés"
   },
   "gateBody": {
-    "message": "Jelentkezz be az e-mail-címeddel, hogy a reakciód számítson."
+    "message": "Jelentkezz be egy meglévő fiókkal, hogy a reakciód számítson."
   },
   "gateSignInBtn": {
     "message": "Bejelentkezés"

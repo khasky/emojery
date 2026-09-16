@@ -60,16 +60,17 @@ export function gitlabUrl(): string {
 
 // Sign-in fixtures come from a resolver module outside the tree: E2E_SIGNIN_RESOLVER
 // names a CommonJS or ES module (absolute, or relative to the repo root) exporting
-//   signInEmail(purpose: string): string  - an address for the flow named by `purpose`,
-//                                           distinct per purpose and per process, so a
-//                                           spec that locks or destroys its state never
-//                                           touches a sibling's;
-//   signInCode(email: string): string     - the code auth.html accepts for that address.
+//   signInSubject(purpose: string): string - the test issuer's subject for the flow
+//                                             named by `purpose`, distinct per purpose
+//                                             and per process, so a spec that destroys
+//                                             its account never touches a sibling's;
+//   issuerSecret(): string                  - the shared secret the staging test issuer
+//                                             asks for beside the subject.
 // Unset => every authed spec skips. Set but unloadable => the run fails naming the
 // path; the module is never committed (keep it under .playwright/ or outside the repo).
 interface SignInResolver {
-  signInEmail(purpose: string): string;
-  signInCode(email: string): string;
+  signInSubject(purpose: string): string;
+  issuerSecret(): string;
 }
 
 const nodeRequire = createRequire(import.meta.url);
@@ -87,39 +88,34 @@ function signInResolver(): SignInResolver {
   const modulePath = resolve(REPO_ROOT, configured);
   const loaded: unknown = nodeRequire(modulePath);
   const exported = (loaded as { default?: unknown }).default ?? loaded;
-  if (!isSignInResolver(exported)) throw new Error(`E2E_SIGNIN_RESOLVER (${modulePath}) must export signInEmail(purpose) and signInCode(email).`);
+  if (!isSignInResolver(exported)) throw new Error(`E2E_SIGNIN_RESOLVER (${modulePath}) must export signInSubject(purpose) and issuerSecret().`);
   loadedResolver = exported;
   return exported;
 }
 
 function isSignInResolver(value: unknown): value is SignInResolver {
   const candidate = value as Partial<SignInResolver> | null;
-  return typeof candidate?.signInEmail === "function" && typeof candidate?.signInCode === "function";
+  return typeof candidate?.signInSubject === "function" && typeof candidate?.issuerSecret === "function";
 }
 
-// The sign-in code for `email`. Every caller sits behind authConfigured(), so a
+// The test issuer's secret. Every caller sits behind authConfigured(), so a
 // missing resolver here is a misconfigured run, not a skipped one - it fails loud
 // rather than typing "" into the form.
-export function authCode(email: string): string {
-  const code = signInResolver().signInCode(email);
-  if (!code) throw new Error(`The sign-in resolver returned no code for ${email}.`);
-  return code;
+export function issuerSecret(): string {
+  const secret = signInResolver().issuerSecret();
+  if (!secret) throw new Error("The sign-in resolver returned no issuer secret.");
+  return secret;
 }
 
-// A code guaranteed to differ from `code`.
-export function wrongCodeFor(code: string): string {
-  return (code.startsWith("0") ? "1" : "0") + code.slice(1);
-}
-
-// One address per purpose. Playwright restarts the worker after a failure, so a
+// One subject per purpose. Playwright restarts the worker after a failure, so a
 // retried run resolves fresh values through the resolver.
-export function authEmail(purpose = "primary"): string {
-  const email = signInResolver().signInEmail(purpose).trim().toLowerCase();
-  if (!email) throw new Error(`The sign-in resolver returned no address for "${purpose}".`);
-  return email;
+export function authSubject(purpose = "primary"): string {
+  const subject = signInResolver().signInSubject(purpose).trim();
+  if (!subject) throw new Error(`The sign-in resolver returned no subject for "${purpose}".`);
+  return subject;
 }
 
-export function otpSkipReason(what: string): string {
+export function signInSkipReason(what: string): string {
   return `Set E2E_SIGNIN_RESOLVER (see .env.e2e.example) to run ${what}.`;
 }
 

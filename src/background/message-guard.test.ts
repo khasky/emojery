@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { describe, expect, it } from "vitest";
-import { EMAIL_MAX, NOTE_MAX, OTP_CODE_MAX, REACTION_BYTES_MAX, type RuntimeMessage } from "../shared/messages";
+import { NOTE_MAX, REACTION_BYTES_MAX, type RuntimeMessage } from "../shared/messages";
+import { PROVIDER_ID_MAX } from "../shared/oidc-providers";
 import { CONTENT_SCRIPT_MESSAGE_TYPES, EXTENSION_PAGE_MESSAGE_TYPES, FETCH_LIMIT_MAX, HISTORY_PAGE_LIMIT_MAX, HISTORY_QUERY_MAX, isExtensionPageSender, isTrustedSender, MESSAGE_TYPES, parseRuntimeMessage, TARGET_COUNT_MAX } from "./message-guard";
 
 const RUNTIME_ID = "abcdefghijklmnopabcdefghijklmnop";
@@ -391,29 +392,31 @@ describe("parseRuntimeMessage", () => {
     }
   });
 
-  // The OTP pair is the one exchange that creates a session, so the sender gate
-  // matters more here than anywhere else: a compromised content script that could
-  // drive it would be requesting and redeeming codes for arbitrary addresses.
-  it("accepts the OTP exchange from the auth page and refuses it from a content script", () => {
+  // The sign-in is the one exchange that creates a session (it opens the browser's
+  // identity window), so the sender gate matters more here than anywhere else: a
+  // compromised content script that could drive it would be starting sign-ins at will.
+  it("accepts the sign-in and the provider list from the auth page and refuses them from a content script", () => {
     const authPage = pageSender({ url: `${EXT_BASE}auth.html` });
-    expect(parseRuntimeMessage({ type: "auth:requestOtp", email: "a@b.com" }, authPage, RUNTIME_ID, EXT_BASE)).toEqual({ type: "auth:requestOtp", email: "a@b.com" });
-    expect(parseRuntimeMessage({ type: "auth:verifyOtp", email: "a@b.com", code: "123456" }, authPage, RUNTIME_ID, EXT_BASE)).toEqual({ type: "auth:verifyOtp", email: "a@b.com", code: "123456" });
+    expect(parseRuntimeMessage({ type: "auth:signIn", provider: "google" }, authPage, RUNTIME_ID, EXT_BASE)).toEqual({ type: "auth:signIn", provider: "google" });
+    expect(parseRuntimeMessage({ type: "auth:providers" }, authPage, RUNTIME_ID, EXT_BASE)).toEqual({ type: "auth:providers" });
 
-    expect(parseRuntimeMessage({ type: "auth:requestOtp", email: "a@b.com" }, tabSender(), RUNTIME_ID, EXT_BASE)).toBeNull();
-    expect(parseRuntimeMessage({ type: "auth:verifyOtp", email: "a@b.com", code: "123456" }, tabSender(), RUNTIME_ID, EXT_BASE)).toBeNull();
+    expect(parseRuntimeMessage({ type: "auth:signIn", provider: "google" }, tabSender(), RUNTIME_ID, EXT_BASE)).toBeNull();
+    expect(parseRuntimeMessage({ type: "auth:providers" }, tabSender(), RUNTIME_ID, EXT_BASE)).toBeNull();
   });
 
-  it("holds the OTP fields to a present, bounded string", () => {
+  // The id is spliced into the URL the identity window opens, so it is held to the
+  // API's own slug shape rather than to a length alone.
+  it("holds the provider id to a bounded lowercase slug", () => {
     const authPage = pageSender({ url: `${EXT_BASE}auth.html` });
     const reject = (raw: unknown) => expect(parseRuntimeMessage(raw, authPage, RUNTIME_ID, EXT_BASE)).toBeNull();
 
-    reject({ type: "auth:requestOtp" });
-    reject({ type: "auth:requestOtp", email: "" });
-    reject({ type: "auth:requestOtp", email: "   " });
-    reject({ type: "auth:requestOtp", email: 42 });
-    reject({ type: "auth:requestOtp", email: `${"a".repeat(EMAIL_MAX + 1 - "@example.com".length)}@example.com` }); // EMAIL_MAX + 1 chars
-    reject({ type: "auth:verifyOtp", email: "a@b.com" });
-    reject({ type: "auth:verifyOtp", email: "a@b.com", code: "" });
-    reject({ type: "auth:verifyOtp", email: "a@b.com", code: "1".repeat(OTP_CODE_MAX + 1) });
+    reject({ type: "auth:signIn" });
+    reject({ type: "auth:signIn", provider: "" });
+    reject({ type: "auth:signIn", provider: "Google" });
+    reject({ type: "auth:signIn", provider: "google&redirect=x" });
+    reject({ type: "auth:signIn", provider: " google" });
+    reject({ type: "auth:signIn", provider: 42 });
+    reject({ type: "auth:signIn", provider: "a".repeat(PROVIDER_ID_MAX + 1) });
+    expect(parseRuntimeMessage({ type: "auth:signIn", provider: "a".repeat(PROVIDER_ID_MAX) }, authPage, RUNTIME_ID, EXT_BASE)).toEqual({ type: "auth:signIn", provider: "a".repeat(PROVIDER_ID_MAX) });
   });
 });

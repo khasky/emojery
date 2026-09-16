@@ -92,6 +92,8 @@
     "postinstall": "wxt prepare"
   },
   "dependencies": {
+    "@cloudflare/blindrsa-ts": "0.4.6",
+    "@noble/ed25519": "3.2.0",
     "emojibase-data": "^17.0.0",
     "preact": "^10.29.8"
   },

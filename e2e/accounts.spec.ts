@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // Multi-account gap coverage: identity isolation across account switches,
-// independent counter moves per account, email-based account recovery, and
+// independent counter moves per account, provider-account recovery, and
 // the wrong-code path of the sign-in form. All flows run on
 // GitHub (login-free mount surface) and read only what a user sees: the
 // shadow-hosted trigger/counter, the popup History tab, and the visible errors on auth.html.
@@ -9,9 +9,8 @@ import { expect, test } from "@playwright/test";
 import * as ext from "./lib/extension";
 import { historyPageOverBridge, openHistoryTab, withPopupOverBridge } from "./lib/popup-probes";
 import { reloadAndSettle } from "./lib/reload-settle";
-import { AGREE_CHECKBOX_SELECTOR, CODE_INPUT_SELECTOR, EMAIL_INPUT_SELECTOR } from "./lib/selectors";
 
-const REQUIRES_OTP = ext.otpSkipReason("multi-account e2e checks");
+const REQUIRES_SIGNIN = ext.signInSkipReason("multi-account e2e checks");
 
 // A queued vote survives a sign-out now (see flushVotes), but not the throwaway
 // profile it lives in, so a vote followed by teardown must first reach the server:
@@ -55,13 +54,14 @@ async function historyState(context: Parameters<typeof ext.openPopup>[0], host: 
 // Switching accounts swaps the visible identity completely: A's history entry and
 // selected reaction never show under B, and both return when A signs back in.
 test("account switching isolates history and the own reaction", async () => {
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
-  const emailA = ext.authEmail("switch-a");
-  const emailB = ext.authEmail("switch-b");
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_SIGN_IN);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
+  const subjectA = ext.authSubject("switch-a");
+  const subjectB = ext.authSubject("switch-b");
   const session = await ext.launchSession();
   let cleanupAsA = false;
   try {
-    await ext.signIn(session.context, emailA);
+    await ext.signIn(session.context, subjectA);
     const page = await ext.openGithub(session.context);
     const key = await ext.firstMountedKey(page);
     expect(key, "a GitHub Emojery host should mount").not.toBeNull();
@@ -83,7 +83,7 @@ test("account switching isolates history and the own reaction", async () => {
     // "mine" (the public count may still include A's vote - aggregate data, not
     // identity).
     await ext.ensureSignedOut(session.context);
-    await ext.signIn(session.context, emailB);
+    await ext.signIn(session.context, subjectB);
     const historyB = await historyState(session.context, "github.com");
     expect(historyB.hasHostEntry, "account B must not see account A's history").toBe(false);
     expect(historyB.empty, "a fresh account starts with an empty history").toBe(true);
@@ -91,7 +91,7 @@ test("account switching isolates history and the own reaction", async () => {
     await expect.poll(() => ext.hasOwnReaction(page), { message: "account B must not inherit account A's selected reaction" }).toBe(false);
 
     await ext.ensureSignedOut(session.context);
-    await ext.signIn(session.context, emailA);
+    await ext.signIn(session.context, subjectA);
     const historyAgain = await historyState(session.context, "github.com");
     expect(historyAgain.hasHostEntry, "account A's history should survive the round-trip through account B").toBe(true);
     await reloadAndSettle(page, 2_500);
@@ -105,7 +105,7 @@ test("account switching isolates history and the own reaction", async () => {
     if (cleanupAsA) {
       // Clear this run's vote off the shared staging target when the clear can be made.
       await ext
-        .signIn(session.context, emailA)
+        .signIn(session.context, subjectA)
         .then(async () => {
           const page = await ext.openGithub(session.context);
           const unreactFlushed = ext.watchNextVoteFlush(session.context);
@@ -118,16 +118,17 @@ test("account switching isolates history and the own reaction", async () => {
   }
 });
 
-// The account (and its reactions) is recoverable by email alone: wipe the
-// profile ("uninstall + reinstall"), sign in with the SAME address from a
+// The account (and its reactions) is recoverable by the provider account alone:
+// wipe the profile ("uninstall + reinstall"), sign in as the SAME subject from a
 // brand-new profile, and the previously picked emoji is selected again while the
 // local history starts empty (history is device-local).
-test("signing in with the same email from a fresh profile restores the reaction", async () => {
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
-  const email = ext.authEmail("recover");
+test("signing in as the same subject from a fresh profile restores the reaction", async () => {
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_SIGN_IN);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
+  const subject = ext.authSubject("recover");
   const first = await ext.launchSession();
   try {
-    await ext.signIn(first.context, email);
+    await ext.signIn(first.context, subject);
     const page = await ext.openGithub(first.context);
     expect(await ext.firstMountedKey(page), "a GitHub Emojery host should mount").not.toBeNull();
     // Same shared-target baseline as the switching case above.
@@ -146,11 +147,11 @@ test("signing in with the same email from a fresh profile restores the reaction"
 
   const second = await ext.launchSession();
   try {
-    await ext.signIn(second.context, email);
+    await ext.signIn(second.context, subject);
     const page = await ext.openGithub(second.context);
     expect(await ext.firstMountedKey(page), "a GitHub Emojery host should mount after reinstall").not.toBeNull();
     // The fresh profile has no local state, so seeing the pick again proves
-    // identity follows the email.
+    // identity follows the provider account.
     await expect
       .poll(
         async () => {
@@ -179,59 +180,6 @@ test("signing in with the same email from a fresh profile restores the reaction"
   }
 });
 
-// The wrong-code path of the sign-in form: the visible error moves from
-// authErrCodeInvalid to authErrTooManyTries within the configured loop bound. Its
-// own address, so the accounts other tests sign in with are untouched.
-test("the wrong-code path of the sign-in form ends in authErrTooManyTries", async () => {
-  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
-  test.setTimeout(Number(process.env.E2E_WRONG_CODE_TEST_TIMEOUT_MS ?? 240_000));
-  const email = ext.authEmail("wrong-codes");
-  const wrongCode = ext.wrongCodeFor(ext.authCode(email));
-  // Loop bound; the test fails if the error never switches within it. Configured
-  // rather than defaulted in the tree. Unset => this case skips.
-  const WRONG_CODE_BUDGET = Number(process.env.E2E_REFUSAL_PATH_CODE_ATTEMPTS);
-  test.skip(!Number.isFinite(WRONG_CODE_BUDGET) || WRONG_CODE_BUDGET < 1, "Set E2E_REFUSAL_PATH_CODE_ATTEMPTS in .env.e2e.local (see .env.e2e.example) to run this check.");
-  const session = await ext.launchSession();
-  try {
-    const extensionId = await ext.resolveExtensionId(session.context);
-    expect(extensionId, "Emojery must be loaded before this check").not.toBeNull();
-    if (!extensionId) return;
-    const authPage = await session.context.newPage();
-    await authPage.goto(ext.extensionPageUrl(extensionId, "auth.html"));
-    await authPage.locator(EMAIL_INPUT_SELECTOR).fill(email);
-    await authPage.locator(AGREE_CHECKBOX_SELECTOR).check();
-    const sendBtn = authPage.getByRole("button", { name: ext.enMessage("authSendCodeBtn") });
-    await expect(sendBtn).toBeEnabled();
-    await sendBtn.click();
-    const codeInput = authPage.locator(CODE_INPUT_SELECTOR);
-    await expect(codeInput).toBeVisible();
-
-    const invalidError = authPage.getByText(ext.enMessage("authErrCodeInvalid"), { exact: true });
-    const tooManyError = authPage.getByText(ext.enMessage("authErrTooManyTries"), { exact: true });
-    const signInBtn = authPage.getByRole("button", { name: ext.enMessage("authVerifyBtn") });
-    let stopped = false;
-    for (let attempt = 1; attempt <= WRONG_CODE_BUDGET && !stopped; attempt += 1) {
-      await codeInput.fill(wrongCode);
-      await expect(signInBtn).toBeEnabled();
-      await signInBtn.click();
-      await expect(invalidError.or(tooManyError)).toBeVisible({ timeout: 20_000 });
-      stopped = await tooManyError.isVisible().catch(() => false);
-      await expect(codeInput).toBeVisible();
-    }
-    expect(stopped, "the error should switch to authErrTooManyTries within the wrong-code budget").toBe(true);
-
-    await codeInput.fill(ext.authCode(email));
-    await expect(signInBtn).toBeEnabled();
-    await signInBtn.click();
-    await expect(tooManyError).toBeVisible({ timeout: 20_000 });
-    await expect(authPage.getByRole("heading", { name: ext.enMessage("authDoneTitle") })).toHaveCount(0);
-    await authPage.close().catch(() => {});
-  } finally {
-    await ext.closeSession(session);
-  }
-});
-
 // Two accounts on one target: each account's react/un-react moves the PUBLIC
 // aggregate by exactly one, independently. Runs TWO parallel sessions (one
 // browser profile per account) instead of switching accounts in one session:
@@ -239,12 +187,13 @@ test("the wrong-code path of the sign-in form ends in authErrTooManyTries", asyn
 // account's and no flush sleeps are needed - each step is proven by polling the OTHER
 // session's RENDERED counter, which only moves once the server took the vote.
 test("two accounts raise and lower the shared counter independently", async () => {
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_SIGN_IN);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
   // Generous: two separate waits for the public count to settle.
   test.setTimeout(Number(process.env.E2E_TWO_ACCOUNT_TEST_TIMEOUT_MS ?? 600_000));
   const CACHE_WAIT = ext.COUNT_CACHE_WAIT_MS;
-  const emailA = ext.authEmail("count-a");
-  const emailB = ext.authEmail("count-b");
+  const subjectA = ext.authSubject("count-a");
+  const subjectB = ext.authSubject("count-b");
   // Launched sequentially INSIDE the try: with a parallel Promise.all outside it,
   // a throw from the second launch discards the first session's browser and its
   // run-* profile, leaking both for the rest of the run.
@@ -255,7 +204,7 @@ test("two accounts raise and lower the shared counter independently", async () =
   try {
     sessionA = await ext.launchSession();
     sessionB = await ext.launchSession();
-    await Promise.all([ext.signIn(sessionA.context, emailA), ext.signIn(sessionB.context, emailB)]);
+    await Promise.all([ext.signIn(sessionA.context, subjectA), ext.signIn(sessionB.context, subjectB)]);
     const pageA = await ext.openGithub(sessionA.context);
     const key = await ext.firstMountedKey(pageA);
     expect(key, "a GitHub Emojery host should mount").not.toBeNull();

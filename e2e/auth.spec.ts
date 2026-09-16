@@ -3,8 +3,9 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
-import { authCode, authConfigured, authEmail, closeSession, enMessage, extensionPageUrl, FIREFOX_NO_EXTENSION_PAGES, isFirefoxRun, launchSession, localeMessage, otpSkipReason, removeProfileUnlessKept, resolveExtensionId, resolveExtensionPath, wrongCodeFor } from "./lib/extension";
-import { AGREE_CHECKBOX_SELECTOR, CODE_INPUT_SELECTOR, EMAIL_INPUT_SELECTOR } from "./lib/selectors";
+import { TEST_PROVIDER } from "./lib/auth-signin";
+import { authConfigured, authSubject, closeSession, enMessage, extensionPageUrl, FIREFOX_NO_EXTENSION_PAGES, isFirefoxRun, issuerSecret, launchSession, localeMessage, removeProfileUnlessKept, resolveExtensionId, resolveExtensionPath, signInSkipReason } from "./lib/extension";
+import { AGREE_CHECKBOX_SELECTOR, PROVIDER_BTN_SELECTOR, providerButtonSelector } from "./lib/selectors";
 
 // Whole file drives auth.html/popup.html, which Playwright Firefox cannot reach.
 test.skip(isFirefoxRun(), FIREFOX_NO_EXTENSION_PAGES);
@@ -22,22 +23,10 @@ function requireAuthApiBase(): string {
   return value;
 }
 
-// The fixture for the rejection error path: an address the auth page ends up
-// showing its refusal message for. Unset fails naming the key, like
-// requireAuthApiBase above.
-function requireRejectedEmail(): string {
-  const value = (process.env.E2E_REJECTED_EMAIL ?? "").trim();
-  if (!value) {
-    throw new Error("Set E2E_REJECTED_EMAIL in .env.e2e.example (the checked-in defaults) or override it in .env.e2e / .env.e2e.local - the address the rejection error-path checks sign in with.");
-  }
-  return value;
-}
-
 let authApiBase: string;
-let rejectedEmail: string;
 // Resolved in beforeAll, behind the sign-in gate: the resolver throws when unset.
-let testEmail: string;
-const localizedAuthErrorLocales = ["ru", "de", "ja"] as const;
+let testSubject: string;
+const localizedAuthLocales = ["ru", "de", "ja"] as const;
 
 // The auth page is a narrow card; shooting it at the suite default would frame mostly
 // empty background.
@@ -48,13 +37,12 @@ let generatedUserDataDir: string | null = null;
 let extensionId: string;
 
 test.describe("extension account auth", () => {
-  test.skip(!authConfigured(), otpSkipReason("the auth e2e test"));
+  test.skip(!authConfigured(), signInSkipReason("the auth e2e test"));
 
   test.beforeAll(async () => {
     const extensionPath = resolveExtensionPath();
     authApiBase = requireAuthApiBase();
-    rejectedEmail = requireRejectedEmail();
-    testEmail = authEmail();
+    testSubject = authSubject();
     assertExtensionManifestAllowsApiBase(extensionPath, authApiBase);
     await assertApiReachable(authApiBase);
 
@@ -72,7 +60,7 @@ test.describe("extension account auth", () => {
     if (generatedUserDataDir) await removeProfileUnlessKept(generatedUserDataDir);
   });
 
-  test("signs in from popup account tab and signs out again", async () => {
+  test("signs in from popup account tab through the test issuer and signs out again", async () => {
     const popup = await openPopupPage();
     await popup.getByRole("tab", { name: enMessage("tabAccount") }).click();
     await expect(popup.getByText(enMessage("signInMsgAccount"))).toBeVisible();
@@ -82,58 +70,39 @@ test.describe("extension account auth", () => {
     const authPage = await authPagePromise;
     await authPage.waitForURL(extensionPageUrl(extensionId, "auth.html"));
 
-    await expect(authPage.locator(EMAIL_INPUT_SELECTOR)).toBeVisible();
-    const emailInput = authPage.locator(EMAIL_INPUT_SELECTOR);
-    const sendCodeButton = authPage.getByRole("button", { name: enMessage("authSendCodeBtn") });
-
-    await expect(sendCodeButton).toBeDisabled();
-    await emailInput.fill("not-an-email");
-    await expect(sendCodeButton).toBeDisabled();
-    await expect(authPage.locator(CODE_INPUT_SELECTOR)).toHaveCount(0);
-
-    // Consent is opt-in: a valid address alone must not enable the send.
+    // The provider list is the API's: the staging build lists the test issuer
+    // beside the real providers, and every button waits for the consent box.
+    const testButton = authPage.locator(providerButtonSelector(TEST_PROVIDER));
+    await expect(testButton).toBeVisible();
+    await expect(testButton).toHaveText(enMessage("authProviderBtn", TEST_PROVIDER));
     const agreeCheckbox = authPage.locator(AGREE_CHECKBOX_SELECTOR);
-    await emailInput.fill(rejectedEmail);
     await expect(agreeCheckbox).not.toBeChecked();
-    await expect(sendCodeButton).toBeDisabled();
+    for (const button of await authPage.locator(PROVIDER_BTN_SELECTOR).all()) await expect(button).toBeDisabled();
     await agreeCheckbox.check();
-    await expect(sendCodeButton).toBeEnabled();
-    await sendCodeButton.click();
-    await expect(
-      authPage.getByText(localeMessage("en", "authErrEmailDomainUndeliverable"), {
-        exact: true,
-      }),
-    ).toBeVisible();
-    await expect(authPage.locator(CODE_INPUT_SELECTOR)).toHaveCount(0);
+    await expect(testButton).toBeEnabled();
 
-    await emailInput.fill(testEmail);
-    await expect(sendCodeButton).toBeEnabled();
-    await sendCodeButton.click();
+    // Closing the identity window before the issuer answers is the cancelled
+    // refusal: the page says so and hands the list back, consent kept.
+    const cancelledWindow = context.waitForEvent("page", { predicate: (page) => page.url().includes("/test-oidc/") });
+    await testButton.click();
+    const issuerToCancel = await cancelledWindow;
+    await issuerToCancel.close();
+    await expect(authPage.getByText(enMessage("authErrCancelled"), { exact: true })).toBeVisible();
+    await expect(agreeCheckbox).toBeChecked();
+    await expect(testButton).toBeEnabled();
 
-    const codeInput = authPage.locator(CODE_INPUT_SELECTOR);
-    const signInButton = authPage.getByRole("button", { name: enMessage("authVerifyBtn") });
-    await expect(codeInput).toBeVisible();
-    await expect(signInButton).toBeDisabled();
-    await expect(authPage.getByRole("button", { name: /Resend code in \d+:\d{2}/ })).toBeDisabled();
+    // A wrong secret is refused by the issuer itself; the auth page then reports
+    // the provider's refusal rather than signing in.
+    const refusedWindow = context.waitForEvent("page", { predicate: (page) => page.url().includes("/test-oidc/") });
+    await testButton.click();
+    const issuerToRefuse = await refusedWindow;
+    await fillIssuer(issuerToRefuse, testSubject, `${issuerSecret()}-wrong`);
+    await expect(authPage.getByText(enMessage("authErrProviderDenied"), { exact: true })).toBeVisible();
+    await expect(authPage.getByRole("heading", { name: enMessage("authDoneTitle") })).toHaveCount(0);
 
-    await authPage.getByRole("button", { name: enMessage("authUseDifferentEmail") }).click();
-    // The cooldown text renders twice: the visible ticking line plus an sr-only
-    // one-shot live-region copy - assert on the visible (aria-hidden) one.
-    await expect(authPage.getByText(/We already sent a code to this address\./).and(authPage.locator('[aria-hidden="true"]'))).toBeVisible();
-    await authPage.getByRole("button", { name: enMessage("authEnterPendingCode", testEmail) }).click();
-    await expect(codeInput).toBeVisible();
-
-    await codeInput.fill(wrongCodeFor(authCode(testEmail)));
-    await expect(signInButton).toBeEnabled();
-    await signInButton.click();
-    await expect(
-      authPage.getByText(localeMessage("en", "authErrCodeInvalid"), {
-        exact: true,
-      }),
-    ).toBeVisible();
-
-    await codeInput.fill(authCode(testEmail));
-    await signInButton.click();
+    const signedInWindow = context.waitForEvent("page", { predicate: (page) => page.url().includes("/test-oidc/") });
+    await testButton.click();
+    await fillIssuer(await signedInWindow, testSubject, issuerSecret());
     await expect(authPage.getByRole("heading", { name: enMessage("authDoneTitle") })).toBeVisible();
 
     await authPage.close();
@@ -142,18 +111,20 @@ test.describe("extension account auth", () => {
     const signedInPopup = await openPopupPage();
     await signedInPopup.getByRole("tab", { name: enMessage("tabAccount") }).click();
     await expect(signedInPopup.getByText(enMessage("signedInLabel"), { exact: true })).toBeVisible();
-    await expect(signedInPopup.getByText(testEmail, { exact: true })).toBeVisible();
+    // The account is named by its provider, never by anything the issuer knows.
+    await expect(signedInPopup.getByText(enMessage("signedInVia", TEST_PROVIDER), { exact: true })).toBeVisible();
+    await expect(signedInPopup.getByText(testSubject)).toHaveCount(0);
 
     await signedInPopup.getByRole("button", { name: enMessage("signOutBtn") }).click();
     await expect(signedInPopup.getByText(enMessage("signInMsgAccount"))).toBeVisible();
     await expect(signedInPopup.getByRole("button", { name: enMessage("signInBtn") })).toBeVisible();
-    await expect(signedInPopup.getByText(testEmail, { exact: true })).toHaveCount(0);
+    await expect(signedInPopup.getByText(enMessage("signedInVia", TEST_PROVIDER), { exact: true })).toHaveCount(0);
 
     await signedInPopup.close();
   });
 
-  for (const locale of localizedAuthErrorLocales) {
-    test(`auth.html localizes visible errors with --lang=${locale}`, async () => {
+  for (const locale of localizedAuthLocales) {
+    test(`auth.html localizes the provider step and its refusal with --lang=${locale}`, async () => {
       const session = await launchAuthBrowserSession({
         locale,
         useGeneratedUserDataDir: true,
@@ -173,33 +144,18 @@ test.describe("extension account auth", () => {
             name: localeMessage(locale, "authSignInTitle"),
           }),
         ).toBeVisible();
-        await authPage.locator(EMAIL_INPUT_SELECTOR).fill(rejectedEmail);
+        const testButton = authPage.locator(providerButtonSelector(TEST_PROVIDER));
+        await expect(testButton).toHaveText(localeMessage(locale, "authProviderBtn", TEST_PROVIDER));
         await authPage.locator(AGREE_CHECKBOX_SELECTOR).check();
-        const sendCodeButton = authPage.getByRole("button", {
-          name: localeMessage(locale, "authSendCodeBtn"),
-        });
-        await expect(sendCodeButton).toBeEnabled();
-        await sendCodeButton.click();
-        await expect(
-          authPage.getByText(localeMessage(locale, "authErrEmailDomainUndeliverable"), {
-            exact: true,
-          }),
-        ).toBeVisible();
+        await expect(testButton).toBeEnabled();
 
-        await authPage.locator(EMAIL_INPUT_SELECTOR).fill(testEmail);
-        await expect(sendCodeButton).toBeEnabled();
-        await sendCodeButton.click();
-
-        const codeInput = authPage.locator(CODE_INPUT_SELECTOR);
-        const signInButton = authPage.getByRole("button", {
-          name: localeMessage(locale, "authVerifyBtn"),
-        });
-        await expect(codeInput).toBeVisible();
-        await codeInput.fill(wrongCodeFor(authCode(testEmail)));
-        await expect(signInButton).toBeEnabled();
-        await signInButton.click();
+        const issuerWindow = session.context.waitForEvent("page", { predicate: (page) => page.url().includes("/test-oidc/") });
+        await testButton.click();
+        await expect(authPage.getByText(localeMessage(locale, "authSigningInWith", TEST_PROVIDER), { exact: true })).toBeVisible();
+        const issuer = await issuerWindow;
+        await issuer.close();
         await expect(
-          authPage.getByText(localeMessage(locale, "authErrCodeInvalid"), {
+          authPage.getByText(localeMessage(locale, "authErrCancelled"), {
             exact: true,
           }),
         ).toBeVisible();
@@ -210,6 +166,15 @@ test.describe("extension account auth", () => {
     });
   }
 });
+
+// The test issuer's form: subject, secret, submit. The window closes itself once
+// the API has redirected it back to the extension.
+async function fillIssuer(issuer: Page, subject: string, secret: string): Promise<void> {
+  await expect(issuer.locator('input[name="sub"]')).toBeVisible();
+  await issuer.locator('input[name="sub"]').fill(subject);
+  await issuer.locator('input[name="secret"]').fill(secret);
+  await issuer.locator('button[type="submit"]').click();
+}
 
 interface AuthBrowserSession {
   context: BrowserContext;

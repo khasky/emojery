@@ -125,6 +125,15 @@
   "signedInLabel": {
     "message": "Innlogget"
   },
+  "signedInVia": {
+    "message": "via $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
   "signOutBtn": {
     "message": "Logg ut"
   },
@@ -387,9 +396,6 @@
   "authPageTitle": {
     "message": "Emojery — Logg inn"
   },
-  "authCodePageTitle": {
-    "message": "Emojery — Skriv inn koden din"
-  },
   "authDonePageTitle": {
     "message": "Emojery — Du er innlogget"
   },
@@ -397,16 +403,28 @@
     "message": "Logg inn for å reagere"
   },
   "authSignInTagline": {
-    "message": "Vi sender deg en verifiseringskode på e-post"
+    "message": "Fortsett med en konto du allerede har. Emojery ser aldri passordet ditt."
   },
-  "authEmailLabel": {
-    "message": "E-post"
+  "authProviderBtn": {
+    "message": "Fortsett med $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendCodeBtn": {
-    "message": "Send kode"
+  "authSigningInWith": {
+    "message": "Logger inn med $PROVIDER$...",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendingBtn": {
-    "message": "Sender..."
+  "authRetryBtn": {
+    "message": "Prøv igjen"
   },
   "authAgreeIntro": {
     "message": "Jeg godtar "
@@ -422,30 +440,6 @@
   },
   "authAgreeOutro": {
     "message": "."
-  },
-  "authCodeTitle": {
-    "message": "Skriv inn koden din"
-  },
-  "authCodeTagline": {
-    "message": "Vi sendte en kode til $EMAIL$. Den utløper om 10 minutter.",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authCodeLabel": {
-    "message": "Verifiseringskode"
-  },
-  "authVerifyingBtn": {
-    "message": "Verifiserer..."
-  },
-  "authVerifyBtn": {
-    "message": "Logg inn"
-  },
-  "authUseDifferentEmail": {
-    "message": "Bruk en annen e-post"
   },
   "authDoneTitle": {
     "message": "Du er innlogget"
@@ -463,7 +457,7 @@
     "message": "Hva Emojery sender"
   },
   "dataConsentBody": {
-    "message": "Emojery sender adressen til siden du reagerer på, en tilfeldig installasjonsidentifikator og e-postadressen din én gang ved innlogging; bare en enveis-hash av den lagres. Valgfri kontekst forblir avslått i denne nettleseren."
+    "message": "Emojery sender adressen til siden du reagerer på, en tilfeldig installasjons-id og et engangstoken for innlogging fra leverandøren du velger; bare en enveis-hash av konto-id-en din lagres. Valgfri kontekst forblir av i denne nettleseren."
   },
   "dataConsentPolicyLink": {
     "message": "Personvernerklæring."
@@ -471,59 +465,17 @@
   "dataConsentContinueBtn": {
     "message": "Fortsett"
   },
-  "authSendThrottle": {
-    "message": "Du ba nylig om en kode. Du kan be om en ny om $TIME$.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authResendCooldown": {
-    "message": "Vi har allerede sendt en kode til denne adressen. Du kan be om en ny om $TIME$.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authEnterPendingCode": {
-    "message": "Skriv inn koden vi sendte til $EMAIL$",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authResendBtn": {
-    "message": "Send kode på nytt"
-  },
-  "authResendInBtn": {
-    "message": "Send kode på nytt om $TIME$",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authErrRateLimit": {
-    "message": "For mange forespørsler. Vent noen minutter og prøv igjen."
-  },
-  "authErrUndeliverable": {
-    "message": "Kunne ikke levere e-posten. Prøv igjen eller sjekk adressen."
-  },
-  "authErrEmailDomainUndeliverable": {
-    "message": "Dette e-postdomenet kan ikke motta e-post. Sjekk adressen for skrivefeil, eller bruk en annen."
-  },
-  "authErrBadEmail": {
-    "message": "Dette ser ikke ut som en gyldig e-postadresse."
-  },
   "authErrUnknown": {
     "message": "Noe gikk galt. Prøv igjen."
+  },
+  "authErrCancelled": {
+    "message": "Innloggingen ble avbrutt. Prøv igjen når du er klar."
+  },
+  "authErrProviderDenied": {
+    "message": "Leverandøren fullførte ikke innloggingen. Prøv igjen eller velg en annen konto."
+  },
+  "authErrEnrollFailed": {
+    "message": "Kontoen din kunne ikke registreres akkurat nå. Prøv igjen om et minutt."
   },
   "authErrOutdated": {
     "message": "Denne versjonen av Emojery er utdatert. Oppdater den for å logge inn."
@@ -539,15 +491,6 @@
   },
   "errServerBusy": {
     "message": "Serveren har problemer. Prøv igjen om et minutt."
-  },
-  "authErrTooManyTries": {
-    "message": "For mange feil koder. Prøv igjen senere."
-  },
-  "authErrCodeInvalid": {
-    "message": "Koden er feil eller utløpt."
-  },
-  "authErrVerifyFailed": {
-    "message": "Verifisering mislyktes. Prøv igjen."
   },
   "searchResultsCount": {
     "message": "$COUNT$ resultater",
@@ -614,7 +557,7 @@
     "message": "Siste steg"
   },
   "gateBody": {
-    "message": "Logg inn med e-posten din, så telles reaksjonen din."
+    "message": "Logg inn med en konto du allerede har, så reaksjonen din teller."
   },
   "gateSignInBtn": {
     "message": "Logg inn"

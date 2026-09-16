@@ -49,13 +49,13 @@ vi.mock("./identity", () => ({
   clearAuth: vi.fn(async () => {}),
   deleteAccount: vi.fn(async () => true),
   finishPendingDeletion: vi.fn(async () => {}),
-  getAuth: vi.fn(async () => ({ userId: "u1", email: "e2e@example.test", token: "tok" })),
-  requestOtp: vi.fn(async () => ({ ok: true })),
+  getAuth: vi.fn(async () => ({ userId: "u1", provider: "google", token: "tok", epochMs: 1000 })),
+  listSignInProviders: vi.fn(async () => ["google", "test"]),
   revokeSessionServerSide: vi.fn(async () => true),
-  // WIDER than the real VerifyOtpResult, which carries no AuthState
-  // (identity.ts says so at the type). The handler must forward only ok/status/error,
-  // and a mock that cannot hand it a token proves nothing about that.
-  verifyOtp: vi.fn(async () => ({ ok: true, auth: { userId: "u1", token: "tok", expiresAt: 1, email: "e2e@example.test" } })),
+  // WIDER than the real SignInResult, which carries no AuthState (identity.ts says
+  // so at the type). The handler must forward only ok/refusal, and a mock that
+  // cannot hand it a token proves nothing about that.
+  signInWithProvider: vi.fn(async () => ({ ok: true, auth: { userId: "u1", token: "tok", expiresAt: 1, provider: "google" } })),
 }));
 vi.mock("./install", () => ({ installFreshInstallAuthReset: vi.fn() }));
 vi.mock("./message-guard", () => ({
@@ -258,23 +258,24 @@ describe("message router", () => {
     await expect(dispatch({ type: "history:import", rows: [{ a: 1 }] }).response).resolves.toEqual({ type: "history:import", imported: 2, replaced: 1, authed: true });
   });
 
-  it("auth:status withholds the email from content scripts and reveals it to extension pages", async () => {
-    await expect(dispatch({ type: "auth:status" }).response).resolves.toEqual({ type: "auth:status", authed: true, userId: "u1", email: null });
+  it("auth:status withholds the provider from content scripts and reveals it to extension pages", async () => {
+    await expect(dispatch({ type: "auth:status" }).response).resolves.toEqual({ type: "auth:status", authed: true, userId: "u1", provider: null });
     vi.mocked(isExtensionPageSender).mockReturnValueOnce(true);
-    await expect(dispatch({ type: "auth:status" }).response).resolves.toMatchObject({ email: "e2e@example.test" });
+    await expect(dispatch({ type: "auth:status" }).response).resolves.toMatchObject({ provider: "google" });
   });
 
-  // The JWT (and the account email) must never reach a web page or content script.
-  // The mocked session above hands the router a real `token`, so a regression that
-  // spreads the auth state into the reply shows up here and nowhere else.
-  it("the auth:status handler gates email and never returns the JWT", async () => {
+  // The JWT (and the account's provider) must never reach a web page or content
+  // script. The mocked session above hands the router a real `token`, so a
+  // regression that spreads the auth state into the reply shows up here and nowhere else.
+  it("the auth:status handler gates the provider and never returns the JWT", async () => {
     const toContentScript = await dispatch({ type: "auth:status" }).response;
     expect(toContentScript).not.toHaveProperty("token");
-    expect(toContentScript).toMatchObject({ email: null });
+    expect(toContentScript).not.toHaveProperty("epochMs");
+    expect(toContentScript).toMatchObject({ provider: null });
     vi.mocked(isExtensionPageSender).mockReturnValueOnce(true);
     const toExtensionPage = await dispatch({ type: "auth:status" }).response;
     expect(toExtensionPage).not.toHaveProperty("token");
-    expect(toExtensionPage).toMatchObject({ email: "e2e@example.test" });
+    expect(toExtensionPage).toMatchObject({ provider: "google" });
   });
 
   it("auth:openTab opens the auth page, remembering the tab that asked", async () => {
@@ -319,49 +320,29 @@ describe("message router", () => {
     await expect(dispatch({ type: "auth:delete" }).response).resolves.toMatchObject({ type: "error" });
   });
 
-  it("auth:requestOtp forwards the address and passes the named refusal straight back", async () => {
-    await expect(dispatch({ type: "auth:requestOtp", email: "a@b.com" }).response).resolves.toEqual({ type: "auth:otpRequested", ok: true });
-    expect(identity.requestOtp).toHaveBeenCalledWith("a@b.com");
-
-    vi.mocked(identity.requestOtp).mockResolvedValueOnce({ ok: false, refusal: "rate_limited", retryAfterSeconds: 42 });
-    await expect(dispatch({ type: "auth:requestOtp", email: "a@b.com" }).response).resolves.toEqual({
-      type: "auth:otpRequested",
-      ok: false,
-      refusal: "rate_limited",
-      retryAfterSeconds: 42,
-    });
+  it("auth:providers answers the API's list, and an unreadable one as an error", async () => {
+    await expect(dispatch({ type: "auth:providers" }).response).resolves.toEqual({ type: "auth:providers", providers: ["google", "test"] });
+    vi.mocked(identity.listSignInProviders).mockRejectedValueOnce(new Error("offline"));
+    await expect(dispatch({ type: "auth:providers" }).response).resolves.toMatchObject({ type: "error", code: "unavailable" });
   });
 
-  // The verify response is the one place a freshly created bearer token could leak
-  // onto the runtime channel. It is already stored by the worker; the page only
-  // needs to know it worked.
-  it("auth:verifyOtp answers the outcome only, never the minted session", async () => {
-    const response = await dispatch({ type: "auth:verifyOtp", email: "a@b.com", code: "123456" }).response;
-
-    expect(response).toEqual({ type: "auth:otpVerified", ok: true, returnsToPage: true });
-    expect(identity.verifyOtp).toHaveBeenCalledWith("a@b.com", "123456");
+  it("auth:signIn answers the outcome only, never the minted session", async () => {
+    const response = await dispatch({ type: "auth:signIn", provider: "google" }).response;
+    // hasAuthOrigin is mocked true above, so the return offer rides along.
+    expect(response).toEqual({ type: "auth:signedIn", ok: true, returnsToPage: true });
+    expect(identity.signInWithProvider).toHaveBeenCalledWith("google");
     expect(JSON.stringify(response)).not.toContain("tok");
 
-    vi.mocked(identity.verifyOtp).mockResolvedValueOnce({ ok: false, refusal: "code_invalid" });
-    await expect(dispatch({ type: "auth:verifyOtp", email: "a@b.com", code: "000000" }).response).resolves.toEqual({ type: "auth:otpVerified", ok: false, refusal: "code_invalid" });
+    vi.mocked(identity.signInWithProvider).mockResolvedValueOnce({ ok: false, refusal: "cancelled" });
+    await expect(dispatch({ type: "auth:signIn", provider: "google" }).response).resolves.toEqual({ type: "auth:signedIn", ok: false, refusal: "cancelled" });
   });
 
-  // The field is omitted rather than sent false, so the page's `=== true` read and
-  // the response's own shape agree on "nothing to go back to".
-  it("auth:verifyOtp leaves returnsToPage off when there is no page to go back to", async () => {
+  it("auth:signIn leaves returnsToPage off when there is no page to go back to", async () => {
     vi.mocked(hasAuthOrigin).mockResolvedValueOnce(false);
-    await expect(dispatch({ type: "auth:verifyOtp", email: "a@b.com", code: "123456" }).response).resolves.toEqual({ type: "auth:otpVerified", ok: true });
-
-    // A failed lookup must cost the offer, not the sign-in that already succeeded.
-    vi.mocked(hasAuthOrigin).mockRejectedValueOnce(new Error("session storage unavailable"));
-    await expect(dispatch({ type: "auth:verifyOtp", email: "a@b.com", code: "123456" }).response).resolves.toEqual({ type: "auth:otpVerified", ok: true });
-  });
-
-  it("history:page and history:export answer through the authed responder", async () => {
-    await expect(dispatch({ type: "history:page", limit: 5 }).response).resolves.toEqual({ type: "history:page", items: [], cursor: null, authed: true });
-    await expect(dispatch({ type: "history:export" }).response).resolves.toEqual({ type: "history:export", rows: [], authed: true });
-    vi.mocked(identity.getAuth).mockResolvedValueOnce(null);
-    await expect(dispatch({ type: "history:export" }).response).resolves.toEqual({ type: "history:export", rows: [], authed: false });
+    await expect(dispatch({ type: "auth:signIn", provider: "google" }).response).resolves.toEqual({ type: "auth:signedIn", ok: true });
+    // A lookup that fails costs the offer, not the sign-in.
+    vi.mocked(hasAuthOrigin).mockRejectedValueOnce(new Error("storage gone"));
+    await expect(dispatch({ type: "auth:signIn", provider: "google" }).response).resolves.toEqual({ type: "auth:signedIn", ok: true });
   });
 
   // Every case answers on BOTH arms of its promise. A rejection that fell
@@ -382,11 +363,8 @@ describe("message router", () => {
     vi.mocked(getHistoryPage).mockRejectedValueOnce(new Error("idb gone"));
     await expect(dispatch({ type: "history:page" }).response).resolves.toMatchObject({ type: "error", code: "unavailable" });
 
-    vi.mocked(identity.requestOtp).mockRejectedValueOnce(new Error("offline"));
-    await expect(dispatch({ type: "auth:requestOtp", email: "a@b.com" }).response).resolves.toMatchObject({ type: "error", code: "unavailable" });
-
-    vi.mocked(identity.verifyOtp).mockRejectedValueOnce(new Error("offline"));
-    await expect(dispatch({ type: "auth:verifyOtp", email: "a@b.com", code: "123456" }).response).resolves.toMatchObject({ type: "error", code: "unavailable" });
+    vi.mocked(identity.signInWithProvider).mockRejectedValueOnce(new Error("offline"));
+    await expect(dispatch({ type: "auth:signIn", provider: "google" }).response).resolves.toMatchObject({ type: "error", code: "unavailable" });
   });
 });
 

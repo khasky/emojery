@@ -9,7 +9,7 @@ import { expect, test } from "@playwright/test";
 import * as ext from "./lib/extension";
 import { reloadAndSettle } from "./lib/reload-settle";
 
-const REQUIRES_OTP = ext.otpSkipReason("authed persistence checks");
+const REQUIRES_SIGNIN = ext.signInSkipReason("authed persistence checks");
 
 // The cases that read the popup through Playwright locators guard themselves;
 // the reaction restart runs on both engines (sign-in through the bridge).
@@ -62,7 +62,8 @@ test("settings: changed values survive a full browser restart", async () => {
 // extension does NOT re-install on a restart and keeps you signed in. So
 // session 2 re-signs in, then verifies the pre-restart reaction is intact.
 test("a reaction survives a full browser restart", async () => {
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_SIGN_IN);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
   const dir = await ext.makeRunProfileDir("persist");
   try {
     let targetKey: string | null = null;
@@ -145,7 +146,7 @@ test("a fresh profile starts with default settings", async () => {
 // to reveal the still-persisted toggle.
 test("analytics consent survives a full browser restart", async () => {
   test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
   const consentLabel = ext.enMessage("settingAnalyticsConsent");
   const dir = await ext.makeRunProfileDir("persist");
   try {

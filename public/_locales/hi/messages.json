@@ -125,6 +125,15 @@
   "signedInLabel": {
     "message": "साइन इन किया गया"
   },
+  "signedInVia": {
+    "message": "$PROVIDER$ के ज़रिए",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
   "signOutBtn": {
     "message": "साइन आउट"
   },
@@ -387,9 +396,6 @@
   "authPageTitle": {
     "message": "Emojery — साइन इन"
   },
-  "authCodePageTitle": {
-    "message": "Emojery — अपना कोड दर्ज करें"
-  },
   "authDonePageTitle": {
     "message": "Emojery — आप साइन इन हो गए हैं"
   },
@@ -397,16 +403,28 @@
     "message": "प्रतिक्रिया देने के लिए साइन इन करें"
   },
   "authSignInTagline": {
-    "message": "हम आपको ईमेल पर सत्यापन कोड भेजेंगे"
+    "message": "अपने मौजूदा खाते से जारी रखें। Emojery आपका पासवर्ड कभी नहीं देखता।"
   },
-  "authEmailLabel": {
-    "message": "ईमेल"
+  "authProviderBtn": {
+    "message": "$PROVIDER$ से जारी रखें",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendCodeBtn": {
-    "message": "कोड भेजें"
+  "authSigningInWith": {
+    "message": "$PROVIDER$ से साइन इन हो रहा है...",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendingBtn": {
-    "message": "भेज रहा है..."
+  "authRetryBtn": {
+    "message": "फिर से कोशिश करें"
   },
   "authAgreeIntro": {
     "message": "मैं "
@@ -422,30 +440,6 @@
   },
   "authAgreeOutro": {
     "message": " से सहमत हूँ।"
-  },
-  "authCodeTitle": {
-    "message": "अपना कोड दर्ज करें"
-  },
-  "authCodeTagline": {
-    "message": "हमने $EMAIL$ पर एक कोड भेजा है। यह 10 मिनट में समाप्त हो जाएगा।",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authCodeLabel": {
-    "message": "सत्यापन कोड"
-  },
-  "authVerifyingBtn": {
-    "message": "सत्यापन कर रहा है..."
-  },
-  "authVerifyBtn": {
-    "message": "साइन इन"
-  },
-  "authUseDifferentEmail": {
-    "message": "दूसरा ईमेल उपयोग करें"
   },
   "authDoneTitle": {
     "message": "आप साइन इन हो गए हैं"
@@ -463,7 +457,7 @@
     "message": "Emojery क्या भेजता है"
   },
   "dataConsentBody": {
-    "message": "Emojery उस पेज का पता भेजता है जिस पर आप प्रतिक्रिया देते हैं, इंस्टॉल का एक यादृच्छिक पहचानकर्ता, और साइन इन करते समय एक बार आपका ईमेल; उसका केवल एक एकतरफ़ा हैश रखा जाता है। वैकल्पिक संदर्भ इस ब्राउज़र में बंद रहता है।"
+    "message": "Emojery उस पेज का पता भेजता है जिस पर आप प्रतिक्रिया देते हैं, एक यादृच्छिक इंस्टॉल पहचानकर्ता और चुने गए प्रदाता का एक बार इस्तेमाल होने वाला साइन-इन टोकन; केवल आपके खाता आईडी का एकतरफ़ा हैश रखा जाता है। वैकल्पिक संदर्भ इस ब्राउज़र में बंद रहता है।"
   },
   "dataConsentPolicyLink": {
     "message": "गोपनीयता नीति।"
@@ -471,59 +465,17 @@
   "dataConsentContinueBtn": {
     "message": "जारी रखें"
   },
-  "authSendThrottle": {
-    "message": "आपने हाल ही में एक कोड का अनुरोध किया है। आप $TIME$ में दूसरा अनुरोध कर सकते हैं।",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authResendCooldown": {
-    "message": "हमने इस पते पर पहले ही एक कोड भेज दिया है। आप $TIME$ में नया कोड मांग सकते हैं।",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authEnterPendingCode": {
-    "message": "$EMAIL$ पर भेजा गया कोड दर्ज करें",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authResendBtn": {
-    "message": "कोड फिर से भेजें"
-  },
-  "authResendInBtn": {
-    "message": "$TIME$ में कोड फिर से भेजें",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authErrRateLimit": {
-    "message": "बहुत अधिक अनुरोध। कृपया कुछ मिनट प्रतीक्षा करें और पुनः प्रयास करें।"
-  },
-  "authErrUndeliverable": {
-    "message": "ईमेल वितरित नहीं किया जा सका। पुनः प्रयास करें या पता जाँचें।"
-  },
-  "authErrEmailDomainUndeliverable": {
-    "message": "यह ईमेल डोमेन संदेश प्राप्त नहीं कर सकता। पते में गलती जाँचें या दूसरा पता उपयोग करें।"
-  },
-  "authErrBadEmail": {
-    "message": "यह वैध ईमेल पता नहीं लगता।"
-  },
   "authErrUnknown": {
     "message": "कुछ गलत हो गया। कृपया पुनः प्रयास करें।"
+  },
+  "authErrCancelled": {
+    "message": "साइन-इन रद्द कर दिया गया। तैयार होने पर फिर से कोशिश करें।"
+  },
+  "authErrProviderDenied": {
+    "message": "प्रदाता ने साइन-इन पूरा नहीं किया। फिर से कोशिश करें या कोई दूसरा खाता चुनें।"
+  },
+  "authErrEnrollFailed": {
+    "message": "अभी आपका खाता पंजीकृत नहीं किया जा सका। कृपया एक मिनट बाद फिर से कोशिश करें।"
   },
   "authErrOutdated": {
     "message": "Emojery का यह संस्करण पुराना हो चुका है। साइन इन करने के लिए इसे अपडेट करें।"
@@ -539,15 +491,6 @@
   },
   "errServerBusy": {
     "message": "सर्वर में दिक्कत है। एक मिनट बाद फिर कोशिश करें।"
-  },
-  "authErrTooManyTries": {
-    "message": "बहुत अधिक गलत कोड। बाद में पुनः प्रयास करें।"
-  },
-  "authErrCodeInvalid": {
-    "message": "वह कोड गलत है या समाप्त हो गया है।"
-  },
-  "authErrVerifyFailed": {
-    "message": "सत्यापन विफल। कृपया पुनः प्रयास करें।"
   },
   "searchResultsCount": {
     "message": "$COUNT$ परिणाम",
@@ -614,7 +557,7 @@
     "message": "आख़िरी कदम"
   },
   "gateBody": {
-    "message": "अपनी रिएक्शन गिनवाने के लिए ईमेल से साइन इन करें।"
+    "message": "अपनी प्रतिक्रिया गिनवाने के लिए मौजूदा खाते से साइन इन करें।"
   },
   "gateSignInBtn": {
     "message": "साइन इन"

@@ -125,6 +125,15 @@
   "signedInLabel": {
     "message": "Ingelogd"
   },
+  "signedInVia": {
+    "message": "via $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
   "signOutBtn": {
     "message": "Uitloggen"
   },
@@ -387,9 +396,6 @@
   "authPageTitle": {
     "message": "Emojery — Inloggen"
   },
-  "authCodePageTitle": {
-    "message": "Emojery — Voer je code in"
-  },
   "authDonePageTitle": {
     "message": "Emojery — Je bent ingelogd"
   },
@@ -397,16 +403,28 @@
     "message": "Log in om te reageren"
   },
   "authSignInTagline": {
-    "message": "We sturen je een verificatiecode per e-mail"
+    "message": "Ga verder met een account dat je al hebt. Emojery ziet je wachtwoord nooit."
   },
-  "authEmailLabel": {
-    "message": "E-mail"
+  "authProviderBtn": {
+    "message": "Doorgaan met $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendCodeBtn": {
-    "message": "Code verzenden"
+  "authSigningInWith": {
+    "message": "Aanmelden met $PROVIDER$...",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendingBtn": {
-    "message": "Verzenden..."
+  "authRetryBtn": {
+    "message": "Opnieuw proberen"
   },
   "authAgreeIntro": {
     "message": "Ik ga akkoord met de "
@@ -422,30 +440,6 @@
   },
   "authAgreeOutro": {
     "message": "."
-  },
-  "authCodeTitle": {
-    "message": "Voer je code in"
-  },
-  "authCodeTagline": {
-    "message": "We hebben een code verstuurd naar $EMAIL$. Deze verloopt over 10 minuten.",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authCodeLabel": {
-    "message": "Verificatiecode"
-  },
-  "authVerifyingBtn": {
-    "message": "Verifiëren..."
-  },
-  "authVerifyBtn": {
-    "message": "Inloggen"
-  },
-  "authUseDifferentEmail": {
-    "message": "Andere e-mail gebruiken"
   },
   "authDoneTitle": {
     "message": "Je bent ingelogd"
@@ -463,7 +457,7 @@
     "message": "Wat Emojery verstuurt"
   },
   "dataConsentBody": {
-    "message": "Emojery stuurt het adres van de pagina waarop je reageert, een willekeurige installatie-identificatie en één keer bij het inloggen je e-mailadres; daarvan wordt alleen een eenwegshash bewaard. Optionele context blijft uitgeschakeld in deze browser."
+    "message": "Emojery verstuurt het adres van de pagina waarop je reageert, een willekeurige installatie-id en een eenmalig aanmeldtoken van de gekozen aanbieder; alleen een eenrichtingshash van je account-id wordt bewaard. Optionele context blijft in deze browser uit."
   },
   "dataConsentPolicyLink": {
     "message": "Privacybeleid."
@@ -471,59 +465,17 @@
   "dataConsentContinueBtn": {
     "message": "Doorgaan"
   },
-  "authSendThrottle": {
-    "message": "Je hebt onlangs een code aangevraagd. Je kunt over $TIME$ een nieuwe aanvragen.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authResendCooldown": {
-    "message": "We hebben al een code naar dit adres gestuurd. Je kunt over $TIME$ een nieuwe aanvragen.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authEnterPendingCode": {
-    "message": "Voer de code in die we naar $EMAIL$ stuurden",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authResendBtn": {
-    "message": "Code opnieuw versturen"
-  },
-  "authResendInBtn": {
-    "message": "Code opnieuw versturen over $TIME$",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authErrRateLimit": {
-    "message": "Te veel verzoeken. Wacht een paar minuten en probeer het opnieuw."
-  },
-  "authErrUndeliverable": {
-    "message": "Kon de e-mail niet afleveren. Probeer het opnieuw of controleer het adres."
-  },
-  "authErrEmailDomainUndeliverable": {
-    "message": "Dit e-maildomein kan geen berichten ontvangen. Controleer het adres op typefouten of gebruik een ander."
-  },
-  "authErrBadEmail": {
-    "message": "Dat ziet er niet uit als een geldig e-mailadres."
-  },
   "authErrUnknown": {
     "message": "Er is iets misgegaan. Probeer het opnieuw."
+  },
+  "authErrCancelled": {
+    "message": "De aanmelding is geannuleerd. Probeer het opnieuw wanneer je er klaar voor bent."
+  },
+  "authErrProviderDenied": {
+    "message": "De aanbieder heeft de aanmelding niet voltooid. Probeer het opnieuw of kies een ander account."
+  },
+  "authErrEnrollFailed": {
+    "message": "Je account kon nu niet worden geregistreerd. Probeer het over een minuut opnieuw."
   },
   "authErrOutdated": {
     "message": "Deze versie van Emojery is verouderd. Werk hem bij om in te loggen."
@@ -539,15 +491,6 @@
   },
   "errServerBusy": {
     "message": "De server heeft een probleem. Probeer het over een minuut opnieuw."
-  },
-  "authErrTooManyTries": {
-    "message": "Te veel verkeerde codes. Probeer het later opnieuw."
-  },
-  "authErrCodeInvalid": {
-    "message": "Die code is onjuist of verlopen."
-  },
-  "authErrVerifyFailed": {
-    "message": "Verificatie mislukt. Probeer het opnieuw."
   },
   "searchResultsCount": {
     "message": "$COUNT$ resultaten",
@@ -614,7 +557,7 @@
     "message": "Laatste stap"
   },
   "gateBody": {
-    "message": "Log in met je e-mail om je reactie te laten meetellen."
+    "message": "Meld je aan met een bestaand account zodat je reactie meetelt."
   },
   "gateSignInBtn": {
     "message": "Inloggen"

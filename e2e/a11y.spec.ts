@@ -14,8 +14,8 @@
 
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import { type AxeViolation, axeSource, COLOR_SCHEMES, formatViolations, POPUP_TABS, TEXT_SPACING_CSS, WCAG_TAGS } from "./lib/axe";
-import { authConfigured, closeSession, extensionPageUrl, FIREFOX_NO_EXTENSION_PAGES, isFirefoxRun, launchSession, openPerSiteList, otpSkipReason, resolveExtensionId, type Session, signIn } from "./lib/extension";
-import { AGREE_SELECTOR, CARD_SELECTOR, EMAIL_INPUT_SELECTOR, TAGLINE_SELECTOR } from "./lib/selectors";
+import { authConfigured, closeSession, extensionPageUrl, FIREFOX_NO_EXTENSION_PAGES, isFirefoxRun, launchSession, openPerSiteList, resolveExtensionId, type Session, signIn, signInSkipReason } from "./lib/extension";
+import { AGREE_CHECKBOX_SELECTOR, AGREE_SELECTOR, CARD_SELECTOR, TAGLINE_SELECTOR } from "./lib/selectors";
 
 // Whole file drives the extension's own pages through Playwright locators, keyboard
 // and aria snapshots; a11y-firefox.spec.ts runs the axe / reflow / text-spacing
@@ -146,7 +146,7 @@ test("axe: the auth page is WCAG A/AA clean in both color schemes", async () => 
   for (const scheme of COLOR_SCHEMES) {
     await page.emulateMedia({ colorScheme: scheme });
     await page.goto(authUrl());
-    await expect(page.locator(EMAIL_INPUT_SELECTOR)).toBeVisible();
+    await expect(page.locator(AGREE_CHECKBOX_SELECTOR)).toBeVisible();
     violations.push(...(await runAxe(page, `auth (${scheme})`)));
   }
   expect(violations).toEqual([]);
@@ -205,18 +205,18 @@ test("aria structure: popup header, tablist and settings panel", async () => {
   await page.close();
 });
 
-test("aria structure: auth email step", async () => {
+test("aria structure: auth provider step", async () => {
   const page = await openA11yPage();
   await page.goto(authUrl());
-  await expect(page.locator(EMAIL_INPUT_SELECTOR)).toBeVisible();
+  await expect(page.locator(AGREE_CHECKBOX_SELECTOR)).toBeVisible();
+  // Subset match: the provider buttons come from the API and vary by
+  // environment, so the landmark, heading and consent row are what is pinned.
   await expect(page.locator("body")).toMatchAriaSnapshot(`
     - main:
       - heading [level=1]
-      - textbox "Email"
       - checkbox /I agree to the/
       - link "Terms of Service"
       - link "Privacy Policy"
-      - button "Send code" [disabled]
   `);
   await page.close();
 });
@@ -271,7 +271,7 @@ test("reflow: no horizontal scrolling at narrow widths (WCAG 1.4.10)", async () 
   // The auth page is a normal tab, so the 320 CSS px reflow breakpoint applies as-is.
   await page.setViewportSize({ width: 320, height: 480 });
   await page.goto(authUrl());
-  await expect(page.locator(EMAIL_INPUT_SELECTOR)).toBeVisible();
+  await expect(page.locator(AGREE_CHECKBOX_SELECTOR)).toBeVisible();
   expect(await hasHorizontalOverflow(page), "auth page overflows at 320px").toBe(false);
 
   // Onboarding is a normal tab too, so it gets the same 320 CSS px breakpoint.
@@ -313,7 +313,7 @@ test("text spacing: key text survives WCAG 1.4.12 overrides without clipping", a
 });
 
 test.describe("authed popup states", () => {
-  test.skip(!authConfigured(), otpSkipReason("the authed a11y checks"));
+  test.skip(!authConfigured(), signInSkipReason("the authed a11y checks"));
 
   test("axe: account tab rows and the armed delete flow", async () => {
     await signIn(context);

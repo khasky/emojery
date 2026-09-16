@@ -5,15 +5,15 @@
 // `chrome-extension://<id>/...` pages - never a site page, which is
 // the half in reaction-surface.ts.
 //
-// The OTP exchange itself is `auth-signin.ts`, a leaf plain Node can also load;
-// this module only supplies the id.
+// The sign-in itself is `auth-signin.ts`, a leaf plain Node can also load; this
+// module only supplies the id.
 import { type BrowserContext, expect, type Page, type Worker } from "@playwright/test";
 import { extensionIdFromServiceWorkers, extensionPageUrl, localeMessage, signInThroughAuthPage } from "./auth-signin";
 import { isFirefoxRun } from "./browser-session";
 import { FIREFOX_EXTENSION_UUID } from "./firefox-addon";
 import { firefoxBridge } from "./firefox-bridge";
 import { DEEP_QUERY_ALL_SRC } from "./probe-src";
-import { authCode, authEmail } from "./test-config";
+import { authSubject, issuerSecret } from "./test-config";
 
 // The background worker - the one context that can write extension storage. It
 // starts with the first extension page/content script, so callers open a tab first.
@@ -48,32 +48,6 @@ function hasStoredAuthSession(context: BrowserContext): Promise<boolean> {
     },
     AUTH_STORAGE_KEY,
   );
-}
-
-type OtpAnswer = { ok?: boolean; status?: number; error?: string } | undefined;
-
-// The OTP exchange auth.html performs, sent from a popup tab the bridge opened:
-// the same two extension-page-only runtime messages, minus the form. Retried
-// like signInThroughAuthPage, since a first verify occasionally fails transiently.
-async function signInOverBridge(context: BrowserContext, email: string, code: string): Promise<void> {
-  const tab = await (await firefoxBridge(context)).openExtensionTab("popup.html");
-  try {
-    let lastAnswer = "";
-    for (let attempt = 0; attempt < 3; attempt += 1) {
-      const requested = await tab.evaluate((email) => browser.runtime.sendMessage({ type: "auth:requestOtp", email }) as Promise<OtpAnswer>, email);
-      if (requested?.ok) {
-        const verified = await tab.evaluate(({ email, code }) => browser.runtime.sendMessage({ type: "auth:verifyOtp", email, code }) as Promise<OtpAnswer>, { email, code });
-        if (verified?.ok) return;
-        lastAnswer = JSON.stringify(verified ?? null);
-      } else {
-        lastAnswer = JSON.stringify(requested ?? null);
-      }
-      await new Promise((settle) => setTimeout(settle, 1_500));
-    }
-    throw new Error(`sign-in over the Firefox bridge never completed - the background answered: ${lastAnswer}`);
-  } finally {
-    await tab.close();
-  }
 }
 
 export async function resolveExtensionId(context: BrowserContext): Promise<string | null> {
@@ -128,15 +102,20 @@ export async function openPopup(context: BrowserContext): Promise<Page> {
   return popup;
 }
 
-// Sign in by opening auth.html directly. Defaults to the primary test account;
-// `locale` as documented on AuthSignInOptions in auth-signin.ts. The exchange
+// Sign in by opening auth.html directly. Defaults to the primary test subject;
+// `locale` as documented on AuthSignInOptions in auth-signin.ts. The sign-in
 // itself lives in `auth-signin.ts`.
-export async function signIn(context: BrowserContext, email: string = authEmail(), code: string = authCode(email), locale = "en"): Promise<void> {
-  if (isFirefoxRun()) return signInOverBridge(context, email, code);
+//
+// Chromium-only: the sign-in runs through the browser's identity window, which
+// Playwright Firefox neither opens for a temporary add-on nor reports - the
+// bridge reaches the background page, not a window the browser owns. A spec that
+// signs in guards itself with `test.skip(isFirefoxRun(), ...)`.
+export async function signIn(context: BrowserContext, subject: string = authSubject(), locale = "en"): Promise<void> {
+  if (isFirefoxRun()) throw new Error("signIn is chromium-only: the identity window is unreachable from Playwright Firefox - guard the spec with test.skip(isFirefoxRun(), ...)");
   const extensionId = await resolveExtensionId(context);
   expect(extensionId, "Emojery must be loaded before signing in").not.toBeNull();
   if (!extensionId) throw new Error("Missing Emojery extension id");
-  await signInThroughAuthPage(context, extensionId, { email, code, locale });
+  await signInThroughAuthPage(context, extensionId, { subject, secret: issuerSecret(), locale });
 }
 
 type AccountState = "signed-in" | "signed-out" | "loading";

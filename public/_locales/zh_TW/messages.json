@@ -125,6 +125,15 @@
   "signedInLabel": {
     "message": "已登入"
   },
+  "signedInVia": {
+    "message": "透過 $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
   "signOutBtn": {
     "message": "登出"
   },
@@ -387,9 +396,6 @@
   "authPageTitle": {
     "message": "Emojery — 登入"
   },
-  "authCodePageTitle": {
-    "message": "Emojery — 輸入驗證碼"
-  },
   "authDonePageTitle": {
     "message": "Emojery — 您已登入"
   },
@@ -397,16 +403,28 @@
     "message": "登入以新增反應"
   },
   "authSignInTagline": {
-    "message": "我們會透過電子郵件寄送驗證碼給您"
+    "message": "使用你已有的帳號繼續。Emojery 絕不會看到你的密碼。"
   },
-  "authEmailLabel": {
-    "message": "電子郵件"
+  "authProviderBtn": {
+    "message": "透過 $PROVIDER$ 繼續",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendCodeBtn": {
-    "message": "寄送代碼"
+  "authSigningInWith": {
+    "message": "正在透過 $PROVIDER$ 登入...",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendingBtn": {
-    "message": "寄送中..."
+  "authRetryBtn": {
+    "message": "重試"
   },
   "authAgreeIntro": {
     "message": "我同意"
@@ -422,30 +440,6 @@
   },
   "authAgreeOutro": {
     "message": "。"
-  },
-  "authCodeTitle": {
-    "message": "輸入驗證碼"
-  },
-  "authCodeTagline": {
-    "message": "我們已將代碼寄送到 $EMAIL$。它將在 10 分鐘後到期。",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authCodeLabel": {
-    "message": "驗證碼"
-  },
-  "authVerifyingBtn": {
-    "message": "驗證中..."
-  },
-  "authVerifyBtn": {
-    "message": "登入"
-  },
-  "authUseDifferentEmail": {
-    "message": "使用其他電子郵件"
   },
   "authDoneTitle": {
     "message": "您已登入"
@@ -463,7 +457,7 @@
     "message": "Emojery 會傳送什麼"
   },
   "dataConsentBody": {
-    "message": "Emojery 會傳送您反應所在頁面的網址、隨機的安裝識別碼，以及登入時一次性傳送的電子郵件地址；僅保留其單向雜湊。選用的附加資訊在此瀏覽器中維持關閉。"
+    "message": "Emojery 會傳送你做出反應的頁面網址、一個隨機的安裝識別碼，以及所選提供者的一次性登入權杖；只保留你帳號 ID 的單向雜湊。選用的內容在此瀏覽器中維持關閉。"
   },
   "dataConsentPolicyLink": {
     "message": "隱私政策。"
@@ -471,59 +465,17 @@
   "dataConsentContinueBtn": {
     "message": "繼續"
   },
-  "authSendThrottle": {
-    "message": "您最近請求過驗證碼。$TIME$後可再次請求。",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authResendCooldown": {
-    "message": "我們已向此地址發送驗證碼。$TIME$後可申請新的驗證碼。",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authEnterPendingCode": {
-    "message": "輸入我們發送到 $EMAIL$ 的驗證碼",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authResendBtn": {
-    "message": "重新傳送驗證碼"
-  },
-  "authResendInBtn": {
-    "message": "$TIME$後重新傳送驗證碼",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authErrRateLimit": {
-    "message": "請求過多。請稍候幾分鐘後重試。"
-  },
-  "authErrUndeliverable": {
-    "message": "無法投遞電子郵件。請重試或檢查地址。"
-  },
-  "authErrEmailDomainUndeliverable": {
-    "message": "此電子郵件網域無法接收郵件。請檢查地址是否有誤，或改用其他地址。"
-  },
-  "authErrBadEmail": {
-    "message": "這看起來不是有效的電子郵件地址。"
-  },
   "authErrUnknown": {
     "message": "出現問題。請重試。"
+  },
+  "authErrCancelled": {
+    "message": "登入已取消。準備好後再試一次。"
+  },
+  "authErrProviderDenied": {
+    "message": "提供者未完成登入。請重試或選擇其他帳號。"
+  },
+  "authErrEnrollFailed": {
+    "message": "目前無法註冊你的帳號。請稍後再試。"
   },
   "authErrOutdated": {
     "message": "此版本的 Emojery 已過時。請更新後再登入。"
@@ -539,15 +491,6 @@
   },
   "errServerBusy": {
     "message": "伺服器發生問題。請一分鐘後再試。"
-  },
-  "authErrTooManyTries": {
-    "message": "錯誤代碼過多。請稍後再試。"
-  },
-  "authErrCodeInvalid": {
-    "message": "代碼錯誤或已過期。"
-  },
-  "authErrVerifyFailed": {
-    "message": "驗證失敗。請重試。"
   },
   "searchResultsCount": {
     "message": "$COUNT$ 個結果",
@@ -614,7 +557,7 @@
     "message": "最後一步"
   },
   "gateBody": {
-    "message": "使用電子郵件登入，讓你的反應生效。"
+    "message": "使用既有帳號登入，讓你的反應被計入。"
   },
   "gateSignInBtn": {
     "message": "登入"

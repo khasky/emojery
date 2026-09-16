@@ -125,6 +125,15 @@
   "signedInLabel": {
     "message": "Đã đăng nhập"
   },
+  "signedInVia": {
+    "message": "qua $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
   "signOutBtn": {
     "message": "Đăng xuất"
   },
@@ -387,9 +396,6 @@
   "authPageTitle": {
     "message": "Emojery — Đăng nhập"
   },
-  "authCodePageTitle": {
-    "message": "Emojery — Nhập mã của bạn"
-  },
   "authDonePageTitle": {
     "message": "Emojery — Bạn đã đăng nhập"
   },
@@ -397,16 +403,28 @@
     "message": "Đăng nhập để bày tỏ cảm xúc"
   },
   "authSignInTagline": {
-    "message": "Chúng tôi sẽ gửi cho bạn mã xác minh qua email"
+    "message": "Tiếp tục với tài khoản bạn đã có. Emojery không bao giờ thấy mật khẩu của bạn."
   },
-  "authEmailLabel": {
-    "message": "Email"
+  "authProviderBtn": {
+    "message": "Tiếp tục với $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendCodeBtn": {
-    "message": "Gửi mã"
+  "authSigningInWith": {
+    "message": "Đang đăng nhập bằng $PROVIDER$...",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendingBtn": {
-    "message": "Đang gửi..."
+  "authRetryBtn": {
+    "message": "Thử lại"
   },
   "authAgreeIntro": {
     "message": "Tôi đồng ý với "
@@ -422,30 +440,6 @@
   },
   "authAgreeOutro": {
     "message": "."
-  },
-  "authCodeTitle": {
-    "message": "Nhập mã của bạn"
-  },
-  "authCodeTagline": {
-    "message": "Chúng tôi đã gửi mã đến $EMAIL$. Mã sẽ hết hạn sau 10 phút.",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authCodeLabel": {
-    "message": "Mã xác minh"
-  },
-  "authVerifyingBtn": {
-    "message": "Đang xác minh..."
-  },
-  "authVerifyBtn": {
-    "message": "Đăng nhập"
-  },
-  "authUseDifferentEmail": {
-    "message": "Dùng email khác"
   },
   "authDoneTitle": {
     "message": "Bạn đã đăng nhập"
@@ -463,7 +457,7 @@
     "message": "Emojery gửi những gì"
   },
   "dataConsentBody": {
-    "message": "Emojery gửi địa chỉ trang mà bạn phản ứng, một mã định danh cài đặt ngẫu nhiên, và email của bạn một lần khi đăng nhập; chỉ một mã băm một chiều của email được giữ lại. Ngữ cảnh tùy chọn vẫn tắt trong trình duyệt này."
+    "message": "Emojery gửi địa chỉ trang bạn phản ứng, một mã định danh cài đặt ngẫu nhiên và một mã thông báo đăng nhập dùng một lần từ nhà cung cấp bạn chọn; chỉ giữ lại một hàm băm một chiều của id tài khoản. Ngữ cảnh tùy chọn vẫn tắt trong trình duyệt này."
   },
   "dataConsentPolicyLink": {
     "message": "Chính sách quyền riêng tư."
@@ -471,59 +465,17 @@
   "dataConsentContinueBtn": {
     "message": "Tiếp tục"
   },
-  "authSendThrottle": {
-    "message": "Bạn vừa yêu cầu một mã. Bạn có thể yêu cầu mã khác sau $TIME$.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authResendCooldown": {
-    "message": "Chúng tôi đã gửi mã đến địa chỉ này. Bạn có thể yêu cầu mã mới sau $TIME$.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authEnterPendingCode": {
-    "message": "Nhập mã chúng tôi đã gửi đến $EMAIL$",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authResendBtn": {
-    "message": "Gửi lại mã"
-  },
-  "authResendInBtn": {
-    "message": "Gửi lại mã sau $TIME$",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authErrRateLimit": {
-    "message": "Quá nhiều yêu cầu. Vui lòng đợi vài phút và thử lại."
-  },
-  "authErrUndeliverable": {
-    "message": "Không thể gửi email. Vui lòng thử lại hoặc kiểm tra địa chỉ."
-  },
-  "authErrEmailDomainUndeliverable": {
-    "message": "Miền email này không thể nhận thư. Vui lòng kiểm tra lỗi chính tả trong địa chỉ hoặc dùng địa chỉ khác."
-  },
-  "authErrBadEmail": {
-    "message": "Đây không giống một địa chỉ email hợp lệ."
-  },
   "authErrUnknown": {
     "message": "Đã có lỗi xảy ra. Vui lòng thử lại."
+  },
+  "authErrCancelled": {
+    "message": "Đã hủy đăng nhập. Hãy thử lại khi bạn sẵn sàng."
+  },
+  "authErrProviderDenied": {
+    "message": "Nhà cung cấp chưa hoàn tất đăng nhập. Hãy thử lại hoặc chọn tài khoản khác."
+  },
+  "authErrEnrollFailed": {
+    "message": "Hiện không thể đăng ký tài khoản của bạn. Vui lòng thử lại sau một phút."
   },
   "authErrOutdated": {
     "message": "Phiên bản Emojery này đã lỗi thời. Hãy cập nhật để đăng nhập."
@@ -539,15 +491,6 @@
   },
   "errServerBusy": {
     "message": "Máy chủ đang gặp sự cố. Hãy thử lại sau một phút."
-  },
-  "authErrTooManyTries": {
-    "message": "Quá nhiều mã sai. Vui lòng thử lại sau."
-  },
-  "authErrCodeInvalid": {
-    "message": "Mã đó không chính xác hoặc đã hết hạn."
-  },
-  "authErrVerifyFailed": {
-    "message": "Xác minh thất bại. Vui lòng thử lại."
   },
   "searchResultsCount": {
     "message": "$COUNT$ kết quả",
@@ -614,7 +557,7 @@
     "message": "Bước cuối cùng"
   },
   "gateBody": {
-    "message": "Đăng nhập bằng email để cảm xúc của bạn được ghi nhận."
+    "message": "Đăng nhập bằng tài khoản bạn đã có để phản ứng của bạn được tính."
   },
   "gateSignInBtn": {
     "message": "Đăng nhập"

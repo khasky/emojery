@@ -25,7 +25,7 @@ import { GRID_ITEM_SELECTOR, HISTORY_EMOJI_SELECTOR, HISTORY_LINK_SELECTOR, HIST
 // unaffected.
 test.use({ trace: "off" });
 
-const REQUIRES_OTP = ext.otpSkipReason("the reaction-burst accounting checks");
+const REQUIRES_SIGNIN = ext.signInSkipReason("the reaction-burst accounting checks");
 
 // The accounting reads the vote responses off context.on("response"), which on
 // Firefox never sees the background page's fetches (verified: a 10-click burst
@@ -202,7 +202,7 @@ async function resetTarget(context: BrowserContext, page: Page): Promise<void> {
 }
 
 test("a fast burst answered 200 throughout is counted in full and every click shows in History", async () => {
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
   test.setTimeout(BURST_TIMEOUT_MS);
   const session = await ext.launchSession();
   const responses = watchVoteResponses(session.context);
@@ -252,7 +252,7 @@ test("a fast burst answered 200 throughout is counted in full and every click sh
 });
 
 test("a burst that meets a 429 is re-sent - no reaction is lost", async () => {
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
   test.skip(!burstShapeConfigured(), REQUIRES_BURST_SHAPE);
   test.setTimeout(REFUSAL_PATH_TIMEOUT_MS);
   const session = await ext.launchSession();

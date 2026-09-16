@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import type { SupportedSite, TargetRef } from "./adapter";
+import type { OidcProvider } from "./oidc-providers";
 import type { Reaction, TargetCounts } from "./reactions";
 
 // Max length of the vote message's `title`. Lives with the message shape, not
@@ -17,13 +18,6 @@ export const NOTE_MAX = 500;
 // popup-history-data.tsx and background/message-guard.ts. The import is one IndexedDB
 // transaction the popup blocks on, which is why it is not larger.
 export const HISTORY_IMPORT_MAX = 100_000;
-
-// Bounds on the two OTP fields. Length only: what makes an address or
-// a code VALID is the server's call - the auth page pre-empts nothing beyond an
-// obviously malformed address - so the guard holds them to a size alone.
-// The email ceiling comfortably exceeds any deliverable address.
-export const EMAIL_MAX = 320;
-export const OTP_CODE_MAX = 12;
 
 // Max UTF-8 bytes of one reaction emoji - one bound in every direction: the
 // background rejects a larger inbound one (background/message-guard.ts), drops a
@@ -81,13 +75,15 @@ export type RuntimeMessage =
   | { type: "auth:returnToOrigin" }
   | { type: "auth:signOut" }
   | { type: "auth:delete" }
-  // The email-code sign-in exchange, sent by the extension's auth page and by
-  // nothing else. It runs in the service worker rather than on the page so the
-  // session token `verify` creates is written where it is used - it never travels
-  // back over this channel (see the auth:otpVerified response, which has no
-  // token field, and the router handler that drops it).
-  | { type: "auth:requestOtp"; email: string }
-  | { type: "auth:verifyOtp"; email: string; code: string }
+  // The providers the auth page may offer, as the API lists them - the page
+  // renders one button per id and hardcodes none (shared/oidc-providers.ts).
+  | { type: "auth:providers" }
+  // The provider sign-in, sent by the extension's auth page and by nothing else.
+  // It runs in the service worker rather than on the page: the browser's identity
+  // window is opened from there, and the session the code exchange creates is
+  // written where it is used - it never travels back over this channel (see the
+  // auth:signedIn response, which has no token field).
+  | { type: "auth:signIn"; provider: OidcProvider }
   | { type: "ui:injected"; targetCount: number };
 
 // What the user did to produce a history row, so the popup can tint it.
@@ -189,28 +185,18 @@ export type RuntimeErrorCode =
   // unexpected 4xx) - the generic "try again" bucket.
   | "unavailable";
 
-// Why the API refused an OTP exchange, classified by the background (identity.ts)
-// from the HTTP status so the auth page picks its copy by name and never sees a
-// status or the API's machine string. `unavailable` is the generic bucket: an
-// unexpected status, a session body the client could not read.
-export type OtpRequestRefusal =
-  // Too many code requests.
-  | "rate_limited"
-  // The address did not parse.
-  | "invalid_email"
-  // The address's provider cannot receive the code.
-  | "email_rejected"
-  // The API tried to send the mail and failed.
-  | "delivery_failed"
+// Why a provider sign-in did not end in a session, classified by the background
+// (identity.ts) so the auth page picks its copy by name and never sees a status
+// or the API's machine string. `unavailable` is the generic bucket: an unexpected
+// status, a session body the client could not read, no identity API at all.
+export type SignInRefusal =
+  // The identity window was closed before the provider answered.
+  | "cancelled"
+  // The provider refused or the API could not validate its answer.
+  | "provider_denied"
+  // The account exists at the provider, but the API could not register it now.
+  | "enrollment_failed"
   // The API stopped serving this build; the fix is an update.
-  | "client_outdated"
-  | "unavailable";
-
-export type OtpVerifyRefusal =
-  // Wrong or expired code.
-  | "code_invalid"
-  // Too many wrong codes; the address is locked for a while.
-  | "locked"
   | "client_outdated"
   | "unavailable";
 
@@ -228,17 +214,18 @@ export type RuntimeResponse =
       type: "auth:status";
       authed: boolean;
       userId: string | null;
-      email: string | null;
+      /** The provider the session was signed in with; null for a content script,
+       *  which only needs the flag, and for a signed-out state. */
+      provider: OidcProvider | null;
     }
-  // A refused exchange names why (see the refusal types above); neither answer
-  // carries the new session - see the auth:verifyOtp note above.
-  | { type: "auth:otpRequested"; ok: true }
-  | { type: "auth:otpRequested"; ok: false; refusal: OtpRequestRefusal; retryAfterSeconds?: number }
+  | { type: "auth:providers"; providers: OidcProvider[] }
+  // A refused sign-in names why (SignInRefusal above); neither answer carries the
+  // new session - see the auth:signIn note above.
   // `returnsToPage` is not about the exchange: it is what the done step does next.
   // True when this sign-in started from a page's sign-in gate and that tab is still
   // open, which is the only case where the page offers to take the user back.
-  | { type: "auth:otpVerified"; ok: true; returnsToPage?: boolean }
-  | { type: "auth:otpVerified"; ok: false; refusal: OtpVerifyRefusal }
+  | { type: "auth:signedIn"; ok: true; returnsToPage?: boolean }
+  | { type: "auth:signedIn"; ok: false; refusal: SignInRefusal }
   | { type: "error"; code: RuntimeErrorCode; message: string };
 
 export type VoteBroadcast = {

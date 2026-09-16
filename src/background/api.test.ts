@@ -14,6 +14,17 @@ vi.mock("./identity", () => ({
   getAuth: vi.fn(),
   clearAuth: vi.fn(),
 }));
+// The key store needs a real IndexedDB (epoch-keys.browser.test.ts); here only
+// the drain's use of it matters: which key it asks for, what it signs, and what
+// it does when the API refuses the key.
+const PUBLIC_KEY = new Uint8Array(32).fill(7);
+const SIGNATURE = new Uint8Array(64).fill(9);
+vi.mock("./epoch-keys", () => ({
+  currentEpoch: vi.fn((epochMs: number) => Math.floor(Date.now() / epochMs)),
+  ensureEpochKey: vi.fn(async (_session: unknown, epoch: number) => ({ epoch, publicKey: PUBLIC_KEY })),
+  reRegisterEpochKey: vi.fn(async () => {}),
+  signVote: vi.fn(async () => SIGNATURE),
+}));
 vi.mock("./history", () => ({
   pushHistory: vi.fn().mockResolvedValue(undefined),
   removeHistoryEntry: vi.fn().mockResolvedValue(undefined),
@@ -29,8 +40,10 @@ import { clearOwnReactionIfMatches } from "../shared/storage";
 import { enqueueVote, flushOwnedVotesForSignOut, flushVotes, voteRetryDelayMs } from "./api";
 import { ApiHttpError, apiErrorCode } from "./api-client";
 import { clearFailedReads, clearPendingMineBatch, fetchCount, MINE_BATCH_WINDOW_MS } from "./api-read";
+import { ensureEpochKey, reRegisterEpochKey, signVote } from "./epoch-keys";
 import { pushHistory, removeHistoryEntry } from "./history";
 import { clearAuth, getAuth } from "./identity";
+import { bytesToBase64Url, voteSignatureMessage } from "./vote-signing";
 import { bumpAttempt, deleteById, enqueue, peekNext, peekNextEligible, type StoredVote } from "./votequeue";
 
 const target: TargetRef = {
@@ -62,8 +75,13 @@ beforeEach(() => {
     userId: "u1",
     token: "jwt",
     expiresAt: 9999999999,
+    provider: "google",
+    epochMs: EPOCH_MS,
   } as Awaited<ReturnType<typeof getAuth>>);
 });
+
+// One day, so the epoch the drain derives is a small round number.
+const EPOCH_MS = 86_400_000;
 
 afterEach(() => {
   vi.useRealTimers();
@@ -508,6 +526,104 @@ describe("flushVotes", () => {
     // The failure backs off THIS vote (per-vote nextAttemptAt), not just the
     // global flush state - so the rest of the queue stays eligible behind it.
     expect(bumpAttempt).toHaveBeenCalledWith(9, expect.any(Number));
+  });
+});
+
+// The vote is signed at send time, with the key of the epoch the send lands in:
+// the API rejects a body without `epoch`/`pubkey`/`sig` from this build.
+describe("flushVotes - signing", () => {
+  it("signs the vote with the current epoch's key and sends the key alongside", async () => {
+    vi.setSystemTime(EPOCH_MS * 42 + 5);
+    vi.mocked(peekNextEligible)
+      .mockResolvedValueOnce(queued({ nonce: "queued-nonce" }))
+      .mockResolvedValueOnce(undefined);
+    const fetchMock = stubFetchJson(200, { accepted: true });
+
+    await flushVotes();
+
+    expect(ensureEpochKey).toHaveBeenCalledWith({ userId: "u1", token: "jwt" }, 42);
+    // The signed bytes are the wire contract (vote-signing.ts): site, target, the
+    // reaction and the SAME nonce the body carries.
+    expect(signVote).toHaveBeenCalledWith({ userId: "u1", token: "jwt" }, 42, voteSignatureMessage({ site: target.site, targetId: target.targetId, reaction: "❤️", nonce: "queued-nonce" }));
+    const [, init] = lastFetchCall(fetchMock);
+    expect(JSON.parse(init.body as string)).toMatchObject({ nonce: "queued-nonce", epoch: 42, pubkey: bytesToBase64Url(PUBLIC_KEY), sig: bytesToBase64Url(SIGNATURE) });
+  });
+
+  it("signs an un-react over the NULL reaction, not an empty string", async () => {
+    vi.mocked(peekNextEligible)
+      .mockResolvedValueOnce(queued({ reaction: null, nonce: "n" }))
+      .mockResolvedValueOnce(undefined);
+    stubFetchJson(200, { accepted: true });
+
+    await flushVotes();
+
+    expect(signVote).toHaveBeenCalledWith(expect.anything(), expect.any(Number), voteSignatureMessage({ site: target.site, targetId: target.targetId, reaction: null, nonce: "n" }));
+  });
+
+  it("backs the vote off without sending when no key can be minted", async () => {
+    vi.mocked(ensureEpochKey).mockRejectedValueOnce(new Error("epoch key refused: epoch_key_limit"));
+    vi.mocked(peekNextEligible)
+      .mockResolvedValueOnce(queued({ id: 21 }))
+      .mockResolvedValueOnce(undefined);
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    await flushVotes();
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(deleteById).not.toHaveBeenCalled();
+    expect(bumpAttempt).toHaveBeenCalledWith(21, expect.any(Number));
+  });
+
+  it("re-registers the key and re-sends once on unknown_key, then drops the vote", async () => {
+    const refused = queued({ id: 22, historyReaction: "❤️", optimisticHistoryId: "hist-22" });
+    vi.mocked(peekNextEligible).mockResolvedValueOnce(refused).mockResolvedValueOnce(refused).mockResolvedValueOnce(undefined);
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ error: "unknown_key" }), { status: 403 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await flushVotes();
+
+    expect(reRegisterEpochKey).toHaveBeenCalledTimes(1);
+    expect(reRegisterEpochKey).toHaveBeenCalledWith({ userId: "u1", token: "jwt" }, expect.any(Number));
+    // Two sends: the refused one and the one retry. The second refusal is a
+    // permanent 4xx like any other: the vote and its optimistic row go.
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(deleteById).toHaveBeenCalledWith(22);
+    expect(removeHistoryEntry).toHaveBeenCalledWith("hist-22");
+  });
+
+  it("re-sends once on key_epoch_mismatch with the epoch derived anew, and needs no re-register", async () => {
+    vi.mocked(peekNextEligible)
+      .mockResolvedValueOnce(queued({ id: 23 }))
+      .mockResolvedValueOnce(queued({ id: 23 }))
+      .mockResolvedValueOnce(undefined);
+    let calls = 0;
+    const fetchMock = vi.fn(async () => {
+      calls++;
+      return calls === 1 ? new Response(JSON.stringify({ error: "key_epoch_mismatch" }), { status: 409 }) : new Response(JSON.stringify({ accepted: true }), { status: 200 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await flushVotes();
+
+    expect(reRegisterEpochKey).not.toHaveBeenCalled();
+    expect(ensureEpochKey).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(deleteById).toHaveBeenCalledWith(23);
+  });
+
+  it("does not spend a retry on a 4xx that is not a key refusal", async () => {
+    vi.mocked(peekNextEligible)
+      .mockResolvedValueOnce(queued({ id: 24 }))
+      .mockResolvedValueOnce(undefined);
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ error: "invalid_input" }), { status: 400 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await flushVotes();
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(reRegisterEpochKey).not.toHaveBeenCalled();
+    expect(deleteById).toHaveBeenCalledWith(24);
   });
 });
 

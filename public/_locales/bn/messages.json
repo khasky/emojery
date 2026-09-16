@@ -125,6 +125,15 @@
   "signedInLabel": {
     "message": "সাইন ইন করেছেন"
   },
+  "signedInVia": {
+    "message": "$PROVIDER$ এর মাধ্যমে",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
   "signOutBtn": {
     "message": "সাইন আউট"
   },
@@ -387,9 +396,6 @@
   "authPageTitle": {
     "message": "Emojery — সাইন ইন"
   },
-  "authCodePageTitle": {
-    "message": "Emojery — আপনার কোড লিখুন"
-  },
   "authDonePageTitle": {
     "message": "Emojery — আপনি সাইন ইন হয়েছেন"
   },
@@ -397,16 +403,28 @@
     "message": "প্রতিক্রিয়া জানাতে সাইন ইন করুন"
   },
   "authSignInTagline": {
-    "message": "আমরা আপনাকে ইমেইলে একটি যাচাইকরণ কোড পাঠাব"
+    "message": "আপনার বিদ্যমান অ্যাকাউন্ট দিয়ে চালিয়ে যান। Emojery কখনও আপনার পাসওয়ার্ড দেখে না।"
   },
-  "authEmailLabel": {
-    "message": "ইমেইল"
+  "authProviderBtn": {
+    "message": "$PROVIDER$ দিয়ে চালিয়ে যান",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendCodeBtn": {
-    "message": "কোড পাঠান"
+  "authSigningInWith": {
+    "message": "$PROVIDER$ দিয়ে সাইন ইন হচ্ছে...",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendingBtn": {
-    "message": "পাঠানো হচ্ছে..."
+  "authRetryBtn": {
+    "message": "আবার চেষ্টা করুন"
   },
   "authAgreeIntro": {
     "message": "আমি "
@@ -422,30 +440,6 @@
   },
   "authAgreeOutro": {
     "message": " মেনে নিচ্ছি।"
-  },
-  "authCodeTitle": {
-    "message": "আপনার কোড লিখুন"
-  },
-  "authCodeTagline": {
-    "message": "আমরা $EMAIL$-এ একটি কোড পাঠিয়েছি। এটি 10 মিনিটে মেয়াদ শেষ হয়।",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authCodeLabel": {
-    "message": "যাচাইকরণ কোড"
-  },
-  "authVerifyingBtn": {
-    "message": "যাচাই করা হচ্ছে..."
-  },
-  "authVerifyBtn": {
-    "message": "সাইন ইন"
-  },
-  "authUseDifferentEmail": {
-    "message": "অন্য ইমেইল ব্যবহার করুন"
   },
   "authDoneTitle": {
     "message": "আপনি সাইন ইন হয়েছেন"
@@ -463,7 +457,7 @@
     "message": "Emojery কী পাঠায়"
   },
   "dataConsentBody": {
-    "message": "আপনি যে পৃষ্ঠায় প্রতিক্রিয়া দেন, Emojery তার ঠিকানা, একটি র‍্যান্ডম ইনস্টল শনাক্তকারী এবং সাইন ইনের সময় একবার আপনার ইমেইল পাঠায়; সেটির শুধু একটি একমুখী হ্যাশ রাখা হয়। ঐচ্ছিক প্রসঙ্গ এই ব্রাউজারে বন্ধ থাকে।"
+    "message": "Emojery যে পৃষ্ঠায় আপনি প্রতিক্রিয়া দেন তার ঠিকানা, একটি এলোমেলো ইনস্টল শনাক্তকারী এবং আপনার বেছে নেওয়া প্রদানকারীর একবার ব্যবহারযোগ্য সাইন-ইন টোকেন পাঠায়; শুধু আপনার অ্যাকাউন্ট আইডির একমুখী হ্যাশ রাখা হয়। ঐচ্ছিক প্রসঙ্গ এই ব্রাউজারে বন্ধ থাকে।"
   },
   "dataConsentPolicyLink": {
     "message": "গোপনীয়তা নীতি।"
@@ -471,59 +465,17 @@
   "dataConsentContinueBtn": {
     "message": "চালিয়ে যান"
   },
-  "authSendThrottle": {
-    "message": "আপনি সম্প্রতি একটি কোড অনুরোধ করেছেন। আপনি $TIME$ পরে আরেকটি অনুরোধ করতে পারবেন।",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authResendCooldown": {
-    "message": "আমরা ইতিমধ্যে এই ঠিকানায় একটি কোড পাঠিয়েছি। আপনি $TIME$ পরে নতুন কোড অনুরোধ করতে পারবেন।",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authEnterPendingCode": {
-    "message": "আমরা $EMAIL$-এ যে কোড পাঠিয়েছি তা লিখুন",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authResendBtn": {
-    "message": "কোড পুনরায় পাঠান"
-  },
-  "authResendInBtn": {
-    "message": "$TIME$ পরে কোড পুনরায় পাঠান",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authErrRateLimit": {
-    "message": "অনেক বেশি অনুরোধ। অনুগ্রহ করে কিছুক্ষণ অপেক্ষা করুন এবং আবার চেষ্টা করুন।"
-  },
-  "authErrUndeliverable": {
-    "message": "ইমেইল পৌঁছানো যায়নি। আবার চেষ্টা করুন বা ঠিকানা যাচাই করুন।"
-  },
-  "authErrEmailDomainUndeliverable": {
-    "message": "এই ইমেইল ডোমেইনে মেইল পৌঁছায় না। ঠিকানায় ভুল আছে কি না দেখুন বা অন্য ঠিকানা ব্যবহার করুন।"
-  },
-  "authErrBadEmail": {
-    "message": "এটি একটি বৈধ ইমেইল ঠিকানার মতো দেখাচ্ছে না।"
-  },
   "authErrUnknown": {
     "message": "কিছু একটা ভুল হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।"
+  },
+  "authErrCancelled": {
+    "message": "সাইন-ইন বাতিল করা হয়েছে। প্রস্তুত হলে আবার চেষ্টা করুন।"
+  },
+  "authErrProviderDenied": {
+    "message": "প্রদানকারী সাইন-ইন সম্পন্ন করেনি। আবার চেষ্টা করুন বা অন্য অ্যাকাউন্ট বেছে নিন।"
+  },
+  "authErrEnrollFailed": {
+    "message": "এই মুহূর্তে আপনার অ্যাকাউন্ট নিবন্ধন করা যায়নি। এক মিনিট পর আবার চেষ্টা করুন।"
   },
   "authErrOutdated": {
     "message": "Emojery-এর এই সংস্করণটি পুরোনো। সাইন ইন করতে এটি আপডেট করুন।"
@@ -539,15 +491,6 @@
   },
   "errServerBusy": {
     "message": "সার্ভারে সমস্যা হচ্ছে। এক মিনিট পরে আবার চেষ্টা করুন।"
-  },
-  "authErrTooManyTries": {
-    "message": "অনেক বেশি ভুল কোড। পরে আবার চেষ্টা করুন।"
-  },
-  "authErrCodeInvalid": {
-    "message": "সেই কোডটি ভুল বা মেয়াদ শেষ হয়েছে।"
-  },
-  "authErrVerifyFailed": {
-    "message": "যাচাইকরণ ব্যর্থ। অনুগ্রহ করে আবার চেষ্টা করুন।"
   },
   "searchResultsCount": {
     "message": "$COUNT$টি ফলাফল",
@@ -614,7 +557,7 @@
     "message": "শেষ ধাপ"
   },
   "gateBody": {
-    "message": "আপনার প্রতিক্রিয়া গণনায় আনতে ইমেল দিয়ে সাইন ইন করুন।"
+    "message": "আপনার প্রতিক্রিয়া গণনায় আসতে বিদ্যমান অ্যাকাউন্ট দিয়ে সাইন ইন করুন।"
   },
   "gateSignInBtn": {
     "message": "সাইন ইন"

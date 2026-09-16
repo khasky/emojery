@@ -176,8 +176,8 @@ You see the same numbers everyone else sees, and anyone can prove they add up.
 
 Counts you can actually believe, in a picker you'll actually enjoy.
 
-- 🛡️ **Real people behind every count** — the count is continuously protected against manipulation. Bots and scripted padding are kept out, and anything fake that slips through is removed from the totals.
-- 🔎 **Counts you can check yourself** — don't take our word for the numbers. Every reaction lands in a public, add-only record, sealed into Bitcoin, watched by independent witnesses, and recountable by a free, open-source tool anyone can run.
+- 🛡️ **One account, one reaction, always revocable** — sign in once with a provider you already use, and that account is 1 Emojery account with 1 reaction per item, which you can change, take back, or erase with the account at any time.
+- 🔎 **Counts you can check yourself** — don't take our word for the numbers. Every reaction lands in a public, add-only record, sealed into Bitcoin, mirrored by Sigstore Rekor and Software Heritage, and recountable by a free, open-source tool anyone can run.
 - 🔒 **Private by design** — change or take back reactions whenever you want. Delete your account and they are removed from the totals, leaving only the reversal needed to keep the record accurate. Your history stays on your device — no ads, profiling, or tracking.
 - 🎨 **A full emoji palette** — over 600 emoji, not the site's defaults. Pick the one that actually fits, or type a word and the picker finds it, with your recently used kept one tap away, all rendered from the same art on every device.
 - 🧩 **Fits every page** — takes on the page's styling and slots into the existing button row, like it always belonged there. And you decide where: switch it off per site, or swap out the native Like/Star entirely.

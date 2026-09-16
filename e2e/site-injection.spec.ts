@@ -2,7 +2,7 @@
 
 import { type BrowserContext, type ElementHandle, expect, type Page, test } from "@playwright/test";
 import { IG_PUBLIC_ACTION_ICON_PATH_PREFIXES } from "../src/adapters/instagram";
-import { authConfigured, closeSession, ensureSignedOut, envUrl, extensionPageUrl, FIREFOX_NO_EXTENSION_PAGES, isFirefoxRun, localeMessage, openPopup, otpSkipReason, REACTIONS, removeProfileUnlessKept, resolveExtensionId, searchTermFor } from "./lib/extension";
+import { authConfigured, closeSession, ensureSignedOut, envUrl, extensionPageUrl, FIREFOX_NO_EXTENSION_PAGES, FIREFOX_NO_SIGN_IN, isFirefoxRun, localeMessage, openPopup, REACTIONS, removeProfileUnlessKept, resolveExtensionId, searchTermFor, signInSkipReason } from "./lib/extension";
 import { expectLocalizedNativePlacement, type I18nLocaleCase, type LocalizedAdapterCheck } from "./lib/localized-placement";
 import { debugEvidence, handleKnownInterstitials, hasLoginWallText, isNoActionSurface, safeGoto, safeReload, settleFullLoad, settlePage, waitForDisabledSiteEvidence, waitForMountEvidence } from "./lib/page-settle";
 import {
@@ -35,7 +35,7 @@ import {
 } from "./lib/popup-probes";
 import { DEEP_QUERY_ALL_SRC } from "./lib/probe-src";
 import { clearReactionOnTarget, clickReactionBySearchOnTarget, expectPickerClosed, expectReactionOptionSelected, expectSelectedReaction, expectVisibleReactionOptions, pickReactionBySearchOnTarget } from "./lib/reaction-actions";
-import { EMAIL_INPUT_SELECTOR, GATE_SIGNIN_CLASS, HIDDEN_SELECTOR } from "./lib/selectors";
+import { AGREE_CHECKBOX_SELECTOR, GATE_SIGNIN_CLASS, HIDDEN_SELECTOR } from "./lib/selectors";
 import type { MountEvidence, SupportedSiteScenario } from "./lib/site-evidence";
 import { keyMatchDiagnostic, launchE2eBrowserSession, settleAndRequireMount, skipWithShot } from "./lib/site-session";
 import { isBlockUrl } from "./lib/site-walls";
@@ -86,7 +86,7 @@ test("extension is loaded in the browser profile", async () => {
   const auth = await context.newPage();
   try {
     await auth.goto(extensionPageUrl(extensionId, "auth.html"));
-    await expect(auth.locator(EMAIL_INPUT_SELECTOR)).toBeVisible();
+    await expect(auth.locator(AGREE_CHECKBOX_SELECTOR)).toBeVisible();
   } finally {
     await auth.close().catch(() => {});
   }
@@ -107,7 +107,7 @@ test("private window: supported site button opens auth.html", async () => {
     expect(authPage, "A private-window supported-site click should open visible auth.html").not.toBeNull();
     if (!authPage) return;
     // Chromium-only above, so the handle is the Playwright page.
-    await expect((authPage as Page).locator(EMAIL_INPUT_SELECTOR)).toBeVisible();
+    await expect((authPage as Page).locator(AGREE_CHECKBOX_SELECTOR)).toBeVisible();
   } finally {
     await authPage?.close().catch(() => {});
     await page.close().catch(() => {});
@@ -117,7 +117,8 @@ test("private window: supported site button opens auth.html", async () => {
 
 test.describe("shared picker behavior", () => {
   test("github: supports toggle-off, switch reaction, and cross-tab sync", async () => {
-    test.skip(!authConfigured(), otpSkipReason("authed picker behavior e2e checks"));
+    test.skip(isFirefoxRun(), FIREFOX_NO_SIGN_IN);
+    test.skip(!authConfigured(), signInSkipReason("authed picker behavior e2e checks"));
 
     const session = await launchE2eBrowserSession();
     const site = pickerBehaviorScenario();
@@ -185,7 +186,8 @@ test.describe("shared picker behavior", () => {
   });
 
   test("github: picker supports keyboard operation with reduced motion", async () => {
-    test.skip(!authConfigured(), otpSkipReason("authed keyboard e2e checks"));
+    test.skip(isFirefoxRun(), FIREFOX_NO_SIGN_IN);
+    test.skip(!authConfigured(), signInSkipReason("authed keyboard e2e checks"));
 
     const session = await launchE2eBrowserSession();
     const site = pickerBehaviorScenario();
@@ -573,8 +575,9 @@ for (const colorScheme of ["light", "dark"] as const) {
 
 for (const site of supportedSiteScenarios) {
   test(`${site.site}: ${site.label} handles auth, reaction history, and per-site toggle`, async () => {
-    test.skip(!authConfigured(), otpSkipReason("authed site e2e checks"));
-    // The authed flow chains sign-in (with OTP retry) and up to three
+    test.skip(isFirefoxRun(), FIREFOX_NO_SIGN_IN);
+    test.skip(!authConfigured(), signInSkipReason("authed site e2e checks"));
+    // The authed flow chains sign-in (with its own retry) and up to three
     // mount-evidence waits - initial load, post-sign-in reload, history URL -
     // so a slow-but-working anti-bot shell overruns the 120s default: Reddit's
     // js_challenge, and worst of all Amazon, whose "Continue shopping"

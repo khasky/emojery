@@ -14,48 +14,11 @@
   --khasky-emojery-disabled-text: #8a8d91;
 
   --khasky-emojery-error-bg: rgba(220, 53, 69, 0.08);
-  --khasky-emojery-notice-bg: rgba(24, 119, 242, 0.08);
-  --khasky-emojery-notice-text: #1b65c9;
 }
 
 /* A sign-in form, so the card stays a single narrow column. */
 #app {
   max-width: 420px;
-}
-
-label {
-  display: block;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--khasky-emojery-muted);
-  margin: 14px 0 6px;
-}
-
-input[type="email"],
-input[type="text"] {
-  width: 100%;
-  border: 1px solid var(--khasky-emojery-field-border);
-  border-radius: 8px;
-  padding: 10px 12px;
-  font: inherit;
-  font-size: 14px;
-  background: var(--khasky-emojery-field-bg);
-  color: inherit;
-  box-sizing: border-box;
-}
-
-input:focus {
-  outline: none;
-  border-color: var(--khasky-emojery-field-focus);
-  box-shadow: 0 0 0 3px var(--khasky-emojery-field-focus-glow);
-}
-
-.code-input {
-  letter-spacing: 0.35em;
-  font-variant-numeric: tabular-nums;
-  font-size: 18px;
-  text-align: center;
 }
 
 .primary {
@@ -166,23 +129,6 @@ input:focus {
   }
 }
 
-.code-actions {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-/* Visually hidden, still read by screen readers (live-region announcements). */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
 .error {
   margin-top: 12px;
   padding: 10px 12px;
@@ -192,18 +138,7 @@ input:focus {
   font-size: 12px;
 }
 
-/* The resend countdown - neutral, so it must not read as `.error`. */
-.notice {
-  margin-top: 12px;
-  padding: 10px 12px;
-  background: var(--khasky-emojery-notice-bg);
-  color: var(--khasky-emojery-notice-text);
-  border-radius: 8px;
-  font-size: 12px;
-}
-
-/* Consent row: wraps an inline checkbox + linked text, so it undoes the global
-   `label` rule (block, uppercase). */
+/* Consent row: an inline checkbox + linked text. */
 .agree {
   display: flex;
   align-items: flex-start;
@@ -212,9 +147,55 @@ input:focus {
   font-size: 12px;
   color: var(--khasky-emojery-muted);
   line-height: 1.45;
-  text-transform: none;
-  letter-spacing: normal;
   cursor: pointer;
+}
+
+/* One button per provider, stacked: a list of equals, so none is the primary. */
+.providers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.provider-btn {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border: 1px solid var(--khasky-emojery-field-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  background: var(--khasky-emojery-field-bg);
+  color: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.provider-btn:hover:not(:disabled) {
+  border-color: var(--khasky-emojery-field-focus);
+}
+
+.provider-btn:focus-visible {
+  outline: none;
+  border-color: var(--khasky-emojery-field-focus);
+  box-shadow: 0 0 0 3px var(--khasky-emojery-field-focus-glow);
+}
+
+.provider-btn:disabled {
+  color: var(--khasky-emojery-disabled-text);
+  cursor: not-allowed;
+  opacity: var(--khasky-emojery-primary-disabled-opacity);
+}
+
+.provider-mark {
+  flex: 0 0 auto;
 }
 
 .agree input[type="checkbox"] {
@@ -235,6 +216,4 @@ a:hover {
 
 :root[data-theme="dark"] {
   --khasky-emojery-error-bg: rgba(255, 89, 103, 0.16);
-  --khasky-emojery-notice-bg: rgba(45, 136, 255, 0.16);
-  --khasky-emojery-notice-text: #9cc7ff;
 }

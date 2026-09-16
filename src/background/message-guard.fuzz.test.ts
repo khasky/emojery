@@ -10,7 +10,8 @@
 
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import { EMAIL_MAX, NOTE_MAX, OTP_CODE_MAX, type RuntimeMessage, TITLE_MAX } from "../shared/messages";
+import { NOTE_MAX, type RuntimeMessage, TITLE_MAX } from "../shared/messages";
+import { PROVIDER_ID_MAX } from "../shared/oidc-providers";
 import { ALL_SITES } from "../shared/sites";
 import { HOSTILE_STRINGS, HOSTILE_VALUES } from "../test/hostile-inputs";
 import { EXTENSION_PAGE_MESSAGE_TYPES, FETCH_LIMIT_MAX, HISTORY_PAGE_LIMIT_MAX, HISTORY_QUERY_MAX, MESSAGE_TYPES, parseRuntimeMessage, TARGET_COUNT_MAX } from "./message-guard";
@@ -62,8 +63,7 @@ const shapedMessage = fc.record(
     query: maybeValid("cats", "x".repeat(HISTORY_QUERY_MAX)),
     since: maybeValid(0, 1_700_000_000_000),
     emoji: maybeValid("👍"),
-    email: maybeValid("a@b.example"),
-    code: maybeValid("123456"),
+    provider: maybeValid("google", "test"),
     rows: fc.oneof(
       hostile,
       fc.array(fc.oneof(hostile, fc.record({ site: maybeValid(...ALL_SITES), targetId: maybeValid("owner/repo"), targetUrl: maybeValid("https://github.com/owner/repo"), reaction: maybeValid("👍"), ts: maybeValid(0, 1_700_000_000_000), action: maybeValid("add", "remove", "change") })), { maxLength: 5 }),
@@ -99,8 +99,7 @@ function expectWithinDeclaredBounds(msg: RuntimeMessage): void {
   atMost("title", TITLE_MAX);
   atMost("note", NOTE_MAX);
   atMost("query", HISTORY_QUERY_MAX);
-  atMost("email", EMAIL_MAX);
-  atMost("code", OTP_CODE_MAX);
+  atMost("provider", PROVIDER_ID_MAX);
 
   const inRange = (field: string, min: number, max: number) => {
     const value = m[field];

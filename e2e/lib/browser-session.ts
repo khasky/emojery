@@ -37,6 +37,10 @@ export function isFirefoxRun(): boolean {
 
 // The one skip reason the specs guarding on isFirefoxRun cite, shared so the
 // wording cannot drift between them.
+// The provider sign-in opens identity.launchWebAuthFlow's window, which the browser owns:
+// Playwright Firefox neither reports it nor lets the bridge reach it, so every authed
+// case is chromium-only (lib/extension-pages.ts signIn throws on the firefox run).
+export const FIREFOX_NO_SIGN_IN = "signs in through the browser's identity window, which Playwright Firefox cannot reach (no page event, no bridge)";
 export const FIREFOX_NO_EXTENSION_PAGES = "drives extension pages (popup/auth) through Playwright locators, which Playwright Firefox cannot attach to - juggler does not track moz-extension:// tabs (firefox-bridge.ts covers evaluate-only checks)";
 
 export interface Session {

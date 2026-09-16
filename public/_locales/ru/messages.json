@@ -125,6 +125,15 @@
   "signedInLabel": {
     "message": "Вы вошли как"
   },
+  "signedInVia": {
+    "message": "через $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
   "signOutBtn": {
     "message": "Выйти"
   },
@@ -387,9 +396,6 @@
   "authPageTitle": {
     "message": "Emojery — вход"
   },
-  "authCodePageTitle": {
-    "message": "Emojery — Введите код"
-  },
   "authDonePageTitle": {
     "message": "Emojery — Успешный вход"
   },
@@ -397,16 +403,28 @@
     "message": "Войдите чтобы оставить реакцию"
   },
   "authSignInTagline": {
-    "message": "Мы отправим вам код подтверждения на email"
+    "message": "Войдите через аккаунт, который у вас уже есть. Emojery не видит ваш пароль."
   },
-  "authEmailLabel": {
-    "message": "Email"
+  "authProviderBtn": {
+    "message": "Продолжить с $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendCodeBtn": {
-    "message": "Отправить код"
+  "authSigningInWith": {
+    "message": "Вход через $PROVIDER$...",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendingBtn": {
-    "message": "Отправка..."
+  "authRetryBtn": {
+    "message": "Попробовать снова"
   },
   "authAgreeIntro": {
     "message": "Я принимаю "
@@ -422,30 +440,6 @@
   },
   "authAgreeOutro": {
     "message": "."
-  },
-  "authCodeTitle": {
-    "message": "Введите код"
-  },
-  "authCodeTagline": {
-    "message": "Мы отправили код на $EMAIL$. Он действует 10 минут.",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authCodeLabel": {
-    "message": "Код подтверждения"
-  },
-  "authVerifyingBtn": {
-    "message": "Проверка..."
-  },
-  "authVerifyBtn": {
-    "message": "Войти"
-  },
-  "authUseDifferentEmail": {
-    "message": "Использовать другой email"
   },
   "authDoneTitle": {
     "message": "Успешный вход"
@@ -463,7 +457,7 @@
     "message": "Что отправляет Emojery"
   },
   "dataConsentBody": {
-    "message": "Emojery отправляет адрес страницы, где вы поставили реакцию, случайный идентификатор установки, а при входе — один раз ваш email; от него хранится только односторонний хеш. Необязательный контекст в этом браузере остаётся выключенным."
+    "message": "Emojery отправляет адрес страницы, на которой вы ставите реакцию, случайный идентификатор установки и одноразовый токен входа от выбранного провайдера; хранится только односторонний хеш идентификатора аккаунта. Необязательные данные в этом браузере остаются выключенными."
   },
   "dataConsentPolicyLink": {
     "message": "Политика приватности."
@@ -471,59 +465,17 @@
   "dataConsentContinueBtn": {
     "message": "Продолжить"
   },
-  "authSendThrottle": {
-    "message": "Вы недавно запрашивали код. Запросить ещё один можно через $TIME$.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authResendCooldown": {
-    "message": "Мы уже отправили код на этот адрес. Запросить новый можно через $TIME$.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authEnterPendingCode": {
-    "message": "Ввести код, отправленный на $EMAIL$",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authResendBtn": {
-    "message": "Отправить код повторно"
-  },
-  "authResendInBtn": {
-    "message": "Отправить код повторно через $TIME$",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authErrRateLimit": {
-    "message": "Слишком много запросов. Подождите несколько минут и попробуйте снова."
-  },
-  "authErrUndeliverable": {
-    "message": "Не удалось доставить письмо. Попробуйте снова или проверьте адрес."
-  },
-  "authErrEmailDomainUndeliverable": {
-    "message": "Этот домен не принимает почту. Проверьте адрес на опечатку или укажите другой."
-  },
-  "authErrBadEmail": {
-    "message": "Введите корректный email-адрес."
-  },
   "authErrUnknown": {
     "message": "Неизвестная ошибка. Попробуйте снова."
+  },
+  "authErrCancelled": {
+    "message": "Вход отменён. Попробуйте снова, когда будете готовы."
+  },
+  "authErrProviderDenied": {
+    "message": "Провайдер не завершил вход. Попробуйте снова или выберите другой аккаунт."
+  },
+  "authErrEnrollFailed": {
+    "message": "Не удалось зарегистрировать аккаунт. Попробуйте снова через минуту."
   },
   "authErrOutdated": {
     "message": "Эта версия Emojery устарела. Обновите её, чтобы войти."
@@ -539,15 +491,6 @@
   },
   "errServerBusy": {
     "message": "На сервере неполадки. Попробуйте через минуту."
-  },
-  "authErrTooManyTries": {
-    "message": "Слишком много неверных кодов. Попробуйте позже."
-  },
-  "authErrCodeInvalid": {
-    "message": "Код неверен или истёк."
-  },
-  "authErrVerifyFailed": {
-    "message": "Не удалось подтвердить. Попробуйте снова."
   },
   "searchResultsCount": {
     "message": "Результатов: $COUNT$",
@@ -614,7 +557,7 @@
     "message": "Последний шаг"
   },
   "gateBody": {
-    "message": "Войдите, используя электронную почту, чтобы ваша реакция засчиталась."
+    "message": "Войдите через существующий аккаунт, чтобы реакция была засчитана."
   },
   "gateSignInBtn": {
     "message": "Войти"

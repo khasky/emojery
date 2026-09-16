@@ -17,7 +17,7 @@ import * as ext from "./lib/extension";
 import { expectLatestHistoryReactions } from "./lib/popup-probes";
 import { DATA_FILE_SELECTOR, DATA_STATUS_SELECTOR, IMPORT_CONFIRM_COUNT_SELECTOR, IMPORT_CONFIRM_SELECTOR } from "./lib/selectors";
 
-const REQUIRES_OTP = ext.otpSkipReason("the history export/import round-trip");
+const REQUIRES_SIGNIN = ext.signInSkipReason("the history export/import round-trip");
 
 // The whole file drives the popup's Account tab, which Playwright Firefox cannot reach.
 test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
@@ -36,7 +36,7 @@ async function storedReactions(popup: Page): Promise<string[]> {
 }
 
 test("history export writes a real file, and importing it back replaces the stored rows", async () => {
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
   const session = await ext.launchSession();
   try {
     const page = await ext.signedInGithubPage(session.context);
@@ -101,7 +101,7 @@ test("history export writes a real file, and importing it back replaces the stor
 });
 
 test("a file that is not an Emojery export is refused before anything is stored", async () => {
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
   const session = await ext.launchSession();
   try {
     await ext.signIn(session.context);

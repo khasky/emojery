@@ -48,7 +48,7 @@ No user data is involved and nothing is fetched to produce it. The whole exchang
 
 ## Data collection permissions
 
-The Firefox manifest declares required data collection through `browser_specific_settings.gecko.data_collection_permissions`: `authenticationInfo`, `websiteContent`, and `personallyIdentifyingInfo`. It also declares `technicalAndInteraction` as optional: reaction requests carry optional context fields for aggregate breakdowns only when both the in-extension "Community insights" toggle and Firefox's optional data permission are enabled.
+The Firefox manifest declares required data collection through `browser_specific_settings.gecko.data_collection_permissions`: `authenticationInfo` and `websiteContent`. It also declares `technicalAndInteraction` as optional: reaction requests carry optional context fields for aggregate breakdowns only when both the in-extension "Community insights" toggle and Firefox's optional data permission are enabled.
 
 `strict_min_version` is `128.0` on desktop and Android, below the 140/142 floor of Mozilla's built-in consent flow, so that Firefox forks still on the previous ESR can install. Both fallbacks Mozilla asks for on older builds are in place, keyed off `permissions.getAll()` omitting the `data_collection` bucket:
 

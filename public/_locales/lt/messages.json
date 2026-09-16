@@ -125,6 +125,15 @@
   "signedInLabel": {
     "message": "Prisijungta"
   },
+  "signedInVia": {
+    "message": "per $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
   "signOutBtn": {
     "message": "Atsijungti"
   },
@@ -387,9 +396,6 @@
   "authPageTitle": {
     "message": "Emojery — Prisijungti"
   },
-  "authCodePageTitle": {
-    "message": "Emojery — Įveskite savo kodą"
-  },
   "authDonePageTitle": {
     "message": "Emojery — Esate prisijungę"
   },
@@ -397,16 +403,28 @@
     "message": "Prisijunkite, kad reaguotumėte"
   },
   "authSignInTagline": {
-    "message": "Atsiųsime jums patvirtinimo kodą el. paštu"
+    "message": "Tęskite su paskyra, kurią jau turite. Emojery niekada nemato jūsų slaptažodžio."
   },
-  "authEmailLabel": {
-    "message": "El. paštas"
+  "authProviderBtn": {
+    "message": "Tęsti su $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendCodeBtn": {
-    "message": "Siųsti kodą"
+  "authSigningInWith": {
+    "message": "Prisijungiama su $PROVIDER$...",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendingBtn": {
-    "message": "Siunčiama..."
+  "authRetryBtn": {
+    "message": "Bandyti dar kartą"
   },
   "authAgreeIntro": {
     "message": "Sutinku su "
@@ -422,30 +440,6 @@
   },
   "authAgreeOutro": {
     "message": "."
-  },
-  "authCodeTitle": {
-    "message": "Įveskite savo kodą"
-  },
-  "authCodeTagline": {
-    "message": "Išsiuntėme kodą į $EMAIL$. Jis galioja 10 minučių.",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authCodeLabel": {
-    "message": "Patvirtinimo kodas"
-  },
-  "authVerifyingBtn": {
-    "message": "Tikrinama..."
-  },
-  "authVerifyBtn": {
-    "message": "Prisijungti"
-  },
-  "authUseDifferentEmail": {
-    "message": "Naudoti kitą el. paštą"
   },
   "authDoneTitle": {
     "message": "Esate prisijungę"
@@ -463,7 +457,7 @@
     "message": "Ką siunčia „Emojery“"
   },
   "dataConsentBody": {
-    "message": "„Emojery“ siunčia puslapio, kuriame reaguojate, adresą, atsitiktinį diegimo identifikatorių ir prisijungiant vieną kartą jūsų el. pašto adresą; saugoma tik vienkryptė jo maiša. Pasirenkamas kontekstas šioje naršyklėje lieka išjungtas."
+    "message": "Emojery siunčia puslapio, kuriame reaguojate, adresą, atsitiktinį diegimo identifikatorių ir vienkartinį pasirinkto teikėjo prisijungimo žetoną; saugoma tik vienkryptė jūsų paskyros identifikatoriaus maiša. Neprivalomas kontekstas šioje naršyklėje lieka išjungtas."
   },
   "dataConsentPolicyLink": {
     "message": "Privatumo politika."
@@ -471,59 +465,17 @@
   "dataConsentContinueBtn": {
     "message": "Tęsti"
   },
-  "authSendThrottle": {
-    "message": "Neseniai užsisakėte kodą. Kitą galėsite užsisakyti po $TIME$.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authResendCooldown": {
-    "message": "Jau išsiuntėme kodą šiuo adresu. Naują galėsite užsisakyti po $TIME$.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authEnterPendingCode": {
-    "message": "Įveskite kodą, kurį išsiuntėme adresu $EMAIL$",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authResendBtn": {
-    "message": "Siųsti kodą iš naujo"
-  },
-  "authResendInBtn": {
-    "message": "Siųsti kodą iš naujo po $TIME$",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authErrRateLimit": {
-    "message": "Per daug užklausų. Palaukite kelias minutes ir bandykite dar kartą."
-  },
-  "authErrUndeliverable": {
-    "message": "Nepavyko pristatyti laiško. Bandykite dar kartą arba patikrinkite adresą."
-  },
-  "authErrEmailDomainUndeliverable": {
-    "message": "Šis el. pašto domenas negali gauti laiškų. Patikrinkite, ar adrese nėra klaidų, arba naudokite kitą."
-  },
-  "authErrBadEmail": {
-    "message": "Tai neatrodo kaip galiojantis el. pašto adresas."
-  },
   "authErrUnknown": {
     "message": "Kažkas nepavyko. Bandykite dar kartą."
+  },
+  "authErrCancelled": {
+    "message": "Prisijungimas atšauktas. Pabandykite dar kartą, kai būsite pasiruošę."
+  },
+  "authErrProviderDenied": {
+    "message": "Teikėjas neužbaigė prisijungimo. Pabandykite dar kartą arba pasirinkite kitą paskyrą."
+  },
+  "authErrEnrollFailed": {
+    "message": "Šiuo metu nepavyko užregistruoti jūsų paskyros. Pabandykite dar kartą po minutės."
   },
   "authErrOutdated": {
     "message": "Ši „Emojery“ versija pasenusi. Norėdami prisijungti, ją atnaujinkite."
@@ -539,15 +491,6 @@
   },
   "errServerBusy": {
     "message": "Serveryje kilo problema. Pabandykite po minutės."
-  },
-  "authErrTooManyTries": {
-    "message": "Per daug neteisingų kodų. Bandykite vėliau."
-  },
-  "authErrCodeInvalid": {
-    "message": "Kodas neteisingas arba pasibaigęs."
-  },
-  "authErrVerifyFailed": {
-    "message": "Patikrinimas nepavyko. Bandykite dar kartą."
   },
   "searchResultsCount": {
     "message": "Rezultatų: $COUNT$",
@@ -614,7 +557,7 @@
     "message": "Paskutinis žingsnis"
   },
   "gateBody": {
-    "message": "Prisijunkite su savo el. paštu, kad jūsų reakcija būtų įskaityta."
+    "message": "Prisijunkite su turima paskyra, kad jūsų reakcija būtų įskaityta."
   },
   "gateSignInBtn": {
     "message": "Prisijungti"

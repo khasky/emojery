@@ -8,7 +8,7 @@
 import { expect, test } from "@playwright/test";
 import * as ext from "./lib/extension";
 
-const REQUIRES_OTP = ext.otpSkipReason("layout checks");
+const REQUIRES_SIGNIN = ext.signInSkipReason("layout checks");
 
 type Fit = NonNullable<Awaited<ReturnType<typeof ext.openPickerViewportFit>>>;
 
@@ -23,7 +23,8 @@ function expectOnScreen(fit: Fit, label: string): void {
 }
 
 test("picker tray fits a narrow ~400px viewport", async () => {
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_SIGN_IN);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
   const session = await ext.launchSession();
   try {
     await ext.signIn(session.context);
@@ -43,7 +44,8 @@ test("picker tray fits a narrow ~400px viewport", async () => {
 });
 
 test("picker tray stays on-screen at 50% and 200% zoom", async () => {
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_SIGN_IN);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
   const session = await ext.launchSession();
   try {
     const page = await ext.signedInGithubPage(session.context);

@@ -16,7 +16,7 @@ import * as ext from "./lib/extension";
 import { reloadAndSettle } from "./lib/reload-settle";
 import { CLICK_FLOAT_CLASS, DEBUG_TAB_SELECTOR, HISTORY_DAY_SELECTOR, HOST_SELECTOR, INTRO_PARTICLE_CLASS, TAB_PANEL_SELECTOR } from "./lib/selectors";
 
-const REQUIRES_OTP = ext.otpSkipReason("the animations-toggle e2e check");
+const REQUIRES_SIGNIN = ext.signInSkipReason("the animations-toggle e2e check");
 
 // The cases that read the popup itself through Playwright locators guard
 // themselves; the toggles reach the popup through the bridge on firefox.
@@ -47,7 +47,8 @@ async function sawClickBurst(page: Page): Promise<boolean> {
 }
 
 test("reaction animations toggle gates the click burst without a reload", async () => {
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_SIGN_IN);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
   const session = await ext.launchSession();
   try {
     const page = await ext.signedInGithubPage(session.context);
@@ -218,7 +219,8 @@ async function sawIntro(page: Page): Promise<boolean> {
 // the Reaction animations switch. Runs authed so the target reliably has a
 // public reaction (this account's own) for the intro to play.
 test("intro animation replays on reload and honors the animations toggle", async () => {
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_SIGN_IN);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
   test.setTimeout(Number(process.env.E2E_INTRO_TEST_TIMEOUT_MS ?? 180_000));
   const session = await ext.launchSession();
   try {

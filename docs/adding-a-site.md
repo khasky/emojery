@@ -277,7 +277,7 @@ Build against staging and load it unpacked:
 pnpm build:chrome   # emits .output/chrome-mv3-staging, targeting the staging API
 ```
 
-Sign in with a real, permanent email address and open the live site. Staging is a separate environment: its accounts and reactions are isolated from production, and **staging data is reset periodically** — so don't be surprised when your test reactions vanish; that's the reset, not a bug.
+Sign in with one of the providers the staging build lists and open the live site. Staging is a separate environment: its accounts and reactions are isolated from production, and **staging data is reset periodically** — so don't be surprised when your test reactions vanish; that's the reset, not a bug.
 
 Verify:
 

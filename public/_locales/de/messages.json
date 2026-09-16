@@ -125,6 +125,15 @@
   "signedInLabel": {
     "message": "Angemeldet"
   },
+  "signedInVia": {
+    "message": "über $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
   "signOutBtn": {
     "message": "Abmelden"
   },
@@ -387,9 +396,6 @@
   "authPageTitle": {
     "message": "Emojery — Anmelden"
   },
-  "authCodePageTitle": {
-    "message": "Emojery — Geben Sie Ihren Code ein"
-  },
   "authDonePageTitle": {
     "message": "Emojery — Sie sind angemeldet"
   },
@@ -397,16 +403,28 @@
     "message": "Zum Reagieren anmelden"
   },
   "authSignInTagline": {
-    "message": "Wir senden Ihnen einen Bestätigungscode per E-Mail"
+    "message": "Melde dich mit einem Konto an, das du schon hast. Emojery sieht dein Passwort nie."
   },
-  "authEmailLabel": {
-    "message": "E-Mail"
+  "authProviderBtn": {
+    "message": "Weiter mit $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendCodeBtn": {
-    "message": "Code senden"
+  "authSigningInWith": {
+    "message": "Anmeldung mit $PROVIDER$...",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendingBtn": {
-    "message": "Senden..."
+  "authRetryBtn": {
+    "message": "Erneut versuchen"
   },
   "authAgreeIntro": {
     "message": "Ich akzeptiere die "
@@ -422,30 +440,6 @@
   },
   "authAgreeOutro": {
     "message": "."
-  },
-  "authCodeTitle": {
-    "message": "Geben Sie Ihren Code ein"
-  },
-  "authCodeTagline": {
-    "message": "Wir haben einen Code an $EMAIL$ gesendet. Er läuft in 10 Minuten ab.",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authCodeLabel": {
-    "message": "Bestätigungscode"
-  },
-  "authVerifyingBtn": {
-    "message": "Wird geprüft..."
-  },
-  "authVerifyBtn": {
-    "message": "Anmelden"
-  },
-  "authUseDifferentEmail": {
-    "message": "Andere E-Mail verwenden"
   },
   "authDoneTitle": {
     "message": "Sie sind angemeldet"
@@ -463,7 +457,7 @@
     "message": "Was Emojery sendet"
   },
   "dataConsentBody": {
-    "message": "Emojery sendet die Adresse der Seite, auf der Sie reagieren, eine zufällige Installationskennung sowie einmalig bei der Anmeldung Ihre E-Mail-Adresse; davon wird nur ein Einweg-Hash gespeichert. Optionaler Kontext bleibt in diesem Browser deaktiviert."
+    "message": "Emojery sendet die Adresse der Seite, auf der du reagierst, eine zufällige Installations-ID und ein einmaliges Anmelde-Token des gewählten Anbieters; gespeichert wird nur ein Einweg-Hash deiner Konto-ID. Optionaler Kontext bleibt in diesem Browser aus."
   },
   "dataConsentPolicyLink": {
     "message": "Datenschutzrichtlinie."
@@ -471,59 +465,17 @@
   "dataConsentContinueBtn": {
     "message": "Weiter"
   },
-  "authSendThrottle": {
-    "message": "Sie haben kürzlich einen Code angefordert. Sie können in $TIME$ einen weiteren anfordern.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authResendCooldown": {
-    "message": "Wir haben bereits einen Code an diese Adresse gesendet. Sie können in $TIME$ einen neuen anfordern.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authEnterPendingCode": {
-    "message": "Code eingeben, den wir an $EMAIL$ gesendet haben",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authResendBtn": {
-    "message": "Code erneut senden"
-  },
-  "authResendInBtn": {
-    "message": "Code erneut senden in $TIME$",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authErrRateLimit": {
-    "message": "Zu viele Anfragen. Bitte warten Sie ein paar Minuten und versuchen Sie es erneut."
-  },
-  "authErrUndeliverable": {
-    "message": "Die E-Mail konnte nicht zugestellt werden. Versuchen Sie es erneut oder überprüfen Sie die Adresse."
-  },
-  "authErrEmailDomainUndeliverable": {
-    "message": "Diese E-Mail-Domain kann keine Nachrichten empfangen. Prüfen Sie die Adresse auf Tippfehler oder verwenden Sie eine andere."
-  },
-  "authErrBadEmail": {
-    "message": "Das sieht nicht nach einer gültigen E-Mail-Adresse aus."
-  },
   "authErrUnknown": {
     "message": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+  },
+  "authErrCancelled": {
+    "message": "Die Anmeldung wurde abgebrochen. Versuche es erneut, wenn du bereit bist."
+  },
+  "authErrProviderDenied": {
+    "message": "Der Anbieter hat die Anmeldung nicht abgeschlossen. Versuche es erneut oder wähle ein anderes Konto."
+  },
+  "authErrEnrollFailed": {
+    "message": "Dein Konto konnte gerade nicht registriert werden. Bitte versuche es in einer Minute erneut."
   },
   "authErrOutdated": {
     "message": "Diese Version von Emojery ist veraltet. Aktualisieren Sie sie, um sich anzumelden."
@@ -539,15 +491,6 @@
   },
   "errServerBusy": {
     "message": "Der Server hat Probleme. Versuchen Sie es in einer Minute erneut."
-  },
-  "authErrTooManyTries": {
-    "message": "Zu viele falsche Codes. Versuchen Sie es später erneut."
-  },
-  "authErrCodeInvalid": {
-    "message": "Der Code ist falsch oder abgelaufen."
-  },
-  "authErrVerifyFailed": {
-    "message": "Bestätigung fehlgeschlagen. Bitte versuchen Sie es erneut."
   },
   "searchResultsCount": {
     "message": "$COUNT$ Ergebnisse",
@@ -614,7 +557,7 @@
     "message": "Letzter Schritt"
   },
   "gateBody": {
-    "message": "Melde dich mit deiner E-Mail an, damit deine Reaktion zählt."
+    "message": "Melde dich mit einem vorhandenen Konto an, damit deine Reaktion zählt."
   },
   "gateSignInBtn": {
     "message": "Anmelden"

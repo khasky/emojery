@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Driving the extension's OWN auth page (auth.html) with the test credentials:
-// the page's selectors, its shipped button labels, and the request-code/verify
-// exchange with the retries that make it survive a real backend.
+// Driving the extension's OWN auth page (auth.html) with the test issuer: the
+// page's selectors, its shipped button labels, and the provider sign-in that runs
+// through the browser's identity window, with the retries that make it survive a
+// real backend.
 //
 // A LEAF module: it is also loaded directly under plain Node, where types are
 // stripped at load and imports resolve by Node's own rules. So: no relative
@@ -13,10 +14,18 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type BrowserContext, expect, type Page } from "@playwright/test";
-import { AGREE_CHECKBOX_SELECTOR, AUTH_ERROR_SELECTOR, CODE_INPUT_SELECTOR, EMAIL_INPUT_SELECTOR } from "./selectors";
+import { AGREE_CHECKBOX_SELECTOR, AUTH_ERROR_SELECTOR, providerButtonSelector } from "./selectors";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 export const EXTENSION_ROOT = resolve(__dirname, "..", "..");
+
+// The provider the staging API lists for the suites: its "login page" is the
+// API's own test issuer, a form of two fields that any subject can sign in as.
+export const TEST_PROVIDER = "test";
+// The issuer page's field names, as the API renders them.
+const ISSUER_SUBJECT_SELECTOR = 'input[name="sub"]';
+const ISSUER_SECRET_SELECTOR = 'input[name="secret"]';
+const ISSUER_SUBMIT_SELECTOR = 'button[type="submit"]';
 
 const localeMessageCache = new Map<string, Record<string, { message?: string }>>();
 
@@ -87,8 +96,10 @@ export function isPageCrash(err: unknown): boolean {
 }
 
 interface AuthSignInOptions {
-  email: string;
-  code: string;
+  /** The test issuer's subject: the account to sign in as. */
+  subject: string;
+  /** The test issuer's shared secret, which any sign-in through it must present. */
+  secret: string;
   /** Matches a `--lang=<locale>` browser, so the auth page's button labels
    *  resolve to that language's shipped copy. */
   locale?: string;
@@ -106,14 +117,13 @@ export async function signInThroughAuthPage(context: BrowserContext, extensionId
   try {
     await opts.prepare?.(authPage);
     await authPage.goto(authUrl);
-    // Retry the whole request-code/verify exchange: a first verify
-    // occasionally fails transiently, and a fresh exchange clears it.
+    // Retry the whole sign-in: a first pass occasionally fails transiently
+    // (the identity window closing early, a slow issuer), and a fresh one clears it.
     for (let attempt = 0; attempt < 3; attempt += 1) {
       try {
-        if (await requestAndVerifyOtp(authPage, opts.email, opts.code, locale)) return;
-        // Backoff between exchanges: a failed pass leaves the page on whichever step
-        // broke, with nothing on it that settles into a retryable state - the next
-        // attempt reloads into a fresh exchange regardless.
+        if (await signInWithTestIssuer(authPage, opts, locale)) return;
+        // Backoff between passes: a failed one leaves the page with its refusal
+        // shown; the next attempt reloads into a fresh pass regardless.
         await authPage.waitForTimeout(1_500);
       } catch (err) {
         // A headed Chrome renderer occasionally crashes under full-suite load
@@ -129,8 +139,8 @@ export async function signInThroughAuthPage(context: BrowserContext, extensionId
     }
     // Surface a genuinely stuck sign-in with the usual explicit assertion, and
     // carry the page's own error into the message: without it the failure reads
-    // as a missing field and says nothing about WHY the exchange never got past
-    // "Send code" (a full-suite run lost three tests to exactly that).
+    // as a missing heading and says nothing about WHY the sign-in never got past
+    // the provider button.
     const reported = await authPage
       .locator(AUTH_ERROR_SELECTOR)
       .first()
@@ -142,67 +152,64 @@ export async function signInThroughAuthPage(context: BrowserContext, extensionId
   }
 }
 
-/** The same exchange against an auth tab the CALLER owns - the one a page's
+/** The same sign-in against an auth tab the CALLER owns - the one a page's
  *  sign-in gate opened, which is the tab the return-to-page path closes by
  *  itself. Retries like signInThroughAuthPage, minus the reopen: this tab is the
  *  subject of the test, so losing it is a failure rather than a blip. */
-export async function verifyOtpOnAuthPage(authPage: Page, opts: AuthSignInOptions): Promise<void> {
+export async function signInOnAuthPage(authPage: Page, opts: AuthSignInOptions): Promise<void> {
   const locale = opts.locale ?? "en";
   for (let attempt = 0; attempt < 3; attempt += 1) {
-    if (await requestAndVerifyOtp(authPage, opts.email, opts.code, locale)) return;
+    if (await signInWithTestIssuer(authPage, opts, locale)) return;
     // The same backoff signInThroughAuthPage's loop takes.
     await authPage.waitForTimeout(1_500);
   }
   await expect(authPage.getByRole("heading", { name: localeMessage(locale, "authDoneTitle") }), "sign-in never completed in the gate's own auth tab").toBeVisible();
 }
 
-// One request-code/verify pass. Returns true once "You're signed in" shows;
-// false if the code was rejected (the caller re-runs the exchange).
-// Structural failures - never reaching the code step, verify hanging - still throw.
-async function requestAndVerifyOtp(authPage: Page, email: string, code: string, locale: string): Promise<boolean> {
-  // Reset the "Send code" cooldown a prior sign-in left in this profile (the
-  // restart test signs in twice on one profile, which otherwise leaves the button
-  // disabled). The key is a literal because this module stays import-free (see the
-  // header); it must equal OTP_COOLDOWN_KEY in src/entrypoints/auth/otp-cooldown.ts.
-  await authPage.evaluate(() => {
-    try {
-      localStorage.removeItem("otp_cooldown_v1");
-    } catch {
-      /* storage unavailable */
-    }
-  });
+// One sign-in pass. Returns true once "You're signed in" shows; false if the
+// page reported a refusal (the caller re-runs the pass). Structural failures -
+// never reaching the provider list, the identity window never opening - still throw.
+//
+// The identity window is a browser window of its own (identity.launchWebAuthFlow),
+// which Playwright surfaces as a page on the same context; it is found by the
+// issuer's URL rather than by order, since the auth tab itself is a page too.
+async function signInWithTestIssuer(authPage: Page, opts: AuthSignInOptions, locale: string): Promise<boolean> {
   await authPage.reload();
-  await expect(authPage.locator(EMAIL_INPUT_SELECTOR)).toBeVisible();
-  await authPage.locator(EMAIL_INPUT_SELECTOR).fill(email);
+  const providerButton = authPage.locator(providerButtonSelector(TEST_PROVIDER));
+  await expect(providerButton, "the staging API should list the test provider").toBeVisible({ timeout: 30_000 });
   // The Terms/Privacy box ships unchecked, so consent is a required step of
-  // every sign-in.
+  // every sign-in, and every provider button stays disabled until it is ticked.
   await authPage.locator(AGREE_CHECKBOX_SELECTOR).check();
-  const sendBtn = authPage.getByRole("button", { name: localeMessage(locale, "authSendCodeBtn") });
-  // Enabled once the email is valid + consent given + cooldown clear; wait out
-  // any residual cooldown rather than clicking a disabled button.
-  await expect(sendBtn).toBeEnabled({ timeout: 65_000 });
-  await sendBtn.click();
-  // The send itself can fail for reasons outside the extension - the backend
-  // answering an error, the service worker missing the message (auth/main.tsx
-  // renders authErrUnknown for both) - and the page then stays on the email step
-  // with that error instead of the code field. Report it as a failed pass, like
-  // the verify below, so the caller's retry loop runs a fresh exchange rather
-  // than hard-failing on a field that was never going to appear.
-  const codeInput = authPage.locator(CODE_INPUT_SELECTOR);
-  const sent = await expect(codeInput.or(authPage.locator(AUTH_ERROR_SELECTOR)))
-    .toBeVisible({ timeout: 30_000 })
-    .then(() => codeInput.isVisible())
-    .catch(() => false);
-  if (!sent) return false;
-  await authPage.locator(CODE_INPUT_SELECTOR).fill(code);
-  await authPage.getByRole("button", { name: localeMessage(locale, "authVerifyBtn") }).click();
+  await expect(providerButton).toBeEnabled();
+
+  const issuerPromise = authPage
+    .context()
+    .waitForEvent("page", { predicate: (page) => page.url().includes("/test-oidc/"), timeout: 30_000 })
+    .catch(() => null);
+  await providerButton.click();
+  const issuer = await issuerPromise;
+  if (!issuer) {
+    // The window never opened, or opened somewhere Playwright does not report:
+    // that is the page-level failure, and it carries the auth page's own refusal
+    // if there is one.
+    const reported = await authPage
+      .locator(AUTH_ERROR_SELECTOR)
+      .first()
+      .innerText()
+      .catch(() => "");
+    throw new Error(`the identity window for the test issuer never appeared${reported ? ` - the auth page reported: ${reported}` : ""}`);
+  }
+  // The issuer's form may still be navigating in from the API's start redirect.
+  await expect(issuer.locator(ISSUER_SUBJECT_SELECTOR)).toBeVisible({ timeout: 30_000 });
+  await issuer.locator(ISSUER_SUBJECT_SELECTOR).fill(opts.subject);
+  await issuer.locator(ISSUER_SECRET_SELECTOR).fill(opts.secret);
+  await issuer.locator(ISSUER_SUBMIT_SELECTOR).click();
+
+  // The window closes itself once the API redirects it back; the auth page then
+  // exchanges the code and lands on the done step, or shows its refusal.
   const signedIn = authPage.getByRole("heading", { name: localeMessage(locale, "authDoneTitle") });
-  // Wait for the verify to resolve either way - the success heading or the inline
-  // error. A verify request can also die at the network layer and change NOTHING
-  // on the page (seen live) - report that as a failed pass so the
-  // caller's retry loop reloads and runs a fresh exchange instead of throwing.
   const resolved = await expect(signedIn.or(authPage.locator(AUTH_ERROR_SELECTOR)))
-    .toBeVisible({ timeout: 30_000 })
+    .toBeVisible({ timeout: 45_000 })
     .then(() => true)
     .catch(() => false);
   if (!resolved) return false;

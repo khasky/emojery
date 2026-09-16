@@ -238,6 +238,33 @@ export function sendMessageToTab(tabId: number, msg: unknown): Promise<unknown> 
   return callChrome<unknown>((done) => chrome.tabs.sendMessage(tabId, msg, (response) => done(response)));
 }
 
+type IdentityApi = {
+  getRedirectURL?: (path?: string) => string;
+  launchWebAuthFlow?: (details: { url: string; interactive: boolean }, callback?: (responseUrl?: string) => void) => MaybePromise<string | undefined>;
+};
+
+function identityApi(): IdentityApi {
+  return (chrome as typeof chrome & { identity?: IdentityApi }).identity ?? {};
+}
+
+// The `https://<id>.chromiumapp.org/` (Firefox: `<uuid>.extensions.allizom.org`)
+// origin the browser hands the auth flow back on. Null where the identity API is
+// absent (Safari), which the sign-in reports as unavailable rather than guessing.
+export function identityRedirectUrl(): string | null {
+  const { getRedirectURL } = identityApi();
+  return getRedirectURL ? getRedirectURL() : null;
+}
+
+// Opens the browser's identity window on `url` and resolves with the redirect
+// URL it closed on (the `#code=` / `#error=` fragment the API sends). Rejects when
+// the window is closed first or the page never loads - identity.ts classifies
+// that. Always interactive: the provider's own login page has to be visible.
+export function launchWebAuthFlow(url: string): Promise<string | null> {
+  const { launchWebAuthFlow: launch } = identityApi();
+  if (!launch) return Promise.reject(new Error("identity.launchWebAuthFlow is unavailable"));
+  return callChrome<string | undefined>((done) => launch({ url, interactive: true }, done)).then((responseUrl) => responseUrl ?? null);
+}
+
 type AlarmsApi = {
   create?: (name: string, alarmInfo: chrome.alarms.AlarmCreateInfo, callback?: () => void) => MaybePromise<void>;
   clear?: (name: string, callback?: (wasCleared: boolean) => void) => MaybePromise<boolean>;

@@ -37,7 +37,7 @@ const settings = {
 // (fields overridable per case); every other message goes through `reply` - ok
 // unless the case makes the vote itself fail.
 function mockAuthedSend(status: Partial<{ authed: boolean; userId: string | null }> = {}, reply: (msg: RuntimeMessage) => Promise<RuntimeResponse> = () => Promise.resolve({ type: "ok" })): void {
-  vi.mocked(sendMessage).mockImplementation((msg) => (msg.type === "auth:status" ? Promise.resolve({ type: "auth:status", authed: true, userId: "u1", email: null, ...status }) : reply(msg)));
+  vi.mocked(sendMessage).mockImplementation((msg) => (msg.type === "auth:status" ? Promise.resolve({ type: "auth:status", authed: true, userId: "u1", provider: null, ...status }) : reply(msg)));
 }
 
 beforeEach(() => {

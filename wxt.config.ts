@@ -155,7 +155,11 @@ export default defineConfig({
     // (adds no user-facing permission warning).
     // `scripting` carries no warning of its own (it can only reach the hosts below) and buys
     // the fresh-install replay into already-open tabs - see background/install.ts.
-    permissions: ["storage", "unlimitedStorage", "alarms", "activeTab", "scripting"],
+    // `identity` is the sign-in window: identity.launchWebAuthFlow opens the provider's
+    // own login page and hands the API's redirect back to the background
+    // (background/identity.ts). No `identity.email`: the browser profile's account is
+    // never read.
+    permissions: ["storage", "unlimitedStorage", "alarms", "activeTab", "scripting", "identity"],
     // The homepage pattern lets the popup read the active tab's URL on emojery.app so its
     // header logo switches to the homepage variant (shared/homepage.ts, which owns the host).
     host_permissions: [...ALL_SITE_MATCH_PATTERNS, HOMEPAGE_MATCH_PATTERN, `${resolveApiOrigin(mode)}/*`],
@@ -215,7 +219,7 @@ export default defineConfig({
               // in shared/data-consent.ts.
               strict_min_version: "128.0",
               data_collection_permissions: {
-                required: ["authenticationInfo", "websiteContent", "personallyIdentifyingInfo"],
+                required: ["authenticationInfo", "websiteContent"],
                 optional: ["technicalAndInteraction"],
               },
             },

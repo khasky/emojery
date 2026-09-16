@@ -18,11 +18,11 @@ describe("t", () => {
   });
 
   it("substitutes a single string into the placeholder", () => {
-    expect(t("authCodeTagline", "a@b.example")).toBe("We sent a code to a@b.example. It expires in 10 minutes.");
+    expect(t("authProviderBtn", "Google")).toBe("Continue with Google");
   });
 
   it("applies array substitutions in order; extras are ignored", () => {
-    expect(t("authResendInBtn", ["0:30", "9:99"])).toBe("Resend code in 0:30");
+    expect(t("authSigningInWith", ["Apple", "Google"])).toBe("Signing in with Apple...");
   });
 
   it("fills a two-placeholder message in the order the text declares them", () => {
@@ -31,7 +31,7 @@ describe("t", () => {
   });
 
   it("leaves the placeholder literal when no substitutions are given", () => {
-    expect(t("authResendInBtn")).toBe("Resend code in $TIME$");
+    expect(t("authSigningInWith")).toBe("Signing in with $PROVIDER$...");
   });
 
   it("ignores substitutions on a placeholder-free message", () => {

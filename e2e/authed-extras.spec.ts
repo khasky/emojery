@@ -10,7 +10,7 @@ import * as ext from "./lib/extension";
 import { pollForValue } from "./lib/picker-probes";
 import { reloadAndSettle } from "./lib/reload-settle";
 
-const REQUIRES_OTP = ext.otpSkipReason("authed extras");
+const REQUIRES_SIGNIN = ext.signInSkipReason("authed extras");
 
 // Between reads of a public counter. Each read reloads the page, and an updated public
 // total is not readable immediately - polling faster only reloads more.
@@ -51,7 +51,8 @@ test("settings: master Enabled toggle removes and restores the picker", async ()
 // Asserts the DELTA around known toggles, so it is independent of any
 // pre-existing (seeded) count on the target.
 test("counter: a reaction increments and un-reaction decrements the aggregate", async () => {
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_SIGN_IN);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
   const session = await ext.launchSession();
   try {
     const page = await ext.signedInGithubPage(session.context);
@@ -86,7 +87,8 @@ test("counter: a reaction increments and un-reaction decrements the aggregate", 
 // The queued offline vote must flush on reconnect and survive a reload - a real
 // server round-trip, not just optimistic UI.
 test("offline: a reaction made offline persists after reconnect + reload", async () => {
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_SIGN_IN);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
   const session = await ext.launchSession();
   try {
     const page = await ext.signedInGithubPage(session.context);
@@ -129,7 +131,7 @@ test("offline: a reaction made offline persists after reconnect + reload", async
 // direct API read.
 test("account deletion: signs out and reverses its reactions", async () => {
   test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
-  test.skip(!ext.authConfigured(), ext.otpSkipReason("account deletion"));
+  test.skip(!ext.authConfigured(), ext.signInSkipReason("account deletion"));
   // Generous: we wait for the public counts to settle TWICE - once to see the
   // vote land in the public counter, once to see it removed.
   test.setTimeout(Number(process.env.E2E_DELETE_TEST_TIMEOUT_MS ?? 600_000));
@@ -139,7 +141,7 @@ test("account deletion: signs out and reverses its reactions", async () => {
   const reacted: Array<{ page: Page; mountKey: string; minimum: number }> = [];
   const withVote: Array<{ page: Page; mountKey: string; countWith: number }> = [];
   try {
-    await ext.signIn(session.context, ext.authEmail("delete"));
+    await ext.signIn(session.context, ext.authSubject("delete"));
 
     // React on a couple of login-free repo/project surfaces; keep each page open
     // so its RENDERED counter can be re-read after the counts settle.
@@ -233,7 +235,7 @@ test("account deletion: signs out and reverses its reactions", async () => {
 // "open a supported page" notice.
 test("report: shows the unsupported-page notice off a supported site", async () => {
   test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
   const session = await ext.launchSession();
   try {
     await ext.signIn(session.context);
@@ -254,7 +256,7 @@ test("report: shows the unsupported-page notice off a supported site", async () 
 // supported site, so open the popup as a BACKGROUND tab (active:false) while
 // GitHub stays the active tab - no dependency on the flaky chrome.action.openPopup().
 test("report: submits a bug report on a supported page", async () => {
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
   test.skip(ext.isFirefoxRun(), "opens the popup via a tabs.create call in the background context, which Playwright cannot reach on Firefox (MV2 background page)");
   const session = await ext.launchSession();
   try {
@@ -314,7 +316,8 @@ test("report: submits a bug report on a supported page", async () => {
 // corrupt the aggregate: a switch keeps the total unchanged, so the end state is
 // exactly one held reaction and base+1 - never doubled, never negative.
 test("rapid reaction switching settles on the last pick without corrupting the counter", async () => {
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_SIGN_IN);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
   const session = await ext.launchSession();
   try {
     const page = await ext.signedInGithubPage(session.context);
@@ -353,7 +356,8 @@ test("rapid reaction switching settles on the last pick without corrupting the c
 // The vote POST is delayed (slow network) so it is unfinished at F5; the durable
 // IndexedDB queue must carry it across the navigation and the service worker re-flushes it.
 test("a reaction in flight survives a reload (slow network)", async () => {
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_SIGN_IN);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
   const session = await ext.launchSession();
   try {
     const page = await ext.signedInGithubPage(session.context);
@@ -391,7 +395,7 @@ test("a reaction in flight survives a reload (slow network)", async () => {
 
 test("analytics consent defaults ON and is an authed-only control", async () => {
   test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
   const session = await ext.launchSession();
   try {
     const consentLabel = ext.enMessage("settingAnalyticsConsent");

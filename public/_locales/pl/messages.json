@@ -125,6 +125,15 @@
   "signedInLabel": {
     "message": "Zalogowany"
   },
+  "signedInVia": {
+    "message": "przez $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
   "signOutBtn": {
     "message": "Wyloguj się"
   },
@@ -387,9 +396,6 @@
   "authPageTitle": {
     "message": "Emojery — Logowanie"
   },
-  "authCodePageTitle": {
-    "message": "Emojery — Wprowadź swój kod"
-  },
   "authDonePageTitle": {
     "message": "Emojery — Zalogowano"
   },
@@ -397,16 +403,28 @@
     "message": "Zaloguj się, aby zareagować"
   },
   "authSignInTagline": {
-    "message": "Wyślemy Ci kod weryfikacyjny na e-mail"
+    "message": "Kontynuuj z kontem, które już masz. Emojery nigdy nie widzi twojego hasła."
   },
-  "authEmailLabel": {
-    "message": "E-mail"
+  "authProviderBtn": {
+    "message": "Kontynuuj z $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendCodeBtn": {
-    "message": "Wyślij kod"
+  "authSigningInWith": {
+    "message": "Logowanie przez $PROVIDER$...",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendingBtn": {
-    "message": "Wysyłanie..."
+  "authRetryBtn": {
+    "message": "Spróbuj ponownie"
   },
   "authAgreeIntro": {
     "message": "Akceptuję "
@@ -422,30 +440,6 @@
   },
   "authAgreeOutro": {
     "message": "."
-  },
-  "authCodeTitle": {
-    "message": "Wprowadź swój kod"
-  },
-  "authCodeTagline": {
-    "message": "Wysłaliśmy kod na $EMAIL$. Wygasa za 10 minut.",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authCodeLabel": {
-    "message": "Kod weryfikacyjny"
-  },
-  "authVerifyingBtn": {
-    "message": "Weryfikacja..."
-  },
-  "authVerifyBtn": {
-    "message": "Zaloguj się"
-  },
-  "authUseDifferentEmail": {
-    "message": "Użyj innego e-maila"
   },
   "authDoneTitle": {
     "message": "Zalogowano"
@@ -463,7 +457,7 @@
     "message": "Co wysyła Emojery"
   },
   "dataConsentBody": {
-    "message": "Emojery wysyła adres strony, na której reagujesz, losowy identyfikator instalacji oraz raz przy logowaniu Twój adres e-mail; przechowywany jest tylko jego jednokierunkowy skrót. Opcjonalny kontekst pozostaje wyłączony w tej przeglądarce."
+    "message": "Emojery wysyła adres strony, na której reagujesz, losowy identyfikator instalacji i jednorazowy token logowania od wybranego dostawcy; przechowywany jest tylko jednokierunkowy skrót identyfikatora konta. Opcjonalny kontekst pozostaje w tej przeglądarce wyłączony."
   },
   "dataConsentPolicyLink": {
     "message": "Polityka prywatności."
@@ -471,59 +465,17 @@
   "dataConsentContinueBtn": {
     "message": "Dalej"
   },
-  "authSendThrottle": {
-    "message": "Niedawno poprosiłeś o kod. Możesz poprosić o kolejny za $TIME$.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authResendCooldown": {
-    "message": "Wysłaliśmy już kod na ten adres. Możesz poprosić o nowy za $TIME$.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authEnterPendingCode": {
-    "message": "Wprowadź kod wysłany na adres $EMAIL$",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authResendBtn": {
-    "message": "Wyślij kod ponownie"
-  },
-  "authResendInBtn": {
-    "message": "Wyślij kod ponownie za $TIME$",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authErrRateLimit": {
-    "message": "Zbyt wiele żądań. Poczekaj kilka minut i spróbuj ponownie."
-  },
-  "authErrUndeliverable": {
-    "message": "Nie udało się dostarczyć e-maila. Spróbuj ponownie lub sprawdź adres."
-  },
-  "authErrEmailDomainUndeliverable": {
-    "message": "Ta domena e-mail nie może odbierać wiadomości. Sprawdź adres pod kątem literówek lub użyj innego."
-  },
-  "authErrBadEmail": {
-    "message": "To nie wygląda na prawidłowy adres e-mail."
-  },
   "authErrUnknown": {
     "message": "Coś poszło nie tak. Spróbuj ponownie."
+  },
+  "authErrCancelled": {
+    "message": "Logowanie zostało anulowane. Spróbuj ponownie, kiedy zechcesz."
+  },
+  "authErrProviderDenied": {
+    "message": "Dostawca nie zakończył logowania. Spróbuj ponownie lub wybierz inne konto."
+  },
+  "authErrEnrollFailed": {
+    "message": "Nie udało się teraz zarejestrować konta. Spróbuj ponownie za minutę."
   },
   "authErrOutdated": {
     "message": "Ta wersja Emojery jest nieaktualna. Zaktualizuj ją, aby się zalogować."
@@ -539,15 +491,6 @@
   },
   "errServerBusy": {
     "message": "Serwer ma problem. Spróbuj ponownie za minutę."
-  },
-  "authErrTooManyTries": {
-    "message": "Zbyt wiele błędnych kodów. Spróbuj ponownie później."
-  },
-  "authErrCodeInvalid": {
-    "message": "Ten kod jest nieprawidłowy lub wygasł."
-  },
-  "authErrVerifyFailed": {
-    "message": "Weryfikacja nie powiodła się. Spróbuj ponownie."
   },
   "searchResultsCount": {
     "message": "Wyniki: $COUNT$",
@@ -614,7 +557,7 @@
     "message": "Ostatni krok"
   },
   "gateBody": {
-    "message": "Zaloguj się e-mailem, aby Twoja reakcja się liczyła."
+    "message": "Zaloguj się istniejącym kontem, aby twoja reakcja się liczyła."
   },
   "gateSignInBtn": {
     "message": "Zaloguj się"

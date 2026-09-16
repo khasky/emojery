@@ -4,7 +4,7 @@
 // tab the install event owes, the toolbar dot that follows the extension's own
 // open pages, the Try-it-live deep link landing on the live repo page with the
 // picker auto-opened, the one-time coach-mark on the first organically-visited
-// trigger, and - behind the OTP credentials - the whole first-reaction journey
+// trigger, and - behind the sign-in resolver - the whole first-reaction journey
 // that ticks the checklist's last step.
 //
 // Every test launches its OWN throwaway profile - onboarding is a
@@ -16,13 +16,13 @@ import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 // as a 404 on someone's repository. The literal behind it is pinned by
 // onboarding.browser.test.tsx.
 import { TRY_IT_LIVE_URL } from "../src/shared/tracking-links";
-import { enMessage, extensionPageUrl, verifyOtpOnAuthPage } from "./lib/auth-signin";
+import { enMessage, extensionPageUrl, signInOnAuthPage } from "./lib/auth-signin";
 import { closeSession, isFirefoxRun, launchSession, makeRunProfileDir } from "./lib/browser-session";
 import { ensureSignedOut, firstServiceWorker, resolveExtensionId } from "./lib/extension-pages";
 import { pollForValue } from "./lib/picker-probes";
 import { signInTestAccount } from "./lib/popup-probes";
 import { COACH_TIP_CLASS, GATE_CLASS, GATE_SIGNIN_CLASS, GRID_ITEM_SELECTOR, HOST_SELECTOR, SEARCH_INPUT_SELECTOR, TRIGGER_SELECTOR } from "./lib/selectors";
-import { authCode, authConfigured, authEmail, envUrl, otpSkipReason } from "./lib/test-config";
+import { authConfigured, authSubject, envUrl, issuerSecret, signInSkipReason } from "./lib/test-config";
 
 // The onboarding tab itself never opens there (temporary add-on installs skip it by design),
 // and extension pages are unreachable anyway - see isFirefoxRun().
@@ -232,7 +232,7 @@ test("the checklist ticks itself once a trigger has been looked at", async () =>
 // the picker waits for the tab to be on screen before spending the animation.
 test("the gate's own auth tab returns to the page and closes itself", async () => {
   test.skip(isFirefoxRun(), FIREFOX_NO_ONBOARDING);
-  test.skip(!authConfigured(), otpSkipReason("the return-to-the-page continuation"));
+  test.skip(!authConfigured(), signInSkipReason("the return-to-the-page continuation"));
   const session = await launchFreshInstall({ keepOnboardingTab: false });
   const page = await session.context.newPage();
   let signedIn = false;
@@ -253,8 +253,7 @@ test("the gate's own auth tab returns to the page and closes itself", async () =
     await authPage.waitForLoadState("domcontentloaded");
     expect(authPage.url()).toContain("/auth.html");
 
-    const email = authEmail();
-    await verifyOtpOnAuthPage(authPage, { email, code: authCode(email) });
+    await signInOnAuthPage(authPage, { subject: authSubject(), secret: issuerSecret() });
     signedIn = true;
     await expect(authPage.getByRole("button", { name: enMessage("authDoneReturnNowBtn") })).toBeVisible();
 
@@ -275,7 +274,7 @@ test("the gate's own auth tab returns to the page and closes itself", async () =
 // queues -> the checklist's last step settles for good.
 test("signing in from the gate casts the held reaction and ticks the last step", async () => {
   test.skip(isFirefoxRun(), FIREFOX_NO_ONBOARDING);
-  test.skip(!authConfigured(), otpSkipReason("the gate sign-in continuation"));
+  test.skip(!authConfigured(), signInSkipReason("the gate sign-in continuation"));
   const session = await launchFreshInstall({ keepOnboardingTab: false });
   const page = await session.context.newPage();
   let signedIn = false;

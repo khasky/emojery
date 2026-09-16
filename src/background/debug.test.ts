@@ -48,17 +48,17 @@ describe("debug API logging", () => {
     );
   });
 
-  it("redacts the OTP email and code from logged auth request bodies", async () => {
+  it("redacts the sign-in code from logged auth request bodies", async () => {
     const { logApiExchange } = await importDebug();
     const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
 
-    logApiExchange("https://api.test/auth/verify-otp", { method: "POST", body: JSON.stringify({ email: "alice@example.com", code: "123456" }) }, { status: 200, body: { ok: true } }, Date.now());
+    logApiExchange("https://api.test/auth/oidc/exchange", { method: "POST", body: JSON.stringify({ code: "one-time-code" }) }, { status: 200, body: { ok: true } }, Date.now());
 
     expect(info).toHaveBeenCalledWith(
       "[emojery:api]",
       expect.objectContaining({
         requestPayload: expect.objectContaining({
-          body: { email: "[redacted]", code: "[redacted]" },
+          body: { code: "[redacted]" },
         }),
       }),
     );

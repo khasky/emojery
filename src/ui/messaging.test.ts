@@ -11,7 +11,7 @@ vi.mock("../shared/webext", () => ({ sendRuntimeMessage: vi.fn() }));
 import { sendRuntimeMessage } from "../shared/webext";
 import { activeUserId, authStatus, sendMessage } from "./messaging";
 
-const AUTHED = { type: "auth:status", authed: true, userId: "u1", email: null } as const;
+const AUTHED = { type: "auth:status", authed: true, userId: "u1", provider: null } as const;
 
 function reply(response: unknown): void {
   vi.mocked(sendRuntimeMessage).mockResolvedValue(response as never);
@@ -42,15 +42,15 @@ describe("authStatus", () => {
     await expect(authStatus()).resolves.toEqual({ authed: true, userId: "u1" });
   });
 
-  // The response carries `email` too. It must not travel further than this function: the
+  // The response carries `provider` too. It must not travel further than this function: the
   // caller is content-script code on a page that can read anything it is given.
-  it("forwards only authed and userId, never the address", async () => {
-    reply({ ...AUTHED, email: "someone@example.com" });
+  it("forwards only authed and userId, never the provider", async () => {
+    reply({ ...AUTHED, provider: "google" });
     expect(Object.keys(await authStatus()).sort()).toEqual(["authed", "userId"]);
   });
 
   it("reports signed out when the background says so", async () => {
-    reply({ type: "auth:status", authed: false, userId: null, email: null });
+    reply({ type: "auth:status", authed: false, userId: null, provider: null });
     await expect(authStatus()).resolves.toEqual({ authed: false, userId: null });
   });
 

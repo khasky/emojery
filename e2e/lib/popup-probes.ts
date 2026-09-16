@@ -20,11 +20,11 @@ import { type FirefoxExtensionTab, firefoxBridge } from "./firefox-bridge";
 import { handleKnownInterstitials } from "./page-settle";
 import { openVisiblePickerAndReadSelectedReaction, pollForValue, selectedReactionOnMatchingHost, waitForMountedTargetKey, waitForVisibleEmojeryTrigger } from "./picker-probes";
 import { setPopupCheckbox } from "./popup-settings";
-import { EMAIL_INPUT_SELECTOR, HISTORY_EMOJI_SELECTOR, HISTORY_LINK_SELECTOR, HISTORY_NOMATCH_SELECTOR, HISTORY_ROW_SELECTOR, HISTORY_SEARCH_INPUT_SELECTOR } from "./selectors";
+import { AGREE_CHECKBOX_SELECTOR, HISTORY_EMOJI_SELECTOR, HISTORY_LINK_SELECTOR, HISTORY_NOMATCH_SELECTOR, HISTORY_ROW_SELECTOR, HISTORY_SEARCH_INPUT_SELECTOR } from "./selectors";
 import type { PickedReaction, SupportedSiteScenario } from "./site-evidence";
 import { siteLabel } from "./site-evidence";
 import { dismissLoginWalls } from "./site-walls";
-import { authCode, authEmail } from "./test-config";
+import { authSubject } from "./test-config";
 
 // How long a queued vote may take to reach local history. Covers a cold service
 // worker doing IndexedDB work on a feed-heavy page, not a healthy flush.
@@ -61,7 +61,7 @@ export async function authPageFromUserAction(browserContext: BrowserContext, loa
       await candidate.waitForURL(expectedUrl, { timeout: 750 }).catch(() => {});
     }
     if (!candidate.url().startsWith(expectedUrl)) continue;
-    await expect(candidate.locator(EMAIL_INPUT_SELECTOR)).toBeVisible();
+    await expect(candidate.locator(AGREE_CHECKBOX_SELECTOR)).toBeVisible();
     return candidate;
   }
 
@@ -70,8 +70,7 @@ export async function authPageFromUserAction(browserContext: BrowserContext, loa
 
 // The caller closes the auth tab the unauth click opened; signIn works in a tab of its own.
 export async function signInTestAccount(browserContext: BrowserContext, locale = "en"): Promise<void> {
-  const email = authEmail();
-  await signIn(browserContext, email, authCode(email), locale);
+  await signIn(browserContext, authSubject(), locale);
 }
 
 export async function setReplaceNativeFromPopup(browserContext: BrowserContext, desired: boolean): Promise<void> {
@@ -409,7 +408,7 @@ async function openLatestHistoryReactionPageOverBridge(browserContext: BrowserCo
 }
 
 // The auth tab a gate click opened, found in Firefox's own tab list (Playwright's
-// page events never report it) and confirmed to have rendered the email step.
+// page events never report it) and confirmed to have rendered the provider step.
 async function authTabFromUserActionOverBridge(browserContext: BrowserContext, action: () => Promise<void>): Promise<AuthTabHandle | null> {
   const bridge = await firefoxBridge(browserContext);
   await action().catch(() => {});
@@ -417,8 +416,8 @@ async function authTabFromUserActionOverBridge(browserContext: BrowserContext, a
   for (;;) {
     const authTab = await bridge.attach(/^moz-extension:\/\/[^/]+\/auth\.html/);
     if (authTab) {
-      const rendered = await authTab.evaluate((selector) => document.querySelector(selector) !== null, EMAIL_INPUT_SELECTOR).catch(() => false);
-      expect(rendered, "the auth tab should render its email step").toBe(true);
+      const rendered = await authTab.evaluate((selector) => document.querySelector(selector) !== null, AGREE_CHECKBOX_SELECTOR).catch(() => false);
+      expect(rendered, "the auth tab should render its provider step").toBe(true);
       return authTab;
     }
     if (Date.now() > deadline) return null;

@@ -125,6 +125,15 @@
   "signedInLabel": {
     "message": "Sisse logitud"
   },
+  "signedInVia": {
+    "message": "$PROVIDER$ kaudu",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
   "signOutBtn": {
     "message": "Logi välja"
   },
@@ -387,9 +396,6 @@
   "authPageTitle": {
     "message": "Emojery — Logi sisse"
   },
-  "authCodePageTitle": {
-    "message": "Emojery — Sisestage oma kood"
-  },
   "authDonePageTitle": {
     "message": "Emojery — Olete sisse logitud"
   },
@@ -397,16 +403,28 @@
     "message": "Logi sisse, et reageerida"
   },
   "authSignInTagline": {
-    "message": "Saadame sulle kinnituskoodi e-postiga"
+    "message": "Jätka kontoga, mis sul juba on. Emojery ei näe kunagi sinu parooli."
   },
-  "authEmailLabel": {
-    "message": "E-post"
+  "authProviderBtn": {
+    "message": "Jätka: $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendCodeBtn": {
-    "message": "Saada kood"
+  "authSigningInWith": {
+    "message": "Sisselogimine: $PROVIDER$...",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendingBtn": {
-    "message": "Saatmine..."
+  "authRetryBtn": {
+    "message": "Proovi uuesti"
   },
   "authAgreeIntro": {
     "message": "Nõustun "
@@ -422,30 +440,6 @@
   },
   "authAgreeOutro": {
     "message": "."
-  },
-  "authCodeTitle": {
-    "message": "Sisestage oma kood"
-  },
-  "authCodeTagline": {
-    "message": "Saatsime koodi aadressile $EMAIL$. See aegub 10 minuti pärast.",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authCodeLabel": {
-    "message": "Kinnituskood"
-  },
-  "authVerifyingBtn": {
-    "message": "Kontrollimine..."
-  },
-  "authVerifyBtn": {
-    "message": "Logi sisse"
-  },
-  "authUseDifferentEmail": {
-    "message": "Kasuta teist e-posti"
   },
   "authDoneTitle": {
     "message": "Olete sisse logitud"
@@ -463,7 +457,7 @@
     "message": "Mida Emojery saadab"
   },
   "dataConsentBody": {
-    "message": "Emojery saadab selle lehe aadressi, millel reageerid, juhusliku paigaldustunnuse ning sisselogimisel ühe korra su e-posti aadressi; sellest säilitatakse ainult ühesuunaline räsi. Valikuline kontekst jääb selles brauseris välja lülitatuks."
+    "message": "Emojery saadab selle lehe aadressi, millel reageerid, juhusliku paigaldustunnuse ja valitud teenusepakkuja ühekordse sisselogimistõendi; alles jääb vaid sinu kontotunnuse ühesuunaline räsi. Valikuline kontekst jääb selles brauseris välja lülitatuks."
   },
   "dataConsentPolicyLink": {
     "message": "Privaatsuspoliitika."
@@ -471,59 +465,17 @@
   "dataConsentContinueBtn": {
     "message": "Jätka"
   },
-  "authSendThrottle": {
-    "message": "Küsisite hiljuti koodi. Saate uue küsida $TIME$ pärast.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authResendCooldown": {
-    "message": "Saatsime sellele aadressile juba koodi. Saate uue küsida $TIME$ pärast.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authEnterPendingCode": {
-    "message": "Sisesta kood, mille saatsime aadressile $EMAIL$",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authResendBtn": {
-    "message": "Saada kood uuesti"
-  },
-  "authResendInBtn": {
-    "message": "Saada kood uuesti $TIME$ pärast",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authErrRateLimit": {
-    "message": "Liiga palju päringuid. Oodake mõni minut ja proovige uuesti."
-  },
-  "authErrUndeliverable": {
-    "message": "E-posti edastamine ebaõnnestus. Proovige uuesti või kontrollige aadressi."
-  },
-  "authErrEmailDomainUndeliverable": {
-    "message": "See e-posti domeen ei saa kirju vastu võtta. Kontrollige aadressi trükivigade suhtes või kasutage teist."
-  },
-  "authErrBadEmail": {
-    "message": "See ei tundu kehtiv e-posti aadress."
-  },
   "authErrUnknown": {
     "message": "Midagi läks valesti. Proovige uuesti."
+  },
+  "authErrCancelled": {
+    "message": "Sisselogimine tühistati. Proovi uuesti, kui oled valmis."
+  },
+  "authErrProviderDenied": {
+    "message": "Teenusepakkuja ei viinud sisselogimist lõpule. Proovi uuesti või vali teine konto."
+  },
+  "authErrEnrollFailed": {
+    "message": "Sinu kontot ei õnnestunud praegu registreerida. Proovi minuti pärast uuesti."
   },
   "authErrOutdated": {
     "message": "See Emojery versioon on aegunud. Sisselogimiseks uuenda seda."
@@ -539,15 +491,6 @@
   },
   "errServerBusy": {
     "message": "Serveril on probleem. Proovi minuti pärast uuesti."
-  },
-  "authErrTooManyTries": {
-    "message": "Liiga palju valesid koode. Proovige hiljem uuesti."
-  },
-  "authErrCodeInvalid": {
-    "message": "Kood on vale või aegunud."
-  },
-  "authErrVerifyFailed": {
-    "message": "Kontrollimine ebaõnnestus. Proovige uuesti."
   },
   "searchResultsCount": {
     "message": "$COUNT$ tulemust",
@@ -614,7 +557,7 @@
     "message": "Viimane samm"
   },
   "gateBody": {
-    "message": "Logi sisse oma e-postiga, et su reaktsioon läheks arvesse."
+    "message": "Logi sisse olemasoleva kontoga, et sinu reaktsioon läheks arvesse."
   },
   "gateSignInBtn": {
     "message": "Logi sisse"

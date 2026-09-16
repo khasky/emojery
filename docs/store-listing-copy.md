@@ -21,7 +21,7 @@ HOW IT WORKS
 
 Open a supported post, video, repository or product page to see the top 3 emoji and the total reaction count. Click the button for the full breakdown, a searchable emoji palette and your own reaction controls.
 
-No account is needed to read counts. To add a reaction, sign in with an email code. These reactions are counted separately from the site's native Likes, stars and votes.
+No account is needed to read counts. To add a reaction, sign in with an account you already have (Google, Apple, Microsoft, Facebook, LinkedIn, Discord, Twitch or Slack). These reactions are counted separately from the site's native Likes, stars and votes.
 
 FEATURES
 
@@ -38,12 +38,12 @@ CHECK THE TOTALS
 
 Accepted reactions are recorded in a public, tamper-evident log, with checkpoints anchored outside the service. A free, open-source verifier reconstructs the totals from that record.
 
-Email verification and anti-abuse checks help limit spam. Reactions identified as abuse can be removed from the totals.
+One provider account gives one Emojery account, every accepted reaction is signed by a key issued to a registered account, and anti-abuse checks help limit spam. Reactions identified as abuse can be removed from the totals.
 
 PRIVACY AND DATA
 
 - The extension contains no ad code, third-party advertising trackers or analytics SDKs.
-- Your email is used to send a sign-in code and then discarded. A one-way keyed hash remains as your account ID.
+- Sign-in goes through the provider's own login page. The extension never sees your password or your email; the provider tells the service only that you signed in, and a one-way hash of that answer is your account ID.
 - Your browsable history stays on your device. To show counts, the extension sends the public identifiers of items on screen; the service answers without storing them. Submitted reactions and their public target identifiers are stored. Public log entries use pseudonyms.
 - Community insights is enabled by default. It attaches country and city, language, browser and operating system to the reactions you submit, for aggregate statistics. Turn it off in Settings.
 - Account deletion removes your reactions from the totals. Historical pseudonymous log entries remain, with reversals recording the change.
@@ -79,7 +79,7 @@ Emojery adds 600+ emoji reactions beside the Like, Star and vote buttons on supp
 ## storage justification
 
 ```text
-Used to save extension settings, per-site preferences, the signed-in session (the session token and the email address it was opened with, kept only to label the account in the popup), a random installation identifier, recently used emoji, local reaction state and a 60-second cache of counts. Only the settings object syncs through the browser's extension-settings sync; the session, the identifier, the cache and the reaction state stay on the device. These values support the reaction picker, the account session and consistent behavior between visits.
+Used to save extension settings, per-site preferences, the signed-in session (the session token and the name of the provider it was opened with, kept only to label the account in the popup), a random installation identifier, recently used emoji, local reaction state and a 60-second cache of counts. Only the settings object syncs through the browser's extension-settings sync; the session, the identifier, the cache and the reaction state stay on the device. These values support the reaction picker, the account session and consistent behavior between visits.
 ```
 
 ## unlimitedStorage justification
@@ -100,6 +100,12 @@ Used to schedule short background tasks that retry queued reactions after tempor
 Used when the user opens the extension from the browser toolbar to inspect the active tab's URL, determine whether the current site is supported and display the appropriate site status and controls. Access is triggered by the user's action and is not used to monitor unrelated tabs or retrieve the browser's browsing-history database.
 ```
 
+## identity justification
+
+```text
+Used only for sign-in: identity.launchWebAuthFlow opens the chosen provider's own login page (Google, Apple, Microsoft, Facebook, LinkedIn, Discord, Twitch or Slack) in a window the browser controls and returns the backend's redirect to the extension, so no extension page ever hosts a provider's form and no password passes through the extension. The optional identity.email permission is not requested; the browser profile's own account is never read.
+```
+
 ## scripting justification
 
 ```text
@@ -109,7 +115,7 @@ Used to inject the extension's packaged content scripts into already-open suppor
 ## Host permission justification
 
 ```text
-Access to the listed Facebook, Instagram, Reddit, YouTube, X, Threads, GitHub, GitLab and Amazon hosts is required to identify supported public content, insert the reaction interface and display its counts. User-enabled settings can hide native controls and link an emoji selection to a native reaction or vote on the current page; Auto-press is off by default. Access to api.emojery.app supports count lookups, email-code authentication, reaction submissions and removals, account deletion and user-submitted bug reports. Access to emojery.app lets a packaged script expose the installed version and handle reaction links. Content scripts run only on the declared supported hosts, not arbitrary websites.
+Access to the listed Facebook, Instagram, Reddit, YouTube, X, Threads, GitHub, GitLab and Amazon hosts is required to identify supported public content, insert the reaction interface and display its counts. User-enabled settings can hide native controls and link an emoji selection to a native reaction or vote on the current page; Auto-press is off by default. Access to api.emojery.app supports count lookups, the provider sign-in, the per-account signing keys, reaction submissions and removals, account deletion and user-submitted bug reports. Access to emojery.app lets a packaged script expose the installed version and handle reaction links. Content scripts run only on the declared supported hosts, not arbitrary websites.
 ```
 
 ## Homepage URL
@@ -151,18 +157,18 @@ WHAT LEAVES YOUR BROWSER
 
 - To show counts, the public target keys of supported items that scroll into view, before you react. That lookup carries no account and no installation identifier, and the service answers it without storing or logging the keys. While you are signed in, a second request asks which of those items you have already reacted to; it carries your session token and is not stored either.
 - The reactions you submit, with the canonical URL and the public identifier of the item you reacted to. The service keeps the identifier, not the URL.
-- Your email address at sign-in, transiently: sent over TLS, used once to deliver a 6-digit code, then discarded on the server. What remains there as your account identifier is a one-way keyed hash of it. The extension keeps the address in its local storage to label the account, and sends it once more only if you delete the account.
+- At sign-in, a one-time token from the provider you choose (Google, Apple, Microsoft, Facebook, LinkedIn, Discord, Twitch or Slack), sent over TLS. The provider learns that you signed in to Emojery and nothing about what you react to; the service reads the token's subject once and keeps a one-way keyed hash of it as your account identifier. The extension stores only the provider's name to label the account. Every reaction carries a signature from a per-account key that changes every 30 days; the public log shows the key, never the account.
 - A session token and a random installation identifier that lasts as long as the installation. The identifier travels only on the requests you initiate that change something: signing in, submitting or removing a reaction, filing a report, deleting your account. Reading counts sends neither.
 - A bug report, only when you send one from the Report tab: your note, the page it is about, and, while Community insights is on, the browser's user-agent string and the extension version.
 - With the "Community insights" setting on, which it is unless you turn it off: country and city, language, browser family and OS alongside a reaction.
 
 WHAT IS NEVER COLLECTED
 
-Real names, email addresses stored on the server, hardware or high-entropy fingerprints, advertising cookies or tracking pixels, passwords, and any stored record of pages you did not react on. Raw IP addresses are never stored: the network layer sees your address the way any web server does, and what the service keeps is a daily-rotating salted hash used to limit abuse. The extension loads no analytics SDK.
+Real names, email addresses, passwords (yours or a provider's), hardware or high-entropy fingerprints, advertising cookies or tracking pixels, and any stored record of pages you did not react on. Raw IP addresses are never stored: the network layer sees your address the way any web server does, and what the service keeps is a daily-rotating salted hash used to limit abuse. The extension loads no analytics SDK.
 
 STORAGE AND RETENTION
 
-Sign-in code: 10 minutes or until used. Session token: 30 days, in extension storage. Account record and active reactions: until you delete them. Aggregate per-item counts: indefinitely. Public transparency-log entries: permanent and append-only, so a deletion is recorded as a public revocation rather than an erasure. A bug report you filed, and abuse decisions and linked-account reviews of the last 90 days, are kept after account deletion; the full table with every period is at https://emojery.app/privacy#retention.
+Provider token: read once at sign-in and not stored. Session token: 30 days, in extension storage. Per-account signing keys: on the device until the account is deleted. Account record and active reactions: until you delete them. Aggregate per-item counts: indefinitely. Public transparency-log entries: permanent and append-only, so a deletion is recorded as a public revocation rather than an erasure. A bug report you filed, and abuse decisions and linked-account reviews of the last 90 days, are kept after account deletion; the full table with every period is at https://emojery.app/privacy#retention.
 
 WHERE YOUR REACTIONS LIVE
 
@@ -170,7 +176,7 @@ Your device keeps the browsable history, including page titles, in the browser's
 
 SUBPROCESSORS
 
-Cloudflare (infrastructure, bot check, country/city), Neon (managed database, EU or US), Resend (delivery of the one-time code; the address is not retained), Axiom (backend logs, 30 days, no raw email, IP or user-agent), Discord (the maintainer's private alerts: abuse decisions, bug reports, uninstall-survey answers), DeepSeek (a language-model second opinion on anti-abuse findings; receives counts and public target keys only), rdap.org and Cloudflare DNS (the domain part of the sign-in address, to refuse throwaway domains). The public transparency log is published to GitHub, anchored through Sigstore Rekor and the OpenTimestamps calendars, and archived by Software Heritage; the entries it carries are pseudonymous. Changes to this list are dated at https://emojery.app/privacy#subprocessor-changes.
+Cloudflare (infrastructure, bot check, country/city), Neon (managed database, EU or US), the sign-in provider you choose (Google, Apple, Microsoft, Facebook, LinkedIn, Discord, Twitch or Slack; it learns that you signed in to Emojery, under its own privacy policy), Axiom (backend logs, 30 days, no raw IP or user-agent), Discord (the maintainer's private alerts: abuse decisions, bug reports, uninstall-survey answers), DeepSeek (a language-model second opinion on anti-abuse findings; receives counts and public target keys only). The public transparency log is published to GitHub, anchored through Sigstore Rekor and the OpenTimestamps calendars, and archived by Software Heritage; the entries it carries are pseudonymous. Changes to this list are dated at https://emojery.app/privacy#subprocessor-changes.
 
 YOUR RIGHTS
 
@@ -202,7 +208,7 @@ Emojery adds an emoji reaction control next to the native like/share/star button
 
 The reaction buttons and counts appear on the supported sites (x.com, facebook.com, reddit.com, instagram.com, youtube.com, github.com, gitlab.com, threads.com, amazon.com) without signing in — install and browse any of them. github.com/torvalds/linux is a reliable page to check without signing in.
 
-To test voting (optional): open the extension, choose Sign in, enter any real email address; a 6-digit code is emailed; enter it. Use a mainstream provider - an address the code cannot be sent to is answered with an on-screen notice rather than a code, and disposable and temp-mail domains are among those refused. The code may land in spam.
+To test voting (optional): open the extension, choose Sign in, tick the consent box and pick a provider (Google, Apple, Microsoft, Facebook, LinkedIn, Discord, Twitch or Slack). The provider's own login page opens in a browser window; sign in there with any account you have and the extension's page confirms the sign-in. No account details reach the add-on: the provider's answer is exchanged for a session by the backend.
 
 VALIDATION WARNINGS
 
@@ -220,7 +226,7 @@ Nothing in this add-on reaches that branch, and the attached source archive show
 ```text
 No account is needed for the core features. Install the extension and open any supported page (youtube.com, reddit.com, github.com, gitlab.com, x.com, threads.com, facebook.com, instagram.com, amazon.com): the reaction button appears next to the site's own controls and shows the public counts. github.com/torvalds/linux is a reliable page to check without signing in.
 
-To test reacting: open the extension popup, choose Sign in, enter any real email address, and enter the 6-digit code that arrives. Disposable and temp-mail addresses are rejected, and the code can land in spam.
+To test reacting: open the extension popup, choose Sign in, tick the consent box and pick a provider (Google, Apple, Microsoft, Facebook, LinkedIn, Discord, Twitch or Slack); sign in on the provider's own page in the window that opens.
 
 "Auto-press original buttons" is off by default. Turning it on in the popup makes the emoji you pick also press the site's own control on the page you are looking at, under your own account; removing the reaction releases only what the extension pressed.
 ```
@@ -251,16 +257,16 @@ No, I am not using remote code.
 ## Data usage declarations (CWS and Edge)
 
 ```text
-Tick 5 of the 9 categories. The wording after each dash is the reason, kept here so the dashboard answer and emojery.app/browser-permissions#chrome-labels say the same thing.
+Tick 4 of the 9 categories. The wording after each dash is the reason, kept here so the dashboard answer and emojery.app/browser-permissions#chrome-labels say the same thing.
 
-  Personally identifiable information  - the email address, sent to the 2 sign-in endpoints and once more on account deletion; a keyed hash of it is the account identifier on the server, and the extension keeps the address in local storage to label the account.
-  Authentication information           - the 6-digit one-time code typed at sign-in and the 30-day session token.
+  Authentication information           - the one-time code the provider's login hands back at sign-in, exchanged for the 30-day session token, and the per-account signing key each reaction carries.
   Location                             - the country and city Cloudflare derives from the connection, stored with a reaction while Community insights is on; nothing finer than a city, nothing when the setting is off. The per-address request limiter uses the raw IP on Cloudflare's rate-limiting service and stores nothing beyond a windowed counter.
   Web history                          - the canonical target key of each supported item that scrolls into view is sent to fetch its count, with no account attached, and answered without being stored or logged; the pages the user reacts on are stored with the reaction, and a bug report carries the page it is about.
   Website content                      - the content script reads the page structure to find the action row and derive the item's public identifier, and sends the item's canonical link with a reaction.
 
 Leave unticked:
   User activity                        - defined by Google as network monitoring, clicks, mouse position, scroll or keystroke logging. None is collected: no analytics library, no click or scroll telemetry, keyboard handling only inside the picker's own search box and focus trap. A submitted reaction is user content, and the timestamps and change count on its row exist so it can be changed or removed.
+  Personally identifiable information  - no name, email address or other identifier is collected; the provider's answer is reduced to a one-way hash on the server, and the extension stores only the provider's name.
   Health information, Financial and payment information, Personal communications - not handled.
 
 Certifications (all 3 ticked, and what keeps each true):
@@ -274,11 +280,11 @@ Certifications (all 3 ticked, and what keeps each true):
 ```text
 Emojery adds an emoji reaction control next to the native Like, Star and vote buttons on 9 explicitly listed sites and shows the public reaction count for the item.
 
-Site access is limited to those sites - no <all_urls>, and no wildcard host match beyond each site's own subdomains. Two further hosts belong to the extension itself: emojery.app for the sign-in hand-off and an installed-version marker, and api.emojery.app, the backend that serves counts, accepts reactions and handles email sign-in. No remote code is executed; the content security policy is script-src 'self'.
+Site access is limited to those sites - no <all_urls>, and no wildcard host match beyond each site's own subdomains. Two further hosts belong to the extension itself: emojery.app for the sign-in hand-off and an installed-version marker, and api.emojery.app, the backend that serves counts, accepts reactions and completes the provider sign-in. No remote code is executed; the content security policy is script-src 'self'.
 
 No account is needed to see the reaction button and the counts. Install the extension and open any supported page (youtube.com, reddit.com, github.com, gitlab.com, x.com, threads.com, facebook.com, instagram.com, amazon.com). github.com/torvalds/linux is a reliable page to check.
 
-To test reacting: open the popup, choose Sign in, enter any real email address and enter the 6-digit code that arrives. Disposable and temp-mail addresses are rejected, and the code can land in spam.
+To test reacting: open the popup, choose Sign in, tick the consent box and pick a provider (Google, Apple, Microsoft, Facebook, LinkedIn, Discord, Twitch or Slack); sign in on the provider's own page in the window that opens. The identity permission is what opens that window; the extension never hosts the provider's form.
 
 "Auto-press original buttons" is off by default. With it on, the emoji the user picks also presses the site's own control, on the page they are looking at and under their own account - one pick presses at most one control, and removing the reaction releases only what the extension pressed.
 ```

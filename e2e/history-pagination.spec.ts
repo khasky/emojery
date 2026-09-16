@@ -18,7 +18,7 @@ import * as ext from "./lib/extension";
 import { openHistoryTab } from "./lib/popup-probes";
 import { HISTORY_LINK_SELECTOR, HISTORY_MORE_SELECTOR, HISTORY_NOMATCH_SELECTOR, HISTORY_ROW_SELECTOR, HISTORY_SEARCH_INPUT_SELECTOR } from "./lib/selectors";
 
-const REQUIRES_OTP = ext.otpSkipReason("the History paging checks");
+const REQUIRES_SIGNIN = ext.signInSkipReason("the History paging checks");
 
 // Mirrors HISTORY_PAGE in src/entrypoints/popup/popup-history.tsx.
 const PAGE_SIZE = 100;
@@ -100,7 +100,7 @@ async function captureStage(popup: Page, testInfo: TestInfo, stage: string): Pro
 }
 
 test("History paging and search stay correct over a 10k-row uncapped store", async () => {
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
   test.skip(ext.isFirefoxRun(), "pages and screenshots the popup's History view through Playwright, which cannot attach to it on Firefox (the seeding itself goes through the bridge)");
   // test.info() instead of the `({}, testInfo)` callback parameters: the empty
   // fixture destructuring trips biome's noEmptyPattern.
@@ -221,7 +221,7 @@ async function seedFacetRows(context: BrowserContext): Promise<void> {
 }
 
 test("History facet counts answer for the filters stacked around them", async () => {
-  test.skip(!ext.authConfigured(), REQUIRES_OTP);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
   test.skip(ext.isFirefoxRun(), "drives the popup's History view through Playwright, which cannot attach to it on Firefox (the seeding itself goes through the bridge)");
   const testInfo = test.info();
   const session = await ext.launchSession();

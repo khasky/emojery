@@ -16,7 +16,7 @@ const testTimeout = Number(process.env.E2E_TEST_TIMEOUT_MS ?? 120_000);
 const expectTimeout = Number(process.env.E2E_EXPECT_TIMEOUT_MS ?? 30_000);
 // Black-box tests against LIVE third-party sites and the live auth backend flake
 // on causes outside the extension (anti-bot interstitials, rate limits, slow
-// loads, the OTP backend). Retry those: a genuine regression still fails every
+// loads, the sign-in backend). Retry those: a genuine regression still fails every
 // attempt and stays red, while an environmental blip self-heals. 0 to reproduce raw.
 const retries = Number(process.env.E2E_RETRIES ?? 2);
 
@@ -44,7 +44,7 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   retries,
-  // Retries exist for LIVE-surface flake (anti-bot walls, slow feeds, the OTP
+  // Retries exist for LIVE-surface flake (anti-bot walls, slow feeds, the sign-in
   // backend). A spec that touches neither live sites nor the backend gets 0:
   // there an intermittent failure IS a product bug and must not self-heal into
   // "flaky but green".

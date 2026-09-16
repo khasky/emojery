@@ -16,7 +16,7 @@ import { fetchCount } from "./api-read";
 import { hasAuthOrigin, rememberAuthOrigin, returnToAuthOrigin } from "./auth-return";
 import { logBackgroundError } from "./debug";
 import { exportHistory, getHistoryPage, getHistoryStats, importHistory } from "./history";
-import { clearAuth, deleteAccount, getAuth, requestOtp, revokeSessionServerSide, verifyOtp } from "./identity";
+import { clearAuth, deleteAccount, getAuth, listSignInProviders, revokeSessionServerSide, signInWithProvider } from "./identity";
 import { isExtensionPageSender, parseRuntimeMessage } from "./message-guard";
 import { reportProblem } from "./reports";
 import { errorResponse, respondAuthed, respondWith } from "./respond";
@@ -201,12 +201,12 @@ const HANDLERS: HandlerTable = {
   },
 
   "auth:status": (_msg, { sender, sendResponse, extensionBaseUrl }) => {
-    // Content scripts only need the authed flag; the email stays on the
-    // extension's own pages.
-    const includeEmail = isExtensionPageSender(sender, extensionBaseUrl);
+    // Content scripts only need the authed flag; which provider the account came
+    // from stays on the extension's own pages.
+    const includeProvider = isExtensionPageSender(sender, extensionBaseUrl);
     respondWith(sendResponse, "auth:status", async () => {
       const auth = await getAuth();
-      return { type: "auth:status", authed: auth !== null, userId: auth?.userId ?? null, email: includeEmail ? (auth?.email ?? null) : null };
+      return { type: "auth:status", authed: auth !== null, userId: auth?.userId ?? null, provider: includeProvider ? (auth?.provider ?? null) : null };
     });
     return ANSWER_LATER;
   },
@@ -246,22 +246,22 @@ const HANDLERS: HandlerTable = {
     return ANSWER_LATER;
   },
 
-  "auth:requestOtp": (msg, { sendResponse }) => {
-    respondWith(sendResponse, "auth:requestOtp", async () => ({ type: "auth:otpRequested", ...(await requestOtp(msg.email)) }));
+  "auth:providers": (_msg, { sendResponse }) => {
+    respondWith(sendResponse, "auth:providers", async () => ({ type: "auth:providers", providers: await listSignInProviders() }));
     return ANSWER_LATER;
   },
 
-  "auth:verifyOtp": (msg, { sendResponse }) => {
+  "auth:signIn": (msg, { sendResponse }) => {
     // Rebuilt field by field, never spread: keeps the response to exactly these
-    // fields even if VerifyOtpResult grows. The session lives in storage.local
+    // fields even if SignInResult grows. The session lives in storage.local
     // (read by getAuth) and is never forwarded here.
-    respondWith(sendResponse, "auth:verifyOtp", async () => {
-      const res = await verifyOtp(msg.email, msg.code);
-      if (!res.ok) return { type: "auth:otpVerified", ok: false, refusal: res.refusal };
+    respondWith(sendResponse, "auth:signIn", async () => {
+      const res = await signInWithProvider(msg.provider);
+      if (!res.ok) return { type: "auth:signedIn", ok: false, refusal: res.refusal };
       // A failed lookup must not fail the sign-in that already succeeded - it
       // costs the return offer, nothing more.
       const returnsToPage = await hasAuthOrigin().catch(() => false);
-      return returnsToPage ? { type: "auth:otpVerified", ok: true, returnsToPage: true } : { type: "auth:otpVerified", ok: true };
+      return returnsToPage ? { type: "auth:signedIn", ok: true, returnsToPage: true } : { type: "auth:signedIn", ok: true };
     });
     return ANSWER_LATER;
   },

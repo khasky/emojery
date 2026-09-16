@@ -40,7 +40,7 @@ function respondAsBackground(local: Store, msg: unknown): unknown {
   const auth = local.get(AUTH_KEY) as { userId?: unknown; expiresAt?: unknown } | undefined;
   const live = typeof auth?.expiresAt === "number" && isAuthSessionLive(auth.expiresAt);
   const userId = live && typeof auth.userId === "string" && auth.userId ? auth.userId : null;
-  return { type: "auth:status", authed: userId !== null, userId, email: null };
+  return { type: "auth:status", authed: userId !== null, userId, provider: null };
 }
 
 // A defaults object also seeds the result - a stored value overrides its entry.

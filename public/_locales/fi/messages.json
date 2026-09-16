@@ -125,6 +125,15 @@
   "signedInLabel": {
     "message": "Kirjautunut"
   },
+  "signedInVia": {
+    "message": "$PROVIDER$-tilillä",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
   "signOutBtn": {
     "message": "Kirjaudu ulos"
   },
@@ -387,9 +396,6 @@
   "authPageTitle": {
     "message": "Emojery — Kirjaudu"
   },
-  "authCodePageTitle": {
-    "message": "Emojery — Syötä koodisi"
-  },
   "authDonePageTitle": {
     "message": "Emojery — Olet kirjautunut"
   },
@@ -397,16 +403,28 @@
     "message": "Kirjaudu reagoidaksesi"
   },
   "authSignInTagline": {
-    "message": "Lähetämme sinulle vahvistuskoodin sähköpostiin"
+    "message": "Jatka tilillä, joka sinulla jo on. Emojery ei koskaan näe salasanaasi."
   },
-  "authEmailLabel": {
-    "message": "Sähköposti"
+  "authProviderBtn": {
+    "message": "Jatka: $PROVIDER$",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendCodeBtn": {
-    "message": "Lähetä koodi"
+  "authSigningInWith": {
+    "message": "Kirjaudutaan: $PROVIDER$...",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendingBtn": {
-    "message": "Lähetetään..."
+  "authRetryBtn": {
+    "message": "Yritä uudelleen"
   },
   "authAgreeIntro": {
     "message": "Hyväksyn "
@@ -422,30 +440,6 @@
   },
   "authAgreeOutro": {
     "message": "."
-  },
-  "authCodeTitle": {
-    "message": "Syötä koodisi"
-  },
-  "authCodeTagline": {
-    "message": "Lähetimme koodin osoitteeseen $EMAIL$. Se vanhenee 10 minuutissa.",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authCodeLabel": {
-    "message": "Vahvistuskoodi"
-  },
-  "authVerifyingBtn": {
-    "message": "Tarkistetaan..."
-  },
-  "authVerifyBtn": {
-    "message": "Kirjaudu"
-  },
-  "authUseDifferentEmail": {
-    "message": "Käytä toista sähköpostia"
   },
   "authDoneTitle": {
     "message": "Olet kirjautunut"
@@ -463,7 +457,7 @@
     "message": "Mitä Emojery lähettää"
   },
   "dataConsentBody": {
-    "message": "Emojery lähettää sen sivun osoitteen, jolla reagoit, satunnaisen asennustunnisteen sekä sähköpostiosoitteesi kerran kirjautuessasi; siitä säilytetään vain yksisuuntainen tiiviste. Valinnainen konteksti pysyy pois päältä tässä selaimessa."
+    "message": "Emojery lähettää sen sivun osoitteen, jolla reagoit, satunnaisen asennustunnisteen ja valitsemasi palveluntarjoajan kertakäyttöisen kirjautumistunnuksen; vain tilitunnisteesi yksisuuntainen tiiviste säilytetään. Valinnainen konteksti pysyy tässä selaimessa pois päältä."
   },
   "dataConsentPolicyLink": {
     "message": "Tietosuojakäytäntö."
@@ -471,59 +465,17 @@
   "dataConsentContinueBtn": {
     "message": "Jatka"
   },
-  "authSendThrottle": {
-    "message": "Pyysit juuri koodin. Voit pyytää toisen $TIME$ kuluttua.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authResendCooldown": {
-    "message": "Lähetimme jo koodin tähän osoitteeseen. Voit pyytää uuden $TIME$ kuluttua.",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authEnterPendingCode": {
-    "message": "Anna koodi, jonka lähetimme osoitteeseen $EMAIL$",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authResendBtn": {
-    "message": "Lähetä koodi uudelleen"
-  },
-  "authResendInBtn": {
-    "message": "Lähetä koodi uudelleen $TIME$ kuluttua",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authErrRateLimit": {
-    "message": "Liian monta pyyntöä. Odota muutama minuutti ja yritä uudelleen."
-  },
-  "authErrUndeliverable": {
-    "message": "Sähköpostin toimitus epäonnistui. Yritä uudelleen tai tarkista osoite."
-  },
-  "authErrEmailDomainUndeliverable": {
-    "message": "Tämä sähköpostiverkkotunnus ei voi vastaanottaa viestejä. Tarkista osoite kirjoitusvirheiden varalta tai käytä toista."
-  },
-  "authErrBadEmail": {
-    "message": "Tämä ei näytä kelvolliselta sähköpostiosoitteelta."
-  },
   "authErrUnknown": {
     "message": "Jotain meni pieleen. Yritä uudelleen."
+  },
+  "authErrCancelled": {
+    "message": "Kirjautuminen peruutettiin. Yritä uudelleen, kun olet valmis."
+  },
+  "authErrProviderDenied": {
+    "message": "Palveluntarjoaja ei saattanut kirjautumista loppuun. Yritä uudelleen tai valitse toinen tili."
+  },
+  "authErrEnrollFailed": {
+    "message": "Tiliäsi ei voitu rekisteröidä juuri nyt. Yritä uudelleen minuutin kuluttua."
   },
   "authErrOutdated": {
     "message": "Tämä Emojeryn versio on vanhentunut. Päivitä se kirjautuaksesi sisään."
@@ -539,15 +491,6 @@
   },
   "errServerBusy": {
     "message": "Palvelimessa on ongelma. Yritä uudelleen minuutin kuluttua."
-  },
-  "authErrTooManyTries": {
-    "message": "Liian monta väärää koodia. Yritä myöhemmin uudelleen."
-  },
-  "authErrCodeInvalid": {
-    "message": "Koodi on virheellinen tai vanhentunut."
-  },
-  "authErrVerifyFailed": {
-    "message": "Vahvistus epäonnistui. Yritä uudelleen."
   },
   "searchResultsCount": {
     "message": "$COUNT$ tulosta",
@@ -614,7 +557,7 @@
     "message": "Viimeinen askel"
   },
   "gateBody": {
-    "message": "Kirjaudu sisään sähköpostillasi, jotta reaktiosi lasketaan."
+    "message": "Kirjaudu sisään olemassa olevalla tilillä, jotta reaktiosi lasketaan."
   },
   "gateSignInBtn": {
     "message": "Kirjaudu"

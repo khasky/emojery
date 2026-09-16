@@ -125,6 +125,15 @@
   "signedInLabel": {
     "message": "サインイン中"
   },
+  "signedInVia": {
+    "message": "$PROVIDER$ 経由",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
   "signOutBtn": {
     "message": "サインアウト"
   },
@@ -387,9 +396,6 @@
   "authPageTitle": {
     "message": "Emojery — サインイン"
   },
-  "authCodePageTitle": {
-    "message": "Emojery — コードを入力"
-  },
   "authDonePageTitle": {
     "message": "Emojery — サインインしました"
   },
@@ -397,16 +403,28 @@
     "message": "サインインしてリアクション"
   },
   "authSignInTagline": {
-    "message": "確認コードをメールで送信します"
+    "message": "すでにお持ちのアカウントで続行します。Emojery がパスワードを見ることはありません。"
   },
-  "authEmailLabel": {
-    "message": "メール"
+  "authProviderBtn": {
+    "message": "$PROVIDER$ で続行",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendCodeBtn": {
-    "message": "コードを送信"
+  "authSigningInWith": {
+    "message": "$PROVIDER$ でサインイン中...",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
   },
-  "authSendingBtn": {
-    "message": "送信中..."
+  "authRetryBtn": {
+    "message": "再試行"
   },
   "authAgreeIntro": {
     "message": "私は"
@@ -422,30 +440,6 @@
   },
   "authAgreeOutro": {
     "message": "に同意します。"
-  },
-  "authCodeTitle": {
-    "message": "コードを入力"
-  },
-  "authCodeTagline": {
-    "message": "$EMAIL$ にコードを送信しました。10 分で期限切れになります。",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authCodeLabel": {
-    "message": "確認コード"
-  },
-  "authVerifyingBtn": {
-    "message": "確認中..."
-  },
-  "authVerifyBtn": {
-    "message": "サインイン"
-  },
-  "authUseDifferentEmail": {
-    "message": "別のメールを使用"
   },
   "authDoneTitle": {
     "message": "サインインしました"
@@ -463,7 +457,7 @@
     "message": "Emojery が送信する情報"
   },
   "dataConsentBody": {
-    "message": "Emojery はリアクションしたページのアドレス、ランダムなインストール識別子、そしてサインイン時に一度だけメールアドレスを送信します。メールアドレスは一方向ハッシュのみが保存されます。任意の付加情報はこのブラウザーでは無効のままです。"
+    "message": "Emojery は、リアクションしたページのアドレス、ランダムなインストール識別子、選択したプロバイダーの使い捨てサインイントークンを送信します。保存されるのはアカウント ID の一方向ハッシュだけです。任意のコンテキストはこのブラウザーではオフのままです。"
   },
   "dataConsentPolicyLink": {
     "message": "プライバシーポリシー。"
@@ -471,59 +465,17 @@
   "dataConsentContinueBtn": {
     "message": "続行"
   },
-  "authSendThrottle": {
-    "message": "最近コードをリクエストしました。$TIME$後に別のコードをリクエストできます。",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authResendCooldown": {
-    "message": "このアドレスにはすでにコードを送信しました。$TIME$後に新しいコードをリクエストできます。",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authEnterPendingCode": {
-    "message": "$EMAIL$ に送信したコードを入力",
-    "placeholders": {
-      "email": {
-        "content": "$1",
-        "example": "alex@example.com"
-      }
-    }
-  },
-  "authResendBtn": {
-    "message": "コードを再送信"
-  },
-  "authResendInBtn": {
-    "message": "$TIME$後にコードを再送信",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "0:47"
-      }
-    }
-  },
-  "authErrRateLimit": {
-    "message": "リクエストが多すぎます。数分待ってからもう一度お試しください。"
-  },
-  "authErrUndeliverable": {
-    "message": "メールを配信できませんでした。もう一度試すかアドレスを確認してください。"
-  },
-  "authErrEmailDomainUndeliverable": {
-    "message": "このメールドメインはメールを受信できません。アドレスの入力ミスを確認するか、別のアドレスをご使用ください。"
-  },
-  "authErrBadEmail": {
-    "message": "有効なメールアドレスではないようです。"
-  },
   "authErrUnknown": {
     "message": "問題が発生しました。もう一度お試しください。"
+  },
+  "authErrCancelled": {
+    "message": "サインインがキャンセルされました。準備ができたらもう一度お試しください。"
+  },
+  "authErrProviderDenied": {
+    "message": "プロバイダーがサインインを完了できませんでした。もう一度試すか、別のアカウントを選んでください。"
+  },
+  "authErrEnrollFailed": {
+    "message": "現在アカウントを登録できません。1 分ほど待ってからもう一度お試しください。"
   },
   "authErrOutdated": {
     "message": "このバージョンの Emojery は古くなっています。サインインするには更新してください。"
@@ -539,15 +491,6 @@
   },
   "errServerBusy": {
     "message": "サーバーで問題が発生しています。1 分ほどしてから再試行してください。"
-  },
-  "authErrTooManyTries": {
-    "message": "誤ったコードが多すぎます。後でもう一度お試しください。"
-  },
-  "authErrCodeInvalid": {
-    "message": "そのコードは正しくないか期限切れです。"
-  },
-  "authErrVerifyFailed": {
-    "message": "確認に失敗しました。もう一度お試しください。"
   },
   "searchResultsCount": {
     "message": "$COUNT$件の結果",
@@ -614,7 +557,7 @@
     "message": "最後のステップ"
   },
   "gateBody": {
-    "message": "メールアドレスでサインインすると、リアクションが反映されます。"
+    "message": "リアクションを反映するには、お持ちのアカウントでサインインしてください。"
   },
   "gateSignInBtn": {
     "message": "サインイン"

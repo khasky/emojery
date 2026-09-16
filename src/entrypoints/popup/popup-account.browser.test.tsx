@@ -3,7 +3,7 @@
 // The Account tab's session states and its one destructive control. Signing in
 // itself is e2e's (auth.spec.ts, against a real backend); what lives only here
 // is what the tab does with the answer - the signed-out gate, the identity line
-// a pre-email session falls back to, and the delete flow: arm, cancel (with the
+// a session with no provider falls back to, and the delete flow: arm, cancel (with the
 // focus hand-back), confirm, and what a refused delete leaves on screen.
 import { h } from "preact";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -22,13 +22,13 @@ let sent: unknown[];
 
 interface Options {
   authed?: boolean;
-  email?: string | null;
+  provider?: string | null;
   deleteReply?: unknown;
 }
 
 // Stateful: the view re-reads auth:status after sign-out and after a
 // delete, so the answer has to change the way the background's would.
-function install({ authed = true, email = "user@example.com", deleteReply = { type: "ok" } }: Options = {}): void {
+function install({ authed = true, provider = "google", deleteReply = { type: "ok" } }: Options = {}): void {
   sent = [];
   let signedIn = authed;
   shim = installChromeShim({
@@ -43,7 +43,7 @@ function install({ authed = true, email = "user@example.com", deleteReply = { ty
         if ((deleteReply as { type?: string }).type === "ok") signedIn = false;
         return deleteReply;
       }
-      if (type === "auth:status") return { type: "auth:status", authed: signedIn, userId: signedIn ? USER_ID : null, email: signedIn ? email : null };
+      if (type === "auth:status") return { type: "auth:status", authed: signedIn, userId: signedIn ? USER_ID : null, provider: signedIn ? provider : null };
       return undefined;
     },
   });
@@ -94,18 +94,18 @@ describe("AccountView - session states", () => {
     expect(sentTypes()).toEqual(["auth:status"]);
   });
 
-  it("shows the signed-in address, and the delete control with it", async () => {
+  it("names the provider the account came from, and the delete control with it", async () => {
     install();
     await mountAndSettle();
 
     const row = container.querySelector(`${ACCOUNT_LIST_SELECTOR} .row`);
     expect(row?.textContent).toContain("Signed in");
-    expect(row?.querySelector(".row-hint")?.textContent).toBe("user@example.com");
+    expect(row?.querySelector(".row-hint")?.textContent).toBe("via Google");
     expect(button("Delete")).toBeDefined();
   });
 
-  it("falls back to a truncated user id for a session minted before the email field", async () => {
-    install({ email: null });
+  it("falls back to a truncated user id for a session carrying no provider", async () => {
+    install({ provider: null });
     await mountAndSettle();
 
     expect(container.querySelector(".row-hint")?.textContent).toBe("id: abcdefgh...");

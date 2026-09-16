@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Auth page for the extension's email-code sign-in flow.
+// Auth page for the extension's provider sign-in flow.
 
-import { render } from "preact";
-import { useCallback, useEffect, useMemo, useRef, useState } from "preact/hooks";
+import { type ComponentChild, render } from "preact";
+import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import { type I18nKey, t } from "../../shared/i18n";
-import type { OtpRequestRefusal, OtpVerifyRefusal, RuntimeResponse } from "../../shared/messages";
+import type { RuntimeResponse, SignInRefusal } from "../../shared/messages";
+import { type OidcProvider, providerLabel } from "../../shared/oidc-providers";
 import { bootstrapPage } from "../../shared/page-bootstrap";
-import { AGREE_CLASS, AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, CODE_INPUT_ID, COUNTDOWN_CLASS, EMAIL_INPUT_ID, NOTICE_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
+import { AGREE_CLASS, AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, COUNTDOWN_CLASS, PROVIDER_BTN_CLASS, PROVIDER_LIST_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
 import { withExtensionUtm } from "../../shared/tracking-links";
 import { sendRuntimeMessage } from "../../shared/webext";
-import { getOtpCooldown, OTP_COOLDOWN_FALLBACK_SECONDS, OTP_RESEND_COOLDOWN_SECONDS, type OtpCooldown, setOtpCooldown } from "./otp-cooldown";
-import { cooldownMessageKey, EMAIL_SHAPE, formatCountdown } from "./otp-format";
 
 // Fresh installs on pre-140 Firefox open this page with `?consent=1` (background/install.ts) to get
 // the data-collection disclosure their browser is too old to show itself.
@@ -19,101 +18,62 @@ const CONSENT_ONLY = typeof location !== "undefined" && new URLSearchParams(loca
 
 bootstrapPage(CONSENT_ONLY ? t("dataConsentTitle") : t("authPageTitle"), true);
 
-type Step = "email" | "code" | "done";
+type Step = "provider" | "busy" | "done";
 
-type OtpRequested = Extract<RuntimeResponse, { type: "auth:otpRequested" }>;
-type OtpVerified = Extract<RuntimeResponse, { type: "auth:otpVerified" }>;
+type SignedIn = Extract<RuntimeResponse, { type: "auth:signedIn" }>;
+type Providers = Extract<RuntimeResponse, { type: "auth:providers" }>;
 
-// The copy each named refusal gets. `rate_limited` is absent because it arms a
-// cooldown instead of a line (see requestCode). `client_outdated` is the one
-// refusal whose fix is on the user's side (update from the store), so it gets its
-// own line instead of the generic fallback.
-const REQUEST_REFUSAL_COPY: Record<Exclude<OtpRequestRefusal, "rate_limited">, I18nKey> = {
-  invalid_email: "authErrBadEmail",
-  email_rejected: "authErrEmailDomainUndeliverable",
-  delivery_failed: "authErrUndeliverable",
+// The copy each named refusal gets. `client_outdated` is the one refusal whose
+// fix is on the user's side (update from the store), so it gets its own line
+// instead of the generic fallback.
+const REFUSAL_COPY: Record<SignInRefusal, I18nKey> = {
+  cancelled: "authErrCancelled",
+  provider_denied: "authErrProviderDenied",
+  enrollment_failed: "authErrEnrollFailed",
   client_outdated: "authErrOutdated",
   unavailable: "authErrUnknown",
 };
 
-const VERIFY_REFUSAL_COPY: Record<OtpVerifyRefusal, I18nKey> = {
-  code_invalid: "authErrCodeInvalid",
-  locked: "authErrTooManyTries",
-  client_outdated: "authErrOutdated",
-  unavailable: "authErrVerifyFailed",
-};
-
 // The exchange itself runs in the service worker (background/message-router), not
-// here: whatever it comes back with belongs where it is used, and a page is not
-// that place. An answer that is not the exchange's own envelope (the background's
-// generic error, a dropped channel) reads as the generic refusal.
-async function askRequestOtp(email: string): Promise<OtpRequested> {
-  const res = await sendRuntimeMessage({ type: "auth:requestOtp", email }).catch(() => undefined);
-  return res?.type === "auth:otpRequested" ? res : { type: "auth:otpRequested", ok: false, refusal: "unavailable" };
+// here: the identity window is opened from there, and whatever it comes back with
+// belongs where it is used. An answer that is not the exchange's own envelope
+// (the background's generic error, a dropped channel) reads as the generic refusal.
+async function askSignIn(provider: OidcProvider): Promise<SignedIn> {
+  const res = await sendRuntimeMessage({ type: "auth:signIn", provider }).catch(() => undefined);
+  return res?.type === "auth:signedIn" ? res : { type: "auth:signedIn", ok: false, refusal: "unavailable" };
 }
 
-async function askVerifyOtp(email: string, code: string): Promise<OtpVerified> {
-  const res = await sendRuntimeMessage({ type: "auth:verifyOtp", email, code }).catch(() => undefined);
-  return res?.type === "auth:otpVerified" ? res : { type: "auth:otpVerified", ok: false, refusal: "unavailable" };
+async function askProviders(): Promise<OidcProvider[] | null> {
+  const res = await sendRuntimeMessage({ type: "auth:providers" }).catch(() => undefined);
+  return res?.type === "auth:providers" ? (res as Providers).providers : null;
 }
 
-type CodeStepProps = {
-  email: string;
-  code: string;
-  error: string | null;
-  busy: boolean;
-  remainingSec: number;
-  cooldown: OtpCooldown | null;
-  onVerify: (e: Event) => void;
-  onResend: () => void;
-  onUseDifferentEmail: () => void;
-  setCode: (value: string) => void;
+// Monochrome marks, one per known provider, drawn in `currentColor` so they follow
+// the theme; a provider without one gets the generic key. Decorative: the button's
+// text is its name.
+const PROVIDER_MARKS: Record<string, ComponentChild> = {
+  google: <path d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.8-5.5 3.8-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.9 1.5l2.6-2.5C16.8 3.1 14.6 2 12 2 6.5 2 2 6.5 2 12s4.5 10 10 10c5.8 0 9.6-4.1 9.6-9.8 0-.7-.1-1.2-.2-1.7H12z" />,
+  apple: (
+    <path d="M16.4 12.7c0-2.4 2-3.6 2.1-3.7-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.8-1.6 0-3.1 1-4 2.4-1.7 3-.4 7.3 1.2 9.7.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.2-.8 1.5 0 1.9.8 3.2.8 1.3 0 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.3-2.8 0 0-2.6-1-2.6-3.8zM14 5.4c.7-.8 1.1-2 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4z" />
+  ),
+  microsoft: <path d="M3 3h8.5v8.5H3zm9.5 0H21v8.5h-8.5zM3 12.5h8.5V21H3zm9.5 0H21V21h-8.5z" />,
+  facebook: <path d="M13.5 22v-8h2.7l.4-3.2h-3.1V8.8c0-.9.3-1.6 1.6-1.6h1.7V4.4c-.3 0-1.3-.1-2.5-.1-2.5 0-4.1 1.5-4.1 4.2v2.3H7.4V14h2.8v8h3.3z" />,
+  linkedin: <path d="M6.9 21H3.3V8.9h3.6V21zM5.1 7.3a2.1 2.1 0 1 1 0-4.2 2.1 2.1 0 0 1 0 4.2zM21 21h-3.6v-5.9c0-1.4 0-3.2-2-3.2s-2.3 1.5-2.3 3.1V21H9.5V8.9H13v1.7h.1c.5-.9 1.7-1.9 3.4-1.9 3.7 0 4.4 2.4 4.4 5.6V21z" />,
+  discord: (
+    <path d="M19.5 5.6A17 17 0 0 0 15.4 4.3l-.5 1a15.7 15.7 0 0 0-5.8 0l-.5-1a17 17 0 0 0-4.1 1.3C1.9 9.5 1.2 13.3 1.5 17a17 17 0 0 0 5.1 2.6l1.1-1.7a11 11 0 0 1-1.7-.8l.4-.3a12.2 12.2 0 0 0 11.2 0l.4.3-1.7.8 1.1 1.7a17 17 0 0 0 5.1-2.6c.4-4.3-.7-8.1-3-11.4zM8.7 14.7c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2zm6.6 0c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2z" />
+  ),
+  twitch: <path d="M4.3 2 2.5 6.4v14.9h5.1V24h2.8l2.6-2.7h4.1l5.4-5.4V2H4.3zm16.4 12.9-3.1 3.1h-5l-2.6 2.6v-2.6H5.9V3.8h14.8v11.1zM16.4 7.2h-1.8v5.4h1.8V7.2zm-4.9 0h-1.8v5.4h1.8V7.2z" />,
+  slack: (
+    <path d="M9.4 2.5a2 2 0 0 0 0 4.1h2V4.5a2 2 0 0 0-2-2zm0 5.4H4.1a2 2 0 1 0 0 4.1h5.3a2 2 0 1 0 0-4.1zm12.1 2a2 2 0 1 0-4.1 0v2h2a2 2 0 0 0 2.1-2zm-5.4 0V4.5a2 2 0 1 0-4.1 0v5.4a2 2 0 1 0 4.1 0zm-2 12.1a2 2 0 1 0 0-4.1h-2v2a2 2 0 0 0 2 2.1zm0-5.4h5.3a2 2 0 1 0 0-4.1h-5.3a2 2 0 1 0 0 4.1zm-12.1-2a2 2 0 1 0 4.1 0v-2h-2a2 2 0 0 0-2.1 2zm5.4 0v5.3a2 2 0 1 0 4.1 0v-5.3a2 2 0 1 0-4.1 0z" />
+  ),
 };
+const GENERIC_MARK: ComponentChild = <path d="M14.5 2A7.5 7.5 0 0 0 7.3 11.7L2 17v5h5v-3h3v-3h3l1.4-1.4A7.5 7.5 0 1 0 14.5 2zm2 5a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" />;
 
-function CodeStep({ email, code, error, busy, remainingSec, cooldown, onVerify, onResend, onUseDifferentEmail, setCode }: CodeStepProps) {
+function ProviderMark({ provider }: { provider: OidcProvider }) {
   return (
-    <main class="wrap">
-      {/* Distinct key per step so Preact mounts a FRESH <form>/<input> subtree. Without it the
-          email <input> inherited this code input's maxLength/pattern/inputMode and rejected
-          typing/paste after "use a different email" until a full page reload. */}
-      <form key="code-step" class={CARD_CLASS} onSubmit={onVerify}>
-        <h1>{t("authCodeTitle")}</h1>
-        <p class={TAGLINE_CLASS}>{t("authCodeTagline", email)}</p>
-        <label for="code-input">{t("authCodeLabel")}</label>
-        <input
-          id={CODE_INPUT_ID}
-          name="code"
-          type="text"
-          inputMode="numeric"
-          autoComplete="one-time-code"
-          maxLength={6}
-          pattern="[0-9]*"
-          class="code-input"
-          value={code}
-          aria-describedby={error ? AUTH_ERROR_ID : undefined}
-          aria-invalid={error ? "true" : undefined}
-          onInput={(e: Event) => setCode((e.target as HTMLInputElement).value.replace(/\D/g, ""))}
-        />
-        {error ? (
-          <div class={AUTH_ERROR_CLASS} id={AUTH_ERROR_ID} role="alert">
-            {error}
-          </div>
-        ) : null}
-        <button class="primary" type="submit" disabled={busy || code.length !== 6}>
-          {busy ? t("authVerifyingBtn") : t("authVerifyBtn")}
-        </button>
-        <div class="code-actions">
-          {/* Resend lives on the code screen so getting a new code never requires leaving it. */}
-          <button class="linkish" type="button" disabled={busy || remainingSec > 0} onClick={onResend}>
-            {/* A rate-limit hit stays disabled without a countdown. */}
-            {remainingSec > 0 && cooldown?.reason !== "rateLimit" ? t("authResendInBtn", formatCountdown(remainingSec)) : t("authResendBtn")}
-          </button>
-          <button class="linkish" type="button" onClick={onUseDifferentEmail}>
-            {t("authUseDifferentEmail")}
-          </button>
-        </div>
-      </form>
-    </main>
+    <svg class="provider-mark" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true" focusable="false">
+      {PROVIDER_MARKS[provider] ?? GENERIC_MARK}
+    </svg>
   );
 }
 
@@ -154,8 +114,8 @@ function DoneStep({ returnsToPage }: { returnsToPage: boolean }) {
     return () => clearTimeout(id);
   }, [returning, remaining, goBack]);
 
-  // The primary action, focused as the step mounts: the Verify button it replaces
-  // has just been removed, which would otherwise drop focus to the body.
+  // The primary action, focused as the step mounts: the provider buttons it
+  // replaces have just been removed, which would otherwise drop focus to the body.
   useEffect(() => {
     backRef.current?.focus();
   }, []);
@@ -197,60 +157,45 @@ function DoneStep({ returnsToPage }: { returnsToPage: boolean }) {
   );
 }
 
-type EmailStepProps = {
-  email: string;
+/** The identity window is open: nothing to do here but say so, and wait. */
+function BusyStep({ provider }: { provider: OidcProvider }) {
+  return (
+    <main class="wrap">
+      <div class={CARD_CLASS}>
+        <h1>{t("authSignInTitle")}</h1>
+        <p class={TAGLINE_CLASS} role="status">
+          {t("authSigningInWith", providerLabel(provider))}
+        </p>
+      </div>
+    </main>
+  );
+}
+
+type ProviderStepProps = {
+  providers: OidcProvider[] | null | undefined;
   error: string | null;
-  busy: boolean;
   accepted: boolean;
-  remainingSec: number;
-  cooldown: OtpCooldown | null;
-  onSendCode: (e: Event) => void;
-  onEnterPendingCode: (pendingEmail: string) => void;
-  setEmail: (value: string) => void;
+  onPick: (provider: OidcProvider) => void;
+  onRetryProviders: () => void;
   setAccepted: (value: boolean) => void;
 };
 
-function EmailStep({ email, error, busy, accepted, remainingSec, cooldown, onSendCode, onEnterPendingCode, setEmail, setAccepted }: EmailStepProps) {
-  // One-shot screen-reader text, frozen at cooldown start (the dependency array omits
-  // `email`/time): the visible countdown re-renders every second, and a live region
-  // tracking it would announce each tick.
-  const cooldownAnnouncement = useMemo(() => (cooldown ? t(cooldownMessageKey(cooldown, email), formatCountdown(Math.max(0, Math.ceil((cooldown.until - Date.now()) / 1000)))) : ""), [cooldown]);
+// `providers` is undefined while the list loads, null when it could not be read
+// (the API unreachable, the worker gone) - that state shows the generic error
+// with a retry, since nothing else on the page can be done without the list.
+function ProviderStep({ providers, error, accepted, onPick, onRetryProviders, setAccepted }: ProviderStepProps) {
+  const firstButton = useRef<HTMLButtonElement>(null);
+  // Focus lands on the first choice once there is one; before that the page
+  // has no field to land in.
+  useEffect(() => {
+    firstButton.current?.focus();
+  }, [providers]);
+
   return (
     <main class="wrap">
-      {/* See the code-step key note - keeps this <input> a separate node from the code field. */}
-      <form key="email-step" class={CARD_CLASS} onSubmit={onSendCode}>
+      <div class={CARD_CLASS}>
         <h1>{t("authSignInTitle")}</h1>
         <p class={TAGLINE_CLASS}>{t("authSignInTagline")}</p>
-        <label for="email-input">{t("authEmailLabel")}</label>
-        <input id={EMAIL_INPUT_ID} type="email" autoComplete="email" required value={email} aria-describedby={error ? AUTH_ERROR_ID : undefined} aria-invalid={error ? "true" : undefined} onInput={(e: Event) => setEmail((e.target as HTMLInputElement).value)} />
-        {remainingSec > 0 ? (
-          cooldown?.reason === "rateLimit" ? (
-            // 429 gets a generic message with no countdown; only the benign resend window shows a timer.
-            <div class="error" role="alert">
-              {t("authErrRateLimit")}
-            </div>
-          ) : (
-            <div class={NOTICE_CLASS}>
-              {/* The ticking line is aria-hidden; the sr-only copy (frozen at cooldown
-                  start) carries the announcement so it fires once, not every second. */}
-              <span aria-hidden="true">{t(cooldownMessageKey(cooldown, email), formatCountdown(remainingSec))}</span>
-              <span class="sr-only" role="status">
-                {cooldownAnnouncement}
-              </span>
-            </div>
-          )
-        ) : error ? (
-          <div class={AUTH_ERROR_CLASS} id={AUTH_ERROR_ID} role="alert">
-            {error}
-          </div>
-        ) : null}
-        {/* Escape hatch: while a code is outstanding, keep a one-click path back to enter it,
-            so "Use a different email" + the timer can never trap the user away from their code. */}
-        {cooldown?.reason === "resend" ? (
-          <button class="linkish" type="button" onClick={() => onEnterPendingCode(cooldown.email)}>
-            {t("authEnterPendingCode", cooldown.email)}
-          </button>
-        ) : null}
         <label class={AGREE_CLASS}>
           <input type="checkbox" checked={accepted} onChange={(e: Event) => setAccepted((e.target as HTMLInputElement).checked)} />
           <span>
@@ -279,146 +224,72 @@ function EmailStep({ email, error, busy, accepted, remainingSec, cooldown, onSen
             {t("authAgreeOutro")}
           </span>
         </label>
-        <button class="primary" type="submit" disabled={busy || !accepted || remainingSec > 0 || !EMAIL_SHAPE.test(email.trim())}>
-          {busy ? t("authSendingBtn") : t("authSendCodeBtn")}
-        </button>
-      </form>
+        {error ? (
+          <div class={AUTH_ERROR_CLASS} id={AUTH_ERROR_ID} role="alert">
+            {error}
+          </div>
+        ) : null}
+        {providers === null ? (
+          <button class="linkish" type="button" onClick={onRetryProviders}>
+            {t("authRetryBtn")}
+          </button>
+        ) : (
+          <div class={PROVIDER_LIST_CLASS} aria-describedby={error ? AUTH_ERROR_ID : undefined}>
+            {(providers ?? []).map((provider, index) => (
+              <button key={provider} class={PROVIDER_BTN_CLASS} type="button" data-provider={provider} disabled={!accepted} {...(index === 0 ? { ref: firstButton } : {})} onClick={() => onPick(provider)}>
+                <ProviderMark provider={provider} />
+                <span>{t("authProviderBtn", providerLabel(provider))}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </main>
   );
 }
 
 function App() {
-  const [step, setStep] = useState<Step>("email");
-  const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [step, setStep] = useState<Step>("provider");
+  const [providers, setProviders] = useState<OidcProvider[] | null | undefined>(undefined);
+  const [picked, setPicked] = useState<OidcProvider | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [accepted, setAccepted] = useState(false);
-  const [cooldown, setCooldown] = useState<OtpCooldown | null>(null);
   const [returnsToPage, setReturnsToPage] = useState(false);
-  const [nowTs, setNowTs] = useState(() => Date.now());
-  const requestInFlight = useRef(false);
+  const signInInFlight = useRef(false);
 
-  const remainingSec = cooldown !== null ? Math.max(0, Math.ceil((cooldown.until - nowTs) / 1000)) : 0;
-
-  // Restore a persisted cooldown on load (survives reload mid-window).
-  useEffect(() => {
-    setCooldown(getOtpCooldown());
+  const loadProviders = useCallback(() => {
+    setProviders(undefined);
+    void askProviders().then((list) => setProviders(list === null || list.length === 0 ? null : list));
   }, []);
+
+  useEffect(loadProviders, [loadProviders]);
 
   // The tab title follows the step: a tab strip full of pages still says which one
-  // is waiting for the code and which one is done.
+  // is done.
   useEffect(() => {
-    document.title = t(step === "code" ? "authCodePageTitle" : step === "done" ? "authDonePageTitle" : "authPageTitle");
+    document.title = t(step === "done" ? "authDonePageTitle" : "authPageTitle");
   }, [step]);
 
-  useEffect(() => {
-    if (cooldown === null) return;
-    setNowTs(Date.now());
-    const id = setInterval(() => {
-      const now = Date.now();
-      setNowTs(now);
-      if (now >= cooldown.until) {
-        setCooldown(null);
-        clearInterval(id);
-      }
-    }, 1000);
-    return () => clearInterval(id);
-  }, [cooldown]);
-
-  // Shared by "Send code" and "Resend code"; returns true on success so the caller can navigate.
-  const requestCode = useCallback(async (trimmed: string): Promise<boolean> => {
-    // Re-arm an active cooldown from cache instead of sending again.
-    const cached = getOtpCooldown();
-    if (cached) {
-      setCooldown(cached);
-      return false;
-    }
-    if (requestInFlight.current) return false;
-    requestInFlight.current = true;
-    setBusy(true);
-    const res = await askRequestOtp(trimmed);
-    requestInFlight.current = false;
-    setBusy(false);
+  const pick = useCallback(async (provider: OidcProvider) => {
+    if (signInInFlight.current) return;
+    signInInFlight.current = true;
+    setError(null);
+    setPicked(provider);
+    setStep("busy");
+    const res = await askSignIn(provider);
+    signInInFlight.current = false;
     if (res.ok) {
-      setCooldown(setOtpCooldown(trimmed, OTP_RESEND_COOLDOWN_SECONDS, "resend"));
-      return true;
+      setReturnsToPage(res.returnsToPage === true);
+      setStep("done");
+      return;
     }
-    if (res.refusal === "rate_limited") {
-      const retryAfter = res.retryAfterSeconds || OTP_COOLDOWN_FALLBACK_SECONDS;
-      setCooldown(setOtpCooldown(trimmed, retryAfter, "rateLimit"));
-    } else {
-      setError(t(REQUEST_REFUSAL_COPY[res.refusal]));
-    }
-    return false;
+    setError(t(REFUSAL_COPY[res.refusal]));
+    setStep("provider");
   }, []);
 
-  const onSendCode = useCallback(
-    async (e: Event) => {
-      e.preventDefault();
-      setError(null);
-      const trimmed = email.trim();
-      // Only pre-empt obviously malformed input; the server decides the rest.
-      if (!EMAIL_SHAPE.test(trimmed)) {
-        setError(t("authErrBadEmail"));
-        return;
-      }
-      if (await requestCode(trimmed)) setStep("code");
-    },
-    [email, requestCode],
-  );
-
-  const onResend = useCallback(async () => {
-    setError(null);
-    await requestCode(email.trim());
-  }, [email, requestCode]);
-
-  const onVerify = useCallback(
-    async (e: Event) => {
-      e.preventDefault();
-      setBusy(true);
-      setError(null);
-      const res = await askVerifyOtp(email.trim(), code.trim());
-      setBusy(false);
-      if (res.ok) {
-        setReturnsToPage(res.returnsToPage === true);
-        setStep("done");
-        return;
-      }
-      setError(t(VERIFY_REFUSAL_COPY[res.refusal]));
-    },
-    [email, code],
-  );
-
-  // The two step transitions the form itself offers, so each step gets one callback
-  // rather than the raw setters behind it.
-  const useDifferentEmail = (): void => {
-    setStep("email");
-    setCode("");
-    setError(null);
-  };
-
-  const enterPendingCode = (pendingEmail: string): void => {
-    setEmail(pendingEmail);
-    setCode("");
-    setError(null);
-    setStep("code");
-  };
-
-  useEffect(() => {
-    // The done step has no field to land in - it focuses its own button instead.
-    if (step === "done") return;
-    const el = document.querySelector<HTMLInputElement>(step === "email" ? 'input[type="email"]' : 'input[name="code"]');
-    el?.focus();
-  }, [step]);
-
   if (step === "done") return <DoneStep returnsToPage={returnsToPage} />;
-
-  if (step === "code") {
-    return <CodeStep email={email} code={code} error={error} busy={busy} remainingSec={remainingSec} cooldown={cooldown} onVerify={onVerify} onResend={onResend} onUseDifferentEmail={useDifferentEmail} setCode={setCode} />;
-  }
-
-  return <EmailStep email={email} error={error} busy={busy} accepted={accepted} remainingSec={remainingSec} cooldown={cooldown} onSendCode={onSendCode} onEnterPendingCode={enterPendingCode} setEmail={setEmail} setAccepted={setAccepted} />;
+  if (step === "busy" && picked) return <BusyStep provider={picked} />;
+  return <ProviderStep providers={providers} error={error} accepted={accepted} onPick={(provider) => void pick(provider)} onRetryProviders={loadProviders} setAccepted={setAccepted} />;
 }
 
 // Shown ahead of the sign-in form on browsers that never prompted for data collection themselves.
