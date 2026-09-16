@@ -541,10 +541,10 @@ describe("flushVotes - signing", () => {
 
     await flushVotes();
 
-    expect(ensureEpochKey).toHaveBeenCalledWith({ userId: "u1", token: "jwt" }, 42);
+    expect(ensureEpochKey).toHaveBeenCalledWith(expect.objectContaining({ userId: "u1", token: "jwt" }), 42);
     // The signed bytes are the wire contract (vote-signing.ts): site, target, the
     // reaction and the SAME nonce the body carries.
-    expect(signVote).toHaveBeenCalledWith({ userId: "u1", token: "jwt" }, 42, voteSignatureMessage({ site: target.site, targetId: target.targetId, reaction: "❤️", nonce: "queued-nonce" }));
+    expect(signVote).toHaveBeenCalledWith(expect.objectContaining({ userId: "u1", token: "jwt" }), 42, voteSignatureMessage({ site: target.site, targetId: target.targetId, reaction: "❤️", nonce: "queued-nonce" }));
     const [, init] = lastFetchCall(fetchMock);
     expect(JSON.parse(init.body as string)).toMatchObject({ nonce: "queued-nonce", epoch: 42, pubkey: bytesToBase64Url(PUBLIC_KEY), sig: bytesToBase64Url(SIGNATURE) });
   });
@@ -561,7 +561,7 @@ describe("flushVotes - signing", () => {
   });
 
   it("backs the vote off without sending when no key can be minted", async () => {
-    vi.mocked(ensureEpochKey).mockRejectedValueOnce(new Error("epoch key refused: epoch_key_limit"));
+    vi.mocked(ensureEpochKey).mockRejectedValueOnce(new Error("epoch key refused: refused"));
     vi.mocked(peekNextEligible)
       .mockResolvedValueOnce(queued({ id: 21 }))
       .mockResolvedValueOnce(undefined);
@@ -584,7 +584,7 @@ describe("flushVotes - signing", () => {
     await flushVotes();
 
     expect(reRegisterEpochKey).toHaveBeenCalledTimes(1);
-    expect(reRegisterEpochKey).toHaveBeenCalledWith({ userId: "u1", token: "jwt" }, expect.any(Number));
+    expect(reRegisterEpochKey).toHaveBeenCalledWith(expect.objectContaining({ userId: "u1", token: "jwt" }), expect.any(Number));
     // Two sends: the refused one and the one retry. The second refusal is a
     // permanent 4xx like any other: the vote and its optimistic row go.
     expect(fetchMock).toHaveBeenCalledTimes(2);

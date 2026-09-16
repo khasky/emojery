@@ -158,7 +158,7 @@
   margin-top: 16px;
 }
 
-.provider-btn {
+.provider-button {
   appearance: none;
   display: flex;
   align-items: center;
@@ -178,17 +178,17 @@
     opacity 0.15s ease;
 }
 
-.provider-btn:hover:not(:disabled) {
+.provider-button:hover:not(:disabled) {
   border-color: var(--khasky-emojery-field-focus);
 }
 
-.provider-btn:focus-visible {
+.provider-button:focus-visible {
   outline: none;
   border-color: var(--khasky-emojery-field-focus);
   box-shadow: 0 0 0 3px var(--khasky-emojery-field-focus-glow);
 }
 
-.provider-btn:disabled {
+.provider-button:disabled {
   color: var(--khasky-emojery-disabled-text);
   cursor: not-allowed;
   opacity: var(--khasky-emojery-primary-disabled-opacity);

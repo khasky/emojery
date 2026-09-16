@@ -108,10 +108,10 @@ export const TOOLTIP_POP_SELECTOR = `.${TOOLTIP_POP_CLASS}`;
 // `data-provider`, which is how a test picks one without reading its label.
 export const PROVIDER_LIST_CLASS = "providers";
 export const PROVIDER_LIST_SELECTOR = `.${PROVIDER_LIST_CLASS}`;
-export const PROVIDER_BTN_CLASS = "provider-btn";
-export const PROVIDER_BTN_SELECTOR = `button.${PROVIDER_BTN_CLASS}`;
+export const PROVIDER_BUTTON_CLASS = "provider-button";
+export const PROVIDER_BUTTON_SELECTOR = `button.${PROVIDER_BUTTON_CLASS}`;
 export function providerButtonSelector(provider: string): string {
-  return `${PROVIDER_BTN_SELECTOR}[data-provider="${provider}"]`;
+  return `${PROVIDER_BUTTON_SELECTOR}[data-provider="${provider}"]`;
 }
 export const AUTH_ERROR_ID = "auth-error";
 export const AUTH_ERROR_CLASS = "error";

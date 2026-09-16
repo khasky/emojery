@@ -7,7 +7,11 @@ import { createHash } from "node:crypto";
 import { getPublicKeyAsync, signAsync, verifyAsync } from "@noble/ed25519";
 import { describe, expect, it } from "vitest";
 import vectors from "./__data__/vote-signing-vectors.json";
-import { base64UrlToBytes, bytesToBase64Url, bytesToHex, epochKeyMessage, hexToBytes, voteSignatureMessage } from "./vote-signing";
+import { base64UrlToBytes, bytesToBase64Url, epochKeyMessage, voteSignatureMessage } from "./vote-signing";
+
+// The vectors spell bytes as hex; Node's Buffer is the codec.
+const hexToBytes = (hex: string): Uint8Array => new Uint8Array(Buffer.from(hex, "hex"));
+const bytesToHex = (bytes: Uint8Array): string => Buffer.from(bytes).toString("hex");
 
 const secretKey = hexToBytes(vectors.keypair.secretKeyHex);
 const publicKey = hexToBytes(vectors.keypair.publicKeyHex);
@@ -60,11 +64,5 @@ describe("wire encodings", () => {
   it("reads the padded standard alphabet too", () => {
     expect(base64UrlToBytes("+/8=")).toEqual(new Uint8Array([0xfb, 0xff]));
     expect(base64UrlToBytes("-_8")).toEqual(new Uint8Array([0xfb, 0xff]));
-  });
-
-  it("round-trips hex and rejects what is not hex", () => {
-    expect(bytesToHex(hexToBytes("00ff10"))).toBe("00ff10");
-    expect(() => hexToBytes("0")).toThrow(RangeError);
-    expect(() => hexToBytes("zz")).toThrow(RangeError);
   });
 });

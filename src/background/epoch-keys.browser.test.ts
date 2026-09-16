@@ -161,8 +161,8 @@ describe("ensureEpochKey", () => {
   });
 
   it.each([
-    ["issue", 403, "no_enrollment"],
-    ["issue", 429, "epoch_key_limit"],
+    ["issue", 403, "refused"],
+    ["issue", 429, "try_later"],
     ["register", 400, "bad_signature"],
   ] as const)("surfaces a %s refusal (%i %s) by name, leaving nothing registered", async (endpoint, status, error) => {
     stubApi({ [endpoint]: { status, error } });

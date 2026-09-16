@@ -9,9 +9,9 @@
 //
 // Minting is one chain per (account, epoch), resumed from wherever a previous run
 // stopped: generate -> blind (persisted before the issue call, so a worker killed
-// mid-flight does not spend a second of the account's ISSUE allowance) -> issue
-// -> finalize -> register. One in-flight promise per key, so a drain that asks
-// twice waits on the same chain.
+// mid-flight re-sends the same blinded message rather than asking for a second
+// signature) -> issue -> finalize -> register. One in-flight promise per key, so
+// a drain that asks twice waits on the same chain.
 
 import { RSABSSA } from "@cloudflare/blindrsa-ts";
 import { getPublicKeyAsync, signAsync, utils } from "@noble/ed25519";
@@ -51,9 +51,8 @@ interface EpochKeyRow {
   registeredAt?: number;
 }
 
-// A refusal the mint chain cannot retry into success within this epoch: the
-// account has no enrollment, or spent its issue allowance. The vote it was
-// minting for backs off like any other failure, and the alarm retries later.
+// A refusal the mint chain cannot retry into success within this epoch. The vote
+// it was minting for backs off like any other failure, and the alarm retries later.
 export class EpochKeyRefusal extends Error {
   constructor(readonly refusal: string) {
     super(`epoch key refused: ${refusal}`);
@@ -118,11 +117,7 @@ export async function clearEpochKeysForUser(userId: string): Promise<void> {
 
 const blindSuite = RSABSSA.SHA384.PSS.Deterministic();
 
-async function importBlindPublicKey(spki: string): Promise<CryptoKey> {
-  return crypto.subtle.importKey("spki", base64UrlToBytes(spki), { name: "RSA-PSS", hash: "SHA-384" }, true, ["verify"]);
-}
-
-function refusalOf(reply: ApiReply): never {
+function throwRefusal(reply: ApiReply): never {
   const error = apiErrorString(reply.body);
   // 4xx: the API has decided, and the same request cannot be retried into a
   // signature. Anything else (5xx, a body the client cannot read) is transient.
@@ -132,9 +127,10 @@ function refusalOf(reply: ApiReply): never {
 
 async function fetchBlindParams(): Promise<{ kid: string; publicKey: CryptoKey }> {
   const reply = await apiRequest("/auth/epoch-key/params", { method: "GET", cache: "no-store" });
-  if (!reply.ok) refusalOf(reply);
+  if (!reply.ok) throwRefusal(reply);
   if (!isRecord(reply.body) || typeof reply.body.kid !== "string" || typeof reply.body.spki !== "string") throw new Error("malformed epoch-key params body");
-  return { kid: reply.body.kid, publicKey: await importBlindPublicKey(reply.body.spki) };
+  const publicKey = await crypto.subtle.importKey("spki", base64UrlToBytes(reply.body.spki), { name: "RSA-PSS", hash: "SHA-384" }, true, ["verify"]);
+  return { kid: reply.body.kid, publicKey };
 }
 
 async function mint(session: EpochKeySession, epoch: number): Promise<EpochKeyRow> {
@@ -143,9 +139,8 @@ async function mint(session: EpochKeySession, epoch: number): Promise<EpochKeyRo
   if (row?.registeredAt) return row;
   // Signed but never registered: the register call is the only step left.
   if (row?.keySig) {
-    const signed = { ...row, keySig: row.keySig };
-    await register(session, signed);
-    return signed;
+    await register(session, row, row.keySig);
+    return row;
   }
 
   if (!row) {
@@ -164,23 +159,22 @@ async function mint(session: EpochKeySession, epoch: number): Promise<EpochKeyRo
   }
 
   const issued = await apiRequest("/auth/epoch-key/issue", { method: "POST", token: session.token, body: { epoch, blinded: bytesToBase64Url(blinded.blindedMsg) } });
-  if (!issued.ok) refusalOf(issued);
+  if (!issued.ok) throwRefusal(issued);
   if (!isRecord(issued.body) || typeof issued.body.blindSig !== "string") throw new Error("malformed epoch-key issue body");
 
   // finalize verifies the unblinded signature against the key it was blinded
   // for, so a mismatched or rotated API key fails here rather than at register.
   const keySig = await blindSuite.finalize(params.publicKey, message, base64UrlToBytes(issued.body.blindSig), blinded.inv);
-  const signed = { ...row, keySig };
-  await writeRow(signed);
+  await writeRow({ ...row, keySig });
 
-  await register(session, signed);
-  return signed;
+  await register(session, row, keySig);
+  return row;
 }
 
-async function register(session: EpochKeySession, row: EpochKeyRow & { keySig: Uint8Array }): Promise<void> {
-  const reply = await apiRequest("/auth/epoch-key/register", { method: "POST", token: session.token, body: { epoch: row.epoch, pubkey: bytesToBase64Url(row.publicKey), keySig: bytesToBase64Url(row.keySig) } });
-  if (!reply.ok) refusalOf(reply);
-  await writeRow({ ...row, registeredAt: Date.now() });
+async function register(session: EpochKeySession, row: EpochKeyRow, keySig: Uint8Array): Promise<void> {
+  const reply = await apiRequest("/auth/epoch-key/register", { method: "POST", token: session.token, body: { epoch: row.epoch, pubkey: bytesToBase64Url(row.publicKey), keySig: bytesToBase64Url(keySig) } });
+  if (!reply.ok) throwRefusal(reply);
+  await writeRow({ ...row, keySig, registeredAt: Date.now() });
 }
 
 const inFlight = new Map<string, Promise<EpochKeyRow>>();
@@ -201,7 +195,7 @@ export async function ensureEpochKey(session: EpochKeySession, epoch: number): P
 
 /** The API answered `unknown_key`: send the registration again from the
  *  stored signature. A key it still refuses is forgotten, so the next
- *  ensureEpochKey mints a fresh one (within the account's issue allowance). */
+ *  ensureEpochKey mints a fresh one. */
 export async function reRegisterEpochKey(session: EpochKeySession, epoch: number): Promise<void> {
   const id = rowId(session.userId, epoch);
   await withSingleFlight(id, async () => {
@@ -211,7 +205,7 @@ export async function reRegisterEpochKey(session: EpochKeySession, epoch: number
       throw new Error("epoch key has no signature to re-register");
     }
     try {
-      await register(session, { ...row, keySig: row.keySig });
+      await register(session, row, row.keySig);
     } catch (error) {
       if (error instanceof EpochKeyRefusal) {
         await deleteRow(id);

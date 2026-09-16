@@ -9,7 +9,7 @@
 // by the message guard before it reaches the background.
 export type OidcProvider = string;
 export const PROVIDER_ID_MAX = 32;
-export const PROVIDER_ID_SHAPE = /^[a-z][a-z0-9-]*$/;
+const PROVIDER_ID_SHAPE = /^[a-z][a-z0-9-]*$/;
 
 const PROVIDER_LABELS: Readonly<Record<string, string>> = {
   google: "Google",

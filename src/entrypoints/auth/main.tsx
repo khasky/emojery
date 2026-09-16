@@ -8,7 +8,7 @@ import { type I18nKey, t } from "../../shared/i18n";
 import type { RuntimeResponse, SignInRefusal } from "../../shared/messages";
 import { type OidcProvider, providerLabel } from "../../shared/oidc-providers";
 import { bootstrapPage } from "../../shared/page-bootstrap";
-import { AGREE_CLASS, AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, COUNTDOWN_CLASS, PROVIDER_BTN_CLASS, PROVIDER_LIST_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
+import { AGREE_CLASS, AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, COUNTDOWN_CLASS, PROVIDER_BUTTON_CLASS, PROVIDER_LIST_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
 import { withExtensionUtm } from "../../shared/tracking-links";
 import { sendRuntimeMessage } from "../../shared/webext";
 
@@ -21,7 +21,6 @@ bootstrapPage(CONSENT_ONLY ? t("dataConsentTitle") : t("authPageTitle"), true);
 type Step = "provider" | "busy" | "done";
 
 type SignedIn = Extract<RuntimeResponse, { type: "auth:signedIn" }>;
-type Providers = Extract<RuntimeResponse, { type: "auth:providers" }>;
 
 // The copy each named refusal gets. `client_outdated` is the one refusal whose
 // fix is on the user's side (update from the store), so it gets its own line
@@ -45,7 +44,7 @@ async function askSignIn(provider: OidcProvider): Promise<SignedIn> {
 
 async function askProviders(): Promise<OidcProvider[] | null> {
   const res = await sendRuntimeMessage({ type: "auth:providers" }).catch(() => undefined);
-  return res?.type === "auth:providers" ? (res as Providers).providers : null;
+  return res?.type === "auth:providers" ? res.providers : null;
 }
 
 // Monochrome marks, one per known provider, drawn in `currentColor` so they follow
@@ -236,7 +235,7 @@ function ProviderStep({ providers, error, accepted, onPick, onRetryProviders, se
         ) : (
           <div class={PROVIDER_LIST_CLASS} aria-describedby={error ? AUTH_ERROR_ID : undefined}>
             {(providers ?? []).map((provider, index) => (
-              <button key={provider} class={PROVIDER_BTN_CLASS} type="button" data-provider={provider} disabled={!accepted} {...(index === 0 ? { ref: firstButton } : {})} onClick={() => onPick(provider)}>
+              <button key={provider} class={PROVIDER_BUTTON_CLASS} type="button" data-provider={provider} disabled={!accepted} {...(index === 0 ? { ref: firstButton } : {})} onClick={() => onPick(provider)}>
                 <ProviderMark provider={provider} />
                 <span>{t("authProviderBtn", providerLabel(provider))}</span>
               </button>
@@ -255,7 +254,6 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [accepted, setAccepted] = useState(false);
   const [returnsToPage, setReturnsToPage] = useState(false);
-  const signInInFlight = useRef(false);
 
   const loadProviders = useCallback(() => {
     setProviders(undefined);
@@ -270,14 +268,12 @@ function App() {
     document.title = t(step === "done" ? "authDonePageTitle" : "authPageTitle");
   }, [step]);
 
+  // The busy step replaces the list, so a second pick cannot land while one runs.
   const pick = useCallback(async (provider: OidcProvider) => {
-    if (signInInFlight.current) return;
-    signInInFlight.current = true;
     setError(null);
     setPicked(provider);
     setStep("busy");
     const res = await askSignIn(provider);
-    signInInFlight.current = false;
     if (res.ok) {
       setReturnsToPage(res.returnsToPage === true);
       setStep("done");

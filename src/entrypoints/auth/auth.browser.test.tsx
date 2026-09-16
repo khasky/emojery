@@ -7,7 +7,7 @@
 import { render } from "preact";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { userEvent } from "vitest/browser";
-import { AGREE_CHECKBOX_SELECTOR, AUTH_ERROR_ID, AUTH_ERROR_SELECTOR, COUNTDOWN_SELECTOR, PROVIDER_BTN_SELECTOR, PROVIDER_LIST_SELECTOR, providerButtonSelector, TAGLINE_SELECTOR } from "../../shared/page-dom";
+import { AGREE_CHECKBOX_SELECTOR, AUTH_ERROR_ID, AUTH_ERROR_SELECTOR, COUNTDOWN_SELECTOR, PROVIDER_BUTTON_SELECTOR, PROVIDER_LIST_SELECTOR, providerButtonSelector, TAGLINE_SELECTOR } from "../../shared/page-dom";
 import { requireEl } from "../../test/browser-harness";
 import { type ChromeShimHandle, installChromeShim } from "../../test/chrome-shim";
 
@@ -52,7 +52,7 @@ async function loadPage(): Promise<void> {
 
 const heading = (): string => requireEl(document, "#app h1").textContent ?? "";
 const termsBox = () => requireEl<HTMLInputElement>(document, AGREE_CHECKBOX_SELECTOR);
-const providerButtons = () => [...document.querySelectorAll<HTMLButtonElement>(PROVIDER_BTN_SELECTOR)];
+const providerButtons = () => [...document.querySelectorAll<HTMLButtonElement>(PROVIDER_BUTTON_SELECTOR)];
 const providerButton = (id: string) => requireEl<HTMLButtonElement>(document, providerButtonSelector(id));
 const primaryBtn = () => requireEl<HTMLButtonElement>(document, "button.primary");
 const errorText = (): string => document.querySelector(AUTH_ERROR_SELECTOR)?.textContent ?? "";

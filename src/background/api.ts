@@ -12,7 +12,7 @@ import { clearOwnReactionIfMatches } from "../shared/storage";
 import { clearAlarm, createAlarm, storageLocalGet, storageLocalSet } from "../shared/webext";
 import { type ApiReply, apiErrorString, apiRequest, isRecord, requestLanguage } from "./api-client";
 import { logBackgroundError } from "./debug";
-import { currentEpoch, ensureEpochKey, reRegisterEpochKey, signVote } from "./epoch-keys";
+import { currentEpoch, type EpochKeySession, ensureEpochKey, reRegisterEpochKey, signVote } from "./epoch-keys";
 import { pushHistory, removeHistoryEntry } from "./history";
 import { type AuthState, clearAuth, getAuth } from "./identity";
 import { bytesToBase64Url, voteSignatureMessage } from "./vote-signing";
@@ -305,10 +305,9 @@ async function drainQueuedVotes(): Promise<void> {
     try {
       // Signed at send time, not at click time: the key belongs to the epoch the
       // vote lands in, and a queued vote can outlive the epoch it was cast in.
-      const session = { userId: auth.userId, token: auth.token };
       const epoch = currentEpoch(auth.epochMs);
-      const key = await ensureEpochKey(session, epoch);
-      const sig = await signVote(session, epoch, voteSignatureMessage({ site: vote.target.site, targetId: vote.target.targetId, reaction: vote.reaction, nonce }));
+      const key = await ensureEpochKey(auth, epoch);
+      const sig = await signVote(auth, epoch, voteSignatureMessage({ site: vote.target.site, targetId: vote.target.targetId, reaction: vote.reaction, nonce }));
       const reply = await apiRequest("/reactions/vote", {
         method: "POST",
         token: auth.token,
@@ -330,7 +329,7 @@ async function drainQueuedVotes(): Promise<void> {
         },
         keepalive: true,
       });
-      if (await recoverFromKeyRefusal(reply, vote, session, epoch)) continue;
+      if (await recoverFromKeyRefusal(reply, vote, auth, epoch)) continue;
       await handleVoteResponse(reply, vote, auth);
       keyRefusalRetried.delete(vote.id);
     } catch (error) {
@@ -355,7 +354,7 @@ async function drainQueuedVotes(): Promise<void> {
 // KEY_REFUSALS and this is its first. `unknown_key` re-sends the stored
 // registration (or forgets a key the API refuses, so the next lap mints a fresh
 // one); `key_epoch_mismatch` needs nothing - the next lap derives the epoch anew.
-async function recoverFromKeyRefusal(reply: ApiReply, vote: StoredVote, session: { userId: string; token: string }, epoch: number): Promise<boolean> {
+async function recoverFromKeyRefusal(reply: ApiReply, vote: StoredVote, session: EpochKeySession, epoch: number): Promise<boolean> {
   if (reply.ok || reply.status < 400 || reply.status >= 500) return false;
   const refusal = apiErrorString(reply.body);
   if (!refusal || !KEY_REFUSALS.has(refusal) || keyRefusalRetried.has(vote.id)) return false;
