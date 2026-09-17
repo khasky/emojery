@@ -21,7 +21,7 @@ HOW IT WORKS
 
 Open a supported post, video, repository or product page to see the top 3 emoji and the total reaction count. Click the button for the full breakdown, a searchable emoji palette and your own reaction controls.
 
-No account is needed to read counts. To add a reaction, sign in with an account you already have (Google, Apple, Microsoft, Facebook, LinkedIn, Discord, Twitch or Slack). These reactions are counted separately from the site's native Likes, stars and votes.
+No account is needed to read counts. To add a reaction, sign in with an account you already have (Google, Apple, Microsoft, Facebook, Twitch or Slack). These reactions are counted separately from the site's native Likes, stars and votes.
 
 FEATURES
 
@@ -103,7 +103,7 @@ Used when the user opens the extension from the browser toolbar to inspect the a
 ## identity justification
 
 ```text
-Used only for sign-in: identity.launchWebAuthFlow opens the chosen provider's own login page (Google, Apple, Microsoft, Facebook, LinkedIn, Discord, Twitch or Slack) in a window the browser controls and returns the backend's redirect to the extension, so no extension page ever hosts a provider's form and no password passes through the extension. The optional identity.email permission is not requested; the browser profile's own account is never read.
+Used only for sign-in: identity.launchWebAuthFlow opens the chosen provider's own login page (Google, Apple, Microsoft, Facebook, Twitch or Slack) in a window the browser controls and returns the backend's redirect to the extension, so no extension page ever hosts a provider's form and no password passes through the extension. The optional identity.email permission is not requested; the browser profile's own account is never read.
 ```
 
 ## scripting justification
@@ -157,7 +157,7 @@ WHAT LEAVES YOUR BROWSER
 
 - To show counts, the public target keys of supported items that scroll into view, before you react. That lookup carries no account and no installation identifier, and the service answers it without storing or logging the keys. While you are signed in, a second request asks which of those items you have already reacted to; it carries your session token and is not stored either.
 - The reactions you submit, with the canonical URL and the public identifier of the item you reacted to. The service keeps the identifier, not the URL.
-- At sign-in, a one-time token from the provider you choose (Google, Apple, Microsoft, Facebook, LinkedIn, Discord, Twitch or Slack), sent over TLS. The provider learns that you signed in to Emojery and nothing about what you react to; the service reads the token's subject once and keeps a one-way keyed hash of it as your account identifier. The extension stores only the provider's name to label the account. Every reaction carries a signature from a per-account key kept on your device; the public log shows the key, never the account.
+- At sign-in, a one-time token from the provider you choose (Google, Apple, Microsoft, Facebook, Twitch or Slack), sent over TLS. The provider learns that you signed in to Emojery and nothing about what you react to; the service reads the token's subject once and keeps a one-way keyed hash of it as your account identifier. The extension stores only the provider's name to label the account. Every reaction carries a signature from a per-account key kept on your device; the public log shows the key, never the account.
 - A session token and a random installation identifier that lasts as long as the installation. The identifier travels only on the requests you initiate that change something: signing in, submitting or removing a reaction, filing a report, deleting your account. Reading counts sends neither.
 - A bug report, only when you send one from the Report tab: your note, the page it is about, and, while Community insights is on, the browser's user-agent string and the extension version.
 - With the "Community insights" setting on, which it is unless you turn it off: country and city, language, browser family and OS alongside a reaction.
@@ -176,7 +176,7 @@ Your device keeps the browsable history, including page titles, in the browser's
 
 SUBPROCESSORS
 
-Cloudflare (infrastructure, bot check, country/city), Neon (managed database, EU or US), the sign-in provider you choose (Google, Apple, Microsoft, Facebook, LinkedIn, Discord, Twitch or Slack; it learns that you signed in to Emojery, under its own privacy policy), Axiom (backend logs, 30 days, no raw IP or user-agent), Discord (the maintainer's private alerts: abuse decisions, bug reports, uninstall-survey answers), DeepSeek (a language-model second opinion on anti-abuse findings; receives counts and public target keys only). The public transparency log is published to GitHub, anchored through Sigstore Rekor and the OpenTimestamps calendars, and archived by Software Heritage; the entries it carries are pseudonymous. Changes to this list are dated at https://emojery.app/privacy#subprocessor-changes.
+Cloudflare (infrastructure, bot check, country/city), Neon (managed database, EU or US), the sign-in provider you choose (Google, Apple, Microsoft, Facebook, Twitch or Slack; it learns that you signed in to Emojery, under its own privacy policy), Axiom (backend logs, 30 days, no raw IP or user-agent), Discord (the maintainer's private alerts: abuse decisions, bug reports, uninstall-survey answers), DeepSeek (a language-model second opinion on anti-abuse findings; receives counts and public target keys only). The public transparency log is published to GitHub, anchored through Sigstore Rekor and the OpenTimestamps calendars, and archived by Software Heritage; the entries it carries are pseudonymous. Changes to this list are dated at https://emojery.app/privacy#subprocessor-changes.
 
 YOUR RIGHTS
 
@@ -208,7 +208,7 @@ Emojery adds an emoji reaction control next to the native like/share/star button
 
 The reaction buttons and counts appear on the supported sites (x.com, facebook.com, reddit.com, instagram.com, youtube.com, github.com, gitlab.com, threads.com, amazon.com) without signing in — install and browse any of them. github.com/torvalds/linux is a reliable page to check without signing in.
 
-To test voting (optional): open the extension, choose Sign in, tick the consent box and pick a provider (Google, Apple, Microsoft, Facebook, LinkedIn, Discord, Twitch or Slack). The provider's own login page opens in a browser window; sign in there with any account you have and the extension's page confirms the sign-in. No account details reach the add-on: the provider's answer is exchanged for a session by the backend.
+To test voting (optional): open the extension, choose Sign in, tick the consent box and pick a provider (Google, Apple, Microsoft, Facebook, Twitch or Slack). The provider's own login page opens in a browser window; sign in there with any account you have and the extension's page confirms the sign-in. No account details reach the add-on: the provider's answer is exchanged for a session by the backend.
 
 VALIDATION WARNINGS
 
@@ -226,7 +226,7 @@ Nothing in this add-on reaches that branch, and the attached source archive show
 ```text
 No account is needed for the core features. Install the extension and open any supported page (youtube.com, reddit.com, github.com, gitlab.com, x.com, threads.com, facebook.com, instagram.com, amazon.com): the reaction button appears next to the site's own controls and shows the public counts. github.com/torvalds/linux is a reliable page to check without signing in.
 
-To test reacting: open the extension popup, choose Sign in, tick the consent box and pick a provider (Google, Apple, Microsoft, Facebook, LinkedIn, Discord, Twitch or Slack); sign in on the provider's own page in the window that opens.
+To test reacting: open the extension popup, choose Sign in, tick the consent box and pick a provider (Google, Apple, Microsoft, Facebook, Twitch or Slack); sign in on the provider's own page in the window that opens.
 
 "Auto-press original buttons" is off by default. Turning it on in the popup makes the emoji you pick also press the site's own control on the page you are looking at, under your own account; removing the reaction releases only what the extension pressed.
 ```
@@ -284,7 +284,7 @@ Site access is limited to those sites - no <all_urls>, and no wildcard host matc
 
 No account is needed to see the reaction button and the counts. Install the extension and open any supported page (youtube.com, reddit.com, github.com, gitlab.com, x.com, threads.com, facebook.com, instagram.com, amazon.com). github.com/torvalds/linux is a reliable page to check.
 
-To test reacting: open the popup, choose Sign in, tick the consent box and pick a provider (Google, Apple, Microsoft, Facebook, LinkedIn, Discord, Twitch or Slack); sign in on the provider's own page in the window that opens. The identity permission is what opens that window; the extension never hosts the provider's form.
+To test reacting: open the popup, choose Sign in, tick the consent box and pick a provider (Google, Apple, Microsoft, Facebook, Twitch or Slack); sign in on the provider's own page in the window that opens. The identity permission is what opens that window; the extension never hosts the provider's form.
 
 "Auto-press original buttons" is off by default. With it on, the emoji the user picks also presses the site's own control, on the page they are looking at and under their own account - one pick presses at most one control, and removing the reaction releases only what the extension pressed.
 ```

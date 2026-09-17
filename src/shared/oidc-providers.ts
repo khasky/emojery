@@ -16,8 +16,6 @@ const PROVIDER_LABELS: Readonly<Record<string, string>> = {
   apple: "Apple",
   microsoft: "Microsoft",
   facebook: "Facebook",
-  linkedin: "LinkedIn",
-  discord: "Discord",
   twitch: "Twitch",
   slack: "Slack",
 };
