@@ -480,6 +480,18 @@
   "authErrOutdated": {
     "message": "Esta versão do Emojery está desatualizada. Atualize para entrar."
   },
+  "authErrDeviceLimit": {
+    "message": "O limite de dispositivos deste mês foi atingido. Tente novamente no mês que vem."
+  },
+  "voteDeviceLimit": {
+    "message": "O limite de dispositivos deste mês foi atingido. A votação volta em $DATE$.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 1, 2026"
+      }
+    }
+  },
   "loadError": {
     "message": "Algo deu errado. Tente novamente."
   },

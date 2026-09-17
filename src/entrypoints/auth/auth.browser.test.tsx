@@ -135,6 +135,7 @@ describe("auth page - the provider step", () => {
     ["provider_denied", "The provider did not complete the sign-in. Try again or choose another account."],
     ["enrollment_failed", "Could not register your account right now. Please try again in a minute."],
     ["client_outdated", "This version of Emojery is out of date. Update it to sign in."],
+    ["device_limit", "Device limit for this month is reached. Try again next month."],
     ["unavailable", "Something went wrong. Please try again."],
   ])("maps %s to its own copy and hands the provider list back", async (refusal, copy) => {
     install({ signInReply: { type: "auth:signedIn", ok: false, refusal } });

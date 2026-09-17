@@ -2,9 +2,10 @@
 import { type ComponentChild, Fragment } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { removeTechnicalAndInteractionConsent, requestTechnicalAndInteractionConsent } from "../../shared/data-consent";
+import { type EpochKeyLimitNotice, readEpochKeyLimitNotice } from "../../shared/epoch-key-limit";
 import { t } from "../../shared/i18n";
 import { providerLabel } from "../../shared/oidc-providers";
-import { ACCOUNT_LIST_CLASS, DELETE_CONFIRM_WARN_CLASS } from "../../shared/page-dom";
+import { ACCOUNT_LIST_CLASS, DELETE_CONFIRM_WARN_CLASS, DEVICE_LIMIT_NOTICE_CLASS } from "../../shared/page-dom";
 import type { Settings } from "../../shared/storage";
 import { sendRuntimeMessage } from "../../shared/webext";
 import { HistoryDataSection } from "./popup-history-data";
@@ -90,6 +91,35 @@ const DeleteAccountRow = ({ refresh }: { refresh: () => void }) => {
   );
 };
 
+// The day voting resumes, in the UI locale. An engine that rejects the tag
+// falls back to its default formatting rather than showing no date.
+function resumeDayLabel(resumesAt: number): string {
+  const date = new Date(resumesAt);
+  try {
+    return date.toLocaleDateString(navigator.language || undefined, { year: "numeric", month: "long", day: "numeric" });
+  } catch {
+    return date.toLocaleDateString();
+  }
+}
+
+// Shown while the API refuses this device a key for the current epoch
+// (shared/epoch-key-limit.ts): every vote until then is dropped, so the tab has
+// to say so - nothing else in the popup does.
+const DeviceLimitNotice = () => {
+  const [notice, setNotice] = useState<EpochKeyLimitNotice | null>(null);
+  useEffect(() => {
+    void readEpochKeyLimitNotice()
+      .then(setNotice)
+      .catch(() => setNotice(null));
+  }, []);
+  if (!notice) return null;
+  return (
+    <p class={DEVICE_LIMIT_NOTICE_CLASS} role="status">
+      {t("voteDeviceLimit", resumeDayLabel(notice.resumesAt))}
+    </p>
+  );
+};
+
 const AccountView = ({ settings, update }: { settings: Settings; update: (patch: Partial<Settings>) => Promise<void> }) => {
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -139,6 +169,7 @@ const AccountView = ({ settings, update }: { settings: Settings; update: (patch:
           {t("signOutBtn")}
         </button>
       </IconRow>
+      <DeviceLimitNotice />
       <HistoryDataSection />
       <AnalyticsConsentSection settings={settings} update={update} />
       <DeleteAccountRow refresh={refresh} />

@@ -29,7 +29,23 @@ vi.mock("./epoch-keys", () => ({
   clearEpochKeysForUser: (userId: string) => clearEpochKeysForUser(userId),
 }));
 
+// And the account key (account-keys.browser.test.ts): here only that sign-in asks
+// for it, what of it reaches the API, and which deletion drops it.
+const ACCOUNT_PUBKEY = new Uint8Array(32).fill(5);
+const NONCE = "ab".repeat(32);
+const ensureAccountKey = vi.fn(async (provider: string) => ({ provider, publicKey: ACCOUNT_PUBKEY }));
+const signInNonce = vi.fn(async (_publicKey: Uint8Array, _salt: Uint8Array) => NONCE);
+const clearAccountKey = vi.fn(async (_provider: string) => {});
+const clearAccountKeys = vi.fn(async () => {});
+vi.mock("./account-keys", () => ({
+  ensureAccountKey: (provider: string) => ensureAccountKey(provider),
+  signInNonce: (publicKey: Uint8Array, salt: Uint8Array) => signInNonce(publicKey, salt),
+  clearAccountKey: (provider: string) => clearAccountKey(provider),
+  clearAccountKeys: () => clearAccountKeys(),
+}));
+
 import { deleteAccount, finishPendingDeletion, getAuth, listSignInProviders, revokeSessionServerSide, signInWithProvider } from "./identity";
+import { base64UrlToBytes, bytesToBase64Url } from "./vote-signing";
 
 const REDIRECT = "https://abcdefghijklmnopabcdefghijklmnop.chromiumapp.org/";
 const SESSION_BODY = { userId: "u1", token: "tok-123", expiresAtSec: FROZEN_SEC + 3600, epochMs: 2_592_000_000 };
@@ -55,6 +71,10 @@ afterEach(() => {
   clearHistoryForUser.mockClear();
   clearQueuedVotes.mockClear();
   clearEpochKeysForUser.mockClear();
+  ensureAccountKey.mockClear();
+  signInNonce.mockClear();
+  clearAccountKey.mockClear();
+  clearAccountKeys.mockClear();
 });
 
 describe("signInWithProvider", () => {
@@ -72,6 +92,39 @@ describe("signInWithProvider", () => {
     expect(details.interactive).toBe(true);
   });
 
+  // The nonce commits the provider's token to this device's account key: it is
+  // derived from that key and a fresh salt, and the key and salt themselves reach
+  // the API only with the exchange, after the provider has answered.
+  it("commits the start URL to the provider's account key through the nonce, and reveals key and salt only at the exchange", async () => {
+    const launch = stubIdentity(async () => `${REDIRECT}#code=one-time`);
+    const fetchMock = stubFetchJson(200, SESSION_BODY);
+
+    await signInWithProvider("google");
+
+    expect(ensureAccountKey).toHaveBeenCalledWith("google");
+    const [details] = launch.mock.calls[0] as [{ url: string }];
+    expect(new URL(details.url).searchParams.get("nonce")).toBe(NONCE);
+    const [, init] = lastFetchCall(fetchMock);
+    const body = JSON.parse(init.body as string) as { code: string; accountPubkey: string; nonceSalt: string };
+    expect(body.code).toBe("one-time");
+    expect(body.accountPubkey).toBe(bytesToBase64Url(ACCOUNT_PUBKEY));
+    const salt = base64UrlToBytes(body.nonceSalt);
+    expect(salt).toHaveLength(32);
+    expect(signInNonce).toHaveBeenCalledWith(ACCOUNT_PUBKEY, salt);
+    // A first sign-in registers the device on the API's side, which outlives the
+    // default request deadline: the exchange carries its own.
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it("draws a fresh salt for every sign-in", async () => {
+    stubIdentity(async () => `${REDIRECT}#code=one-time`);
+    const fetchMock = stubFetchJson(200, SESSION_BODY);
+    await signInWithProvider("google");
+    await signInWithProvider("google");
+    const salts = fetchMock.mock.calls.map(([, init]) => (JSON.parse((init as RequestInit).body as string) as { nonceSalt: string }).nonceSalt);
+    expect(salts[0]).not.toBe(salts[1]);
+  });
+
   // Pins the seconds-vs-milliseconds contract: the wire field is `expiresAtSec`,
   // the stored `expiresAt` carries the same unit (rationale in identity.ts).
   it("exchanges the code and stores the session with its provider and epoch length", async () => {
@@ -83,7 +136,7 @@ describe("signInWithProvider", () => {
     const [url, init] = lastFetchCall(fetchMock);
     expect(url).toContain("/auth/oidc/exchange");
     expect(init.method).toBe("POST");
-    expect(JSON.parse(init.body as string)).toEqual({ code: "one-time" });
+    expect(JSON.parse(init.body as string)).toMatchObject({ code: "one-time" });
     expect(await getAuth()).toEqual({ userId: "u1", token: "tok-123", expiresAt: SESSION_BODY.expiresAtSec, provider: "google", epochMs: SESSION_BODY.epochMs });
   });
 
@@ -148,6 +201,11 @@ describe("signInWithProvider", () => {
     [403, "client_outdated", "client_outdated"],
     [403, "unsupported_client", "unavailable"],
     [400, "code_invalid", "unavailable"],
+    [400, "nonce_mismatch", "unavailable"],
+    [409, "epoch_key_limit", "device_limit"],
+    [503, "enroll_unavailable", "enrollment_failed"],
+    // A named error is read only on its own status.
+    [409, "client_outdated", "unavailable"],
     [500, "boom", "unavailable"],
   ] as const)("classifies a %i %s exchange as %s", async (status, error, refusal) => {
     stubIdentity(async () => `${REDIRECT}#code=one-time`);
@@ -280,6 +338,9 @@ describe("account deletion", () => {
     expect(clearQueuedVotes).toHaveBeenCalledWith("u1");
     // The signing keys go with the account - deletion is the only path that removes them.
     expect(clearEpochKeysForUser).toHaveBeenCalledWith("u1");
+    // And the account key of the provider it signed in through, and no other's.
+    expect(clearAccountKey).toHaveBeenCalledWith("google");
+    expect(clearAccountKeys).not.toHaveBeenCalled();
     expect(store.own_reactions_v2).toEqual({ "facebook:2": { reaction: "🔥", userId: "u2" } });
     expect(store.auto_native_v1).toEqual({ "facebook:2": { action: "like", userId: "u2" } });
     expect(store.deletion_pending_v1).toBeUndefined();
@@ -293,8 +354,9 @@ describe("account deletion", () => {
 
     expect(ok).toBe(false);
     expect(store.auth_v1).toEqual(AUTH); // still signed in - not stranded
-    expect(session.deletion_pending_v1).toEqual({ token: "tok-123", userId: "u1", expiresAt: AUTH.expiresAt }); // retry later, still scoped
+    expect(session.deletion_pending_v1).toEqual({ token: "tok-123", userId: "u1", provider: "google", expiresAt: AUTH.expiresAt }); // retry later, still scoped
     expect(clearEpochKeysForUser).not.toHaveBeenCalled();
+    expect(clearAccountKey).not.toHaveBeenCalled();
   });
 
   // The marker is the one place a bearer token survives clearAuth(), so it must not
@@ -310,7 +372,7 @@ describe("account deletion", () => {
   });
 
   it("finishPendingDeletion drains a pending marker; 401 (already erased) counts as done", async () => {
-    const { store, session, fetchMock } = setupChrome({ own_reactions_v2: { "facebook:2": { reaction: "🔥", userId: "u2" } } }, { deletion_pending_v1: { token: "tok-xyz", userId: "u9" } });
+    const { store, session, fetchMock } = setupChrome({ own_reactions_v2: { "facebook:2": { reaction: "🔥", userId: "u2" } } }, { deletion_pending_v1: { token: "tok-xyz", userId: "u9", provider: "apple" } });
     fetchMock.mockResolvedValue(new Response(null, { status: 401 }));
 
     const ok = await finishPendingDeletion();
@@ -321,6 +383,7 @@ describe("account deletion", () => {
     expect(session.deletion_pending_v1).toBeUndefined();
     expect(clearHistoryForUser).toHaveBeenCalledWith("u9");
     expect(clearEpochKeysForUser).toHaveBeenCalledWith("u9");
+    expect(clearAccountKey).toHaveBeenCalledWith("apple");
     expect(store.own_reactions_v2).toEqual({ "facebook:2": { reaction: "🔥", userId: "u2" } });
   });
 
@@ -334,6 +397,9 @@ describe("account deletion", () => {
     expect(clearHistory).toHaveBeenCalled();
     expect(clearHistoryForUser).not.toHaveBeenCalled();
     expect(clearEpochKeysForUser).not.toHaveBeenCalled();
+    // No provider named either: every provider's account key goes.
+    expect(clearAccountKeys).toHaveBeenCalled();
+    expect(clearAccountKey).not.toHaveBeenCalled();
     expect(clearQueuedVotes).toHaveBeenCalledWith(undefined);
     expect(store.deletion_pending_v1).toBeUndefined();
   });

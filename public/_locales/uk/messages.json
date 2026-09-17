@@ -480,6 +480,18 @@
   "authErrOutdated": {
     "message": "Ця версія Emojery застаріла. Оновіть її, щоб увійти."
   },
+  "authErrDeviceLimit": {
+    "message": "Ліміт пристроїв на цей місяць вичерпано. Спробуйте ще раз наступного місяця."
+  },
+  "voteDeviceLimit": {
+    "message": "Ліміт пристроїв на цей місяць вичерпано. Голосування відновиться $DATE$.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 1, 2026"
+      }
+    }
+  },
   "loadError": {
     "message": "Щось пішло не так. Спробуйте знову."
   },

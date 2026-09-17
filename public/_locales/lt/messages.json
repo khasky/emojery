@@ -480,6 +480,18 @@
   "authErrOutdated": {
     "message": "Ši „Emojery“ versija pasenusi. Norėdami prisijungti, ją atnaujinkite."
   },
+  "authErrDeviceLimit": {
+    "message": "Pasiektas šio mėnesio įrenginių limitas. Pabandykite dar kartą kitą mėnesį."
+  },
+  "voteDeviceLimit": {
+    "message": "Pasiektas šio mėnesio įrenginių limitas. Balsuoti vėl bus galima $DATE$.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 1, 2026"
+      }
+    }
+  },
   "loadError": {
     "message": "Kažkas nepavyko. Bandykite dar kartą."
   },

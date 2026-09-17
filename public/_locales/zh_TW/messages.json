@@ -480,6 +480,18 @@
   "authErrOutdated": {
     "message": "此版本的 Emojery 已過時。請更新後再登入。"
   },
+  "authErrDeviceLimit": {
+    "message": "本月的裝置數量已達上限。請下個月再試。"
+  },
+  "voteDeviceLimit": {
+    "message": "本月的裝置數量已達上限。$DATE$ 起可以繼續投票。",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 1, 2026"
+      }
+    }
+  },
   "loadError": {
     "message": "出現問題。請重試。"
   },

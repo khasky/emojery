@@ -480,6 +480,18 @@
   "authErrOutdated": {
     "message": "Tämä Emojeryn versio on vanhentunut. Päivitä se kirjautuaksesi sisään."
   },
+  "authErrDeviceLimit": {
+    "message": "Tämän kuun laiterajoitus on täynnä. Yritä uudelleen ensi kuussa."
+  },
+  "voteDeviceLimit": {
+    "message": "Tämän kuun laiterajoitus on täynnä. Äänestäminen jatkuu $DATE$.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 1, 2026"
+      }
+    }
+  },
   "loadError": {
     "message": "Jotain meni pieleen. Yritä uudelleen."
   },

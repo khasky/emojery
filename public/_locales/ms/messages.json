@@ -480,6 +480,18 @@
   "authErrOutdated": {
     "message": "Versi Emojery ini sudah lapuk. Kemas kini untuk log masuk."
   },
+  "authErrDeviceLimit": {
+    "message": "Had peranti untuk bulan ini telah dicapai. Sila cuba lagi bulan depan."
+  },
+  "voteDeviceLimit": {
+    "message": "Had peranti untuk bulan ini telah dicapai. Undian disambung pada $DATE$.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 1, 2026"
+      }
+    }
+  },
   "loadError": {
     "message": "Sesuatu yang tidak kena. Sila cuba lagi."
   },

@@ -480,6 +480,18 @@
   "authErrOutdated": {
     "message": "Эта версия Emojery устарела. Обновите её, чтобы войти."
   },
+  "authErrDeviceLimit": {
+    "message": "Лимит устройств на этот месяц исчерпан. Попробуйте снова в следующем месяце."
+  },
+  "voteDeviceLimit": {
+    "message": "Лимит устройств на этот месяц исчерпан. Голосование возобновится $DATE$.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 1, 2026"
+      }
+    }
+  },
   "loadError": {
     "message": "Неизвестная ошибка. Попробуйте снова."
   },

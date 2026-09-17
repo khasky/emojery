@@ -480,6 +480,18 @@
   "authErrOutdated": {
     "message": "See Emojery versioon on aegunud. Sisselogimiseks uuenda seda."
   },
+  "authErrDeviceLimit": {
+    "message": "Selle kuu seadmete limiit on täis. Proovi järgmisel kuul uuesti."
+  },
+  "voteDeviceLimit": {
+    "message": "Selle kuu seadmete limiit on täis. Hääletamine jätkub $DATE$.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 1, 2026"
+      }
+    }
+  },
   "loadError": {
     "message": "Midagi läks valesti. Proovige uuesti."
   },

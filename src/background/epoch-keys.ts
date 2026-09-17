@@ -15,19 +15,19 @@
 
 import { RSABSSA } from "@cloudflare/blindrsa-ts";
 import { getPublicKeyAsync, signAsync, utils } from "@noble/ed25519";
+import type { OidcProvider } from "../shared/oidc-providers";
+import { sha256, signIssue } from "./account-keys";
 import { type ApiReply, apiErrorString, apiRequest, isRecord } from "./api-client";
 import { logBackgroundError } from "./debug";
-import { createIdbHandle, runTransaction } from "./idb-open";
+import { runTransaction } from "./idb-open";
+import { keysDb, EPOCH_KEYS_STORE as STORE, EPOCH_KEYS_USER_INDEX as USER_INDEX } from "./keys-db";
 import { base64UrlToBytes, bytesToBase64Url, epochKeyMessage } from "./vote-signing";
-
-const DB_NAME = "emojery-epoch-keys";
-const STORE = "keys";
-const VERSION = 1;
-const USER_INDEX = "userId";
 
 export interface EpochKeySession {
   userId: string;
   token: string;
+  /** Names the account key (account-keys.ts) that authorises the issue. */
+  provider: OidcProvider;
 }
 
 /** What the drain signs with. The secret stays inside this module's rows. */
@@ -59,13 +59,6 @@ export class EpochKeyRefusal extends Error {
     this.name = "EpochKeyRefusal";
   }
 }
-
-const keysDb = createIdbHandle(DB_NAME, VERSION, (db) => {
-  if (!db.objectStoreNames.contains(STORE)) {
-    const store = db.createObjectStore(STORE, { keyPath: "id" });
-    store.createIndex(USER_INDEX, "userId", { unique: false });
-  }
-});
 
 function rowId(userId: string, epoch: number): string {
   return `${userId}:${epoch}`;
@@ -158,7 +151,14 @@ async function mint(session: EpochKeySession, epoch: number): Promise<EpochKeyRo
     await writeRow(row);
   }
 
-  const issued = await apiRequest("/auth/epoch-key/issue", { method: "POST", token: session.token, body: { epoch, blinded: bytesToBase64Url(blinded.blindedMsg) } });
+  // The account key vouches for the issue: the API checks the signature against
+  // the key it saw at sign-in, so a session token alone cannot mint a key.
+  const authorised = await signIssue(session.provider, epoch, await sha256(blinded.blindedMsg));
+  const issued = await apiRequest("/auth/epoch-key/issue", {
+    method: "POST",
+    token: session.token,
+    body: { epoch, blinded: bytesToBase64Url(blinded.blindedMsg), accountPubkey: bytesToBase64Url(authorised.accountPubkey), accountSig: bytesToBase64Url(authorised.accountSig) },
+  });
   if (!issued.ok) throwRefusal(issued);
   if (!isRecord(issued.body) || typeof issued.body.blindSig !== "string") throw new Error("malformed epoch-key issue body");
 

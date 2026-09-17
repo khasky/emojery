@@ -480,6 +480,18 @@
   "authErrOutdated": {
     "message": "Emojery का यह संस्करण पुराना हो चुका है। साइन इन करने के लिए इसे अपडेट करें।"
   },
+  "authErrDeviceLimit": {
+    "message": "इस महीने की डिवाइस सीमा पूरी हो गई है। अगले महीने फिर से कोशिश करें।"
+  },
+  "voteDeviceLimit": {
+    "message": "इस महीने की डिवाइस सीमा पूरी हो गई है। वोटिंग $DATE$ से फिर शुरू होगी।",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 1, 2026"
+      }
+    }
+  },
   "loadError": {
     "message": "कुछ गलत हो गया। कृपया पुनः प्रयास करें।"
   },

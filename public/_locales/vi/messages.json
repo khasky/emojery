@@ -480,6 +480,18 @@
   "authErrOutdated": {
     "message": "Phiên bản Emojery này đã lỗi thời. Hãy cập nhật để đăng nhập."
   },
+  "authErrDeviceLimit": {
+    "message": "Đã đạt giới hạn thiết bị của tháng này. Vui lòng thử lại vào tháng sau."
+  },
+  "voteDeviceLimit": {
+    "message": "Đã đạt giới hạn thiết bị của tháng này. Bạn có thể bình chọn lại từ $DATE$.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 1, 2026"
+      }
+    }
+  },
   "loadError": {
     "message": "Đã có lỗi xảy ra. Vui lòng thử lại."
   },

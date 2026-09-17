@@ -480,6 +480,18 @@
   "authErrOutdated": {
     "message": "Ta wersja Emojery jest nieaktualna. Zaktualizuj ją, aby się zalogować."
   },
+  "authErrDeviceLimit": {
+    "message": "Osiągnięto limit urządzeń na ten miesiąc. Spróbuj ponownie w przyszłym miesiącu."
+  },
+  "voteDeviceLimit": {
+    "message": "Osiągnięto limit urządzeń na ten miesiąc. Głosowanie wznowi się $DATE$.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 1, 2026"
+      }
+    }
+  },
   "loadError": {
     "message": "Coś poszło nie tak. Spróbuj ponownie."
   },

@@ -480,6 +480,18 @@
   "authErrOutdated": {
     "message": "Den här versionen av Emojery är föråldrad. Uppdatera den för att logga in."
   },
+  "authErrDeviceLimit": {
+    "message": "Enhetsgränsen för den här månaden är nådd. Försök igen nästa månad."
+  },
+  "voteDeviceLimit": {
+    "message": "Enhetsgränsen för den här månaden är nådd. Du kan rösta igen från $DATE$.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 1, 2026"
+      }
+    }
+  },
   "loadError": {
     "message": "Något gick fel. Försök igen."
   },

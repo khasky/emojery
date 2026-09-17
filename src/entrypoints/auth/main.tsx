@@ -30,6 +30,7 @@ const REFUSAL_COPY: Record<SignInRefusal, I18nKey> = {
   provider_denied: "authErrProviderDenied",
   enrollment_failed: "authErrEnrollFailed",
   client_outdated: "authErrOutdated",
+  device_limit: "authErrDeviceLimit",
   unavailable: "authErrUnknown",
 };
 

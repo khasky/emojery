@@ -7,7 +7,7 @@ import { createHash } from "node:crypto";
 import { getPublicKeyAsync, signAsync, verifyAsync } from "@noble/ed25519";
 import { describe, expect, it } from "vitest";
 import vectors from "./__data__/vote-signing-vectors.json";
-import { base64UrlToBytes, bytesToBase64Url, epochKeyMessage, voteSignatureMessage } from "./vote-signing";
+import { base64UrlToBytes, bytesToBase64Url, epochKeyMessage, bytesToHex as implBytesToHex, issueMessage, nonceMessage, voteSignatureMessage } from "./vote-signing";
 
 // The vectors spell bytes as hex; Node's Buffer is the codec.
 const hexToBytes = (hex: string): Uint8Array => new Uint8Array(Buffer.from(hex, "hex"));
@@ -38,6 +38,29 @@ describe("vote-signing vectors", () => {
     expect(createHash("sha256").update(pubkey).digest("hex")).toBe(vector.userRefHex);
   });
 
+  // The account key's authorisation of an epoch-key issue: the pinned keypair
+  // plays the account key, so the signature is a vector too.
+  it.each(vectors.issueMessage)("frames the issue of epoch $epoch over blinded hash $blindedHashHex to the pinned bytes and signature", async (vector) => {
+    const message = issueMessage(vector.epoch, hexToBytes(vector.blindedHashHex));
+    expect(bytesToHex(message)).toBe(vector.messageHex);
+    expect(bytesToHex(await signAsync(message, secretKey))).toBe(vector.signatureHex);
+    expect(await verifyAsync(hexToBytes(vector.signatureHex), message, publicKey)).toBe(true);
+  });
+
+  // The OIDC nonce: what the provider signs into its token, and what the API
+  // recomputes from the account key and salt the exchange reveals.
+  it.each(vectors.nonce)("hashes account key $accountPubkeyHex and salt $nonceSaltHex to the pinned nonce", (vector) => {
+    const message = nonceMessage(hexToBytes(vector.accountPubkeyHex), hexToBytes(vector.nonceSaltHex));
+    expect(createHash("sha256").update(message).digest("hex")).toBe(vector.nonce);
+    expect(vector.nonce).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it("refuses a blinded hash, an account key or a salt that is not 32 bytes", () => {
+    expect(() => issueMessage(1, new Uint8Array(31))).toThrow(RangeError);
+    expect(() => nonceMessage(new Uint8Array(31), new Uint8Array(32))).toThrow(RangeError);
+    expect(() => nonceMessage(new Uint8Array(32), new Uint8Array(33))).toThrow(RangeError);
+  });
+
   // The NULL marker can never collide with a real reaction: an empty string is
   // length-prefixed as four zero bytes, NULL is four 0xff bytes.
   it("tells an absent reaction from an empty one", () => {
@@ -54,6 +77,11 @@ describe("vote-signing vectors", () => {
 });
 
 describe("wire encodings", () => {
+  it("spells bytes as lowercase zero-padded hex", () => {
+    expect(implBytesToHex(new Uint8Array([0, 1, 15, 16, 255]))).toBe("00010f10ff");
+    expect(implBytesToHex(new Uint8Array(0))).toBe("");
+  });
+
   it("round-trips bytes through unpadded base64url", () => {
     const bytes = new Uint8Array([0, 1, 250, 251, 252, 253, 254, 255]);
     const encoded = bytesToBase64Url(bytes);

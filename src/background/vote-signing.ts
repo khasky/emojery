@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// The bytes a vote and an epoch key are signed over, framed exactly as the API
-// serializes them into its transparency log. A wire contract shared with the
-// backend and the public verifier: `__data__/vote-signing-vectors.json` pins the
-// same inputs to the same bytes on every side, so a change here is a coordinated
-// release, never a local edit.
+// The bytes a vote, an epoch key, an epoch-key issue and the sign-in nonce are
+// framed over, exactly as the API serializes them into its transparency log. A
+// wire contract shared with the backend and the public verifier:
+// `__data__/vote-signing-vectors.json` pins the same inputs to the same bytes on
+// every side, so a change here is a coordinated release, never a local edit.
 //
 // Framing: `lp(s) = u32be(len) || utf8(s)`; an absent reaction is the NULL marker
 // `u32be(0xFFFFFFFF)`, which no length-prefixed string can produce (an empty
@@ -14,6 +14,8 @@ const encoder = new TextEncoder();
 
 const VOTE_DOMAIN = "emojery-vote-v1";
 const EPOCH_KEY_DOMAIN = "emojery-epoch-key-v1";
+const ISSUE_DOMAIN = "emojery-issue-v1";
+const NONCE_DOMAIN = "emojery-nonce-v1";
 const NULL_MARKER = new Uint8Array([0xff, 0xff, 0xff, 0xff]);
 
 function u32be(value: number): Uint8Array<ArrayBuffer> {
@@ -60,6 +62,27 @@ export function voteSignatureMessage(input: VoteSigningInput): Uint8Array<ArrayB
 export function epochKeyMessage(epoch: number, pubkey: Uint8Array): Uint8Array<ArrayBuffer> {
   if (pubkey.length !== 32) throw new RangeError(`epochKeyMessage: a public key is 32 bytes, got ${pubkey.length}`);
   return concat(encoder.encode(EPOCH_KEY_DOMAIN), u64be(epoch), pubkey);
+}
+
+/** `"emojery-issue-v1" || u64be(epoch) || blinded_hash32` - what the account key
+ *  signs to authorise one epoch-key issue; `blinded_hash = SHA256(blinded)`. */
+export function issueMessage(epoch: number, blindedHash: Uint8Array): Uint8Array<ArrayBuffer> {
+  if (blindedHash.length !== 32) throw new RangeError(`issueMessage: a blinded hash is 32 bytes, got ${blindedHash.length}`);
+  return concat(encoder.encode(ISSUE_DOMAIN), u64be(epoch), blindedHash);
+}
+
+/** `"emojery-nonce-v1" || account_pubkey32 || nonce_salt32` - the OIDC nonce is
+ *  the lowercase hex SHA-256 of these bytes (background/account-keys.ts). */
+export function nonceMessage(accountPubkey: Uint8Array, nonceSalt: Uint8Array): Uint8Array<ArrayBuffer> {
+  if (accountPubkey.length !== 32) throw new RangeError(`nonceMessage: an account public key is 32 bytes, got ${accountPubkey.length}`);
+  if (nonceSalt.length !== 32) throw new RangeError(`nonceMessage: a nonce salt is 32 bytes, got ${nonceSalt.length}`);
+  return concat(encoder.encode(NONCE_DOMAIN), accountPubkey, nonceSalt);
+}
+
+export function bytesToHex(bytes: Uint8Array): string {
+  let hex = "";
+  for (const byte of bytes) hex += byte.toString(16).padStart(2, "0");
+  return hex;
 }
 
 // The wire encoding of every byte string the identity endpoints carry.

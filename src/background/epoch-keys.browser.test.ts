@@ -8,19 +8,20 @@ import { RSABSSA } from "@cloudflare/blindrsa-ts";
 import { verifyAsync } from "@noble/ed25519";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { type ChromeShimHandle, installChromeShim } from "../test/chrome-shim";
+import { clearAccountKeys, ensureAccountKey, sha256 } from "./account-keys";
 import { clearEpochKeysForUser, currentEpoch, EpochKeyRefusal, ensureEpochKey, reRegisterEpochKey, signVote } from "./epoch-keys";
-import { base64UrlToBytes, bytesToBase64Url, epochKeyMessage } from "./vote-signing";
+import { base64UrlToBytes, bytesToBase64Url, epochKeyMessage, issueMessage } from "./vote-signing";
 
 const suite = RSABSSA.SHA384.PSS.Deterministic();
-const SESSION = { userId: "user-a", token: "tok-a" };
-const OTHER = { userId: "user-b", token: "tok-b" };
+const SESSION = { userId: "user-a", token: "tok-a", provider: "google" };
+const OTHER = { userId: "user-b", token: "tok-b", provider: "apple" };
 
 let shim: ChromeShimHandle;
 let blindKeys: CryptoKeyPair;
 let spki: string;
 
 interface ApiLog {
-  issues: { epoch: number; blinded: string; token: string }[];
+  issues: { epoch: number; blinded: string; accountPubkey: string; accountSig: string; token: string }[];
   registers: { epoch: number; pubkey: string; keySig: string; token: string }[];
 }
 
@@ -44,7 +45,7 @@ function stubApi(refuse: Partial<Record<"params" | "issue" | "register", { statu
       if (url.endsWith("/auth/epoch-key/issue")) {
         const r = refused("issue");
         if (r) return r;
-        log.issues.push({ epoch: body.epoch as number, blinded: body.blinded as string, token });
+        log.issues.push({ epoch: body.epoch as number, blinded: body.blinded as string, accountPubkey: body.accountPubkey as string, accountSig: body.accountSig as string, token });
         const blindSig = await suite.blindSign(blindKeys.privateKey, base64UrlToBytes(body.blinded as string));
         return new Response(JSON.stringify({ blindSig: bytesToBase64Url(blindSig) }), { status: 200 });
       }
@@ -69,6 +70,9 @@ async function deleteDatabase(): Promise<void> {
 
 beforeEach(async () => {
   shim = installChromeShim();
+  // Sign-in creates the account key the issue is authorised with.
+  await ensureAccountKey(SESSION.provider);
+  await ensureAccountKey(OTHER.provider);
   blindKeys = await suite.generateKey({ modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]) });
   spki = bytesToBase64Url(new Uint8Array(await crypto.subtle.exportKey("spki", blindKeys.publicKey)));
 });
@@ -78,6 +82,7 @@ afterEach(async () => {
   shim.uninstall();
   await clearEpochKeysForUser(SESSION.userId);
   await clearEpochKeysForUser(OTHER.userId);
+  await clearAccountKeys();
   await deleteDatabase();
 });
 
@@ -97,7 +102,13 @@ describe("ensureEpochKey", () => {
 
     expect(key.epoch).toBe(7);
     expect(key.publicKey).toHaveLength(32);
-    expect(api.issues).toEqual([{ epoch: 7, blinded: expect.any(String), token: "tok-a" }]);
+    expect(api.issues).toEqual([{ epoch: 7, blinded: expect.any(String), accountPubkey: expect.any(String), accountSig: expect.any(String), token: "tok-a" }]);
+    // The issue is authorised by the provider's account key: its signature over
+    // the issue message for this epoch and the hash of the blinded message sent.
+    const issue = api.issues[0]!;
+    const accountKey = await ensureAccountKey(SESSION.provider);
+    expect(base64UrlToBytes(issue.accountPubkey)).toEqual(accountKey.publicKey);
+    expect(await verifyAsync(base64UrlToBytes(issue.accountSig), issueMessage(7, await sha256(base64UrlToBytes(issue.blinded))), accountKey.publicKey)).toBe(true);
     expect(api.registers).toEqual([{ epoch: 7, pubkey: bytesToBase64Url(key.publicKey), keySig: expect.any(String), token: "tok-a" }]);
     // The registration carries a signature the API can verify over the epoch-key
     // message under its own key: the unblinded RSABSSA signature.
@@ -174,6 +185,12 @@ describe("ensureEpochKey", () => {
       await expect(attempt).rejects.toMatchObject({ name: "EpochKeyRefusal", refusal: error });
     }
     await expect(signVote(SESSION, 7, new Uint8Array(1))).rejects.toThrow("no registered epoch key");
+  });
+
+  it("mints nothing, and asks the API for nothing, without an account key for the provider", async () => {
+    const api = stubApi();
+    await expect(ensureEpochKey({ ...SESSION, provider: "slack" }, 7)).rejects.toThrow("no account key for provider slack");
+    expect(api.issues).toHaveLength(0);
   });
 
   it("refuses to sign with a key that was never registered", async () => {

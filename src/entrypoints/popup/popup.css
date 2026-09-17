@@ -406,6 +406,14 @@ body {
 .acct-list .row.arow:first-child {
   border-top: 0;
 }
+/* Sits between the signed-in row and the next divider, in the delete-confirm's type. */
+.acct-device-limit {
+  margin: 0;
+  padding: 0 0 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--khasky-emojery-muted);
+}
 .row-icon {
   width: 20px;
   height: 20px;

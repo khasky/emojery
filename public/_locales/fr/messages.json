@@ -480,6 +480,18 @@
   "authErrOutdated": {
     "message": "Cette version d’Emojery est obsolète. Mettez-la à jour pour vous connecter."
   },
+  "authErrDeviceLimit": {
+    "message": "La limite d'appareils de ce mois est atteinte. Réessayez le mois prochain."
+  },
+  "voteDeviceLimit": {
+    "message": "La limite d'appareils de ce mois est atteinte. Le vote reprendra le $DATE$.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 1, 2026"
+      }
+    }
+  },
   "loadError": {
     "message": "Une erreur s’est produite. Veuillez réessayer."
   },

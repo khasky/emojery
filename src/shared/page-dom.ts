@@ -67,6 +67,8 @@ export const ROW_SELECT_SELECTOR = `select.${ROW_SELECT_CLASS}`;
 
 export const ACCOUNT_LIST_CLASS = "acct-list";
 export const ACCOUNT_LIST_SELECTOR = `.${ACCOUNT_LIST_CLASS}`;
+export const DEVICE_LIMIT_NOTICE_CLASS = "acct-device-limit";
+export const DEVICE_LIMIT_NOTICE_SELECTOR = `.${DEVICE_LIMIT_NOTICE_CLASS}`;
 export const DELETE_CONFIRM_WARN_CLASS = "delete-confirm-warn";
 export const DELETE_CONFIRM_WARN_SELECTOR = `.${DELETE_CONFIRM_WARN_CLASS}`;
 

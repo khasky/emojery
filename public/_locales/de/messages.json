@@ -480,6 +480,18 @@
   "authErrOutdated": {
     "message": "Diese Version von Emojery ist veraltet. Aktualisieren Sie sie, um sich anzumelden."
   },
+  "authErrDeviceLimit": {
+    "message": "Das Gerätelimit für diesen Monat ist erreicht. Versuche es nächsten Monat erneut."
+  },
+  "voteDeviceLimit": {
+    "message": "Das Gerätelimit für diesen Monat ist erreicht. Abstimmen geht wieder ab $DATE$.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 1, 2026"
+      }
+    }
+  },
   "loadError": {
     "message": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
   },

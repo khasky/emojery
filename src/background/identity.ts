@@ -3,15 +3,23 @@
 
 import { AUTH_KEY, isAuthSessionLive } from "../shared/auth-session";
 import { API_BASE } from "../shared/config";
+import { defined } from "../shared/defined";
+import { deadlineSignal } from "../shared/fetch-deadline";
 import type { SignInRefusal } from "../shared/messages";
 import { isProviderId, type OidcProvider } from "../shared/oidc-providers";
 import { clearAutoNativesForUser, clearOwnReactionsForUser } from "../shared/storage";
 import { identityRedirectUrl, launchWebAuthFlow, storageLocalGet, storageLocalRemove, storageLocalSet, storageSessionGet, storageSessionRemove, storageSessionSet } from "../shared/webext";
+import { clearAccountKey, clearAccountKeys, ensureAccountKey, signInNonce } from "./account-keys";
 import { apiErrorString, apiRequest, isRecord, requestLanguage } from "./api-client";
 import { logBackgroundError } from "./debug";
 import { clearEpochKeysForUser } from "./epoch-keys";
 import { clearHistory, clearHistoryForUser } from "./history";
+import { bytesToBase64Url } from "./vote-signing";
 import { clearQueuedVotes } from "./votequeue";
+
+// The exchange registers the device's account key on a first sign-in, which the
+// API takes tens of seconds to do; the default deadline would cut it off.
+const EXCHANGE_TIMEOUT_MS = 90_000;
 
 export interface AuthState {
   userId: string;
@@ -73,6 +81,14 @@ const CALLBACK_REFUSALS: Record<string, SignInRefusal> = {
   enroll_unavailable: "enrollment_failed",
 };
 
+// The same for a refused exchange, keyed by `status error`. The status is part of
+// the key so an error string is never trusted on a status it does not belong to.
+const EXCHANGE_REFUSALS: Record<string, SignInRefusal> = {
+  "403 client_outdated": "client_outdated",
+  "409 epoch_key_limit": "device_limit",
+  "503 enroll_unavailable": "enrollment_failed",
+};
+
 // The identity window rejects with a message rather than a code. A closed window
 // (Chrome: "The user did not approve access.", Firefox: "User cancelled or denied
 // access.") is the user's choice; anything else is the flow failing to run.
@@ -100,7 +116,13 @@ function parseCallbackFragment(responseUrl: string): { code: string } | { error:
 export async function signInWithProvider(provider: OidcProvider): Promise<SignInResult> {
   const redirect = identityRedirectUrl();
   if (!redirect) return { ok: false, refusal: "unavailable" };
-  const startUrl = `${API_BASE}/auth/oidc/start?provider=${encodeURIComponent(provider)}&redirect=${encodeURIComponent(redirect)}`;
+  // The nonce the provider signs into its token commits to this device's account
+  // key; the key and the salt behind it reach the API only with the exchange,
+  // after the provider has already answered, so the API cannot swap the key.
+  const accountKey = await ensureAccountKey(provider);
+  const nonceSalt = crypto.getRandomValues(new Uint8Array(32));
+  const nonce = await signInNonce(accountKey.publicKey, nonceSalt);
+  const startUrl = `${API_BASE}/auth/oidc/start?provider=${encodeURIComponent(provider)}&redirect=${encodeURIComponent(redirect)}&nonce=${nonce}`;
 
   let responseUrl: string | null;
   try {
@@ -113,11 +135,13 @@ export async function signInWithProvider(provider: OidcProvider): Promise<SignIn
   const callback = parseCallbackFragment(responseUrl);
   if ("error" in callback) return { ok: false, refusal: CALLBACK_REFUSALS[callback.error] ?? "unavailable" };
 
-  const reply = await apiRequest("/auth/oidc/exchange", { method: "POST", lang: requestLanguage(), body: { code: callback.code } });
-  if (!reply.ok) {
-    if (reply.status === 403 && apiErrorString(reply.body) === "client_outdated") return { ok: false, refusal: "client_outdated" };
-    return { ok: false, refusal: "unavailable" };
-  }
+  const reply = await apiRequest("/auth/oidc/exchange", {
+    method: "POST",
+    lang: requestLanguage(),
+    body: { code: callback.code, accountPubkey: bytesToBase64Url(accountKey.publicKey), nonceSalt: bytesToBase64Url(nonceSalt) },
+    ...defined({ signal: deadlineSignal(EXCHANGE_TIMEOUT_MS) }),
+  });
+  if (!reply.ok) return { ok: false, refusal: EXCHANGE_REFUSALS[`${reply.status} ${apiErrorString(reply.body)}`] ?? "unavailable" };
   // The wire field is `expiresAtSec` (seconds). The stored AuthState keeps its own
   // `expiresAt` name (documented as seconds).
   const session = reply.body;
@@ -162,6 +186,9 @@ interface DeletionPending {
    *  Absent on a marker written before this field existed - see
    *  clearLocalAccountStateAfterDeletion. */
   userId?: string;
+  /** The provider the account signed in with, naming the account key to drop.
+   *  Absent on a marker written before this field existed. */
+  provider?: OidcProvider;
   /** The token's own seconds-epoch expiry, copied from AuthState. This record is
    *  the one place a bearer token outlives clearAuth(), so a marker whose token has
    *  already expired is dropped rather than kept around. Absent on a marker written
@@ -170,8 +197,8 @@ interface DeletionPending {
   expiresAt?: number;
 }
 
-async function setDeletionPending(token: string, userId: string, expiresAt: number): Promise<void> {
-  await storageSessionSet({ [DELETION_PENDING_KEY]: { token, userId, expiresAt } satisfies DeletionPending });
+async function setDeletionPending(token: string, userId: string, provider: OidcProvider, expiresAt: number): Promise<void> {
+  await storageSessionSet({ [DELETION_PENDING_KEY]: { token, userId, provider, expiresAt } satisfies DeletionPending });
 }
 
 async function getDeletionPending(): Promise<DeletionPending | null> {
@@ -193,6 +220,7 @@ async function getDeletionPending(): Promise<DeletionPending | null> {
   }
   const out: DeletionPending = { token: pending.token };
   if (typeof pending.userId === "string" && pending.userId) out.userId = pending.userId;
+  if (isProviderId(pending.provider)) out.provider = pending.provider;
   return out;
 }
 
@@ -221,7 +249,12 @@ async function requestAccountDeletion(token: string): Promise<boolean> {
 // marker, where nothing names the account - history then falls back to the
 // wholesale wipe, and the two capped, self-evicting map stores keep the deleted
 // account's inert entries rather than taking a live account's with them.
-async function clearLocalAccountStateAfterDeletion(userId: string | undefined): Promise<void> {
+async function clearLocalAccountStateAfterDeletion(userId: string | undefined, provider: OidcProvider | undefined): Promise<void> {
+  // The account key is per provider, not per account: the one this account signed
+  // in through goes, so the next sign-in registers a fresh device. A marker that
+  // names no provider drops every provider's key, as history falls back below.
+  if (provider) await clearAccountKey(provider);
+  else await clearAccountKeys();
   if (userId) {
     await clearHistoryForUser(userId);
     await clearOwnReactionsForUser(userId);
@@ -243,9 +276,9 @@ async function clearLocalAccountStateAfterDeletion(userId: string | undefined): 
 export async function deleteAccount(): Promise<boolean> {
   const auth = await getAuth();
   if (!auth) return finishPendingDeletion();
-  await setDeletionPending(auth.token, auth.userId, auth.expiresAt);
+  await setDeletionPending(auth.token, auth.userId, auth.provider, auth.expiresAt);
   const done = await requestAccountDeletion(auth.token);
-  if (done) await clearLocalAccountStateAfterDeletion(auth.userId);
+  if (done) await clearLocalAccountStateAfterDeletion(auth.userId, auth.provider);
   return done;
 }
 
@@ -253,6 +286,6 @@ export async function finishPendingDeletion(): Promise<boolean> {
   const pending = await getDeletionPending();
   if (!pending) return false;
   const done = await requestAccountDeletion(pending.token);
-  if (done) await clearLocalAccountStateAfterDeletion(pending.userId);
+  if (done) await clearLocalAccountStateAfterDeletion(pending.userId, pending.provider);
   return done;
 }

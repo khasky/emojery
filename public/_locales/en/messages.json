@@ -613,6 +613,20 @@
     "message": "This version of Emojery is out of date. Update it to sign in.",
     "description": "Auth error: the API no longer serves this extension build; the user must update it from the store to sign in."
   },
+  "authErrDeviceLimit": {
+    "message": "Device limit for this month is reached. Try again next month.",
+    "description": "Auth error: the account already has as many signed-in devices as the current key epoch allows; a new device can sign in once the next epoch starts."
+  },
+  "voteDeviceLimit": {
+    "message": "Device limit for this month is reached. Voting resumes on $DATE$.",
+    "description": "Account tab notice while the account has reached its device limit for the current key epoch: every reaction is refused until the next epoch. $DATE$ is the day voting resumes, in the UI locale.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 1, 2026"
+      }
+    }
+  },
   "loadError": {
     "message": "Something went wrong. Please try again.",
     "description": "Shown when the popup could not read locally stored data (history, stats, export)."

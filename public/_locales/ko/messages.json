@@ -480,6 +480,18 @@
   "authErrOutdated": {
     "message": "이 버전의 Emojery는 오래되었습니다. 로그인하려면 업데이트하세요."
   },
+  "authErrDeviceLimit": {
+    "message": "이번 달 기기 한도에 도달했습니다. 다음 달에 다시 시도하세요."
+  },
+  "voteDeviceLimit": {
+    "message": "이번 달 기기 한도에 도달했습니다. $DATE$부터 다시 투표할 수 있습니다.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 1, 2026"
+      }
+    }
+  },
   "loadError": {
     "message": "문제가 발생했습니다. 다시 시도하세요."
   },

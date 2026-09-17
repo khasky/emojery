@@ -480,6 +480,18 @@
   "authErrOutdated": {
     "message": "このバージョンの Emojery は古くなっています。サインインするには更新してください。"
   },
+  "authErrDeviceLimit": {
+    "message": "今月の端末数の上限に達しました。来月もう一度お試しください。"
+  },
+  "voteDeviceLimit": {
+    "message": "今月の端末数の上限に達しました。$DATE$ から再び投票できます。",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 1, 2026"
+      }
+    }
+  },
   "loadError": {
     "message": "問題が発生しました。もう一度お試しください。"
   },

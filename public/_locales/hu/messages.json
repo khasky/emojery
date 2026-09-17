@@ -480,6 +480,18 @@
   "authErrOutdated": {
     "message": "Az Emojery ezen verziója elavult. A bejelentkezéshez frissítse."
   },
+  "authErrDeviceLimit": {
+    "message": "Elérted az e havi eszközkorlátot. Próbáld újra jövő hónapban."
+  },
+  "voteDeviceLimit": {
+    "message": "Elérted az e havi eszközkorlátot. A szavazás $DATE$ napján folytatódik.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 1, 2026"
+      }
+    }
+  },
   "loadError": {
     "message": "Valami elromlott. Próbálja újra."
   },

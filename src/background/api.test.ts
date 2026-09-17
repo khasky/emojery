@@ -19,7 +19,9 @@ vi.mock("./identity", () => ({
 // it does when the API refuses the key.
 const PUBLIC_KEY = new Uint8Array(32).fill(7);
 const SIGNATURE = new Uint8Array(64).fill(9);
-vi.mock("./epoch-keys", () => ({
+vi.mock("./epoch-keys", async (importOriginal) => ({
+  // The real refusal class: the drain tells the device-limit refusal apart by it.
+  EpochKeyRefusal: (await importOriginal<typeof import("./epoch-keys")>()).EpochKeyRefusal,
   currentEpoch: vi.fn((epochMs: number) => Math.floor(Date.now() / epochMs)),
   ensureEpochKey: vi.fn(async (_session: unknown, epoch: number) => ({ epoch, publicKey: PUBLIC_KEY })),
   reRegisterEpochKey: vi.fn(async () => {}),
@@ -35,12 +37,13 @@ vi.mock("../shared/storage", async (importOriginal) => ({
 }));
 
 import type { TargetRef } from "../shared/adapter";
+import { EPOCH_KEY_LIMIT_KEY } from "../shared/epoch-key-limit";
 import { REACTION_BYTES_MAX } from "../shared/messages";
 import { clearOwnReactionIfMatches } from "../shared/storage";
 import { enqueueVote, flushOwnedVotesForSignOut, flushVotes, voteRetryDelayMs } from "./api";
 import { ApiHttpError, apiErrorCode } from "./api-client";
 import { clearFailedReads, clearPendingMineBatch, fetchCount, MINE_BATCH_WINDOW_MS } from "./api-read";
-import { ensureEpochKey, reRegisterEpochKey, signVote } from "./epoch-keys";
+import { EpochKeyRefusal, ensureEpochKey, reRegisterEpochKey, signVote } from "./epoch-keys";
 import { pushHistory, removeHistoryEntry } from "./history";
 import { clearAuth, getAuth } from "./identity";
 import { bytesToBase64Url, voteSignatureMessage } from "./vote-signing";
@@ -69,7 +72,7 @@ beforeEach(() => {
   // Same reason: an open /reactions/mine batch would collect the next test's target.
   clearPendingMineBatch();
   vi.useFakeTimers();
-  installFakeChrome();
+  local = installFakeChrome().local;
   vi.stubGlobal("navigator", { language: "uk-UA" });
   vi.mocked(getAuth).mockResolvedValue({
     userId: "u1",
@@ -82,6 +85,7 @@ beforeEach(() => {
 
 // One day, so the epoch the drain derives is a small round number.
 const EPOCH_MS = 86_400_000;
+let local: Record<string, unknown>;
 
 afterEach(() => {
   vi.useRealTimers();
@@ -573,6 +577,28 @@ describe("flushVotes - signing", () => {
     expect(fetchMock).not.toHaveBeenCalled();
     expect(deleteById).not.toHaveBeenCalled();
     expect(bumpAttempt).toHaveBeenCalledWith(21, expect.any(Number));
+  });
+
+  // The API will not issue this device a key before the next epoch, so a retry
+  // could only fail the same way: the vote and its optimistic row go at once, and
+  // the notice the Account tab renders names when voting resumes.
+  it("drops the vote without retry on epoch_key_limit, rolls the optimistic state back and leaves the notice", async () => {
+    vi.setSystemTime(EPOCH_MS * 42 + 5);
+    vi.mocked(ensureEpochKey).mockRejectedValueOnce(new EpochKeyRefusal("epoch_key_limit"));
+    vi.mocked(peekNextEligible)
+      .mockResolvedValueOnce(queued({ id: 24, historyReaction: "❤️", optimisticHistoryId: "hist-24" }))
+      .mockResolvedValueOnce(undefined);
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    await flushVotes();
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(bumpAttempt).not.toHaveBeenCalled();
+    expect(deleteById).toHaveBeenCalledWith(24);
+    expect(removeHistoryEntry).toHaveBeenCalledWith("hist-24");
+    expect(clearOwnReactionIfMatches).toHaveBeenCalledWith(target, "❤️", "u1");
+    expect(local[EPOCH_KEY_LIMIT_KEY]).toEqual({ epoch: 42, resumesAt: EPOCH_MS * 43 });
   });
 
   it("re-registers the key and re-sends once on unknown_key, then drops the vote", async () => {

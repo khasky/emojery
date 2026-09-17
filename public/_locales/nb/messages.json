@@ -480,6 +480,18 @@
   "authErrOutdated": {
     "message": "Denne versjonen av Emojery er utdatert. Oppdater den for å logge inn."
   },
+  "authErrDeviceLimit": {
+    "message": "Enhetsgrensen for denne måneden er nådd. Prøv igjen neste måned."
+  },
+  "voteDeviceLimit": {
+    "message": "Enhetsgrensen for denne måneden er nådd. Du kan stemme igjen fra $DATE$.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 1, 2026"
+      }
+    }
+  },
   "loadError": {
     "message": "Noe gikk galt. Prøv igjen."
   },

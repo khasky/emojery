@@ -3,6 +3,7 @@
 import type { TargetRef } from "../shared/adapter";
 import { effectiveAnalyticsConsent, resolveLocalAnalyticsConsent } from "../shared/data-consent";
 import { defined } from "../shared/defined";
+import { noteEpochKeyLimit } from "../shared/epoch-key-limit";
 import { normalizeLanguageTag } from "../shared/language-tag";
 import type { ReactionAction } from "../shared/messages";
 import { markReactedOnce } from "../shared/onboarding";
@@ -12,7 +13,7 @@ import { clearOwnReactionIfMatches } from "../shared/storage";
 import { clearAlarm, createAlarm, storageLocalGet, storageLocalSet } from "../shared/webext";
 import { type ApiReply, apiErrorString, apiRequest, isRecord, requestLanguage } from "./api-client";
 import { logBackgroundError } from "./debug";
-import { currentEpoch, type EpochKeySession, ensureEpochKey, reRegisterEpochKey, signVote } from "./epoch-keys";
+import { currentEpoch, EpochKeyRefusal, type EpochKeySession, ensureEpochKey, reRegisterEpochKey, signVote } from "./epoch-keys";
 import { pushHistory, removeHistoryEntry } from "./history";
 import { type AuthState, clearAuth, getAuth } from "./identity";
 import { bytesToBase64Url, voteSignatureMessage } from "./vote-signing";
@@ -302,10 +303,10 @@ async function drainQueuedVotes(): Promise<void> {
     // Stable across retries either way. The stored key for rows written since
     // enqueue started stamping one, the id+ts derivation for older rows.
     const nonce = vote.nonce ?? `${vote.id}:${vote.ts}`;
+    // Signed at send time, not at click time: the key belongs to the epoch the
+    // vote lands in, and a queued vote can outlive the epoch it was cast in.
+    const epoch = currentEpoch(auth.epochMs);
     try {
-      // Signed at send time, not at click time: the key belongs to the epoch the
-      // vote lands in, and a queued vote can outlive the epoch it was cast in.
-      const epoch = currentEpoch(auth.epochMs);
       const key = await ensureEpochKey(auth, epoch);
       const sig = await signVote(auth, epoch, voteSignatureMessage({ site: vote.target.site, targetId: vote.target.targetId, reaction: vote.reaction, nonce }));
       const reply = await apiRequest("/reactions/vote", {
@@ -333,11 +334,19 @@ async function drainQueuedVotes(): Promise<void> {
       await handleVoteResponse(reply, vote, auth);
       keyRefusalRetried.delete(vote.id);
     } catch (error) {
+      keyRefusalRetried.delete(vote.id);
+      if (error instanceof EpochKeyRefusal && error.refusal === "epoch_key_limit") {
+        // No key for this device until the next epoch, so no retry can carry the
+        // vote: it goes now, and the Account tab says until when.
+        await noteEpochKeyLimit(epoch, auth.epochMs);
+        await dropOptimisticHistory(vote);
+        await deleteById(vote.id);
+        continue;
+      }
       // Offline and a bug in the request build land here alike; without the trace a
       // vote that can NEVER succeed looks like a flaky network and the queue drains
       // itself silently.
       logBackgroundError("drainQueuedVotes", error);
-      keyRefusalRetried.delete(vote.id);
       await retryVoteOrDropAfterLimit(vote);
       await recordVoteRetryBackoff(vote.id);
     }

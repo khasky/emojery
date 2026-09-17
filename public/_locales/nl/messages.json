@@ -480,6 +480,18 @@
   "authErrOutdated": {
     "message": "Deze versie van Emojery is verouderd. Werk hem bij om in te loggen."
   },
+  "authErrDeviceLimit": {
+    "message": "De apparaatlimiet voor deze maand is bereikt. Probeer het volgende maand opnieuw."
+  },
+  "voteDeviceLimit": {
+    "message": "De apparaatlimiet voor deze maand is bereikt. Stemmen kan weer vanaf $DATE$.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 1, 2026"
+      }
+    }
+  },
   "loadError": {
     "message": "Er is iets misgegaan. Probeer het opnieuw."
   },

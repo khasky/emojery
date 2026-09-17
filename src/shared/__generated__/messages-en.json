@@ -480,6 +480,18 @@
  "authErrOutdated": {
   "message": "This version of Emojery is out of date. Update it to sign in."
  },
+ "authErrDeviceLimit": {
+  "message": "Device limit for this month is reached. Try again next month."
+ },
+ "voteDeviceLimit": {
+  "message": "Device limit for this month is reached. Voting resumes on $DATE$.",
+  "placeholders": {
+   "date": {
+    "content": "$1",
+    "example": "October 1, 2026"
+   }
+  }
+ },
  "loadError": {
   "message": "Something went wrong. Please try again."
  },

@@ -8,7 +8,8 @@
 import { h } from "preact";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { userEvent } from "vitest/browser";
-import { ACCOUNT_LIST_SELECTOR, DELETE_CONFIRM_WARN_SELECTOR, SIGNIN_PROMPT_MSG_SELECTOR } from "../../shared/page-dom";
+import { EPOCH_KEY_LIMIT_KEY } from "../../shared/epoch-key-limit";
+import { ACCOUNT_LIST_SELECTOR, DELETE_CONFIRM_WARN_SELECTOR, DEVICE_LIMIT_NOTICE_SELECTOR, SIGNIN_PROMPT_MSG_SELECTOR } from "../../shared/page-dom";
 import { DEFAULT_SETTINGS } from "../../shared/storage";
 import { mountContainer, renderAndSettle, unmountContainer } from "../../test/browser-harness";
 import { type ChromeShimHandle, installChromeShim } from "../../test/chrome-shim";
@@ -24,14 +25,16 @@ interface Options {
   authed?: boolean;
   provider?: string | null;
   deleteReply?: unknown;
+  local?: Record<string, unknown>;
 }
 
 // Stateful: the view re-reads auth:status after sign-out and after a
 // delete, so the answer has to change the way the background's would.
-function install({ authed = true, provider = "google", deleteReply = { type: "ok" } }: Options = {}): void {
+function install({ authed = true, provider = "google", deleteReply = { type: "ok" }, local }: Options = {}): void {
   sent = [];
   let signedIn = authed;
   shim = installChromeShim({
+    ...(local ? { local } : {}),
     onMessage: (msg) => {
       const type = (msg as { type?: string }).type;
       sent.push(msg);
@@ -119,6 +122,34 @@ describe("AccountView - session states", () => {
     await vi.waitFor(() => expect(container.querySelector(SIGNIN_PROMPT_MSG_SELECTOR)).not.toBeNull());
     // Signed out, then re-read: the tab never keeps a stale signed-in header.
     expect(sentTypes()).toEqual(["auth:status", "auth:signOut", "auth:status"]);
+  });
+});
+
+describe("AccountView - device limit notice", () => {
+  const RESUMES_AT = Date.UTC(2026, 9, 1, 12);
+
+  it("says until when voting is paused while the notice stands", async () => {
+    install({ local: { [EPOCH_KEY_LIMIT_KEY]: { epoch: 41, resumesAt: RESUMES_AT } } });
+    await mountAndSettle();
+
+    await vi.waitFor(() => expect(container.querySelector(DEVICE_LIMIT_NOTICE_SELECTOR)).not.toBeNull());
+    const notice = container.querySelector(DEVICE_LIMIT_NOTICE_SELECTOR)!;
+    expect(notice.getAttribute("role")).toBe("status");
+    expect(notice.textContent).toBe(`Device limit for this month is reached. Voting resumes on ${new Date(RESUMES_AT).toLocaleDateString(navigator.language, { year: "numeric", month: "long", day: "numeric" })}.`);
+  });
+
+  it("shows nothing once the epoch it names has passed, and drops the stale notice", async () => {
+    install({ local: { [EPOCH_KEY_LIMIT_KEY]: { epoch: 1, resumesAt: Date.now() - 1 } } });
+    await mountAndSettle();
+
+    await vi.waitFor(() => expect(shim.local.has(EPOCH_KEY_LIMIT_KEY)).toBe(false));
+    expect(container.querySelector(DEVICE_LIMIT_NOTICE_SELECTOR)).toBeNull();
+  });
+
+  it("shows nothing for a signed-in account without one", async () => {
+    install();
+    await mountAndSettle();
+    expect(container.querySelector(DEVICE_LIMIT_NOTICE_SELECTOR)).toBeNull();
   });
 });
 
