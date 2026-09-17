@@ -258,7 +258,9 @@ test("a burst that meets a 429 is re-sent - no reaction is lost", async () => {
   const session = await ext.launchSession();
   const responses = watchVoteResponses(session.context);
   try {
-    const page = await ext.signedInGithubPage(session.context);
+    // Its own account: the primary one is exempt from the per-minute budget
+    // this case has to run into.
+    const page = await ext.signedInGithubPage(session.context, ext.authAccount("burst-limit"));
     await resetTarget(session.context, page);
 
     const glyphs = await pickerGlyphs(page, MAX_BURST_CLICKS * BURST_ROUNDS);
