@@ -199,10 +199,12 @@ async function signInThroughTestProvider(authPage: Page, opts: AuthSignInOptions
   await opts.completeSignIn(window);
 
   // The window closes itself once the API redirects it back; the auth page then
-  // exchanges the code and lands on the done step, or shows its refusal.
+  // exchanges the code and lands on the done step, or shows its refusal. A first
+  // sign-in registers the device's account key during the exchange, which the
+  // API takes tens of seconds to do, so the wait spans that.
   const signedIn = authPage.getByRole("heading", { name: localeMessage(locale, "authDoneTitle") });
   const resolved = await expect(signedIn.or(authPage.locator(AUTH_ERROR_SELECTOR)))
-    .toBeVisible({ timeout: 45_000 })
+    .toBeVisible({ timeout: 120_000 })
     .then(() => true)
     .catch(() => false);
   if (!resolved) return false;
