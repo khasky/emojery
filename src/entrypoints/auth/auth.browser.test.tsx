@@ -145,14 +145,14 @@ describe("auth page - the provider step", () => {
   });
 
   it("offers the featured providers in a fixed order, whatever order the API used", async () => {
-    install({ providersReply: { type: "auth:providers", providers: ["slack", "microsoft", "google"] } });
+    install({ providersReply: { type: "auth:providers", providers: ["twitch", "microsoft", "google"] } });
     await loadPage();
     await reachProviders();
 
     expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "microsoft"]);
     await userEvent.click(termsBox());
     await userEvent.click(requireEl<HTMLButtonElement>(document, MORE_PROVIDERS_SELECTOR));
-    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "microsoft", "slack"]);
+    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "microsoft", "twitch"]);
   });
 
   it("shows no reveal button when the API lists nothing past the featured three", async () => {

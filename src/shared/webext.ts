@@ -248,9 +248,10 @@ function identityApi(): IdentityApi {
   return (chrome as typeof chrome & { identity?: IdentityApi }).identity ?? {};
 }
 
-// The `https://<id>.chromiumapp.org/` (Firefox: `<uuid>.extensions.allizom.org`)
-// origin the browser hands the auth flow back on. Null where the identity API is
-// absent (Safari), which the sign-in reports as unavailable rather than guessing.
+// The `https://<id>.chromiumapp.org/` (Firefox: `<sha1 of the gecko
+// id>.extensions.allizom.org`) origin the browser hands the auth flow back on. Null
+// where the identity API is absent (Safari), which the sign-in reports as
+// unavailable rather than guessing.
 export function identityRedirectUrl(): string | null {
   const { getRedirectURL } = identityApi();
   return getRedirectURL ? getRedirectURL() : null;
