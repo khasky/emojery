@@ -13,6 +13,10 @@ const INDEX = JSON.stringify({ format: 1, id: ID, files: [BUILD_INDEX_PATH, ...O
 
 const URL_UNDER_TEST = "https://api.emojery.app/reactions/vote";
 
+// The ref carries an absolute expiry, so a test that builds one to hand in and a
+// second one to compare against reads a different second whenever the clock ticks
+// between the two calls - and the measurement it waits for takes long enough to
+// make that a coin flip. Every case builds its ref ONCE and asserts on that value.
 function refFor(secondsFromNow: number): string {
   const payload = btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + secondsFromNow, n: "00" }));
   return `v1.${payload.replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "")}.mac`;
@@ -61,12 +65,13 @@ describe("buildTagHeaders", () => {
 
   it("answers with the measured package", async () => {
     stubPackage();
-    rememberBuildRef(refFor(600));
+    const handedOut = refFor(600);
+    rememberBuildRef(handedOut);
     const headers = await settledHeaders();
     expect(headers[BUILD_ID_HEADER]).toBe(ID);
     const [ref, tag] = (headers[BUILD_TAG_HEADER] ?? "").split("~");
     expect(tag).toMatch(/^[a-f0-9]{64}$/);
-    expect(ref).toBe(refFor(600));
+    expect(ref).toBe(handedOut);
   });
 
   it("binds the answer to the request it rides on", async () => {
@@ -132,12 +137,13 @@ describe("buildTagHeaders", () => {
   it("re-measures rather than trusting a cached digest from another build", async () => {
     session.build_measurement_v1 = { id: ID, root: "c".repeat(64) };
     const { reads } = stubPackage();
-    rememberBuildRef(refFor(600));
+    const handedOut = refFor(600);
+    rememberBuildRef(handedOut);
     const headers = await settledHeaders();
     // The cached digest is keyed by the index id, so this one is used as-is...
     expect(reads).toEqual([BUILD_INDEX_PATH]);
-    const expected = await buildRequestTag(ID, "c".repeat(64), refFor(600), URL_UNDER_TEST, "POST", "");
-    expect(headers[BUILD_TAG_HEADER]).toBe(`${refFor(600)}~${expected}`);
+    const expected = await buildRequestTag(ID, "c".repeat(64), handedOut, URL_UNDER_TEST, "POST", "");
+    expect(headers[BUILD_TAG_HEADER]).toBe(`${handedOut}~${expected}`);
 
     // ...and a package whose index names a different build is measured again.
     resetBuildContext();
