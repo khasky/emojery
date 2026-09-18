@@ -414,6 +414,9 @@
       }
     }
   },
+  "authMoreProvidersBtn": {
+    "message": "更多登录方式"
+  },
   "authSigningInWith": {
     "message": "正在通过 $PROVIDER$ 登录...",
     "placeholders": {

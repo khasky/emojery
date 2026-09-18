@@ -7,7 +7,7 @@
 import { render } from "preact";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { userEvent } from "vitest/browser";
-import { AGREE_CHECKBOX_SELECTOR, AUTH_ERROR_ID, AUTH_ERROR_SELECTOR, COUNTDOWN_SELECTOR, PROVIDER_BUTTON_SELECTOR, PROVIDER_LIST_SELECTOR, providerButtonSelector, TAGLINE_SELECTOR } from "../../shared/page-dom";
+import { AGREE_CHECKBOX_SELECTOR, AUTH_ERROR_ID, AUTH_ERROR_SELECTOR, COUNTDOWN_SELECTOR, MORE_PROVIDERS_SELECTOR, PROVIDER_BUTTON_SELECTOR, PROVIDER_LIST_SELECTOR, providerButtonSelector, TAGLINE_SELECTOR } from "../../shared/page-dom";
 import { requireEl } from "../../test/browser-harness";
 import { type ChromeShimHandle, installChromeShim } from "../../test/chrome-shim";
 
@@ -15,7 +15,7 @@ import { type ChromeShimHandle, installChromeShim } from "../../test/chrome-shim
 // the URL - restored unchanged between tests, because the runner's own query string
 // is what later dynamic imports resolve against.
 const PAGE_URL = location.href;
-const PROVIDERS = { type: "auth:providers", providers: ["google", "apple", "test"] };
+const PROVIDERS = { type: "auth:providers", providers: ["google", "apple", "microsoft", "twitch", "test"] };
 const OK_SIGN_IN = { type: "auth:signedIn", ok: true };
 // In production the background closes this tab on an "ok", so nothing repaints
 // after it - here the page stays put, which is what the asserts read.
@@ -54,6 +54,7 @@ const heading = (): string => requireEl(document, "#app h1").textContent ?? "";
 const termsBox = () => requireEl<HTMLInputElement>(document, AGREE_CHECKBOX_SELECTOR);
 const providerButtons = () => [...document.querySelectorAll<HTMLButtonElement>(PROVIDER_BUTTON_SELECTOR)];
 const providerButton = (id: string) => requireEl<HTMLButtonElement>(document, providerButtonSelector(id));
+const moreProvidersBtn = () => document.querySelector<HTMLButtonElement>(MORE_PROVIDERS_SELECTOR);
 const primaryBtn = () => requireEl<HTMLButtonElement>(document, "button.primary");
 const errorText = (): string => document.querySelector(AUTH_ERROR_SELECTOR)?.textContent ?? "";
 const sentOfType = (type: string) => sent.filter((m) => (m as { type?: string }).type === type);
@@ -66,6 +67,8 @@ async function reachProviders(): Promise<void> {
 async function pick(id = "google"): Promise<void> {
   await reachProviders();
   await userEvent.click(termsBox());
+  const more = moreProvidersBtn();
+  if (more && !document.querySelector(providerButtonSelector(id))) await userEvent.click(more);
   await userEvent.click(providerButton(id));
 }
 
@@ -94,9 +97,49 @@ describe("auth page - the provider step", () => {
 
     expect(heading()).toBe("Sign in to react");
     await vi.waitFor(() => expect(document.title).toBe("Emojery — Sign in"));
-    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "apple", "test"]);
-    expect(providerButtons().map((b) => b.textContent?.trim())).toEqual(["Continue with Google", "Continue with Apple", "Continue with test"]);
+    await userEvent.click(termsBox());
+    await userEvent.click(requireEl<HTMLButtonElement>(document, MORE_PROVIDERS_SELECTOR));
+    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "apple", "microsoft", "twitch", "test"]);
+    expect(providerButtons().map((b) => b.textContent?.trim())).toEqual(["Continue with Google", "Continue with Apple", "Continue with Microsoft", "Continue with Twitch", "Continue with test"]);
     expect(sentOfType("auth:providers")).toHaveLength(1);
+  });
+
+  it("opens with the three most common accounts and keeps the rest behind one button", async () => {
+    install();
+    await loadPage();
+    await reachProviders();
+
+    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "apple", "microsoft"]);
+    const more = requireEl<HTMLButtonElement>(document, MORE_PROVIDERS_SELECTOR);
+    expect(more.textContent?.trim()).toBe("More sign-in options");
+
+    await userEvent.click(termsBox());
+    await userEvent.click(more);
+
+    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "apple", "microsoft", "twitch", "test"]);
+    // The button removed itself, so focus has to land on what it opened.
+    expect(moreProvidersBtn()).toBeNull();
+    await vi.waitFor(() => expect(document.activeElement).toBe(providerButton("twitch")));
+  });
+
+  it("offers the featured providers in a fixed order, whatever order the API used", async () => {
+    install({ providersReply: { type: "auth:providers", providers: ["slack", "microsoft", "google"] } });
+    await loadPage();
+    await reachProviders();
+
+    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "microsoft"]);
+    await userEvent.click(termsBox());
+    await userEvent.click(requireEl<HTMLButtonElement>(document, MORE_PROVIDERS_SELECTOR));
+    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "microsoft", "slack"]);
+  });
+
+  it("shows no reveal button when the API lists nothing past the featured three", async () => {
+    install({ providersReply: { type: "auth:providers", providers: ["google", "apple"] } });
+    await loadPage();
+    await reachProviders();
+
+    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "apple"]);
+    expect(moreProvidersBtn()).toBeNull();
   });
 
   it("keeps every provider disabled until the terms are ticked", async () => {
@@ -105,8 +148,10 @@ describe("auth page - the provider step", () => {
     await reachProviders();
 
     expect(providerButtons().every((b) => b.disabled)).toBe(true);
+    expect(moreProvidersBtn()?.disabled).toBe(true);
     await userEvent.click(termsBox());
     expect(providerButtons().every((b) => !b.disabled)).toBe(true);
+    expect(moreProvidersBtn()?.disabled).toBe(false);
     expect(sentOfType("auth:signIn")).toHaveLength(0);
   });
 
@@ -150,6 +195,16 @@ describe("auth page - the provider step", () => {
     expect(document.querySelector(PROVIDER_LIST_SELECTOR)?.getAttribute("aria-describedby")).toBe(AUTH_ERROR_ID);
     // The list is still usable: the consent survives, so a second pick is one click.
     expect(providerButtons().every((b) => !b.disabled)).toBe(true);
+  });
+
+  it("keeps the longer list open after a refusal sends the page back to it", async () => {
+    install({ signInReply: { type: "auth:signedIn", ok: false, refusal: "cancelled" } });
+    await loadPage();
+    await pick("twitch");
+
+    await vi.waitFor(() => expect(errorText()).toBe("Sign-in was cancelled. Try again when you're ready."));
+    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "apple", "microsoft", "twitch", "test"]);
+    expect(moreProvidersBtn()).toBeNull();
   });
 
   it("treats a background that answers something else as the generic refusal", async () => {

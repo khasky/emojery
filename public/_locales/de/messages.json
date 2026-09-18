@@ -414,6 +414,9 @@
       }
     }
   },
+  "authMoreProvidersBtn": {
+    "message": "Weitere Anmeldeoptionen"
+  },
   "authSigningInWith": {
     "message": "Anmeldung mit $PROVIDER$...",
     "placeholders": {

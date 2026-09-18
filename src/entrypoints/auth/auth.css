@@ -198,6 +198,14 @@
   flex: 0 0 auto;
 }
 
+/* Sits inside the provider list, so the list's gap spaces it; centred because it
+   opens the rest of the list rather than being one more choice in it. */
+.more-providers {
+  align-self: center;
+  margin: 0;
+  padding: 8px 12px;
+}
+
 .agree input[type="checkbox"] {
   flex: 0 0 auto;
   width: auto;

@@ -414,6 +414,9 @@
       }
     }
   },
+  "authMoreProvidersBtn": {
+    "message": "Інші способи входу"
+  },
   "authSigningInWith": {
     "message": "Вхід через $PROVIDER$...",
     "placeholders": {

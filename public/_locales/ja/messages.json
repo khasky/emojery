@@ -414,6 +414,9 @@
       }
     }
   },
+  "authMoreProvidersBtn": {
+    "message": "他のログイン方法"
+  },
   "authSigningInWith": {
     "message": "$PROVIDER$ でサインイン中...",
     "placeholders": {

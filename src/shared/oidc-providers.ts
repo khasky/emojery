@@ -24,6 +24,19 @@ export function providerLabel(id: OidcProvider): string {
   return PROVIDER_LABELS[id] ?? id;
 }
 
+// The providers the sign-in page shows straight away, in this order - the accounts
+// most people already carry. Everything else the API offers waits behind "more
+// sign-in options", in the order the API listed it, so a provider added or retired
+// on the backend still needs no release here.
+export const FEATURED_PROVIDERS: readonly OidcProvider[] = ["google", "apple", "microsoft"];
+
+export function splitFeaturedProviders(ids: readonly OidcProvider[]): { featured: OidcProvider[]; rest: OidcProvider[] } {
+  return {
+    featured: FEATURED_PROVIDERS.filter((id) => ids.includes(id)),
+    rest: ids.filter((id) => !FEATURED_PROVIDERS.includes(id)),
+  };
+}
+
 export function isProviderId(value: unknown): value is OidcProvider {
   return typeof value === "string" && value.length <= PROVIDER_ID_MAX && PROVIDER_ID_SHAPE.test(value);
 }

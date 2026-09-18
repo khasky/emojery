@@ -414,6 +414,9 @@
       }
     }
   },
+  "authMoreProvidersBtn": {
+    "message": "Más opciones de inicio de sesión"
+  },
   "authSigningInWith": {
     "message": "Iniciando sesión con $PROVIDER$...",
     "placeholders": {

@@ -414,6 +414,9 @@
       }
     }
   },
+  "authMoreProvidersBtn": {
+    "message": "Daugiau prisijungimo parinkčių"
+  },
   "authSigningInWith": {
     "message": "Prisijungiama su $PROVIDER$...",
     "placeholders": {

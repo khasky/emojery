@@ -414,6 +414,9 @@
       }
     }
   },
+  "authMoreProvidersBtn": {
+    "message": "ตัวเลือกการลงชื่อเข้าใช้เพิ่มเติม"
+  },
   "authSigningInWith": {
     "message": "กำลังลงชื่อเข้าใช้ด้วย $PROVIDER$...",
     "placeholders": {

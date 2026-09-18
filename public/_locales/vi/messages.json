@@ -414,6 +414,9 @@
       }
     }
   },
+  "authMoreProvidersBtn": {
+    "message": "Thêm tuỳ chọn đăng nhập"
+  },
   "authSigningInWith": {
     "message": "Đang đăng nhập bằng $PROVIDER$...",
     "placeholders": {

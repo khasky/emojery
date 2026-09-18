@@ -414,6 +414,9 @@
       }
     }
   },
+  "authMoreProvidersBtn": {
+    "message": "További bejelentkezési lehetőségek"
+  },
   "authSigningInWith": {
     "message": "Bejelentkezés ezzel: $PROVIDER$...",
     "placeholders": {

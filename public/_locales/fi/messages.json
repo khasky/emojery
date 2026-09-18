@@ -414,6 +414,9 @@
       }
     }
   },
+  "authMoreProvidersBtn": {
+    "message": "Lisää kirjautumisvaihtoehtoja"
+  },
   "authSigningInWith": {
     "message": "Kirjaudutaan: $PROVIDER$...",
     "placeholders": {

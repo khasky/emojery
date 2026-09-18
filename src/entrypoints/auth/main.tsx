@@ -6,9 +6,9 @@ import { type ComponentChild, render } from "preact";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import { type I18nKey, t } from "../../shared/i18n";
 import type { RuntimeResponse, SignInRefusal } from "../../shared/messages";
-import { type OidcProvider, providerLabel } from "../../shared/oidc-providers";
+import { type OidcProvider, providerLabel, splitFeaturedProviders } from "../../shared/oidc-providers";
 import { bootstrapPage } from "../../shared/page-bootstrap";
-import { AGREE_CLASS, AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, COUNTDOWN_CLASS, PROVIDER_BUTTON_CLASS, PROVIDER_LIST_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
+import { AGREE_CLASS, AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, COUNTDOWN_CLASS, MORE_PROVIDERS_CLASS, PROVIDER_BUTTON_CLASS, PROVIDER_LIST_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
 import { withExtensionUtm } from "../../shared/tracking-links";
 import { sendRuntimeMessage } from "../../shared/webext";
 
@@ -174,21 +174,34 @@ type ProviderStepProps = {
   providers: OidcProvider[] | null | undefined;
   error: string | null;
   accepted: boolean;
+  showAll: boolean;
   onPick: (provider: OidcProvider) => void;
   onRetryProviders: () => void;
   setAccepted: (value: boolean) => void;
+  setShowAll: (value: boolean) => void;
 };
 
 // `providers` is undefined while the list loads, null when it could not be read
 // (the API unreachable, the worker gone) - that state shows the generic error
 // with a retry, since nothing else on the page can be done without the list.
-function ProviderStep({ providers, error, accepted, onPick, onRetryProviders, setAccepted }: ProviderStepProps) {
+function ProviderStep({ providers, error, accepted, showAll, onPick, onRetryProviders, setAccepted, setShowAll }: ProviderStepProps) {
   const firstButton = useRef<HTMLButtonElement>(null);
+  const firstRevealed = useRef<HTMLButtonElement>(null);
+  const wasShowingAll = useRef(showAll);
   // Focus lands on the first choice once there is one; before that the page
   // has no field to land in.
   useEffect(() => {
     firstButton.current?.focus();
   }, [providers]);
+  // The button that revealed the rest removes itself, so keyboard focus has to
+  // move into what it opened rather than back to the top of the document.
+  useEffect(() => {
+    if (showAll && !wasShowingAll.current) firstRevealed.current?.focus();
+    wasShowingAll.current = showAll;
+  }, [showAll]);
+
+  const { featured, rest } = splitFeaturedProviders(providers ?? []);
+  const shown = showAll ? [...featured, ...rest] : featured;
 
   return (
     <main class="wrap">
@@ -234,12 +247,31 @@ function ProviderStep({ providers, error, accepted, onPick, onRetryProviders, se
           </button>
         ) : (
           <div class={PROVIDER_LIST_CLASS} aria-describedby={error ? AUTH_ERROR_ID : undefined}>
-            {(providers ?? []).map((provider, index) => (
-              <button key={provider} class={PROVIDER_BUTTON_CLASS} type="button" data-provider={provider} disabled={!accepted} {...(index === 0 ? { ref: firstButton } : {})} onClick={() => onPick(provider)}>
+            {shown.map((provider, index) => (
+              <button
+                key={provider}
+                class={PROVIDER_BUTTON_CLASS}
+                type="button"
+                data-provider={provider}
+                disabled={!accepted}
+                // One callback for both marks: with no featured provider on the list
+                // the first button is also the first revealed one, and two `ref` props
+                // on one element would leave whichever lost null.
+                ref={(el: HTMLButtonElement | null) => {
+                  if (index === 0) firstButton.current = el;
+                  if (index === featured.length) firstRevealed.current = el;
+                }}
+                onClick={() => onPick(provider)}
+              >
                 <ProviderMark provider={provider} />
                 <span>{t("authProviderBtn", providerLabel(provider))}</span>
               </button>
             ))}
+            {showAll || rest.length === 0 ? null : (
+              <button class={`linkish ${MORE_PROVIDERS_CLASS}`} type="button" disabled={!accepted} onClick={() => setShowAll(true)}>
+                {t("authMoreProvidersBtn")}
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -253,6 +285,9 @@ function App() {
   const [picked, setPicked] = useState<OidcProvider | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [accepted, setAccepted] = useState(false);
+  // Held here, not in the step: a refused sign-in comes back to the list, and a
+  // reader who already opened the longer list should not have to open it again.
+  const [showAll, setShowAll] = useState(false);
   const [returnsToPage, setReturnsToPage] = useState(false);
 
   const loadProviders = useCallback(() => {
@@ -285,7 +320,7 @@ function App() {
 
   if (step === "done") return <DoneStep returnsToPage={returnsToPage} />;
   if (step === "busy" && picked) return <BusyStep provider={picked} />;
-  return <ProviderStep providers={providers} error={error} accepted={accepted} onPick={(provider) => void pick(provider)} onRetryProviders={loadProviders} setAccepted={setAccepted} />;
+  return <ProviderStep providers={providers} error={error} accepted={accepted} showAll={showAll} onPick={(provider) => void pick(provider)} onRetryProviders={loadProviders} setAccepted={setAccepted} setShowAll={setShowAll} />;
 }
 
 // Shown ahead of the sign-in form on browsers that never prompted for data collection themselves.

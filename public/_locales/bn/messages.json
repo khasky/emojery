@@ -414,6 +414,9 @@
       }
     }
   },
+  "authMoreProvidersBtn": {
+    "message": "সাইন ইন করার আরও উপায়"
+  },
   "authSigningInWith": {
     "message": "$PROVIDER$ দিয়ে সাইন ইন হচ্ছে...",
     "placeholders": {

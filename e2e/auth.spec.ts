@@ -3,7 +3,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
-import { identityWindowAfter, TEST_PROVIDER } from "./lib/auth-signin";
+import { identityWindowAfter, revealTestProvider, TEST_PROVIDER } from "./lib/auth-signin";
 import { authAccount, authConfigured, closeSession, completeSignIn, enMessage, extensionPageUrl, FIREFOX_NO_EXTENSION_PAGES, isFirefoxRun, launchSession, localeMessage, removeProfileUnlessKept, resolveExtensionId, resolveExtensionPath, signInSkipReason } from "./lib/extension";
 import { AGREE_CHECKBOX_SELECTOR, PROVIDER_BUTTON_SELECTOR, providerButtonSelector } from "./lib/selectors";
 
@@ -72,13 +72,14 @@ test.describe("extension account auth", () => {
 
     // The provider list is the API's: the staging build lists the test provider
     // beside the real ones, and every button waits for the consent box.
-    const testButton = authPage.locator(providerButtonSelector(TEST_PROVIDER));
-    await expect(testButton).toBeVisible();
-    await expect(testButton).toHaveText(enMessage("authProviderBtn", TEST_PROVIDER));
     const agreeCheckbox = authPage.locator(AGREE_CHECKBOX_SELECTOR);
     await expect(agreeCheckbox).not.toBeChecked();
     for (const button of await authPage.locator(PROVIDER_BUTTON_SELECTOR).all()) await expect(button).toBeDisabled();
     await agreeCheckbox.check();
+    await revealTestProvider(authPage);
+    const testButton = authPage.locator(providerButtonSelector(TEST_PROVIDER));
+    await expect(testButton).toBeVisible();
+    await expect(testButton).toHaveText(enMessage("authProviderBtn", TEST_PROVIDER));
     await expect(testButton).toBeEnabled();
 
     // Closing the identity window before the provider answers is the cancelled
@@ -145,9 +146,10 @@ test.describe("extension account auth", () => {
             name: localeMessage(locale, "authSignInTitle"),
           }),
         ).toBeVisible();
+        await authPage.locator(AGREE_CHECKBOX_SELECTOR).check();
+        await revealTestProvider(authPage);
         const testButton = authPage.locator(providerButtonSelector(TEST_PROVIDER));
         await expect(testButton).toHaveText(localeMessage(locale, "authProviderBtn", TEST_PROVIDER));
-        await authPage.locator(AGREE_CHECKBOX_SELECTOR).check();
         await expect(testButton).toBeEnabled();
 
         const window = await identityWindowAfter(authPage, () => testButton.click());

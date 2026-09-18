@@ -414,6 +414,9 @@
       }
     }
   },
+  "authMoreProvidersBtn": {
+    "message": "Flere påloggingsalternativer"
+  },
   "authSigningInWith": {
     "message": "Logger inn med $PROVIDER$...",
     "placeholders": {

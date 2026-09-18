@@ -15,7 +15,7 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type BrowserContext, expect, type Page } from "@playwright/test";
-import { AGREE_CHECKBOX_SELECTOR, AUTH_ERROR_SELECTOR, providerButtonSelector } from "./selectors";
+import { AGREE_CHECKBOX_SELECTOR, AUTH_ERROR_SELECTOR, MORE_PROVIDERS_SELECTOR, PROVIDER_LIST_SELECTOR, providerButtonSelector } from "./selectors";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 export const EXTENSION_ROOT = resolve(__dirname, "..", "..");
@@ -172,16 +172,26 @@ export function identityWindowAfter(authPage: Page, open: () => Promise<void>): 
   return open().then(() => opened);
 }
 
+// The page opens with the featured providers only; the staging test issuer sits
+// behind "more sign-in options", which is gated by the same consent box, so this
+// runs after the box is ticked. A build that lists nothing extra has no button.
+export async function revealTestProvider(authPage: Page): Promise<void> {
+  await expect(authPage.locator(PROVIDER_LIST_SELECTOR), "the auth page should list the providers the API offers").toBeVisible({ timeout: 30_000 });
+  if (await authPage.locator(providerButtonSelector(TEST_PROVIDER)).isVisible()) return;
+  await authPage.locator(MORE_PROVIDERS_SELECTOR).click();
+}
+
 // One sign-in pass. Returns true once "You're signed in" shows; false if the
 // page reported a refusal (the caller re-runs the pass). Structural failures -
 // never reaching the provider list, the identity window never opening - still throw.
 async function signInThroughTestProvider(authPage: Page, opts: AuthSignInOptions, locale: string): Promise<boolean> {
   await authPage.reload();
-  const providerButton = authPage.locator(providerButtonSelector(TEST_PROVIDER));
-  await expect(providerButton, "the staging build should list the test provider").toBeVisible({ timeout: 30_000 });
   // The Terms/Privacy box ships unchecked, so consent is a required step of
   // every sign-in, and every provider button stays disabled until it is ticked.
   await authPage.locator(AGREE_CHECKBOX_SELECTOR).check();
+  await revealTestProvider(authPage);
+  const providerButton = authPage.locator(providerButtonSelector(TEST_PROVIDER));
+  await expect(providerButton, "the staging build should list the test provider").toBeVisible({ timeout: 30_000 });
   await expect(providerButton).toBeEnabled();
 
   const window = await identityWindowAfter(authPage, () => providerButton.click());
