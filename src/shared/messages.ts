@@ -73,6 +73,9 @@ export type RuntimeMessage =
   // remembered it when the gate asked for the tab (background/auth-return.ts), so
   // a page cannot name a tab to jump to.
   | { type: "auth:returnToOrigin" }
+  // Closes the auth tab where there is nowhere to return to - the sign-in was
+  // started from the popup, so the page it belongs to is the popup, not a tab.
+  | { type: "auth:closeTab" }
   | { type: "auth:signOut" }
   | { type: "auth:delete" }
   // The providers the auth page may offer, as the API lists them - the page

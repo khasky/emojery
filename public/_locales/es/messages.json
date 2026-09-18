@@ -123,16 +123,7 @@
     "message": "Inicia sesión para enviar un reporte de error."
   },
   "signedInLabel": {
-    "message": "Sesión iniciada"
-  },
-  "signedInVia": {
-    "message": "con $PROVIDER$",
-    "placeholders": {
-      "provider": {
-        "content": "$1",
-        "example": "Google"
-      }
-    }
+    "message": "Tu cuenta"
   },
   "signOutBtn": {
     "message": "Cerrar sesión"
@@ -403,7 +394,7 @@
     "message": "Inicia sesión para reaccionar"
   },
   "authSignInTagline": {
-    "message": "Continúa con una cuenta que ya tengas. Emojery nunca ve tu contraseña."
+    "message": "Inicia sesión con una cuenta que ya tengas, usando cualquiera de los servicios de abajo."
   },
   "authProviderBtn": {
     "message": "Continuar con $PROVIDER$",
@@ -425,6 +416,15 @@
         "example": "Google"
       }
     }
+  },
+  "authSigningInKeepOpen": {
+    "message": "Mantén esta pestaña abierta hasta que termine. El primer inicio de sesión tarda un poco más."
+  },
+  "authDoneCloseTagline": {
+    "message": "Cerramos esta pestaña por ti."
+  },
+  "authDoneCloseNowBtn": {
+    "message": "Cerrar ahora"
   },
   "authRetryBtn": {
     "message": "Reintentar"

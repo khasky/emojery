@@ -123,16 +123,7 @@
     "message": "Log in om een foutmelding te versturen."
   },
   "signedInLabel": {
-    "message": "Ingelogd"
-  },
-  "signedInVia": {
-    "message": "via $PROVIDER$",
-    "placeholders": {
-      "provider": {
-        "content": "$1",
-        "example": "Google"
-      }
-    }
+    "message": "Je account"
   },
   "signOutBtn": {
     "message": "Uitloggen"
@@ -403,7 +394,7 @@
     "message": "Log in om te reageren"
   },
   "authSignInTagline": {
-    "message": "Ga verder met een account dat je al hebt. Emojery ziet je wachtwoord nooit."
+    "message": "Meld je aan met een account dat je al hebt, via een van de diensten hieronder."
   },
   "authProviderBtn": {
     "message": "Doorgaan met $PROVIDER$",
@@ -425,6 +416,15 @@
         "example": "Google"
       }
     }
+  },
+  "authSigningInKeepOpen": {
+    "message": "Houd dit tabblad open tot het klaar is. De eerste keer aanmelden duurt iets langer."
+  },
+  "authDoneCloseTagline": {
+    "message": "We sluiten dit tabblad voor je."
+  },
+  "authDoneCloseNowBtn": {
+    "message": "Nu sluiten"
   },
   "authRetryBtn": {
     "message": "Opnieuw proberen"

@@ -123,16 +123,7 @@
     "message": "বাগ রিপোর্ট জমা দিতে সাইন ইন করুন।"
   },
   "signedInLabel": {
-    "message": "সাইন ইন করেছেন"
-  },
-  "signedInVia": {
-    "message": "$PROVIDER$ এর মাধ্যমে",
-    "placeholders": {
-      "provider": {
-        "content": "$1",
-        "example": "Google"
-      }
-    }
+    "message": "আপনার অ্যাকাউন্ট"
   },
   "signOutBtn": {
     "message": "সাইন আউট"
@@ -403,7 +394,7 @@
     "message": "প্রতিক্রিয়া জানাতে সাইন ইন করুন"
   },
   "authSignInTagline": {
-    "message": "আপনার বিদ্যমান অ্যাকাউন্ট দিয়ে চালিয়ে যান। Emojery কখনও আপনার পাসওয়ার্ড দেখে না।"
+    "message": "নিচের যেকোনো সেবা ব্যবহার করে আপনার বিদ্যমান অ্যাকাউন্ট দিয়ে সাইন ইন করুন।"
   },
   "authProviderBtn": {
     "message": "$PROVIDER$ দিয়ে চালিয়ে যান",
@@ -425,6 +416,15 @@
         "example": "Google"
       }
     }
+  },
+  "authSigningInKeepOpen": {
+    "message": "এটি শেষ না হওয়া পর্যন্ত এই ট্যাব খোলা রাখুন। প্রথম সাইন-ইনে একটু বেশি সময় লাগে।"
+  },
+  "authDoneCloseTagline": {
+    "message": "এই ট্যাবটি বন্ধ করা হচ্ছে।"
+  },
+  "authDoneCloseNowBtn": {
+    "message": "এখনই বন্ধ করুন"
   },
   "authRetryBtn": {
     "message": "আবার চেষ্টা করুন"

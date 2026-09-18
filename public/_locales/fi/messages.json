@@ -123,16 +123,7 @@
     "message": "Kirjaudu lähettääksesi virheraportin."
   },
   "signedInLabel": {
-    "message": "Kirjautunut"
-  },
-  "signedInVia": {
-    "message": "$PROVIDER$-tilillä",
-    "placeholders": {
-      "provider": {
-        "content": "$1",
-        "example": "Google"
-      }
-    }
+    "message": "Tilisi"
   },
   "signOutBtn": {
     "message": "Kirjaudu ulos"
@@ -403,7 +394,7 @@
     "message": "Kirjaudu reagoidaksesi"
   },
   "authSignInTagline": {
-    "message": "Jatka tilillä, joka sinulla jo on. Emojery ei koskaan näe salasanaasi."
+    "message": "Kirjaudu sisään tilillä, joka sinulla jo on, millä tahansa alla olevalla palvelulla."
   },
   "authProviderBtn": {
     "message": "Jatka: $PROVIDER$",
@@ -425,6 +416,15 @@
         "example": "Google"
       }
     }
+  },
+  "authSigningInKeepOpen": {
+    "message": "Pidä tämä välilehti auki, kunnes se on valmis. Ensimmäinen kirjautuminen kestää hieman pidempään."
+  },
+  "authDoneCloseTagline": {
+    "message": "Suljemme tämän välilehden puolestasi."
+  },
+  "authDoneCloseNowBtn": {
+    "message": "Sulje nyt"
   },
   "authRetryBtn": {
     "message": "Yritä uudelleen"

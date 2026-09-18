@@ -123,16 +123,7 @@
     "message": "Đăng nhập để gửi báo cáo lỗi."
   },
   "signedInLabel": {
-    "message": "Đã đăng nhập"
-  },
-  "signedInVia": {
-    "message": "qua $PROVIDER$",
-    "placeholders": {
-      "provider": {
-        "content": "$1",
-        "example": "Google"
-      }
-    }
+    "message": "Tài khoản của bạn"
   },
   "signOutBtn": {
     "message": "Đăng xuất"
@@ -403,7 +394,7 @@
     "message": "Đăng nhập để bày tỏ cảm xúc"
   },
   "authSignInTagline": {
-    "message": "Tiếp tục với tài khoản bạn đã có. Emojery không bao giờ thấy mật khẩu của bạn."
+    "message": "Đăng nhập bằng tài khoản bạn đã có, dùng bất kỳ dịch vụ nào bên dưới."
   },
   "authProviderBtn": {
     "message": "Tiếp tục với $PROVIDER$",
@@ -425,6 +416,15 @@
         "example": "Google"
       }
     }
+  },
+  "authSigningInKeepOpen": {
+    "message": "Giữ thẻ này mở cho đến khi xong. Lần đăng nhập đầu tiên mất lâu hơn một chút."
+  },
+  "authDoneCloseTagline": {
+    "message": "Đang đóng thẻ này giúp bạn."
+  },
+  "authDoneCloseNowBtn": {
+    "message": "Đóng ngay"
   },
   "authRetryBtn": {
     "message": "Thử lại"

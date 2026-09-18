@@ -123,16 +123,7 @@
     "message": "버그 신고를 보내려면 로그인하세요."
   },
   "signedInLabel": {
-    "message": "로그인됨"
-  },
-  "signedInVia": {
-    "message": "$PROVIDER$ 계정",
-    "placeholders": {
-      "provider": {
-        "content": "$1",
-        "example": "Google"
-      }
-    }
+    "message": "내 계정"
   },
   "signOutBtn": {
     "message": "로그아웃"
@@ -403,7 +394,7 @@
     "message": "로그인하고 리액션하기"
   },
   "authSignInTagline": {
-    "message": "이미 가지고 있는 계정으로 계속하세요. Emojery는 비밀번호를 볼 수 없습니다."
+    "message": "아래 서비스 중 하나를 사용해 이미 가지고 있는 계정으로 로그인하세요."
   },
   "authProviderBtn": {
     "message": "$PROVIDER$(으)로 계속",
@@ -425,6 +416,15 @@
         "example": "Google"
       }
     }
+  },
+  "authSigningInKeepOpen": {
+    "message": "완료될 때까지 이 탭을 열어 두세요. 첫 로그인은 조금 더 걸립니다."
+  },
+  "authDoneCloseTagline": {
+    "message": "이 탭을 닫는 중입니다."
+  },
+  "authDoneCloseNowBtn": {
+    "message": "지금 닫기"
   },
   "authRetryBtn": {
     "message": "다시 시도"

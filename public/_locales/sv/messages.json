@@ -123,16 +123,7 @@
     "message": "Logga in för att skicka en felrapport."
   },
   "signedInLabel": {
-    "message": "Inloggad"
-  },
-  "signedInVia": {
-    "message": "via $PROVIDER$",
-    "placeholders": {
-      "provider": {
-        "content": "$1",
-        "example": "Google"
-      }
-    }
+    "message": "Ditt konto"
   },
   "signOutBtn": {
     "message": "Logga ut"
@@ -403,7 +394,7 @@
     "message": "Logga in för att reagera"
   },
   "authSignInTagline": {
-    "message": "Fortsätt med ett konto du redan har. Emojery ser aldrig ditt lösenord."
+    "message": "Logga in med ett konto du redan har, via någon av tjänsterna nedan."
   },
   "authProviderBtn": {
     "message": "Fortsätt med $PROVIDER$",
@@ -425,6 +416,15 @@
         "example": "Google"
       }
     }
+  },
+  "authSigningInKeepOpen": {
+    "message": "Låt den här fliken vara öppen tills det är klart. Första inloggningen tar lite längre tid."
+  },
+  "authDoneCloseTagline": {
+    "message": "Vi stänger den här fliken åt dig."
+  },
+  "authDoneCloseNowBtn": {
+    "message": "Stäng nu"
   },
   "authRetryBtn": {
     "message": "Försök igen"

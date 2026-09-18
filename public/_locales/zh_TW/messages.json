@@ -123,16 +123,7 @@
     "message": "登入以提交錯誤回報。"
   },
   "signedInLabel": {
-    "message": "已登入"
-  },
-  "signedInVia": {
-    "message": "透過 $PROVIDER$",
-    "placeholders": {
-      "provider": {
-        "content": "$1",
-        "example": "Google"
-      }
-    }
+    "message": "你的帳號"
   },
   "signOutBtn": {
     "message": "登出"
@@ -403,7 +394,7 @@
     "message": "登入以新增反應"
   },
   "authSignInTagline": {
-    "message": "使用你已有的帳號繼續。Emojery 絕不會看到你的密碼。"
+    "message": "使用下方任一服務，以你已有的帳號登入。"
   },
   "authProviderBtn": {
     "message": "透過 $PROVIDER$ 繼續",
@@ -425,6 +416,15 @@
         "example": "Google"
       }
     }
+  },
+  "authSigningInKeepOpen": {
+    "message": "請保持此分頁開啟，直到完成。首次登入會稍久一些。"
+  },
+  "authDoneCloseTagline": {
+    "message": "正在為你關閉此分頁。"
+  },
+  "authDoneCloseNowBtn": {
+    "message": "立即關閉"
   },
   "authRetryBtn": {
     "message": "重試"

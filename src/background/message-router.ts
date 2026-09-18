@@ -13,7 +13,7 @@ import { createTab } from "../shared/webext";
 import { enqueueVote, flushOwnedVotesForSignOut, getFlushState } from "./api";
 import { apiErrorCode } from "./api-client";
 import { fetchCount } from "./api-read";
-import { hasAuthOrigin, rememberAuthOrigin, returnToAuthOrigin } from "./auth-return";
+import { closeAuthTab, hasAuthOrigin, rememberAuthOrigin, returnToAuthOrigin } from "./auth-return";
 import { logBackgroundError } from "./debug";
 import { exportHistory, getHistoryPage, getHistoryStats, importHistory } from "./history";
 import { clearAuth, deleteAccount, getAuth, listSignInProviders, revokeSessionServerSide, signInWithProvider } from "./identity";
@@ -219,6 +219,11 @@ const HANDLERS: HandlerTable = {
 
   "auth:returnToOrigin": (_msg, { sender, sendResponse }) => {
     respondWith(sendResponse, "auth:returnToOrigin", async () => ((await returnToAuthOrigin(sender.tab?.id)) ? { type: "ok" } : errorResponse("unavailable", "auth:returnToOrigin")));
+    return ANSWER_LATER;
+  },
+
+  "auth:closeTab": (_msg, { sender, sendResponse }) => {
+    respondWith(sendResponse, "auth:closeTab", async () => ((await closeAuthTab(sender.tab?.id)) ? { type: "ok" } : errorResponse("unavailable", "auth:closeTab")));
     return ANSWER_LATER;
   },
 

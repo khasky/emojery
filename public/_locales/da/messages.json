@@ -123,16 +123,7 @@
     "message": "Log ind for at indsende en fejlrapport."
   },
   "signedInLabel": {
-    "message": "Logget ind"
-  },
-  "signedInVia": {
-    "message": "via $PROVIDER$",
-    "placeholders": {
-      "provider": {
-        "content": "$1",
-        "example": "Google"
-      }
-    }
+    "message": "Din konto"
   },
   "signOutBtn": {
     "message": "Log ud"
@@ -403,7 +394,7 @@
     "message": "Log ind for at reagere"
   },
   "authSignInTagline": {
-    "message": "Fortsæt med en konto, du allerede har. Emojery ser aldrig din adgangskode."
+    "message": "Log ind med en konto, du allerede har, via en af tjenesterne nedenfor."
   },
   "authProviderBtn": {
     "message": "Fortsæt med $PROVIDER$",
@@ -425,6 +416,15 @@
         "example": "Google"
       }
     }
+  },
+  "authSigningInKeepOpen": {
+    "message": "Lad denne fane være åben, til det er færdigt. Første login tager lidt længere."
+  },
+  "authDoneCloseTagline": {
+    "message": "Lukker denne fane for dig."
+  },
+  "authDoneCloseNowBtn": {
+    "message": "Luk nu"
   },
   "authRetryBtn": {
     "message": "Prøv igen"

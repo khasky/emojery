@@ -123,16 +123,7 @@
     "message": "Connectez-vous pour envoyer un rapport de bug."
   },
   "signedInLabel": {
-    "message": "Connecté"
-  },
-  "signedInVia": {
-    "message": "via $PROVIDER$",
-    "placeholders": {
-      "provider": {
-        "content": "$1",
-        "example": "Google"
-      }
-    }
+    "message": "Ton compte"
   },
   "signOutBtn": {
     "message": "Se déconnecter"
@@ -403,7 +394,7 @@
     "message": "Se connecter pour réagir"
   },
   "authSignInTagline": {
-    "message": "Continuez avec un compte que vous avez déjà. Emojery ne voit jamais votre mot de passe."
+    "message": "Connecte-toi avec un compte que tu as déjà, via l'un des services ci-dessous."
   },
   "authProviderBtn": {
     "message": "Continuer avec $PROVIDER$",
@@ -425,6 +416,15 @@
         "example": "Google"
       }
     }
+  },
+  "authSigningInKeepOpen": {
+    "message": "Garde cet onglet ouvert jusqu'à la fin. La première connexion prend un peu plus de temps."
+  },
+  "authDoneCloseTagline": {
+    "message": "Cet onglet se ferme tout seul."
+  },
+  "authDoneCloseNowBtn": {
+    "message": "Fermer maintenant"
   },
   "authRetryBtn": {
     "message": "Réessayer"

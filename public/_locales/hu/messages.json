@@ -123,16 +123,7 @@
     "message": "Jelentkezzen be hibabejelentés küldéséhez."
   },
   "signedInLabel": {
-    "message": "Bejelentkezve"
-  },
-  "signedInVia": {
-    "message": "$PROVIDER$ fiókkal",
-    "placeholders": {
-      "provider": {
-        "content": "$1",
-        "example": "Google"
-      }
-    }
+    "message": "A fiókod"
   },
   "signOutBtn": {
     "message": "Kijelentkezés"
@@ -403,7 +394,7 @@
     "message": "Jelentkezzen be a reagáláshoz"
   },
   "authSignInTagline": {
-    "message": "Folytasd egy meglévő fiókoddal. Az Emojery sosem látja a jelszavadat."
+    "message": "Jelentkezz be egy meglévő fiókoddal az alábbi szolgáltatások bármelyikével."
   },
   "authProviderBtn": {
     "message": "Folytatás ezzel: $PROVIDER$",
@@ -425,6 +416,15 @@
         "example": "Google"
       }
     }
+  },
+  "authSigningInKeepOpen": {
+    "message": "Hagyd nyitva ezt a lapot, amíg be nem fejeződik. Az első bejelentkezés kicsit tovább tart."
+  },
+  "authDoneCloseTagline": {
+    "message": "Bezárjuk ezt a lapot."
+  },
+  "authDoneCloseNowBtn": {
+    "message": "Bezárás most"
   },
   "authRetryBtn": {
     "message": "Próbáld újra"

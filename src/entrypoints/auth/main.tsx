@@ -8,7 +8,7 @@ import { type I18nKey, t } from "../../shared/i18n";
 import type { RuntimeResponse, SignInRefusal } from "../../shared/messages";
 import { type OidcProvider, providerLabel, splitFeaturedProviders } from "../../shared/oidc-providers";
 import { bootstrapPage } from "../../shared/page-bootstrap";
-import { AGREE_CLASS, AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, COUNTDOWN_CLASS, MORE_PROVIDERS_CLASS, PROVIDER_BUTTON_CLASS, PROVIDER_LIST_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
+import { AGREE_CLASS, AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, COUNTDOWN_CLASS, MORE_PROVIDERS_CLASS, PROVIDER_BUTTON_CLASS, PROVIDER_LIST_CLASS, SPINNER_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
 import { withExtensionUtm } from "../../shared/tracking-links";
 import { sendRuntimeMessage } from "../../shared/webext";
 
@@ -82,11 +82,12 @@ function ProviderMark({ provider }: { provider: OidcProvider }) {
 // skips the wait entirely.
 const RETURN_DELAY_SECONDS = 10;
 
-/** The last step. Plain "you can close this" unless the sign-in started from a
- *  page's gate and that tab is still open - then it takes the user back there, so
- *  the reaction the gate was holding is watched landing instead of missed. */
+/** The last step, on the same countdown either way: back to the page whose gate
+ *  started the sign-in, or, when it started in the popup, just closed. A tab left
+ *  behind on a finished sign-in is litter in both cases. */
 function DoneStep({ returnsToPage }: { returnsToPage: boolean }) {
   const [remaining, setRemaining] = useState(RETURN_DELAY_SECONDS);
+  const [counting, setCounting] = useState(true);
   const [returning, setReturning] = useState(returnsToPage);
   const backRef = useRef<HTMLButtonElement>(null);
   // A click landing on the same tick the countdown expires would otherwise ask
@@ -96,22 +97,25 @@ function DoneStep({ returnsToPage }: { returnsToPage: boolean }) {
   const goBack = useCallback(async () => {
     if (returnSent.current) return;
     returnSent.current = true;
-    const res = await sendRuntimeMessage({ type: "auth:returnToOrigin" }).catch(() => undefined);
+    const res = await sendRuntimeMessage({ type: returning ? "auth:returnToOrigin" : "auth:closeTab" }).catch(() => undefined);
     // On success the background closes this tab, so nothing below ever repaints.
-    // On failure the origin tab went away mid-countdown - the one thing that
-    // stops the countdown, and the reason this step keeps its old copy at all.
-    if (res?.type !== "ok") setReturning(false);
-  }, []);
+    // On failure the origin tab went away mid-countdown, or the tab cannot be
+    // closed from here - either way the step stops counting and keeps its copy.
+    if (res?.type !== "ok") {
+      setReturning(false);
+      setCounting(false);
+    }
+  }, [returning]);
 
   useEffect(() => {
-    if (!returning) return;
+    if (!counting) return;
     if (remaining <= 0) {
       void goBack();
       return;
     }
     const id = setTimeout(() => setRemaining((s) => s - 1), 1000);
     return () => clearTimeout(id);
-  }, [returning, remaining, goBack]);
+  }, [counting, remaining, goBack]);
 
   // The primary action, focused as the step mounts: the provider buttons it
   // replaces have just been removed, which would otherwise drop focus to the body.
@@ -119,7 +123,7 @@ function DoneStep({ returnsToPage }: { returnsToPage: boolean }) {
     backRef.current?.focus();
   }, []);
 
-  if (!returning) {
+  if (!counting) {
     return (
       <main class="wrap">
         <div class={CARD_CLASS}>
@@ -137,7 +141,7 @@ function DoneStep({ returnsToPage }: { returnsToPage: boolean }) {
         {/* Static text, so `status` announces the pending return exactly once - no
             live region tracks the seconds, which would announce every tick. */}
         <p class={TAGLINE_CLASS} role="status">
-          {t("authDoneReturnTagline")}
+          {t(returning ? "authDoneReturnTagline" : "authDoneCloseTagline")}
         </p>
         {/* The bar and the digits say the same thing twice, for the eye and for the
             impatient; neither is the only carrier, so both are hidden from the a11y
@@ -149,15 +153,31 @@ function DoneStep({ returnsToPage }: { returnsToPage: boolean }) {
           <span class="seconds">{remaining}</span>
         </div>
         <button class="primary" type="button" ref={backRef} onClick={() => void goBack()}>
-          {t("authDoneReturnNowBtn")}
+          {t(returning ? "authDoneReturnNowBtn" : "authDoneCloseNowBtn")}
         </button>
       </div>
     </main>
   );
 }
 
-/** The identity window is open: nothing to do here but say so, and wait. */
+/** The identity window is open: nothing to do here but say so, and wait. A first
+ *  sign-in also builds the enrolment proof, which runs for tens of seconds after the
+ *  provider window closes, so the wait is announced and the tab guards itself. */
 function BusyStep({ provider }: { provider: OidcProvider }) {
+  // Closing the tab mid-flight strands the sign-in: the code is spent, the account
+  // key is not registered yet, and the next attempt starts over. The browser's own
+  // leave-site prompt is the only one that can stop that, and it still lets the
+  // impatient leave.
+  useEffect(() => {
+    const warn = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      // Set for the browsers that still require it; none renders the string.
+      e.returnValue = "";
+    };
+    addEventListener("beforeunload", warn);
+    return () => removeEventListener("beforeunload", warn);
+  }, []);
+
   return (
     <main class="wrap">
       <div class={CARD_CLASS}>
@@ -165,6 +185,9 @@ function BusyStep({ provider }: { provider: OidcProvider }) {
         <p class={TAGLINE_CLASS} role="status">
           {t("authSigningInWith", providerLabel(provider))}
         </p>
+        {/* The sentence above is what a screen reader announces; the ring is for the eye. */}
+        <div class={SPINNER_CLASS} aria-hidden="true" />
+        <p class="keep-open">{t("authSigningInKeepOpen")}</p>
       </div>
     </main>
   );

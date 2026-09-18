@@ -129,6 +129,38 @@
   }
 }
 
+/* Sign-in can take tens of seconds while the enrolment proof is built, and the
+   window must stay open for it - a still page reads as a hung one. */
+.spinner {
+  width: 22px;
+  height: 22px;
+  margin-top: 18px;
+  border: 2px solid var(--khasky-emojery-field-border);
+  border-top-color: var(--khasky-emojery-link);
+  border-radius: 50%;
+  animation: emojery-spin 0.9s linear infinite;
+}
+
+@keyframes emojery-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+/* Motion off: the ring still marks the spot, it just stops turning. */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+}
+
+.keep-open {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: var(--khasky-emojery-muted);
+  line-height: 1.45;
+}
+
 .error {
   margin-top: 12px;
   padding: 10px 12px;

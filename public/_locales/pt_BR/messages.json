@@ -123,16 +123,7 @@
     "message": "Entre para enviar um relato de bug."
   },
   "signedInLabel": {
-    "message": "Conectado"
-  },
-  "signedInVia": {
-    "message": "via $PROVIDER$",
-    "placeholders": {
-      "provider": {
-        "content": "$1",
-        "example": "Google"
-      }
-    }
+    "message": "Sua conta"
   },
   "signOutBtn": {
     "message": "Sair"
@@ -403,7 +394,7 @@
     "message": "Entre para reagir"
   },
   "authSignInTagline": {
-    "message": "Continue com uma conta que você já tem. O Emojery nunca vê sua senha."
+    "message": "Entre com uma conta que você já tem, usando qualquer serviço abaixo."
   },
   "authProviderBtn": {
     "message": "Continuar com $PROVIDER$",
@@ -425,6 +416,15 @@
         "example": "Google"
       }
     }
+  },
+  "authSigningInKeepOpen": {
+    "message": "Mantenha esta aba aberta até terminar. O primeiro login demora um pouco mais."
+  },
+  "authDoneCloseTagline": {
+    "message": "Fechando esta aba para você."
+  },
+  "authDoneCloseNowBtn": {
+    "message": "Fechar agora"
   },
   "authRetryBtn": {
     "message": "Tentar novamente"

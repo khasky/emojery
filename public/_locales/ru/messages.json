@@ -123,16 +123,7 @@
     "message": "Войдите, чтобы отправить отчёт об ошибке."
   },
   "signedInLabel": {
-    "message": "Вы вошли как"
-  },
-  "signedInVia": {
-    "message": "через $PROVIDER$",
-    "placeholders": {
-      "provider": {
-        "content": "$1",
-        "example": "Google"
-      }
-    }
+    "message": "Ваш аккаунт"
   },
   "signOutBtn": {
     "message": "Выйти"
@@ -403,7 +394,7 @@
     "message": "Войдите чтобы оставить реакцию"
   },
   "authSignInTagline": {
-    "message": "Войдите через аккаунт, который у вас уже есть. Emojery не видит ваш пароль."
+    "message": "Войдите через существующий аккаунт используя любой сервис ниже."
   },
   "authProviderBtn": {
     "message": "Продолжить с $PROVIDER$",
@@ -425,6 +416,15 @@
         "example": "Google"
       }
     }
+  },
+  "authSigningInKeepOpen": {
+    "message": "Не закрывайте эту вкладку до конца входа. Первый вход занимает чуть больше времени."
+  },
+  "authDoneCloseTagline": {
+    "message": "Закрываем эту вкладку."
+  },
+  "authDoneCloseNowBtn": {
+    "message": "Закрыть сейчас"
   },
   "authRetryBtn": {
     "message": "Попробовать снова"

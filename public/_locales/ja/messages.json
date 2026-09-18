@@ -123,16 +123,7 @@
     "message": "バグレポートを送信するにはサインインしてください。"
   },
   "signedInLabel": {
-    "message": "サインイン中"
-  },
-  "signedInVia": {
-    "message": "$PROVIDER$ 経由",
-    "placeholders": {
-      "provider": {
-        "content": "$1",
-        "example": "Google"
-      }
-    }
+    "message": "あなたのアカウント"
   },
   "signOutBtn": {
     "message": "サインアウト"
@@ -403,7 +394,7 @@
     "message": "サインインしてリアクション"
   },
   "authSignInTagline": {
-    "message": "すでにお持ちのアカウントで続行します。Emojery がパスワードを見ることはありません。"
+    "message": "下のいずれかのサービスで、お持ちのアカウントからログインしてください。"
   },
   "authProviderBtn": {
     "message": "$PROVIDER$ で続行",
@@ -425,6 +416,15 @@
         "example": "Google"
       }
     }
+  },
+  "authSigningInKeepOpen": {
+    "message": "完了するまでこのタブを開いたままにしてください。初回のログインは少し時間がかかります。"
+  },
+  "authDoneCloseTagline": {
+    "message": "このタブを閉じます。"
+  },
+  "authDoneCloseNowBtn": {
+    "message": "今すぐ閉じる"
   },
   "authRetryBtn": {
     "message": "再試行"

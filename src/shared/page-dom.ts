@@ -118,6 +118,9 @@ export function providerButtonSelector(provider: string): string {
 // The button that reveals the providers past the first few; gone once they show.
 export const MORE_PROVIDERS_CLASS = "more-providers";
 export const MORE_PROVIDERS_SELECTOR = `button.${MORE_PROVIDERS_CLASS}`;
+// The spinner shown while the provider window is open and the enrolment runs.
+export const SPINNER_CLASS = "spinner";
+export const SPINNER_SELECTOR = `.${SPINNER_CLASS}`;
 export const AUTH_ERROR_ID = "auth-error";
 export const AUTH_ERROR_CLASS = "error";
 // The class sits on every error banner the page can raise; the id marks the one

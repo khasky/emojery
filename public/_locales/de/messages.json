@@ -123,16 +123,7 @@
     "message": "Melden Sie sich an, um einen Fehler zu melden."
   },
   "signedInLabel": {
-    "message": "Angemeldet"
-  },
-  "signedInVia": {
-    "message": "über $PROVIDER$",
-    "placeholders": {
-      "provider": {
-        "content": "$1",
-        "example": "Google"
-      }
-    }
+    "message": "Dein Konto"
   },
   "signOutBtn": {
     "message": "Abmelden"
@@ -403,7 +394,7 @@
     "message": "Zum Reagieren anmelden"
   },
   "authSignInTagline": {
-    "message": "Melde dich mit einem Konto an, das du schon hast. Emojery sieht dein Passwort nie."
+    "message": "Melde dich mit einem Konto an, das du schon hast, über einen der Dienste unten."
   },
   "authProviderBtn": {
     "message": "Weiter mit $PROVIDER$",
@@ -425,6 +416,15 @@
         "example": "Google"
       }
     }
+  },
+  "authSigningInKeepOpen": {
+    "message": "Lass diesen Tab offen, bis es fertig ist. Die erste Anmeldung dauert etwas länger."
+  },
+  "authDoneCloseTagline": {
+    "message": "Dieser Tab wird gleich geschlossen."
+  },
+  "authDoneCloseNowBtn": {
+    "message": "Jetzt schließen"
   },
   "authRetryBtn": {
     "message": "Erneut versuchen"

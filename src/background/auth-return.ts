@@ -56,6 +56,20 @@ export async function hasAuthOrigin(): Promise<boolean> {
  *  `false` means the origin tab is gone - the auth tab is then left open, because
  *  closing the page the user is looking at with nowhere to send them is worse than
  *  the dead end it replaces. */
+// Closes the auth tab on its own, for a sign-in that started in the popup: there is
+// no page waiting for it, so the tab has served its purpose once the account exists.
+export async function closeAuthTab(authTabId: number | undefined): Promise<boolean> {
+  if (authTabId === undefined) return false;
+  await storageSessionRemove([RETURN_TARGET_KEY]).catch(() => {});
+  try {
+    await removeTab(authTabId);
+    return true;
+  } catch (error: unknown) {
+    logBackgroundError("closeAuthTab.removeTab", error);
+    return false;
+  }
+}
+
 export async function returnToAuthOrigin(authTabId: number | undefined): Promise<boolean> {
   const target = await readAuthOrigin();
   if (!target) return false;

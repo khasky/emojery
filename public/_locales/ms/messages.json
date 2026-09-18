@@ -123,16 +123,7 @@
     "message": "Log masuk untuk menghantar laporan pepijat."
   },
   "signedInLabel": {
-    "message": "Log masuk"
-  },
-  "signedInVia": {
-    "message": "melalui $PROVIDER$",
-    "placeholders": {
-      "provider": {
-        "content": "$1",
-        "example": "Google"
-      }
-    }
+    "message": "Akaun anda"
   },
   "signOutBtn": {
     "message": "Log keluar"
@@ -403,7 +394,7 @@
     "message": "Log masuk untuk bertindak balas"
   },
   "authSignInTagline": {
-    "message": "Teruskan dengan akaun yang anda sudah ada. Emojery tidak pernah melihat kata laluan anda."
+    "message": "Log masuk dengan akaun sedia ada anda menggunakan mana-mana perkhidmatan di bawah."
   },
   "authProviderBtn": {
     "message": "Teruskan dengan $PROVIDER$",
@@ -425,6 +416,15 @@
         "example": "Google"
       }
     }
+  },
+  "authSigningInKeepOpen": {
+    "message": "Biarkan tab ini terbuka sehingga selesai. Log masuk pertama mengambil masa sedikit lebih lama."
+  },
+  "authDoneCloseTagline": {
+    "message": "Menutup tab ini untuk anda."
+  },
+  "authDoneCloseNowBtn": {
+    "message": "Tutup sekarang"
   },
   "authRetryBtn": {
     "message": "Cuba lagi"

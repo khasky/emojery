@@ -162,18 +162,8 @@
     "description": "Empty-state message on the Report tab when the user is signed out."
   },
   "signedInLabel": {
-    "message": "Signed in",
-    "description": "Label on the Account tab indicating the user is currently signed in."
-  },
-  "signedInVia": {
-    "message": "via $PROVIDER$",
-    "description": "Hint under the Account tab's signed-in row, naming the provider the account came from. $PROVIDER$ is the provider's name.",
-    "placeholders": {
-      "provider": {
-        "content": "$1",
-        "example": "Google"
-      }
-    }
+    "message": "Your account",
+    "description": "Label on the Account tab's row naming the signed-in account; the provider's name sits under it."
   },
   "signOutBtn": {
     "message": "Sign out",
@@ -514,8 +504,8 @@
     "description": "Heading on the auth page, email step."
   },
   "authSignInTagline": {
-    "message": "Continue with an account you already have. Emojery never sees your password.",
-    "description": "Subheading on the auth page, provider step: the account is one the user already has elsewhere."
+    "message": "Sign in with an account you already have, using any service below.",
+    "description": "Subheading on the auth page, provider step: the account is one the user already has with a service listed below."
   },
   "authProviderBtn": {
     "message": "Continue with $PROVIDER$",
@@ -540,6 +530,18 @@
         "example": "Google"
       }
     }
+  },
+  "authSigningInKeepOpen": {
+    "message": "Keep this tab open until it finishes. The first sign-in takes a little longer.",
+    "description": "Line under the spinner on the auth page while the sign-in runs."
+  },
+  "authDoneCloseTagline": {
+    "message": "Closing this tab for you.",
+    "description": "Line on the auth page after a popup-started sign-in, while the tab closes itself."
+  },
+  "authDoneCloseNowBtn": {
+    "message": "Close now",
+    "description": "Button on the auth page that closes the tab without waiting out the countdown."
   },
   "authRetryBtn": {
     "message": "Try again",

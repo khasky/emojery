@@ -123,16 +123,7 @@
     "message": "Logi sisse, et saata veateavitus."
   },
   "signedInLabel": {
-    "message": "Sisse logitud"
-  },
-  "signedInVia": {
-    "message": "$PROVIDER$ kaudu",
-    "placeholders": {
-      "provider": {
-        "content": "$1",
-        "example": "Google"
-      }
-    }
+    "message": "Sinu konto"
   },
   "signOutBtn": {
     "message": "Logi välja"
@@ -403,7 +394,7 @@
     "message": "Logi sisse, et reageerida"
   },
   "authSignInTagline": {
-    "message": "Jätka kontoga, mis sul juba on. Emojery ei näe kunagi sinu parooli."
+    "message": "Logi sisse kontoga, mis sul juba on, kasutades mõnda allolevat teenust."
   },
   "authProviderBtn": {
     "message": "Jätka: $PROVIDER$",
@@ -425,6 +416,15 @@
         "example": "Google"
       }
     }
+  },
+  "authSigningInKeepOpen": {
+    "message": "Hoia see kaart avatuna, kuni see lõpeb. Esimene sisselogimine võtab veidi kauem."
+  },
+  "authDoneCloseTagline": {
+    "message": "Sulgeme selle kaardi."
+  },
+  "authDoneCloseNowBtn": {
+    "message": "Sulge kohe"
   },
   "authRetryBtn": {
     "message": "Proovi uuesti"

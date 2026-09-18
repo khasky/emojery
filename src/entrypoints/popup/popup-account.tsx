@@ -149,11 +149,12 @@ const AccountView = ({ settings, update }: { settings: Settings; update: (patch:
     return <SignInPrompt message={t("signInMsgAccount")} />;
   }
 
-  // The account is named by the provider it came from - nothing else about it is
-  // stored locally. A session carrying no provider shows a short id prefix instead.
-  // The empty tail is unreachable - a signed-in session always has an id - but
-  // `hint` takes a string.
-  const subtitle = provider ? t("signedInVia", providerLabel(provider)) : userId ? `id: ${userId.slice(0, 8)}...` : "";
+  // The account is named by the provider it came from - the sign-in asks for the
+  // `openid` scope only, so there is no address or display name to show, and nothing
+  // else about the account is stored locally. A session carrying no provider shows a
+  // short id prefix instead. The empty tail is unreachable - a signed-in session
+  // always has an id - but `hint` takes a string.
+  const subtitle = provider ? providerLabel(provider) : userId ? `id: ${userId.slice(0, 8)}...` : "";
   return (
     <div class={ACCOUNT_LIST_CLASS}>
       <IconRow rowClass="row arow" icon={ICON_USER} label={t("signedInLabel")} hint={subtitle}>

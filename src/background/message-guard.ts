@@ -17,7 +17,7 @@ export const CONTENT_SCRIPT_MESSAGE_TYPES: ReadonlySet<RuntimeMessage["type"]> =
 // `auth:signIn` matters most: it is the one exchange that CREATES a credential (it
 // opens the browser's identity window), so a content script on any supported site
 // must never be able to drive it.
-export const EXTENSION_PAGE_MESSAGE_TYPES: ReadonlySet<RuntimeMessage["type"]> = new Set(["report", "history:page", "history:stats", "history:export", "history:import", "queue:snapshot", "auth:signOut", "auth:delete", "auth:providers", "auth:signIn", "auth:returnToOrigin"]);
+export const EXTENSION_PAGE_MESSAGE_TYPES: ReadonlySet<RuntimeMessage["type"]> = new Set(["report", "history:page", "history:stats", "history:export", "history:import", "queue:snapshot", "auth:signOut", "auth:delete", "auth:providers", "auth:signIn", "auth:returnToOrigin", "auth:closeTab"]);
 
 // Every type the guard will accept at all. The suites cover this set exhaustively, so a type
 // added here fails them until it is classified as content-script, extension-page or either.
@@ -138,6 +138,7 @@ export function parseRuntimeMessage(raw: unknown, sender: chrome.runtime.Message
     case "auth:status":
     case "auth:openTab":
     case "auth:returnToOrigin":
+    case "auth:closeTab":
     case "auth:signOut":
     case "auth:delete":
       return { type };

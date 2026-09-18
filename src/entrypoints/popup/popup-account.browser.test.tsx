@@ -102,8 +102,10 @@ describe("AccountView - session states", () => {
     await mountAndSettle();
 
     const row = container.querySelector(`${ACCOUNT_LIST_SELECTOR} .row`);
-    expect(row?.textContent).toContain("Signed in");
-    expect(row?.querySelector(".row-hint")?.textContent).toBe("via Google");
+    expect(row?.textContent).toContain("Your account");
+    // The provider name alone: the sign-in asks for `openid` only, so there is no
+    // address or display name to put here.
+    expect(row?.querySelector(".row-hint")?.textContent).toBe("Google");
     expect(button("Delete")).toBeDefined();
   });
 

@@ -114,13 +114,13 @@ test.describe("extension account auth", () => {
     await signedInPopup.getByRole("tab", { name: enMessage("tabAccount") }).click();
     await expect(signedInPopup.getByText(enMessage("signedInLabel"), { exact: true })).toBeVisible();
     // The account is named by its provider, never by anything the provider knows.
-    await expect(signedInPopup.getByText(enMessage("signedInVia", TEST_PROVIDER), { exact: true })).toBeVisible();
+    await expect(signedInPopup.getByText(TEST_PROVIDER, { exact: true })).toBeVisible();
     await expect(signedInPopup.getByText(testAccount)).toHaveCount(0);
 
     await signedInPopup.getByRole("button", { name: enMessage("signOutBtn") }).click();
     await expect(signedInPopup.getByText(enMessage("signInMsgAccount"))).toBeVisible();
     await expect(signedInPopup.getByRole("button", { name: enMessage("signInBtn") })).toBeVisible();
-    await expect(signedInPopup.getByText(enMessage("signedInVia", TEST_PROVIDER), { exact: true })).toHaveCount(0);
+    await expect(signedInPopup.getByText(enMessage("signedInLabel"), { exact: true })).toHaveCount(0);
 
     await signedInPopup.close();
   });

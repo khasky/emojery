@@ -7,7 +7,7 @@
 import { render } from "preact";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { userEvent } from "vitest/browser";
-import { AGREE_CHECKBOX_SELECTOR, AUTH_ERROR_ID, AUTH_ERROR_SELECTOR, COUNTDOWN_SELECTOR, MORE_PROVIDERS_SELECTOR, PROVIDER_BUTTON_SELECTOR, PROVIDER_LIST_SELECTOR, providerButtonSelector, TAGLINE_SELECTOR } from "../../shared/page-dom";
+import { AGREE_CHECKBOX_SELECTOR, AUTH_ERROR_ID, AUTH_ERROR_SELECTOR, COUNTDOWN_SELECTOR, MORE_PROVIDERS_SELECTOR, PROVIDER_BUTTON_SELECTOR, PROVIDER_LIST_SELECTOR, providerButtonSelector, SPINNER_SELECTOR, TAGLINE_SELECTOR } from "../../shared/page-dom";
 import { requireEl } from "../../test/browser-harness";
 import { type ChromeShimHandle, installChromeShim } from "../../test/chrome-shim";
 
@@ -28,7 +28,7 @@ let loads = 0;
 
 // `signInReply` may be a promise, for the case that watches the page while the
 // identity window is open.
-function install({ providersReply = PROVIDERS, signInReply = OK_SIGN_IN, returnReply = OK_RETURN }: { providersReply?: unknown; signInReply?: unknown; returnReply?: unknown } = {}): void {
+function install({ providersReply = PROVIDERS, signInReply = OK_SIGN_IN, returnReply = OK_RETURN, closeReply = OK_RETURN }: { providersReply?: unknown; signInReply?: unknown; returnReply?: unknown; closeReply?: unknown } = {}): void {
   sent = [];
   shim = installChromeShim({
     onMessage: (msg) => {
@@ -37,6 +37,7 @@ function install({ providersReply = PROVIDERS, signInReply = OK_SIGN_IN, returnR
       if (type === "auth:providers") return providersReply;
       if (type === "auth:signIn") return signInReply;
       if (type === "auth:returnToOrigin") return returnReply;
+      if (type === "auth:closeTab") return closeReply;
       return undefined;
     },
   });
@@ -167,12 +168,42 @@ describe("auth page - the provider step", () => {
     expect(requireEl(document, TAGLINE_SELECTOR).getAttribute("role")).toBe("status");
     expect(document.querySelector(PROVIDER_LIST_SELECTOR)).toBeNull();
 
+    // The wait can run for tens of seconds while the enrolment proof is built, so it
+    // shows it is alive and guards the tab against a close that would strand it.
+    expect(document.querySelector(SPINNER_SELECTOR)).not.toBeNull();
+
     settle(OK_SIGN_IN);
     await vi.waitFor(() => expect(heading()).toBe("You're signed in"));
     await vi.waitFor(() => expect(document.title).toBe("Emojery — You're signed in"));
-    // No page to go back to: the dead-end copy, and nothing that could close a tab.
-    expect(document.querySelector(COUNTDOWN_SELECTOR)).toBeNull();
+    // Nowhere to go back to: the tab closes itself on the same countdown instead.
+    expect(document.querySelector(COUNTDOWN_SELECTOR)).not.toBeNull();
     expect(sentOfType("auth:returnToOrigin")).toHaveLength(0);
+  });
+
+  it("closes its own tab when the sign-in started outside a page", async () => {
+    install();
+    await loadPage();
+    await pick();
+
+    await vi.waitFor(() => expect(heading()).toBe("You're signed in"));
+    const closeNow = [...document.querySelectorAll("button.primary")].find((b) => b.textContent?.trim() === "Close now");
+    expect(closeNow).toBeDefined();
+    await userEvent.click(closeNow as HTMLButtonElement);
+
+    expect(sentOfType("auth:closeTab")).toEqual([{ type: "auth:closeTab" }]);
+    expect(sentOfType("auth:returnToOrigin")).toHaveLength(0);
+  });
+
+  it("keeps the dead-end copy when its tab cannot be closed", async () => {
+    install({ closeReply: { type: "error", code: "unavailable" } });
+    await loadPage();
+    await pick();
+
+    await vi.waitFor(() => expect(heading()).toBe("You're signed in"));
+    await userEvent.click([...document.querySelectorAll("button.primary")].find((b) => b.textContent?.trim() === "Close now") as HTMLButtonElement);
+
+    await vi.waitFor(() => expect(requireEl(document, TAGLINE_SELECTOR).textContent).toBe("You can close this tab and react on any supported page."));
+    expect(document.querySelector(COUNTDOWN_SELECTOR)).toBeNull();
   });
 
   it.each([

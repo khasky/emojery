@@ -123,16 +123,7 @@
     "message": "Accedi per inviare una segnalazione di errore."
   },
   "signedInLabel": {
-    "message": "Accesso eseguito"
-  },
-  "signedInVia": {
-    "message": "tramite $PROVIDER$",
-    "placeholders": {
-      "provider": {
-        "content": "$1",
-        "example": "Google"
-      }
-    }
+    "message": "Il tuo account"
   },
   "signOutBtn": {
     "message": "Esci"
@@ -403,7 +394,7 @@
     "message": "Accedi per reagire"
   },
   "authSignInTagline": {
-    "message": "Continua con un account che hai già. Emojery non vede mai la tua password."
+    "message": "Accedi con un account che hai già, usando uno dei servizi qui sotto."
   },
   "authProviderBtn": {
     "message": "Continua con $PROVIDER$",
@@ -425,6 +416,15 @@
         "example": "Google"
       }
     }
+  },
+  "authSigningInKeepOpen": {
+    "message": "Tieni aperta questa scheda fino al termine. Il primo accesso richiede un po' più di tempo."
+  },
+  "authDoneCloseTagline": {
+    "message": "Chiudiamo questa scheda per te."
+  },
+  "authDoneCloseNowBtn": {
+    "message": "Chiudi ora"
   },
   "authRetryBtn": {
     "message": "Riprova"

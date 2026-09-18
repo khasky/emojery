@@ -123,16 +123,7 @@
     "message": "बग रिपोर्ट भेजने के लिए साइन इन करें।"
   },
   "signedInLabel": {
-    "message": "साइन इन किया गया"
-  },
-  "signedInVia": {
-    "message": "$PROVIDER$ के ज़रिए",
-    "placeholders": {
-      "provider": {
-        "content": "$1",
-        "example": "Google"
-      }
-    }
+    "message": "आपका खाता"
   },
   "signOutBtn": {
     "message": "साइन आउट"
@@ -403,7 +394,7 @@
     "message": "प्रतिक्रिया देने के लिए साइन इन करें"
   },
   "authSignInTagline": {
-    "message": "अपने मौजूदा खाते से जारी रखें। Emojery आपका पासवर्ड कभी नहीं देखता।"
+    "message": "अपने किसी मौजूदा खाते से, नीचे दी गई किसी भी सेवा के ज़रिए साइन इन करें।"
   },
   "authProviderBtn": {
     "message": "$PROVIDER$ से जारी रखें",
@@ -425,6 +416,15 @@
         "example": "Google"
       }
     }
+  },
+  "authSigningInKeepOpen": {
+    "message": "यह पूरा होने तक इस टैब को खुला रखें। पहली बार साइन इन करने में थोड़ा अधिक समय लगता है।"
+  },
+  "authDoneCloseTagline": {
+    "message": "यह टैब बंद किया जा रहा है।"
+  },
+  "authDoneCloseNowBtn": {
+    "message": "अभी बंद करें"
   },
   "authRetryBtn": {
     "message": "फिर से कोशिश करें"

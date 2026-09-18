@@ -123,16 +123,7 @@
   "message": "Sign in to submit a bug report."
  },
  "signedInLabel": {
-  "message": "Signed in"
- },
- "signedInVia": {
-  "message": "via $PROVIDER$",
-  "placeholders": {
-   "provider": {
-    "content": "$1",
-    "example": "Google"
-   }
-  }
+  "message": "Your account"
  },
  "signOutBtn": {
   "message": "Sign out"
@@ -403,7 +394,7 @@
   "message": "Sign in to react"
  },
  "authSignInTagline": {
-  "message": "Continue with an account you already have. Emojery never sees your password."
+  "message": "Sign in with an account you already have, using any service below."
  },
  "authProviderBtn": {
   "message": "Continue with $PROVIDER$",
@@ -425,6 +416,15 @@
     "example": "Google"
    }
   }
+ },
+ "authSigningInKeepOpen": {
+  "message": "Keep this tab open until it finishes. The first sign-in takes a little longer."
+ },
+ "authDoneCloseTagline": {
+  "message": "Closing this tab for you."
+ },
+ "authDoneCloseNowBtn": {
+  "message": "Close now"
  },
  "authRetryBtn": {
   "message": "Try again"

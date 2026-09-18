@@ -123,16 +123,7 @@
     "message": "Prisijunkite, kad galėtumėte išsiųsti klaidos pranešimą."
   },
   "signedInLabel": {
-    "message": "Prisijungta"
-  },
-  "signedInVia": {
-    "message": "per $PROVIDER$",
-    "placeholders": {
-      "provider": {
-        "content": "$1",
-        "example": "Google"
-      }
-    }
+    "message": "Jūsų paskyra"
   },
   "signOutBtn": {
     "message": "Atsijungti"
@@ -403,7 +394,7 @@
     "message": "Prisijunkite, kad reaguotumėte"
   },
   "authSignInTagline": {
-    "message": "Tęskite su paskyra, kurią jau turite. Emojery niekada nemato jūsų slaptažodžio."
+    "message": "Prisijunk turima paskyra naudodamas bet kurią paslaugą žemiau."
   },
   "authProviderBtn": {
     "message": "Tęsti su $PROVIDER$",
@@ -425,6 +416,15 @@
         "example": "Google"
       }
     }
+  },
+  "authSigningInKeepOpen": {
+    "message": "Palik šią kortelę atidarytą, kol bus baigta. Pirmas prisijungimas trunka šiek tiek ilgiau."
+  },
+  "authDoneCloseTagline": {
+    "message": "Uždarome šią kortelę."
+  },
+  "authDoneCloseNowBtn": {
+    "message": "Uždaryti dabar"
   },
   "authRetryBtn": {
     "message": "Bandyti dar kartą"

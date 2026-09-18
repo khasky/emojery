@@ -123,16 +123,7 @@
     "message": "เข้าสู่ระบบเพื่อส่งรายงานข้อผิดพลาด"
   },
   "signedInLabel": {
-    "message": "เข้าสู่ระบบแล้ว"
-  },
-  "signedInVia": {
-    "message": "ผ่าน $PROVIDER$",
-    "placeholders": {
-      "provider": {
-        "content": "$1",
-        "example": "Google"
-      }
-    }
+    "message": "บัญชีของคุณ"
   },
   "signOutBtn": {
     "message": "ออกจากระบบ"
@@ -403,7 +394,7 @@
     "message": "เข้าสู่ระบบเพื่อแสดงความรู้สึก"
   },
   "authSignInTagline": {
-    "message": "ดำเนินการต่อด้วยบัญชีที่คุณมีอยู่แล้ว Emojery ไม่เห็นรหัสผ่านของคุณ"
+    "message": "ลงชื่อเข้าใช้ด้วยบัญชีที่คุณมีอยู่แล้ว ผ่านบริการใดก็ได้ด้านล่าง"
   },
   "authProviderBtn": {
     "message": "ดำเนินการต่อด้วย $PROVIDER$",
@@ -425,6 +416,15 @@
         "example": "Google"
       }
     }
+  },
+  "authSigningInKeepOpen": {
+    "message": "เปิดแท็บนี้ไว้จนกว่าจะเสร็จ การลงชื่อเข้าใช้ครั้งแรกใช้เวลานานขึ้นเล็กน้อย"
+  },
+  "authDoneCloseTagline": {
+    "message": "กำลังปิดแท็บนี้ให้คุณ"
+  },
+  "authDoneCloseNowBtn": {
+    "message": "ปิดตอนนี้"
   },
   "authRetryBtn": {
     "message": "ลองอีกครั้ง"
