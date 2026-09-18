@@ -12,8 +12,10 @@ import { findVisualActionSlot, isStructuralRoot, pageHasLayout } from "./visual-
 // One generic selector: Like/Liked/Unlike variants are strict subsets of it,
 // and queryAll dedupes, so listing them adds nothing.
 // closestActionButton + the label registry do the actual classification.
-const LIKE_ICON_SELECTORS = ['svg[role="img"][aria-label]'];
-const REPLY_ICON_SELECTORS = ['svg[aria-label="Reply"][role="img"]', 'svg[aria-label="Comment"][role="img"]'];
+const LIKE_ICON_SELECTORS = ['svg[role="img"][aria-label]', 'svg[role="img"][title]'];
+// The headless fallback reads every action icon and classifies by path, for the
+// same reason: the English label is no longer on the element to match.
+const ACTION_ICON_SELECTORS = ['svg[role="img"]'];
 const POST_LINK_SELECTORS = ['a[href*="/post/"]'];
 
 const POST_PATH_RE = /^\/@([A-Za-z0-9._]+)\/post\/([A-Za-z0-9_-]+)(?:\/|$)/;
@@ -223,7 +225,7 @@ function buildActionRow(row: HTMLElement, slots: HTMLElement[]): ActionRow | nul
 // (`--x-fill: currentColor`). Reading the paint also survives an icon redesign,
 // which the path prefixes in the registry below do not.
 function threadsLikePressed(likeButton: HTMLElement): boolean | null {
-  const icon = likeButton.querySelector("svg[aria-label]");
+  const icon = likeButton.querySelector('svg[role="img"]');
   return icon ? isPaintedFill(getComputedStyle(icon).fill) : null;
 }
 
@@ -249,35 +251,39 @@ function actionButtonInSlot(slot: HTMLElement): HTMLElement | undefined {
 // labels keep unlocalized UIs working in the meantime. The Share prefix must
 // stay precise enough not to match the sidebar Messages icon, whose path
 // starts "M7.24745 1.49856" (one more digit).
-const REPLY_ICON_PATH_PREFIX = "M12 3C7.02944 3 3 7.02944 3 12";
+const REPLY_ICON_PATH_PREFIXES = ["M12 3C7.02944 3 3 7.02944 3 12", "M12 3a9 9 0 0 0 0 18"];
 // Two path variants: idle loop and the "you reposted" active glyph
 // (captured live; aria-label stays «Сделать репост» in both states).
-const REPOST_ICON_PATH_PREFIXES = ["M4.51617 6.9986", "M11.9996 3C8.88111"];
-const SHARE_ICON_PATH_PREFIX = "M7.2474 1.49853";
+const REPOST_ICON_PATH_PREFIXES = ["M4.51617 6.9986", "M11.9996 3C8.88111", "M4.516 6.999a8.99"];
+const SHARE_ICON_PATH_PREFIXES = ["M7.2474 1.49853", "M7.247 1.499C4.183"];
+// The heart, outline and painted. Its label used to classify it; with the label now a
+// localized `title`, the path is what names it in every language.
+export const THREADS_LIKE_ICON_PATH_PREFIXES = ["M16.5 2c-1.666 0-3.278.707", "M16.404 1.509c-1.619 0-3.185.654"];
 
 // Every non-Like action icon - the site-auth suite finds the heart by
 // excluding these, so it must stay in lockstep with the registry below.
-export const THREADS_NON_LIKE_ICON_PATH_PREFIXES = [REPLY_ICON_PATH_PREFIX, ...REPOST_ICON_PATH_PREFIXES, SHARE_ICON_PATH_PREFIX];
+export const THREADS_NON_LIKE_ICON_PATH_PREFIXES = [...REPLY_ICON_PATH_PREFIXES, ...REPOST_ICON_PATH_PREFIXES, ...SHARE_ICON_PATH_PREFIXES];
 
 const threadsLabels = defineLabelRegistry(
   {
     reply: {
       stems: /^(reply|comment)\b/i,
-      iconPathPrefix: REPLY_ICON_PATH_PREFIX,
+      iconPathPrefix: REPLY_ICON_PATH_PREFIXES,
     },
     repost: { stems: /^(repost(ed)?|reshare)\b/i, iconPathPrefix: REPOST_ICON_PATH_PREFIXES },
-    share: { stems: /^share\b/i, iconPathPrefix: SHARE_ICON_PATH_PREFIX },
-    like: { exact: ["like", "liked", "unlike"] },
+    share: { stems: /^share\b/i, iconPathPrefix: SHARE_ICON_PATH_PREFIXES },
+    like: { exact: ["like", "liked", "unlike"], iconPathPrefix: THREADS_LIKE_ICON_PATH_PREFIXES },
   },
   { useTextFallback: false },
 );
 
 function containsKnownLikeIcon(root: Element): boolean {
-  return Array.from(root.querySelectorAll<SVGElement>("svg[aria-label]")).some((icon) => threadsLabels.classify(icon) === "like");
+  return Array.from(root.querySelectorAll<SVGElement>('svg[role="img"]')).some((icon) => threadsLabels.classify(icon) === "like");
 }
 
 function findReplyButton(root: ParentNode, likeButton: HTMLElement): HTMLElement | null {
-  for (const icon of queryAll<SVGElement>(root, REPLY_ICON_SELECTORS)) {
+  for (const icon of queryAll<SVGElement>(root, ACTION_ICON_SELECTORS)) {
+    if (threadsLabels.classify(icon) !== "reply") continue;
     const button = closestActionButton(icon);
     if (!button || button === likeButton) continue;
     if (button.contains(likeButton) || likeButton.contains(button)) continue;

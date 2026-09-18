@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { describe, expect, it } from "vitest";
 import { expectMatchesRegistryHosts } from "./test-fixtures";
-import threadsAdapter, { extractThreadsPostRef, isMediaViewerPath, isPaintedFill } from "./threads";
+import threadsAdapter, { extractThreadsPostRef, isMediaViewerPath, isPaintedFill, THREADS_LIKE_ICON_PATH_PREFIXES, THREADS_NON_LIKE_ICON_PATH_PREFIXES } from "./threads";
 
 const HANDLE = "theromero";
 const POST_ID = "DYpmDeHjE1L";
@@ -28,6 +28,23 @@ describe("threads adapter", () => {
 // localizes the aria-label, so the state comes from the paint - outline unliked, filled liked.
 // This is why Threads auto-press works in every language, unlike the label readers in
 // github/instagram/facebook (see their "stays unknown on CJK" cases).
+describe("threads icon path prefixes", () => {
+  it("keeps the like glyphs disjoint from every other action glyph", () => {
+    for (const like of THREADS_LIKE_ICON_PATH_PREFIXES) {
+      for (const other of THREADS_NON_LIKE_ICON_PATH_PREFIXES) {
+        expect(like.startsWith(other)).toBe(false);
+        expect(other.startsWith(like)).toBe(false);
+      }
+    }
+  });
+
+  it("carries a prefix long enough to name one glyph", () => {
+    for (const prefix of [...THREADS_LIKE_ICON_PATH_PREFIXES, ...THREADS_NON_LIKE_ICON_PATH_PREFIXES]) {
+      expect(prefix.length).toBeGreaterThan(10);
+    }
+  });
+});
+
 describe("isPaintedFill", () => {
   it("reads the fills Threads actually ships", () => {
     // Captured live on a RU feed, both states of the same heart.
