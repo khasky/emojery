@@ -8,8 +8,9 @@
 import { h } from "preact";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { userEvent } from "vitest/browser";
+import { accountDisplayName } from "../../shared/account-names";
 import { EPOCH_KEY_LIMIT_KEY } from "../../shared/epoch-key-limit";
-import { ACCOUNT_LIST_SELECTOR, DELETE_CONFIRM_WARN_SELECTOR, DEVICE_LIMIT_NOTICE_SELECTOR, SIGNIN_PROMPT_MSG_SELECTOR } from "../../shared/page-dom";
+import { ACCOUNT_LIST_SELECTOR, ACCOUNT_NAME_INPUT_SELECTOR, ACCOUNT_NAME_SELECTOR, DELETE_CONFIRM_WARN_SELECTOR, DEVICE_LIMIT_NOTICE_SELECTOR, SIGNIN_PROMPT_MSG_SELECTOR } from "../../shared/page-dom";
 import { DEFAULT_SETTINGS } from "../../shared/storage";
 import { mountContainer, renderAndSettle, unmountContainer } from "../../test/browser-harness";
 import { type ChromeShimHandle, installChromeShim } from "../../test/chrome-shim";
@@ -103,17 +104,40 @@ describe("AccountView - session states", () => {
 
     const row = container.querySelector(`${ACCOUNT_LIST_SELECTOR} .row`);
     expect(row?.textContent).toContain("Your account");
-    // The provider name alone: the sign-in asks for `openid` only, so there is no
-    // address or display name to put here.
-    expect(row?.querySelector(".row-hint")?.textContent).toBe("Google");
+    // The provider, then which account: `openid` alone gives no address to show, and
+    // one reader can hold several accounts at the same provider.
+    await vi.waitFor(() => expect(row?.querySelector(".row-hint")?.textContent).toMatch(/^Google · [a-z]+-[a-z]+$/));
     expect(button("Delete")).toBeDefined();
   });
 
-  it("falls back to a truncated user id for a session carrying no provider", async () => {
+  it("renames the account to what the reader typed, and keeps it after a reopen", async () => {
+    install();
+    await mountAndSettle();
+
+    const nameButton = () => container.querySelector<HTMLButtonElement>(ACCOUNT_NAME_SELECTOR);
+    // `element.click()`, not a pointer: this harness mounts the component without the
+    // popup stylesheet, so the row's icon renders at its intrinsic size and covers the
+    // name. A real popup has the stylesheet and the pointer lands; what is under test
+    // here is the rename, not hit-testing.
+    await vi.waitFor(() => expect(nameButton()).not.toBeNull());
+    (nameButton() as HTMLButtonElement).click();
+    await vi.waitFor(() => expect(container.querySelector(ACCOUNT_NAME_INPUT_SELECTOR)).not.toBeNull());
+    const field = container.querySelector<HTMLInputElement>(ACCOUNT_NAME_INPUT_SELECTOR) as HTMLInputElement;
+    await userEvent.clear(field);
+    await userEvent.type(field, "work");
+    await userEvent.keyboard("{Enter}");
+
+    await vi.waitFor(() => expect(nameButton()?.textContent).toBe("work"));
+    // Stored, not just rendered: the popup is torn down on every close.
+    await expect(accountDisplayName(USER_ID)).resolves.toBe("work");
+  });
+
+  it("still names the account when the session carries no provider", async () => {
     install({ provider: null });
     await mountAndSettle();
 
-    expect(container.querySelector(".row-hint")?.textContent).toBe("id: abcdefgh...");
+    // The label is derived from the account id, so it stands on its own.
+    await vi.waitFor(() => expect(container.querySelector(".row-hint")?.textContent).toMatch(/^[a-z]+-[a-z]+$/));
   });
 
   it("signs out and lands back on the sign-in prompt", async () => {

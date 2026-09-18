@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Extension-local auth session state.
 
+import { forgetAccount, noteAccountSeen } from "../shared/account-names";
 import { AUTH_KEY, isAuthSessionLive } from "../shared/auth-session";
 import { API_BASE } from "../shared/config";
 import { defined } from "../shared/defined";
@@ -151,6 +152,10 @@ export async function signInWithProvider(provider: OidcProvider): Promise<SignIn
     return { ok: false, refusal: "unavailable" };
   }
   await setAuth({ userId: session.userId, token: session.token, expiresAt: session.expiresAtSec, provider, epochMs: session.epochMs });
+  // Remembered for the sign-in page, which runs before any account is known and is
+  // exactly where a reader with two accounts at one provider needs the hint. A
+  // failure here costs a hint, never the sign-in.
+  await noteAccountSeen(provider, session.userId).catch((error: unknown) => logBackgroundError("signInWithProvider.noteAccountSeen", error));
   return { ok: true };
 }
 
@@ -261,6 +266,8 @@ async function clearLocalAccountStateAfterDeletion(userId: string | undefined, p
     await clearAutoNativesForUser(userId);
     // The signing keys go with the account and only with it (background/epoch-keys.ts).
     await clearEpochKeysForUser(userId);
+    // Its name and its place in the sign-in page's list of seen accounts go too.
+    await forgetAccount(userId);
   } else {
     await clearHistory();
   }

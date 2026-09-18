@@ -7,7 +7,8 @@
 import { render } from "preact";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { userEvent } from "vitest/browser";
-import { AGREE_CHECKBOX_SELECTOR, AUTH_ERROR_ID, AUTH_ERROR_SELECTOR, COUNTDOWN_SELECTOR, MORE_PROVIDERS_SELECTOR, PROVIDER_BUTTON_SELECTOR, PROVIDER_LIST_SELECTOR, providerButtonSelector, SPINNER_SELECTOR, TAGLINE_SELECTOR } from "../../shared/page-dom";
+import { ACCOUNTS_SEEN_KEY } from "../../shared/account-names";
+import { AGREE_CHECKBOX_SELECTOR, AUTH_ERROR_ID, AUTH_ERROR_SELECTOR, COUNTDOWN_SELECTOR, LAST_ACCOUNT_SELECTOR, MORE_PROVIDERS_SELECTOR, PROVIDER_BUTTON_SELECTOR, PROVIDER_LIST_SELECTOR, providerButtonSelector, SPINNER_SELECTOR, TAGLINE_SELECTOR } from "../../shared/page-dom";
 import { requireEl } from "../../test/browser-harness";
 import { type ChromeShimHandle, installChromeShim } from "../../test/chrome-shim";
 
@@ -103,6 +104,26 @@ describe("auth page - the provider step", () => {
     expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "apple", "microsoft", "twitch", "test"]);
     expect(providerButtons().map((b) => b.textContent?.trim())).toEqual(["Continue with Google", "Continue with Apple", "Continue with Microsoft", "Continue with Twitch", "Continue with test"]);
     expect(sentOfType("auth:providers")).toHaveLength(1);
+  });
+
+  it("names the account this device last used with a provider", async () => {
+    // Written by a previous sign-in (background/identity.ts); the page reads it
+    // locally, since the API tells it nothing about who signed in before.
+    shim = installChromeShim({
+      onMessage: (msg) => {
+        sent.push(msg);
+        return (msg as { type?: string }).type === "auth:providers" ? PROVIDERS : undefined;
+      },
+      local: { [ACCOUNTS_SEEN_KEY]: [{ provider: "google", userId: "u_1", at: 1_000 }] },
+    });
+    sent = [];
+    await loadPage();
+    await reachProviders();
+
+    const google = providerButton("google");
+    await vi.waitFor(() => expect(google.querySelector(LAST_ACCOUNT_SELECTOR)?.textContent).toMatch(/^Last time: [a-z]+-[a-z]+$/));
+    // Nothing for a provider this device has not signed in with.
+    expect(providerButton("apple").querySelector(LAST_ACCOUNT_SELECTOR)).toBeNull();
   });
 
   it("opens with the three most common accounts and keeps the rest behind one button", async () => {

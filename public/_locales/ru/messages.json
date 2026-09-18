@@ -125,6 +125,12 @@
   "signedInLabel": {
     "message": "Ваш аккаунт"
   },
+  "accountRenameBtn": {
+    "message": "Переименовать этот аккаунт"
+  },
+  "accountNamePlaceholder": {
+    "message": "Название аккаунта"
+  },
   "signOutBtn": {
     "message": "Выйти"
   },
@@ -407,6 +413,15 @@
   },
   "authMoreProvidersBtn": {
     "message": "Другие способы входа"
+  },
+  "authLastAccount": {
+    "message": "В прошлый раз: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "quiet-heron"
+      }
+    }
   },
   "authSigningInWith": {
     "message": "Вход через $PROVIDER$...",

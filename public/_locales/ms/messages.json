@@ -125,6 +125,12 @@
   "signedInLabel": {
     "message": "Akaun anda"
   },
+  "accountRenameBtn": {
+    "message": "Namakan semula akaun ini"
+  },
+  "accountNamePlaceholder": {
+    "message": "Nama akaun"
+  },
   "signOutBtn": {
     "message": "Log keluar"
   },
@@ -407,6 +413,15 @@
   },
   "authMoreProvidersBtn": {
     "message": "Lagi pilihan log masuk"
+  },
+  "authLastAccount": {
+    "message": "Kali lalu: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "quiet-heron"
+      }
+    }
   },
   "authSigningInWith": {
     "message": "Log masuk dengan $PROVIDER$...",

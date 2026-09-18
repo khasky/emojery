@@ -125,6 +125,12 @@
   "signedInLabel": {
     "message": "Tài khoản của bạn"
   },
+  "accountRenameBtn": {
+    "message": "Đổi tên tài khoản này"
+  },
+  "accountNamePlaceholder": {
+    "message": "Tên tài khoản"
+  },
   "signOutBtn": {
     "message": "Đăng xuất"
   },
@@ -407,6 +413,15 @@
   },
   "authMoreProvidersBtn": {
     "message": "Thêm tuỳ chọn đăng nhập"
+  },
+  "authLastAccount": {
+    "message": "Lần trước: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "quiet-heron"
+      }
+    }
   },
   "authSigningInWith": {
     "message": "Đang đăng nhập bằng $PROVIDER$...",

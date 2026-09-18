@@ -40,13 +40,23 @@ export const rowIcon = (children: ComponentChild[], danger = false) => svgIcon(c
 // Shared list-row shell for Settings and Account: icon, a label + hint stack, then the row's own
 // control as children. `<label>` where that control is the row's checkbox (so the whole row toggles
 // it), `<div>` where the row carries its own button instead.
-export const IconRow = ({ icon, danger, label, hint, rowClass = "row", tag = "div", children }: { icon: ComponentChild[]; danger?: boolean; label: string; hint: string; rowClass?: string; tag?: "div" | "label"; children?: ComponentChildren }) => {
+// `hintTail` rides inside the hint line rather than beside it: the account row puts
+// an interactive name there, and a second block would wrap onto its own line.
+export const IconRow = ({ icon, danger, label, hint, hintTail, rowClass = "row", tag = "div", children }: { icon: ComponentChild[]; danger?: boolean; label: string; hint: string; hintTail?: ComponentChildren; rowClass?: string; tag?: "div" | "label"; children?: ComponentChildren }) => {
   const body = (
     <Fragment>
       {rowIcon(icon, danger)}
       <span class="row-label">
         <span>{label}</span>
-        <span class="row-hint">{hint}</span>
+        <span class="row-hint">
+          {hint}
+          {hintTail ? (
+            <Fragment>
+              {hint ? " · " : ""}
+              {hintTail}
+            </Fragment>
+          ) : null}
+        </span>
       </span>
       {children}
     </Fragment>

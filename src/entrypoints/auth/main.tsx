@@ -4,11 +4,12 @@
 
 import { type ComponentChild, render } from "preact";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
+import { lastAccountPerProvider } from "../../shared/account-names";
 import { type I18nKey, t } from "../../shared/i18n";
 import type { RuntimeResponse, SignInRefusal } from "../../shared/messages";
 import { type OidcProvider, providerLabel, splitFeaturedProviders } from "../../shared/oidc-providers";
 import { bootstrapPage } from "../../shared/page-bootstrap";
-import { AGREE_CLASS, AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, COUNTDOWN_CLASS, MORE_PROVIDERS_CLASS, PROVIDER_BUTTON_CLASS, PROVIDER_LIST_CLASS, SPINNER_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
+import { AGREE_CLASS, AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, COUNTDOWN_CLASS, LAST_ACCOUNT_CLASS, MORE_PROVIDERS_CLASS, PROVIDER_BUTTON_CLASS, PROVIDER_LIST_CLASS, SPINNER_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
 import { withExtensionUtm } from "../../shared/tracking-links";
 import { sendRuntimeMessage } from "../../shared/webext";
 
@@ -195,6 +196,9 @@ function BusyStep({ provider }: { provider: OidcProvider }) {
 
 type ProviderStepProps = {
   providers: OidcProvider[] | null | undefined;
+  /** Account name last used with each provider on this device, for the hint under
+   *  its button. Empty until the store answers, and for a first sign-in. */
+  lastAccounts: Record<string, string>;
   error: string | null;
   accepted: boolean;
   showAll: boolean;
@@ -207,7 +211,7 @@ type ProviderStepProps = {
 // `providers` is undefined while the list loads, null when it could not be read
 // (the API unreachable, the worker gone) - that state shows the generic error
 // with a retry, since nothing else on the page can be done without the list.
-function ProviderStep({ providers, error, accepted, showAll, onPick, onRetryProviders, setAccepted, setShowAll }: ProviderStepProps) {
+function ProviderStep({ providers, lastAccounts, error, accepted, showAll, onPick, onRetryProviders, setAccepted, setShowAll }: ProviderStepProps) {
   const firstButton = useRef<HTMLButtonElement>(null);
   const firstRevealed = useRef<HTMLButtonElement>(null);
   const wasShowingAll = useRef(showAll);
@@ -287,7 +291,13 @@ function ProviderStep({ providers, error, accepted, showAll, onPick, onRetryProv
                 onClick={() => onPick(provider)}
               >
                 <ProviderMark provider={provider} />
-                <span>{t("authProviderBtn", providerLabel(provider))}</span>
+                <span>
+                  {t("authProviderBtn", providerLabel(provider))}
+                  {/* Which account this device used here last: with the `openid` scope
+                      alone the provider tells us nothing to show, and someone holding
+                      two accounts at one provider needs the reminder before the click. */}
+                  {lastAccounts[provider] ? <span class={LAST_ACCOUNT_CLASS}>{t("authLastAccount", lastAccounts[provider])}</span> : null}
+                </span>
               </button>
             ))}
             {showAll || rest.length === 0 ? null : (
@@ -305,6 +315,7 @@ function ProviderStep({ providers, error, accepted, showAll, onPick, onRetryProv
 function App() {
   const [step, setStep] = useState<Step>("provider");
   const [providers, setProviders] = useState<OidcProvider[] | null | undefined>(undefined);
+  const [lastAccounts, setLastAccounts] = useState<Record<string, string>>({});
   const [picked, setPicked] = useState<OidcProvider | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [accepted, setAccepted] = useState(false);
@@ -319,6 +330,13 @@ function App() {
   }, []);
 
   useEffect(loadProviders, [loadProviders]);
+
+  // Device-local, so it never blocks the list: the hint appears when it appears.
+  useEffect(() => {
+    void lastAccountPerProvider()
+      .then(setLastAccounts)
+      .catch(() => {});
+  }, []);
 
   // The tab title follows the step: a tab strip full of pages still says which one
   // is done.
@@ -343,7 +361,7 @@ function App() {
 
   if (step === "done") return <DoneStep returnsToPage={returnsToPage} />;
   if (step === "busy" && picked) return <BusyStep provider={picked} />;
-  return <ProviderStep providers={providers} error={error} accepted={accepted} showAll={showAll} onPick={(provider) => void pick(provider)} onRetryProviders={loadProviders} setAccepted={setAccepted} setShowAll={setShowAll} />;
+  return <ProviderStep providers={providers} lastAccounts={lastAccounts} error={error} accepted={accepted} showAll={showAll} onPick={(provider) => void pick(provider)} onRetryProviders={loadProviders} setAccepted={setAccepted} setShowAll={setShowAll} />;
 }
 
 // Shown ahead of the sign-in form on browsers that never prompted for data collection themselves.

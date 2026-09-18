@@ -125,6 +125,12 @@
   "signedInLabel": {
     "message": "আপনার অ্যাকাউন্ট"
   },
+  "accountRenameBtn": {
+    "message": "এই অ্যাকাউন্টের নাম বদলান"
+  },
+  "accountNamePlaceholder": {
+    "message": "অ্যাকাউন্টের নাম"
+  },
   "signOutBtn": {
     "message": "সাইন আউট"
   },
@@ -407,6 +413,15 @@
   },
   "authMoreProvidersBtn": {
     "message": "সাইন ইন করার আরও উপায়"
+  },
+  "authLastAccount": {
+    "message": "গতবার: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "quiet-heron"
+      }
+    }
   },
   "authSigningInWith": {
     "message": "$PROVIDER$ দিয়ে সাইন ইন হচ্ছে...",

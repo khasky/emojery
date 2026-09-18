@@ -125,6 +125,12 @@
   "signedInLabel": {
     "message": "你的账号"
   },
+  "accountRenameBtn": {
+    "message": "重命名此账号"
+  },
+  "accountNamePlaceholder": {
+    "message": "账号名称"
+  },
   "signOutBtn": {
     "message": "登出"
   },
@@ -407,6 +413,15 @@
   },
   "authMoreProvidersBtn": {
     "message": "更多登录方式"
+  },
+  "authLastAccount": {
+    "message": "上次：$NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "quiet-heron"
+      }
+    }
   },
   "authSigningInWith": {
     "message": "正在通过 $PROVIDER$ 登录...",

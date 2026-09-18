@@ -1307,3 +1307,22 @@ a:hover {
   color: var(--khasky-emojery-faint);
   opacity: 1;
 }
+
+/* The account name doubles as the control that renames it: link-styled inside the
+   hint line, swapped for an input of the same size while editing. */
+.account-name {
+  font-size: inherit;
+  padding: 0;
+  margin: 0;
+}
+
+.account-name-input {
+  width: 12ch;
+  padding: 0 2px;
+  font: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: var(--khasky-emojery-field-bg);
+  border: 1px solid var(--khasky-emojery-field-border);
+  border-radius: 4px;
+}

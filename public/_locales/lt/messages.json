@@ -125,6 +125,12 @@
   "signedInLabel": {
     "message": "Jūsų paskyra"
   },
+  "accountRenameBtn": {
+    "message": "Pervadinti šią paskyrą"
+  },
+  "accountNamePlaceholder": {
+    "message": "Paskyros pavadinimas"
+  },
   "signOutBtn": {
     "message": "Atsijungti"
   },
@@ -407,6 +413,15 @@
   },
   "authMoreProvidersBtn": {
     "message": "Daugiau prisijungimo parinkčių"
+  },
+  "authLastAccount": {
+    "message": "Praeitą kartą: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "quiet-heron"
+      }
+    }
   },
   "authSigningInWith": {
     "message": "Prisijungiama su $PROVIDER$...",

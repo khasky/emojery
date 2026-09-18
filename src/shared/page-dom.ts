@@ -121,6 +121,16 @@ export const MORE_PROVIDERS_SELECTOR = `button.${MORE_PROVIDERS_CLASS}`;
 // The spinner shown while the provider window is open and the enrolment runs.
 export const SPINNER_CLASS = "spinner";
 export const SPINNER_SELECTOR = `.${SPINNER_CLASS}`;
+// The account row's name: a button that opens the rename field in its place, and
+// the field itself. Both carry the account's display name (shared/account-names.ts).
+export const ACCOUNT_NAME_CLASS = "account-name";
+export const ACCOUNT_NAME_SELECTOR = `button.${ACCOUNT_NAME_CLASS}`;
+export const ACCOUNT_NAME_INPUT_CLASS = "account-name-input";
+export const ACCOUNT_NAME_INPUT_SELECTOR = `input.${ACCOUNT_NAME_INPUT_CLASS}`;
+// The sign-in page's note under a provider button, naming the account last used
+// with it on this device.
+export const LAST_ACCOUNT_CLASS = "last-account";
+export const LAST_ACCOUNT_SELECTOR = `.${LAST_ACCOUNT_CLASS}`;
 export const AUTH_ERROR_ID = "auth-error";
 export const AUTH_ERROR_CLASS = "error";
 // The class sits on every error banner the page can raise; the id marks the one

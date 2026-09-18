@@ -125,6 +125,12 @@
   "signedInLabel": {
     "message": "Tilisi"
   },
+  "accountRenameBtn": {
+    "message": "Nimeä tämä tili uudelleen"
+  },
+  "accountNamePlaceholder": {
+    "message": "Tilin nimi"
+  },
   "signOutBtn": {
     "message": "Kirjaudu ulos"
   },
@@ -407,6 +413,15 @@
   },
   "authMoreProvidersBtn": {
     "message": "Lisää kirjautumisvaihtoehtoja"
+  },
+  "authLastAccount": {
+    "message": "Viimeksi: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "quiet-heron"
+      }
+    }
   },
   "authSigningInWith": {
     "message": "Kirjaudutaan: $PROVIDER$...",

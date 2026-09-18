@@ -154,6 +154,15 @@
   }
 }
 
+/* Sits under the provider's name inside its button: secondary, so the button still
+   reads as one line of action with a note beneath it. */
+.last-account {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--khasky-emojery-muted);
+}
+
 .keep-open {
   margin: 12px 0 0;
   font-size: 12px;

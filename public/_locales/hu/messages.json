@@ -125,6 +125,12 @@
   "signedInLabel": {
     "message": "A fiókod"
   },
+  "accountRenameBtn": {
+    "message": "Fiók átnevezése"
+  },
+  "accountNamePlaceholder": {
+    "message": "Fiók neve"
+  },
   "signOutBtn": {
     "message": "Kijelentkezés"
   },
@@ -407,6 +413,15 @@
   },
   "authMoreProvidersBtn": {
     "message": "További bejelentkezési lehetőségek"
+  },
+  "authLastAccount": {
+    "message": "Legutóbb: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "quiet-heron"
+      }
+    }
   },
   "authSigningInWith": {
     "message": "Bejelentkezés ezzel: $PROVIDER$...",

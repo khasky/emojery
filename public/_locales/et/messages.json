@@ -125,6 +125,12 @@
   "signedInLabel": {
     "message": "Sinu konto"
   },
+  "accountRenameBtn": {
+    "message": "Nimeta see konto ümber"
+  },
+  "accountNamePlaceholder": {
+    "message": "Konto nimi"
+  },
   "signOutBtn": {
     "message": "Logi välja"
   },
@@ -407,6 +413,15 @@
   },
   "authMoreProvidersBtn": {
     "message": "Rohkem sisselogimisvalikuid"
+  },
+  "authLastAccount": {
+    "message": "Viimati: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "quiet-heron"
+      }
+    }
   },
   "authSigningInWith": {
     "message": "Sisselogimine: $PROVIDER$...",

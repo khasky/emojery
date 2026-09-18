@@ -125,6 +125,12 @@
   "signedInLabel": {
     "message": "Il tuo account"
   },
+  "accountRenameBtn": {
+    "message": "Rinomina questo account"
+  },
+  "accountNamePlaceholder": {
+    "message": "Nome dell'account"
+  },
   "signOutBtn": {
     "message": "Esci"
   },
@@ -407,6 +413,15 @@
   },
   "authMoreProvidersBtn": {
     "message": "Altre opzioni di accesso"
+  },
+  "authLastAccount": {
+    "message": "L'ultima volta: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "quiet-heron"
+      }
+    }
   },
   "authSigningInWith": {
     "message": "Accesso con $PROVIDER$...",

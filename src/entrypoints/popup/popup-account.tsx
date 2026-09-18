@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { type ComponentChild, Fragment } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
+import { accountLabel } from "../../shared/account-label";
+import { ACCOUNT_NAME_MAX, accountDisplayName, setAccountName } from "../../shared/account-names";
 import { removeTechnicalAndInteractionConsent, requestTechnicalAndInteractionConsent } from "../../shared/data-consent";
 import { type EpochKeyLimitNotice, readEpochKeyLimitNotice } from "../../shared/epoch-key-limit";
 import { t } from "../../shared/i18n";
 import { providerLabel } from "../../shared/oidc-providers";
-import { ACCOUNT_LIST_CLASS, DELETE_CONFIRM_WARN_CLASS, DEVICE_LIMIT_NOTICE_CLASS } from "../../shared/page-dom";
+import { ACCOUNT_LIST_CLASS, ACCOUNT_NAME_CLASS, ACCOUNT_NAME_INPUT_CLASS, DELETE_CONFIRM_WARN_CLASS, DEVICE_LIMIT_NOTICE_CLASS } from "../../shared/page-dom";
 import type { Settings } from "../../shared/storage";
 import { sendRuntimeMessage } from "../../shared/webext";
 import { HistoryDataSection } from "./popup-history-data";
@@ -120,6 +122,73 @@ const DeviceLimitNotice = () => {
   );
 };
 
+// The name shown for the signed-in account, and the field that renames it. The
+// name is the reader's own or a two-word label derived from the account id
+// (shared/account-label.ts) - with the `openid` scope alone there is no address to
+// show, and someone with two accounts at one provider still has to tell them apart.
+const AccountName = ({ userId }: { userId: string }) => {
+  // The derived label first, synchronously: it needs no storage read, so the row
+  // never renders an account without a name and then pops one in. A name the reader
+  // typed replaces it when the read lands.
+  const [name, setName] = useState(() => accountLabel(userId));
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setName(accountLabel(userId));
+    void accountDisplayName(userId)
+      .then(setName)
+      .catch(() => {});
+  }, [userId]);
+
+  useEffect(() => {
+    if (editing) inputRef.current?.focus();
+  }, [editing]);
+
+  const commit = async (value: string) => {
+    setEditing(false);
+    await setAccountName(userId, value).catch(() => {});
+    await accountDisplayName(userId)
+      .then(setName)
+      .catch(() => {});
+  };
+
+  if (!editing) {
+    return (
+      <button
+        class={`linkish ${ACCOUNT_NAME_CLASS}`}
+        type="button"
+        title={t("accountRenameBtn")}
+        onClick={() => {
+          setDraft(name);
+          setEditing(true);
+        }}
+      >
+        {name}
+      </button>
+    );
+  }
+  return (
+    <input
+      class={ACCOUNT_NAME_INPUT_CLASS}
+      ref={inputRef}
+      type="text"
+      value={draft}
+      maxLength={ACCOUNT_NAME_MAX}
+      aria-label={t("accountRenameBtn")}
+      placeholder={t("accountNamePlaceholder")}
+      onInput={(e: Event) => setDraft((e.target as HTMLInputElement).value)}
+      onBlur={() => void commit(draft)}
+      onKeyDown={(e: KeyboardEvent) => {
+        if (e.key === "Enter") void commit(draft);
+        // Escape leaves the stored name as it was, whatever the field holds.
+        if (e.key === "Escape") setEditing(false);
+      }}
+    />
+  );
+};
+
 const AccountView = ({ settings, update }: { settings: Settings; update: (patch: Partial<Settings>) => Promise<void> }) => {
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -149,15 +218,13 @@ const AccountView = ({ settings, update }: { settings: Settings; update: (patch:
     return <SignInPrompt message={t("signInMsgAccount")} />;
   }
 
-  // The account is named by the provider it came from - the sign-in asks for the
-  // `openid` scope only, so there is no address or display name to show, and nothing
-  // else about the account is stored locally. A session carrying no provider shows a
-  // short id prefix instead. The empty tail is unreachable - a signed-in session
-  // always has an id - but `hint` takes a string.
-  const subtitle = provider ? providerLabel(provider) : userId ? `id: ${userId.slice(0, 8)}...` : "";
+  // The provider names the account; the label beside it names WHICH account, since
+  // one reader can hold several at the same provider. The empty tail is unreachable
+  // - a signed-in session always has a provider - but `hint` takes a string.
+  const subtitle = provider ? providerLabel(provider) : "";
   return (
     <div class={ACCOUNT_LIST_CLASS}>
-      <IconRow rowClass="row arow" icon={ICON_USER} label={t("signedInLabel")} hint={subtitle}>
+      <IconRow rowClass="row arow" icon={ICON_USER} label={t("signedInLabel")} hint={subtitle} hintTail={userId ? <AccountName userId={userId} /> : undefined}>
         <button
           class="linkish"
           type="button"

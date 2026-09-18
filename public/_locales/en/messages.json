@@ -165,6 +165,14 @@
     "message": "Your account",
     "description": "Label on the Account tab's row naming the signed-in account; the provider's name sits under it."
   },
+  "accountRenameBtn": {
+    "message": "Rename this account",
+    "description": "Title of the account name in the popup; clicking it opens the rename field."
+  },
+  "accountNamePlaceholder": {
+    "message": "Account name",
+    "description": "Placeholder in the popup's rename field for the signed-in account."
+  },
   "signOutBtn": {
     "message": "Sign out",
     "description": "Button that ends the current session."
@@ -520,6 +528,16 @@
   "authMoreProvidersBtn": {
     "message": "More sign-in options",
     "description": "Button on the auth page that reveals the sign-in providers beyond the first three."
+  },
+  "authLastAccount": {
+    "message": "Last time: $NAME$",
+    "description": "Note under a provider button on the auth page, naming the account last used with that provider on this device. $NAME$ is the account's name or label.",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "quiet-heron"
+      }
+    }
   },
   "authSigningInWith": {
     "message": "Signing in with $PROVIDER$...",

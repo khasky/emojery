@@ -125,6 +125,12 @@
   "signedInLabel": {
     "message": "あなたのアカウント"
   },
+  "accountRenameBtn": {
+    "message": "このアカウントの名前を変更"
+  },
+  "accountNamePlaceholder": {
+    "message": "アカウント名"
+  },
   "signOutBtn": {
     "message": "サインアウト"
   },
@@ -407,6 +413,15 @@
   },
   "authMoreProvidersBtn": {
     "message": "他のログイン方法"
+  },
+  "authLastAccount": {
+    "message": "前回: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "quiet-heron"
+      }
+    }
   },
   "authSigningInWith": {
     "message": "$PROVIDER$ でサインイン中...",

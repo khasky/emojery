@@ -125,6 +125,12 @@
   "signedInLabel": {
     "message": "내 계정"
   },
+  "accountRenameBtn": {
+    "message": "이 계정 이름 바꾸기"
+  },
+  "accountNamePlaceholder": {
+    "message": "계정 이름"
+  },
   "signOutBtn": {
     "message": "로그아웃"
   },
@@ -407,6 +413,15 @@
   },
   "authMoreProvidersBtn": {
     "message": "다른 로그인 방법"
+  },
+  "authLastAccount": {
+    "message": "지난번: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "quiet-heron"
+      }
+    }
   },
   "authSigningInWith": {
     "message": "$PROVIDER$(으)로 로그인하는 중...",

@@ -125,6 +125,12 @@
   "signedInLabel": {
     "message": "บัญชีของคุณ"
   },
+  "accountRenameBtn": {
+    "message": "เปลี่ยนชื่อบัญชีนี้"
+  },
+  "accountNamePlaceholder": {
+    "message": "ชื่อบัญชี"
+  },
   "signOutBtn": {
     "message": "ออกจากระบบ"
   },
@@ -407,6 +413,15 @@
   },
   "authMoreProvidersBtn": {
     "message": "ตัวเลือกการลงชื่อเข้าใช้เพิ่มเติม"
+  },
+  "authLastAccount": {
+    "message": "ครั้งก่อน: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "quiet-heron"
+      }
+    }
   },
   "authSigningInWith": {
     "message": "กำลังลงชื่อเข้าใช้ด้วย $PROVIDER$...",

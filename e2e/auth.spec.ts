@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import { identityWindowAfter, revealTestProvider, TEST_PROVIDER } from "./lib/auth-signin";
 import { authAccount, authConfigured, closeSession, completeSignIn, enMessage, extensionPageUrl, FIREFOX_NO_EXTENSION_PAGES, isFirefoxRun, launchSession, localeMessage, removeProfileUnlessKept, resolveExtensionId, resolveExtensionPath, signInSkipReason } from "./lib/extension";
-import { AGREE_CHECKBOX_SELECTOR, PROVIDER_BUTTON_SELECTOR, providerButtonSelector } from "./lib/selectors";
+import { ACCOUNT_LIST_SELECTOR, ACCOUNT_NAME_SELECTOR, AGREE_CHECKBOX_SELECTOR, PROVIDER_BUTTON_SELECTOR, providerButtonSelector } from "./lib/selectors";
 
 // Whole file drives auth.html/popup.html, which Playwright Firefox cannot reach.
 test.skip(isFirefoxRun(), FIREFOX_NO_EXTENSION_PAGES);
@@ -113,8 +113,10 @@ test.describe("extension account auth", () => {
     const signedInPopup = await openPopupPage();
     await signedInPopup.getByRole("tab", { name: enMessage("tabAccount") }).click();
     await expect(signedInPopup.getByText(enMessage("signedInLabel"), { exact: true })).toBeVisible();
-    // The account is named by its provider, never by anything the provider knows.
-    await expect(signedInPopup.getByText(TEST_PROVIDER, { exact: true })).toBeVisible();
+    // The provider names the account, and a device-local two-word label says WHICH
+    // account - never anything the provider knows about its owner.
+    await expect(signedInPopup.locator(`${ACCOUNT_LIST_SELECTOR} .row-hint`).first()).toContainText(TEST_PROVIDER);
+    await expect(signedInPopup.locator(ACCOUNT_NAME_SELECTOR).first()).toHaveText(/^[a-z]+-[a-z]+$/);
     await expect(signedInPopup.getByText(testAccount)).toHaveCount(0);
 
     await signedInPopup.getByRole("button", { name: enMessage("signOutBtn") }).click();

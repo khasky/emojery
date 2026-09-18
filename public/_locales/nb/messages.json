@@ -125,6 +125,12 @@
   "signedInLabel": {
     "message": "Kontoen din"
   },
+  "accountRenameBtn": {
+    "message": "Gi denne kontoen nytt navn"
+  },
+  "accountNamePlaceholder": {
+    "message": "Kontonavn"
+  },
   "signOutBtn": {
     "message": "Logg ut"
   },
@@ -407,6 +413,15 @@
   },
   "authMoreProvidersBtn": {
     "message": "Flere påloggingsalternativer"
+  },
+  "authLastAccount": {
+    "message": "Forrige gang: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "quiet-heron"
+      }
+    }
   },
   "authSigningInWith": {
     "message": "Logger inn med $PROVIDER$...",

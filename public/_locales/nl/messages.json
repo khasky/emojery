@@ -125,6 +125,12 @@
   "signedInLabel": {
     "message": "Je account"
   },
+  "accountRenameBtn": {
+    "message": "Deze account hernoemen"
+  },
+  "accountNamePlaceholder": {
+    "message": "Accountnaam"
+  },
   "signOutBtn": {
     "message": "Uitloggen"
   },
@@ -407,6 +413,15 @@
   },
   "authMoreProvidersBtn": {
     "message": "Meer aanmeldopties"
+  },
+  "authLastAccount": {
+    "message": "Vorige keer: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "quiet-heron"
+      }
+    }
   },
   "authSigningInWith": {
     "message": "Aanmelden met $PROVIDER$...",
