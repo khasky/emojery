@@ -432,6 +432,15 @@
    }
   }
  },
+ "authSignOutAtProviderBtn": {
+  "message": "Sign out at $PROVIDER$ to use another account",
+  "placeholders": {
+   "provider": {
+    "content": "$1",
+    "example": "Apple"
+   }
+  }
+ },
  "authSigningInWith": {
   "message": "Signing in with $PROVIDER$...",
   "placeholders": {

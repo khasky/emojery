@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import { lastAccountPerProvider } from "../../shared/account-names";
 import { type I18nKey, t } from "../../shared/i18n";
 import type { RuntimeResponse, SignInRefusal } from "../../shared/messages";
-import { type OidcProvider, providerLabel, splitFeaturedProviders } from "../../shared/oidc-providers";
+import { type OidcProvider, providerAccountUrl, providerLabel, splitFeaturedProviders } from "../../shared/oidc-providers";
 import { bootstrapPage } from "../../shared/page-bootstrap";
 import { AGREE_CLASS, AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, COUNTDOWN_CLASS, LAST_ACCOUNT_CLASS, MORE_PROVIDERS_CLASS, OTHER_ACCOUNT_CLASS, PROVIDER_BUTTON_CLASS, PROVIDER_LIST_CLASS, SPINNER_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
 import { noteTermsAccepted, termsAccepted } from "../../shared/terms-consent";
@@ -196,6 +196,29 @@ function BusyStep({ provider }: { provider: OidcProvider }) {
   );
 }
 
+// The way to a second account at one provider. Most reopen their own picker on
+// request, so the control starts the sign-in again and asks for it. Apple cannot:
+// it takes no parameter for this, and the only way across is ending the session
+// Apple holds - so there the control is a link to its account page, which says
+// where it goes rather than restarting a flow that would return the same account.
+function OtherAccount({ provider, canChoose, accepted, onPick }: { provider: OidcProvider; canChoose: boolean; accepted: boolean; onPick: (provider: OidcProvider, chooser: boolean) => void }) {
+  const label = providerLabel(provider);
+  if (canChoose) {
+    return (
+      <button class={`linkish ${OTHER_ACCOUNT_CLASS}`} type="button" data-provider={provider} disabled={!accepted} onClick={() => onPick(provider, true)}>
+        {t("authOtherAccountBtn", label)}
+      </button>
+    );
+  }
+  const accountUrl = providerAccountUrl(provider);
+  if (!accountUrl) return null;
+  return (
+    <a class={`linkish ${OTHER_ACCOUNT_CLASS}`} data-provider={provider} href={withExtensionUtm(accountUrl, { campaign: "auth_switch_account", content: provider })} target="_blank" rel="noopener noreferrer">
+      {t("authSignOutAtProviderBtn", label)}
+    </a>
+  );
+}
+
 type ProviderStepProps = {
   providers: OidcProvider[] | null | undefined;
   /** Account name last used with each provider on this device, for the hint under
@@ -308,11 +331,7 @@ function ProviderStep({ providers, lastAccounts, chooserProviders, error, accept
                     the provider will actually offer a picker: signing out here ends
                     our session, never the one the browser holds with the provider,
                     so without this the second account is unreachable from the page. */}
-                {lastAccounts[provider] && chooserProviders.includes(provider) ? (
-                  <button class={`linkish ${OTHER_ACCOUNT_CLASS}`} type="button" data-provider={provider} disabled={!accepted} onClick={() => onPick(provider, true)}>
-                    {t("authOtherAccountBtn", providerLabel(provider))}
-                  </button>
-                ) : null}
+                {lastAccounts[provider] ? <OtherAccount provider={provider} canChoose={chooserProviders.includes(provider)} accepted={accepted} onPick={onPick} /> : null}
               </Fragment>
             ))}
             {showAll || rest.length === 0 ? null : (

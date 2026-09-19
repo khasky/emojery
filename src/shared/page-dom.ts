@@ -132,9 +132,11 @@ export const ACCOUNT_NAME_INPUT_SELECTOR = `input.${ACCOUNT_NAME_INPUT_CLASS}`;
 export const LAST_ACCOUNT_CLASS = "last-account";
 export const LAST_ACCOUNT_SELECTOR = `.${LAST_ACCOUNT_CLASS}`;
 // The sign-in page's control for reaching a second account at the same provider.
-// A sibling of the provider button, never inside it: a button cannot nest.
+// A sibling of the provider button, never inside it: a button cannot nest. Either
+// element: a button where the provider reopens its own picker, a link to the
+// provider's account page where it cannot (auth/main.tsx OtherAccount).
 export const OTHER_ACCOUNT_CLASS = "other-account";
-export const OTHER_ACCOUNT_SELECTOR = `button.${OTHER_ACCOUNT_CLASS}`;
+export const OTHER_ACCOUNT_SELECTOR = `.${OTHER_ACCOUNT_CLASS}`;
 export function otherAccountSelector(provider: string): string {
   return `${OTHER_ACCOUNT_SELECTOR}[data-provider="${provider}"]`;
 }

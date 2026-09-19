@@ -549,6 +549,16 @@
       }
     }
   },
+  "authSignOutAtProviderBtn": {
+    "message": "Sign out at $PROVIDER$ to use another account",
+    "description": "Link on the auth page under a provider that cannot reopen its own account picker (Apple today). It opens that provider's account page, where ending the session is what makes another account reachable. $PROVIDER$ is the provider's name.",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Apple"
+      }
+    }
+  },
   "authSigningInWith": {
     "message": "Signing in with $PROVIDER$...",
     "description": "Status line on the auth page while the provider's sign-in window is open. $PROVIDER$ is the provider's name.",

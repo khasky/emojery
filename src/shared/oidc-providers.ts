@@ -24,6 +24,20 @@ export function providerLabel(id: OidcProvider): string {
   return PROVIDER_LABELS[id] ?? id;
 }
 
+// Where to send a reader whose provider cannot be asked to reopen its account
+// picker (`chooser` in GET /auth/oidc/providers). Apple is the one today: its
+// authorization endpoint takes no `prompt` at all - passing one is answered 400 -
+// so the only way to another Apple Account is ending the session Apple itself
+// holds. A provider absent from both lists gets no control rather than one that
+// would lead nowhere.
+const PROVIDER_ACCOUNT_URL: Readonly<Record<string, string>> = {
+  apple: "https://account.apple.com/",
+};
+
+export function providerAccountUrl(id: OidcProvider): string | null {
+  return PROVIDER_ACCOUNT_URL[id] ?? null;
+}
+
 // The providers the sign-in page shows straight away, in this order - the accounts
 // most people already carry. Everything else the API offers waits behind "more
 // sign-in options", in the order the API listed it, so a provider added or retired

@@ -181,6 +181,30 @@ describe("auth page - the provider step", () => {
     expect(providerButton("google").disabled).toBe(false);
   });
 
+  // Apple takes no parameter that reopens its picker - one is answered 400 - so the
+  // control there leads to Apple's own account page instead of restarting a flow
+  // that would hand back the same account.
+  it("sends a provider with no picker to its account page instead", async () => {
+    shim = installChromeShim({
+      onMessage: (msg) => {
+        sent.push(msg);
+        return (msg as { type?: string }).type === "auth:providers" ? { ...PROVIDERS, chooser: ["google"] } : undefined;
+      },
+      local: { [ACCOUNTS_SEEN_KEY]: [{ provider: "apple", userId: "u_3", at: 3_000 }] },
+    });
+    sent = [];
+    await loadPage();
+    await reachProviders();
+
+    const link = await vi.waitFor(() => requireEl<HTMLAnchorElement>(document, otherAccountSelector("apple")));
+    expect(link.tagName).toBe("A");
+    expect(link.textContent).toBe("Sign out at Apple to use another account");
+    expect(link.href.startsWith("https://account.apple.com/")).toBe(true);
+    expect(link.target).toBe("_blank");
+    // It leaves the page rather than driving our own flow.
+    expect(sentOfType("auth:signIn")).toHaveLength(0);
+  });
+
   it("does not carry an agreement given for older terms", async () => {
     shim = installChromeShim({
       onMessage: (msg) => {
