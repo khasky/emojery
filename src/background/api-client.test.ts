@@ -113,7 +113,7 @@ describe("reply", () => {
 
   it("surfaces the error string a refused request answers with", async () => {
     stubFetchJson(429, { error: "rate_limited" });
-    const reply = await apiRequest("/auth/request-otp", { method: "POST", body: {} });
+    const reply = await apiRequest("/auth/oidc/exchange", { method: "POST", body: {} });
     expect(apiErrorString(reply.body)).toBe("rate_limited");
     expect(apiErrorString({ error: "" })).toBeUndefined();
     expect(apiErrorString({ error: 7 })).toBeUndefined();

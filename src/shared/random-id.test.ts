@@ -64,7 +64,7 @@ describe("randomId", () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
     const { apiRequest } = await import("../background/api-client");
-    await expect(apiRequest("/auth/request-otp", { method: "POST", body: {} })).rejects.toThrow(/no Web Crypto/);
+    await expect(apiRequest("/auth/oidc/exchange", { method: "POST", body: {} })).rejects.toThrow(/no Web Crypto/);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 

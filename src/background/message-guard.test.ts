@@ -111,7 +111,7 @@ describe("isTrustedSender", () => {
 // extension injects into a supported site messages with THAT url as `sender.url`. So a page
 // can put the extension's own base anywhere but the front, and a check that only looked
 // for the base somewhere in the string would hand it the extension-page types: `report`,
-// the history store, and the OTP pair that CREATES a credential.
+// the history store, and the sign-in that CREATES a credential.
 describe("isExtensionPageSender is anchored at the start of the URL", () => {
   const smuggled = [
     `https://www.facebook.com/watch/?u=${EXT_BASE}popup.html`,
@@ -127,7 +127,7 @@ describe("isExtensionPageSender is anchored at the start of the URL", () => {
     }
   });
 
-  it("keeps the OTP exchange out of reach of such a sender", () => {
+  it("keeps the sign-in exchange out of reach of such a sender", () => {
     for (const url of smuggled) {
       for (const type of EXTENSION_PAGE_TYPES) {
         expect(isTrustedSender(type, sender({ url, tab: { id: 7 } as chrome.tabs.Tab }), RUNTIME_ID, EXT_BASE), `${type} <- ${url}`).toBe(false);
