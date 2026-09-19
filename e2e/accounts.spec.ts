@@ -189,8 +189,9 @@ test("signing in as the same subject from a fresh profile restores the reaction"
 test("two accounts raise and lower the shared counter independently", async () => {
   test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_SIGN_IN);
   test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
-  // Generous: two separate waits for the public count to settle.
-  test.setTimeout(Number(process.env.E2E_TWO_ACCOUNT_TEST_TIMEOUT_MS ?? 600_000));
+  // Generous: two separate waits for the public count to settle, and the baseline
+  // below spends a cache window per read.
+  test.setTimeout(Number(process.env.E2E_TWO_ACCOUNT_TEST_TIMEOUT_MS ?? 900_000));
   const CACHE_WAIT = ext.COUNT_CACHE_WAIT_MS;
   const subjectA = ext.authAccount("count-a");
   const subjectB = ext.authAccount("count-b");
@@ -216,7 +217,12 @@ test("two accounts raise and lower the shared counter independently", async () =
     // true total, so a single early read is stale and the absolute base+1/base+2
     // expectations below (including the COUNT_CACHE_WAIT_MS cross-session poll) can then never
     // converge. Same rendered-counter wait the deletion spec uses.
-    const base = await ext.waitForSettledTotal(pageA);
+    //
+    // A window wider than the count cache (s-maxage=60), because the un-react
+    // above just moved this target: on the default 10 s window both reads came
+    // out of one cached body, the baseline settled one too high, and account B
+    // then waited out the whole cache poll for a total that was never coming.
+    const base = await ext.waitForSettledTotal(pageA, { timeout: 280_000, interval: 65_000 });
     const voteFlushed = ext.watchNextVoteFlush(sessionA.context);
     await ext.reactWith(pageA, ext.REACTIONS.heart);
     reactedAsA = true;
