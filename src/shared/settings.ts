@@ -6,7 +6,7 @@ import type { SupportedSite } from "./adapter";
 import { DEFAULT_EMOJI_SENTIMENT, type EmojiSentiment } from "./native-actions";
 import { DEFAULT_SITE_TOGGLES } from "./sites";
 import type { ThemePreference } from "./theme";
-import { storageSyncGet, storageSyncSet } from "./webext";
+import { storageLocalGet, storageLocalSet, storageSyncGet, storageSyncSet } from "./webext";
 
 export interface Settings {
   enabled: boolean;
@@ -117,9 +117,99 @@ export function resolveSettings(raw: unknown): Settings {
   return merged;
 }
 
+// --- where settings live ---------------------------------------------------
+//
+// Two keys, and the split is what keeps the content script out of the account's
+// business. `settings` is the EFFECTIVE snapshot of whoever is signed in: one
+// object, the shape every reader already watches, so the mount gate and the
+// settings watcher are untouched by any of this. `settings_by_account` is the
+// record each account keeps of what it changed - sparse, since a setting left
+// alone is the default and belongs to nobody.
+//
+// The active account is named in a key of its own rather than read off the
+// session record: that record carries the bearer token, and a content script has
+// no business holding one (shared/auth-session.ts).
+
+export const SETTINGS_KEY = "settings";
+export const SETTINGS_BY_ACCOUNT_KEY = "settings_by_account_v1";
+/** storage.local, written by background/identity.ts on every sign-in and sign-out. */
+export const ACTIVE_ACCOUNT_KEY = "active_account_v1";
+/** The bucket for "nobody is signed in": its own account, not a shared default. */
+export const SIGNED_OUT_ACCOUNT = "";
+
+type AccountSettings = Record<string, Partial<Settings>>;
+
+function asAccountSettings(value: unknown): AccountSettings {
+  if (typeof value !== "object" || value === null) return {};
+  const out: AccountSettings = {};
+  for (const [account, patch] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof patch === "object" && patch !== null) out[account] = patch as Partial<Settings>;
+  }
+  return out;
+}
+
+export async function activeAccountKey(): Promise<string> {
+  try {
+    const stored = await storageLocalGet([ACTIVE_ACCOUNT_KEY]);
+    const active = stored[ACTIVE_ACCOUNT_KEY];
+    return typeof active === "string" ? active : SIGNED_OUT_ACCOUNT;
+  } catch {
+    return SIGNED_OUT_ACCOUNT;
+  }
+}
+
+/** Only what this account moved off its default: a setting never touched is the
+ *  default and stays that way for every account, including the ones made later. */
+export function changedFromDefaults(settings: Settings): Partial<Settings> {
+  const patch: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(settings)) {
+    const fallback = DEFAULT_SETTINGS[key as keyof Settings];
+    if (JSON.stringify(value) !== JSON.stringify(fallback)) patch[key] = value;
+  }
+  return patch as Partial<Settings>;
+}
+
+async function withAccountSettings(account: string, patch: Partial<Settings>): Promise<AccountSettings> {
+  const stored = await storageSyncGet([SETTINGS_BY_ACCOUNT_KEY]);
+  const all = asAccountSettings(stored[SETTINGS_BY_ACCOUNT_KEY]);
+  if (Object.keys(patch).length === 0) delete all[account];
+  else all[account] = patch;
+  return all;
+}
+
+/** The settings an account carries: its own record laid over the defaults. An
+ *  account that has changed nothing - including one signing in here for the first
+ *  time - gets the defaults, which is what "settings follow the account" means. */
+export async function settingsForAccount(account: string): Promise<Settings> {
+  const stored = await storageSyncGet([SETTINGS_BY_ACCOUNT_KEY]);
+  return mergeSettings(resolveSettings(undefined), asAccountSettings(stored[SETTINGS_BY_ACCOUNT_KEY])[account] ?? {});
+}
+
+// The one-time move from "one set of settings on this device" to "one per account".
+// Everything the device had becomes the record of whoever is signed in at that
+// moment, so nobody's settings reset under them on upgrade; every account made
+// later starts from the defaults. Writing the key even when there was nothing to
+// carry is what makes this run once.
+async function migrateOnce(): Promise<void> {
+  const stored = await storageSyncGet([SETTINGS_BY_ACCOUNT_KEY, SETTINGS_KEY]);
+  if (stored[SETTINGS_BY_ACCOUNT_KEY] !== undefined) return;
+  const carried = changedFromDefaults(resolveSettings(stored[SETTINGS_KEY]));
+  await storageSyncSet({ [SETTINGS_BY_ACCOUNT_KEY]: Object.keys(carried).length > 0 ? { [await activeAccountKey()]: carried } : {} });
+}
+
+/** Make `account`'s settings the effective ones. Called on every sign-in and
+ *  sign-out; the readers see one `settings` write and nothing else changes.
+ *  The order matters: the account being LEFT is the one the migration carries,
+ *  so it runs before the active key moves. */
+export async function activateAccountSettings(account: string): Promise<void> {
+  await migrateOnce();
+  await storageLocalSet({ [ACTIVE_ACCOUNT_KEY]: account });
+  await storageSyncSet({ [SETTINGS_KEY]: await settingsForAccount(account) });
+}
+
 export async function getSettings(): Promise<Settings> {
-  const stored = await storageSyncGet(["settings"]);
-  return resolveSettings(stored.settings);
+  const stored = await storageSyncGet([SETTINGS_KEY]);
+  return resolveSettings(stored[SETTINGS_KEY]);
 }
 
 /** The one spelling of "should the extension mount on this site?" - the mount
@@ -143,5 +233,9 @@ export function mergeSettings(base: Settings, patch: Partial<Settings>): Setting
 }
 
 export async function setSettings(patch: Partial<Settings>): Promise<void> {
-  await storageSyncSet({ settings: mergeSettings(await getSettings(), patch) });
+  await migrateOnce();
+  const next = mergeSettings(await getSettings(), patch);
+  // Both halves, one write: the effective snapshot every reader already watches, and
+  // the owning account's record of what it changed.
+  await storageSyncSet({ [SETTINGS_KEY]: next, [SETTINGS_BY_ACCOUNT_KEY]: await withAccountSettings(await activeAccountKey(), changedFromDefaults(next)) });
 }

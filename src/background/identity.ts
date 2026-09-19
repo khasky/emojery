@@ -8,7 +8,7 @@ import { defined } from "../shared/defined";
 import { deadlineSignal } from "../shared/fetch-deadline";
 import type { SignInRefusal } from "../shared/messages";
 import { isProviderId, type OidcProvider } from "../shared/oidc-providers";
-import { clearAutoNativesForUser, clearOwnReactionsForUser } from "../shared/storage";
+import { activateAccountSettings, clearAutoNativesForUser, clearOwnReactionsForUser, SIGNED_OUT_ACCOUNT } from "../shared/storage";
 import { identityRedirectUrl, launchWebAuthFlow, storageLocalGet, storageLocalRemove, storageLocalSet, storageSessionGet, storageSessionRemove, storageSessionSet } from "../shared/webext";
 import { clearAccountKey, clearAccountKeys, ensureAccountKey, signInNonce } from "./account-keys";
 import { apiErrorString, apiRequest, isRecord, requestLanguage } from "./api-client";
@@ -64,10 +64,15 @@ export async function getAuth(): Promise<AuthState | null> {
 
 async function setAuth(auth: AuthState): Promise<void> {
   await storageLocalSet({ [AUTH_KEY]: auth });
+  // Settings belong to the account, so the session and the settings move together
+  // (shared/settings.ts). Failing here must not fail a sign-in that has otherwise
+  // succeeded: the reader would be left signed out of an account the server made.
+  await activateAccountSettings(auth.userId).catch((error: unknown) => logBackgroundError("setAuth.activateAccountSettings", error));
 }
 
 export async function clearAuth(): Promise<void> {
   await storageLocalRemove([AUTH_KEY]);
+  await activateAccountSettings(SIGNED_OUT_ACCOUNT).catch((error: unknown) => logBackgroundError("clearAuth.activateAccountSettings", error));
 }
 
 export type SignInResult = { ok: true } | { ok: false; refusal: SignInRefusal };
