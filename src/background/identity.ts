@@ -114,7 +114,7 @@ function parseCallbackFragment(responseUrl: string): { code: string } | { error:
 // Carries no AuthState: the session (bearer token included) is already persisted
 // via setAuth and read back through getAuth, so returning it would only widen the
 // credential's exposure surface.
-export async function signInWithProvider(provider: OidcProvider): Promise<SignInResult> {
+export async function signInWithProvider(provider: OidcProvider, chooser = false): Promise<SignInResult> {
   const redirect = identityRedirectUrl();
   if (!redirect) return { ok: false, refusal: "unavailable" };
   // The nonce the provider signs into its token commits to this device's account
@@ -123,7 +123,9 @@ export async function signInWithProvider(provider: OidcProvider): Promise<SignIn
   const accountKey = await ensureAccountKey(provider);
   const nonceSalt = crypto.getRandomValues(new Uint8Array(32));
   const nonce = await signInNonce(accountKey.publicKey, nonceSalt);
-  const startUrl = `${API_BASE}/auth/oidc/start?provider=${encodeURIComponent(provider)}&redirect=${encodeURIComponent(redirect)}&nonce=${nonce}`;
+  // Absent unless the reader asked to pick an account: a provider holding a live
+  // session returns it without a screen, which is what the plain button is for.
+  const startUrl = `${API_BASE}/auth/oidc/start?provider=${encodeURIComponent(provider)}&redirect=${encodeURIComponent(redirect)}&nonce=${nonce}${chooser ? "&chooser=1" : ""}`;
 
   let responseUrl: string | null;
   try {
@@ -159,12 +161,15 @@ export async function signInWithProvider(provider: OidcProvider): Promise<SignIn
   return { ok: true };
 }
 
-// The providers the API offers this build, in the order the page shows them. An
-// unreadable list rejects: the page has nothing to render without it.
-export async function listSignInProviders(): Promise<OidcProvider[]> {
+// The providers the API offers this build, in the order the page shows them, and
+// which of them can be asked for a different account. An unreadable list rejects:
+// the page has nothing to render without it. A build talking to an API that
+// predates `chooser` reads an empty set and offers the control nowhere.
+export async function listSignInProviders(): Promise<{ providers: OidcProvider[]; chooser: OidcProvider[] }> {
   const reply = await apiRequest("/auth/oidc/providers", { method: "GET", cache: "no-store" });
   if (!reply.ok || !isRecord(reply.body) || !Array.isArray(reply.body.providers)) throw new Error(`providers list unavailable: http ${reply.status}`);
-  return reply.body.providers.filter(isProviderId);
+  const chooser = Array.isArray(reply.body.chooser) ? reply.body.chooser.filter(isProviderId) : [];
+  return { providers: reply.body.providers.filter(isProviderId), chooser };
 }
 
 // End this account's session server-side; clearing the local token alone does not.

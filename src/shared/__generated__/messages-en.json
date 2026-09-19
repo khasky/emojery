@@ -423,6 +423,15 @@
    }
   }
  },
+ "authOtherAccountBtn": {
+  "message": "Use a different $PROVIDER$ account",
+  "placeholders": {
+   "provider": {
+    "content": "$1",
+    "example": "Google"
+   }
+  }
+ },
  "authSigningInWith": {
   "message": "Signing in with $PROVIDER$...",
   "placeholders": {

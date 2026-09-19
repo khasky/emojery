@@ -86,7 +86,10 @@ export type RuntimeMessage =
   // window is opened from there, and the session the code exchange creates is
   // written where it is used - it never travels back over this channel (see the
   // auth:signedIn response, which has no token field).
-  | { type: "auth:signIn"; provider: OidcProvider }
+  // `chooser` asks the provider for its account picker instead of the account the
+  // browser is already signed in as - the auth page sends it only from the control
+  // that says so, and only for a provider that answers to it.
+  | { type: "auth:signIn"; provider: OidcProvider; chooser?: boolean }
   | { type: "ui:injected"; targetCount: number };
 
 // What the user did to produce a history row, so the popup can tint it.
@@ -224,7 +227,9 @@ export type RuntimeResponse =
        *  which only needs the flag, and for a signed-out state. */
       provider: OidcProvider | null;
     }
-  | { type: "auth:providers"; providers: OidcProvider[] }
+  // `chooser` is the subset of `providers` that can be asked for a different
+  // account; the page offers that control for those and no others.
+  | { type: "auth:providers"; providers: OidcProvider[]; chooser: OidcProvider[] }
   // A refused sign-in names why (SignInRefusal above); neither answer carries the
   // new session - see the auth:signIn note above.
   // `returnsToPage` is not about the exchange: it is what the done step does next.

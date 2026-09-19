@@ -2,14 +2,14 @@
 //
 // Auth page for the extension's provider sign-in flow.
 
-import { type ComponentChild, render } from "preact";
+import { type ComponentChild, Fragment, render } from "preact";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import { lastAccountPerProvider } from "../../shared/account-names";
 import { type I18nKey, t } from "../../shared/i18n";
 import type { RuntimeResponse, SignInRefusal } from "../../shared/messages";
 import { type OidcProvider, providerLabel, splitFeaturedProviders } from "../../shared/oidc-providers";
 import { bootstrapPage } from "../../shared/page-bootstrap";
-import { AGREE_CLASS, AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, COUNTDOWN_CLASS, LAST_ACCOUNT_CLASS, MORE_PROVIDERS_CLASS, PROVIDER_BUTTON_CLASS, PROVIDER_LIST_CLASS, SPINNER_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
+import { AGREE_CLASS, AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, COUNTDOWN_CLASS, LAST_ACCOUNT_CLASS, MORE_PROVIDERS_CLASS, OTHER_ACCOUNT_CLASS, PROVIDER_BUTTON_CLASS, PROVIDER_LIST_CLASS, SPINNER_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
 import { withExtensionUtm } from "../../shared/tracking-links";
 import { sendRuntimeMessage } from "../../shared/webext";
 
@@ -42,14 +42,15 @@ const REFUSAL_COPY: Record<SignInRefusal, I18nKey> = {
 // No deadline: the answer waits on the provider's window (the user's own pace) and
 // on a first sign-in's enrollment, both longer than the round-trip timeout allows;
 // a background that dies still rejects through the closed channel.
-async function askSignIn(provider: OidcProvider): Promise<SignedIn> {
-  const res = await sendRuntimeMessage({ type: "auth:signIn", provider }, null).catch(() => undefined);
+async function askSignIn(provider: OidcProvider, chooser: boolean): Promise<SignedIn> {
+  const message = chooser ? { type: "auth:signIn" as const, provider, chooser: true } : { type: "auth:signIn" as const, provider };
+  const res = await sendRuntimeMessage(message, null).catch(() => undefined);
   return res?.type === "auth:signedIn" ? res : { type: "auth:signedIn", ok: false, refusal: "unavailable" };
 }
 
-async function askProviders(): Promise<OidcProvider[] | null> {
+async function askProviders(): Promise<{ providers: OidcProvider[]; chooser: OidcProvider[] } | null> {
   const res = await sendRuntimeMessage({ type: "auth:providers" }).catch(() => undefined);
-  return res?.type === "auth:providers" ? res.providers : null;
+  return res?.type === "auth:providers" ? { providers: res.providers, chooser: res.chooser } : null;
 }
 
 // Monochrome marks, one per known provider, drawn in `currentColor` so they follow
@@ -199,10 +200,13 @@ type ProviderStepProps = {
   /** Account name last used with each provider on this device, for the hint under
    *  its button. Empty until the store answers, and for a first sign-in. */
   lastAccounts: Record<string, string>;
+  /** The providers that answer to a request for their account picker. The control
+   *  appears for these only, so it never promises a switch that would not happen. */
+  chooserProviders: OidcProvider[];
   error: string | null;
   accepted: boolean;
   showAll: boolean;
-  onPick: (provider: OidcProvider) => void;
+  onPick: (provider: OidcProvider, chooser: boolean) => void;
   onRetryProviders: () => void;
   setAccepted: (value: boolean) => void;
   setShowAll: (value: boolean) => void;
@@ -211,7 +215,7 @@ type ProviderStepProps = {
 // `providers` is undefined while the list loads, null when it could not be read
 // (the API unreachable, the worker gone) - that state shows the generic error
 // with a retry, since nothing else on the page can be done without the list.
-function ProviderStep({ providers, lastAccounts, error, accepted, showAll, onPick, onRetryProviders, setAccepted, setShowAll }: ProviderStepProps) {
+function ProviderStep({ providers, lastAccounts, chooserProviders, error, accepted, showAll, onPick, onRetryProviders, setAccepted, setShowAll }: ProviderStepProps) {
   const firstButton = useRef<HTMLButtonElement>(null);
   const firstRevealed = useRef<HTMLButtonElement>(null);
   const wasShowingAll = useRef(showAll);
@@ -275,30 +279,40 @@ function ProviderStep({ providers, lastAccounts, error, accepted, showAll, onPic
         ) : (
           <div class={PROVIDER_LIST_CLASS} aria-describedby={error ? AUTH_ERROR_ID : undefined}>
             {shown.map((provider, index) => (
-              <button
-                key={provider}
-                class={PROVIDER_BUTTON_CLASS}
-                type="button"
-                data-provider={provider}
-                disabled={!accepted}
-                // One callback for both marks: with no featured provider on the list
-                // the first button is also the first revealed one, and two `ref` props
-                // on one element would leave whichever lost null.
-                ref={(el: HTMLButtonElement | null) => {
-                  if (index === 0) firstButton.current = el;
-                  if (index === featured.length) firstRevealed.current = el;
-                }}
-                onClick={() => onPick(provider)}
-              >
-                <ProviderMark provider={provider} />
-                <span>
-                  {t("authProviderBtn", providerLabel(provider))}
-                  {/* Which account this device used here last: with the `openid` scope
-                      alone the provider tells us nothing to show, and someone holding
-                      two accounts at one provider needs the reminder before the click. */}
-                  {lastAccounts[provider] ? <span class={LAST_ACCOUNT_CLASS}>{t("authLastAccount", lastAccounts[provider])}</span> : null}
-                </span>
-              </button>
+              <Fragment key={provider}>
+                <button
+                  class={PROVIDER_BUTTON_CLASS}
+                  type="button"
+                  data-provider={provider}
+                  disabled={!accepted}
+                  // One callback for both marks: with no featured provider on the list
+                  // the first button is also the first revealed one, and two `ref` props
+                  // on one element would leave whichever lost null.
+                  ref={(el: HTMLButtonElement | null) => {
+                    if (index === 0) firstButton.current = el;
+                    if (index === featured.length) firstRevealed.current = el;
+                  }}
+                  onClick={() => onPick(provider, false)}
+                >
+                  <ProviderMark provider={provider} />
+                  <span>
+                    {t("authProviderBtn", providerLabel(provider))}
+                    {/* Which account this device used here last: with the `openid` scope
+                        alone the provider tells us nothing to show, and someone holding
+                        two accounts at one provider needs the reminder before the click. */}
+                    {lastAccounts[provider] ? <span class={LAST_ACCOUNT_CLASS}>{t("authLastAccount", lastAccounts[provider])}</span> : null}
+                  </span>
+                </button>
+                {/* Only where there is something to switch AWAY from, and only where
+                    the provider will actually offer a picker: signing out here ends
+                    our session, never the one the browser holds with the provider,
+                    so without this the second account is unreachable from the page. */}
+                {lastAccounts[provider] && chooserProviders.includes(provider) ? (
+                  <button class={`linkish ${OTHER_ACCOUNT_CLASS}`} type="button" data-provider={provider} disabled={!accepted} onClick={() => onPick(provider, true)}>
+                    {t("authOtherAccountBtn", providerLabel(provider))}
+                  </button>
+                ) : null}
+              </Fragment>
             ))}
             {showAll || rest.length === 0 ? null : (
               <button class={`linkish ${MORE_PROVIDERS_CLASS}`} type="button" disabled={!accepted} onClick={() => setShowAll(true)}>
@@ -315,6 +329,7 @@ function ProviderStep({ providers, lastAccounts, error, accepted, showAll, onPic
 function App() {
   const [step, setStep] = useState<Step>("provider");
   const [providers, setProviders] = useState<OidcProvider[] | null | undefined>(undefined);
+  const [chooserProviders, setChooserProviders] = useState<OidcProvider[]>([]);
   const [lastAccounts, setLastAccounts] = useState<Record<string, string>>({});
   const [picked, setPicked] = useState<OidcProvider | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -326,7 +341,10 @@ function App() {
 
   const loadProviders = useCallback(() => {
     setProviders(undefined);
-    void askProviders().then((list) => setProviders(list === null || list.length === 0 ? null : list));
+    void askProviders().then((list) => {
+      setProviders(list === null || list.providers.length === 0 ? null : list.providers);
+      setChooserProviders(list?.chooser ?? []);
+    });
   }, []);
 
   useEffect(loadProviders, [loadProviders]);
@@ -345,11 +363,11 @@ function App() {
   }, [step]);
 
   // The busy step replaces the list, so a second pick cannot land while one runs.
-  const pick = useCallback(async (provider: OidcProvider) => {
+  const pick = useCallback(async (provider: OidcProvider, chooser: boolean) => {
     setError(null);
     setPicked(provider);
     setStep("busy");
-    const res = await askSignIn(provider);
+    const res = await askSignIn(provider, chooser);
     if (res.ok) {
       setReturnsToPage(res.returnsToPage === true);
       setStep("done");
@@ -361,7 +379,7 @@ function App() {
 
   if (step === "done") return <DoneStep returnsToPage={returnsToPage} />;
   if (step === "busy" && picked) return <BusyStep provider={picked} />;
-  return <ProviderStep providers={providers} lastAccounts={lastAccounts} error={error} accepted={accepted} showAll={showAll} onPick={(provider) => void pick(provider)} onRetryProviders={loadProviders} setAccepted={setAccepted} setShowAll={setShowAll} />;
+  return <ProviderStep providers={providers} lastAccounts={lastAccounts} chooserProviders={chooserProviders} error={error} accepted={accepted} showAll={showAll} onPick={(provider, chooser) => void pick(provider, chooser)} onRetryProviders={loadProviders} setAccepted={setAccepted} setShowAll={setShowAll} />;
 }
 
 // Shown ahead of the sign-in form on browsers that never prompted for data collection themselves.

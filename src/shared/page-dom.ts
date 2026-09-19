@@ -131,6 +131,13 @@ export const ACCOUNT_NAME_INPUT_SELECTOR = `input.${ACCOUNT_NAME_INPUT_CLASS}`;
 // with it on this device.
 export const LAST_ACCOUNT_CLASS = "last-account";
 export const LAST_ACCOUNT_SELECTOR = `.${LAST_ACCOUNT_CLASS}`;
+// The sign-in page's control for reaching a second account at the same provider.
+// A sibling of the provider button, never inside it: a button cannot nest.
+export const OTHER_ACCOUNT_CLASS = "other-account";
+export const OTHER_ACCOUNT_SELECTOR = `button.${OTHER_ACCOUNT_CLASS}`;
+export function otherAccountSelector(provider: string): string {
+  return `${OTHER_ACCOUNT_SELECTOR}[data-provider="${provider}"]`;
+}
 export const AUTH_ERROR_ID = "auth-error";
 export const AUTH_ERROR_CLASS = "error";
 // The class sits on every error banner the page can raise; the id marks the one

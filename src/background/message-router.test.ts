@@ -50,7 +50,7 @@ vi.mock("./identity", () => ({
   deleteAccount: vi.fn(async () => true),
   finishPendingDeletion: vi.fn(async () => {}),
   getAuth: vi.fn(async () => ({ userId: "u1", provider: "google", token: "tok", epochMs: 1000 })),
-  listSignInProviders: vi.fn(async () => ["google", "test"]),
+  listSignInProviders: vi.fn(async () => ({ providers: ["google", "test"], chooser: ["google"] })),
   revokeSessionServerSide: vi.fn(async () => true),
   // WIDER than the real SignInResult, which carries no AuthState (identity.ts says
   // so at the type). The handler must forward only ok/refusal, and a mock that
@@ -321,7 +321,7 @@ describe("message router", () => {
   });
 
   it("auth:providers answers the API's list, and an unreadable one as an error", async () => {
-    await expect(dispatch({ type: "auth:providers" }).response).resolves.toEqual({ type: "auth:providers", providers: ["google", "test"] });
+    await expect(dispatch({ type: "auth:providers" }).response).resolves.toEqual({ type: "auth:providers", providers: ["google", "test"], chooser: ["google"] });
     vi.mocked(identity.listSignInProviders).mockRejectedValueOnce(new Error("offline"));
     await expect(dispatch({ type: "auth:providers" }).response).resolves.toMatchObject({ type: "error", code: "unavailable" });
   });
@@ -330,8 +330,11 @@ describe("message router", () => {
     const response = await dispatch({ type: "auth:signIn", provider: "google" }).response;
     // hasAuthOrigin is mocked true above, so the return offer rides along.
     expect(response).toEqual({ type: "auth:signedIn", ok: true, returnsToPage: true });
-    expect(identity.signInWithProvider).toHaveBeenCalledWith("google");
+    expect(identity.signInWithProvider).toHaveBeenCalledWith("google", false);
     expect(JSON.stringify(response)).not.toContain("tok");
+    // The account picker travels only when the page asked for it.
+    await dispatch({ type: "auth:signIn", provider: "google", chooser: true }).response;
+    expect(identity.signInWithProvider).toHaveBeenLastCalledWith("google", true);
 
     vi.mocked(identity.signInWithProvider).mockResolvedValueOnce({ ok: false, refusal: "cancelled" });
     await expect(dispatch({ type: "auth:signIn", provider: "google" }).response).resolves.toEqual({ type: "auth:signedIn", ok: false, refusal: "cancelled" });

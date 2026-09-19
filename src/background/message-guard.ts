@@ -120,7 +120,8 @@ export function parseRuntimeMessage(raw: unknown, sender: chrome.runtime.Message
     case "auth:signIn": {
       // The id goes into a URL the identity window opens, so it is held to the
       // slug shape the API spells its providers in, not just to a length.
-      return isProviderId(raw.provider) ? { type, provider: raw.provider } : null;
+      if (!isProviderId(raw.provider)) return null;
+      return raw.chooser === true ? { type, provider: raw.provider, chooser: true } : { type, provider: raw.provider };
     }
     case "history:stats": {
       // Same four facets as history:page, parsed by the same bounds - the aggregates

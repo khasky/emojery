@@ -252,7 +252,7 @@ const HANDLERS: HandlerTable = {
   },
 
   "auth:providers": (_msg, { sendResponse }) => {
-    respondWith(sendResponse, "auth:providers", async () => ({ type: "auth:providers", providers: await listSignInProviders() }));
+    respondWith(sendResponse, "auth:providers", async () => ({ type: "auth:providers", ...(await listSignInProviders()) }));
     return ANSWER_LATER;
   },
 
@@ -261,7 +261,7 @@ const HANDLERS: HandlerTable = {
     // fields even if SignInResult grows. The session lives in storage.local
     // (read by getAuth) and is never forwarded here.
     respondWith(sendResponse, "auth:signIn", async () => {
-      const res = await signInWithProvider(msg.provider);
+      const res = await signInWithProvider(msg.provider, msg.chooser === true);
       if (!res.ok) return { type: "auth:signedIn", ok: false, refusal: res.refusal };
       // A failed lookup must not fail the sign-in that already succeeded - it
       // costs the return offer, nothing more.

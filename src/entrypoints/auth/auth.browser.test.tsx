@@ -8,7 +8,7 @@ import { render } from "preact";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { userEvent } from "vitest/browser";
 import { ACCOUNTS_SEEN_KEY } from "../../shared/account-names";
-import { AGREE_CHECKBOX_SELECTOR, AUTH_ERROR_ID, AUTH_ERROR_SELECTOR, COUNTDOWN_SELECTOR, LAST_ACCOUNT_SELECTOR, MORE_PROVIDERS_SELECTOR, PROVIDER_BUTTON_SELECTOR, PROVIDER_LIST_SELECTOR, providerButtonSelector, SPINNER_SELECTOR, TAGLINE_SELECTOR } from "../../shared/page-dom";
+import { AGREE_CHECKBOX_SELECTOR, AUTH_ERROR_ID, AUTH_ERROR_SELECTOR, COUNTDOWN_SELECTOR, LAST_ACCOUNT_SELECTOR, MORE_PROVIDERS_SELECTOR, otherAccountSelector, PROVIDER_BUTTON_SELECTOR, PROVIDER_LIST_SELECTOR, providerButtonSelector, SPINNER_SELECTOR, TAGLINE_SELECTOR } from "../../shared/page-dom";
 import { requireEl } from "../../test/browser-harness";
 import { type ChromeShimHandle, installChromeShim } from "../../test/chrome-shim";
 
@@ -16,7 +16,7 @@ import { type ChromeShimHandle, installChromeShim } from "../../test/chrome-shim
 // the URL - restored unchanged between tests, because the runner's own query string
 // is what later dynamic imports resolve against.
 const PAGE_URL = location.href;
-const PROVIDERS = { type: "auth:providers", providers: ["google", "apple", "microsoft", "twitch", "test"] };
+const PROVIDERS = { type: "auth:providers", providers: ["google", "apple", "microsoft", "twitch", "test"], chooser: ["google", "microsoft", "twitch", "test"] };
 const OK_SIGN_IN = { type: "auth:signedIn", ok: true };
 // In production the background closes this tab on an "ok", so nothing repaints
 // after it - here the page stays put, which is what the asserts read.
@@ -124,6 +124,50 @@ describe("auth page - the provider step", () => {
     await vi.waitFor(() => expect(google.querySelector(LAST_ACCOUNT_SELECTOR)?.textContent).toMatch(/^Last time: [a-z]+-[a-z]+$/));
     // Nothing for a provider this device has not signed in with.
     expect(providerButton("apple").querySelector(LAST_ACCOUNT_SELECTOR)).toBeNull();
+  });
+
+  // Signing out ends our session, never the one the browser holds with the
+  // provider, so the second account at one provider is reachable only from here.
+  it("offers a second account where the provider can be asked for one, and asks for it on the click", async () => {
+    shim = installChromeShim({
+      onMessage: (msg) => {
+        sent.push(msg);
+        const type = (msg as { type?: string }).type;
+        if (type === "auth:providers") return { ...PROVIDERS, chooser: ["google"] };
+        return type === "auth:signIn" ? OK_SIGN_IN : undefined;
+      },
+      local: {
+        [ACCOUNTS_SEEN_KEY]: [
+          { provider: "google", userId: "u_1", at: 1_000 },
+          { provider: "microsoft", userId: "u_2", at: 2_000 },
+        ],
+      },
+    });
+    sent = [];
+    await loadPage();
+    await reachProviders();
+    await userEvent.click(termsBox());
+
+    const other = await vi.waitFor(() => requireEl<HTMLButtonElement>(document, otherAccountSelector("google")));
+    expect(other.textContent).toBe("Use a different Google account");
+    // Microsoft was used on this device too, but the API says its picker cannot be
+    // reopened - a control there would send a parameter the provider ignores.
+    expect(document.querySelector(otherAccountSelector("microsoft"))).toBeNull();
+    // And nothing to switch away from yet on a provider this device has not used.
+    expect(document.querySelector(otherAccountSelector("apple"))).toBeNull();
+
+    await userEvent.click(other);
+    await vi.waitFor(() => expect(sentOfType("auth:signIn")).toHaveLength(1));
+    expect(sentOfType("auth:signIn")[0]).toEqual({ type: "auth:signIn", provider: "google", chooser: true });
+  });
+
+  it("asks for no account picker on the ordinary provider button", async () => {
+    install();
+    await loadPage();
+    await pick("google");
+
+    await vi.waitFor(() => expect(sentOfType("auth:signIn")).toHaveLength(1));
+    expect(sentOfType("auth:signIn")[0]).toEqual({ type: "auth:signIn", provider: "google" });
   });
 
   it("opens with the three most common accounts and keeps the rest behind one button", async () => {

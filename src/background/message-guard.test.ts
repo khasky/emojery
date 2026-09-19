@@ -419,4 +419,17 @@ describe("parseRuntimeMessage", () => {
     reject({ type: "auth:signIn", provider: "a".repeat(PROVIDER_ID_MAX + 1) });
     expect(parseRuntimeMessage({ type: "auth:signIn", provider: "a".repeat(PROVIDER_ID_MAX) }, authPage, RUNTIME_ID, EXT_BASE)).toEqual({ type: "auth:signIn", provider: "a".repeat(PROVIDER_ID_MAX) });
   });
+
+  // The account picker rides on a boolean that must survive as a boolean: the flag
+  // goes into the provider's URL, and anything truthy-but-not-true reaching the
+  // background would make a sign-in take a route the page never asked for.
+  it("carries the account picker only for a literal true", () => {
+    const authPage = pageSender({ url: `${EXT_BASE}auth.html` });
+    const parse = (raw: unknown) => parseRuntimeMessage(raw, authPage, RUNTIME_ID, EXT_BASE);
+
+    expect(parse({ type: "auth:signIn", provider: "google", chooser: true })).toEqual({ type: "auth:signIn", provider: "google", chooser: true });
+    for (const chooser of [false, "true", 1, "1", null, {}]) {
+      expect(parse({ type: "auth:signIn", provider: "google", chooser })).toEqual({ type: "auth:signIn", provider: "google" });
+    }
+  });
 });

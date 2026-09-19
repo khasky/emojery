@@ -225,8 +225,15 @@ describe("signInWithProvider", () => {
 
 describe("listSignInProviders", () => {
   it("returns the API's ids, dropping anything that is not a provider id", async () => {
-    stubFetchJson(200, { providers: ["google", "test", "Bad Id", 42, ""] });
-    expect(await listSignInProviders()).toEqual(["google", "test"]);
+    stubFetchJson(200, { providers: ["google", "test", "Bad Id", 42, ""], chooser: ["google", "Bad Id"] });
+    expect(await listSignInProviders()).toEqual({ providers: ["google", "test"], chooser: ["google"] });
+  });
+
+  // An API that predates the field leaves the page with nothing to offer rather
+  // than a control that would send a parameter nobody reads.
+  it("reads an absent account-picker list as none", async () => {
+    stubFetchJson(200, { providers: ["google"] });
+    expect(await listSignInProviders()).toEqual({ providers: ["google"], chooser: [] });
   });
 
   it("rejects an unreadable list", async () => {

@@ -423,6 +423,16 @@
       }
     }
   },
+  "authOtherAccountBtn": {
+    "message": "Увійти іншим акаунтом $PROVIDER$",
+    "description": "Button on the auth page under a provider this device already signed in with. It reopens that provider's account picker instead of continuing as the account the browser holds. $PROVIDER$ is the provider's name (Google, Apple, ...).",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
   "authSigningInWith": {
     "message": "Вхід через $PROVIDER$...",
     "placeholders": {
