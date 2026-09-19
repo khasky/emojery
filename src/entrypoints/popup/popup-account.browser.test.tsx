@@ -120,12 +120,23 @@ describe("AccountView - session states", () => {
     // name. A real popup has the stylesheet and the pointer lands; what is under test
     // here is the rename, not hit-testing.
     await vi.waitFor(() => expect(nameButton()).not.toBeNull());
-    (nameButton() as HTMLButtonElement).click();
-    await vi.waitFor(() => expect(container.querySelector(ACCOUNT_NAME_INPUT_SELECTOR)).not.toBeNull());
+    // Clicked until the field is open, and then typed into by event rather than by
+    // `userEvent`: the field commits on blur, and a Firefox window losing focus to
+    // the second browser this suite runs blurs it the moment it is focused, closing
+    // it again. Measured at ~40% of paired runs. Nothing here needs the field to
+    // HOLD focus - onInput and onKeyDown are the whole of the rename.
+    await vi.waitFor(() => {
+      if (container.querySelector(ACCOUNT_NAME_INPUT_SELECTOR) === null) nameButton()?.click();
+      expect(container.querySelector(ACCOUNT_NAME_INPUT_SELECTOR)).not.toBeNull();
+    });
     const field = container.querySelector<HTMLInputElement>(ACCOUNT_NAME_INPUT_SELECTOR) as HTMLInputElement;
-    await userEvent.clear(field);
-    await userEvent.type(field, "work");
-    await userEvent.keyboard("{Enter}");
+    field.value = "work";
+    field.dispatchEvent(new Event("input", { bubbles: true }));
+    // The Enter handler closes over the draft of the render it was attached in, so
+    // the render that onInput schedules has to land first - dispatched back to back,
+    // the commit still carries the old name.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    field.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
 
     await vi.waitFor(() => expect(nameButton()?.textContent).toBe("work"));
     // Stored, not just rendered: the popup is torn down on every close.
