@@ -9,6 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { userEvent } from "vitest/browser";
 import { ACCOUNTS_SEEN_KEY } from "../../shared/account-names";
 import { AGREE_CHECKBOX_SELECTOR, AUTH_ERROR_ID, AUTH_ERROR_SELECTOR, COUNTDOWN_SELECTOR, LAST_ACCOUNT_SELECTOR, MORE_PROVIDERS_SELECTOR, otherAccountSelector, PROVIDER_BUTTON_SELECTOR, PROVIDER_LIST_SELECTOR, providerButtonSelector, SPINNER_SELECTOR, TAGLINE_SELECTOR } from "../../shared/page-dom";
+import { TERMS_ACCEPTED_KEY, TERMS_REVISION } from "../../shared/terms-consent";
 import { requireEl } from "../../test/browser-harness";
 import { type ChromeShimHandle, installChromeShim } from "../../test/chrome-shim";
 
@@ -159,6 +160,52 @@ describe("auth page - the provider step", () => {
     await userEvent.click(other);
     await vi.waitFor(() => expect(sentOfType("auth:signIn")).toHaveLength(1));
     expect(sentOfType("auth:signIn")[0]).toEqual({ type: "auth:signIn", provider: "google", chooser: true });
+  });
+
+  // The agreement is the reader's, not the session's: re-ticking it on every
+  // sign-in and every account switch is a click for a consent already given.
+  it("ticks the agreement back for a device that already gave it", async () => {
+    shim = installChromeShim({
+      onMessage: (msg) => {
+        sent.push(msg);
+        return (msg as { type?: string }).type === "auth:providers" ? PROVIDERS : undefined;
+      },
+      local: { [TERMS_ACCEPTED_KEY]: { revision: TERMS_REVISION, at: 1_000 } },
+    });
+    sent = [];
+    await loadPage();
+    await reachProviders();
+
+    await vi.waitFor(() => expect(termsBox().checked).toBe(true));
+    // And the providers are reachable straight away, which is the point of it.
+    expect(providerButton("google").disabled).toBe(false);
+  });
+
+  it("does not carry an agreement given for older terms", async () => {
+    shim = installChromeShim({
+      onMessage: (msg) => {
+        sent.push(msg);
+        return (msg as { type?: string }).type === "auth:providers" ? PROVIDERS : undefined;
+      },
+      local: { [TERMS_ACCEPTED_KEY]: { revision: "1970-01-01", at: 1_000 } },
+    });
+    sent = [];
+    await loadPage();
+    await reachProviders();
+
+    expect(termsBox().checked).toBe(false);
+    expect(providerButton("google").disabled).toBe(true);
+  });
+
+  it("remembers the agreement as it is ticked, and forgets it when it is cleared", async () => {
+    install();
+    await loadPage();
+    await reachProviders();
+
+    await userEvent.click(termsBox());
+    await vi.waitFor(() => expect(shim.local.get(TERMS_ACCEPTED_KEY)).toMatchObject({ revision: TERMS_REVISION }));
+    await userEvent.click(termsBox());
+    await vi.waitFor(() => expect(shim.local.has(TERMS_ACCEPTED_KEY)).toBe(false));
   });
 
   it("asks for no account picker on the ordinary provider button", async () => {

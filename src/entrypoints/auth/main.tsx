@@ -10,6 +10,7 @@ import type { RuntimeResponse, SignInRefusal } from "../../shared/messages";
 import { type OidcProvider, providerLabel, splitFeaturedProviders } from "../../shared/oidc-providers";
 import { bootstrapPage } from "../../shared/page-bootstrap";
 import { AGREE_CLASS, AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, COUNTDOWN_CLASS, LAST_ACCOUNT_CLASS, MORE_PROVIDERS_CLASS, OTHER_ACCOUNT_CLASS, PROVIDER_BUTTON_CLASS, PROVIDER_LIST_CLASS, SPINNER_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
+import { noteTermsAccepted, termsAccepted } from "../../shared/terms-consent";
 import { withExtensionUtm } from "../../shared/tracking-links";
 import { sendRuntimeMessage } from "../../shared/webext";
 
@@ -208,14 +209,14 @@ type ProviderStepProps = {
   showAll: boolean;
   onPick: (provider: OidcProvider, chooser: boolean) => void;
   onRetryProviders: () => void;
-  setAccepted: (value: boolean) => void;
+  onAccept: (value: boolean) => void;
   setShowAll: (value: boolean) => void;
 };
 
 // `providers` is undefined while the list loads, null when it could not be read
 // (the API unreachable, the worker gone) - that state shows the generic error
 // with a retry, since nothing else on the page can be done without the list.
-function ProviderStep({ providers, lastAccounts, chooserProviders, error, accepted, showAll, onPick, onRetryProviders, setAccepted, setShowAll }: ProviderStepProps) {
+function ProviderStep({ providers, lastAccounts, chooserProviders, error, accepted, showAll, onPick, onRetryProviders, onAccept, setShowAll }: ProviderStepProps) {
   const firstButton = useRef<HTMLButtonElement>(null);
   const firstRevealed = useRef<HTMLButtonElement>(null);
   const wasShowingAll = useRef(showAll);
@@ -240,7 +241,7 @@ function ProviderStep({ providers, lastAccounts, chooserProviders, error, accept
         <h1>{t("authSignInTitle")}</h1>
         <p class={TAGLINE_CLASS}>{t("authSignInTagline")}</p>
         <label class={AGREE_CLASS}>
-          <input type="checkbox" checked={accepted} onChange={(e: Event) => setAccepted((e.target as HTMLInputElement).checked)} />
+          <input type="checkbox" checked={accepted} onChange={(e: Event) => onAccept((e.target as HTMLInputElement).checked)} />
           <span>
             {t("authAgreeIntro")}
             <a
@@ -356,6 +357,22 @@ function App() {
       .catch(() => {});
   }, []);
 
+  // An agreement already given for the revision in force ticks the box back, so a
+  // second sign-in does not ask twice for the same consent. Read once, on mount:
+  // after that the reader owns the box.
+  useEffect(() => {
+    void termsAccepted().then((remembered) => {
+      if (remembered) setAccepted(true);
+    });
+  }, []);
+
+  // Remembered as it is ticked rather than at the sign-in, so the agreement is
+  // recorded even when the reader closes the page without picking a provider.
+  const onAccept = useCallback((value: boolean) => {
+    setAccepted(value);
+    void noteTermsAccepted(value);
+  }, []);
+
   // The tab title follows the step: a tab strip full of pages still says which one
   // is done.
   useEffect(() => {
@@ -379,7 +396,7 @@ function App() {
 
   if (step === "done") return <DoneStep returnsToPage={returnsToPage} />;
   if (step === "busy" && picked) return <BusyStep provider={picked} />;
-  return <ProviderStep providers={providers} lastAccounts={lastAccounts} chooserProviders={chooserProviders} error={error} accepted={accepted} showAll={showAll} onPick={(provider, chooser) => void pick(provider, chooser)} onRetryProviders={loadProviders} setAccepted={setAccepted} setShowAll={setShowAll} />;
+  return <ProviderStep providers={providers} lastAccounts={lastAccounts} chooserProviders={chooserProviders} error={error} accepted={accepted} showAll={showAll} onPick={(provider, chooser) => void pick(provider, chooser)} onRetryProviders={loadProviders} onAccept={onAccept} setShowAll={setShowAll} />;
 }
 
 // Shown ahead of the sign-in form on browsers that never prompted for data collection themselves.
