@@ -126,6 +126,13 @@ export function resolveSettings(raw: unknown): Settings {
 // record each account keeps of what it changed - sparse, since a setting left
 // alone is the default and belongs to nobody.
 //
+// The per-account records stay in storage.LOCAL while the effective snapshot goes
+// on syncing as it always has. They are keyed by account id, and storage.sync
+// passes through the browser vendor's service: what syncs today is a preferences
+// blob naming nobody, and docs/permissions.md says so in as many words. Keeping
+// that promise costs per-device records, which is what "settings follow the
+// account" needs anyway - the switching happens on one device.
+//
 // The active account is named in a key of its own rather than read off the
 // session record: that record carries the bearer token, and a content script has
 // no business holding one (shared/auth-session.ts).
@@ -170,7 +177,7 @@ export function changedFromDefaults(settings: Settings): Partial<Settings> {
 }
 
 async function withAccountSettings(account: string, patch: Partial<Settings>): Promise<AccountSettings> {
-  const stored = await storageSyncGet([SETTINGS_BY_ACCOUNT_KEY]);
+  const stored = await storageLocalGet([SETTINGS_BY_ACCOUNT_KEY]);
   const all = asAccountSettings(stored[SETTINGS_BY_ACCOUNT_KEY]);
   if (Object.keys(patch).length === 0) delete all[account];
   else all[account] = patch;
@@ -181,7 +188,7 @@ async function withAccountSettings(account: string, patch: Partial<Settings>): P
  *  account that has changed nothing - including one signing in here for the first
  *  time - gets the defaults, which is what "settings follow the account" means. */
 export async function settingsForAccount(account: string): Promise<Settings> {
-  const stored = await storageSyncGet([SETTINGS_BY_ACCOUNT_KEY]);
+  const stored = await storageLocalGet([SETTINGS_BY_ACCOUNT_KEY]);
   return mergeSettings(resolveSettings(undefined), asAccountSettings(stored[SETTINGS_BY_ACCOUNT_KEY])[account] ?? {});
 }
 
@@ -191,10 +198,10 @@ export async function settingsForAccount(account: string): Promise<Settings> {
 // later starts from the defaults. Writing the key even when there was nothing to
 // carry is what makes this run once.
 async function migrateOnce(): Promise<void> {
-  const stored = await storageSyncGet([SETTINGS_BY_ACCOUNT_KEY, SETTINGS_KEY]);
-  if (stored[SETTINGS_BY_ACCOUNT_KEY] !== undefined) return;
-  const carried = changedFromDefaults(resolveSettings(stored[SETTINGS_KEY]));
-  await storageSyncSet({ [SETTINGS_BY_ACCOUNT_KEY]: Object.keys(carried).length > 0 ? { [await activeAccountKey()]: carried } : {} });
+  const [byAccount, settings] = await Promise.all([storageLocalGet([SETTINGS_BY_ACCOUNT_KEY]), storageSyncGet([SETTINGS_KEY])]);
+  if (byAccount[SETTINGS_BY_ACCOUNT_KEY] !== undefined) return;
+  const carried = changedFromDefaults(resolveSettings(settings[SETTINGS_KEY]));
+  await storageLocalSet({ [SETTINGS_BY_ACCOUNT_KEY]: Object.keys(carried).length > 0 ? { [await activeAccountKey()]: carried } : {} });
 }
 
 /** Make `account`'s settings the effective ones. Called on every sign-in and
@@ -237,5 +244,6 @@ export async function setSettings(patch: Partial<Settings>): Promise<void> {
   const next = mergeSettings(await getSettings(), patch);
   // Both halves, one write: the effective snapshot every reader already watches, and
   // the owning account's record of what it changed.
-  await storageSyncSet({ [SETTINGS_KEY]: next, [SETTINGS_BY_ACCOUNT_KEY]: await withAccountSettings(await activeAccountKey(), changedFromDefaults(next)) });
+  const byAccount = await withAccountSettings(await activeAccountKey(), changedFromDefaults(next));
+  await Promise.all([storageSyncSet({ [SETTINGS_KEY]: next }), storageLocalSet({ [SETTINGS_BY_ACCOUNT_KEY]: byAccount })]);
 }

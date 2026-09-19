@@ -42,7 +42,7 @@ describe("settings that follow the account", () => {
     await activateAccountSettings("u_1");
     await setSettings({ enabled: false });
 
-    expect(sync[SETTINGS_BY_ACCOUNT_KEY]).toEqual({ u_1: { enabled: false } });
+    expect(local[SETTINGS_BY_ACCOUNT_KEY]).toEqual({ u_1: { enabled: false } });
     expect((await getSettings()).enabled).toBe(false);
   });
 
@@ -82,6 +82,18 @@ describe("settings that follow the account", () => {
     expect(await getSettings()).toMatchObject({ enabled: false, theme: DEFAULT_SETTINGS.theme });
   });
 
+  // storage.sync passes through the browser vendor's service, and what goes there is
+  // a preferences blob naming nobody (docs/permissions.md). The per-account records
+  // are keyed by account id, so they stay on the device.
+  it("keeps the account ids out of synced storage", async () => {
+    await activateAccountSettings("u_1");
+    await setSettings({ enabled: false });
+
+    expect(sync[SETTINGS_BY_ACCOUNT_KEY]).toBeUndefined();
+    expect(JSON.stringify(sync)).not.toContain("u_1");
+    expect(local[SETTINGS_BY_ACCOUNT_KEY]).toEqual({ u_1: { enabled: false } });
+  });
+
   it("names the active account where a content script can read it without the session record", async () => {
     await activateAccountSettings("u_1");
     expect(local[ACTIVE_ACCOUNT_KEY]).toBe("u_1");
@@ -101,7 +113,7 @@ describe("settings that follow the account", () => {
     await activateAccountSettings("u_1");
     await setSettings({ enabled: false });
     await setSettings({ enabled: true });
-    expect(sync[SETTINGS_BY_ACCOUNT_KEY]).toEqual({});
+    expect(local[SETTINGS_BY_ACCOUNT_KEY]).toEqual({});
   });
 });
 
@@ -112,7 +124,7 @@ describe("the move to per-account settings", () => {
 
     await setSettings({});
 
-    expect(sync[SETTINGS_BY_ACCOUNT_KEY]).toEqual({ u_1: { enabled: false, theme: "dark" } });
+    expect(local[SETTINGS_BY_ACCOUNT_KEY]).toEqual({ u_1: { enabled: false, theme: "dark" } });
     expect(await getSettings()).toMatchObject({ enabled: false, theme: "dark" });
   });
 
@@ -139,6 +151,6 @@ describe("the move to per-account settings", () => {
   it("leaves a device that changed nothing with no records at all", async () => {
     install({ sync: { [SETTINGS_KEY]: { ...DEFAULT_SETTINGS } } });
     await activateAccountSettings("u_1");
-    expect(sync[SETTINGS_BY_ACCOUNT_KEY]).toEqual({});
+    expect(local[SETTINGS_BY_ACCOUNT_KEY]).toEqual({});
   });
 });
