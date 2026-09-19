@@ -122,6 +122,9 @@ const DeviceLimitNotice = () => {
   );
 };
 
+// Narrowest the rename field goes, so an empty one still shows its placeholder.
+const NAME_FIELD_MIN_CHARS = 12;
+
 // The name shown for the signed-in account, and the field that renames it. The
 // name is the reader's own or a two-word label derived from the account id
 // (shared/account-label.ts) - with the `openid` scope alone there is no address to
@@ -176,6 +179,10 @@ const AccountName = ({ userId }: { userId: string }) => {
       type="text"
       value={draft}
       maxLength={ACCOUNT_NAME_MAX}
+      // Grows with what is typed instead of scrolling inside a fixed box. The floor
+      // keeps an empty field wide enough to read the placeholder in; the ceiling is
+      // what the name itself can reach, and the row's max-width holds it there.
+      size={Math.min(Math.max(draft.length + 1, NAME_FIELD_MIN_CHARS), ACCOUNT_NAME_MAX)}
       aria-label={t("accountRenameBtn")}
       placeholder={t("accountNamePlaceholder")}
       onInput={(e: Event) => setDraft((e.target as HTMLInputElement).value)}

@@ -158,6 +158,11 @@
    reads as one line of action with a note beneath it. */
 .last-account {
   display: block;
+  /* Same reason as .account-name in the popup: a long name truncates rather than
+     wrapping the button onto a second line. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   margin-top: 2px;
   font-size: 11px;
   color: var(--khasky-emojery-muted);

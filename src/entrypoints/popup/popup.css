@@ -1309,15 +1309,25 @@ a:hover {
 }
 
 /* The account name doubles as the control that renames it: link-styled inside the
-   hint line, swapped for an input of the same size while editing. */
+   hint line, swapped for a field while editing. */
 .account-name {
   font-size: inherit;
   padding: 0;
   margin: 0;
+  /* A name the reader typed runs to 32 characters; the row does not. Truncated on
+     one line rather than wrapped, so a long one cannot stretch the row - the full
+     text is in the field the click opens. */
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
 }
 
+/* Width comes from the `size` attribute, which tracks what is typed (popup-account.tsx),
+   so the field grows with the name instead of scrolling a fixed box. */
 .account-name-input {
-  width: 12ch;
+  max-width: 100%;
   padding: 0 2px;
   font: inherit;
   font-size: inherit;
