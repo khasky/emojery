@@ -446,10 +446,10 @@
     "message": "Hoia see kaart avatuna, kuni see lõpeb. Esimene sisselogimine võtab veidi kauem."
   },
   "authDoneCloseTagline": {
-    "message": "Sulgeme selle kaardi."
+    "message": "See kaart suletakse."
   },
   "authDoneCloseNowBtn": {
-    "message": "Sulge kohe"
+    "message": "Sulge"
   },
   "authRetryBtn": {
     "message": "Proovi uuesti"

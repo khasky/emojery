@@ -446,10 +446,10 @@
     "message": "Не закривайте цю вкладку до кінця входу. Перший вхід триває трохи довше."
   },
   "authDoneCloseTagline": {
-    "message": "Закриваємо цю вкладку."
+    "message": "Ця вкладка буде закрита."
   },
   "authDoneCloseNowBtn": {
-    "message": "Закрити зараз"
+    "message": "Закрити"
   },
   "authRetryBtn": {
     "message": "Спробувати ще раз"

@@ -446,10 +446,10 @@
     "message": "请保持此标签页打开，直到完成。首次登录会稍久一些。"
   },
   "authDoneCloseTagline": {
-    "message": "正在为你关闭此标签页。"
+    "message": "此标签页将被关闭。"
   },
   "authDoneCloseNowBtn": {
-    "message": "立即关闭"
+    "message": "关闭"
   },
   "authRetryBtn": {
     "message": "重试"

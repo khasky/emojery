@@ -446,10 +446,10 @@
     "message": "Pidä tämä välilehti auki, kunnes se on valmis. Ensimmäinen kirjautuminen kestää hieman pidempään."
   },
   "authDoneCloseTagline": {
-    "message": "Suljemme tämän välilehden puolestasi."
+    "message": "Tämä välilehti suljetaan."
   },
   "authDoneCloseNowBtn": {
-    "message": "Sulje nyt"
+    "message": "Sulje"
   },
   "authRetryBtn": {
     "message": "Yritä uudelleen"

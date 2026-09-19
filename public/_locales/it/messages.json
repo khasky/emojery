@@ -446,10 +446,10 @@
     "message": "Tieni aperta questa scheda fino al termine. Il primo accesso richiede un po' più di tempo."
   },
   "authDoneCloseTagline": {
-    "message": "Chiudiamo questa scheda per te."
+    "message": "Questa scheda verrà chiusa."
   },
   "authDoneCloseNowBtn": {
-    "message": "Chiudi ora"
+    "message": "Chiudi"
   },
   "authRetryBtn": {
     "message": "Riprova"

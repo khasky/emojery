@@ -446,10 +446,10 @@
     "message": "Hagyd nyitva ezt a lapot, amíg be nem fejeződik. Az első bejelentkezés kicsit tovább tart."
   },
   "authDoneCloseTagline": {
-    "message": "Bezárjuk ezt a lapot."
+    "message": "Ez a lap be fog záródni."
   },
   "authDoneCloseNowBtn": {
-    "message": "Bezárás most"
+    "message": "Bezárás"
   },
   "authRetryBtn": {
     "message": "Próbáld újra"

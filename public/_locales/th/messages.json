@@ -446,10 +446,10 @@
     "message": "เปิดแท็บนี้ไว้จนกว่าจะเสร็จ การลงชื่อเข้าใช้ครั้งแรกใช้เวลานานขึ้นเล็กน้อย"
   },
   "authDoneCloseTagline": {
-    "message": "กำลังปิดแท็บนี้ให้คุณ"
+    "message": "แท็บนี้จะถูกปิด"
   },
   "authDoneCloseNowBtn": {
-    "message": "ปิดตอนนี้"
+    "message": "ปิด"
   },
   "authRetryBtn": {
     "message": "ลองอีกครั้ง"

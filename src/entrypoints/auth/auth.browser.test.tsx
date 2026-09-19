@@ -251,9 +251,10 @@ describe("auth page - the provider step", () => {
     await pick();
 
     await vi.waitFor(() => expect(heading()).toBe("You're signed in"));
-    const closeNow = [...document.querySelectorAll("button.primary")].find((b) => b.textContent?.trim() === "Close now");
-    expect(closeNow).toBeDefined();
-    await userEvent.click(closeNow as HTMLButtonElement);
+    expect(requireEl(document, TAGLINE_SELECTOR).textContent).toBe("This tab will be closed.");
+    const closeBtn = [...document.querySelectorAll("button.primary")].find((b) => b.textContent?.trim() === "Close");
+    expect(closeBtn).toBeDefined();
+    await userEvent.click(closeBtn as HTMLButtonElement);
 
     expect(sentOfType("auth:closeTab")).toEqual([{ type: "auth:closeTab" }]);
     expect(sentOfType("auth:returnToOrigin")).toHaveLength(0);
@@ -265,7 +266,7 @@ describe("auth page - the provider step", () => {
     await pick();
 
     await vi.waitFor(() => expect(heading()).toBe("You're signed in"));
-    await userEvent.click([...document.querySelectorAll("button.primary")].find((b) => b.textContent?.trim() === "Close now") as HTMLButtonElement);
+    await userEvent.click([...document.querySelectorAll("button.primary")].find((b) => b.textContent?.trim() === "Close") as HTMLButtonElement);
 
     await vi.waitFor(() => expect(requireEl(document, TAGLINE_SELECTOR).textContent).toBe("You can close this tab and react on any supported page."));
     expect(document.querySelector(COUNTDOWN_SELECTOR)).toBeNull();

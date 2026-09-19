@@ -446,10 +446,10 @@
     "message": "Lass diesen Tab offen, bis es fertig ist. Die erste Anmeldung dauert etwas länger."
   },
   "authDoneCloseTagline": {
-    "message": "Dieser Tab wird gleich geschlossen."
+    "message": "Dieser Tab wird geschlossen."
   },
   "authDoneCloseNowBtn": {
-    "message": "Jetzt schließen"
+    "message": "Schließen"
   },
   "authRetryBtn": {
     "message": "Erneut versuchen"

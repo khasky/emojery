@@ -446,10 +446,10 @@
     "message": "완료될 때까지 이 탭을 열어 두세요. 첫 로그인은 조금 더 걸립니다."
   },
   "authDoneCloseTagline": {
-    "message": "이 탭을 닫는 중입니다."
+    "message": "이 탭은 닫힙니다."
   },
   "authDoneCloseNowBtn": {
-    "message": "지금 닫기"
+    "message": "닫기"
   },
   "authRetryBtn": {
     "message": "다시 시도"

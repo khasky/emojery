@@ -446,10 +446,10 @@
     "message": "Palik šią kortelę atidarytą, kol bus baigta. Pirmas prisijungimas trunka šiek tiek ilgiau."
   },
   "authDoneCloseTagline": {
-    "message": "Uždarome šią kortelę."
+    "message": "Ši kortelė bus uždaryta."
   },
   "authDoneCloseNowBtn": {
-    "message": "Uždaryti dabar"
+    "message": "Uždaryti"
   },
   "authRetryBtn": {
     "message": "Bandyti dar kartą"

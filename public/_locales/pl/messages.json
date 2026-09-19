@@ -446,10 +446,10 @@
     "message": "Zostaw tę kartę otwartą, aż się zakończy. Pierwsze logowanie trwa nieco dłużej."
   },
   "authDoneCloseTagline": {
-    "message": "Zamykamy tę kartę za Ciebie."
+    "message": "Ta karta zostanie zamknięta."
   },
   "authDoneCloseNowBtn": {
-    "message": "Zamknij teraz"
+    "message": "Zamknij"
   },
   "authRetryBtn": {
     "message": "Spróbuj ponownie"

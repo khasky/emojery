@@ -445,10 +445,10 @@
   "message": "Keep this tab open until it finishes. The first sign-in takes a little longer."
  },
  "authDoneCloseTagline": {
-  "message": "Closing this tab for you."
+  "message": "This tab will be closed."
  },
  "authDoneCloseNowBtn": {
-  "message": "Close now"
+  "message": "Close"
  },
  "authRetryBtn": {
   "message": "Try again"

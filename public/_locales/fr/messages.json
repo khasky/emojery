@@ -446,10 +446,10 @@
     "message": "Garde cet onglet ouvert jusqu'à la fin. La première connexion prend un peu plus de temps."
   },
   "authDoneCloseTagline": {
-    "message": "Cet onglet se ferme tout seul."
+    "message": "Cet onglet va être fermé."
   },
   "authDoneCloseNowBtn": {
-    "message": "Fermer maintenant"
+    "message": "Fermer"
   },
   "authRetryBtn": {
     "message": "Réessayer"

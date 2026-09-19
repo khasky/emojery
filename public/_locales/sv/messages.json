@@ -446,10 +446,10 @@
     "message": "Låt den här fliken vara öppen tills det är klart. Första inloggningen tar lite längre tid."
   },
   "authDoneCloseTagline": {
-    "message": "Vi stänger den här fliken åt dig."
+    "message": "Den här fliken stängs."
   },
   "authDoneCloseNowBtn": {
-    "message": "Stäng nu"
+    "message": "Stäng"
   },
   "authRetryBtn": {
     "message": "Försök igen"

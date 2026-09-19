@@ -564,11 +564,11 @@
     "description": "Line under the spinner on the auth page while the sign-in runs."
   },
   "authDoneCloseTagline": {
-    "message": "Closing this tab for you.",
+    "message": "This tab will be closed.",
     "description": "Line on the auth page after a popup-started sign-in, while the tab closes itself."
   },
   "authDoneCloseNowBtn": {
-    "message": "Close now",
+    "message": "Close",
     "description": "Button on the auth page that closes the tab without waiting out the countdown."
   },
   "authRetryBtn": {

@@ -446,10 +446,10 @@
     "message": "Houd dit tabblad open tot het klaar is. De eerste keer aanmelden duurt iets langer."
   },
   "authDoneCloseTagline": {
-    "message": "We sluiten dit tabblad voor je."
+    "message": "Dit tabblad wordt gesloten."
   },
   "authDoneCloseNowBtn": {
-    "message": "Nu sluiten"
+    "message": "Sluiten"
   },
   "authRetryBtn": {
     "message": "Opnieuw proberen"

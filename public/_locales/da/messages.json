@@ -446,10 +446,10 @@
     "message": "Lad denne fane være åben, til det er færdigt. Første login tager lidt længere."
   },
   "authDoneCloseTagline": {
-    "message": "Lukker denne fane for dig."
+    "message": "Denne fane bliver lukket."
   },
   "authDoneCloseNowBtn": {
-    "message": "Luk nu"
+    "message": "Luk"
   },
   "authRetryBtn": {
     "message": "Prøv igen"

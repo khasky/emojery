@@ -446,10 +446,10 @@
     "message": "Mantén esta pestaña abierta hasta que termine. El primer inicio de sesión tarda un poco más."
   },
   "authDoneCloseTagline": {
-    "message": "Cerramos esta pestaña por ti."
+    "message": "Esta pestaña se cerrará."
   },
   "authDoneCloseNowBtn": {
-    "message": "Cerrar ahora"
+    "message": "Cerrar"
   },
   "authRetryBtn": {
     "message": "Reintentar"

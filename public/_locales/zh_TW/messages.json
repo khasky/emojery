@@ -446,10 +446,10 @@
     "message": "請保持此分頁開啟，直到完成。首次登入會稍久一些。"
   },
   "authDoneCloseTagline": {
-    "message": "正在為你關閉此分頁。"
+    "message": "此分頁將被關閉。"
   },
   "authDoneCloseNowBtn": {
-    "message": "立即關閉"
+    "message": "關閉"
   },
   "authRetryBtn": {
     "message": "重試"

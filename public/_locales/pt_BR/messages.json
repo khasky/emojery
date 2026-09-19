@@ -446,10 +446,10 @@
     "message": "Mantenha esta aba aberta até terminar. O primeiro login demora um pouco mais."
   },
   "authDoneCloseTagline": {
-    "message": "Fechando esta aba para você."
+    "message": "Esta aba será fechada."
   },
   "authDoneCloseNowBtn": {
-    "message": "Fechar agora"
+    "message": "Fechar"
   },
   "authRetryBtn": {
     "message": "Tentar novamente"

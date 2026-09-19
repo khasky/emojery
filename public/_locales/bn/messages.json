@@ -446,10 +446,10 @@
     "message": "এটি শেষ না হওয়া পর্যন্ত এই ট্যাব খোলা রাখুন। প্রথম সাইন-ইনে একটু বেশি সময় লাগে।"
   },
   "authDoneCloseTagline": {
-    "message": "এই ট্যাবটি বন্ধ করা হচ্ছে।"
+    "message": "এই ট্যাবটি বন্ধ করা হবে।"
   },
   "authDoneCloseNowBtn": {
-    "message": "এখনই বন্ধ করুন"
+    "message": "বন্ধ করুন"
   },
   "authRetryBtn": {
     "message": "আবার চেষ্টা করুন"

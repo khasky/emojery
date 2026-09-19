@@ -446,10 +446,10 @@
     "message": "Giữ thẻ này mở cho đến khi xong. Lần đăng nhập đầu tiên mất lâu hơn một chút."
   },
   "authDoneCloseTagline": {
-    "message": "Đang đóng thẻ này giúp bạn."
+    "message": "Thẻ này sẽ được đóng."
   },
   "authDoneCloseNowBtn": {
-    "message": "Đóng ngay"
+    "message": "Đóng"
   },
   "authRetryBtn": {
     "message": "Thử lại"

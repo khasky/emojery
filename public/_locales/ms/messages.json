@@ -446,10 +446,10 @@
     "message": "Biarkan tab ini terbuka sehingga selesai. Log masuk pertama mengambil masa sedikit lebih lama."
   },
   "authDoneCloseTagline": {
-    "message": "Menutup tab ini untuk anda."
+    "message": "Tab ini akan ditutup."
   },
   "authDoneCloseNowBtn": {
-    "message": "Tutup sekarang"
+    "message": "Tutup"
   },
   "authRetryBtn": {
     "message": "Cuba lagi"

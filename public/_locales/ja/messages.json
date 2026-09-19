@@ -446,10 +446,10 @@
     "message": "完了するまでこのタブを開いたままにしてください。初回のログインは少し時間がかかります。"
   },
   "authDoneCloseTagline": {
-    "message": "このタブを閉じます。"
+    "message": "このタブは閉じられます。"
   },
   "authDoneCloseNowBtn": {
-    "message": "今すぐ閉じる"
+    "message": "閉じる"
   },
   "authRetryBtn": {
     "message": "再試行"
