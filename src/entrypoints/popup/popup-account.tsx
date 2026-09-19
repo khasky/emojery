@@ -126,7 +126,7 @@ const DeviceLimitNotice = () => {
 const NAME_FIELD_MIN_CHARS = 12;
 
 // The name shown for the signed-in account, and the field that renames it. The
-// name is the reader's own or a two-word label derived from the account id
+// name is the reader's own or the emoji mark derived from the account id
 // (shared/account-label.ts) - with the `openid` scope alone there is no address to
 // show, and someone with two accounts at one provider still has to tell them apart.
 const AccountName = ({ userId }: { userId: string }) => {

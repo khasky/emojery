@@ -35,7 +35,7 @@ export interface SeenAccount {
    *  here - the default name is built from it ("Google 2"). Assigned once and kept,
    *  so renaming the first account does not make the next one take its number.
    *  Absent on a record written before this field existed; those keep the derived
-   *  two-word label, since inventing a number now would misname an old account. */
+   *  mark alone, since inventing a number now would misname an old account. */
   ordinal?: number;
 }
 

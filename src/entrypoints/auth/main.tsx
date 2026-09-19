@@ -222,7 +222,7 @@ function OtherAccount({ provider, canChoose, accepted, onPick }: { provider: Oid
 
 type LastAccount = { name: string; ordinal: number; at: number };
 
-// "Google #2 - steep-sparrow - 12 minutes ago": which account of that provider, what
+// "Google #2 - a mark - 12 minutes ago": which account of that provider, what
 // this device calls it, and when it was last used here. The three together are what a
 // reader holding two accounts at one provider recognises the right one by; the button
 // above already says the provider, so nothing here repeats it on its own.
