@@ -113,10 +113,13 @@ test.describe("extension account auth", () => {
     const signedInPopup = await openPopupPage();
     await signedInPopup.getByRole("tab", { name: enMessage("tabAccount") }).click();
     await expect(signedInPopup.getByText(enMessage("signedInLabel"), { exact: true })).toBeVisible();
-    // The provider names the account, and a device-local two-word label says WHICH
-    // account - never anything the provider knows about its owner.
+    // The provider and which of its accounts this is, then a device-local mark saying
+    // WHICH account - never anything the provider knows about its owner. The mark is
+    // one emoji, and its name in the reader's language rides along as the tooltip.
     await expect(signedInPopup.locator(`${ACCOUNT_LIST_SELECTOR} .row-hint`).first()).toContainText(TEST_PROVIDER);
-    await expect(signedInPopup.locator(ACCOUNT_NAME_SELECTOR).first()).toHaveText(/^[a-z]+-[a-z]+$/);
+    const mark = signedInPopup.locator(ACCOUNT_NAME_SELECTOR).first();
+    await expect(mark).toHaveText(/^\p{Extended_Pictographic}\uFE0F?$/u);
+    await expect(mark).toHaveAttribute("title", /\S/);
     await expect(signedInPopup.getByText(testAccount)).toHaveCount(0);
 
     await signedInPopup.getByRole("button", { name: enMessage("signOutBtn") }).click();
