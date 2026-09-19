@@ -414,15 +414,6 @@
  "authMoreProvidersBtn": {
   "message": "More sign-in options"
  },
- "authLastAccount": {
-  "message": "Last time: $NAME$",
-  "placeholders": {
-   "name": {
-    "content": "$1",
-    "example": "quiet-heron"
-   }
-  }
- },
  "authOtherAccountBtn": {
   "message": "Use a different $PROVIDER$ account",
   "placeholders": {

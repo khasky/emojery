@@ -414,15 +414,6 @@
   "authMoreProvidersBtn": {
     "message": "Rohkem sisselogimisvalikuid"
   },
-  "authLastAccount": {
-    "message": "Viimati: $NAME$",
-    "placeholders": {
-      "name": {
-        "content": "$1",
-        "example": "quiet-heron"
-      }
-    }
-  },
   "authOtherAccountBtn": {
     "message": "Kasuta teist $PROVIDER$ kontot",
     "description": "Button on the auth page under a provider this device already signed in with. It reopens that provider's account picker instead of continuing as the account the browser holds. $PROVIDER$ is the provider's name (Google, Apple, ...).",

@@ -414,15 +414,6 @@
   "authMoreProvidersBtn": {
     "message": "다른 로그인 방법"
   },
-  "authLastAccount": {
-    "message": "지난번: $NAME$",
-    "placeholders": {
-      "name": {
-        "content": "$1",
-        "example": "quiet-heron"
-      }
-    }
-  },
   "authOtherAccountBtn": {
     "message": "다른 $PROVIDER$ 계정 사용",
     "description": "Button on the auth page under a provider this device already signed in with. It reopens that provider's account picker instead of continuing as the account the browser holds. $PROVIDER$ is the provider's name (Google, Apple, ...).",

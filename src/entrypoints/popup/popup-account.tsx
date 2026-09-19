@@ -2,11 +2,11 @@
 import { type ComponentChild, Fragment } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { accountLabel } from "../../shared/account-label";
-import { ACCOUNT_NAME_MAX, accountDisplayName, setAccountName } from "../../shared/account-names";
+import { ACCOUNT_NAME_MAX, accountDisplayName, accountOrdinal, providerTag, setAccountName } from "../../shared/account-names";
 import { removeTechnicalAndInteractionConsent, requestTechnicalAndInteractionConsent } from "../../shared/data-consent";
+import { getEmojiLabel, onLocalesChanged } from "../../shared/emoji-meta";
 import { type EpochKeyLimitNotice, readEpochKeyLimitNotice } from "../../shared/epoch-key-limit";
 import { t } from "../../shared/i18n";
-import { providerLabel } from "../../shared/oidc-providers";
 import { ACCOUNT_LIST_CLASS, ACCOUNT_NAME_CLASS, ACCOUNT_NAME_INPUT_CLASS, DELETE_CONFIRM_WARN_CLASS, DEVICE_LIMIT_NOTICE_CLASS } from "../../shared/page-dom";
 import type { Settings } from "../../shared/storage";
 import { sendRuntimeMessage } from "../../shared/webext";
@@ -134,6 +134,11 @@ const AccountName = ({ userId }: { userId: string }) => {
   // never renders an account without a name and then pops one in. A name the reader
   // typed replaces it when the read lands.
   const [name, setName] = useState(() => accountLabel(userId));
+  // The mark's name in the reader's language, for the tooltip. getEmojiLabel answers
+  // the emoji itself until the locale file lands and starts that load, so the mark is
+  // never waiting on it; the subscription is what repaints once it has.
+  const [, repaint] = useState(0);
+  useEffect(() => onLocalesChanged(() => repaint((n) => n + 1)), []);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -162,7 +167,9 @@ const AccountName = ({ userId }: { userId: string }) => {
       <button
         class={`linkish ${ACCOUNT_NAME_CLASS}`}
         type="button"
-        title={t("accountRenameBtn")}
+        // The emoji's own name where the name IS the mark; a name the reader typed
+        // needs no gloss, so there the tooltip stays the control's purpose.
+        title={name === accountLabel(userId) ? getEmojiLabel(name) : t("accountRenameBtn")}
         onClick={() => {
           setDraft(name);
           setEditing(true);
@@ -200,6 +207,9 @@ const AccountView = ({ settings, update }: { settings: Settings; update: (patch:
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [provider, setProvider] = useState<string | null>(null);
+  // Which account of that provider this is on this device. 0 until the read lands and
+  // for an account with no record to number it by, and providerTag then omits it.
+  const [ordinal, setOrdinal] = useState(0);
 
   const refresh = () => {
     void sendRuntimeMessage({ type: "auth:status" })
@@ -208,6 +218,10 @@ const AccountView = ({ settings, update }: { settings: Settings; update: (patch:
           setAuthed(resp.authed);
           setUserId(resp.userId);
           setProvider(resp.provider);
+          if (resp.userId)
+            void accountOrdinal(resp.userId)
+              .then(setOrdinal)
+              .catch(() => {});
         } else {
           setAuthed(false);
         }
@@ -225,13 +239,12 @@ const AccountView = ({ settings, update }: { settings: Settings; update: (patch:
     return <SignInPrompt message={t("signInMsgAccount")} />;
   }
 
-  // The provider names the account; the label beside it names WHICH account, since
-  // one reader can hold several at the same provider. The empty tail is unreachable
-  // - a signed-in session always has a provider - but `hint` takes a string.
-  const subtitle = provider ? providerLabel(provider) : "";
+  // "Apple #1 · spawrro": the provider and which of its accounts this is, then the
+  // name - the only half the reader edits. The number identifies the account whatever
+  // it ends up called, so renaming never costs the reader the way back to it.
   return (
     <div class={ACCOUNT_LIST_CLASS}>
-      <IconRow rowClass="row arow" icon={ICON_USER} label={t("signedInLabel")} hint={subtitle} hintTail={userId ? <AccountName userId={userId} /> : undefined}>
+      <IconRow rowClass="row arow" icon={ICON_USER} label={t("signedInLabel")} hint={provider ? providerTag(provider, ordinal) : ""} hintTail={userId ? <AccountName userId={userId} /> : undefined}>
         <button
           class="linkish"
           type="button"

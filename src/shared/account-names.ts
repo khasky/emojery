@@ -12,14 +12,16 @@
 // browser already holds. Account deletion drops both (background/identity.ts).
 
 import { accountLabel } from "./account-label";
+import { providerLabel } from "./oidc-providers";
 import { storageLocalGet, storageLocalRemove, storageLocalSet } from "./webext";
 
 export const ACCOUNT_NAMES_KEY = "account_names_v1";
 export const ACCOUNTS_SEEN_KEY = "accounts_seen_v1";
 
-/** A name the reader typed. Long enough for "work" or "личный аккаунт", short
- *  enough to sit in the popup's one-line row. */
-export const ACCOUNT_NAME_MAX = 32;
+/** A name the reader typed, and the ceiling the derived label is built under.
+ *  Long enough for "work" or "рабочий", short enough that the row shows it whole in
+ *  a script whose characters are wide. Counted in characters, not bytes. */
+export const ACCOUNT_NAME_MAX = 12;
 // Enough to tell this device's accounts apart; past that the oldest goes, since a
 // hint about an account last used a year ago helps nobody.
 const SEEN_MAX = 12;
@@ -29,6 +31,12 @@ export interface SeenAccount {
   userId: string;
   /** Ms-epoch of the last sign-in with it on this device. */
   at: number;
+  /** Which account of this provider it was, in the order they were first used
+   *  here - the default name is built from it ("Google 2"). Assigned once and kept,
+   *  so renaming the first account does not make the next one take its number.
+   *  Absent on a record written before this field existed; those keep the derived
+   *  two-word label, since inventing a number now would misname an old account. */
+  ordinal?: number;
 }
 
 type NameMap = Record<string, string>;
@@ -47,10 +55,26 @@ function asSeen(value: unknown): SeenAccount[] {
   return value.filter((e): e is SeenAccount => typeof e === "object" && e !== null && typeof (e as SeenAccount).provider === "string" && typeof (e as SeenAccount).userId === "string" && typeof (e as SeenAccount).at === "number");
 }
 
+/** "Apple #1": the provider and which of its accounts on this device this one is.
+ *  The number is never part of the name the reader edits - it identifies the account
+ *  whatever they call it. Without a record to number it by, the provider stands alone. */
+export function providerTag(provider: string, ordinal: number): string {
+  const label = providerLabel(provider);
+  return ordinal > 0 ? `${label} #${ordinal}` : label;
+}
+
 /** The name to show for an account: the reader's, or the derived label. */
 export async function accountDisplayName(userId: string): Promise<string> {
   const stored = await storageLocalGet([ACCOUNT_NAMES_KEY]);
   return asNameMap(stored[ACCOUNT_NAMES_KEY])[userId] ?? accountLabel(userId);
+}
+
+/** Which account of its provider this one is here, or 0 when this device has no
+ *  record to number it by - one pruned by SEEN_MAX, one written before ordinals
+ *  existed, or an account known only from imported history. */
+export async function accountOrdinal(userId: string): Promise<number> {
+  const stored = await storageLocalGet([ACCOUNTS_SEEN_KEY]);
+  return asSeen(stored[ACCOUNTS_SEEN_KEY]).find((e) => e.userId === userId)?.ordinal ?? 0;
 }
 
 /** Sets the reader's own name for an account; an empty one restores the label. */
@@ -67,9 +91,18 @@ export async function setAccountName(userId: string, name: string): Promise<void
 /** Records a sign-in, so the sign-in page can name the account next time. */
 export async function noteAccountSeen(provider: string, userId: string, now: number = Date.now()): Promise<void> {
   const stored = await storageLocalGet([ACCOUNTS_SEEN_KEY]);
-  const rest = asSeen(stored[ACCOUNTS_SEEN_KEY]).filter((e) => e.userId !== userId);
-  const seen = [{ provider, userId, at: now }, ...rest].slice(0, SEEN_MAX);
+  const all = asSeen(stored[ACCOUNTS_SEEN_KEY]);
+  const rest = all.filter((e) => e.userId !== userId);
+  // Kept across sign-ins, and never reused: the next account of this provider takes
+  // one past the highest ever handed out here, so renaming or signing out of the
+  // first does not hand its number to the second.
+  const ordinal = all.find((e) => e.userId === userId)?.ordinal ?? highestOrdinal(all, provider) + 1;
+  const seen = [{ provider, userId, at: now, ordinal }, ...rest].slice(0, SEEN_MAX);
   await storageLocalSet({ [ACCOUNTS_SEEN_KEY]: seen });
+}
+
+function highestOrdinal(seen: SeenAccount[], provider: string): number {
+  return seen.reduce((high, e) => (e.provider === provider && typeof e.ordinal === "number" ? Math.max(high, e.ordinal) : high), 0);
 }
 
 /** The accounts this device has used, newest first. */
@@ -78,13 +111,15 @@ export async function readSeenAccounts(): Promise<SeenAccount[]> {
   return asSeen(stored[ACCOUNTS_SEEN_KEY]).sort((a, b) => b.at - a.at);
 }
 
-/** The most recent account used with each provider, with its display name. */
-export async function lastAccountPerProvider(): Promise<Record<string, string>> {
+/** The most recent account used with each provider: which account of that provider
+ *  it was, what it is called, and when it was last used here - the three things that
+ *  tell two accounts of one provider apart before either has been renamed. */
+export async function lastAccountPerProvider(): Promise<Record<string, { name: string; ordinal: number; at: number }>> {
   const [seen, stored] = await Promise.all([readSeenAccounts(), storageLocalGet([ACCOUNT_NAMES_KEY])]);
   const names = asNameMap(stored[ACCOUNT_NAMES_KEY]);
-  const out: Record<string, string> = {};
+  const out: Record<string, { name: string; ordinal: number; at: number }> = {};
   for (const entry of seen) {
-    if (out[entry.provider] === undefined) out[entry.provider] = names[entry.userId] ?? accountLabel(entry.userId);
+    if (out[entry.provider] === undefined) out[entry.provider] = { name: names[entry.userId] ?? accountLabel(entry.userId), ordinal: entry.ordinal ?? 0, at: entry.at };
   }
   return out;
 }

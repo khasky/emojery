@@ -4,12 +4,13 @@
 
 import { type ComponentChild, Fragment, render } from "preact";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
-import { lastAccountPerProvider } from "../../shared/account-names";
+import { lastAccountPerProvider, providerTag } from "../../shared/account-names";
 import { type I18nKey, t } from "../../shared/i18n";
 import type { RuntimeResponse, SignInRefusal } from "../../shared/messages";
 import { type OidcProvider, providerAccountUrl, providerLabel, splitFeaturedProviders } from "../../shared/oidc-providers";
 import { bootstrapPage } from "../../shared/page-bootstrap";
 import { AGREE_CLASS, AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, COUNTDOWN_CLASS, LAST_ACCOUNT_CLASS, MORE_PROVIDERS_CLASS, OTHER_ACCOUNT_CLASS, PROVIDER_BUTTON_CLASS, PROVIDER_LIST_CLASS, SPINNER_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
+import { relativeTime } from "../../shared/relative-time";
 import { noteTermsAccepted, termsAccepted } from "../../shared/terms-consent";
 import { withExtensionUtm } from "../../shared/tracking-links";
 import { sendRuntimeMessage } from "../../shared/webext";
@@ -219,11 +220,22 @@ function OtherAccount({ provider, canChoose, accepted, onPick }: { provider: Oid
   );
 }
 
+type LastAccount = { name: string; ordinal: number; at: number };
+
+// "Google #2 - steep-sparrow - 12 minutes ago": which account of that provider, what
+// this device calls it, and when it was last used here. The three together are what a
+// reader holding two accounts at one provider recognises the right one by; the button
+// above already says the provider, so nothing here repeats it on its own.
+function lastAccountHint(provider: OidcProvider, last: LastAccount): string {
+  const when = relativeTime(last.at);
+  return [providerTag(provider, last.ordinal), last.name, when].filter((part) => part !== null && part !== "").join(" · ");
+}
+
 type ProviderStepProps = {
   providers: OidcProvider[] | null | undefined;
-  /** Account name last used with each provider on this device, for the hint under
-   *  its button. Empty until the store answers, and for a first sign-in. */
-  lastAccounts: Record<string, string>;
+  /** The account last used with each provider on this device, for the hint under its
+   *  button. Empty until the store answers, and for a first sign-in. */
+  lastAccounts: Record<string, LastAccount>;
   /** The providers that answer to a request for their account picker. The control
    *  appears for these only, so it never promises a switch that would not happen. */
   chooserProviders: OidcProvider[];
@@ -324,7 +336,7 @@ function ProviderStep({ providers, lastAccounts, chooserProviders, error, accept
                     {/* Which account this device used here last: with the `openid` scope
                         alone the provider tells us nothing to show, and someone holding
                         two accounts at one provider needs the reminder before the click. */}
-                    {lastAccounts[provider] ? <span class={LAST_ACCOUNT_CLASS}>{t("authLastAccount", lastAccounts[provider])}</span> : null}
+                    {lastAccounts[provider] ? <span class={LAST_ACCOUNT_CLASS}>{lastAccountHint(provider, lastAccounts[provider])}</span> : null}
                   </span>
                 </button>
                 {/* Only where there is something to switch AWAY from, and only where
@@ -350,7 +362,7 @@ function App() {
   const [step, setStep] = useState<Step>("provider");
   const [providers, setProviders] = useState<OidcProvider[] | null | undefined>(undefined);
   const [chooserProviders, setChooserProviders] = useState<OidcProvider[]>([]);
-  const [lastAccounts, setLastAccounts] = useState<Record<string, string>>({});
+  const [lastAccounts, setLastAccounts] = useState<Record<string, LastAccount>>({});
   const [picked, setPicked] = useState<OidcProvider | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [accepted, setAccepted] = useState(false);

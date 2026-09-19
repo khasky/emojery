@@ -5,10 +5,12 @@
 // is what the tab does with the answer - the signed-out gate, the identity line
 // a session with no provider falls back to, and the delete flow: arm, cancel (with the
 // focus hand-back), confirm, and what a refused delete leaves on screen.
+
 import { h } from "preact";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { userEvent } from "vitest/browser";
-import { accountDisplayName } from "../../shared/account-names";
+import { accountLabel } from "../../shared/account-label";
+import { ACCOUNTS_SEEN_KEY, accountDisplayName } from "../../shared/account-names";
 import { EPOCH_KEY_LIMIT_KEY } from "../../shared/epoch-key-limit";
 import { ACCOUNT_LIST_SELECTOR, ACCOUNT_NAME_INPUT_SELECTOR, ACCOUNT_NAME_SELECTOR, DELETE_CONFIRM_WARN_SELECTOR, DEVICE_LIMIT_NOTICE_SELECTOR, SIGNIN_PROMPT_MSG_SELECTOR } from "../../shared/page-dom";
 import { DEFAULT_SETTINGS } from "../../shared/storage";
@@ -99,14 +101,17 @@ describe("AccountView - session states", () => {
   });
 
   it("names the provider the account came from, and the delete control with it", async () => {
-    install();
+    // The sign-in that produced this account left the record the default name is
+    // built from (shared/account-names.ts).
+    install({ local: { [ACCOUNTS_SEEN_KEY]: [{ provider: "google", userId: USER_ID, at: 1_000, ordinal: 1 }] } });
     await mountAndSettle();
 
     const row = container.querySelector(`${ACCOUNT_LIST_SELECTOR} .row`);
     expect(row?.textContent).toContain("Your account");
-    // The provider, then which account: `openid` alone gives no address to show, and
-    // one reader can hold several accounts at the same provider.
-    await vi.waitFor(() => expect(row?.querySelector(".row-hint")?.textContent).toMatch(/^Google · [a-z]+-[a-z]+$/));
+    // The provider and which of its accounts this is, then the name - the only half
+    // the reader edits. `openid` alone gives no address to show, and one reader can
+    // hold several accounts at the same provider.
+    await vi.waitFor(() => expect(row?.querySelector(".row-hint")?.textContent).toBe(`Google #1 · ${accountLabel(USER_ID)}`));
     expect(button("Delete")).toBeDefined();
   });
 
@@ -147,8 +152,8 @@ describe("AccountView - session states", () => {
     install({ provider: null });
     await mountAndSettle();
 
-    // The label is derived from the account id, so it stands on its own.
-    await vi.waitFor(() => expect(container.querySelector(".row-hint")?.textContent).toMatch(/^[a-z]+-[a-z]+$/));
+    // The mark is derived from the account id, so it stands on its own.
+    await vi.waitFor(() => expect(container.querySelector(".row-hint")?.textContent).toBe(accountLabel(USER_ID)));
   });
 
   it("signs out and lands back on the sign-in prompt", async () => {

@@ -529,16 +529,6 @@
     "message": "More sign-in options",
     "description": "Button on the auth page that reveals the sign-in providers beyond the first three."
   },
-  "authLastAccount": {
-    "message": "Last time: $NAME$",
-    "description": "Note under a provider button on the auth page, naming the account last used with that provider on this device. $NAME$ is the account's name or label.",
-    "placeholders": {
-      "name": {
-        "content": "$1",
-        "example": "quiet-heron"
-      }
-    }
-  },
   "authOtherAccountBtn": {
     "message": "Use a different $PROVIDER$ account",
     "description": "Button on the auth page under a provider this device already signed in with. It reopens that provider's account picker instead of continuing as the account the browser holds. $PROVIDER$ is the provider's name (Google, Apple, ...).",

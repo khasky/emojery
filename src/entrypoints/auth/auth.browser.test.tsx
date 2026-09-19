@@ -4,9 +4,11 @@
 // what each named refusal turns into on screen, and the pre-140 Firefox consent
 // gate. e2e/auth.spec.ts drives the real sign-in end to end; this file covers
 // the UI states against a mocked background.
+
 import { render } from "preact";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { userEvent } from "vitest/browser";
+import { accountLabel } from "../../shared/account-label";
 import { ACCOUNTS_SEEN_KEY } from "../../shared/account-names";
 import { AGREE_CHECKBOX_SELECTOR, AUTH_ERROR_ID, AUTH_ERROR_SELECTOR, COUNTDOWN_SELECTOR, LAST_ACCOUNT_SELECTOR, MORE_PROVIDERS_SELECTOR, otherAccountSelector, PROVIDER_BUTTON_SELECTOR, PROVIDER_LIST_SELECTOR, providerButtonSelector, SPINNER_SELECTOR, TAGLINE_SELECTOR } from "../../shared/page-dom";
 import { TERMS_ACCEPTED_KEY, TERMS_REVISION } from "../../shared/terms-consent";
@@ -115,14 +117,16 @@ describe("auth page - the provider step", () => {
         sent.push(msg);
         return (msg as { type?: string }).type === "auth:providers" ? PROVIDERS : undefined;
       },
-      local: { [ACCOUNTS_SEEN_KEY]: [{ provider: "google", userId: "u_1", at: 1_000 }] },
+      local: { [ACCOUNTS_SEEN_KEY]: [{ provider: "google", userId: "u_1", at: Date.now(), ordinal: 2 }] },
     });
     sent = [];
     await loadPage();
     await reachProviders();
 
     const google = providerButton("google");
-    await vi.waitFor(() => expect(google.querySelector(LAST_ACCOUNT_SELECTOR)?.textContent).toMatch(/^Last time: [a-z]+-[a-z]+$/));
+    // Which account of that provider, what this device calls it, and when it was last
+    // used here - the three things that tell two accounts of one provider apart.
+    await vi.waitFor(() => expect(google.querySelector(LAST_ACCOUNT_SELECTOR)?.textContent).toBe(`Google #2 · ${accountLabel("u_1")} · 1 minute ago`));
     // Nothing for a provider this device has not signed in with.
     expect(providerButton("apple").querySelector(LAST_ACCOUNT_SELECTOR)).toBeNull();
   });
