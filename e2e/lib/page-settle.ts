@@ -124,8 +124,12 @@ export async function scrollPassUntil<T>(page: Page, scrollSteps: number[], dead
 // The mirror image of waitForMountEvidence, for a site the popup just switched
 // OFF: wait for evidence that the page reached its DISABLED signature rather
 // than for a mount. `mount.ts` claims the anchor BEFORE it reads settings, so
-// "anchors present, zero hosts" is what a disabled site looks like - and either
-// signal ends the wait, so a re-enabled site is not waited out to the deadline.
+// "anchors present, zero hosts" is what a disabled site looks like, and that whole
+// signature is the exit - not either half of it. Accepting a sample that still
+// carries a host ends the wait ON the state the caller then asserts against, which
+// is how a row still tearing down (Reddit hydrates its action bar in stages) is
+// reported as a site that ignored the toggle. A page that really did ignore it now
+// runs to the deadline before failing; a slower red is worth a red that is true.
 export async function waitForDisabledSiteEvidence(page: Page, site: SupportedSiteScenario): Promise<MountEvidence> {
   const last = await scrollPassUntil(
     page,
@@ -133,7 +137,7 @@ export async function waitForDisabledSiteEvidence(page: Page, site: SupportedSit
     Date.now() + Number(process.env.E2E_SITE_TIMEOUT_MS ?? 70_000),
     (p) => settlePage(p, site),
     () => collectMountEvidence(page, site),
-    (evidence) => evidence.matchingAnchorKeys.length > 0 || evidence.matchingHostCount > 0,
+    (evidence) => evidence.matchingAnchorKeys.length > 0 && evidence.matchingHostCount === 0,
   );
 
   return last ?? (await collectMountEvidence(page, site));
