@@ -19,7 +19,12 @@ export const SignInPrompt = ({ message }: { message: string }) => (
       onClick={() => {
         // Swallowed: this prompt has no error surface - a failed open (background
         // unreachable) leaves the popup unchanged and the button ready to retry.
-        void sendRuntimeMessage({ type: "auth:openTab" }).catch(() => {});
+        // The popup closes only once the background confirms the tab, so the user
+        // is never left with neither the prompt nor the auth page.
+        void sendRuntimeMessage({ type: "auth:openTab" }).then(
+          () => window.close(),
+          () => {},
+        );
       }}
     >
       {t("signInBtn")}
