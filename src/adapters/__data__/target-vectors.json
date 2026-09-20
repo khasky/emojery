@@ -127,6 +127,13 @@
       "url": "https://www.metacritic.com/game/valheim/",
       "targetId": "game/valheim",
       "noTargetUrls": ["https://www.metacritic.com/music/random-access-memories/daft-punk/"]
+    },
+    {
+      "site": "opencritic",
+      "url": "https://opencritic.com/game/12090/elden-ring",
+      "targetId": "12090",
+      "variantUrls": ["https://opencritic.com/game/12090/elden-ring/", "https://opencritic.com/game/12090/elden-ring?utm_source=x", "https://opencritic.com/game/12090/a-completely-wrong-slug", "https://opencritic.com/game/12090/Elden-Ring"],
+      "noTargetUrls": ["https://opencritic.com/game/12090", "https://opencritic.com/game/12090/elden-ring/reviews", "https://opencritic.com/outlet/56/ign", "https://opencritic.com/browse/all", "https://evil.example/game/12090/elden-ring"]
     }
   ],
   "notUrlDerivable": [{ "site": "gitlab", "why": "the canonical id is GitLab's numeric project id, read from the page" }, { "site": "facebook", "why": "photo and lazy-permalink identities are resolved from the DOM" }]

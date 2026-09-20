@@ -301,6 +301,19 @@ export const SUPPORTED_SITE_SCENARIOS: SiteScenarioSpec[] = [
     expectHiddenNativeOnReplace: false,
   },
   {
+    site: "opencritic",
+    label: "OpenCritic game page",
+    urlKey: "OPENCRITIC_GAME",
+    mountKeyPattern: "^opencritic:\\d+$",
+    // The header card's own action row and score orbs. Nothing here is hidden
+    // under replaceNative: Rate is a score and the rest are lists, not
+    // reactions the picker stands in for.
+    nativeSelectors: [".action-buttons", ".action-buttons .rate-button", ".action-buttons .favorite-button", "app-game-scores-display", "app-score-orb"],
+    containerSelectors: [".header-card", "app-game-overview", "main"],
+    maxHosts: 1,
+    expectHiddenNativeOnReplace: false,
+  },
+  {
     site: "facebook",
     label: "Facebook public page feed",
     urlKey: "FACEBOOK_PAGE",

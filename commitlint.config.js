@@ -37,6 +37,7 @@ const scopes = [
   "metacritic",
   "mount",
   "onboarding",
+  "opencritic",
   "permissions",
   "picker",
   "popup",

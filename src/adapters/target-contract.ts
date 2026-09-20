@@ -19,6 +19,7 @@ import { githubTargetFromRef, repoRefFromHref } from "./github";
 import { extractImdbTitleRef, imdbTargetFromRef } from "./imdb";
 import { extractInstagramShortcode, instagramTargetFromRef } from "./instagram";
 import { extractMetacriticProductRef, metacriticTargetFromRef } from "./metacritic";
+import { extractOpenCriticGameRef, opencriticTargetFromRef } from "./opencritic";
 import { extractRedditPostRef, redditTargetFromRef } from "./reddit";
 import { extractRottenTomatoesTitleRef, rottentomatoesTargetFromRef } from "./rottentomatoes";
 import { extractThreadsPostRef, threadsTargetFromRef } from "./threads";
@@ -33,7 +34,7 @@ interface DerivedTarget {
   url: string;
 }
 
-export const URL_DERIVABLE_SITES = ["x", "youtube", "reddit", "instagram", "threads", "github", "amazon", "rottentomatoes", "tmdb", "imdb", "metacritic"] as const;
+export const URL_DERIVABLE_SITES = ["x", "youtube", "reddit", "instagram", "threads", "github", "amazon", "rottentomatoes", "tmdb", "imdb", "metacritic", "opencritic"] as const;
 
 function derived(target: TargetRef | null): DerivedTarget | null {
   return target ? { targetId: target.targetId, url: target.url } : null;
@@ -97,6 +98,10 @@ export function deriveTargetFromUrl(site: string, url: string): DerivedTarget | 
     case "metacritic": {
       const ref = extractMetacriticProductRef(url);
       return derived(ref && metacriticTargetFromRef(ref));
+    }
+    case "opencritic": {
+      const ref = extractOpenCriticGameRef(url);
+      return derived(ref && opencriticTargetFromRef(ref));
     }
     case "amazon": {
       const path = amazonPathname(url);

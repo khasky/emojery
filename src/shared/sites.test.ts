@@ -128,6 +128,7 @@ describe("matchPatternsForSite", () => {
       "https://www.themoviedb.org/*",
       "https://www.imdb.com/*",
       "https://www.metacritic.com/*",
+      "https://opencritic.com/*",
     ]);
   });
 });
