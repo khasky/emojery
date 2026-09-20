@@ -568,7 +568,7 @@
     "message": "Fest ikonet"
   },
   "onboardingStepPinBody": {
-    "message": "Klikk på puslespillikonet i verktøylinjen og fest Emojery slik at det alltid er for hånden."
+    "message": "Klikk på puslespillikonet {icon} i verktøylinjen og fest Emojery slik at det alltid er for hånden."
   },
   "onboardingStepPinDone": {
     "message": "Festet!"

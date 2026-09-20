@@ -102,6 +102,19 @@ describe("onboarding checklist", () => {
     expect(cta?.closest(".step")?.querySelector("b")?.textContent).toBe("Spot the button");
   });
 
+  // The step names a button the user has to recognize in their own toolbar, so the
+  // glyph is drawn beside the words for it - and the token that places it never
+  // reaches the screen.
+  it("draws the puzzle piece inside the pin step's sentence", async () => {
+    stubPinState(false);
+    renderPage();
+
+    await expect.poll(() => container.querySelector(".step .pin-icon")).not.toBeNull();
+    const body = container.querySelector(".step .pin-icon")?.parentElement;
+    expect(body?.textContent).toContain("puzzle-piece icon");
+    expect(body?.textContent).not.toContain("{icon}");
+  });
+
   it("drops the pin step where the browser cannot report pin state", async () => {
     seedFlags({ sawTrigger: false, reacted: false });
     renderPage();

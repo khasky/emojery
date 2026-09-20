@@ -568,7 +568,7 @@
     "message": "Ghim biểu tượng"
   },
   "onboardingStepPinBody": {
-    "message": "Nhấp vào biểu tượng ghép hình trên thanh công cụ và ghim Emojery để luôn trong tầm tay."
+    "message": "Nhấp vào biểu tượng ghép hình {icon} trên thanh công cụ và ghim Emojery để luôn trong tầm tay."
   },
   "onboardingStepPinDone": {
     "message": "Đã ghim!"

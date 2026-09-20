@@ -718,8 +718,8 @@
     "description": "Onboarding page, step 1 title — pin the extension to the toolbar."
   },
   "onboardingStepPinBody": {
-    "message": "Click the puzzle-piece icon in the toolbar and pin Emojery so it stays in reach.",
-    "description": "Onboarding page, step 1 body — how to pin via the browser's puzzle-piece extensions menu."
+    "message": "Click the puzzle-piece icon {icon} in the toolbar and pin Emojery so it stays in reach.",
+    "description": "Onboarding page, step 1 body — how to pin via the browser's puzzle-piece extensions menu. Keep {icon} right after the words naming the icon: the page swaps it for the puzzle glyph."
   },
   "onboardingStepPinDone": {
     "message": "Pinned!",

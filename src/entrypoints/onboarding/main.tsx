@@ -147,10 +147,33 @@ const Confetti = () => (
   </div>
 );
 
+// The pin step names a button the user still has to find in their own toolbar,
+// so the browser's puzzle piece rides inside the sentence: every locale carries
+// this token right after its own word for the icon (i18n-locales.test.ts holds
+// that line). A locale that lost it renders the sentence without the glyph.
+const PIN_ICON_TOKEN = "{icon}";
+// Material's `extension` glyph - the piece Chrome, Edge and Firefox all put on
+// the toolbar button this step is about.
+const PUZZLE_PATH = "M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7s2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z";
+
+function pinBody(): preact.ComponentChildren {
+  const parts = t("onboardingStepPinBody").split(PIN_ICON_TOKEN);
+  if (parts.length < 2) return parts[0];
+  return (
+    <>
+      {parts[0]}
+      <svg class="pin-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d={PUZZLE_PATH} />
+      </svg>
+      {parts[1]}
+    </>
+  );
+}
+
 interface Step {
   key: string;
   title: string;
-  body?: string;
+  body?: preact.ComponentChildren;
   doneBody?: string;
   done: boolean;
   detail?: preact.ComponentChildren;
@@ -165,7 +188,7 @@ export function App() {
     { key: "install", title: t("onboardingStepInstallTitle"), done: true },
     // Dropped entirely where the browser cannot report pin state - a step that
     // can never tick would strand the progress bar (and the confetti) forever.
-    ...(pinned === null ? [] : [{ key: "pin", title: t("onboardingStepPinTitle"), body: t("onboardingStepPinBody"), doneBody: t("onboardingStepPinDone"), done: pinned }]),
+    ...(pinned === null ? [] : [{ key: "pin", title: t("onboardingStepPinTitle"), body: pinBody(), doneBody: t("onboardingStepPinDone"), done: pinned }]),
     {
       key: "spot",
       title: t("onboardingStepSpotTitle"),

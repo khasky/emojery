@@ -568,7 +568,7 @@
     "message": "固定图标"
   },
   "onboardingStepPinBody": {
-    "message": "点击工具栏中的拼图图标并固定 Emojery,方便随时使用。"
+    "message": "点击工具栏中的拼图图标{icon}并固定 Emojery,方便随时使用。"
   },
   "onboardingStepPinDone": {
     "message": "已固定!"

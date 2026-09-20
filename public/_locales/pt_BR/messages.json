@@ -568,7 +568,7 @@
     "message": "Fixe o ícone"
   },
   "onboardingStepPinBody": {
-    "message": "Clique no ícone de quebra-cabeça na barra de ferramentas e fixe o Emojery para deixá-lo sempre à mão."
+    "message": "Clique no ícone de quebra-cabeça {icon} na barra de ferramentas e fixe o Emojery para deixá-lo sempre à mão."
   },
   "onboardingStepPinDone": {
     "message": "Fixado!"

@@ -568,7 +568,7 @@
     "message": "Rögzítsd az ikont"
   },
   "onboardingStepPinBody": {
-    "message": "Kattints a puzzle ikonra az eszköztáron, és rögzítsd az Emojeryt, hogy mindig kéznél legyen."
+    "message": "Kattints a puzzle ikonra {icon} az eszköztáron, és rögzítsd az Emojeryt, hogy mindig kéznél legyen."
   },
   "onboardingStepPinDone": {
     "message": "Rögzítve!"

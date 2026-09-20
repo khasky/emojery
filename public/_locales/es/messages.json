@@ -568,7 +568,7 @@
     "message": "Fíjalo"
   },
   "onboardingStepPinBody": {
-    "message": "Haz clic en el icono del puzle en la barra de herramientas y fija Emojery para tenerlo a mano."
+    "message": "Haz clic en el icono del puzle {icon} en la barra de herramientas y fija Emojery para tenerlo a mano."
   },
   "onboardingStepPinDone": {
     "message": "¡Fijado!"

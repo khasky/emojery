@@ -65,6 +65,14 @@ describe("i18n locales", () => {
     expect(missing, `undefined placeholders in ${locale}`).toEqual([]);
   });
 
+  // The onboarding pin step splits its sentence on this token to drop the
+  // browser's puzzle-piece glyph beside the word naming it (entrypoints/
+  // onboarding/main.tsx). A translation that loses the token loses the glyph -
+  // silently, since the sentence still renders.
+  it.each(LOCALES)("%s: keeps the pin step's {icon} token", (locale) => {
+    expect(readLocale(locale).onboardingStepPinBody?.message).toContain("{icon}");
+  });
+
   it.each(NON_EN)("%s: defines no keys absent from en", (locale) => {
     const orphans = Object.keys(readLocale(locale)).filter((k) => !(k in EN));
     expect(orphans, `orphan keys in ${locale}`).toEqual([]);

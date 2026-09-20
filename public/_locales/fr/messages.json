@@ -568,7 +568,7 @@
     "message": "Épinglez-le"
   },
   "onboardingStepPinBody": {
-    "message": "Cliquez sur l'icône puzzle dans la barre d'outils et épinglez Emojery pour le garder à portée de main."
+    "message": "Cliquez sur l'icône puzzle {icon} dans la barre d'outils et épinglez Emojery pour le garder à portée de main."
   },
   "onboardingStepPinDone": {
     "message": "Épinglé !"

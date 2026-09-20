@@ -568,7 +568,7 @@
     "message": "Przypnij ikonę"
   },
   "onboardingStepPinBody": {
-    "message": "Kliknij ikonę puzzla na pasku narzędzi i przypnij Emojery, aby był zawsze pod ręką."
+    "message": "Kliknij ikonę puzzla {icon} na pasku narzędzi i przypnij Emojery, aby był zawsze pod ręką."
   },
   "onboardingStepPinDone": {
     "message": "Przypięto!"

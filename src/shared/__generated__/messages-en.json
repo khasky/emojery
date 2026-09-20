@@ -566,7 +566,7 @@
   "message": "Pin it"
  },
  "onboardingStepPinBody": {
-  "message": "Click the puzzle-piece icon in the toolbar and pin Emojery so it stays in reach."
+  "message": "Click the puzzle-piece icon {icon} in the toolbar and pin Emojery so it stays in reach."
  },
  "onboardingStepPinDone": {
   "message": "Pinned!"

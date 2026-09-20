@@ -568,7 +568,7 @@
     "message": "ピン留めする"
   },
   "onboardingStepPinBody": {
-    "message": "ツールバーのパズルアイコンをクリックして Emojery をピン留めすると、いつでも使えます。"
+    "message": "ツールバーのパズルアイコン{icon}をクリックして Emojery をピン留めすると、いつでも使えます。"
   },
   "onboardingStepPinDone": {
     "message": "ピン留め完了!"

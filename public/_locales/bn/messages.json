@@ -568,7 +568,7 @@
     "message": "পিন করুন"
   },
   "onboardingStepPinBody": {
-    "message": "টুলবারের পাজল আইকনে ক্লিক করে Emojery পিন করুন, যাতে এটি হাতের কাছে থাকে।"
+    "message": "টুলবারের পাজল আইকনে {icon} ক্লিক করে Emojery পিন করুন, যাতে এটি হাতের কাছে থাকে।"
   },
   "onboardingStepPinDone": {
     "message": "পিন করা হয়েছে!"

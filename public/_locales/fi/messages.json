@@ -568,7 +568,7 @@
     "message": "Kiinnitä kuvake"
   },
   "onboardingStepPinBody": {
-    "message": "Napsauta työkalurivin palapelikuvaketta ja kiinnitä Emojery, niin se on aina käden ulottuvilla."
+    "message": "Napsauta työkalurivin palapelikuvaketta {icon} ja kiinnitä Emojery, niin se on aina käden ulottuvilla."
   },
   "onboardingStepPinDone": {
     "message": "Kiinnitetty!"

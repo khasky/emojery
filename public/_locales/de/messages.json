@@ -568,7 +568,7 @@
     "message": "Anheften"
   },
   "onboardingStepPinBody": {
-    "message": "Klicke auf das Puzzle-Symbol in der Symbolleiste und hefte Emojery an, damit es griffbereit bleibt."
+    "message": "Klicke auf das Puzzle-Symbol {icon} in der Symbolleiste und hefte Emojery an, damit es griffbereit bleibt."
   },
   "onboardingStepPinDone": {
     "message": "Angeheftet!"

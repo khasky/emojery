@@ -568,7 +568,7 @@
     "message": "Zet het vast"
   },
   "onboardingStepPinBody": {
-    "message": "Klik op het puzzelpictogram in de werkbalk en zet Emojery vast zodat het binnen handbereik blijft."
+    "message": "Klik op het puzzelpictogram {icon} in de werkbalk en zet Emojery vast zodat het binnen handbereik blijft."
   },
   "onboardingStepPinDone": {
     "message": "Vastgezet!"

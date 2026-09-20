@@ -568,7 +568,7 @@
     "message": "Prisekite piktogramą"
   },
   "onboardingStepPinBody": {
-    "message": "Spustelėkite dėlionės piktogramą įrankių juostoje ir prisekite Emojery, kad visada būtų po ranka."
+    "message": "Spustelėkite dėlionės piktogramą {icon} įrankių juostoje ir prisekite Emojery, kad visada būtų po ranka."
   },
   "onboardingStepPinDone": {
     "message": "Prisegta!"

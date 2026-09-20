@@ -568,7 +568,7 @@
     "message": "Pinkan ikon"
   },
   "onboardingStepPinBody": {
-    "message": "Klik ikon teka-teki pada bar alat dan pinkan Emojery supaya sentiasa mudah dicapai."
+    "message": "Klik ikon teka-teki {icon} pada bar alat dan pinkan Emojery supaya sentiasa mudah dicapai."
   },
   "onboardingStepPinDone": {
     "message": "Telah dipin!"

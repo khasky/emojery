@@ -568,7 +568,7 @@
     "message": "Fissalo"
   },
   "onboardingStepPinBody": {
-    "message": "Fai clic sull'icona a puzzle nella barra degli strumenti e fissa Emojery per averlo sempre a portata di mano."
+    "message": "Fai clic sull'icona a puzzle {icon} nella barra degli strumenti e fissa Emojery per averlo sempre a portata di mano."
   },
   "onboardingStepPinDone": {
     "message": "Fissato!"

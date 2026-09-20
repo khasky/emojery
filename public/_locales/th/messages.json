@@ -568,7 +568,7 @@
     "message": "ปักหมุดไอคอน"
   },
   "onboardingStepPinBody": {
-    "message": "คลิกไอคอนจิ๊กซอว์บนแถบเครื่องมือแล้วปักหมุด Emojery ให้อยู่ใกล้มือเสมอ"
+    "message": "คลิกไอคอนจิ๊กซอว์{icon}บนแถบเครื่องมือแล้วปักหมุด Emojery ให้อยู่ใกล้มือเสมอ"
   },
   "onboardingStepPinDone": {
     "message": "ปักหมุดแล้ว!"

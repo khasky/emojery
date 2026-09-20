@@ -568,7 +568,7 @@
     "message": "पिन करें"
   },
   "onboardingStepPinBody": {
-    "message": "टूलबार में पज़ल आइकन पर क्लिक करके Emojery को पिन करें ताकि वह हमेशा पास रहे।"
+    "message": "टूलबार में पज़ल आइकन {icon} पर क्लिक करके Emojery को पिन करें ताकि वह हमेशा पास रहे।"
   },
   "onboardingStepPinDone": {
     "message": "पिन हो गया!"
