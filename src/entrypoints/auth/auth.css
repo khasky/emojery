@@ -132,24 +132,48 @@
 /* Sign-in can take tens of seconds while the enrolment proof is built, and the
    window must stay open for it - a still page reads as a hung one. */
 .spinner {
-  width: 22px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* Holds the row open against the dot that is travelling above the baseline, so
+     the copy under it does not shift on every bounce. */
   height: 22px;
   margin-top: 18px;
-  border: 2px solid var(--khasky-emojery-field-border);
-  border-top-color: var(--khasky-emojery-link);
-  border-radius: 50%;
-  animation: emojery-spin 0.9s linear infinite;
 }
 
-@keyframes emojery-spin {
-  to {
-    transform: rotate(1turn);
+.spinner span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--khasky-emojery-link);
+  animation: emojery-bounce 1.2s ease-in-out infinite;
+}
+
+.spinner span:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
+.spinner span:nth-child(3) {
+  animation-delay: 0.32s;
+}
+
+@keyframes emojery-bounce {
+  0%,
+  75%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.3;
+  }
+  38% {
+    transform: translateY(-8px);
+    opacity: 1;
   }
 }
 
-/* Motion off: the ring still marks the spot, it just stops turning. */
+/* Motion off: the three dots still mark the spot at full strength, they just stop
+   travelling - the dimming is part of the animation, not of the resting state. */
 @media (prefers-reduced-motion: reduce) {
-  .spinner {
+  .spinner span {
     animation: none;
   }
 }

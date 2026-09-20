@@ -189,8 +189,12 @@ function BusyStep({ provider }: { provider: OidcProvider }) {
         <p class={TAGLINE_CLASS} role="status">
           {t("authSigningInWith", providerLabel(provider))}
         </p>
-        {/* The sentence above is what a screen reader announces; the ring is for the eye. */}
-        <div class={SPINNER_CLASS} aria-hidden="true" />
+        {/* The sentence above is what a screen reader announces; the dots are for the eye. */}
+        <div class={SPINNER_CLASS} aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
         <p class="keep-open">{t("authSigningInKeepOpen")}</p>
       </div>
     </main>
