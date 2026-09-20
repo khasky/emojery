@@ -202,7 +202,10 @@ describe("auth page - the provider step", () => {
 
     const link = await vi.waitFor(() => requireEl<HTMLAnchorElement>(document, otherAccountSelector("apple")));
     expect(link.tagName).toBe("A");
-    expect(link.textContent).toBe("Sign out at Apple to use another account");
+    // Worded as a remedy, not a prerequisite: Apple ignores an OpenID `prompt`, so
+    // this only helps the reader Apple continued on its own, and a reader with no
+    // Apple session is asked which account anyway.
+    expect(link.textContent).toBe("Wrong Apple account? Sign out there");
     expect(link.href.startsWith("https://account.apple.com/")).toBe(true);
     expect(link.target).toBe("_blank");
     // It leaves the page rather than driving our own flow.
@@ -359,8 +362,18 @@ describe("auth page - the provider step", () => {
     await loadPage();
     await pick();
 
-    await vi.waitFor(() => expect(errorText()).toBe(copy));
+    await vi.waitFor(() => expect(errorText()).toContain(copy));
     expect(heading()).toBe("Sign in to react");
+    // The device limit is the one refusal a reader cannot act on from here, so it
+    // carries the article that says what to do; every other one stands alone.
+    const help = document.querySelector<HTMLAnchorElement>(`${AUTH_ERROR_SELECTOR} a`);
+    if (refusal === "device_limit") {
+      expect(help?.textContent).toBe("What this means");
+      expect(help?.href.startsWith("https://emojery.app/help/device-limit-reached")).toBe(true);
+      expect(help?.target).toBe("_blank");
+    } else {
+      expect(help).toBeNull();
+    }
     // aria wiring for the message the screen reader has to reach (WCAG): the
     // banner is an alert, and the list it belongs to points at it.
     expect(document.querySelector(AUTH_ERROR_SELECTOR)?.getAttribute("role")).toBe("alert");

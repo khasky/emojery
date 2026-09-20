@@ -9,6 +9,7 @@ import { type EpochKeyLimitNotice, readEpochKeyLimitNotice } from "../../shared/
 import { t } from "../../shared/i18n";
 import { ACCOUNT_LIST_CLASS, ACCOUNT_NAME_CLASS, ACCOUNT_NAME_INPUT_CLASS, DELETE_CONFIRM_WARN_CLASS, DEVICE_LIMIT_NOTICE_CLASS } from "../../shared/page-dom";
 import type { Settings } from "../../shared/storage";
+import { HELP_DEVICE_LIMIT_URL, withExtensionUtm } from "../../shared/tracking-links";
 import { sendRuntimeMessage } from "../../shared/webext";
 import { HistoryDataSection } from "./popup-history-data";
 import { IconRow, SignInPrompt } from "./popup-shared";
@@ -117,7 +118,10 @@ const DeviceLimitNotice = () => {
   if (!notice) return null;
   return (
     <p class={DEVICE_LIMIT_NOTICE_CLASS} role="status">
-      {t("voteDeviceLimit", resumeDayLabel(notice.resumesAt))}
+      {t("voteDeviceLimit", resumeDayLabel(notice.resumesAt))}{" "}
+      <a class="linkish" href={withExtensionUtm(HELP_DEVICE_LIMIT_URL, { campaign: "auth_device_limit", content: "popup" })} target="_blank" rel="noopener noreferrer">
+        {t("deviceLimitHelpLink")}
+      </a>
     </p>
   );
 };

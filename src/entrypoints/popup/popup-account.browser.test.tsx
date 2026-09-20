@@ -177,7 +177,13 @@ describe("AccountView - device limit notice", () => {
     await vi.waitFor(() => expect(container.querySelector(DEVICE_LIMIT_NOTICE_SELECTOR)).not.toBeNull());
     const notice = container.querySelector(DEVICE_LIMIT_NOTICE_SELECTOR)!;
     expect(notice.getAttribute("role")).toBe("status");
-    expect(notice.textContent).toBe(`Device limit for this month is reached. Voting resumes on ${new Date(RESUMES_AT).toLocaleDateString(navigator.language, { year: "numeric", month: "long", day: "numeric" })}.`);
+    expect(notice.textContent).toContain(`Device limit for this month is reached. Voting resumes on ${new Date(RESUMES_AT).toLocaleDateString(navigator.language, { year: "numeric", month: "long", day: "numeric" })}.`);
+    // The date alone does not say what to do about it, and nothing in the popup can:
+    // the remedies live on the site, so the notice carries the article.
+    const help = notice.querySelector<HTMLAnchorElement>("a");
+    expect(help?.textContent).toBe("What this means");
+    expect(help?.href.startsWith("https://emojery.app/help/device-limit-reached")).toBe(true);
+    expect(help?.target).toBe("_blank");
   });
 
   it("shows nothing once the epoch it names has passed, and drops the stale notice", async () => {

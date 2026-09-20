@@ -25,11 +25,14 @@ export function providerLabel(id: OidcProvider): string {
 }
 
 // Where to send a reader whose provider cannot be asked to reopen its account
-// picker (`chooser` in GET /auth/oidc/providers). Apple is the one today: its
-// authorization endpoint takes no `prompt` at all - passing one is answered 400 -
-// so the only way to another Apple Account is ending the session Apple itself
-// holds. A provider absent from both lists gets no control rather than one that
-// would lead nowhere.
+// picker (`chooser` in GET /auth/oidc/providers). Apple is the one today: it
+// ignores an OpenID `prompt` rather than refusing it (measured 2026-09-20: the
+// authorization page comes back byte-identical with and without one), so there is
+// no request that makes it ask. The only way to another Apple Account is ending
+// the session Apple holds, which is what this page is for - and only when Apple
+// continued on its own, since a browser with no Apple session is asked which
+// account anyway. A provider absent from both lists gets no control rather than
+// one that would lead nowhere.
 const PROVIDER_ACCOUNT_URL: Readonly<Record<string, string>> = {
   apple: "https://account.apple.com/",
 };

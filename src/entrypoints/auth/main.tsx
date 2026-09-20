@@ -12,7 +12,7 @@ import { bootstrapPage } from "../../shared/page-bootstrap";
 import { AGREE_CLASS, AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, COUNTDOWN_CLASS, LAST_ACCOUNT_CLASS, MORE_PROVIDERS_CLASS, OTHER_ACCOUNT_CLASS, PROVIDER_BUTTON_CLASS, PROVIDER_LIST_CLASS, SPINNER_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
 import { relativeTime } from "../../shared/relative-time";
 import { noteTermsAccepted, termsAccepted } from "../../shared/terms-consent";
-import { withExtensionUtm } from "../../shared/tracking-links";
+import { HELP_DEVICE_LIMIT_URL, withExtensionUtm } from "../../shared/tracking-links";
 import { sendRuntimeMessage } from "../../shared/webext";
 
 // Fresh installs on pre-140 Firefox open this page with `?consent=1` (background/install.ts) to get
@@ -243,7 +243,9 @@ type ProviderStepProps = {
   /** The providers that answer to a request for their account picker. The control
    *  appears for these only, so it never promises a switch that would not happen. */
   chooserProviders: OidcProvider[];
-  error: string | null;
+  /** The refusal to show, not its copy: the device limit is the one that also
+   *  carries a link, and a rendered string cannot say which refusal it came from. */
+  error: SignInRefusal | null;
   accepted: boolean;
   showAll: boolean;
   onPick: (provider: OidcProvider, chooser: boolean) => void;
@@ -309,7 +311,15 @@ function ProviderStep({ providers, lastAccounts, chooserProviders, error, accept
         </label>
         {error ? (
           <div class={AUTH_ERROR_CLASS} id={AUTH_ERROR_ID} role="alert">
-            {error}
+            {t(REFUSAL_COPY[error])}
+            {error === "device_limit" ? (
+              <>
+                {" "}
+                <a class="linkish" href={withExtensionUtm(HELP_DEVICE_LIMIT_URL, { campaign: "auth_device_limit", content: "auth" })} target="_blank" rel="noopener noreferrer">
+                  {t("deviceLimitHelpLink")}
+                </a>
+              </>
+            ) : null}
           </div>
         ) : null}
         {providers === null ? (
@@ -368,7 +378,9 @@ function App() {
   const [chooserProviders, setChooserProviders] = useState<OidcProvider[]>([]);
   const [lastAccounts, setLastAccounts] = useState<Record<string, LastAccount>>({});
   const [picked, setPicked] = useState<OidcProvider | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  // The refusal itself, not its rendered copy: the device limit is the one that
+  // also gets a link, and a string cannot say which refusal produced it.
+  const [error, setError] = useState<SignInRefusal | null>(null);
   const [accepted, setAccepted] = useState(false);
   // Held here, not in the step: a refused sign-in comes back to the list, and a
   // reader who already opened the longer list should not have to open it again.
@@ -425,7 +437,7 @@ function App() {
       setStep("done");
       return;
     }
-    setError(t(REFUSAL_COPY[res.refusal]));
+    setError(res.refusal);
     setStep("provider");
   }, []);
 

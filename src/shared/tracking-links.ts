@@ -8,6 +8,13 @@
 // import it instead of repeating the URL (that module renders on import).
 export const TRY_IT_LIVE_URL = "https://github.com/khasky/emojery#emojery-react";
 
+// The one refusal a reader cannot act on from inside the extension: the account
+// holds as many signing keys as a month allows. What to do about it depends on
+// facts the popup does not have (another profile, the date, whether to ask the
+// operator to raise it), so the article carries them and can be corrected without
+// a release. Both places that show the limit link here.
+export const HELP_DEVICE_LIMIT_URL = "https://emojery.app/help/device-limit-reached";
+
 const EXTENSION_UTM_SOURCE = "emojery";
 const EXTENSION_UTM_MEDIUM = "browser_extension";
 

@@ -425,8 +425,8 @@
     }
   },
   "authSignOutAtProviderBtn": {
-    "message": "다른 계정을 사용하려면 $PROVIDER$에서 로그아웃하세요",
-    "description": "Link on the auth page under a provider that cannot reopen its own account picker (Apple today). It opens that provider's account page, where ending the session is what makes another account reachable. $PROVIDER$ is the provider's name.",
+    "message": "잘못된 $PROVIDER$ 계정인가요? 거기서 로그아웃하세요",
+    "description": "Link on the auth page under a provider that cannot reopen its own account picker (Apple today). Apple ignores an OpenID `prompt`, so a browser already signed in there continues as that account without asking; this is the remedy for that case, not a step before every sign-in - a reader with no session at the provider is asked which account anyway. It opens the provider's account page, where ending the session lives. $PROVIDER$ is the provider's name.",
     "placeholders": {
       "provider": {
         "content": "$1",
@@ -511,6 +511,10 @@
   },
   "authErrDeviceLimit": {
     "message": "이번 달 기기 한도에 도달했습니다. 다음 달에 다시 시도하세요."
+  },
+  "deviceLimitHelpLink": {
+    "message": "무슨 뜻인가요",
+    "description": "Link shown beside both device-limit messages (the sign-in refusal and the Account-tab notice). It opens the help article that says what the monthly key limit is, what to do while it holds, and how to reach the operator. Deliberately short: it sits at the end of a sentence that already carries the news."
   },
   "voteDeviceLimit": {
     "message": "이번 달 기기 한도에 도달했습니다. $DATE$부터 다시 투표할 수 있습니다.",

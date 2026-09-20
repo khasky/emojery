@@ -425,8 +425,8 @@
     }
   },
   "authSignOutAtProviderBtn": {
-    "message": "दूसरा खाता इस्तेमाल करने के लिए $PROVIDER$ से साइन आउट करें",
-    "description": "Link on the auth page under a provider that cannot reopen its own account picker (Apple today). It opens that provider's account page, where ending the session is what makes another account reachable. $PROVIDER$ is the provider's name.",
+    "message": "गलत $PROVIDER$ खाता? वहाँ साइन आउट करें",
+    "description": "Link on the auth page under a provider that cannot reopen its own account picker (Apple today). Apple ignores an OpenID `prompt`, so a browser already signed in there continues as that account without asking; this is the remedy for that case, not a step before every sign-in - a reader with no session at the provider is asked which account anyway. It opens the provider's account page, where ending the session lives. $PROVIDER$ is the provider's name.",
     "placeholders": {
       "provider": {
         "content": "$1",
@@ -511,6 +511,10 @@
   },
   "authErrDeviceLimit": {
     "message": "इस महीने की डिवाइस सीमा पूरी हो गई है। अगले महीने फिर से कोशिश करें।"
+  },
+  "deviceLimitHelpLink": {
+    "message": "इसका मतलब क्या है",
+    "description": "Link shown beside both device-limit messages (the sign-in refusal and the Account-tab notice). It opens the help article that says what the monthly key limit is, what to do while it holds, and how to reach the operator. Deliberately short: it sits at the end of a sentence that already carries the news."
   },
   "voteDeviceLimit": {
     "message": "इस महीने की डिवाइस सीमा पूरी हो गई है। वोटिंग $DATE$ से फिर शुरू होगी।",

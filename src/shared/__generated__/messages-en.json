@@ -424,7 +424,7 @@
   }
  },
  "authSignOutAtProviderBtn": {
-  "message": "Sign out at $PROVIDER$ to use another account",
+  "message": "Wrong $PROVIDER$ account? Sign out there",
   "placeholders": {
    "provider": {
     "content": "$1",
@@ -509,6 +509,9 @@
  },
  "authErrDeviceLimit": {
   "message": "Device limit for this month is reached. Try again next month."
+ },
+ "deviceLimitHelpLink": {
+  "message": "What this means"
  },
  "voteDeviceLimit": {
   "message": "Device limit for this month is reached. Voting resumes on $DATE$.",
