@@ -28,9 +28,12 @@ export function isBlockUrl(url: string): boolean {
 // the phrase holds whichever quote codepoint the page serves. X fronts its
 // profile pages with Cloudflare, which answers a datacenter IP with the managed
 // challenge instead of the feed - matched by BOTH of its sentences, because the
-// heading varies with the challenge type while the body paragraph stays.
+// heading varies with the challenge type while the body paragraph stays. IMDb
+// answers an automated browser with its own human-verification page, matched
+// from the apostrophe-free tail of its heading ("Let's confirm you are human")
+// plus its instruction line, which no title page renders.
 export const WALL_SENTENCES_RE =
-  /Click the button below to continue shopping|Enter the characters you see below|we just need to make sure you're not a robot|detected unusual traffic|verif(?:y|ies|ying) you are (?:a )?(?:human|not a bot)|blocked by network security|Prove your humanity|Performing security verification|protect against malicious bots/i;
+  /Click the button below to continue shopping|Enter the characters you see below|we just need to make sure you're not a robot|detected unusual traffic|verif(?:y|ies|ying) (?:that )?you are (?:a )?(?:human|not a bot)|blocked by network security|Prove your humanity|Performing security verification|protect against malicious bots|confirm you are human|Complete the security check before continuing/i;
 
 // The one shared "this page is a wall, and here is why" verdict for suites that
 // hold a live Page: the URL gate first, then the exact wall sentences. The text
