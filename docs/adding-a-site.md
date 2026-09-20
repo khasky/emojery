@@ -269,6 +269,8 @@ The unauthenticated e2e suite (`e2e/site-injection.spec.ts`) is what keeps provi
 
 Run it against your staging build: `pnpm run build:chrome`, then `pnpm exec playwright test -c e2e/playwright.config.ts site-injection.spec.ts --grep "<label>"`. See `e2e/README.md` for setup and the anti-bot caveat — on bot-walled sites a `skip` is expected and is not a failure.
 
+A site that answers an automated browser with a verification page needs its wall recognised, or the scenario fails red instead of skipping: add the exact sentence that page renders to `WALL_SENTENCES_RE` in `e2e/lib/site-walls.ts`, matched from a fragment carrying no apostrophe. The suite's own launcher clears more of these than a bare Playwright context does, so check the wall against the real run before concluding a site is unreachable — and expect a CI runner's datacenter IP to be challenged where a desktop one is not.
+
 ## 10. Run the gates (must be green)
 
 The same gates every PR runs — the full list and what each one catches is in [CONTRIBUTING.md](../CONTRIBUTING.md#pre-pr-gates):
