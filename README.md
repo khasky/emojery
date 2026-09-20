@@ -205,6 +205,7 @@ Curious what's next? Check the [roadmap](https://emojery.app/roadmap?utm_source=
 | [Rotten Tomatoes](https://emojery.app/rottentomatoes-reactions?utm_source=github&utm_medium=readme&utm_campaign=emojery&utm_content=supported_sites) | Movies · TV shows · Seasons · Episodes |
 | [TMDB](https://emojery.app/tmdb-reactions?utm_source=github&utm_medium=readme&utm_campaign=emojery&utm_content=supported_sites) | Movies · TV shows · Collections |
 | [IMDb](https://emojery.app/imdb-reactions?utm_source=github&utm_medium=readme&utm_campaign=emojery&utm_content=supported_sites) | Movies · TV shows · Episodes |
+| [Metacritic](https://emojery.app/metacritic-reactions?utm_source=github&utm_medium=readme&utm_campaign=emojery&utm_content=supported_sites) | Movies · TV shows · Seasons · Games |
 
 [250+ more sites on the roadmap](https://emojery.app/roadmap?utm_source=github&utm_medium=readme&utm_campaign=emojery&utm_content=supported_sites).
 

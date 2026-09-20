@@ -111,6 +111,7 @@ export const SUPPORTED_SITES = [
   // `m.imdb.com` 301s to the `www` host on a desktop browser, so it is neither
   // a run host nor a parse host.
   { site: "imdb", label: "IMDb", hosts: ["www.imdb.com"], homeUrl: "https://www.imdb.com/" },
+  { site: "metacritic", label: "Metacritic", hosts: ["www.metacritic.com"], homeUrl: "https://www.metacritic.com/" },
 ] as const satisfies readonly SiteDescriptorInput[];
 
 // DERIVED single source of truth for the site-id union - adding a row above adds

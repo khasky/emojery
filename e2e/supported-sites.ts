@@ -268,6 +268,39 @@ export const SUPPORTED_SITE_SCENARIOS: SiteScenarioSpec[] = [
     expectHiddenNativeOnReplace: false,
   },
   {
+    site: "metacritic",
+    label: "Metacritic movie page",
+    urlKey: "METACRITIC_MOVIE",
+    mountKeyPattern: "^metacritic:(?:movie|tv|game)/",
+    // The hero's score column, which the trigger sits at the foot of. Nothing
+    // here is hidden under replaceNative: My Score is a rating and a review
+    // form, not a reaction the picker stands in for.
+    nativeSelectors: ['[data-testid="product-score"]', '[data-testid="global-score"]', ".hero-scores", ".product-hero__scores"],
+    containerSelectors: [".product-hero", '[data-testid="product-hero"]', "main"],
+    maxHosts: 1,
+    expectHiddenNativeOnReplace: false,
+  },
+  {
+    site: "metacritic",
+    label: "Metacritic game page",
+    urlKey: "METACRITIC_GAME",
+    mountKeyPattern: "^metacritic:(?:movie|tv|game)/",
+    nativeSelectors: ['[data-testid="product-score"]', '[data-testid="global-score"]', ".hero-scores", ".product-hero__scores"],
+    containerSelectors: [".product-hero", '[data-testid="product-hero"]', "main"],
+    maxHosts: 1,
+    expectHiddenNativeOnReplace: false,
+  },
+  {
+    site: "metacritic",
+    label: "Metacritic TV season page",
+    urlKey: "METACRITIC_TV_SEASON",
+    mountKeyPattern: "^metacritic:(?:movie|tv|game)/",
+    nativeSelectors: ['[data-testid="product-score"]', '[data-testid="global-score"]', ".hero-scores", ".product-hero__scores"],
+    containerSelectors: [".product-hero", '[data-testid="product-hero"]', "main"],
+    maxHosts: 1,
+    expectHiddenNativeOnReplace: false,
+  },
+  {
     site: "facebook",
     label: "Facebook public page feed",
     urlKey: "FACEBOOK_PAGE",

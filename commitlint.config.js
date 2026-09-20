@@ -34,6 +34,7 @@ const scopes = [
   "i18n",
   "imdb",
   "instagram",
+  "metacritic",
   "mount",
   "onboarding",
   "permissions",

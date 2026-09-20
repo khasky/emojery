@@ -108,6 +108,25 @@
       "url": "https://www.imdb.com/title/tt0959621/",
       "targetId": "tt0959621",
       "noTargetUrls": ["https://www.imdb.com/title/tt0903747/episodes/", "https://www.imdb.com/list/ls000004717/"]
+    },
+    {
+      "site": "metacritic",
+      "url": "https://www.metacritic.com/movie/resident-evil-2026/",
+      "targetId": "movie/resident-evil-2026",
+      "variantUrls": ["https://www.metacritic.com/movie/resident-evil-2026", "https://www.metacritic.com/movie/resident-evil-2026/?utm_source=x"],
+      "noTargetUrls": ["https://www.metacritic.com/movie/resident-evil-2026/critic-reviews/", "https://www.metacritic.com/movie/Resident-Evil-2026/", "https://www.metacritic.com/browse/movie/", "https://evil.example/movie/resident-evil-2026/"]
+    },
+    {
+      "site": "metacritic",
+      "url": "https://www.metacritic.com/tv/breaking-bad/season-5/",
+      "targetId": "tv/breaking-bad/season-5",
+      "noTargetUrls": ["https://www.metacritic.com/person/milla-jovovich/"]
+    },
+    {
+      "site": "metacritic",
+      "url": "https://www.metacritic.com/game/valheim/",
+      "targetId": "game/valheim",
+      "noTargetUrls": ["https://www.metacritic.com/music/random-access-memories/daft-punk/"]
     }
   ],
   "notUrlDerivable": [{ "site": "gitlab", "why": "the canonical id is GitLab's numeric project id, read from the page" }, { "site": "facebook", "why": "photo and lazy-permalink identities are resolved from the DOM" }]

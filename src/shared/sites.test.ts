@@ -127,6 +127,7 @@ describe("matchPatternsForSite", () => {
       "https://www.rottentomatoes.com/*",
       "https://www.themoviedb.org/*",
       "https://www.imdb.com/*",
+      "https://www.metacritic.com/*",
     ]);
   });
 });
