@@ -16,22 +16,10 @@ export type View = (typeof VIEWS)[number];
 // opt-in control is an icon in the header (main.tsx) rather than a fifth tab.
 export const TAB_VIEWS: readonly View[] = VIEWS.filter((view) => view !== "debug");
 
-// The help article the header's Help link points at, per view. Keyed by View for the same
-// reason as the labels below: a new panel fails to compile until somebody has decided what
-// help means for it, rather than silently inheriting the hub.
-//
-// One link whose target follows the open tab, rather than a link per row: every visible
-// string in this popup is translated into every locale the extension ships, so an
-// affordance that costs 1 string is the one that can carry contextual targets at all.
-// Settings is the exception that points at the hub - its switches span several articles, and
-// guessing which one the reader came for would usually be wrong.
-export const HELP_URL_BY_VIEW: Record<View, string> = {
-  settings: "https://emojery.app/help",
-  history: "https://emojery.app/help/browse-your-reaction-history",
-  account: "https://emojery.app/help/sign-in-with-a-code",
-  report: "https://emojery.app/help/button-missing-on-a-site",
-  debug: "https://emojery.app/help",
-};
+// Where the header's Help link points, from every view. One destination rather than a
+// per-view article: the hub lists them all, and a link that lands somewhere different
+// depending on the open tab reads as a different link each time.
+export const HELP_URL = "https://emojery.app/help";
 
 // Keyed by View (not a parallel array), so a new view fails to compile until it has a label.
 // Debug reuses the Settings row's own label: both name the same thing, and one key keeps the

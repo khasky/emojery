@@ -17,7 +17,7 @@ import { QueueView } from "./popup-queue";
 import { ReportView } from "./popup-report";
 import { ICON_BUG, SettingsView } from "./popup-settings";
 import { BUILD_VERSION, svgIcon, useActiveTabUrl } from "./popup-shared";
-import { HELP_URL_BY_VIEW, nextViewForKey, rememberView, resolveShownView, storedView, TAB_VIEWS, tabAnchorFor, VIEW_LABEL_KEYS, type View } from "./popup-view-state";
+import { HELP_URL, nextViewForKey, rememberView, resolveShownView, storedView, TAB_VIEWS, tabAnchorFor, VIEW_LABEL_KEYS, type View } from "./popup-view-state";
 
 // The stored Theme setting lands later, from the effect in App.
 bootstrapPage(t("popupTitle"));
@@ -92,9 +92,9 @@ function App() {
             <span>{t("popupHeading")}</span>
           </h1>
           <BuildInfo showStamp={settings.debugMode} />
-          {/* Opens the help article for the tab that is open, on emojery.app. The target
-              lives with the rest of the per-view decisions in popup-view-state.ts. */}
-          <a class="help-link" href={withExtensionUtm(HELP_URL_BY_VIEW[shown], { campaign: "popup_help", content: shown })} target="_blank" rel="noopener noreferrer" aria-label={t("helpLink")} title={t("helpLink")}>
+          {/* Opens the help hub on emojery.app, from every tab - see HELP_URL in
+              popup-view-state.ts. The open tab rides along as utm_content only. */}
+          <a class="help-link" href={withExtensionUtm(HELP_URL, { campaign: "popup_help", content: shown })} target="_blank" rel="noopener noreferrer" aria-label={t("helpLink")} title={t("helpLink")}>
             {svgIcon(ICON_HELP, "help-link-icon")}
           </a>
           {/* Debug rides in the header rather than as a fifth tab - TAB_VIEWS in
