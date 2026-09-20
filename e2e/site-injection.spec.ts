@@ -522,6 +522,15 @@ test("youtube: an in-page hop from the watch page to Shorts mounts on the Shorts
 // clicking the visible trigger opens auth.html.
 for (const site of supportedSiteScenarios) {
   test(`${site.site}: ${site.label} default unauth placement and auth-click`, async () => {
+    // One load, but a generous one: safeGoto waits up to 45s for it and the mount
+    // evidence up to E2E_SITE_TIMEOUT_MS (70s) after that, which is already 115s of
+    // the 120s default. A live site that answers slowly - or serves the blank shell
+    // X gives a logged-out profile feed on CI - then burns the budget before
+    // isNoActionSurface can turn it into the skip this suite has for exactly that,
+    // and a walled page reports as a hard timeout instead. The authed sibling below
+    // raises its own budget for the same reason.
+    test.setTimeout(Number(process.env.E2E_UNAUTH_SITE_TIMEOUT_MS ?? 240_000));
+
     const isolatedSession = site.isolatedContext && !process.env.E2E_USER_DATA_DIR ? await launchE2eBrowserSession() : null;
     const activeContext = isolatedSession?.context ?? context;
     try {
