@@ -212,6 +212,39 @@ export const SUPPORTED_SITE_SCENARIOS: SiteScenarioSpec[] = [
     expectHiddenNativeOnReplace: false,
   },
   {
+    site: "tmdb",
+    label: "TMDB movie page",
+    urlKey: "TMDB_MOVIE",
+    mountKeyPattern: "^tmdb:(?:movie|tv|collection)/\\d+$",
+    // The header controls the trigger has to land beside: the score row TMDB's
+    // own reactions live in, and the icon row below it. Narrower than the set
+    // replaceNative hides, which is the reactions alone (adapters/tmdb.ts).
+    nativeSelectors: [".actions #vibes_label", ".actions ul.consensus_reaction_items", ".actions .user_score_chart", "ul.auto.actions #favourite", "ul.auto.actions #watchlist"],
+    containerSelectors: [".actions", ".header_poster_wrapper", "#original_header"],
+    maxHosts: 1,
+  },
+  {
+    site: "tmdb",
+    label: "TMDB TV series page",
+    urlKey: "TMDB_TV",
+    mountKeyPattern: "^tmdb:(?:movie|tv|collection)/\\d+$",
+    nativeSelectors: [".actions #vibes_label", ".actions ul.consensus_reaction_items", ".actions .user_score_chart", "ul.auto.actions #favourite", "ul.auto.actions #watchlist"],
+    containerSelectors: [".actions", ".header_poster_wrapper", "#original_header"],
+    maxHosts: 1,
+  },
+  {
+    site: "tmdb",
+    label: "TMDB collection page",
+    urlKey: "TMDB_COLLECTION",
+    mountKeyPattern: "^tmdb:(?:movie|tv|collection)/\\d+$",
+    // A collection header carries the score alone - no Vibe pill, no reaction
+    // strip, so there is nothing for "Hide original buttons" to hide here.
+    nativeSelectors: [".actions .user_score_chart", ".actions"],
+    containerSelectors: [".actions", "section.header", "#original_header"],
+    maxHosts: 1,
+    expectHiddenNativeOnReplace: false,
+  },
+  {
     site: "facebook",
     label: "Facebook public page feed",
     urlKey: "FACEBOOK_PAGE",

@@ -115,7 +115,7 @@ Used to inject the extension's packaged content scripts into already-open suppor
 ## Host permission justification
 
 ```text
-Access to the listed Facebook, Instagram, Reddit, YouTube, X, Threads, GitHub, GitLab, Amazon and Rotten Tomatoes hosts is required to identify supported public content, insert the reaction interface and display its counts. User-enabled settings can hide native controls and link an emoji selection to a native reaction or vote on the current page; Auto-press is off by default. Access to api.emojery.app supports count lookups, the provider sign-in, the per-account signing keys, reaction submissions and removals, account deletion and user-submitted bug reports. Access to emojery.app lets a packaged script expose the installed version and handle reaction links. Content scripts run only on the declared supported hosts, not arbitrary websites.
+Access to the listed Facebook, Instagram, Reddit, YouTube, X, Threads, GitHub, GitLab, Amazon, Rotten Tomatoes and TMDB hosts is required to identify supported public content, insert the reaction interface and display its counts. User-enabled settings can hide native controls and link an emoji selection to a native reaction or vote on the current page; Auto-press is off by default. Access to api.emojery.app supports count lookups, the provider sign-in, the per-account signing keys, reaction submissions and removals, account deletion and user-submitted bug reports. Access to emojery.app lets a packaged script expose the installed version and handle reaction links. Content scripts run only on the declared supported hosts, not arbitrary websites.
 ```
 
 ## Homepage URL
@@ -206,7 +206,7 @@ HOW TO EXERCISE THE ADD-ON
 
 Emojery adds an emoji reaction control next to the native like/share/star buttons on supported sites and shows per-post reaction counts.
 
-The reaction buttons and counts appear on the supported sites (x.com, facebook.com, reddit.com, instagram.com, youtube.com, github.com, gitlab.com, threads.com, amazon.com, rottentomatoes.com) without signing in — install and browse any of them. github.com/torvalds/linux is a reliable page to check without signing in.
+The reaction buttons and counts appear on the supported sites (x.com, facebook.com, reddit.com, instagram.com, youtube.com, github.com, gitlab.com, threads.com, amazon.com, rottentomatoes.com, themoviedb.org) without signing in — install and browse any of them. github.com/torvalds/linux is a reliable page to check without signing in.
 
 To test voting (optional): open the extension, choose Sign in, tick the consent box and pick a provider (Google, Apple, Microsoft or Twitch). The provider's own login page opens in a browser window; sign in there with any account you have and the extension's page confirms the sign-in. No account details reach the add-on: the provider's answer is exchanged for a session by the backend.
 
@@ -224,7 +224,7 @@ Nothing in this add-on reaches that branch, and the attached source archive show
 ## Test Instructions
 
 ```text
-No account is needed for the core features. Install the extension and open any supported page (youtube.com, reddit.com, github.com, gitlab.com, x.com, threads.com, facebook.com, instagram.com, amazon.com, rottentomatoes.com): the reaction button appears next to the site's own controls and shows the public counts. github.com/torvalds/linux is a reliable page to check without signing in.
+No account is needed for the core features. Install the extension and open any supported page (youtube.com, reddit.com, github.com, gitlab.com, x.com, threads.com, facebook.com, instagram.com, amazon.com, rottentomatoes.com, themoviedb.org): the reaction button appears next to the site's own controls and shows the public counts. github.com/torvalds/linux is a reliable page to check without signing in.
 
 To test reacting: open the extension popup, choose Sign in, tick the consent box and pick a provider (Google, Apple, Microsoft or Twitch); sign in on the provider's own page in the window that opens.
 
@@ -282,7 +282,7 @@ Emojery adds an emoji reaction control next to the native Like, Star and vote bu
 
 Site access is limited to those sites - no <all_urls>, and no wildcard host match beyond each site's own subdomains. Two further hosts belong to the extension itself: emojery.app for the sign-in hand-off and an installed-version marker, and api.emojery.app, the backend that serves counts, accepts reactions and completes the provider sign-in. No remote code is executed; the content security policy is script-src 'self'.
 
-No account is needed to see the reaction button and the counts. Install the extension and open any supported page (youtube.com, reddit.com, github.com, gitlab.com, x.com, threads.com, facebook.com, instagram.com, amazon.com, rottentomatoes.com). github.com/torvalds/linux is a reliable page to check.
+No account is needed to see the reaction button and the counts. Install the extension and open any supported page (youtube.com, reddit.com, github.com, gitlab.com, x.com, threads.com, facebook.com, instagram.com, amazon.com, rottentomatoes.com, themoviedb.org). github.com/torvalds/linux is a reliable page to check.
 
 To test reacting: open the popup, choose Sign in, tick the consent box and pick a provider (Google, Apple, Microsoft or Twitch); sign in on the provider's own page in the window that opens. The identity permission is what opens that window; the extension never hosts the provider's form.
 

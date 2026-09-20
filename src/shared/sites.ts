@@ -105,6 +105,9 @@ export const SUPPORTED_SITES = [
   // The bare `rottentomatoes.com` is a 301 to the `www` host and never stays in
   // the address bar, so it is neither a run host nor a parse host.
   { site: "rottentomatoes", label: "Rotten Tomatoes", hosts: ["www.rottentomatoes.com"], homeUrl: "https://www.rottentomatoes.com/" },
+  // Same 301-to-`www` shape as Rotten Tomatoes above: the bare `themoviedb.org`
+  // never stays in the address bar, so one run host covers the site.
+  { site: "tmdb", label: "TMDB", hosts: ["www.themoviedb.org"], homeUrl: "https://www.themoviedb.org/" },
 ] as const satisfies readonly SiteDescriptorInput[];
 
 // DERIVED single source of truth for the site-id union - adding a row above adds

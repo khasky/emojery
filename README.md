@@ -203,6 +203,7 @@ Curious what's next? Check the [roadmap](https://emojery.app/roadmap?utm_source=
 | [Threads](https://emojery.app/threads-reactions?utm_source=github&utm_medium=readme&utm_campaign=emojery&utm_content=supported_sites) | Posts |
 | [Amazon](https://emojery.app/amazon-reactions?utm_source=github&utm_medium=readme&utm_campaign=emojery&utm_content=supported_sites) | Products |
 | [Rotten Tomatoes](https://emojery.app/rottentomatoes-reactions?utm_source=github&utm_medium=readme&utm_campaign=emojery&utm_content=supported_sites) | Movies · TV shows · Seasons · Episodes |
+| [TMDB](https://emojery.app/tmdb-reactions?utm_source=github&utm_medium=readme&utm_campaign=emojery&utm_content=supported_sites) | Movies · TV shows · Collections |
 
 [250+ more sites on the roadmap](https://emojery.app/roadmap?utm_source=github&utm_medium=readme&utm_campaign=emojery&utm_content=supported_sites).
 

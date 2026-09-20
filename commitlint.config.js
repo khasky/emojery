@@ -51,6 +51,7 @@ const scopes = [
   "staging",
   "test",
   "threads",
+  "tmdb",
   "trigger",
   "ui",
   "vote",

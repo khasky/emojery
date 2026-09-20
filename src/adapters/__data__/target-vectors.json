@@ -76,6 +76,25 @@
       "site": "rottentomatoes",
       "url": "https://www.rottentomatoes.com/tv/trespasses/s01/e02",
       "targetId": "tv/trespasses/s01/e02"
+    },
+    {
+      "site": "tmdb",
+      "url": "https://www.themoviedb.org/movie/238-the-godfather",
+      "targetId": "movie/238",
+      "variantUrls": ["https://www.themoviedb.org/movie/238", "https://www.themoviedb.org/movie/238-a-completely-different-slug", "https://www.themoviedb.org/movie/238-the-godfather/", "https://www.themoviedb.org/movie/238?language=en-US"],
+      "noTargetUrls": ["https://www.themoviedb.org/movie/238-the-godfather/cast", "https://www.themoviedb.org/person/1136406-tom-holland", "https://evil.example/movie/238"]
+    },
+    {
+      "site": "tmdb",
+      "url": "https://www.themoviedb.org/tv/275102",
+      "targetId": "tv/275102",
+      "noTargetUrls": ["https://www.themoviedb.org/tv/275102/season/1", "https://www.themoviedb.org/tv/275102/season/1/episode/1"]
+    },
+    {
+      "site": "tmdb",
+      "url": "https://www.themoviedb.org/collection/531241-spider-man-mcu-collection",
+      "targetId": "collection/531241",
+      "noTargetUrls": ["https://www.themoviedb.org/list/1-the-marvel-universe"]
     }
   ],
   "notUrlDerivable": [{ "site": "gitlab", "why": "the canonical id is GitLab's numeric project id, read from the page" }, { "site": "facebook", "why": "photo and lazy-permalink identities are resolved from the DOM" }]

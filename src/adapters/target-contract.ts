@@ -20,6 +20,7 @@ import { extractInstagramShortcode, instagramTargetFromRef } from "./instagram";
 import { extractRedditPostRef, redditTargetFromRef } from "./reddit";
 import { extractRottenTomatoesTitleRef, rottentomatoesTargetFromRef } from "./rottentomatoes";
 import { extractThreadsPostRef, threadsTargetFromRef } from "./threads";
+import { extractTmdbTitleRef, tmdbTargetFromRef } from "./tmdb";
 import { extractXStatusRef, xTargetFromRef } from "./x";
 import { extractYouTubeVideoRef, youtubeTargetFromRef } from "./youtube";
 
@@ -30,7 +31,7 @@ interface DerivedTarget {
   url: string;
 }
 
-export const URL_DERIVABLE_SITES = ["x", "youtube", "reddit", "instagram", "threads", "github", "amazon", "rottentomatoes"] as const;
+export const URL_DERIVABLE_SITES = ["x", "youtube", "reddit", "instagram", "threads", "github", "amazon", "rottentomatoes", "tmdb"] as const;
 
 function derived(target: TargetRef | null): DerivedTarget | null {
   return target ? { targetId: target.targetId, url: target.url } : null;
@@ -82,6 +83,10 @@ export function deriveTargetFromUrl(site: string, url: string): DerivedTarget | 
     case "rottentomatoes": {
       const ref = extractRottenTomatoesTitleRef(url);
       return derived(ref && rottentomatoesTargetFromRef(ref));
+    }
+    case "tmdb": {
+      const ref = extractTmdbTitleRef(url);
+      return derived(ref && tmdbTargetFromRef(ref));
     }
     case "amazon": {
       const path = amazonPathname(url);
