@@ -10,10 +10,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { userEvent } from "vitest/browser";
 import { accountLabel } from "../../shared/account-label";
 import { ACCOUNTS_SEEN_KEY } from "../../shared/account-names";
+import { AUTH_KEY } from "../../shared/auth-session";
 import { AGREE_CHECKBOX_SELECTOR, AUTH_ERROR_ID, AUTH_ERROR_SELECTOR, COUNTDOWN_SELECTOR, LAST_ACCOUNT_SELECTOR, MORE_PROVIDERS_SELECTOR, otherAccountSelector, PROVIDER_BUTTON_SELECTOR, PROVIDER_LIST_SELECTOR, providerButtonSelector, SPINNER_SELECTOR, TAGLINE_SELECTOR } from "../../shared/page-dom";
 import { TERMS_ACCEPTED_KEY, TERMS_REVISION } from "../../shared/terms-consent";
 import { requireEl } from "../../test/browser-harness";
-import { type ChromeShimHandle, installChromeShim } from "../../test/chrome-shim";
+import { type ChromeShimHandle, installChromeShim, makeLiveAuthSession } from "../../test/chrome-shim";
 
 // CONSENT_ONLY is read off location.search at import, so the consent test rewrites
 // the URL - restored unchanged between tests, because the runner's own query string
@@ -423,6 +424,46 @@ describe("auth page - the provider step", () => {
     await userEvent.click(retry);
     await reachProviders();
     expect(sentOfType("auth:providers")).toHaveLength(2);
+  });
+});
+
+// A sign-in the page did not perform still has to reach it. Two auth tabs are one
+// click each from running the whole provider flow twice for an account that is
+// already signed in, and the second tab has no way to know unless it watches.
+describe("auth page - a session it did not open", () => {
+  it("opens on the done step when a session already exists", async () => {
+    install();
+    shim.local.set(AUTH_KEY, makeLiveAuthSession());
+    await loadPage();
+
+    await vi.waitFor(() => expect(heading()).toBe("You're signed in"));
+    // Nothing to return to: this tab never held the reaction that opened a flow.
+    expect(document.querySelector(COUNTDOWN_SELECTOR)).toBeNull();
+    expect(document.querySelector(PROVIDER_LIST_SELECTOR)).toBeNull();
+  });
+
+  it("leaves the sign-in card when a session lands in another tab", async () => {
+    install();
+    await loadPage();
+    await reachProviders();
+
+    shim.emitChanged("local", { [AUTH_KEY]: { newValue: makeLiveAuthSession() } });
+
+    await vi.waitFor(() => expect(heading()).toBe("You're signed in"));
+    expect(document.querySelector(PROVIDER_LIST_SELECTOR)).toBeNull();
+    // The card is gone rather than disabled, so there is nothing left to click a
+    // second sign-in with.
+    expect(sentOfType("auth:signIn")).toHaveLength(0);
+  });
+
+  it("stays on the sign-in card when the key is cleared rather than written", async () => {
+    install();
+    await loadPage();
+    await reachProviders();
+
+    shim.emitChanged("local", { [AUTH_KEY]: { oldValue: makeLiveAuthSession() } });
+
+    expect(heading()).toBe("Sign in to react");
   });
 });
 

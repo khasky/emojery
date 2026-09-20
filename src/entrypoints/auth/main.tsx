@@ -5,6 +5,7 @@
 import { type ComponentChild, Fragment, render } from "preact";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import { lastAccountPerProvider, providerTag } from "../../shared/account-names";
+import { AUTH_KEY } from "../../shared/auth-session";
 import { type I18nKey, t } from "../../shared/i18n";
 import type { RuntimeResponse, SignInRefusal } from "../../shared/messages";
 import { type OidcProvider, providerAccountUrl, providerLabel, splitFeaturedProviders } from "../../shared/oidc-providers";
@@ -50,6 +51,26 @@ async function askSignIn(provider: OidcProvider, chooser: boolean): Promise<Sign
   return res?.type === "auth:signedIn" ? res : { type: "auth:signedIn", ok: false, refusal: "unavailable" };
 }
 
+// Whether a session already exists. An unreachable background answers "no", which
+// leaves the page on the sign-in card - the same place it would be without this call.
+async function askSignedIn(): Promise<boolean> {
+  const res = await sendRuntimeMessage({ type: "auth:status" }).catch(() => undefined);
+  return res?.type === "auth:status" && res.authed;
+}
+
+// The session is stored under one key, and every page that must notice a sign-in it
+// did not perform watches that key (shared/auth-session.ts). Presence is the whole
+// test: the record carries the bearer token and nothing here reads its value.
+function watchSignedIn(onSignedIn: () => void): () => void {
+  if (typeof chrome === "undefined" || !chrome.storage?.onChanged) return () => {};
+  const listener = (changes: Record<string, { newValue?: unknown }>, area: string): void => {
+    if (area !== "local") return;
+    if (changes[AUTH_KEY]?.newValue !== undefined) onSignedIn();
+  };
+  chrome.storage.onChanged.addListener(listener);
+  return () => chrome.storage.onChanged.removeListener(listener);
+}
+
 async function askProviders(): Promise<{ providers: OidcProvider[]; chooser: OidcProvider[] } | null> {
   const res = await sendRuntimeMessage({ type: "auth:providers" }).catch(() => undefined);
   return res?.type === "auth:providers" ? { providers: res.providers, chooser: res.chooser } : null;
@@ -89,9 +110,12 @@ const RETURN_DELAY_SECONDS = 10;
 /** The last step, on the same countdown either way: back to the page whose gate
  *  started the sign-in, or, when it started in the popup, just closed. A tab left
  *  behind on a finished sign-in is litter in both cases. */
-function DoneStep({ returnsToPage }: { returnsToPage: boolean }) {
+// `autoClose` is off for a session this tab did not open: the countdown ends by
+// closing the tab or returning to the page that asked for the sign-in, and a tab
+// that asked for neither is not this flow's to dispose of.
+function DoneStep({ returnsToPage, autoClose = true }: { returnsToPage: boolean; autoClose?: boolean }) {
   const [remaining, setRemaining] = useState(RETURN_DELAY_SECONDS);
-  const [counting, setCounting] = useState(true);
+  const [counting, setCounting] = useState(autoClose);
   const [returning, setReturning] = useState(returnsToPage);
   const backRef = useRef<HTMLButtonElement>(null);
   // A click landing on the same tick the countdown expires would otherwise ask
@@ -386,6 +410,9 @@ function App() {
   // reader who already opened the longer list should not have to open it again.
   const [showAll, setShowAll] = useState(false);
   const [returnsToPage, setReturnsToPage] = useState(false);
+  // Whether the session on screen is the one this tab opened. A tab that only
+  // watched it land shows the same copy and keeps itself open.
+  const [signedInHere, setSignedInHere] = useState(false);
 
   const loadProviders = useCallback(() => {
     setProviders(undefined);
@@ -422,6 +449,26 @@ function App() {
 
   // The tab title follows the step: a tab strip full of pages still says which one
   // is done.
+  // A tab that did not perform the sign-in still has to stop offering one: a second
+  // auth tab left open while the first signs in would otherwise keep a live-looking
+  // card, and clicking it runs the whole provider flow again for an account that is
+  // already signed in. Asked once on mount (the tab may have opened signed in) and
+  // watched after (the sign-in may land in another tab). `returnsToPage` stays false:
+  // this tab never held the reaction that opened the flow.
+  useEffect(() => {
+    let live = true;
+    void askSignedIn().then((authed) => {
+      if (live && authed) setStep("done");
+    });
+    const stop = watchSignedIn(() => {
+      if (live) setStep("done");
+    });
+    return () => {
+      live = false;
+      stop();
+    };
+  }, []);
+
   useEffect(() => {
     document.title = t(step === "done" ? "authDonePageTitle" : "authPageTitle");
   }, [step]);
@@ -434,6 +481,7 @@ function App() {
     const res = await askSignIn(provider, chooser);
     if (res.ok) {
       setReturnsToPage(res.returnsToPage === true);
+      setSignedInHere(true);
       setStep("done");
       return;
     }
@@ -441,7 +489,7 @@ function App() {
     setStep("provider");
   }, []);
 
-  if (step === "done") return <DoneStep returnsToPage={returnsToPage} />;
+  if (step === "done") return <DoneStep returnsToPage={returnsToPage} autoClose={signedInHere} />;
   if (step === "busy" && picked) return <BusyStep provider={picked} />;
   return <ProviderStep providers={providers} lastAccounts={lastAccounts} chooserProviders={chooserProviders} error={error} accepted={accepted} showAll={showAll} onPick={(provider, chooser) => void pick(provider, chooser)} onRetryProviders={loadProviders} onAccept={onAccept} setShowAll={setShowAll} />;
 }

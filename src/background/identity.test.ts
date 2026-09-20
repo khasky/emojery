@@ -221,6 +221,65 @@ describe("signInWithProvider", () => {
     expect(await signInWithProvider("google")).toEqual({ ok: false, refusal: "unavailable" });
     expect(await getAuth()).toBeNull();
   });
+
+  // Two auth tabs are one click each from asking for the same sign-in twice. The
+  // second ask would open its own provider window and, on a first sign-in, spend a
+  // second enrolment proof on a leaf it cannot write - the account key is shared, so
+  // the pair is already enrolled by the time it lands.
+  it("runs one flow when the same sign-in is asked for twice at once", async () => {
+    // The window is held open until both callers are in, so the second one asks while
+    // the first is genuinely still running rather than after it finished.
+    let release = (_: string) => {};
+    let opened = () => {};
+    const windowOpened = new Promise<void>((resolve) => {
+      opened = resolve;
+    });
+    const launch = stubIdentity(() => {
+      opened();
+      return new Promise<string>((resolve) => {
+        release = resolve;
+      });
+    });
+    stubFetchJson(200, SESSION_BODY);
+
+    const first = signInWithProvider("google");
+    await windowOpened;
+    const second = signInWithProvider("google");
+    release(`${REDIRECT}#code=one-time`);
+
+    expect(await first).toEqual({ ok: true });
+    expect(await second).toEqual({ ok: true });
+    expect(launch).toHaveBeenCalledTimes(1);
+  });
+
+  // The chooser carries an intent the plain sign-in does not: a provider holding a
+  // live session answers the plain one without a screen, so serving that answer to a
+  // reader who asked to pick would swallow the ask.
+  it("keeps a chooser request apart from a plain sign-in for the same provider", async () => {
+    const launch = stubIdentity(async () => `${REDIRECT}#code=one-time`);
+    stubFetchJson(200, SESSION_BODY);
+
+    await Promise.all([signInWithProvider("google"), signInWithProvider("google", true)]);
+
+    expect(launch).toHaveBeenCalledTimes(2);
+    const chooserFlags = launch.mock.calls.map(([d]) => new URL((d as { url: string }).url).searchParams.get("chooser"));
+    expect(chooserFlags).toHaveLength(2);
+    expect(chooserFlags).toContain("1");
+    expect(chooserFlags).toContain(null);
+  });
+
+  // A finished flow must not be handed to the next caller: the reader who signs out
+  // and back in is asking for a new session, not for the old answer.
+  it("starts a fresh flow once the previous one has finished", async () => {
+    const launch = stubIdentity(async () => `${REDIRECT}#code=one-time`);
+    stubFetchJson(200, SESSION_BODY);
+
+    await signInWithProvider("google");
+    await signInWithProvider("google");
+
+    expect(launch).toHaveBeenCalledTimes(2);
+  });
+
 });
 
 describe("listSignInProviders", () => {
