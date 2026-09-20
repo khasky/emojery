@@ -245,6 +245,29 @@ export const SUPPORTED_SITE_SCENARIOS: SiteScenarioSpec[] = [
     expectHiddenNativeOnReplace: false,
   },
   {
+    site: "imdb",
+    label: "IMDb movie page",
+    urlKey: "IMDB_MOVIE",
+    mountKeyPattern: "^imdb:tt\\d+$",
+    // The hero rating bar, by the testids that survive IMDb's per-build class
+    // names. Nothing here is hidden under replaceNative: the star is a 1-10
+    // rating, not a reaction the picker stands in for.
+    nativeSelectors: ['[data-testid="hero-rating-bar__aggregate-rating"]', '[data-testid="hero-rating-bar__user-rating"]', '[data-testid="hero-rating-bar__popularity"]'],
+    containerSelectors: ['[data-testid="hero-parent"]', "section.ipc-page-section", "main"],
+    maxHosts: 1,
+    expectHiddenNativeOnReplace: false,
+  },
+  {
+    site: "imdb",
+    label: "IMDb TV episode page",
+    urlKey: "IMDB_EPISODE",
+    mountKeyPattern: "^imdb:tt\\d+$",
+    nativeSelectors: ['[data-testid="hero-rating-bar__aggregate-rating"]', '[data-testid="hero-rating-bar__user-rating"]', '[data-testid="hero-rating-bar__popularity"]'],
+    containerSelectors: ['[data-testid="hero-parent"]', "section.ipc-page-section", "main"],
+    maxHosts: 1,
+    expectHiddenNativeOnReplace: false,
+  },
+  {
     site: "facebook",
     label: "Facebook public page feed",
     urlKey: "FACEBOOK_PAGE",

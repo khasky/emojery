@@ -83,6 +83,7 @@ describe("unauthenticated e2e scenarios cover every registered site", () => {
       amazon: "https://www.amazon.com/dp/B00ZV9RDKK",
       rottentomatoes: "https://www.rottentomatoes.com/m/the_odyssey_2026",
       tmdb: "https://www.themoviedb.org/movie/238-the-godfather",
+      imdb: "https://www.imdb.com/title/tt0903747/",
     };
     for (const site of URL_DERIVABLE_SITES) {
       const url = representativeUrl[site];

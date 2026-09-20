@@ -19,7 +19,7 @@ export type SiteId = SupportedSite;
 // check; "deep" sites additionally get the heavy-feed passes (deep = the bot-sensitive,
 // feed-heavy platforms; smoke = the stable ones).
 export const DEEP_SITES: readonly SiteId[] = ["facebook", "instagram", "reddit", "threads", "x"];
-export const SMOKE_SITES: readonly SiteId[] = ["youtube", "github", "gitlab", "amazon", "rottentomatoes", "tmdb"];
+export const SMOKE_SITES: readonly SiteId[] = ["youtube", "github", "gitlab", "amazon", "rottentomatoes", "tmdb", "imdb"];
 
 // NO live URLs in code: every fixture lives in `.env.e2e.example` (the
 // checked-in set) or a tester's `.env.e2e` / `.env.e2e.local` override. A

@@ -108,6 +108,9 @@ export const SUPPORTED_SITES = [
   // Same 301-to-`www` shape as Rotten Tomatoes above: the bare `themoviedb.org`
   // never stays in the address bar, so one run host covers the site.
   { site: "tmdb", label: "TMDB", hosts: ["www.themoviedb.org"], homeUrl: "https://www.themoviedb.org/" },
+  // `m.imdb.com` 301s to the `www` host on a desktop browser, so it is neither
+  // a run host nor a parse host.
+  { site: "imdb", label: "IMDb", hosts: ["www.imdb.com"], homeUrl: "https://www.imdb.com/" },
 ] as const satisfies readonly SiteDescriptorInput[];
 
 // DERIVED single source of truth for the site-id union - adding a row above adds

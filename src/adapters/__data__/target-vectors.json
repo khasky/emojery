@@ -95,6 +95,19 @@
       "url": "https://www.themoviedb.org/collection/531241-spider-man-mcu-collection",
       "targetId": "collection/531241",
       "noTargetUrls": ["https://www.themoviedb.org/list/1-the-marvel-universe"]
+    },
+    {
+      "site": "imdb",
+      "url": "https://www.imdb.com/title/tt33764258/",
+      "targetId": "tt33764258",
+      "variantUrls": ["https://www.imdb.com/title/tt33764258", "https://www.imdb.com/title/TT33764258/", "https://www.imdb.com/title/tt33764258/?ref_=fn_al_tt_1"],
+      "noTargetUrls": ["https://www.imdb.com/title/tt33764258/fullcredits/", "https://www.imdb.com/name/nm1297015/", "https://evil.example/title/tt33764258/"]
+    },
+    {
+      "site": "imdb",
+      "url": "https://www.imdb.com/title/tt0959621/",
+      "targetId": "tt0959621",
+      "noTargetUrls": ["https://www.imdb.com/title/tt0903747/episodes/", "https://www.imdb.com/list/ls000004717/"]
     }
   ],
   "notUrlDerivable": [{ "site": "gitlab", "why": "the canonical id is GitLab's numeric project id, read from the page" }, { "site": "facebook", "why": "photo and lazy-permalink identities are resolved from the DOM" }]

@@ -32,6 +32,7 @@ const scopes = [
   "gitlab",
   "history",
   "i18n",
+  "imdb",
   "instagram",
   "mount",
   "onboarding",
