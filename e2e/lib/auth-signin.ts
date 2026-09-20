@@ -160,15 +160,47 @@ export async function signInOnAuthPage(authPage: Page, opts: AuthSignInOptions):
   await expect(authPage.getByRole("heading", { name: localeMessage(locale, "authDoneTitle") }), "sign-in never completed in the gate's own auth tab").toBeVisible();
 }
 
+// The page a click opens, found by its URL rather than by being the next one.
+//
+// "The next page event" is not the same thing: a fresh profile fires
+// onInstalled("install"), the service worker opens onboarding.html into the spec's
+// tab set, and lib/browser-session.ts closes it again a moment later. The service
+// worker starts lazily - typically when the spec opens the popup - so that tab lands
+// somewhere inside the very window a spec waits in, and a wait for "the next page"
+// hands back a tab that is already closing. Matching the URL makes the race
+// irrelevant. Null when nothing matches within the timeout.
+//
+// A page is checked when it opens and again on every main-frame navigation, because
+// a tab is created before its URL commits. Only pages that open from here on count:
+// the caller registers before the click that opens the one it wants, and matching an
+// already-open tab would hand back whatever site page the spec left behind.
+export function pageMatching(context: BrowserContext, matches: (url: string) => boolean, timeoutMs = 30_000): Promise<Page | null> {
+  return new Promise((resolve) => {
+    let settled = false;
+    const done = (page: Page | null) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      context.off("page", watch);
+      resolve(page);
+    };
+    const timer = setTimeout(() => done(null), timeoutMs);
+    const watch = (page: Page) => {
+      if (matches(page.url())) return done(page);
+      page.on("framenavigated", (frame) => {
+        if (frame === page.mainFrame() && matches(frame.url())) done(page);
+      });
+    };
+    context.on("page", watch);
+  });
+}
+
 // The identity window is a browser window of its own (identity.launchWebAuthFlow),
-// which Playwright surfaces as the next page event on the context. Registered
-// BEFORE the click so a window that opens at once is not missed; null when none
-// opens within the timeout.
+// carrying the provider's authorize URL - the only page in this flow that is not an
+// extension page of ours. Registered BEFORE the click so a window that opens at once
+// is not missed; null when none opens within the timeout.
 export function identityWindowAfter(authPage: Page, open: () => Promise<void>): Promise<Page | null> {
-  const opened = authPage
-    .context()
-    .waitForEvent("page", { timeout: 30_000 })
-    .catch(() => null);
+  const opened = pageMatching(authPage.context(), (url) => url.startsWith("http"));
   return open().then(() => opened);
 }
 

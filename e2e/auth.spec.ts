@@ -3,7 +3,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
-import { identityWindowAfter, revealTestProvider, TEST_PROVIDER } from "./lib/auth-signin";
+import { identityWindowAfter, pageMatching, revealTestProvider, TEST_PROVIDER } from "./lib/auth-signin";
 import { authAccount, authConfigured, closeSession, completeSignIn, enMessage, extensionPageUrl, FIREFOX_NO_EXTENSION_PAGES, isFirefoxRun, launchSession, localeMessage, removeProfileUnlessKept, resolveExtensionId, resolveExtensionPath, signInSkipReason } from "./lib/extension";
 import { ACCOUNT_LIST_SELECTOR, ACCOUNT_NAME_SELECTOR, AGREE_CHECKBOX_SELECTOR, PROVIDER_BUTTON_SELECTOR, providerButtonSelector } from "./lib/selectors";
 
@@ -65,10 +65,15 @@ test.describe("extension account auth", () => {
     await popup.getByRole("tab", { name: enMessage("tabAccount") }).click();
     await expect(popup.getByText(enMessage("signInMsgAccount"))).toBeVisible();
 
-    const authPagePromise = context.waitForEvent("page");
+    // By URL, not by "the next page to open": a fresh profile's service worker opens
+    // onboarding.html on install and the harness closes it again, and that tab lands
+    // inside this very window often enough to have been a 60% failure.
+    const authUrl = extensionPageUrl(extensionId, "auth.html");
+    const authPagePromise = pageMatching(context, (url) => url.startsWith(authUrl));
     await popup.getByRole("button", { name: enMessage("signInBtn") }).click();
     const authPage = await authPagePromise;
-    await authPage.waitForURL(extensionPageUrl(extensionId, "auth.html"));
+    expect(authPage, "the sign-in button should open the extension's auth page").not.toBeNull();
+    if (!authPage) return;
 
     // The provider list is the API's: the staging build lists the test provider
     // beside the real ones, and every button waits for the consent box.
