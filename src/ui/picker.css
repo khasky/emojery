@@ -26,6 +26,10 @@
   --khasky-emojery-font-max: 18px;
   font-size: clamp(var(--khasky-emojery-font-min), var(--khasky-emojery-page-font, 1em), var(--khasky-emojery-font-max));
   line-height: 1.4;
+  /* UA widgets inside the shadow tree - the search field's cancel cross, scrollbars - follow
+     the inherited color-scheme, which without this line is the page's. A light picker on a
+     dark page then paints a white cross on the light search row. */
+  color-scheme: light;
 
   /* Light palette (default - overrides via [data-theme="dark"] below) */
   --khasky-emojery-bg: #fff;
@@ -62,6 +66,7 @@
 }
 
 :host([data-theme="dark"]) {
+  color-scheme: dark;
   --khasky-emojery-bg: #242526;
   --khasky-emojery-fg: #e4e6eb;
   --khasky-emojery-muted: #b0b3b8;
