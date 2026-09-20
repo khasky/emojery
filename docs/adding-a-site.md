@@ -43,15 +43,18 @@ The full scope before the prose: steps 1–2 decide what to build and step 10 ru
 | --- | --- | --- |
 | [3](#3-register-the-site-single-source-of-truth) | `src/shared/sites.ts` — the registry row | — (the source everything below derives from) |
 | [3](#3-register-the-site-single-source-of-truth) | `src/ui/brand-icons.ts` — the brand glyph | `pnpm compile` (total `Record<SupportedSite, ...>`) |
+| [3](#3-register-the-site-single-source-of-truth) | `src/shared/sites.test.ts` — the site's patterns in the literal manifest list | `pnpm test` (the list is written out, never re-derived) |
 | [4](#4-write-the-adapter-with-definesiteadapter) | `src/adapters/<site>.ts` — the adapter | — (the work itself) |
 | [4](#4-write-the-adapter-with-definesiteadapter) | `src/adapters/page-visibility.ts` — a detector for the site's private pages, wired as the adapter's `isPrivatePage` — **only when the site has private content** | nothing — the trigger then mounts on pages an anonymous visitor can't read (see [Design invariants](#design-invariants)) |
 | [5](#5-the-canonical-id-is-a-wire-contract) | `src/adapters/target-contract.ts` — a `URL_DERIVABLE_SITES` entry + a `deriveTargetFromUrl` case (URL-derivable sites only) | `pnpm test` (`lockstep.test.ts`) |
 | [5](#5-the-canonical-id-is-a-wire-contract) | a row in `src/adapters/__data__/target-vectors.json` (or a `notUrlDerivable` entry) | `pnpm test` (`lockstep.test.ts` coverage guard) |
 | [6](#6-add-the-content-entrypoint) | `src/entrypoints/<site>.content.ts` | `pnpm test` (`content-matches.test.ts`) |
 | [7](#7-add-the-supported-sites-row-to-the-readme) | the Supported-sites table row in `README.md` | `pnpm test` (row-count guard) |
+| [7](#7-add-the-supported-sites-row-to-the-readme) | the host enumerations in `docs/store-listing-copy.md` | nothing — a listing whose permission justification names every host but the new one is a review question |
 | [8](#8-adapter-unit-tests-required) | `src/adapters/<site>.test.ts` | — (no gate catches a missing adapter test; it is a review requirement) |
 | [9](#9-add-an-e2e-scenario) | `e2e/supported-sites.ts` + `E2E_URL_*` in `.env.e2e.example` | `pnpm test` (`e2e-site-coverage.test.ts`) |
-| [9](#9-add-an-e2e-scenario) | the DEEP/SMOKE tier + URLs in `e2e/site-auth/scenarios.ts` | `pnpm test` (`e2e-site-coverage.test.ts`) |
+| [9](#9-add-an-e2e-scenario) | the DEEP/SMOKE tier in `e2e/site-auth/scenarios.ts`, plus `E2E_AUTHURL_<SITE>` / `E2E_AUTHURL_<SITE>_DETAIL` in `.env.e2e.example` | `pnpm test` (`e2e-site-coverage.test.ts`) for the tier; the 2 env keys fail only once a bridge run reaches them |
+| [9](#9-add-an-e2e-scenario) | `src/shared/e2e-site-coverage.test.ts` — a representative URL for a URL-derivable site | `pnpm test` (the `mountKeyPattern` guard has no URL to build a key from) |
 | [9](#9-add-an-e2e-scenario) | `e2e/private-pages.spec.ts` — a live probe for the detector above — same condition as its row | nothing — the detector then ships with no live check |
 | [10](#10-run-the-gates-must-be-green) | `commitlint.config.js` — the site id as a commit scope | nothing — commitlint warns on an unlisted scope and lets the commit through ([CONTRIBUTING](../CONTRIBUTING.md)) |
 | [11](#11-manual-smoke-on-the-live-site--against-the-staging-api) | — (the staging round-trip) | nothing — manual; note the result in the PR |
@@ -96,6 +99,8 @@ Choose a lowercase `site` id (e.g. `"mastodon"`), a brand `label` (e.g. `"Mastod
 Add one row (`site`, `label`, `hosts`, `homeUrl`, optional `urlHosts` / `hostRegex` / `resolveHomeUrl`) to `SUPPORTED_SITES` in `src/shared/sites.ts`. `resolveHomeUrl` overrides the popup's per-site home link when one global `homeUrl` isn't enough (see Amazon's regional storefronts).
 
 That row automatically updates everything derived from it: the `SupportedSite` union, `ALL_SITES`, `SITE_LABELS`, `DEFAULT_SITE_TOGGLES`, `ALL_SITE_MATCH_PATTERNS`, the popup toggle, the manifest host permissions, and storage defaults.
+
+One expectation is written out rather than derived, and so has to be extended by hand: `src/shared/sites.test.ts` holds the manifest `content_scripts` pattern list as a literal, so a host-derivation regression fails there instead of co-mutating the expectation. Add the new site's `https://<host>/*` patterns to it, in registry order.
 
 Then add the site's **brand glyph** to `SITE_BRAND` in `src/ui/brand-icons.ts` — the mark shown beside the toggle in the popup's per-site list. It's a total `Record<SupportedSite, ...>`, so until you add it `pnpm compile` fails with `Property '<site>' is missing ... but required in type 'Record<...>'`. Take the 24×24 `path` from the site's [simple-icons](https://simpleicons.org/) glyph (CC0) and its brand `color`, or `"currentColor"` for a mark that is inherently monochrome.
 
@@ -154,6 +159,8 @@ A typical social site is mostly configuration: a label registry + an action-row 
 - Other DOM helpers: `runtime.ts` — `closestAny`, `directChildSlot`, `compactElements`, `orderModalFirst`, `precedes`, `textOf`/`collapseWhitespace`, `safeMatches`/`matchesAny`.
 - Placement strategies: `placement.ts` — `findFirstAnchor` (the single page-level anchor from a prioritized fallback chain, as in `github.ts`/`gitlab.ts`/`amazon.ts`/`youtube.ts`) and `findSiblingAction`/`slotAction`. A strategy used by exactly one site lives in that adapter instead, next to its caller (`closestWithin` in `gitlab.ts`, `findListItemWithin`/`isListItemWithin` in `github.ts`, `resolveSegmentedGroup` in `youtube.ts`). A row that needs the host wrapped to hold the row's layout declares that as the adapter's own `wrapper` on the `PickerInsertionPoint` (see `x.ts`'s grow-slot wrapper), not through a shared helper. Path parsing: `url-target.ts` `pathSegments`.
 - Visual geometry: `visual-action-row.ts` — `findVisualActionSlot`, `isRenderableInPageLayout`, `hasRenderableBox`, `isStructuralRoot`.
+
+**An anchor may live inside another element's open shadow root.** A site that renders its action surface in a web component (Reddit's post shell, Rotten Tomatoes' score card) is reached with `queryAllDeep` or a direct `element.shadowRoot` query, and `mount.ts` inserts there like anywhere else. Two things change. The trigger's style blending reads the page through `anchor.parentElement`, and that chain stops at the shadow root: light-DOM controls the component only slots in are invisible to it, so such a site blends on its typography and the surface behind it rather than on a neighbouring button's shape. And a document `MutationObserver` sees nothing inside that root — including the moment the element upgrades and attaches it. When the shadow content is built once and then static, the cheap signal is an attribute the upgrade itself flips on the light-DOM host (`skeleton` on Rotten Tomatoes' card), named in the observer's `attributeFilter`; a root that keeps mutating wants the `shadowRootDiscovery` plugin below instead.
 
 Pipeline rules the framework enforces for you: target dedupe by `targetId`, optional container dedupe (`dedupeContainer`), dropping candidates with no row/target/binding, and the observer. The expensive per-candidate lookup (the action row, usually) goes in `resolveRow`: it runs once per candidate per scan and its result reaches `dedupeContainer` / `resolveTarget` / `resolveBinding` as their third argument, so none of them repeats or null-checks it. `ctx.memo(key, () => ...)` is for a value the whole scan shares, keyed on `ctx.root` (a parse of the page URL, as in `x.ts` / `threads.ts`); it caches `null` results too.
 
@@ -216,6 +223,8 @@ Create `src/entrypoints/<site>.content.ts` with `matches: matchPatternsForSite("
 
 Add a row to the Supported sites table in `README.md`. The drift suite (`src/shared/content-matches.test.ts`) checks the table has exactly one row per registered site, so a forgotten row fails `pnpm test`.
 
+Then extend the host enumerations in `docs/store-listing-copy.md` — the store permission justification and the reviewer/FAQ answers name the supported hosts one by one, and the build carrying the new adapter requests a host permission that text has to account for. Nothing guards it.
+
 ## 8. Adapter unit tests (required)
 
 Add `src/adapters/<site>.test.ts`. Unit-test the adapter's **pure, extension-owned logic** with plain strings — never by building the site's DOM and calling `scan()`, per [where a test belongs](../CONTRIBUTING.md#where-a-test-belongs). Model it on `src/adapters/x.test.ts`:
@@ -252,7 +261,9 @@ The unauthenticated e2e suite (`e2e/site-injection.spec.ts`) is what keeps provi
 
 1. Pick stable public URLs (long-lived posts/videos/products unlikely to be deleted) and add them to `.env.e2e.example` as `E2E_URL_<SITE>` / `E2E_URL_<SITE>_<VARIANT>` entries.
 2. Add one scenario per URL to `SUPPORTED_SITE_SCENARIOS` in **`e2e/supported-sites.ts`** (data only — the spec that drives them stays in `site-injection.spec.ts`), modeled on an existing entry: `site`, a human-readable `label`, `urlKey: "<SITE>"` (the `E2E_URL_` suffix, resolved at run time), `mountKeyPattern` (a regex the mounted `data-khasky-emojery-mounted` key must match, e.g. `"^x:\\d+$"`), `nativeSelectors` (the site's own action controls the trigger must sit near), and `containerSelectors` (the per-item container). Add `scrollSteps` / `settleMs` when the target only appears after scrolling or the page is slow to settle.
-3. Put the site in `DEEP_SITES` or `SMOKE_SITES` in `e2e/site-auth/scenarios.ts` and give it feed + content URLs there (deep = the feed-heavy, bot-sensitive platforms).
+   A site whose action surface carries no native control to stand in for (Amazon, Rotten Tomatoes) adds `expectHiddenNativeOnReplace: false`: the replace-native case asserts something was hidden, and with nothing to hide it fails on a correct mount.
+3. Put the site in `DEEP_SITES` or `SMOKE_SITES` in `e2e/site-auth/scenarios.ts` (deep = the feed-heavy, bot-sensitive platforms) and give it `E2E_AUTHURL_<SITE>` (the logged-in feed/surface) and `E2E_AUTHURL_<SITE>_DETAIL` (one stable permalink, read back after a reload) in `.env.e2e.example`. The tier is guarded; those 2 keys are not, and a missing one fails with its own name once a bridge run reaches it.
+4. For a URL-derivable site, add a representative URL to the `representativeUrl` map in `src/shared/e2e-site-coverage.test.ts`. That guard builds a real key from it and asserts **every** one of the site's `mountKeyPattern` literals accepts it — so a site with 2 surfaces under different id prefixes needs one pattern that covers both, not a narrower pattern per scenario.
 
 `src/shared/e2e-site-coverage.test.ts` fails `pnpm test` for a registered site with no scenario, and for one missing from both site-auth tiers — so a site can't ship with zero live coverage.
 
