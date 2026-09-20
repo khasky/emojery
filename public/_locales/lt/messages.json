@@ -613,8 +613,8 @@
   "coachBody": {
     "message": "Vienu spustelėjimu pamatysite bendruomenės reakcijas ir pasirinksite savo iš neribotos jaustukų paletės."
   },
-  "coachDismissAria": {
-    "message": "Uždaryti"
+  "coachGotItBtn": {
+    "message": "Supratau"
   },
   "onboardingStepInstallTitle": {
     "message": "Įdiegti Emojery"

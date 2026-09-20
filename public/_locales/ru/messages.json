@@ -613,8 +613,8 @@
   "coachBody": {
     "message": "Всего один клик, чтобы посмотреть реакции сообщества и выбрать свою из неограниченной палитры эмодзи."
   },
-  "coachDismissAria": {
-    "message": "Скрыть"
+  "coachGotItBtn": {
+    "message": "Понятно"
   },
   "onboardingStepInstallTitle": {
     "message": "Установить Emojery"

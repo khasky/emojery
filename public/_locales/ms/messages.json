@@ -613,8 +613,8 @@
   "coachBody": {
     "message": "Satu klik untuk melihat reaksi komuniti dan memilih reaksi anda daripada palet emoji tanpa had."
   },
-  "coachDismissAria": {
-    "message": "Tutup"
+  "coachGotItBtn": {
+    "message": "Faham"
   },
   "onboardingStepInstallTitle": {
     "message": "Pasang Emojery"

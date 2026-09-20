@@ -613,8 +613,8 @@
   "coachBody": {
     "message": "ワンクリックでみんなのリアクションを見て、無制限の絵文字パレットから自分のリアクションを選べます。"
   },
-  "coachDismissAria": {
-    "message": "閉じる"
+  "coachGotItBtn": {
+    "message": "わかりました"
   },
   "onboardingStepInstallTitle": {
     "message": "Emojery をインストール"

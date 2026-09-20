@@ -613,8 +613,8 @@
   "coachBody": {
     "message": "Un clic per vedere le reazioni della community e scegliere la tua da una tavolozza di emoji illimitata."
   },
-  "coachDismissAria": {
-    "message": "Chiudi"
+  "coachGotItBtn": {
+    "message": "Ho capito"
   },
   "onboardingStepInstallTitle": {
     "message": "Installare Emojery"

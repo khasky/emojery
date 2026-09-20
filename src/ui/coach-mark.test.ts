@@ -4,7 +4,7 @@
 // and every dismissal path tearing the tooltip and the pulse attribute down.
 // The host/trigger here are Emojery's OWN shadow DOM, not a supported site's.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { COACH_ATTR, COACH_TIP_CLASS, TRIGGER_CLASS } from "../shared/dom";
+import { COACH_ATTR, COACH_BTN_CLASS, COACH_TIP_CLASS, TRIGGER_CLASS } from "../shared/dom";
 import { claimCoachMark } from "../shared/onboarding";
 import { type ChromeShimHandle, installChromeShim } from "../test/chrome-shim";
 
@@ -104,6 +104,20 @@ describe("maybeShowCoachMark", () => {
     await showMark();
 
     host.dispatchEvent(new Event("pointerdown"));
+
+    expect(tip()).toBeNull();
+    expect(host.hasAttribute(COACH_ATTR)).toBe(false);
+  });
+
+  // The tooltip's only on-screen dismissal. Its label is asserted too: a lost
+  // i18n key renders the bare key name, which still dismisses and still reads
+  // as broken.
+  it("the Got it button dismisses", async () => {
+    await showMark();
+    const btn = tip()?.querySelector<HTMLButtonElement>(`.${COACH_BTN_CLASS}`);
+
+    expect(btn?.textContent).toBe("Got it");
+    btn?.click();
 
     expect(tip()).toBeNull();
     expect(host.hasAttribute(COACH_ATTR)).toBe(false);

@@ -613,8 +613,8 @@
   "coachBody": {
     "message": "Лише один клік, щоб побачити реакції спільноти й обрати свою з необмеженої палітри емодзі."
   },
-  "coachDismissAria": {
-    "message": "Приховати"
+  "coachGotItBtn": {
+    "message": "Зрозуміло"
   },
   "onboardingStepInstallTitle": {
     "message": "Встановити Emojery"

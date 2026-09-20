@@ -7,7 +7,7 @@
 // tight: one shot, quiet animation (none under reduced-motion),
 // and it yields to a click, Escape, a scroll, or a timeout.
 
-import { COACH_ATTR, COACH_BODY_CLASS, COACH_CLOSE_CLASS, COACH_TIP_CLASS, COACH_TITLE_CLASS, COUNTER_CLASS, TRIGGER_CLASS } from "../shared/dom";
+import { COACH_ATTR, COACH_BODY_CLASS, COACH_BTN_CLASS, COACH_TIP_CLASS, COACH_TITLE_CLASS, COUNTER_CLASS, TRIGGER_CLASS } from "../shared/dom";
 import { t } from "../shared/i18n";
 import { claimCoachMark } from "../shared/onboarding";
 import { whenVisible } from "../shared/visibility";
@@ -111,23 +111,23 @@ function showCoachMark(host: HTMLElement, trigger: HTMLElement): void {
 }
 
 // role="status" (polite announcement), not a dialog: nothing is trapped and the
-// page keeps keyboard focus.
+// page keeps keyboard focus. The dismissal sits under the text as a labelled
+// button, so the tooltip is read first and acknowledged second.
 function buildTip(): HTMLElement {
   const tip = document.createElement("div");
   tip.className = COACH_TIP_CLASS;
   tip.setAttribute("role", "status");
-  const close = document.createElement("button");
-  close.type = "button";
-  close.className = COACH_CLOSE_CLASS;
-  close.setAttribute("aria-label", t("coachDismissAria"));
-  close.textContent = "✕";
   const title = document.createElement("p");
   title.className = COACH_TITLE_CLASS;
   title.textContent = t("coachTitle");
   const body = document.createElement("p");
   body.className = COACH_BODY_CLASS;
   body.textContent = t("coachBody");
-  tip.append(close, title, body);
+  const dismiss = document.createElement("button");
+  dismiss.type = "button";
+  dismiss.className = COACH_BTN_CLASS;
+  dismiss.textContent = t("coachGotItBtn");
+  tip.append(title, body, dismiss);
   return tip;
 }
 

@@ -613,8 +613,8 @@
   "coachBody": {
     "message": "Một cú nhấp để xem cảm xúc của cộng đồng và chọn cảm xúc của bạn từ bảng emoji không giới hạn."
   },
-  "coachDismissAria": {
-    "message": "Đóng"
+  "coachGotItBtn": {
+    "message": "Đã hiểu"
   },
   "onboardingStepInstallTitle": {
     "message": "Cài đặt Emojery"

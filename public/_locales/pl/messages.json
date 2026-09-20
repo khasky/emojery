@@ -613,8 +613,8 @@
   "coachBody": {
     "message": "Jedno kliknięcie, aby zobaczyć reakcje społeczności i wybrać własną z nieograniczonej palety emoji."
   },
-  "coachDismissAria": {
-    "message": "Zamknij"
+  "coachGotItBtn": {
+    "message": "Rozumiem"
   },
   "onboardingStepInstallTitle": {
     "message": "Zainstaluj Emojery"

@@ -613,8 +613,8 @@
   "coachBody": {
     "message": "คลิกเดียวเพื่อดูความรู้สึกจากคอมมูนิตี้ และเลือกความรู้สึกของคุณเองจากชุดอิโมจิไม่จำกัด"
   },
-  "coachDismissAria": {
-    "message": "ปิด"
+  "coachGotItBtn": {
+    "message": "เข้าใจแล้ว"
   },
   "onboardingStepInstallTitle": {
     "message": "ติดตั้ง Emojery"

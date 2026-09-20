@@ -613,8 +613,8 @@
   "coachBody": {
     "message": "এক ক্লিকেই কমিউনিটির প্রতিক্রিয়া দেখুন এবং সীমাহীন ইমোজি প্যালেট থেকে নিজের প্রতিক্রিয়া বেছে নিন।"
   },
-  "coachDismissAria": {
-    "message": "বন্ধ করুন"
+  "coachGotItBtn": {
+    "message": "বুঝেছি"
   },
   "onboardingStepInstallTitle": {
     "message": "Emojery ইনস্টল করুন"

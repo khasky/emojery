@@ -613,8 +613,8 @@
   "coachBody": {
     "message": "Eén klik om de reacties van de community te zien en je eigen reactie uit een onbeperkt emoji-palet te kiezen."
   },
-  "coachDismissAria": {
-    "message": "Sluiten"
+  "coachGotItBtn": {
+    "message": "Begrepen"
   },
   "onboardingStepInstallTitle": {
     "message": "Emojery installeren"

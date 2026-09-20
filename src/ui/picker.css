@@ -748,20 +748,45 @@
 }
 
 /* Lives in the overlay root's shadow (same sheet as the popover), positioned
-   by coach-mark.ts. Fixed px font: no page font is stamped here. */
+   by coach-mark.ts. Fixed px font: no page font is stamped here.
+
+   `border: 0` is load-bearing: the frame is the gradient band ::before paints,
+   and a border under it shows through the mask's transparent corners. */
 .khasky-emojery-coach-tip {
   position: fixed;
   background: var(--khasky-emojery-bg);
   color: var(--khasky-emojery-fg);
-  border: 1px solid var(--khasky-emojery-accent);
+  border: 0;
   border-radius: 10px;
   box-shadow: var(--khasky-emojery-shadow);
-  padding: 10px 32px 10px 14px;
+  padding: 12px 15px;
   font: inherit;
   font-size: 14px;
   line-height: 1.4;
   z-index: 2147483646;
   box-sizing: border-box;
+}
+
+/* The trigger's RGB ring flattened into a 2px frame: same stops, same
+   content-box mask as .khasky-emojery-ring, so the tooltip carries the colours
+   of the button it points at. Static - the spin stays on the trigger, where it
+   is time-boxed (ring-spin.ts). */
+.khasky-emojery-coach-tip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  pointer-events: none;
+  background: conic-gradient(var(--khasky-emojery-ring-stops));
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
 }
 
 .khasky-emojery-coach-title {
@@ -774,27 +799,32 @@
   color: var(--khasky-emojery-muted);
 }
 
-.khasky-emojery-coach-close {
-  position: absolute;
-  top: 4px;
-  right: 4px;
+/* Hugs its label: the gate's full-width button ends a flow, this one only
+   acknowledges a hint. Same fixed blue as the gate and the extension pages -
+   white 13px text needs 4.5:1, which the brand #1877f2 misses
+   (styles/tokens.css). */
+.khasky-emojery-coach-btn {
+  display: block;
+  margin-top: 10px;
   border: 0;
-  background: none;
-  color: var(--khasky-emojery-muted);
+  background: #1670e8;
+  color: #fff;
   font: inherit;
   font-size: 13px;
-  line-height: 1;
-  padding: 4px;
+  font-weight: 600;
+  line-height: 1.4;
+  padding: 5px 12px;
   border-radius: 6px;
   cursor: pointer;
 }
 
-.khasky-emojery-coach-close:hover {
-  background: var(--khasky-emojery-hover);
+.khasky-emojery-coach-btn:hover {
+  background: #1665d8;
 }
 
-.khasky-emojery-coach-close:focus-visible {
+.khasky-emojery-coach-btn:focus-visible {
   outline: var(--khasky-emojery-focus-ring);
+  outline-offset: 2px;
 }
 
 /* Sign-in gate (popover content after a signed-out pick) */

@@ -613,8 +613,8 @@
   "coachBody": {
     "message": "Üks klõps, et näha kogukonna reaktsioone ja valida oma piiramatust emojipaletist."
   },
-  "coachDismissAria": {
-    "message": "Sulge"
+  "coachGotItBtn": {
+    "message": "Selge"
   },
   "onboardingStepInstallTitle": {
     "message": "Paigalda Emojery"

@@ -613,8 +613,8 @@
   "coachBody": {
     "message": "Egy kattintás, és látod a közösség reakcióit, a sajátodat pedig korlátlan emoji-palettáról választhatod."
   },
-  "coachDismissAria": {
-    "message": "Bezárás"
+  "coachGotItBtn": {
+    "message": "Értem"
   },
   "onboardingStepInstallTitle": {
     "message": "Emojery telepítése"

@@ -777,9 +777,9 @@
     "message": "One click to see the community's reactions and pick yours from an unlimited emoji palette.",
     "description": "Body of the one-time tooltip."
   },
-  "coachDismissAria": {
-    "message": "Dismiss",
-    "description": "Accessible label of the tooltip's close button."
+  "coachGotItBtn": {
+    "message": "Got it",
+    "description": "Button under the one-time tooltip's text; dismisses the tooltip."
   },
   "onboardingStepInstallTitle": {
     "message": "Install Emojery",

@@ -111,7 +111,7 @@ export const SPRITE_ROWS_VAR = `--${NS}-sprite-rows`;
 // --- The one-time coach mark (coach-mark.ts) ---
 
 export const COACH_TIP_CLASS = `${NS}-coach-tip`;
-export const COACH_CLOSE_CLASS = `${NS}-coach-close`;
+export const COACH_BTN_CLASS = `${NS}-coach-btn`;
 export const COACH_TITLE_CLASS = `${NS}-coach-title`;
 export const COACH_BODY_CLASS = `${NS}-coach-body`;
 

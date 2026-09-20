@@ -613,8 +613,8 @@
   "coachBody": {
     "message": "一次点击，即可查看社区的反应，并从无限表情面板中选出你的反应。"
   },
-  "coachDismissAria": {
-    "message": "关闭"
+  "coachGotItBtn": {
+    "message": "知道了"
   },
   "onboardingStepInstallTitle": {
     "message": "安装 Emojery"

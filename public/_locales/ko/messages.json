@@ -613,8 +613,8 @@
   "coachBody": {
     "message": "클릭 한 번으로 커뮤니티의 반응을 보고 무제한 이모지 팔레트에서 내 반응을 고르세요."
   },
-  "coachDismissAria": {
-    "message": "닫기"
+  "coachGotItBtn": {
+    "message": "확인"
   },
   "onboardingStepInstallTitle": {
     "message": "Emojery 설치"

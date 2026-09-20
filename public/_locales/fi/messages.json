@@ -613,8 +613,8 @@
   "coachBody": {
     "message": "Yhdellä napsautuksella näet yhteisön reaktiot ja valitset omasi rajattomasta emojipaletista."
   },
-  "coachDismissAria": {
-    "message": "Sulje"
+  "coachGotItBtn": {
+    "message": "Selvä"
   },
   "onboardingStepInstallTitle": {
     "message": "Asenna Emojery"
