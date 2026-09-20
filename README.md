@@ -202,6 +202,7 @@ Curious what's next? Check the [roadmap](https://emojery.app/roadmap?utm_source=
 | [X](https://emojery.app/x-reactions?utm_source=github&utm_medium=readme&utm_campaign=emojery&utm_content=supported_sites) | Posts · Photos |
 | [Threads](https://emojery.app/threads-reactions?utm_source=github&utm_medium=readme&utm_campaign=emojery&utm_content=supported_sites) | Posts |
 | [Amazon](https://emojery.app/amazon-reactions?utm_source=github&utm_medium=readme&utm_campaign=emojery&utm_content=supported_sites) | Products |
+| [Rotten Tomatoes](https://emojery.app/rottentomatoes-reactions?utm_source=github&utm_medium=readme&utm_campaign=emojery&utm_content=supported_sites) | Movies · TV shows · Seasons · Episodes |
 
 [250+ more sites on the roadmap](https://emojery.app/roadmap?utm_source=github&utm_medium=readme&utm_campaign=emojery&utm_content=supported_sites).
 

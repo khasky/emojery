@@ -187,6 +187,31 @@ export const SUPPORTED_SITE_SCENARIOS: SiteScenarioSpec[] = [
     expectHiddenNativeOnReplace: false,
   },
   {
+    site: "rottentomatoes",
+    label: "Rotten Tomatoes movie page",
+    urlKey: "ROTTENTOMATOES_MOVIE",
+    mountKeyPattern: "^rottentomatoes:(?:m|tv)/",
+    // Rotten Tomatoes has no native reaction control, so the Tomatometer /
+    // Popcornmeter surface is what the trigger is placed against. These are the
+    // card's light-DOM slotted nodes, not its shadow tree.
+    nativeSelectors: ['media-scorecard [slot="critics-score"]', 'media-scorecard [slot="audience-score"]', 'media-scorecard [slot="critics-score-type"]', 'media-scorecard [slot="audience-score-type"]', "media-scorecard"],
+    containerSelectors: ["media-scorecard", "div.media-scorecard", "#main-page-content"],
+    maxHosts: 1,
+    // With no native control to stand in for, "Hide original buttons" has
+    // nothing to hide on this site.
+    expectHiddenNativeOnReplace: false,
+  },
+  {
+    site: "rottentomatoes",
+    label: "Rotten Tomatoes TV season page",
+    urlKey: "ROTTENTOMATOES_TV",
+    mountKeyPattern: "^rottentomatoes:(?:m|tv)/",
+    nativeSelectors: ['media-scorecard [slot="critics-score"]', 'media-scorecard [slot="audience-score"]', 'media-scorecard [slot="critics-score-type"]', 'media-scorecard [slot="audience-score-type"]', "media-scorecard"],
+    containerSelectors: ["media-scorecard", "div.media-scorecard", "#main-page-content"],
+    maxHosts: 1,
+    expectHiddenNativeOnReplace: false,
+  },
+  {
     site: "facebook",
     label: "Facebook public page feed",
     urlKey: "FACEBOOK_PAGE",

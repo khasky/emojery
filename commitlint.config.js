@@ -41,6 +41,7 @@ const scopes = [
   "readme",
   "reddit",
   "release",
+  "rottentomatoes",
   "scripts",
   "security",
   "settings",

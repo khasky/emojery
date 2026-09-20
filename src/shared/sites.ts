@@ -102,6 +102,9 @@ export const SUPPORTED_SITES = [
     // `a.amazon.evil.com` never matches. Runtime-only - not in the manifest.
     hostRegex: /(?:^|\.)amazon\.[a-z]{2,3}(?:\.[a-z]{2,3})?$/,
   },
+  // The bare `rottentomatoes.com` is a 301 to the `www` host and never stays in
+  // the address bar, so it is neither a run host nor a parse host.
+  { site: "rottentomatoes", label: "Rotten Tomatoes", hosts: ["www.rottentomatoes.com"], homeUrl: "https://www.rottentomatoes.com/" },
 ] as const satisfies readonly SiteDescriptorInput[];
 
 // DERIVED single source of truth for the site-id union - adding a row above adds

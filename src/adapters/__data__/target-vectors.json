@@ -51,6 +51,31 @@
       "targetId": "B00ZV9RDKK",
       "variantUrls": ["https://www.amazon.co.uk/gp/product/B00ZV9RDKK"],
       "noTargetUrls": ["https://evil.example/dp/B00ZV9RDKK"]
+    },
+    {
+      "site": "rottentomatoes",
+      "url": "https://www.rottentomatoes.com/m/the_odyssey_2026",
+      "targetId": "m/the_odyssey_2026",
+      "variantUrls": ["https://www.rottentomatoes.com/m/The_Odyssey_2026", "https://www.rottentomatoes.com/m/the_odyssey_2026/", "https://www.rottentomatoes.com/m/the_odyssey_2026?cmp=RT_Home"],
+      "noTargetUrls": ["https://www.rottentomatoes.com/m/the_odyssey_2026/reviews", "https://www.rottentomatoes.com/browse/movies_at_home", "https://evil.example/m/the_odyssey_2026"]
+    },
+    {
+      "site": "rottentomatoes",
+      "url": "https://www.rottentomatoes.com/tv/trespasses",
+      "targetId": "tv/trespasses",
+      "noTargetUrls": ["https://www.rottentomatoes.com/celebrity/tom_holland"]
+    },
+    {
+      "site": "rottentomatoes",
+      "url": "https://www.rottentomatoes.com/tv/trespasses/s01",
+      "targetId": "tv/trespasses/s01",
+      "variantUrls": ["https://www.rottentomatoes.com/tv/Trespasses/S01", "https://www.rottentomatoes.com/tv/trespasses/s01/"],
+      "noTargetUrls": ["https://www.rottentomatoes.com/tv/trespasses/s01/cast-and-crew"]
+    },
+    {
+      "site": "rottentomatoes",
+      "url": "https://www.rottentomatoes.com/tv/trespasses/s01/e02",
+      "targetId": "tv/trespasses/s01/e02"
     }
   ],
   "notUrlDerivable": [{ "site": "gitlab", "why": "the canonical id is GitLab's numeric project id, read from the page" }, { "site": "facebook", "why": "photo and lazy-permalink identities are resolved from the DOM" }]

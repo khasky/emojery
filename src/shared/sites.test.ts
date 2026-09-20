@@ -124,6 +124,7 @@ describe("matchPatternsForSite", () => {
       "https://www.amazon.in/*",
       "https://www.amazon.com.br/*",
       "https://www.amazon.com.mx/*",
+      "https://www.rottentomatoes.com/*",
     ]);
   });
 });

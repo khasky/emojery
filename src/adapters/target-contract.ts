@@ -18,6 +18,7 @@ import { amazonTargetFromAsin, asinFromPathname } from "./amazon";
 import { githubTargetFromRef, repoRefFromHref } from "./github";
 import { extractInstagramShortcode, instagramTargetFromRef } from "./instagram";
 import { extractRedditPostRef, redditTargetFromRef } from "./reddit";
+import { extractRottenTomatoesTitleRef, rottentomatoesTargetFromRef } from "./rottentomatoes";
 import { extractThreadsPostRef, threadsTargetFromRef } from "./threads";
 import { extractXStatusRef, xTargetFromRef } from "./x";
 import { extractYouTubeVideoRef, youtubeTargetFromRef } from "./youtube";
@@ -29,7 +30,7 @@ interface DerivedTarget {
   url: string;
 }
 
-export const URL_DERIVABLE_SITES = ["x", "youtube", "reddit", "instagram", "threads", "github", "amazon"] as const;
+export const URL_DERIVABLE_SITES = ["x", "youtube", "reddit", "instagram", "threads", "github", "amazon", "rottentomatoes"] as const;
 
 function derived(target: TargetRef | null): DerivedTarget | null {
   return target ? { targetId: target.targetId, url: target.url } : null;
@@ -77,6 +78,10 @@ export function deriveTargetFromUrl(site: string, url: string): DerivedTarget | 
     case "github": {
       const ref = repoRefFromHref(url);
       return derived(ref && githubTargetFromRef(ref));
+    }
+    case "rottentomatoes": {
+      const ref = extractRottenTomatoesTitleRef(url);
+      return derived(ref && rottentomatoesTargetFromRef(ref));
     }
     case "amazon": {
       const path = amazonPathname(url);

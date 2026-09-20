@@ -81,6 +81,7 @@ describe("unauthenticated e2e scenarios cover every registered site", () => {
       threads: "https://www.threads.com/@theromero/post/DYpmDeHjE1L",
       github: "https://github.com/facebook/react",
       amazon: "https://www.amazon.com/dp/B00ZV9RDKK",
+      rottentomatoes: "https://www.rottentomatoes.com/m/the_odyssey_2026",
     };
     for (const site of URL_DERIVABLE_SITES) {
       const url = representativeUrl[site];
