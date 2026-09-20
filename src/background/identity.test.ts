@@ -279,7 +279,6 @@ describe("signInWithProvider", () => {
 
     expect(launch).toHaveBeenCalledTimes(2);
   });
-
 });
 
 describe("listSignInProviders", () => {
