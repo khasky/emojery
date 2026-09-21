@@ -9,20 +9,13 @@
 // (content-type, the install id, accept-language when a language is given); a
 // GET carries only the client identity headers. A bearer token rides on either.
 
-import { BUILD_REF_HEADER } from "../shared/build-context";
 import { API_BASE, API_TIMEOUT_MS } from "../shared/config";
 import { deadlineSignal } from "../shared/fetch-deadline";
 import { normalizeLanguageTag } from "../shared/language-tag";
 import type { RuntimeErrorCode } from "../shared/messages";
 import { randomId } from "../shared/random-id";
 import { storageLocalGet, storageLocalSet } from "../shared/webext";
-import { buildTagHeaders, rememberBuildRef } from "./build-context";
 import { logApiExchange, logBackgroundError } from "./debug";
-
-// Injected by wxt.config.ts: false under the dev server, where the whole exchange folds
-// out of the bundle.
-declare const __EM_BUILD_CONTEXT__: boolean;
-const BUILD_CONTEXT_ENABLED: boolean = typeof __EM_BUILD_CONTEXT__ !== "undefined" && __EM_BUILD_CONTEXT__;
 
 export interface ApiRequestOptions {
   method: "GET" | "POST";
@@ -50,9 +43,6 @@ export interface ApiReply {
 export async function apiRequest(path: string, options: ApiRequestOptions): Promise<ApiReply> {
   const url = `${API_BASE}${path}`;
   const headers = options.method === "POST" ? await jsonHeaders(options) : clientHeaders(options);
-  if (BUILD_CONTEXT_ENABLED) {
-    Object.assign(headers, await buildTagHeaders(url, options.method, headers.authorization ?? ""));
-  }
   const init: RequestInit = {
     method: options.method,
     headers,
@@ -73,7 +63,6 @@ export async function apiRequest(path: string, options: ApiRequestOptions): Prom
     logApiExchange(url, init, { error }, startedAt);
     throw error;
   }
-  if (BUILD_CONTEXT_ENABLED) rememberBuildRef(response.headers.get(BUILD_REF_HEADER));
   const retryAfterSeconds = parseRetryAfterSeconds(response.headers.get("retry-after"));
   const text = await response.text();
   let body: unknown = null;

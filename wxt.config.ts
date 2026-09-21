@@ -7,7 +7,6 @@ import { fileURLToPath } from "node:url";
 import preact from "@preact/preset-vite";
 import { parse as parseDotenv } from "dotenv";
 import { defineConfig } from "wxt";
-import { writeBuildContext } from "./scripts/lib/build-context";
 import { shrinkRawCssPlugin } from "./scripts/lib/shrink-raw-css";
 import { PRODUCTION_API_BASE, STAGING_API_BASE } from "./src/shared/api-origins";
 import { HOMEPAGE_MATCH_PATTERN } from "./src/shared/homepage";
@@ -92,9 +91,6 @@ export default defineConfig({
   vite: (env) => ({
     define: {
       __EM_API_BASE__: JSON.stringify(resolveApiBase(BUILD_MODE)),
-      // The packaged-build measurement (background/build-context.ts). The dev server
-      // writes no build-context.json, so there the whole exchange folds out.
-      __EM_BUILD_CONTEXT__: JSON.stringify(env.command === "build"),
       // Console debug channels (background/debug.ts). `false` in a production
       // build, so the channels AND their redactor tree-shake out of the shipped
       // bundle. This replaced a runtime "is this unpacked?" guess (no `update_url`
@@ -266,11 +262,6 @@ export default defineConfig({
       // with a blank size. Drop them so the summary describes the real directory.
       forgetSourcemaps(output.publicAssets);
       for (const step of output.steps) forgetSourcemaps(step.chunks);
-      // Last, once the source maps are out: the index names exactly the files that
-      // ship, and anything still moving through outDir would leave the installed
-      // package disagreeing with its registered digest. The record lands in
-      // outBaseDir, outside the directory `zip` packs.
-      await writeBuildContext(wxt.config.outDir, resolve(wxt.config.outBaseDir, "build-records"), target, output.manifest.version);
     },
   },
 });

@@ -26,17 +26,10 @@ The build emits:
 - `.output/firefox-mv2/` — the unpacked extension
 - `.output/emojery-v<version>-firefox-mv2.zip` — the packaged extension
 - `.output/emojery-v<version>-sources.zip` — the source archive
-- `.output/build-records/firefox-mv2/<id>.json` — the digest of the package, outside it
 
 To verify the submitted add-on, compare the rebuilt `.output/firefox-mv2/` directory with the contents of the submitted Firefox extension zip. The production build takes nothing from the clock or the environment, so the two are byte-identical whenever the rebuild is run.
 
 Two things in the source are absent from that output, both by a build-time constant in `wxt.config.ts`: the console debug channels and their redactor (`__EM_DEBUG_LOG__`), and the English fallback dictionary that exists only for the unit-test environment (`__EM_I18N_FALLBACK__`). `__EM_API_BASE__` is why the API origin appears in the bundle as a literal; it comes from `src/shared/api-origins.ts`.
-
-### `build-context.json`
-
-The package carries one generated file, `build-context.json`, holding the sorted path of every file in the package and an id for the build. At run time the background reads those files back, hashes their contents and sends the result to the API, which can then tell which build a request came from. The digest the API compares against is written outside the package (`.output/build-records/`) and never ships.
-
-No user data is involved and nothing is fetched to produce it. The whole exchange is 2 request headers and 1 response header (`x-emojery-build-*`), all computed from files already in the package, and a build that fails to measure itself sends none of them. The file is written after the bundle it describes, so a rebuild regenerates it from the rebuilt output and the comparison above still holds.
 
 ## Linter warnings
 

@@ -200,8 +200,6 @@ This emits .output/firefox-mv2/ (the unpacked extension), .output/emojery-v1.0.0
 
 The production build takes nothing from the clock or the environment, so a rebuild of this source reproduces the submitted files exactly whenever it is run. Two things in the source are absent from that output, both by a build-time constant in wxt.config.ts: the console debug channels and their redactor (__EM_DEBUG_LOG__), and the English fallback dictionary that exists only for the unit-test environment (__EM_I18N_FALLBACK__). __EM_API_BASE__ is why the API origin appears in the bundle as a literal; it comes from src/shared/api-origins.ts.
 
-The package also carries one generated file, build-context.json, holding the sorted path of every file in the package and an id for the build. At run time the background reads those files back, hashes their contents and sends the result to the API, which can then tell which build a request came from. No user data is involved, nothing is fetched to produce it, and a build that fails to measure itself sends nothing.
-
 HOW TO EXERCISE THE ADD-ON
 
 Emojery adds an emoji reaction control next to the native like/share/star buttons on supported sites and shows per-post reaction counts.
