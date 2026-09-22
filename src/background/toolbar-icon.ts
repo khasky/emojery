@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // Toolbar-icon state: an alternate icon on the extension's own homepage, full-color on a
-// supported site, greyscale everywhere else - a passive "does nothing here" cue. Greyscale
+// supported site, grayscale everywhere else - a passive "does nothing here" cue. Grayscale
 // is derived at runtime from the packaged color icons; the homepage icons ship as assets.
 //
 // State is read WITHOUT the broad `tabs` permission: host permissions cover the
 // supported sites, emojery.app and the API origin, so a tab's `url` is populated
 // for those and redacted (undefined) on every other page - unreadable means
-// greyscale.
+// grayscale.
 import { API_TIMEOUT_MS } from "../shared/config";
 import { deadlineSignal } from "../shared/fetch-deadline";
 import { isOwnHomepage } from "../shared/homepage";

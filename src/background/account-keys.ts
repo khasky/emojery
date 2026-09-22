@@ -6,7 +6,8 @@
 // browser that holds it can later authorise an epoch-key issue (epoch-keys.ts)
 // for the account. It lives in the same IndexedDB as the epoch keys, keyed by
 // provider id, and stays across sign-outs: only deleting the account removes it.
-// A reinstall starts with a fresh key, which the API registers as a new device.
+// Nothing carries it across a reinstall, so a reinstalled extension generates a new
+// one at its next sign-in.
 
 import { getPublicKeyAsync, signAsync, utils } from "@noble/ed25519";
 import type { OidcProvider } from "../shared/oidc-providers";

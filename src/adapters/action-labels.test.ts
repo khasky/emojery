@@ -104,7 +104,7 @@ describe("defineLabelRegistry", () => {
     it("repost by icon path", () => {
       expect(reg.classify(control({ path: "M4.51617 6.9986 1 2 3" }))).toBe("repost");
     });
-    it("normalises irregular whitespace in the path before matching", () => {
+    it("normalizes irregular whitespace in the path before matching", () => {
       expect(reg.classify(control({ path: "M12   3C7.02944\n3 3 7.02944 3 12" }))).toBe("reply");
     });
     it("like by svg[aria-label]", () => {

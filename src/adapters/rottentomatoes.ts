@@ -15,7 +15,7 @@ const SCORECARD_SELECTORS = ["media-scorecard"];
 const SCORE_BLOCK_SELECTORS = [".audience-score-wrap", ".critics-score-wrap", ".score-wrap"];
 
 // The score blocks are flex items of a row with free space to their right; the
-// trigger takes that space and holds the row's vertical centre.
+// trigger takes that space and holds the row's vertical center.
 const TRIGGER_WRAPPER = { tagName: "span", style: "align-self:center;display:inline-flex;margin-left:32px" };
 
 const MOVIE_PATH_RE = /^\/m\/([a-z0-9_.-]+)\/?$/;

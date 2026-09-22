@@ -2,9 +2,8 @@
 //
 // Single source of truth for the extension's own homepage host. The popup reads it
 // through `isOwnHomepage` (below); the match pattern is what wxt.config.ts puts in the
-// manifest host permission, and what shared/content-matches.test.ts pins
-// the hand-written `matches` literal in entrypoints/emojery.content.ts against (WXT extracts
-// that literal statically, so the entrypoint can't compute it).
+// manifest host permission and what entrypoints/emojery.content.ts registers its
+// content script on, both by importing it from here.
 //
 // The host is in host_permissions, so the tab URL is readable here (it's redacted
 // on pages the extension holds no permission for).

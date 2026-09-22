@@ -54,8 +54,7 @@ async function loadedExtensionCount(context: BrowserContext): Promise<number> {
 // The guard's selectors come from the shared registry, like private-pages.spec.ts:
 // selector-drift.spec.ts asserts that same list is alive daily, which makes it
 // the single canary. A private copy here would let a YouTube/Reddit restyle read
-// as an anti-bot block instead of a failure - and it already had: the old copy
-// listed `[data-testid='post-container']`, which the Reddit entry never had.
+// as an anti-bot block instead of a failure.
 const registryNativeSurface = (urlKey: string): string =>
   SUPPORTED_SITE_SCENARIOS.filter((scenario) => scenario.urlKey === urlKey)
     .flatMap((scenario) => scenario.nativeSelectors)

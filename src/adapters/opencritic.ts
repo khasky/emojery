@@ -28,8 +28,6 @@ const opencriticAdapter = defineSiteAdapter({
   observer: { navKey: "pathname" },
 });
 
-// Exported under its `extract...Ref` name so the URL parsing stays directly
-// testable and `target-contract.ts` can derive from a bare URL.
 export function extractOpenCriticGameRef(href: string | null): { gameId: string; slug: string } | null {
   return parseSiteHref(href, "opencritic", (url) => {
     const match = url.pathname.match(GAME_PATH_RE);

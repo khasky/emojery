@@ -25,13 +25,10 @@ WXT's reload signal only reaches the Chrome instance **it spawned** (the one tha
 
 Edit `entrypoints/popup/main.tsx`, save, and watch the `pnpm dev` terminal: a rebuild line should print within ~1 second. If nothing prints, the file watcher isn't seeing your saves. On native Windows with NTFS this is rare; the common causes are:
 
-- **WSL paths.** Editing under `/mnt/c/...` or watching a Windows-side checkout from inside WSL drops fs events. Either move the checkout inside WSL's ext4 filesystem, or enable polling in `wxt.config.ts`:
+- **WSL paths.** Editing under `/mnt/c/...` or watching a Windows-side checkout from inside WSL drops fs events. Either move the checkout inside WSL's ext4 filesystem, or enable polling by adding one key to the object `vite(env)` already returns in `wxt.config.ts` — keep everything else it returns, the `define` block above all, or the build ships without its compiled constants:
 
   ```ts
-  vite: () => ({
-    server: { watch: { usePolling: true, interval: 200 } },
-    plugins: [preact() as never],
-  }),
+  server: { watch: { usePolling: true, interval: 200 } },
   ```
 
 - **Network drives** (mapped SMB shares, OneDrive selective-sync folders). Same fix: move the checkout to local disk or enable polling.

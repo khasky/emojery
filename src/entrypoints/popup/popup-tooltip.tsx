@@ -142,7 +142,7 @@ export const HoverTooltip = (props: TooltipProps) => {
   );
 };
 
-// Render a URL as coloured, labelled segments (protocol/host/path/query/hash) so the tooltip
+// Render a URL as colored, labelled segments (protocol/host/path/query/hash) so the tooltip
 // reads clearly. Percent-encoded values are decoded; unparseable input falls back to the raw string.
 export function renderUrlParts(raw: string): ComponentChild {
   let parsed: URL;

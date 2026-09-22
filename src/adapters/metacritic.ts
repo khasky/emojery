@@ -16,8 +16,10 @@ const SCORE_COLUMN_SELECTORS = [".hero-scores", ".product-hero__scores"];
 const COLUMN_WRAPPER = { tagName: "div", style: "margin-top:16px" };
 
 // `/movie/<slug>/`, `/tv/<slug>/`, `/tv/<slug>/season-5/`, `/game/<slug>/`. The
-// slug is case-SENSITIVE here (a re-cased path 404s), so unlike Rotten Tomatoes
-// and IMDb the id keeps what the URL carries.
+// slug is case-SENSITIVE here (a re-cased path 404s), so unlike Rotten Tomatoes and
+// IMDb there is no case folding: a path that is not already lowercase is not a
+// product page and derives nothing. Widening the class would split one product
+// across two keys.
 const PRODUCT_PATH_RE = /^\/(movie|game)\/([a-z0-9-]{1,120})\/?$/;
 const TV_PATH_RE = /^\/tv\/([a-z0-9-]{1,120})(?:\/(season-\d{1,3}))?\/?$/;
 

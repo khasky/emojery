@@ -35,7 +35,7 @@ export const COMMENT_MENU_STEM = /\boption|\bmore\b|\bmenu\b|\bsettings\b|\bmana
 // layout that ships no path, and cover EN/RU/UA only - Like and Share omit the
 // German part, Repost keeps just repost/репост/поширит. Reply is the exception,
 // keeping the FULL shared stem: it is only ever used to REJECT a comment row (see
-// isCommentRow), and recognizing «Antwort» is what keeps the picker off a comment
+// isCommentRow), and recognizing "Antwort" is what keeps the picker off a comment
 // on a German UI. IG reads each control's OWN aria-label (or visible text for an
 // unlabeled Reply) and never a count summary, which the registry options encode.
 export const IG_STEMS = {
@@ -66,8 +66,8 @@ const REPOST_ICON_PATH_PREFIX = "M19.998 9.497";
 export const IG_PUBLIC_ACTION_ICON_PATH_PREFIXES = [IDLE_LIKE_ICON_PATH_PREFIX, COMMENT_ICON_PATH_PREFIX];
 
 // Liked-state read for auto-press. IG ships EN/RU/UA; the unlike aria starts
-// with a negation ("Unlike", «Не нравится», «Не подобається») which the like
-// stem alone cannot separate - the RU unlike CONTAINS «нравится».
+// with a negation ("Unlike", "Не нравится", "Не подобається") which the like
+// stem alone cannot separate - the RU unlike CONTAINS "нравится".
 export const IG_UNLIKE_RE = /^(unlike|не\s)/i;
 
 // An unreadable/foreign label reads UNKNOWN (null) - see the likePressed
@@ -114,10 +114,10 @@ const igLabels = defineLabelRegistry(
 );
 // `comment` is absent from the isCommentRow marker list below, unlike
 // SIBLING_KINDS above: the per-comment hover kebab carries the LOCALIZED word
-// "comment" (EN "Comment options", RU «Действия с комментарием», UA «Параметри
-// коментаря» - verified live), so counting it made a hovered comment row read as
+// "comment" (EN "Comment options", RU "Действия с комментарием", UA "Параметри
+// коментаря" - verified live), so counting it made a hovered comment row read as
 // a post action bar and the picker jumped onto the comment. COMMENT_MENU_STEM
-// catches some kebabs by their menu word but not RU «действия» - exactly why
+// catches some kebabs by their menu word but not RU "действия" - exactly why
 // this recurred per-locale. Reply-presence is the locale-robust discriminator: a
 // post action bar NEVER carries Reply, a comment row ALWAYS does.
 const isCommentRow = rejectCommentRow(["share", "send", "repost"], "reply");
@@ -129,10 +129,10 @@ const isCommentRow = rejectCommentRow(["share", "send", "repost"], "reply");
 const COUNTER_DIGITS_RE = /^\p{Nd}[\p{Nd},.’' ]*$/u;
 const LIKE_COUNTER_RE = /^\d[\d,.]*(?:\s?[KMB])?\s+likes?$/i;
 // How long a standalone counter's like-word tail may be - room for the longest
-// shipped form («отметки "Нравится"»); longer text is a caption.
+// shipped form ('отметки "Нравится"'); longer text is a caption.
 const LIKE_TAIL_MAX = 24;
 
-// The magnitude suffix is localized too: EN "1.2K", ru «41 тыс.», de «1,2 Mio.»,
+// The magnitude suffix is localized too: EN "1.2K", ru "41 тыс.", de "1,2 Mio.",
 // ja「1.2万」. An unmatched suffix left the reels-feed like count visible beside
 // the trigger while replace-native had already hidden its heart button. The
 // suffix set is generated for every shipped locale from the browser's own CLDR
@@ -174,7 +174,7 @@ function compactCountSuffixList(): string[] {
   return compactCountSuffixes;
 }
 
-// "11 490" / "1.2K" / «41 тыс.» / «1,2 Mio.» /「1.2万」- a bare count in any
+// "11 490" / "1.2K" / "41 тыс." / "1,2 Mio." /「1.2万」- a bare count in any
 // shipped locale's short compact notation.
 export function isBareCountText(raw: string): boolean {
   const text = raw.trim();
@@ -191,7 +191,7 @@ export function isBareCountText(raw: string): boolean {
 // The standalone like-count line under a post: EN "1,234 likes" (exact legacy
 // form - the \b in the like STEM never matches "likes"), or a bare count followed by
 // a SHORT like-word tail in a locale whose Like stem we ship
-// («2 534 отметки "Нравится"», UA «2 534 вподобання»). The tail-length cap and
+// ('2 534 отметки "Нравится"', UA "2 534 вподобання"). The tail-length cap and
 // full anchoring keep out captions that only mention numbers and liking.
 export function isStandaloneLikeCountText(raw: string): boolean {
   const text = raw.trim();
@@ -544,6 +544,12 @@ function findCounterElement(root: HTMLElement, predicate: (text: string) => bool
   return null;
 }
 
+// Deliberately NOT visual-action-row's isRenderableInPageLayout, and different from it
+// in two ways: it reads the element's OWN computed style with no ancestor walk, and it
+// does not test opacity. A counter is read as text beside a control that has already
+// passed the full check, so the ancestor state is settled by then and a faded counter
+// still carries its number. Change that reasoning and this should collapse into the
+// shared helper.
 function isUsableCounter(el: HTMLElement): boolean {
   if (!pageHasLayout()) return true;
   if (!hasRenderableBox(el)) return false;

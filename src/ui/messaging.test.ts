@@ -42,8 +42,10 @@ describe("authStatus", () => {
     await expect(authStatus()).resolves.toEqual({ authed: true, userId: "u1" });
   });
 
-  // The response carries `provider` too. It must not travel further than this function: the
-  // caller is content-script code on a page that can read anything it is given.
+  // The background already nulls `provider` for a content-script sender
+  // (message-router's auth:status handler). This projection is the second, local
+  // gate, so a change there cannot leak it into code running on a page that can
+  // read anything it is given.
   it("forwards only authed and userId, never the provider", async () => {
     reply({ ...AUTHED, provider: "google" });
     expect(Object.keys(await authStatus()).sort()).toEqual(["authed", "userId"]);

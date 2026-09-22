@@ -5,7 +5,7 @@
 // mid-screen and the extension never fails to load on a bad placeholder (a
 // missing `placeholders` entry fails the WHOLE extension load, per-locale).
 //
-// NOTE: layout overflow (e.g. the long German "Verifizierungscode") is a
+// NOTE: layout overflow (e.g. the long German "Datenschutzrichtlinie") is a
 // RENDER concern - a manual visual check; this only guarantees data presence.
 
 import { readdirSync, readFileSync, statSync } from "node:fs";

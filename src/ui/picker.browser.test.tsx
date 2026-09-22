@@ -115,7 +115,8 @@ beforeEach(() => {
   portalRoot = document.createElement("div");
   document.body.append(container, portalRoot);
   // Load the shipped picker stylesheet so the popover gets its real geometry
-  // (`position: fixed; width: 18em`) - the layout tests assert on it. The rules
+  // (`position: fixed` and the `max(18em, ...)` width) - the layout tests assert on
+  // it. The rules
   // are class-based (not `:host`-scoped), so they apply in this light-DOM render.
   styleEl = document.createElement("style");
   styleEl.textContent = PICKER_STYLESHEET;
@@ -653,7 +654,7 @@ describe("Picker - site dark theme (trigger inherits the site fg)", () => {
 });
 
 // One shortcut per category; clicking one smooth-scrolls the grid to that section.
-// (The grayscale->colour scroll-spy is geometry-driven and verified live, not here.)
+// (The grayscale->color scroll-spy is geometry-driven and verified live, not here.)
 describe("Picker - category nav bar", () => {
   // Target Size, Minimum (WCAG). `flex: 1 1 0` divides the bar by the category count,
   // so every category added shrinks all of them; at the stylesheet's 14px font floor the
@@ -945,7 +946,7 @@ describe("Picker - signed-out gate", () => {
 });
 
 // NOT parseRgb from mount-color.ts: that one answers `null` for an unpaintable
-// colour, which is the right production behaviour and the wrong test behaviour - a computed
+// color, which is the right production behavior and the wrong test behavior - a computed
 // style this cannot read means the assertion below never ran, and it has to say so.
 function parseRgb(value: string): [number, number, number] {
   const m = value.match(/rgba?\(\s*(\d+)\D+(\d+)\D+(\d+)/);

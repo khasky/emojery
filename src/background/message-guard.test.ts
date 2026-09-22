@@ -157,18 +157,18 @@ describe("isExtensionPageSender is anchored at the start of the URL", () => {
   });
 });
 
-// The JWT (and the account email) must never reach a web page or content script.
-// The `auth:status` reply is the one place identity could leak. This half locks
-// the predicate the handler gates email on; the handler's own reply is asserted
-// behaviorally in message-router.test.ts ("the auth:status handler gates email
-// and never returns the JWT").
+// The JWT (and the provider the account signed in through) must never reach a web
+// page or content script. The `auth:status` reply is the one place identity could
+// leak. This half locks the predicate the handler gates the provider on; the
+// handler's own reply is asserted behaviorally in message-router.test.ts ("the
+// auth:status handler gates the provider and never returns the JWT").
 describe("auth:status identity isolation", () => {
-  it("withholds email from a content-script sender, allows it only from an extension page", () => {
+  it("withholds the provider from a content-script sender, allows it only from an extension page", () => {
     expect(isExtensionPageSender(tabSender(), EXT_BASE)).toBe(false);
     expect(isExtensionPageSender(pageSender(), EXT_BASE)).toBe(true);
     // An extension-id-shaped url that isn't the real base must not count as a page.
     expect(isExtensionPageSender(sender({ url: "chrome-extension://someoneelse/popup.html" }), EXT_BASE)).toBe(false);
-    // Empty base (unknown extension origin) never grants email.
+    // Empty base (unknown extension origin) never grants the provider.
     expect(isExtensionPageSender(pageSender(), "")).toBe(false);
   });
 });

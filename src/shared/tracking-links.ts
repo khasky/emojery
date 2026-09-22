@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // The onboarding page's "Try it live" target: must be a supported-site page that
-// renders for a logged-out visitor (GitHub is the only supported site with no
-// login wall or bot check), and the keyless #emojery-react hint auto-opens the
-// picker on the first mount there (shared/deep-link.ts) - the extension's own
-// public repo. Lives here, not in onboarding/main.tsx, so the onboarding e2e can
-// import it instead of repeating the URL (that module renders on import).
+// renders for a logged-out visitor, and the keyless #emojery-react hint auto-opens
+// the picker on the first mount there (shared/deep-link.ts). The extension's own
+// public repo is the page chosen for it. Lives here, not in onboarding/main.tsx, so
+// the onboarding e2e can import it instead of repeating the URL (that module renders
+// on import).
 export const TRY_IT_LIVE_URL = "https://github.com/khasky/emojery#emojery-react";
 
 // The one refusal a reader cannot act on from inside the extension: the account

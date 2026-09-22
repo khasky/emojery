@@ -16,12 +16,12 @@ describe("isSupportedTabUrl - toolbar icon color gate", () => {
     expect(isSupportedTabUrl("https://m.facebook.com/zuck")).toBe(true);
   });
 
-  it("greys out unsupported or unreadable URLs", () => {
+  it("grays out unsupported or unreadable URLs", () => {
     expect(isSupportedTabUrl("https://example.com/")).toBe(false);
     // A parse-only host is not a run host: no content script, so no color.
     expect(isSupportedTabUrl("https://m.youtube.com/watch?v=x")).toBe(false);
     // A redacted url (no host permission) is the extension's own signal that the
-    // page is unsupported - must resolve to greyscale, not throw.
+    // page is unsupported - must resolve to grayscale, not throw.
     expect(isSupportedTabUrl(undefined)).toBe(false);
     expect(isSupportedTabUrl("not a url")).toBe(false);
     expect(isSupportedTabUrl("chrome://extensions")).toBe(false);
@@ -57,7 +57,7 @@ describe("applyToolbarIconForTab - per-tab icon choice", () => {
     expect((details.path as Record<number, string>)[48]).toBe("icons/icon-48.png");
   });
 
-  it("falls back to the color icon when greyscale can't be produced (never blank)", async () => {
+  it("falls back to the color icon when grayscale can't be produced (never blank)", async () => {
     applyToolbarIconForTab(9, "https://example.com/");
     await vi.waitFor(() => expect(setToolbarIcon).toHaveBeenCalled());
     const details = firstIconDetails();

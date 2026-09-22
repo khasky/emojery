@@ -58,7 +58,7 @@ describe("distinctiveMessages", () => {
   });
 
   // The gate exits 1 on an empty list rather than passing vacuously; this is the input that
-  // would produce one, so the behaviour above it stays reachable.
+  // would produce one, so the behavior above it stays reachable.
   it("returns nothing when no message is long enough", () => {
     expect(distinctiveMessages(dictionary, 1_000)).toEqual([]);
   });

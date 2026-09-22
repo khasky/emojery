@@ -1,7 +1,9 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /* Reaction animations for the shared fixed layer ui/animations.ts injects on the
-   host page. The ids/classes and the drop duration are mirrored by constants
-   there - change them together. */
+   host page. The ids and classes come from shared/dom.ts, except the <style> id,
+   which ui/animations.ts owns. That module also reads the 55% keyframe of
+   khasky-emojery-button-drop below as BUTTON_DROP_IMPACT_MS to time the dust -
+   retime the drop and that constant moves with it. */
 
 #khasky-emojery-reaction-animations {
   position: fixed;

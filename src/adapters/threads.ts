@@ -197,7 +197,7 @@ function findActionRow(candidate: HTMLElement): ActionRow | null {
 // the Reply (comment) control with another post action - Repost or Share -
 // while headers and other icon clusters carry neither. Repost alone is NOT
 // required: after the user reposts, Threads swaps the repost icon for an "undo"
-// glyph. Both path variants sit in REPOST_ICON_PATH_PREFIXES today, but while
+// glyph. The known variants sit in REPOST_ICON_PATH_PREFIXES today, but while
 // only the idle one was registered, requiring Repost dropped the reposted
 // post's picker on every surface - and any future unregistered variant would
 // again. Share has no such state-dependent glyph, so either action proves the
@@ -217,7 +217,7 @@ function buildActionRow(row: HTMLElement, slots: HTMLElement[]): ActionRow | nul
 
 // Liked-state read for auto-press, by the one signal that holds in every language:
 // the heart is an OUTLINE when unliked and PAINTED when liked. The aria-label is
-// localized - a RU feed reads «Поставить "Нравится"» / «Не нравится» - so matching
+// localized - a RU feed reads "Поставить "Нравится"" / "Не нравится" - so matching
 // the English strings returned null on every other locale, and an unknown state
 // makes the trigger engine decline to press at all: auto-press was silently dead
 // outside English. Captured live on a RU feed: unliked `fill: rgba(0, 0, 0, 0)`
@@ -252,8 +252,9 @@ function actionButtonInSlot(slot: HTMLElement): HTMLElement | undefined {
 // stay precise enough not to match the sidebar Messages icon, whose path
 // starts "M7.24745 1.49856" (one more digit).
 const REPLY_ICON_PATH_PREFIXES = ["M12 3C7.02944 3 3 7.02944 3 12", "M12 3a9 9 0 0 0 0 18"];
-// Two path variants: idle loop and the "you reposted" active glyph
-// (captured live; aria-label stays «Сделать репост» in both states).
+// The repost glyph in each shape Threads ships: the idle loop, the "you reposted"
+// active glyph, and the rounded-coordinate reissue of the idle loop (captured live;
+// aria-label stays "Сделать репост" in every state).
 const REPOST_ICON_PATH_PREFIXES = ["M4.51617 6.9986", "M11.9996 3C8.88111", "M4.516 6.999a8.99"];
 const SHARE_ICON_PATH_PREFIXES = ["M7.2474 1.49853", "M7.247 1.499C4.183"];
 // The heart, outline and painted. Its label used to classify it; with the label now a

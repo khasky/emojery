@@ -113,12 +113,12 @@
   padding-bottom: 0;
 }
 
-/* Same height as the title's line box, so `align-items: start` still centres a
+/* Same height as the title's line box, so `align-items: start` still centers a
    one-line step and keeps a wrapping step's tick beside its FIRST line. */
 .step .tick {
   width: 22px;
   /* Border-box so the 2px ring does not make the circle 26px tall and push its
-     centre below the title's. */
+     center below the title's. */
   box-sizing: border-box;
   height: 22px;
   border-radius: 50%;
@@ -297,7 +297,7 @@
 
 /* Fixed, not absolute: a fixed box never joins the document's scrollable
    overflow, so pieces flying past the card cannot summon a scrollbar. The
-   viewport centre is the card's - body centres it. */
+   viewport center is the card's - body centers it. */
 .confetti {
   position: fixed;
   left: 50%;

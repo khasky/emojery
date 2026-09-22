@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Vendor brand marks for the Settings per-site list. `path` values are the standard
+// Vendor brand marks for the popup's site rows - the Settings list and the report view. `path` values are the standard
 // simple-icons glyphs (CC0); the trademarks belong to their owners and are used only to
-// identify each supported site. `color` is the brand colour, or "currentColor" for the
-// inherently monochrome marks so they follow the theme's text colour.
+// identify each supported site. `color` is the brand color, or "currentColor" for the
+// inherently monochrome marks so they follow the theme's text color.
 
 import type { SupportedSite } from "../shared/adapter";
 

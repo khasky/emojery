@@ -1,6 +1,6 @@
 # Site-authenticated e2e (Playwright Extension bridge)
 
-Black-box checks of Emojery for users logged into the host platforms (Facebook, Instagram, Reddit, X, Threads, ...) and into Emojery (OTP). It drives your real, human-launched Chrome through the Playwright Extension (`@playwright/mcp --extension` -> `chrome.debugger`) instead of launching its own browser the way the `test:e2e` runner does. That is what makes a logged-in run possible at all: the session is the one you already have, and it stays where you left it.
+Black-box checks of Emojery for users logged into the host platforms (Facebook, Instagram, Reddit, X, Threads, ...) and into Emojery (a provider sign-in from the popup). It drives your real, human-launched Chrome through the Playwright Extension (`@playwright/mcp --extension` -> `chrome.debugger`) instead of launching its own browser the way the `test:e2e` runner does. That is what makes a logged-in run possible at all: the session is the one you already have, and it stays where you left it.
 
 > **Warning — `test:e2e:siteauth:autopress` acts as you, in public.** It exercises the **Auto-press original buttons** setting, so it presses real native controls under your signed-in accounts:
 >
@@ -78,7 +78,7 @@ pnpm exec vitest run -c e2e/site-auth/vitest.config.ts precheck
 
 - OK: precheck green → bridge attached to your real Chrome + Emojery is signed in.
 - FAIL: "bridge launched a throwaway browser" → the token/extension is wrong; the server didn't attach (your real tabs should be visible, not one `about:blank`).
-- FAIL: "Emojery picker grid did not open" → finish the Emojery OTP in that Chrome.
+- FAIL: "Emojery picker grid did not open" → sign in to Emojery through a provider in that Chrome.
 - FAIL: "Emojery is SIGNED OUT" → the Emojery popup in that Chrome is signed out. Sign in there by hand and re-run.
 - FAIL: "pointed at the WRONG BUILD" → the loaded build is not the one this suite drives. Rebuild with `pnpm run build:chrome` and load `.output/chrome-mv3-staging` unpacked ("Emojery (Staging)" on `chrome://extensions`).
 
@@ -113,13 +113,11 @@ A revert that fails is logged loudly (`[warmup] <id>: revert FAILED`) so you can
 
 Each confirmed change to real account state is journaled to `.playwright/warmup-journal.json` before the run continues, so a process that dies between apply and restore doesn't strand it: the next run reads the journal and replays those reverts first. That file is the only record a crashed run leaves — don't delete it while a warm-up is outstanding.
 
-## Coverage requirement: all 9 supported sites
+## Coverage requirement: every supported site
 
-Every supported content-script site is exercised on each run — no sampling, no subset:
+Every supported content-script site is exercised on each run — no sampling, no subset. The list is `ALL_SITES` in `scenarios.ts`, which is `DEEP_SITES` plus `SMOKE_SITES` and cannot fall behind the registry (see below).
 
-Facebook, Instagram, Reddit, Threads, X, YouTube, GitHub, GitLab, Amazon
-
-- The `reaction-roundtrip` flow runs on all 9 sites (the per-site baseline: react → emoji+count → persists after reload).
+- The `reaction-roundtrip` flow runs on every site in `ALL_SITES` (the per-site baseline: react → emoji+count → persists after reload).
 - The `lifecycle` flow additionally goes deep on the feed-heavy / bot-sensitive sites (`DEEP_SITES`: Facebook, Instagram, Reddit, Threads, X). The `localized` flow is Facebook-only, and opportunistic (it skips unless that account's UI renders RU/UA).
 
 A site whose live session or content isn't present in the connected Chrome makes the run fail fast (not skip), with a message naming what to log into. Fix it (log in to that site / refresh the URL) and re-run; a missing site is never a pass.
@@ -133,12 +131,12 @@ The tier lists in `scenarios.ts` can't fall behind the site registry either: `Si
 | `warmup` | Not a live flow: a browser-free, bridge-free self-check of the warm-up orchestration — only the steps that reported a change are undone, in LIFO order, and one failing undo doesn't stop the rest. The property the "restore after the run" guarantee rests on, so it runs in the same command. |
 | `harness` | The other browser-free self-check: the 3 discriminations `waitForHost` has to get right. A page it cannot read at all is a broken bridge; a readable page serving a recognized anti-bot wall is the environment; and so is a readable page in a background tab, where Emojery scans nothing while `document.hidden` and so mounts nothing on any site at once. None of the three is a missing site login. Returning 0 for any of them once sent 8 tests' readers after a login that was never the problem. |
 | `precheck` | Bridge is on the real Chrome; Emojery extension is signed in. |
-| `reaction-roundtrip` (9 sites) | Real authenticated reaction shows emoji+count and persists across reload; cross-tab counter syncs via the SW-brokered push; picker search narrows the emoji grid on a live platform. |
-| `lifecycle` (all 9; deep on FB/IG/Reddit/X/Threads) | Hosts mount with no duplicate target keys on every site, and the feed-heavy ones survive a deep scroll. See [What `lifecycle` checks](#what-lifecycle-checks). |
+| `reaction-roundtrip` (every site) | Real authenticated reaction shows emoji+count and persists across reload; cross-tab counter syncs via the SW-brokered push; picker search narrows the emoji grid on a live platform. |
+| `lifecycle` (every site; deep on FB/IG/Reddit/X/Threads) | Hosts mount with no duplicate target keys on every site, and the feed-heavy ones survive a deep scroll. See [What `lifecycle` checks](#what-lifecycle-checks). |
 | `wall-coverage` | Post-by-post coverage of a Facebook profile wall and a group wall: every post whose action row has entered the viewport carries a visible, correctly placed trigger. A post is audited only after its Like control has sat well inside the viewport for a settle step, so lazy mounting below the fold is never misread as a missing trigger; one that never reports a placed host fails the run with its permalink. `lifecycle`'s scroll counts hosts in aggregate, which hides the post class that mounts nothing while its neighbours mount. |
 | `comment-surface` | A Facebook permalink whose pinned top comment carries photo attachments mounts no trigger on a comment. The comment footer that mimics a post's counts row only renders for a signed-in, non-English account, so this shape cannot be reached logged out. Suggested posts under the permalink legitimately earn their own triggers, so the assert is "nothing mounts inside a comment", never a host count. |
 | `localized` | Opportunistic: RU/UA FB feed still mounts (stem matching) without overlap — else skips (durable contract is in adapter unit tests). |
-| `auto-press` (YouTube, Reddit, GitLab, GitHub, Threads, Instagram, Facebook) | The **Auto-press original buttons** setting: a pick presses the site's own control, un-react releases it. See [What `auto-press` presses](#what-auto-press-presses). |
+| `auto-press` (YouTube, Reddit, GitLab, GitHub, Threads, Instagram, Facebook, X) | The **Auto-press original buttons** setting: a pick presses the site's own control, un-react releases it. See [What `auto-press` presses](#what-auto-press-presses). |
 
 ### What `lifecycle` checks
 

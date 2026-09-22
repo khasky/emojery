@@ -14,7 +14,7 @@ import type { RuntimeResponse } from "../../shared/messages";
 import { mountContainer, renderAndSettle, requireEl, unmountContainer } from "../../test/browser-harness";
 import { type ChromeShimHandle, installChromeShim, makeLiveAuthSession } from "../../test/chrome-shim";
 import { HistoryDataSection } from "./popup-history-data";
-// The theme case reads resolved colours, so it needs the real sheet.
+// The theme case reads resolved colors, so it needs the real sheet.
 // @ts-expect-error side-effect css import, resolved by the browser-mode Vite server
 import "./popup.css";
 import { DATA_FILE_SELECTOR, IMPORT_CONFIRM_COUNT_SELECTOR, IMPORT_CONFIRM_SELECTOR } from "../../shared/page-dom";

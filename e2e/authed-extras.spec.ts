@@ -360,11 +360,9 @@ test("a reaction in flight survives a reload (slow network)", async () => {
   test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
   const session = await ext.launchSession();
   try {
-    // Its own account: every fresh profile that votes mints a signing key, and the
-    // API issues an account 3 per epoch. The counter, offline and rapid-switching
-    // cases above already spend the shared account's 3 in one worker, so a 4th
-    // fresh-profile vote on it is refused and never reaches the wire (seen live).
-    // A further voting case in this file needs its own purpose the same way.
+    // Its own account, so this case's fresh profile shares no state with the other
+    // voting cases in this file. A further voting case here needs its own purpose the
+    // same way.
     const page = await ext.signedInGithubPage(session.context, ext.authAccount("slow-network"));
     // A leftover reaction from a prior test makes clearReaction send an un-react
     // vote; let it reach the server BEFORE arming the delay route, or the route

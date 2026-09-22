@@ -321,7 +321,7 @@ describe("findVisualActionSlot", () => {
       expect(findVisualActionSlot(spans[0]!, { controlSelector: "span" })?.index).toBe(0);
     });
 
-    it("honours a controlPredicate override", () => {
+    it("honors a controlPredicate override", () => {
       layoutPage();
       const { buttons } = buildRow({ widths: [40, 40, 40] });
       expect(findVisualActionSlot(buttons[0]!, { controlPredicate: () => false })).toBeNull();

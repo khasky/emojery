@@ -59,7 +59,7 @@ describe("isPaintedFill", () => {
     expect(isPaintedFill("color(display-p3 1 0.18 0.25 / 0)")).toBe(false);
   });
 
-  it("does not mistake a colour ending in a zero digit for zero alpha", () => {
+  it("does not mistake a color ending in a zero digit for zero alpha", () => {
     // `rgb(255, 48, 60)` ends in "0)" but is fully opaque red.
     expect(isPaintedFill("rgb(255, 48, 60)")).toBe(true);
     expect(isPaintedFill("rgb(255, 48, 64)")).toBe(true);
@@ -78,7 +78,7 @@ describe("isPaintedFill", () => {
 // The lightbox URL freezes the scan (threads.ts suspendScan): mounting behind
 // the overlay and tearing down on close produced a visible blink and, when the
 // teardown scan lost the race, a stale wrong-post trigger. The path test is the
-// pure half; e2e/overlay-freeze.spec.ts pins the live freeze behaviour.
+// pure half; e2e/overlay-freeze.spec.ts pins the live freeze behavior.
 describe("isMediaViewerPath - the /media lightbox overlay", () => {
   it("recognizes a post's media overlay path", () => {
     expect(isMediaViewerPath(`/@${HANDLE}/post/${POST_ID}/media`)).toBe(true);

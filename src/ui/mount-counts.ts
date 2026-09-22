@@ -2,8 +2,8 @@
 //
 // Counts loading for a mounted trigger: the initial cache/local read, the
 // deferred server hydration applied through the picker's refresh callback, and
-// the per-target auth-change refetch. Apart from mount.ts (the mount lifecycle):
-// these own only count resolution and the message round-trips they need.
+// the per-target auth-change refetch. Holds no mount state: the lifecycle stays in
+// mount.ts.
 
 import type { PickerInsertionPoint } from "../shared/adapter";
 import type { RuntimeResponse } from "../shared/messages";

@@ -31,7 +31,7 @@ describe("parseReactHint", () => {
     expect(parseReactHint("#readme")).toBeNull();
     expect(parseReactHint("#emojery-reaction")).toBeNull();
     // The pre-rename hash the /react page emitted before the website switched
-    // to `em-react` - no longer recognised.
+    // to `em-react` - no longer recognized.
     expect(parseReactHint("#wr-react")).toBeNull();
   });
 

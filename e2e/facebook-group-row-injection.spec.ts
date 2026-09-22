@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // A group photo-post's action row labels its Comment and Send as ICON-ONLY
-// buttons - aria «Залишити коментар» / «Надіслати», empty text, ~44px wide
+// buttons - aria "Залишити коментар" / "Надіслати", empty text, ~44px wide
 // (captured live on the reported group permalinks, uk-UA UI). A row-marker rule
 // that required visible text on the marker rejected that whole row, so the post
 // scrolled by with no trigger while its text-labeled neighbours had one.

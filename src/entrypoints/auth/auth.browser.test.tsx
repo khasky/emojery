@@ -312,7 +312,7 @@ describe("auth page - the provider step", () => {
     expect(requireEl(document, TAGLINE_SELECTOR).getAttribute("role")).toBe("status");
     expect(document.querySelector(PROVIDER_LIST_SELECTOR)).toBeNull();
 
-    // The wait can run for tens of seconds while the enrolment proof is built, so it
+    // The wait can run for tens of seconds while the enrollment proof is built, so it
     // shows it is alive and guards the tab against a close that would strand it.
     expect(document.querySelector(SPINNER_SELECTOR)).not.toBeNull();
 

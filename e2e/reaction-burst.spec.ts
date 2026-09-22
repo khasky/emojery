@@ -258,8 +258,7 @@ test("a burst that meets a 429 is re-sent - no reaction is lost", async () => {
   const session = await ext.launchSession();
   const responses = watchVoteResponses(session.context);
   try {
-    // Its own account: the primary one is exempt from the per-minute budget
-    // this case has to run into.
+    // Its own account, so this case's votes never interact with the shared one.
     const page = await ext.signedInGithubPage(session.context, ext.authAccount("burst-limit"));
     await resetTarget(session.context, page);
 

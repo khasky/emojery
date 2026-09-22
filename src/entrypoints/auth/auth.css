@@ -6,7 +6,7 @@
 @import "../../styles/page-surface.css";
 
 :root {
-  /* Every themed colour goes through a token, so the dark block at the bottom
+  /* Every themed color goes through a token, so the dark block at the bottom
      only re-points them. */
 
   /* Same on both themes: a disabled control reads as inert either way, so this
@@ -129,7 +129,7 @@
   }
 }
 
-/* Sign-in can take tens of seconds while the enrolment proof is built, and the
+/* Sign-in can take tens of seconds while the enrollment proof is built, and the
    window must stay open for it - a still page reads as a hung one. */
 .spinner {
   display: flex;
@@ -277,7 +277,7 @@
   font-size: 12px;
 }
 
-/* Sits inside the provider list, so the list's gap spaces it; centred because it
+/* Sits inside the provider list, so the list's gap spaces it; centered because it
    opens the rest of the list rather than being one more choice in it. */
 .more-providers {
   align-self: center;

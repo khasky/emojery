@@ -117,11 +117,11 @@ function parseCallbackFragment(responseUrl: string): { code: string } | { error:
 }
 
 // One flow per (provider, chooser) at a time. Two auth tabs are one click each from
-// asking for the same sign-in twice, and each ask opens its own provider window and
-// spends its own enrolment proof on the API - which is seconds of a scarce prover for
-// a leaf the second one cannot write, since the account key is shared and the pair is
-// already enrolled. Joining the calls costs the second caller nothing: the answer it
-// waits for is the answer it asked for.
+// asking for the same sign-in twice, and each ask opens its own provider window for an
+// answer that is already settled: the account key is shared, so by the time the second
+// call lands the pair is registered and it can only re-ask the same question. Joining
+// the calls costs the second caller nothing: the answer it waits for is the answer it
+// asked for.
 //
 // Keyed by the chooser flag too, so "use a different account" is never silently served
 // the plain sign-in's result - that one carries the intent to pick, and a live provider
@@ -228,7 +228,7 @@ interface DeletionPending {
   /** The token's own seconds-epoch expiry, copied from AuthState. This record is
    *  the one place a bearer token outlives clearAuth(), so a marker whose token has
    *  already expired is dropped rather than kept around. Absent on a marker written
-   *  before this field existed - those keep the old open-ended behaviour rather than
+   *  before this field existed - those keep the old open-ended behavior rather than
    *  being dropped on sight. */
   expiresAt?: number;
 }

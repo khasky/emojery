@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// The id behind the optimistic history row and the client-security install/session
-// headers. The contract that matters is the one background/client-security.ts reads
-// back: /^[A-Za-z0-9_-]{16,128}$/. Each generator branch is pinned against it, because
+// The id behind the optimistic history row and the install-id header. The contract
+// that matters is the one background/api-client.ts reads back in normalizeStoredId:
+// /^[A-Za-z0-9_-]{16,128}$/. Each generator branch is pinned against it, because
 // the fallbacks only ever run where the branch above them is missing - which is exactly
 // where nobody looks until a stored id fails validation.
 

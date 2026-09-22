@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // Regression: a Facebook comment's footer mimics a post counts row. Its
-// reaction cluster reads as a Like (localized aria «Подобається» - the EN form
+// reaction cluster reads as a Like (localized aria "Подобається" - the EN form
 // "Like: 4 people" is a count summary and never matched) and sits beside an
-// icon-only comment-bubble aria'd «Залишити коментар», while FB's newer comment
+// icon-only comment-bubble aria'd "Залишити коментар", while FB's newer comment
 // UI ships NO textual Reply link for the comment-row guard to catch. That pair
 // passed as a post action row and the picker mounted ON THE COMMENT, keyed to
 // the comment's attached photo (verified live, a `facebook:photo:<id>` key on a

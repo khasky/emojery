@@ -85,7 +85,7 @@ describe("fmtExactDate", () => {
   // day - so on its own it lets the whole Intl branch be deleted without a red test, and
   // with it the win the memoization exists for (constructing a formatter per row instead of
   // reusing one). Assert the SEAM instead: one formatter, built with these options,
-  // reused across rows. That is the behaviour, and it holds in every locale.
+  // reused across rows. That is the behavior, and it holds in every locale.
   it("builds one formatter with the exact options and reuses it for every row", async () => {
     vi.resetModules();
     const spy = vi.spyOn(Intl, "DateTimeFormat");

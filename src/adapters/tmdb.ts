@@ -46,8 +46,6 @@ const tmdbAdapter = defineSiteAdapter({
   observer: { navKey: "pathname" },
 });
 
-// Exported under its `extract...Ref` name so the URL parsing stays directly
-// testable and `target-contract.ts` can derive from a bare URL.
 export function extractTmdbTitleRef(href: string | null): { titleId: string } | null {
   return parseSiteHref(href, "tmdb", (url) => {
     const match = url.pathname.match(TITLE_PATH_RE);

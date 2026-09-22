@@ -71,7 +71,7 @@ export const EmojiSection = ({
   headingId: string;
   heading: string;
   action?: ComponentChild;
-  // Index into CATEGORIES, read by the popover's scroll-spy to colour the nav icons.
+  // Index into CATEGORIES, read by the popover's scroll-spy to color the nav icons.
   categoryIndex?: number;
   children: ComponentChildren;
 }) => (
@@ -183,7 +183,7 @@ export const ReactionBreakdown = ({ entries, mine, showToggle, expanded, onToggl
 );
 
 // Category shortcuts under the search box: each icon stays grayscale until its section
-// scrolls into view, then fades to colour in step with the scroll (`intensity` comes
+// scrolls into view, then fades to color in step with the scroll (`intensity` comes
 // from the picker's scroll-spy); an accent underline fades in on the same signal.
 export const CategoryBar = ({ intensity, onSelect }: { intensity: number[]; onSelect: (index: number) => void }) => (
   // biome-ignore lint/a11y/useSemanticElements: a fieldset would drag form semantics/styling into the shadow-DOM picker; role="group" on a div is intentional

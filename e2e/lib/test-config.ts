@@ -66,7 +66,7 @@ export function gitlabUrl(): string {
 //                                            signs in as, distinct per purpose and per
 //                                            process, so a spec that destroys its
 //                                            account never touches a sibling's;
-//   completeSignIn(window, account, outcome) - drives the staging test provider's
+//   completeSignIn(window, account, outcome) - drives the test provider's
 //                                            window (the page identity.launchWebAuthFlow
 //                                            opened) to "accepted" or "refused" for
 //                                            that account; what the window asks for

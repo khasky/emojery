@@ -50,14 +50,15 @@ export default defineConfig({
         // inheritance and glyph sizing are read off a real page's computed
         // styles, so the jsdom tests that covered them were a fake action row
         // in disguise and are gone. Same rule as mount.ts above - the decisions
-        // that need only values (radius/padding/margin lengths, the readable-colour
+        // that need only values (radius/padding/margin lengths, the readable-color
         // snap) live in the MEASURED mount-style-math.ts; what stays here reads a
         // live box. Only the geometry-free readActionLayout contract is tested
         // against this file directly.
         "src/ui/mount-style.ts",
-        // WXT registration stubs: a `defineContentScript` call and nothing
-        // else. Their one contract - the literal match patterns WXT extracts
-        // statically - is pinned by shared/content-matches.test.ts.
+        // WXT registration stubs: a `defineContentScript` call and nothing else.
+        // They take their match patterns from the site registry and wire that site's
+        // adapter, and shared/content-matches.test.ts pins both - a file importing a
+        // sibling site's adapter compiles clean.
         "src/entrypoints/*.content.ts",
         // covered by the browser-mode suite (vitest.browser.config.ts), not jsdom:
         "src/ui/picker.tsx",
@@ -89,8 +90,9 @@ export default defineConfig({
         // adding here: anything that needs neither the DOM nor a rendered view
         // belongs in that module, not this one.
         "src/entrypoints/popup/main.tsx",
-        // Staging-only diagnostics: `IS_STAGING_BUILD` folds to false in a
-        // production build and this module drops out of the bundle with it.
+        // A diagnostics view rendered only through the browser-mode suite: it ships in
+        // every build behind the Debug setting, so it is excluded for its renderer, not
+        // for its build mode.
         "src/entrypoints/popup/popup-queue.tsx",
         // Same rule, for the two background modules whose tests need a REAL
         // IndexedDB (history.browser.test.ts, votequeue.browser.test.ts): a 0%

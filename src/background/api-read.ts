@@ -156,13 +156,8 @@ async function sendMineRequest(token: string, targets: readonly TargetRef[]): Pr
     // Filtered to the requested targets and to emoji-shaped values rather than
     // trusted from a cast: the shared map is read per target key, so nothing
     // beyond this batch's keys has a reader, and a junk value would otherwise
-    // travel into the counts cache as `myReaction`.
-    //
-    // Two key shapes: the API answers under the same `site/targetId`
-    // token this request sent, while `targetKey()` is the LOCAL storage key
-    // (`site:targetId`) that the durable stores are already written under. Reading
-    // the wire under one and returning the other keeps the rename on the wire
-    // instead of turning it into a storage migration.
+    // travel into the counts cache as `myReaction`. The two key shapes in play are
+    // wireTargetToken's.
     const raw = isRecord(reply.body) && isRecord(reply.body.reactions) ? reply.body.reactions : {};
     const reactions: Record<string, string> = {};
     for (const target of targets) {
@@ -171,7 +166,7 @@ async function sendMineRequest(token: string, targets: readonly TargetRef[]): Pr
     }
     return reactions;
   } catch (error) {
-    logBackgroundError("fetchOwnReaction.request", error);
+    logBackgroundError("sendMineRequest", error);
     return {};
   }
 }
