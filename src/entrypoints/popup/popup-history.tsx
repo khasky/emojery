@@ -6,12 +6,14 @@ import { errorCopyKey, failureCode } from "../../shared/error-copy";
 import { t } from "../../shared/i18n";
 import type { HistoryStats, ReactionHistoryItem, RuntimeErrorCode } from "../../shared/messages";
 import { HISTORY_CLASS, HISTORY_DAY_CLASS, HISTORY_EMOJI_CLASS, HISTORY_LINK_CLASS, HISTORY_MID_CLASS, HISTORY_MORE_CLASS, HISTORY_NOMATCH_CLASS, HISTORY_SEARCH_INPUT_CLASS, HISTORY_TIME_CLASS, HISTORY_TITLE_CLASS } from "../../shared/page-dom";
+import { DAY_MS, MINUTE_MS } from "../../shared/relative-time";
 import { SITE_LABELS } from "../../shared/sites";
 import { sendRuntimeMessage } from "../../shared/webext";
 import { EmojiImg } from "../../ui/emoji-img";
 import { fmtExactDate, historyDayKey, historyDayLabel } from "./popup-history-dates";
-import { SearchField, SignInPrompt, shortenUrl } from "./popup-shared";
+import { SearchField, SignInPrompt } from "./popup-shared";
 import { HoverTooltip, renderUrlParts } from "./popup-tooltip";
+import { shortenUrl } from "./shorten-url";
 
 // Rows per fetched page; the list grows a page at a time via "Show more", so the
 // popup only ever holds what it revealed - history itself is uncapped.
@@ -29,9 +31,6 @@ type HistoryRange = (typeof HISTORY_RANGES)[number];
 // sums to less than what the other filters left in scope, and reads as reactions that
 // went missing.
 const HISTORY_FACET_EMOJI_LIMIT = 10;
-
-const DAY_MS = 86_400_000;
-const MINUTE_MS = 60_000;
 
 function rangeSince(range: HistoryRange): number | undefined {
   const now = Date.now();

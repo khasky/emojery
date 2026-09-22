@@ -39,6 +39,8 @@ function systemTheme(): Theme {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
+// Exported for theme.test.ts, which pins the media-query reading; the app reaches the
+// theme through the watcher below.
 export function detectTheme(): Theme {
   if (forced) return forced;
   if (typeof document === "undefined") return "light";

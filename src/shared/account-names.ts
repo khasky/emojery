@@ -32,7 +32,8 @@ export interface SeenAccount {
   /** Ms-epoch of the last sign-in with it on this device. */
   at: number;
   /** Which account of this provider it was, in the order they were first used
-   *  here - the default name is built from it ("Google 2"). Assigned once and kept,
+   *  here - providerTag builds its tag from it ("Google #2"), and it is never part
+   *  of the name the reader edits. Assigned once and kept,
    *  so renaming the first account does not make the next one take its number.
    *  Absent on a record written before this field existed; those keep the derived
    *  mark alone, since inventing a number now would misname an old account. */
@@ -105,7 +106,8 @@ function highestOrdinal(seen: SeenAccount[], provider: string): number {
   return seen.reduce((high, e) => (e.provider === provider && typeof e.ordinal === "number" ? Math.max(high, e.ordinal) : high), 0);
 }
 
-/** The accounts this device has used, newest first. */
+/** The accounts this device has used, newest first. Exported for account-names.test.ts,
+ *  which pins the ordering; inside this module only noteSeenAccount reads it. */
 export async function readSeenAccounts(): Promise<SeenAccount[]> {
   const stored = await storageLocalGet([ACCOUNTS_SEEN_KEY]);
   return asSeen(stored[ACCOUNTS_SEEN_KEY]).sort((a, b) => b.at - a.at);

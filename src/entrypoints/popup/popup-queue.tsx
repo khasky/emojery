@@ -12,7 +12,7 @@ import type { FlushSnapshot, QueuedVoteRow } from "../../shared/messages";
 import { HISTORY_CLASS, HISTORY_DAY_CLASS, HISTORY_EMOJI_CLASS, HISTORY_LINK_CLASS, HISTORY_MID_CLASS, HISTORY_TIME_CLASS, HISTORY_TITLE_CLASS } from "../../shared/page-dom";
 import { sendRuntimeMessage } from "../../shared/webext";
 import { EmojiImg } from "../../ui/emoji-img";
-import { shortenUrl } from "./popup-shared";
+import { shortenUrl } from "./shorten-url";
 
 // Fast enough to watch a backoff count down, slow enough to stay out of the way
 // of the flush loop it is observing.

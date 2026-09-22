@@ -14,6 +14,10 @@ export interface CachedTarget extends TargetCounts {
   fetchedAt: number;
 }
 
+// Overloaded so a caller that has already defaulted the empty case does not have to
+// assert away a null the body cannot return for it.
+function normalizeCachedTargetCounts(raw: Partial<CachedTarget>): CachedTarget;
+function normalizeCachedTargetCounts(raw: Partial<CachedTarget> | undefined): CachedTarget | null;
 function normalizeCachedTargetCounts(raw: Partial<CachedTarget> | undefined): CachedTarget | null {
   if (!raw) return null;
   const counts = raw.counts ?? {};
@@ -129,7 +133,7 @@ export async function setCachedCounts(byTargetKey: Record<string, { value: Targe
 export async function applyOptimisticReaction(target: TargetRef, reaction: Reaction | null, userId: string): Promise<{ next: CachedTarget; prevReaction: Reaction | null }> {
   const key = countsCacheKey(targetKey(target));
   const stored = await storageLocalGet([key]);
-  const prev: CachedTarget = normalizeCachedTargetCounts((stored[key] as Partial<CachedTarget> | undefined) ?? {})!;
+  const prev: CachedTarget = normalizeCachedTargetCounts((stored[key] as Partial<CachedTarget> | undefined) ?? {});
   // Same derivation the picker paints with (shared/reaction-delta) - the two
   // must not drift, or a re-mount reads back a different number than the one on
   // screen.

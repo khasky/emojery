@@ -5,7 +5,7 @@
 
 import { DEBUG_LOG_ENABLED, logDebug, logScopedError, redactSensitive } from "../shared/debug-log";
 
-export type ApiExchangeOutcome = { status: number; body: unknown } | { error: unknown };
+type ApiExchangeOutcome = { status: number; body: unknown } | { error: unknown };
 
 // One API round trip, as api-client.ts saw it: the request it sent and either the
 // status + decoded body or the rejection. Credential-shaped fields are redacted

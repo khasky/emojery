@@ -13,9 +13,9 @@
 // theme-contrast.spec.ts.
 
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
-import { type AxeViolation, axeSource, COLOR_SCHEMES, formatViolations, POPUP_TABS, TEXT_SPACING_CSS, WCAG_TAGS } from "./lib/axe";
+import { type AxeViolation, axeSource, COLOR_SCHEMES, formatViolations, hasHorizontalOverflowProbe, POPUP_TABS, REFLOW_WIDTH_PX, TEXT_SPACING_CSS, TEXT_SPACING_SELECTORS, WCAG_TAGS } from "./lib/axe";
 import { authConfigured, closeSession, extensionPageUrl, FIREFOX_NO_EXTENSION_PAGES, isFirefoxRun, launchSession, openPerSiteList, resolveExtensionId, type Session, signIn, signInSkipReason } from "./lib/extension";
-import { AGREE_CHECKBOX_SELECTOR, AGREE_SELECTOR, CARD_SELECTOR, TAGLINE_SELECTOR } from "./lib/selectors";
+import { AGREE_CHECKBOX_SELECTOR } from "./lib/selectors";
 
 // Whole file drives the extension's own pages through Playwright locators, keyboard
 // and aria snapshots; a11y-firefox.spec.ts runs the axe / reflow / text-spacing
@@ -25,6 +25,11 @@ test.skip(isFirefoxRun(), FIREFOX_NO_EXTENSION_PAGES);
 let session: Session;
 let context: BrowserContext;
 let extensionId: string;
+
+// Everything above the `authed popup states` block below drives the extension's own
+// pages only - no live site, no backend - which is the config's condition for no
+// retries: an intermittent failure here is a product bug, not the environment.
+test.describe.configure({ retries: 0 });
 
 test.beforeAll(async () => {
   // `keepOnboardingTab` is not about the auto-opened tab here - it disables the sweeper
@@ -124,7 +129,7 @@ test("axe: the opt-in Debug panel is WCAG A/AA clean, and costs the tab strip no
     await expect(openDebug).toHaveAttribute("aria-pressed", "true");
     await expect(page.getByRole("region")).toBeVisible();
     // Same rule with no tab selected at all: the active tab's underline is carried by every
-    // tab and merely coloured in, so leaving the strip does not shorten it.
+    // tab and merely colored in, so leaving the strip does not shorten it.
     expect(await verticals(), "opening the Debug panel must not move the tab strip").toEqual(before);
     // No tab may claim selection while the panel showing is not a tab's.
     await expect(page.locator('[role="tab"][aria-selected="true"]')).toHaveCount(0);
@@ -263,39 +268,35 @@ test("keyboard: popup tab order, roving tablist and a visible panel focus ring",
   await page.close();
 });
 
-const hasHorizontalOverflow = (page: Page) => page.evaluate(() => Math.max(document.documentElement.scrollWidth - document.documentElement.clientWidth, document.body.scrollWidth - document.body.clientWidth) > 0);
+const hasHorizontalOverflow = (page: Page) => page.evaluate(hasHorizontalOverflowProbe);
 
 test("reflow: no horizontal scrolling at narrow widths (WCAG 1.4.10)", async () => {
   const page = await openA11yPage();
 
-  // The auth page is a normal tab, so the 320 CSS px reflow breakpoint applies as-is.
-  await page.setViewportSize({ width: 320, height: 480 });
+  await page.setViewportSize({ width: REFLOW_WIDTH_PX.auth, height: 480 });
   await page.goto(authUrl());
   await expect(page.locator(AGREE_CHECKBOX_SELECTOR)).toBeVisible();
-  expect(await hasHorizontalOverflow(page), "auth page overflows at 320px").toBe(false);
+  expect(await hasHorizontalOverflow(page), `auth page overflows at ${REFLOW_WIDTH_PX.auth}px`).toBe(false);
 
-  // Onboarding is a normal tab too, so it gets the same 320 CSS px breakpoint.
-  await page.setViewportSize({ width: 320, height: 480 });
+  await page.setViewportSize({ width: REFLOW_WIDTH_PX.onboarding, height: 480 });
   await page.goto(onboardingUrl());
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  expect(await hasHorizontalOverflow(page), "onboarding page overflows at 320px").toBe(false);
+  expect(await hasHorizontalOverflow(page), `onboarding page overflows at ${REFLOW_WIDTH_PX.onboarding}px`).toBe(false);
 
-  // The popup is fixed-size browser chrome with a declared 360px floor
-  // (popup.css min-width) - assert no overflow at that floor.
-  await page.setViewportSize({ width: 360, height: 480 });
+  await page.setViewportSize({ width: REFLOW_WIDTH_PX.popup, height: 480 });
   await page.goto(popupUrl());
   await expect(page.getByRole("tab", { name: "Settings" })).toBeVisible();
-  expect(await hasHorizontalOverflow(page), "popup overflows at its 360px floor").toBe(false);
+  expect(await hasHorizontalOverflow(page), `popup overflows at its ${REFLOW_WIDTH_PX.popup}px floor`).toBe(false);
   await page.close();
 });
 
 test("text spacing: key text survives WCAG 1.4.12 overrides without clipping", async () => {
   const page = await openA11yPage();
   const clipped: string[] = [];
-  const checks: { url: string; selectors: string[] }[] = [
-    { url: authUrl(), selectors: [`${CARD_SELECTOR} h1`, TAGLINE_SELECTOR, "label", `${AGREE_SELECTOR} span`, "button.primary"] },
-    { url: onboardingUrl(), selectors: [".card h1", ".checklist .label"] },
-    { url: popupUrl(), selectors: [".tab", ".row-label > span:first-child", ".brand-title span"] },
+  const checks: { url: string; selectors: readonly string[] }[] = [
+    { url: authUrl(), selectors: TEXT_SPACING_SELECTORS.auth },
+    { url: onboardingUrl(), selectors: TEXT_SPACING_SELECTORS.onboarding },
+    { url: popupUrl(), selectors: TEXT_SPACING_SELECTORS.popup },
   ];
   for (const { url, selectors } of checks) {
     await page.goto(url);
@@ -313,6 +314,8 @@ test("text spacing: key text survives WCAG 1.4.12 overrides without clipping", a
 });
 
 test.describe("authed popup states", () => {
+  // These reach the sign-in backend, so they take the suite default back.
+  test.describe.configure({ retries: Number(process.env.E2E_RETRIES ?? 2) });
   test.skip(!authConfigured(), signInSkipReason("the authed a11y checks"));
 
   test("axe: account tab rows and the armed delete flow", async () => {

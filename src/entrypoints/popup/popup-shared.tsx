@@ -33,7 +33,7 @@ export const SignInPrompt = ({ message }: { message: string }) => (
 );
 
 // Each icon is an array of <path>/<circle> children (multi-stroke glyphs need more
-// than one), rendered stroke-only; the colour follows the icon class set in popup.css.
+// than one), rendered stroke-only; the color follows the icon class set in popup.css.
 export const svgIcon = (children: ComponentChild[], cls: string) => (
   <svg viewBox="0 0 24 24" class={cls} aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
     {children}
@@ -114,7 +114,7 @@ function parseTabUrl(raw: string | undefined): URL | null {
 }
 
 // A supported site's real vendor logo (see ui/brand-icons.ts). Filled, not
-// stroked; brand-coloured, or theme text colour for the monochrome marks.
+// stroked; brand-colored, or theme text color for the monochrome marks.
 export const brandIcon = (site: SupportedSite) => {
   const brand = SITE_BRAND[site];
   return (
@@ -123,5 +123,3 @@ export const brandIcon = (site: SupportedSite) => {
     </svg>
   );
 };
-
-export { shortenUrl } from "./shorten-url";

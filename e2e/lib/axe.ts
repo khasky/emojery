@@ -6,6 +6,7 @@
 // a11y-firefox.spec.ts scans the same pages through firefox-bridge.ts.
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
+import { AGREE_SELECTOR, CARD_SELECTOR, TAGLINE_SELECTOR } from "./selectors";
 
 export const axeSource = readFileSync(createRequire(import.meta.url).resolve("axe-core/axe.min.js"), "utf8");
 
@@ -37,3 +38,23 @@ export const TEXT_SPACING_CSS = `
   }
   p, h1, h2, h3, li { margin-bottom: 2em !important; }
 `;
+
+// The reflow and text-spacing tables both specs walk. They live here because the
+// two files are mutually exclusive by engine skip: a selector added to only one
+// list is never checked on the other engine, and both runs stay green.
+
+/** Narrowest width each page must survive without horizontal scrolling (WCAG 1.4.10).
+ *  auth and onboarding are normal tabs, so the 320 CSS px breakpoint applies as-is;
+ *  the popup is fixed-size browser chrome with a declared 360px floor (popup.css
+ *  min-width). */
+export const REFLOW_WIDTH_PX = { auth: 320, onboarding: 320, popup: 360 } as const;
+
+/** The always-visible reading surfaces checked for clipping under TEXT_SPACING_CSS. */
+export const TEXT_SPACING_SELECTORS = {
+  auth: [`${CARD_SELECTOR} h1`, TAGLINE_SELECTOR, "label", `${AGREE_SELECTOR} span`, "button.primary"],
+  onboarding: [`${CARD_SELECTOR} h1`, ".checklist .label"],
+  popup: [".tab", ".row-label > span:first-child", ".brand-title span"],
+} as const;
+
+/** Serialized into the page by both specs, so keep it closure-free. */
+export const hasHorizontalOverflowProbe = (): boolean => Math.max(document.documentElement.scrollWidth - document.documentElement.clientWidth, document.body.scrollWidth - document.body.clientWidth) > 0;

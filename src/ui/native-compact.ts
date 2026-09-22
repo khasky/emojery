@@ -5,12 +5,12 @@
 // of like text whose width we may reduce - a bare COUNT ("327 555" -> "327K") and a verbose
 // LABEL with its short name in quotes.
 import { elementsToArray, type PickerInsertionPoint } from "../shared/adapter";
-import { OWN_NODES_SELECTOR } from "../shared/dom";
+import { nsAttr, OWN_NODES_SELECTOR } from "../shared/dom";
 import { queryAllDeep } from "../shared/dom-query";
 
 // Original counter text, stamped on the counter's parent element so the change
 // is idempotent and reversible (see restoreCompactedCounts).
-export const COUNT_ATTR = "data-khasky-emojery-count";
+export const COUNT_ATTR = nsAttr("count");
 const COUNT_ATTR_SELECTOR = `[${COUNT_ATTR}]`;
 
 // A bare integer counter: plain digits, or three-digit groups joined by a locale separator
@@ -58,7 +58,7 @@ function truncated(value: number, oneDecimal: boolean): string {
 }
 
 // A verbose action label carrying its own short form in quotes - FB wraps the reaction
-// name this way in several locales (RU «Поставить "Нравится"»). The quoted core IS the
+// name this way in several locales (RU "Поставить "Нравится""). The quoted core IS the
 // site's short name, so extracting it shortens the label without inventing a translation.
 const QUOTED_LABEL_RE = /^[^"«„“”]*["«„“]([^"«»„“”]{2,})["»“”]$/u;
 

@@ -13,7 +13,8 @@
 
 import type { AggregateCounts, Reaction, ReactionCounts } from "./reactions";
 
-// Never mutates the input.
+// Never mutates the input. Exported for reaction-delta.test.ts, which pins the
+// transition table; in the app it is reached through applyReactionTransition.
 export function applyCountsDelta(counts: ReactionCounts, prev: Reaction | null, next: Reaction | null): ReactionCounts {
   if (prev === next) return { ...counts };
   const out = { ...counts };
@@ -28,7 +29,8 @@ export function applyCountsDelta(counts: ReactionCounts, prev: Reaction | null, 
 }
 
 // The total counts REACTORS, not reactions: it moves only when one is added or
-// removed. Switching from one emoji to another leaves it where it was.
+// removed. Switching from one emoji to another leaves it where it was. Exported for
+// its own test, the same way as applyCountsDelta above.
 export function applyTotalDelta(total: number, prev: Reaction | null, next: Reaction | null): number {
   if (prev && next === null) return Math.max(0, total - 1);
   if (!prev && next !== null) return total + 1;

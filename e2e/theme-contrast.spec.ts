@@ -224,7 +224,7 @@ async function openSite(page: Page, scenario: ThemeScenario): Promise<boolean> {
   if (scenario.site === "amazon") await clickAmazonContinueShopping(page, scenario.url);
   // Cleared BEFORE and AFTER the settle, the same way selector-drift.spec.ts does
   // it: a consent or ads dialog can render a second after `load`, so one early
-  // pass misses it and every colour then samples the overlay instead of the page.
+  // pass misses it and every color then samples the overlay instead of the page.
   await dismissInterstitials(page);
   await page.waitForTimeout(1_500);
   await dismissInterstitials(page);
@@ -234,9 +234,6 @@ async function openSite(page: Page, scenario: ThemeScenario): Promise<boolean> {
 // True for the logged-out social platforms that anti-bot-block automated
 // browsers (login walls, error interstitials); only these are eligible to skip.
 const SOCIAL_SITES = new Set(["instagram", "threads"]);
-function isSocialSite(scenario: ThemeScenario): boolean {
-  return SOCIAL_SITES.has(scenario.site);
-}
 
 // Body-text signals of a wall, kept social-only (see below). Named so the skip can quote
 // the sentence that matched instead of just the URL - "log in to" legitimately appears on
@@ -264,7 +261,7 @@ async function blockedReason(page: Page, scenario: ThemeScenario): Promise<strin
   // URL isn't a product page, the product (and its trigger) was never served, so
   // skip rather than false-fail.
   if (scenario.site === "amazon") return amazonRedirectedAwayFromProduct(page, scenario) ? `redirected away from the product page: ${page.url()}` : null;
-  if (!isSocialSite(scenario)) return null;
+  if (!SOCIAL_SITES.has(scenario.site)) return null;
   const text = await page.evaluate(() => (document.body?.textContent ?? "").replace(/\s+/g, " ").slice(0, 4000)).catch(() => "");
   const hit = text.match(WALL_TEXT);
   return hit ? `login wall / interstitial text: "${hit[0]}" (${page.url()})` : null;
@@ -337,7 +334,7 @@ function triggerState(page: Page): Promise<{ visible: boolean; active: boolean }
 }
 
 // The first host whose shadow trigger paints a box, through the same walk.
-// Resolved as an element HANDLE so the colour math in measureTrigger stays a
+// Resolved as an element HANDLE so the color math in measureTrigger stays a
 // type-checked callback instead of re-declaring the walk inline.
 async function firstPaintedTriggerHost(page: Page) {
   const handle = await page.evaluateHandle<HTMLElement | null>(`(() => {
@@ -463,7 +460,7 @@ async function pickFirstReaction(page: Page): Promise<string | null> {
   if ((await triggerState(page)).active) return null;
   // The tray opens via the KEYBOARD (focus + Space), not a coordinate click: the
   // trigger keeps re-measuring itself for ~2.4s after mount and Playwright's
-  // coordinate mapping ignores CSS `zoom`, so a click aimed at a measured centre
+  // coordinate mapping ignores CSS `zoom`, so a click aimed at a measured center
   // lands beside the button and the grid "never appears" (see openPickerTray).
   // The grid-item click below stays a real mouse event - the picker ignores
   // untrusted ones, so an in-page .click() is dropped without a trace.

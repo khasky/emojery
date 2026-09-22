@@ -6,7 +6,7 @@
 // (what outlives a mount: the route, the shown and placed tallies).
 import { render } from "preact";
 import type { PickerInsertionPoint } from "../shared/adapter";
-import { HOST_CLASS, HOST_SELECTOR, MOUNT_ATTR } from "../shared/dom";
+import { HOST_CLASS, HOST_SELECTOR, MOUNT_ATTR, nsAttr } from "../shared/dom";
 import type { VoteBroadcast } from "../shared/messages";
 import type { CountsRefresh } from "../shared/reactions";
 import { type TargetKey, targetKey } from "../shared/storage";
@@ -102,7 +102,7 @@ export function dispatchVoteSync(b: VoteBroadcast): void {
 /** Test seam: the registries below are module state and outlive a single test's setup.
  *  Only the per-key registries are cleared - every other piece of module state is left
  *  standing (the shared pending-anchor observer and its maps, the shown
- *  and placed target sets, the last reported route href, the prune clock). */
+ *  and placed target sets, the last reported route href). */
 export function resetMountRegistryForTests(): void {
   mountedTargets.clear();
   mountedAnchors.clear();
@@ -309,7 +309,7 @@ function isMountNode(node: Node): boolean {
 // Compared as the RAW spec string - the browser-normalized style.cssText formats
 // differently and would flag a phantom change on every scan (a permanent remount loop).
 // The mark and its key are written (wrapHost) and read (wrapperSpecChanged) here only.
-const WRAPPER_SPEC_ATTR = "data-khasky-emojery-wrapper-spec";
+const WRAPPER_SPEC_ATTR = nsAttr("wrapper-spec");
 
 function wrapperSpecKey(wrapper: NonNullable<PickerInsertionPoint["wrapper"]>): string {
   return [wrapper.tagName, wrapper.className ?? "", wrapper.style ?? ""].join("|");

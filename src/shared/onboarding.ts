@@ -51,7 +51,8 @@ export async function resetOnboardingLatches(): Promise<void> {
   await storageLocalRemove([COACH_SEEN_KEY, FIRST_REACTION_KEY, TRIGGER_SEEN_KEY]);
 }
 
-/** Whether the first reaction is still owed. Missing key = not in play. */
+/** Whether the first reaction is still owed. Missing key = not in play. Exported for
+ *  onboarding.test.ts; inside this module only the completion path reads it. */
 export async function isFirstReactionOwed(): Promise<boolean> {
   const items = await storageLocalGet(FIRST_REACTION_KEY);
   return items[FIRST_REACTION_KEY] === true;

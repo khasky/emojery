@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // Visual blending for the inline trigger: read the host page's typography and the surface
-// (border-radius / fill / text colour) of the action-row buttons around the injection point,
+// (border-radius / fill / text color) of the action-row buttons around the injection point,
 // and stamp them onto the picker host so the trigger reads as a sibling of the site's own
 // controls. Reads the page, writes only onto our own host (plus the one same-task detach in
 // probeNativeFlankMargins); no mount lifecycle state and no storage live here. What outlives a
@@ -9,7 +9,7 @@
 // the two module-level caches below (spacingBaselines, revealedHosts) are host-keyed weak
 // collections that die with their element.
 import { elementsToArray, type PickerInsertionPoint } from "../shared/adapter";
-import { BUTTON_DROP_CLASS, GLYPH_H_VAR, HIDDEN_ATTR, HOST_CLASS, HOST_SELECTOR, ICON_SIZE_VAR, LAYOUT_ATTR, PAGE_FONT_VAR, ROW_H_VAR, SITE_BG_VAR, SITE_FG_VAR, SITE_PAD_X_VAR, SITE_RADIUS_VAR } from "../shared/dom";
+import { BUTTON_DROP_CLASS, GLYPH_H_VAR, HIDDEN_ATTR, HOST_CLASS, HOST_SELECTOR, ICON_SIZE_VAR, LAYOUT_ATTR, nsAttr, PAGE_FONT_VAR, ROW_H_VAR, SITE_BG_VAR, SITE_FG_VAR, SITE_PAD_X_VAR, SITE_RADIUS_VAR } from "../shared/dom";
 import { getCurrentTheme } from "../shared/theme";
 import { composite, isSolidFill, parseRgba, type RgbaColor, rgbaToRgbString } from "./mount-color";
 import { clampRadius, largestCornerPx, marginPx, normalizeReadableColor, pickRepresentativeRadius, readPaddingInline } from "./mount-style-math";
@@ -265,11 +265,15 @@ function defaultCanvasColor(): RgbaColor {
 }
 
 // Collapse an asymmetric border-radius to its largest corner, as a px length: segmented
-// controls (YouTube's like/dislike pill, `18px 0 0 18px`) normalise to `18px` so the
+// controls (YouTube's like/dislike pill, `18px 0 0 18px`) normalize to `18px` so the
 // standalone trigger takes the full pill shape instead of a lopsided half-rounding, and a
 // circular sibling (`50%`, YouTube's round more-menu button) resolves against its own box to
 // a comparable px value - never a literal "50%", which on our wider trigger would bulge the
 // ends into an ellipse instead of the site's fixed-radius stadium.
+// Set while the sampled surface is a real painted fill; picker.css keys the
+// row-height match on it.
+const FILLED_ATTR = nsAttr("filled");
+
 function normalizeRadius(cs: CSSStyleDeclaration, rect: DOMRect): string | undefined {
   const corners = [cs.borderTopLeftRadius, cs.borderTopRightRadius, cs.borderBottomRightRadius, cs.borderBottomLeftRadius];
   const max = largestCornerPx(corners, rect.width, rect.height);
@@ -285,9 +289,9 @@ export function applySiteButtonStyle(host: HTMLElement, style: SiteButtonStyle):
   if (style.backgroundColor) {
     host.style.setProperty(SITE_BG_VAR, style.backgroundColor);
   }
-  // Gate the row-height match (picker.css) on a real painted surface: a transparent icon
-  // button's tap-target box is not its visible size, so the trigger must not stretch to it.
-  host.toggleAttribute("data-khasky-emojery-filled", isSolidFill(style.backgroundColor));
+  // Gate the row-height match on a real painted surface: a transparent icon button's
+  // tap-target box is not its visible size, so the trigger must not stretch to it.
+  host.toggleAttribute(FILLED_ATTR, isSolidFill(style.backgroundColor));
   if (style.color) host.style.setProperty(SITE_FG_VAR, style.color);
   applySitePadding(host, style);
 }
@@ -453,7 +457,7 @@ function isOwnMountNode(el: HTMLElement): boolean {
 }
 
 // Re-apply only the trigger's SIZE + SHAPE from the page's *current* styling, on a short
-// schedule after mount (see mount-reblend.ts) - Reddit hydrates its buttons a beat late. Colours
+// schedule after mount (see mount-reblend.ts) - Reddit hydrates its buttons a beat late. Colors
 // are NOT re-stamped on this host: a later re-read risks capturing a neighbour's
 // hover/active fill. The read itself still refreshes the session's remembered site surface
 // (readSiteButtonStyle -> rememberSiteStyle), which mounts with an unreadable row fall back to.
@@ -504,7 +508,7 @@ export function hostShapeSignature(host: HTMLElement): string {
 // known - the trigger must first paint at its exact size, never resize in front of the
 // user (YouTube's watch row hydrates its icons a beat late). Revealed on the first
 // successful glyph resolve, or unconditionally by the bounded deadline in mount-reblend.ts.
-const SIZING_ATTR = "data-khasky-emojery-sizing";
+const SIZING_ATTR = nsAttr("sizing");
 const revealedHosts = new WeakSet<HTMLElement>();
 
 export function revealHost(host: HTMLElement): void {

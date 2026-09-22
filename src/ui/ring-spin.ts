@@ -5,12 +5,14 @@
 // registry but the moment a host is dropped (see forgetRingHost / pruneRingHosts,
 // called from ui/mount-registry.ts).
 
+import { nsAttr } from "../shared/dom";
+
 // Gates the RGB ring's CSS spin (picker.css). Set only while the ring's host is BOTH allowed
 // to animate (the Reaction-animations setting) and on screen.
-export const ANIMATE_ATTR = "data-khasky-emojery-animate";
+export const ANIMATE_ATTR = nsAttr("animate");
 // The spin is a GREETING, not a permanent state: the masked, overflow-clipped ring box is
 // GPU-re-rastered every frame it turns, the extension's largest idle cost (why the mask is
-// there: picker.css `.khasky-emojery-ring`; what the spin costs: ring-spin.test.ts).
+// there: picker.css `.khasky-emojery-ring`; the window and its re-arm: ring-spin.test.ts).
 // So each host spins for a bounded window whenever it comes into view and re-arms when the user
 // points at or focuses it - present every time a user looks at a trigger, free on a parked tab.
 export const RING_SPIN_WINDOW_MS = 8_000;

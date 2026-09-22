@@ -10,6 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { type ChromeShimHandle, installChromeShim } from "../test/chrome-shim";
 import { clearAccountKeys, ensureAccountKey, sha256 } from "./account-keys";
 import { clearEpochKeysForUser, currentEpoch, EpochKeyRefusal, ensureEpochKey, reRegisterEpochKey, signVote } from "./epoch-keys";
+import { KEYS_DB_NAME } from "./keys-db";
 import { base64UrlToBytes, bytesToBase64Url, epochKeyMessage, issueMessage } from "./vote-signing";
 
 const suite = RSABSSA.SHA384.PSS.Deterministic();
@@ -63,7 +64,7 @@ function stubApi(refuse: Partial<Record<"params" | "issue" | "register", { statu
 
 async function deleteDatabase(): Promise<void> {
   await new Promise<void>((resolve) => {
-    const req = indexedDB.deleteDatabase("emojery-epoch-keys");
+    const req = indexedDB.deleteDatabase(KEYS_DB_NAME);
     req.onsuccess = req.onerror = req.onblocked = () => resolve();
   });
 }

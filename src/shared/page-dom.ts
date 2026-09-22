@@ -118,7 +118,7 @@ export function providerButtonSelector(provider: string): string {
 // The button that reveals the providers past the first few; gone once they show.
 export const MORE_PROVIDERS_CLASS = "more-providers";
 export const MORE_PROVIDERS_SELECTOR = `button.${MORE_PROVIDERS_CLASS}`;
-// The spinner shown while the provider window is open and the enrolment runs.
+// The spinner shown while the provider window is open and the enrollment runs.
 export const SPINNER_CLASS = "spinner";
 export const SPINNER_SELECTOR = `.${SPINNER_CLASS}`;
 // The account row's name: a button that opens the rename field in its place, and
@@ -136,7 +136,7 @@ export const LAST_ACCOUNT_SELECTOR = `.${LAST_ACCOUNT_CLASS}`;
 // element: a button where the provider reopens its own picker, a link to the
 // provider's account page where it cannot (auth/main.tsx OtherAccount).
 export const OTHER_ACCOUNT_CLASS = "other-account";
-export const OTHER_ACCOUNT_SELECTOR = `.${OTHER_ACCOUNT_CLASS}`;
+const OTHER_ACCOUNT_SELECTOR = `.${OTHER_ACCOUNT_CLASS}`;
 export function otherAccountSelector(provider: string): string {
   return `${OTHER_ACCOUNT_SELECTOR}[data-provider="${provider}"]`;
 }

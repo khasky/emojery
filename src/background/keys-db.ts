@@ -7,7 +7,9 @@
 
 import { createIdbHandle } from "./idb-open";
 
-const DB_NAME = "emojery-epoch-keys";
+// Exported so the browser test tears down the real database by name rather than by a
+// retyped literal, which a rename would leave pointing at nothing.
+export const KEYS_DB_NAME = "emojery-epoch-keys";
 // v2 added the account-keys store; the epoch-key store is kept as it was.
 const VERSION = 2;
 
@@ -15,7 +17,7 @@ export const EPOCH_KEYS_STORE = "keys";
 export const EPOCH_KEYS_USER_INDEX = "userId";
 export const ACCOUNT_KEYS_STORE = "account-keys";
 
-export const keysDb = createIdbHandle(DB_NAME, VERSION, (db) => {
+export const keysDb = createIdbHandle(KEYS_DB_NAME, VERSION, (db) => {
   if (!db.objectStoreNames.contains(EPOCH_KEYS_STORE)) {
     const store = db.createObjectStore(EPOCH_KEYS_STORE, { keyPath: "id" });
     store.createIndex(EPOCH_KEYS_USER_INDEX, "userId", { unique: false });

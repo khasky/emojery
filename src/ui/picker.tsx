@@ -61,7 +61,7 @@ interface Initial {
   isAuthed: boolean;
 }
 
-export interface PickerListeners {
+interface PickerListeners {
   onVote: (b: VoteBroadcast) => void;
   onRefresh: (next: CountsRefresh) => void;
 }
@@ -139,7 +139,7 @@ export function Picker({ initial, typography, onPick, onSignIn, portalRoot, subs
   // backend-fetched, cached 24h), so it is filled from the first render. Re-read on each open,
   // never mid-open, so a background refresh cannot reshuffle a visible row.
   const [popular, setPopular] = useState<string[]>(() => getPopularSync());
-  // Per-category colour intensity (0 = grayscale, 1 = full colour), driven
+  // Per-category color intensity (0 = grayscale, 1 = full color), driven
   // by the scroll position of the popover's grid (see the scroll-spy effect).
   const [categoryColor, setCategoryColor] = useState<number[]>(() => CATEGORIES.map(() => 0));
   // Bumped when locale data finishes loading so labels/search re-render.
@@ -327,7 +327,7 @@ export function Picker({ initial, typography, onPick, onSignIn, portalRoot, subs
     await castPick(r, pickOriginFromEvent(ev));
   };
 
-  // Sign-in landed while the gate held a pick: honour the gate's promise and cast
+  // Sign-in landed while the gate held a pick: honor the gate's promise and cast
   // it. `authed` only ever flips through the background's auth-change push (subscribe), so
   // the page cannot forge this - the trusted click that chose the emoji still gates it.
   useEffect(() => {
@@ -578,7 +578,7 @@ function pickOriginFromEvent(ev?: MouseEvent): ReactionAnimationOrigin | undefin
   return current instanceof HTMLElement ? elementOrigin(current) : undefined;
 }
 
-// Centre of an element in viewport coordinates - the animation origin when there is no
+// Center of an element in viewport coordinates - the animation origin when there is no
 // click to read one from (keyboard activation, the gate's post-sign-in cast).
 function elementOrigin(el: HTMLElement | null): ReactionAnimationOrigin | undefined {
   if (!el) return undefined;

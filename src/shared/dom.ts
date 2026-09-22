@@ -12,6 +12,13 @@
 // collide with a host page's own names.
 const NS = "khasky-emojery";
 
+/** Builds a data-attribute name in the shared namespace. For a name one module both
+ *  writes and reads: it stays next to that writer per the rule above, and still moves
+ *  with NS instead of spelling the prefix out again. */
+export function nsAttr(name: string): string {
+  return `data-${NS}-${name}`;
+}
+
 // --- Roots and mount markers ---
 
 export const HOST_CLASS = `${NS}-host`;
@@ -117,11 +124,11 @@ export const COACH_BODY_CLASS = `${NS}-coach-body`;
 
 // --- Reaction animations, appended to the page (animations.ts) ---
 
-// The fixed overlay div the keyframes and particle rules render into, and the <style>
-// that carries them. The id doubles as the sprite scope and as the
-// `#khasky-emojery-reaction-animations` selector in animations.css.
+// The fixed overlay div the keyframes and particle rules render into. The id
+// doubles as the sprite scope and as the `#khasky-emojery-reaction-animations`
+// selector in animations.css. The <style> carrying them is named next to its
+// writer in ui/animations.ts, which is the only module that reads it.
 export const ANIMATION_LAYER_ID = `${NS}-reaction-animations`;
-export const ANIMATION_STYLE_ID = `${ANIMATION_LAYER_ID}-style`;
 export const CLICK_FLOAT_CLASS = `${NS}-reaction-click-float`;
 export const INTRO_PARTICLE_CLASS = `${NS}-reaction-intro-particle`;
 // Carried by the host only while the drop-in plays; mount-style.ts reads it to skip
