@@ -45,16 +45,16 @@
   --khasky-emojery-accent-soft: rgba(24, 119, 242, 0.08);
   --khasky-emojery-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
 
-  /* RGB ring colour stops, shared by the row trigger and the icon-column circle. */
+  /* RGB ring color stops, shared by the row trigger and the icon-column circle. */
   --khasky-emojery-ring-stops: #f00, #f80, #ff0, #0f0, #0ff, #08f, #80f, #f08, #f00;
 
   /* One focus indicator for every focusable control in the picker. Each use site keeps
      its own `outline-offset` - the popover's is inset (see the note there). */
   --khasky-emojery-focus-ring: 2px solid var(--khasky-emojery-accent);
 
-  /* The counter trio renders slightly under the trigger's glyph so the stack stays compact
-     (0.87 ~ 1.15/1.32, the old em ratio). Used twice - the width floor below and the rendered
-     font-size - and the two MUST move together or the two trigger states shift the row. */
+  /* The counter trio renders slightly under the trigger's glyph so the stack stays compact.
+     Used twice - the width floor below and the rendered font-size - and the two MUST move
+     together or the two trigger states shift the row. */
   --khasky-emojery-trio-scale: 0.87;
 }
 
@@ -188,8 +188,8 @@
 }
 
 /* The rotating layer. A square at least twice the box's longest side still covers every
-   corner at any angle (its inscribed circle spans the full diagonal). Centred first, then
-   rotated about its own centre - `translate`/`rotate` compose in that order. */
+   corner at any angle (its inscribed circle spans the full diagonal). Centered first, then
+   rotated about its own center - `translate`/`rotate` compose in that order. */
 .khasky-emojery-ring::before {
   content: "";
   position: absolute;
@@ -335,7 +335,7 @@
   box-shadow: none;
 }
 
-/* Count beneath the circle, in the rail's text colour - like native counts.
+/* Count beneath the circle, in the rail's text color - like native counts.
    The text label is dropped: an icon rail shows just the glyph, and the label
    would overflow the narrow column. */
 :host([data-khasky-emojery-layout="icon-column"]) .khasky-emojery-counter-total {
@@ -360,14 +360,15 @@
   position: fixed;
   /* 18em ~ 252-324px depending on inherited base - wide enough for the breakdown
      labels without dominating the viewport on big-font pages.
-     The floor keeps the category bar on ONE row: its targets are pinned at 24 CSS px
-     (WCAG) while everything around them scales with the font, so at the 14px
-     font floor 18em is ~15px too narrow for the last category. Terms, outside-in:
-     the popover's 2 x 0.6em padding, the scroller's 0.15em padding-right, the bar's
-     2 x 0.15em padding, then the targets and their 0.1em gaps - plus 20px for the
-     popover's own 1px borders (the width is border-box, so they sit inside it) and a
-     classic scrollbar: 15px on Windows Chrome, 17px and a fraction more in Firefox
-     at a fractional device scale. Slack, not breakage, where the scrollbar overlays.
+     The calc keeps the category bar on ONE row: its targets are pinned at 24 CSS px
+     (WCAG) while everything around them scales with the font, so at the 14px font
+     floor the targets and their em-scaled surroundings already fill 18em to within
+     2px. Terms, outside-in: the popover's 2 x 0.6em padding, the scroller's 0.15em
+     padding-right, the bar's 2 x 0.15em padding, then the targets and their 0.1em
+     gaps. The trailing 20px is what 18em cannot cover: the popover's own 1px borders
+     (the width is border-box, so they sit inside it) and a classic scrollbar - 15px
+     on Windows Chrome, 17px and a fraction more in Firefox at a fractional device
+     scale. Where the scrollbar overlays instead, that width simply goes unused.
      Category count comes from picker.tsx, so a 10th category widens the popover
      instead of overflowing. */
   width: max(18em, calc(var(--khasky-emojery-cat-count, 9) * 24px + (var(--khasky-emojery-cat-count, 9) - 1) * 0.1em + 1.65em + 20px));
@@ -507,7 +508,7 @@
 }
 
 /* Accent underline marking the in-view category; its opacity is set inline
-   from the same scroll intensity so it fades in together with the colour. */
+   from the same scroll intensity so it fades in together with the color. */
 .khasky-emojery-cat-underline {
   position: absolute;
   left: 18%;
@@ -640,7 +641,7 @@
 }
 
 /* `all: unset` lets the <button> inherit the section header's small uppercase
-   treatment; only the accent colour marks it as an action. */
+   treatment; only the accent color marks it as an action. */
 .khasky-emojery-section-clear {
   all: unset;
   cursor: pointer;
@@ -768,7 +769,7 @@
 }
 
 /* The trigger's RGB ring flattened into a 2px frame: same stops, same
-   content-box mask as .khasky-emojery-ring, so the tooltip carries the colours
+   content-box mask as .khasky-emojery-ring, so the tooltip carries the colors
    of the button it points at. Static - the spin stays on the trigger, where it
    is time-boxed (ring-spin.ts). */
 .khasky-emojery-coach-tip::before {

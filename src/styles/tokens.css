@@ -6,7 +6,7 @@
  * cascade order. Plain RULES are not: `.sr-only`, `a:hover` and the two `.primary`
  * state rules stay byte-identical in auth.css and popup.css, because hoisting would
  * move them ahead of each page's own rules. The bare `a` rule is the exception: popup.css
- * does not import styles/page-surface.css, so it restates the link colour that sheet
+ * does not import styles/page-surface.css, so it restates the link color that sheet
  * gives auth.
  *
  * The in-page picker cannot import this file - it renders in a shadow root on a
@@ -46,9 +46,9 @@
      in both themes (same value on the landing site). */
   --khasky-emojery-fixed-mark: #fec206;
 
-  /* Four-point star behind the brand sparkles, applied as a `mask` so the colour
-     stays in CSS. A native ✨ was rejected: its glyph and metrics differ per
-     platform, which moved the sparkles off their marks. */
+  /* Four-point star behind the brand sparkles, applied as a `mask` so the color
+     stays in CSS. A native sparkles emoji was rejected: its glyph and metrics differ
+     per platform, which moved the sparkles off their marks. */
   --khasky-emojery-sparkle-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 0c1 6.5 5.5 11 12 12-6.5 1-11 5.5-12 12-1-6.5-5.5-11-12-12C6.5 11 11 6.5 12 0z'/%3E%3C/svg%3E");
 
   --khasky-emojery-error-text: #c1303f;

@@ -69,8 +69,8 @@ function resolveAmazonHomeUrl(activeHost: string | null, lang: string): string {
   // `a.amazon.evil.com` never becomes the popup's Amazon link.
   //
   // smile.amazon.com is retired (Amazon shut AmazonSmile down in 2023) and is no
-  // longer a run host, but the anchored regional catch-all below still recognises
-  // it - so normalise it here, or an old tab would hand the popup a dead link.
+  // longer a run host, but the anchored regional catch-all below still recognizes
+  // it - so normalize it here, or an old tab would hand the popup a dead link.
   if (activeHost === "smile.amazon.com") return "https://www.amazon.com/";
   if (activeHost && detectSupportedSite(activeHost) === "amazon") return `https://${activeHost}/`;
   const base = lang.split("-")[0] ?? "";

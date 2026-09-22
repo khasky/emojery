@@ -17,7 +17,7 @@ interface ActionMatcher {
   stems?: RegExp;
   /** Stable SVG `data-icon` value (X), tested against a descendant svg[data-icon]. */
   dataIcon?: RegExp;
-  /** Distinctive `svg path[d]` prefix(es) (Threads), whitespace-normalised. */
+  /** Distinctive `svg path[d]` prefix(es) (Threads), whitespace-normalized. */
   iconPathPrefix?: string | readonly string[];
 }
 

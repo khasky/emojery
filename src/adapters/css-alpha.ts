@@ -2,7 +2,7 @@
 //
 // Whether a computed CSS color paints anything - the one alpha read shared by
 // the Threads liked-state heart (SVG fill) and the Facebook filled-chip probe
-// (background-color), so the two cannot drift on a colour syntax again: the
+// (background-color), so the two cannot drift on a color syntax again: the
 // Facebook copy once took any `color(...)` value as painted, reading the
 // `color(display-p3 ... / 0)` outline spelling as a fill.
 //

@@ -216,10 +216,10 @@ export async function reloadAndReadTotal(page: Page): Promise<number | null> {
 // read one low, so `before+1` never matched the settled total) - a stability
 // window is the reliable "settled" signal.
 //
-// `interval` has to outlive the shared cache in front of GET /reactions/count
-// (s-maxage=60) whenever a vote has just landed on this target: two reads inside
-// one cached window return the same body whatever the true total is, so the
-// default window would call a stale count settled. Callers that only need a
+// `interval` has to outlive the public cache in front of the count read whenever a
+// vote has just landed on this target: two reads inside one cached window return the
+// same body whatever the true total is, so the default window would call a stale
+// count settled. Callers that only need a
 // readable number, or that read a target nothing has touched, can keep it short.
 export async function waitForSettledTotal(page: Page, opts: { timeout?: number; interval?: number } = {}): Promise<number> {
   const timeout = opts.timeout ?? 90_000;

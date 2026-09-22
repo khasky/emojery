@@ -75,8 +75,8 @@ test.describe("extension account auth", () => {
     expect(authPage, "the sign-in button should open the extension's auth page").not.toBeNull();
     if (!authPage) return;
 
-    // The provider list is the API's: the staging build lists the test provider
-    // beside the real ones, and every button waits for the consent box.
+    // The provider list is the API's: this build lists the test provider beside the
+    // real ones, and every button waits for the consent box.
     const agreeCheckbox = authPage.locator(AGREE_CHECKBOX_SELECTOR);
     await expect(agreeCheckbox).not.toBeChecked();
     for (const button of await authPage.locator(PROVIDER_BUTTON_SELECTOR).all()) await expect(button).toBeDisabled();
@@ -107,9 +107,8 @@ test.describe("extension account auth", () => {
     const windowToAccept = await identityWindowAfter(authPage, () => testButton.click());
     expect(windowToAccept, "the identity window should open on the third click").not.toBeNull();
     await completeSignIn(windowToAccept!, testAccount);
-    // A first sign-in enrolls the account before the window comes back (measured on
-    // staging: 14-23 s, more when the prover starts cold); the default wait is too
-    // short for it.
+    // A first sign-in enrolls the account before the window comes back, which takes
+    // longer than the default wait allows.
     await expect(authPage.getByRole("heading", { name: enMessage("authDoneTitle") })).toBeVisible({ timeout: 60_000 });
 
     await authPage.close();

@@ -3,7 +3,7 @@
 // The connection lifecycle both stores share. Driven against a fake IDBFactory rather
 // than a real one because what is under test is the EVENT handling - versionchange,
 // blocked, close, a failed open - and a real IndexedDB will not produce a blocked event
-// on demand. The stores' real behaviour against a real database is covered by
+// on demand. The stores' real behavior against a real database is covered by
 // history.browser.test.ts / votequeue.browser.test.ts.
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

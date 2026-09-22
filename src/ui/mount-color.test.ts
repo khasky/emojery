@@ -35,7 +35,7 @@ describe("parseRgba - both syntaxes getComputedStyle returns", () => {
 });
 
 describe("parseRgb - opaque channels only", () => {
-  it("drops a fully transparent colour so a see-through surface never counts as a sample", () => {
+  it("drops a fully transparent color so a see-through surface never counts as a sample", () => {
     expect(parseRgb("rgba(255, 0, 0, 0)")).toBeNull();
     expect(parseRgb("rgba(255, 0, 0, 0.01)")).toEqual([255, 0, 0]);
   });
@@ -72,7 +72,7 @@ describe("WCAG contrast", () => {
   });
 });
 
-describe("bestTextColor - the legible one of the picker's two text colours", () => {
+describe("bestTextColor - the legible one of the picker's two text colors", () => {
   it("picks dark text on a light surface and light text on a dark one", () => {
     expect(bestTextColor(WHITE)).toBe(DARK_TEXT);
     expect(bestTextColor(BLACK)).toBe(LIGHT_TEXT);
@@ -88,10 +88,10 @@ describe("bestTextColor - the legible one of the picker's two text colours", () 
     }
   });
 
-  // Known ceiling: with only two text colours, a mid-tone surface cannot reach
+  // Known ceiling: with only two text colors, a mid-tone surface cannot reach
   // AA either way (#1a73e8 tops out at ~3.7:1). AA is guaranteed on the light
   // and dark canvases the picker renders against; widening it would
-  // need a computed text colour, not a two-colour pick.
+  // need a computed text color, not a two-color pick.
   it("clears AA body text (4.5:1) on the light and dark canvases", () => {
     for (const bg of [WHITE, BLACK, [24, 25, 26]] as Rgb[]) {
       const picked = bestTextColor(bg) === LIGHT_TEXT ? LIGHT_TEXT_RGB : DARK_TEXT_RGB;
@@ -101,13 +101,13 @@ describe("bestTextColor - the legible one of the picker's two text colours", () 
 });
 
 describe("colorfulness - neutral text vs a brand accent", () => {
-  it("reads 0 for greys, black and white", () => {
+  it("reads 0 for grays, black and white", () => {
     expect(colorfulness(BLACK)).toBe(0);
     expect(colorfulness(WHITE)).toBe(0);
     expect(colorfulness([128, 128, 128])).toBe(0);
   });
 
-  it("puts Amazon's link blue above the 0.4 replace threshold, and body greys below it", () => {
+  it("puts Amazon's link blue above the 0.4 replace threshold, and body grays below it", () => {
     // The Amazon link-blue story lives on normalizeReadableColor in mount-style-math.ts.
     expect(colorfulness([0, 113, 133])).toBeGreaterThan(0.4);
     expect(colorfulness([28, 30, 33])).toBeLessThan(0.4);
@@ -120,7 +120,7 @@ describe("composite - flatten translucent layers onto the canvas", () => {
     expect(composite({ r: 10, g: 20, b: 30, a: 1 }, { r: 255, g: 255, b: 255, a: 1 })).toEqual({ r: 10, g: 20, b: 30, a: 1 });
   });
 
-  it("blends a half-transparent black over white to mid grey", () => {
+  it("blends a half-transparent black over white to mid gray", () => {
     const out = composite({ r: 0, g: 0, b: 0, a: 0.5 }, { r: 255, g: 255, b: 255, a: 1 });
     expect(out.a).toBeCloseTo(1, 10);
     expect(rgbaToRgbString(out)).toBe("rgb(128, 128, 128)");

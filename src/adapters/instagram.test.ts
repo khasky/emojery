@@ -119,7 +119,7 @@ describe("instagram adapter", () => {
 });
 
 // Auto-press liked-state read: IG ships EN/RU/UA, and the RU unlike label
-// CONTAINS the like stem («Не нравится») - the negation must win before the
+// CONTAINS the like stem ("Не нравится") - the negation must win before the
 // stem is consulted.
 describe("igLikeLabelPressed", () => {
   it("reads the unlike label as pressed in every shipped locale", () => {

@@ -1,13 +1,14 @@
 // @ts-check
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Generate a single WebP sprite sheet for every emoji the picker can show, plus a TS lookup map
-// (emoji -> cell index), so the picker and the popup History tab render each reaction from a
-// fixed sheet instead of the user's OS emoji font:
+// Generate a single WebP sprite sheet for every emoji the picker can show, plus the sheet
+// geometry, so the picker and the popup History tab render each reaction from a fixed sheet
+// instead of the user's OS emoji font:
 //   1. public/emoji-sprite/emoji-sprite.webp - SPRITE_COLS x SPRITE_ROWS cells of SPRITE_CELL px,
 //      shipped as a web_accessible_resource (wxt.config.ts).
-//   2. src/ui/__generated__/emoji-sprite-map.ts - geometry + the emoji -> index map read by
-//      emoji-img.tsx and stamped as CSS variables by mount.ts/popup.
+//   2. src/ui/__generated__/emoji-sprite-map.ts - the sheet geometry plus the palette size and
+//      signature, stamped as CSS variables by mount.ts/popup. Deliberately no emoji -> index
+//      table (see writeMap): ui/emoji-sprite.ts derives the index from the palette order.
 //
 // Art source: Noto Emoji (https://github.com/googlefonts/noto-emoji), SIL Open Font License 1.1 -
 // see public/licenses/noto-emoji-OFL.txt. Vector glyphs are rasterized to CELL px (no upscaling
@@ -136,8 +137,8 @@ async function fetchTile(emoji) {
 // Draw every tile onto one canvas in Chromium (already installed for e2e) and read it
 // back as encoded bytes - the browser's canvas avoids a native image dependency.
 async function composeSheet(tilesBase64, cols, rows, cell) {
-  // @playwright/test re-exports the browser launchers and is a direct dev dependency;
-  // the bare `playwright` package may not be hoisted to a resolvable spot under pnpm.
+  // @playwright/test re-exports the browser launchers, so the sheet needs no second
+  // import path for them.
   const { chromium } = await import("@playwright/test");
   const browser = await chromium.launch();
   try {

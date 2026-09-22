@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Driving the extension's OWN auth page (auth.html) through the staging test
-// provider: the page's selectors, its shipped button labels, and the provider
+// Driving the extension's OWN auth page (auth.html) through the test provider: the
+// page's selectors, its shipped button labels, and the provider
 // sign-in that runs through the browser's identity window, with the retries that
 // make it survive a real backend. What happens INSIDE that window is the caller's
 // `completeSignIn` (the out-of-tree sign-in resolver, see lib/test-config.ts).
 //
 // A LEAF module: it is also loaded directly under plain Node, where types are
-// stripped at load and imports resolve by Node's own rules. So: no relative
-// imports, nothing outside `node:*` and `@playwright/test` - and keep the export
-// shape stable.
+// stripped at load and imports resolve by Node's own rules. So: nothing outside
+// `node:*`, `@playwright/test` and `./selectors` - which is itself only string
+// constants re-exported from the extension, with no runtime of its own. Keep the
+// export shape stable, and do not reach for anything that runs code at import.
 
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -20,7 +21,8 @@ import { AGREE_CHECKBOX_SELECTOR, AUTH_ERROR_SELECTOR, MORE_PROVIDERS_SELECTOR, 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 export const EXTENSION_ROOT = resolve(__dirname, "..", "..");
 
-// The provider the staging build lists for the suites.
+// The provider the suites sign in with. Offered only by non-production builds; which
+// backend a run talks to is E2E_API_BASE's business, not this module's.
 export const TEST_PROVIDER = "test";
 
 const localeMessageCache = new Map<string, Record<string, { message?: string }>>();
@@ -204,9 +206,9 @@ export function identityWindowAfter(authPage: Page, open: () => Promise<void>): 
   return open().then(() => opened);
 }
 
-// The page opens with the featured providers only; the staging test issuer sits
-// behind "more sign-in options", which is gated by the same consent box, so this
-// runs after the box is ticked. A build that lists nothing extra has no button.
+// The page opens with the featured providers only; the test provider sits behind
+// "more sign-in options", which is gated by the same consent box, so this runs after
+// the box is ticked. A build that lists nothing extra has no button.
 export async function revealTestProvider(authPage: Page): Promise<void> {
   await expect(authPage.locator(PROVIDER_LIST_SELECTOR), "the auth page should list the providers the API offers").toBeVisible({ timeout: 30_000 });
   if (await authPage.locator(providerButtonSelector(TEST_PROVIDER)).isVisible()) return;
@@ -223,7 +225,7 @@ async function signInThroughTestProvider(authPage: Page, opts: AuthSignInOptions
   await authPage.locator(AGREE_CHECKBOX_SELECTOR).check();
   await revealTestProvider(authPage);
   const providerButton = authPage.locator(providerButtonSelector(TEST_PROVIDER));
-  await expect(providerButton, "the staging build should list the test provider").toBeVisible({ timeout: 30_000 });
+  await expect(providerButton, "this build should list the test provider").toBeVisible({ timeout: 30_000 });
   await expect(providerButton).toBeEnabled();
 
   const window = await identityWindowAfter(authPage, () => providerButton.click());

@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // Multi-account gap coverage: identity isolation across account switches,
-// independent counter moves per account, provider-account recovery, and
-// the wrong-code path of the sign-in form. All flows run on
-// GitHub (login-free mount surface) and read only what a user sees: the
-// shadow-hosted trigger/counter, the popup History tab, and the visible errors on auth.html.
+// provider-account recovery from a fresh profile, and independent counter moves per
+// account. All flows run on GitHub (login-free mount surface) and read only what a
+// user sees: the shadow-hosted trigger/counter and the popup History tab.
 import { expect, test } from "@playwright/test";
 import * as ext from "./lib/extension";
 import { historyPageOverBridge, openHistoryTab, withPopupOverBridge } from "./lib/popup-probes";
@@ -218,7 +217,7 @@ test("two accounts raise and lower the shared counter independently", async () =
     // expectations below (including the COUNT_CACHE_WAIT_MS cross-session poll) can then never
     // converge. Same rendered-counter wait the deletion spec uses.
     //
-    // A window wider than the count cache (s-maxage=60), because the un-react
+    // A window wider than the public count cache, because the un-react
     // above just moved this target: on the default 10 s window both reads came
     // out of one cached body, the baseline settled one too high, and account B
     // then waited out the whole cache poll for a total that was never coming.

@@ -189,7 +189,7 @@ function DoneStep({ returnsToPage, autoClose = true }: { returnsToPage: boolean;
 }
 
 /** The identity window is open: nothing to do here but say so, and wait. A first
- *  sign-in also builds the enrolment proof, which runs for tens of seconds after the
+ *  sign-in also builds the enrollment proof, which runs for tens of seconds after the
  *  provider window closes, so the wait is announced and the tab guards itself. */
 function BusyStep({ provider }: { provider: OidcProvider }) {
   // Closing the tab mid-flight strands the sign-in: the code is spent, the account
@@ -250,9 +250,9 @@ function OtherAccount({ provider, canChoose, accepted, onPick }: { provider: Oid
 
 type LastAccount = { name: string; ordinal: number; at: number };
 
-// "Google #2 - a mark - 12 minutes ago": which account of that provider, what
+// "Google #2 · a mark · 12 minutes ago": which account of that provider, what
 // this device calls it, and when it was last used here. The three together are what a
-// reader holding two accounts at one provider recognises the right one by; the button
+// reader holding two accounts at one provider recognizes the right one by; the button
 // above already says the provider, so nothing here repeats it on its own.
 function lastAccountHint(provider: OidcProvider, last: LastAccount): string {
   const when = relativeTime(last.at);
@@ -447,8 +447,6 @@ function App() {
     void noteTermsAccepted(value);
   }, []);
 
-  // The tab title follows the step: a tab strip full of pages still says which one
-  // is done.
   // A tab that did not perform the sign-in still has to stop offering one: a second
   // auth tab left open while the first signs in would otherwise keep a live-looking
   // card, and clicking it runs the whole provider flow again for an account that is
@@ -469,6 +467,8 @@ function App() {
     };
   }, []);
 
+  // The tab title follows the step: a tab strip full of pages still says which one
+  // is done.
   useEffect(() => {
     document.title = t(step === "done" ? "authDonePageTitle" : "authPageTitle");
   }, [step]);

@@ -123,7 +123,7 @@ The commit hooks are the other half. `commit-msg` runs commitlint; `pre-commit` 
 | `security.yml` | every PR, and daily | OSV Scanner, Gitleaks, Semgrep |
 | `selector-drift.yml` | daily | whether each scenario URL still serves the native controls the adapters anchor on |
 | `e2e-adapter.yml` | a PR touching `src/adapters/` | live-page placement on every supported site — advisory, never a required check |
-| `e2e-ci.yml` | every other day + weekly | live-page placement, replace-native, theme contrast |
+| `e2e-ci.yml` | every other day + weekly | live-page placement, the extension's own surfaces (locale sweep, theme and debug settings), the shipped Firefox build on a real page, replace-native, theme contrast, the renderer heap budget |
 | `edge-smoke.yml` | every other day | the GitHub + YouTube placement pair in real Edge |
 | `a11y.yml` | every other day | the extension's own pages (axe, keyboard walk, reflow) |
 | `mirror.yml` | every push and tag, plus daily | nothing — one-way push mirrors to the GitLab, Codeberg and Bitbucket copies, plus a Software Heritage archive request |

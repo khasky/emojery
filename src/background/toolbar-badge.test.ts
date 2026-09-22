@@ -44,7 +44,7 @@ describe("formatBadgeCount", () => {
 });
 
 describe("setInjectedBadge", () => {
-  it("paints text and both colours against the given tab only", () => {
+  it("paints text and both colors against the given tab only", () => {
     setInjectedBadge(42, 3);
     expect(setToolbarBadgeText).toHaveBeenCalledWith({ text: "3", tabId: 42 });
     expect(setToolbarBadgeBackgroundColor).toHaveBeenCalledWith({ color: expect.any(String), tabId: 42 });
@@ -53,7 +53,7 @@ describe("setInjectedBadge", () => {
 });
 
 describe("clearInjectedBadge", () => {
-  it("blanks the text for that tab without touching the colours", () => {
+  it("blanks the text for that tab without touching the colors", () => {
     clearInjectedBadge(42);
     expect(setToolbarBadgeText).toHaveBeenCalledWith({ text: "", tabId: 42 });
     expect(setToolbarBadgeBackgroundColor).not.toHaveBeenCalled();

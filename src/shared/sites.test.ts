@@ -139,7 +139,7 @@ describe("resolveSiteHomeUrl", () => {
     expect(resolveSiteHomeUrl("github", null, "de-DE")).toBe("https://github.com/");
   });
 
-  it("Amazon prefers the active storefront host, normalising smile.* to .com", () => {
+  it("Amazon prefers the active storefront host, normalizing smile.* to .com", () => {
     expect(resolveSiteHomeUrl("amazon", "www.amazon.de", "en-US")).toBe("https://www.amazon.de/");
     // Retired host, so not a run host any more - but the regional catch-all still
     // matches it, and an old tab must not hand the popup a dead storefront link.

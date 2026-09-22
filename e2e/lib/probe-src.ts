@@ -106,6 +106,11 @@ export const IS_VISIBLE_RECT_SRC = `const isVisibleRect = (rect) => rect.width >
 // Target key for a host: the `[data-khasky-emojery-mounted]` anchor can be an
 // ancestor, a sibling of the host (or its wrapper), or the parent - the host is
 // sometimes placed in a different DOM node than its keyed anchor.
+//
+// site-auth/probes.ts carries a TWIN of this walk (`keyOfHost`), because injected
+// source cannot import. The two differ on purpose and must stay that way knowingly:
+// this one tries `closest()` first and refuses to climb into an overlay host; the twin
+// has neither, and bounds itself at three levels instead. Change one, read the other.
 export const MOUNTED_KEY_OF_SRC = `const mountedKeyOf = (host) => {
   const direct = host.closest("${MOUNTED_SELECTOR}");
   if (direct) return direct.getAttribute("${MOUNT_ATTR}");

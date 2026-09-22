@@ -39,7 +39,7 @@ const DEEP_SCROLL_TIMEOUT_MS = 420_000;
     await fx.teardown();
   });
 
-  // Cross-cutting invariant on ALL 9 sites: a logged-in surface mounts at least
+  // Cross-cutting invariant on every site in ALL_SITES: a logged-in surface mounts at least
   // one host and never leaves two connected hosts on one target key (the
   // duplicate/stolen-host bug). The single-target sites (YouTube/GitHub/GitLab/
   // Amazon) carry one target, so the no-duplicate half is the whole check there.

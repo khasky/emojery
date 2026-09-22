@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // Shadow-root plumbing for the injected UI: the shared picker stylesheet and the
-// fixed-position overlay host the picker portals into. Apart from mount.ts (the mount
-// lifecycle): these own only DOM/stylesheet setup and hold no mount state.
+// fixed-position overlay host the picker portals into. DOM and stylesheet setup only:
+// the mount lifecycle stays in mount.ts.
 
 import { OVERLAY_HOST_CLASS } from "../shared/dom";
 import { applyEmojiSpriteHost, emojiSpriteCss, PICKER_SPRITE_SCOPE } from "./emoji-sprite";

@@ -19,6 +19,6 @@
     "forceConsistentCasingInFileNames": true
   },
   "include": ["**/*.ts"],
-  "//5": "site-auth/ keeps its own tsconfig (relaxed exactOptionalPropertyTypes for the MCP SDK types); `pnpm compile:e2e` runs that one too.",
+  "//4": "site-auth/ keeps its own tsconfig (relaxed exactOptionalPropertyTypes for the MCP SDK types); `pnpm compile:e2e` runs that one too.",
   "exclude": ["site-auth/**"]
 }

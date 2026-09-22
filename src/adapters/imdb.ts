@@ -32,8 +32,6 @@ const imdbAdapter = defineSiteAdapter({
   observer: { navKey: "pathname" },
 });
 
-// Exported under its `extract...Ref` name so the URL parsing stays directly
-// testable and `target-contract.ts` can derive from a bare URL.
 export function extractImdbTitleRef(href: string | null): { titleId: string } | null {
   return parseSiteHref(href, "imdb", (url) => {
     // IMDb routes the const case-insensitively (`/title/TT33764258/` serves the

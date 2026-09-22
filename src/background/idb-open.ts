@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// One connection opener and one transaction runner for both IndexedDB stores
-// (history.ts, votequeue.ts).
+// One connection opener and one transaction runner for every IndexedDB store the
+// extension keeps: history.ts, votequeue.ts and keys-db.ts (which holds the account
+// and epoch keys account-keys.ts and epoch-keys.ts run their transactions against).
 //
 // Shared for the second-context-wants-a-new-schema-version case: an extension
 // page opening a store the service worker also holds (the popup's Debug tab did,

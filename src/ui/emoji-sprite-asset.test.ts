@@ -4,9 +4,9 @@
 // runtime notices a mismatch: emoji-sprite.ts probes the sheet with an Image and
 // silently keeps OS-font glyphs when it fails to load, so a renamed, missing or
 // re-sized sheet ships as "the emoji look different on some machines" rather
-// than as an error. The byte budget is the other half - the sheet is fetched
-// into the renderer of every page that mounts a trigger, and it grew to 3.7 MB
-// once already.
+// than as an error. The byte budget is the other half - the sheet is fetched into
+// the renderer of every page that mounts a trigger, so its size is a cost every
+// supported page pays.
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";

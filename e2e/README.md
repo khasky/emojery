@@ -50,7 +50,7 @@ The **When CI runs it** column is the honest map of what a green pipeline has ac
 | `overlay-freeze.spec.ts` | Threads' URL-addressed photo lightbox: a `/media` overlay open/close cycle (pushState/back, no real click needed) must leave the mounts untouched — no blink, no stale wrong-post trigger | No | Manual only |
 | `facebook-comment-injection.spec.ts` | A comment's reaction cluster never becomes a mount: injects the vulnerable A/B-served comment shape next to a live post's own counts row and asserts nothing mounts on or inside it | No | Manual only |
 | `facebook-group-row-injection.spec.ts` | The icon-only Comment/Send action row (the group photo-post shape, which live sits behind a group login) still mounts a trigger: injects the captured row beside a live public post | No | Manual only |
-| `auth.spec.ts` | The provider sign-in through the staging test provider: consent gating the buttons, a cancelled window, a refused sign-in, sign-in/out, the localized provider step | Yes | Manual only |
+| `auth.spec.ts` | The provider sign-in through the test provider: consent gating the buttons, a cancelled window, a refused sign-in, sign-in/out, the localized provider step | Yes | Manual only |
 | `accounts.spec.ts` | Multi-account: identity isolation across switches, independent counter moves, provider-account recovery (all on GitHub) | Yes | Manual only |
 | `authed-extras.spec.ts` | Master toggle, react/un-react counter math, offline queue flush, account deletion, the Report tab, rapid reaction switching, an in-flight vote surviving a reload, the analytics-consent default | Yes | Manual only |
 | `reaction-burst.spec.ts` | A fast burst of reactions: every accepted click is counted and listed in History; a refused one is re-sent by the durable queue, losing nothing | Yes | Manual only |
@@ -96,7 +96,7 @@ The helpers are layered, lowest first, so a spec is a table of scenarios plus th
 | `lib/coext-source.ts` | Resolving a coexistence-test extension source (folder, zip/crx URL, Web Store id) to a cached unpacked folder |
 | `lib/extension.ts` | Barrel for the autonomous specs, kept for import stability — it re-exports the modules above under one path and owns no work of its own. New code imports the specific module. |
 
-`lib/launch-args.ts` and `lib/auth-signin.ts` are deliberate leaf modules: the store-asset generator loads both directly under plain Node, so they import nothing but `node:*` and `@playwright/test`. A flag or a selector added for the suites reaches the release captures for free.
+`lib/launch-args.ts` and `lib/auth-signin.ts` are deliberate leaf modules: the store-asset generator loads both directly under plain Node, so they import nothing but `node:*`, `@playwright/test` and `lib/selectors.ts` — itself only string constants, with no runtime of its own. A flag or a selector added for the suites reaches the release captures for free.
 
 `selector-drift/` is the one suite the main config does not run: it carries its own `playwright.config.ts` and the main one lists it under `testIgnore`, so `pnpm run test:e2e` never picks it up. Run it directly — no build, no auth, ~5 minutes:
 

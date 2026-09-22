@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Colour math behind the trigger's visual blending: parse the CSS colour strings
+// Color math behind the trigger's visual blending: parse the CSS color strings
 // `getComputedStyle` returns, flatten translucent layers, and pick a legible text
-// colour. Pure functions over numbers and strings - no DOM, no theme, no storage -
+// color. Pure functions over numbers and strings - no DOM, no theme, no storage -
 // so the WCAG contrast rules the trigger's legibility rests on are unit-testable
 // without laying out a page (the live-site check stays e2e/theme-contrast.spec.ts).
 
@@ -15,15 +15,15 @@ export interface RgbaColor {
 
 export type Rgb = [number, number, number];
 
-/** The picker's two text colours - the same pair the stylesheet uses. */
+/** The picker's two text colors - the same pair the stylesheet uses. */
 export const LIGHT_TEXT = "#e4e6eb";
 export const DARK_TEXT = "#1c1e21";
 
 const LIGHT_TEXT_RGB: Rgb = [228, 230, 235];
 const DARK_TEXT_RGB: Rgb = [28, 30, 33];
 
-// HSV-style saturation: 0 for greys/black/white, approaching 1 for vivid hues.
-// Used to tell a neutral text colour (keep) from a brand/link accent (replace).
+// HSV-style saturation: 0 for grays/black/white, approaching 1 for vivid hues.
+// Used to tell a neutral text color (keep) from a brand/link accent (replace).
 export function colorfulness([r, g, b]: Rgb): number {
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
@@ -46,7 +46,7 @@ export function rgbaToRgbString(color: RgbaColor): string {
   return `rgb(${Math.round(color.r)}, ${Math.round(color.g)}, ${Math.round(color.b)})`;
 }
 
-// Accepts both CSS colour syntaxes `getComputedStyle` may return: legacy
+// Accepts both CSS color syntaxes `getComputedStyle` may return: legacy
 // `rgba(r, g, b, a)` and the modern space-separated `rgb(r g b / a)`.
 export function parseRgba(value: string | undefined): RgbaColor | null {
   if (!value) return null;
@@ -73,7 +73,7 @@ export function parseRgba(value: string | undefined): RgbaColor | null {
   };
 }
 
-/** Opaque channels of a colour, or null when it is absent or fully transparent. */
+/** Opaque channels of a color, or null when it is absent or fully transparent. */
 export function parseRgb(value: string | undefined): Rgb | null {
   const color = parseRgba(value);
   if (!color || color.a === 0) return null;

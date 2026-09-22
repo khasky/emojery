@@ -74,7 +74,7 @@ describe("skipGateFailure", () => {
     expect(skipGateFailure(at(6, 4), 0.5)).not.toBeNull();
   });
 
-  it("honours a stricter or looser threshold", () => {
+  it("honors a stricter or looser threshold", () => {
     expect(skipGateFailure(at(3, 7), 0.2)).not.toBeNull();
     expect(skipGateFailure(at(9, 1), 0.95)).toBeNull();
   });

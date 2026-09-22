@@ -72,8 +72,8 @@ function showCoachMark(host: HTMLElement, trigger: HTMLElement): void {
   function onKeydown(e: KeyboardEvent): void {
     if (e.key === "Escape") dismiss();
   }
-  // Any interaction with the trigger is the mission accomplished - the picker
-  // (or the sign-in gate) takes over from here.
+  // Any interaction with the trigger dismisses the mark: the picker (or the
+  // sign-in gate) takes over from here.
   function onHostInteract(): void {
     dismiss();
   }

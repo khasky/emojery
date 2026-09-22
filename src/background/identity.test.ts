@@ -223,9 +223,8 @@ describe("signInWithProvider", () => {
   });
 
   // Two auth tabs are one click each from asking for the same sign-in twice. The
-  // second ask would open its own provider window and, on a first sign-in, spend a
-  // second enrolment proof on a leaf it cannot write - the account key is shared, so
-  // the pair is already enrolled by the time it lands.
+  // second ask would open its own provider window for an answer already settled: the
+  // account key is shared, so the pair is registered by the time it lands.
   it("runs one flow when the same sign-in is asked for twice at once", async () => {
     // The window is held open until both callers are in, so the second one asks while
     // the first is genuinely still running rather than after it finished.

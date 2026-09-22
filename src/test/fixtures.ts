@@ -12,7 +12,7 @@ import { storageGetKeys } from "./storage-keys";
 type Items = Record<string, unknown>;
 
 // A stateful chrome.storage area over a plain object. get/set/remove/clear are
-// `vi.fn` spies (so tests can assert calls) that honour BOTH the callback and
+// `vi.fn` spies (so tests can assert calls) that honor BOTH the callback and
 // promise styles callChrome in webext.ts accepts. Reads reflect prior writes.
 function storageArea(store: Items) {
   return {

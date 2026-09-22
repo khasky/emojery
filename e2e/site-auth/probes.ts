@@ -84,6 +84,10 @@ const re = new RegExp(${JSON.stringify(mountKeyPattern)});
 // reads null. The node is the host or a thin adapter wrapper around it, so the
 // host, its parent and its grandparent cover every shape; stopping there keeps a
 // feed's NEXT post out of the answer.
+//
+// lib/probe-src.ts carries a TWIN of this walk, mountedKeyOf, because injected source
+// cannot import. It tries closest() first and skips an overlay host; this one does
+// neither and relies on the depth bound instead. Change one, read the other.
 const MOUNT_WALK_DEPTH = 3;
 const keyOfHost = (h) => {
   let node = h;

@@ -65,7 +65,7 @@ for (const locale of locales) {
   const compactEntries = JSON.parse(readFileSync(srcPath, "utf8"));
   const pruned = pruneCompactData(compactEntries, keep);
   const json = JSON.stringify(pruned);
-  // Both serialised minified, so "before" matches what shipping the raw array would weigh.
+  // Both serialized minified, so "before" matches what shipping the raw array would weigh.
   beforeTotal += Buffer.byteLength(JSON.stringify(compactEntries));
   afterTotal += Buffer.byteLength(json);
   writeFileSync(destPath, json);

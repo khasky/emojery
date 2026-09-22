@@ -85,9 +85,10 @@ async function attachedToRealBrowser(bridge: Bridge): Promise<boolean> {
 }
 
 export function mountKeyPattern(site: SiteId): string {
-  // Union of the site's scenario patterns from the shared registry. Only reddit's
-  // are uniformly tight - every other site has at least one scenario using a bare
-  // '^site:', so the union comes out as that. Tighten the registry to tighten this.
+  // Union of the site's scenario patterns from the shared registry. Reddit and the
+  // critic sites are uniformly tight; the social and code-hosting sites each have at
+  // least one scenario using a bare '^site:', so their union comes out as that.
+  // Tighten the registry to tighten this.
   const patterns = SUPPORTED_SITE_SCENARIOS.filter((s) => s.site === site).map((s) => s.mountKeyPattern);
   return patterns.length > 0 ? patterns.map((p) => `(?:${p})`).join("|") : `^${site}:`;
 }
@@ -488,9 +489,7 @@ export async function closeSpawnedAuthTabs(bridge: Bridge): Promise<number> {
     .catch(() => 0);
   authTabsSeen += closed;
   if (authTabsSeen >= AUTH_TAB_LIMIT) {
-    throw recordSetupFault(
-      `Aborting: trigger clicks opened ${authTabsSeen} auth.html tabs - Emojery is SIGNED OUT in the connected Chrome. Sign in with the address the sign-in resolver names (E2E_SIGNIN_RESOLVER) in that Chrome, and confirm chrome://extensions shows the build this suite drives. ${MANUAL_SIGNIN_HINT}`,
-    );
+    throw recordSetupFault(`Aborting: trigger clicks opened ${authTabsSeen} auth.html tabs - Emojery is SIGNED OUT in the connected Chrome. Sign in as the account the sign-in resolver names (E2E_SIGNIN_RESOLVER) in that Chrome, and confirm chrome://extensions shows the build this suite drives. ${MANUAL_SIGNIN_HINT}`);
   }
   return closed;
 }
@@ -656,7 +655,7 @@ export async function assertEmojerySignedIn(bridge: Bridge): Promise<void> {
   const picker = await openPickerState(bridge);
   await bridge.press("Escape").catch(() => {});
   if (!picker.gridVisible) {
-    throw recordSetupFault(`Emojery is SIGNED OUT in the connected Chrome - the trigger opened the sign-in CTA instead of the emoji grid. Sign in with the address the sign-in resolver names (E2E_SIGNIN_RESOLVER) in that Chrome, and confirm chrome://extensions shows the build this suite drives. ${MANUAL_SIGNIN_HINT}`);
+    throw recordSetupFault(`Emojery is SIGNED OUT in the connected Chrome - the trigger opened the sign-in CTA instead of the emoji grid. Sign in as the account the sign-in resolver names (E2E_SIGNIN_RESOLVER) in that Chrome, and confirm chrome://extensions shows the build this suite drives. ${MANUAL_SIGNIN_HINT}`);
   }
 }
 

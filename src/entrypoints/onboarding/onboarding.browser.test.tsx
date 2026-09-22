@@ -76,7 +76,7 @@ describe("onboarding checklist", () => {
     // The tab strip carries the same count, in the UI language, so a backgrounded
     // page still says how far along it is.
     await expect.poll(() => document.title).toBe("Emojery — Onboarding 1/4");
-    // The bar stays on its in-progress colour until the last tick.
+    // The bar stays on its in-progress color until the last tick.
     expect(container.querySelector(".progress.complete")).toBeNull();
   });
 

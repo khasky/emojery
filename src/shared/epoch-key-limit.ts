@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// The notice the drain leaves when the API refuses to issue this device a key for
-// the current epoch (`epoch_key_limit`): the account has reached its device count
-// for the epoch, so every vote until the next one is refused before it is sent.
-// Written by background/api.ts, read by the popup's Account tab, and dropped by
-// whoever reads it first once the epoch it names has passed.
+// The notice the drain leaves when the API refuses this device's votes until a
+// stated date: they are refused before they are sent, so nothing reaches the wire
+// and the reader needs telling. Written by background/api.ts, read by the popup's
+// Account tab, and dropped by whoever reads it first once that date has passed.
 
 import { storageLocalGet, storageLocalRemove, storageLocalSet } from "./webext";
 

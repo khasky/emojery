@@ -2,8 +2,8 @@
 //
 // The core proof that an authenticated reaction round-trips: a real
 // signed-in user clicks the Emojery trigger, picks an emoji, the trigger shows
-// emoji+count, and the pick PERSISTS across a reload. Runs (lightly) on all 9
-// sites; cross-tab sync (brokered by the service worker) is checked once on a stable target.
+// emoji+count, and the pick PERSISTS across a reload. Runs (lightly) on every site in
+// ALL_SITES; cross-tab sync (brokered by the service worker) is checked once on a stable target.
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { COUNTER_CLASS, GRID_ITEM_SELECTOR, HOST_SELECTOR, MOUNTED_SELECTOR } from "../lib/selectors";
 import type { Bridge } from "./bridge";

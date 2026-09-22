@@ -9,8 +9,8 @@
 // instead of a second copy of them - a copy would keep passing after the gate moved.
 /** @typedef {{ maxBytes: number, maxDistinctive: number }} BundleLimits */
 
-// Below this length a match is a common word ("Search", "Clear", a category name that also
-// lives in emoji-categories.json), not evidence the dictionary shipped.
+// Below this length a match is a common word ("Search", "Clear"), not evidence the
+// dictionary shipped.
 export const DISTINCTIVE_MESSAGE_LENGTH = 25;
 
 /**

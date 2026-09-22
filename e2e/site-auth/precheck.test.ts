@@ -34,7 +34,7 @@ const fx = bridgeFixture();
     // auth.html). This is independent of being logged into GitHub.
     await gotoSettled(b, authContentUrl("github"));
     const st = await openPickerState(b);
-    expect(st.gridVisible, "Emojery picker grid did not open - complete the Emojery OTP sign-in in this Chrome").toBe(true);
+    expect(st.gridVisible, "Emojery picker grid did not open - sign in to Emojery through a provider in the popup of this Chrome").toBe(true);
     await b.press("Escape");
   });
 });

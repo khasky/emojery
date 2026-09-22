@@ -23,8 +23,9 @@ const VOTE_FLUSH_DEBOUNCE_MS = 250;
 const VOTE_FLUSH_MIN_RETRY_MS = 2_000;
 const VOTE_FLUSH_MAX_RETRY_MS = 180_000;
 const MAX_VOTE_ATTEMPTS = 10;
-// The one 4xx retried (server-shaped); any other 4xx is permanent - the payload
-// can never get past it.
+// The one 4xx handleVoteResponse retries; every other 4xx is permanent there, and the
+// payload can never get past it. The key refusals below are the exception, with their
+// own one-shot recovery before that verdict is reached.
 const HTTP_TOO_MANY_REQUESTS = 429;
 // Bounds one drain invocation, not the queue: whatever is left re-arms itself.
 const MAX_SENDS_PER_DRAIN = 50;
