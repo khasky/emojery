@@ -116,6 +116,27 @@ describe("observePendingAnchor", () => {
     expect(isNearPrefetchMargin(anchor)).toBe(false);
   });
 
+  // The observer's rootMargin is vertical only, so a horizontally offscreen anchor
+  // on a carousel or a side rail never delivers. A probe with horizontal slack
+  // answers "near" for it, and the eager mount that follows is the double-mount the
+  // shared band exists to prevent.
+  it("gives the horizontal edge no slack the observer does not have", () => {
+    const anchor = anchorEl();
+    observePendingAnchor(KEY, anchor);
+
+    const viewportWidth = window.innerWidth;
+    const rectFrom = (left: number) => () => ({ top: 0, bottom: 40, left, right: left + 100, width: 100, height: 40 }) as DOMRect;
+
+    anchor.getBoundingClientRect = rectFrom(viewportWidth - 10);
+    expect(isNearPrefetchMargin(anchor)).toBe(true);
+
+    anchor.getBoundingClientRect = rectFrom(viewportWidth + 10);
+    expect(isNearPrefetchMargin(anchor)).toBe(false);
+
+    anchor.getBoundingClientRect = rectFrom(-110);
+    expect(isNearPrefetchMargin(anchor)).toBe(false);
+  });
+
   it("still reports the anchor as visible once it intersects", () => {
     const seen: TargetKey[] = [];
     setPendingAnchorHandler((key) => seen.push(key));

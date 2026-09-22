@@ -28,6 +28,7 @@ import { githubStarLabelPressed } from "../../src/adapters/github";
 import { gitlabIconName, gitlabStarIconPressed } from "../../src/adapters/gitlab";
 import { IG_STEMS, IG_UNLIKE_RE, igLikeLabelPressed } from "../../src/adapters/instagram";
 import { isPaintedFill, THREADS_NON_LIKE_ICON_PATH_PREFIXES } from "../../src/adapters/threads";
+import { readPressed } from "../../src/ui/native-pressed";
 import { HOST_SELECTOR } from "../lib/selectors";
 import type { Bridge } from "./bridge";
 import { bridgeFixture, GRID_ITEM_SELECTOR, gotoSettled, openPickerState, SETUP_HOOK_TIMEOUT_MS, siteAuthEnabled, waitForHost } from "./harness";
@@ -290,6 +291,16 @@ const X_LIKE = nativeControl(
   `return el.getAttribute('data-testid') === 'unlike' ? 'true' : 'false';`,
 );
 
+// The shipped generic pressed-state read, run over whichever control a site probe
+// found. Its two locale-free fallbacks are site-owned markers - X's data-testid and
+// GitHub's star/unstar form action - so a unit fixture of them would keep passing
+// after the site moved (X dropped every data-testid once already). Pinned here
+// against the real controls, beside the site probe that has to agree with it.
+const shippedReadPressed = (find: string): string => `${find}
+  if (!el) return null;
+  const readPressed = ${fnSrc(readPressed)};
+  return String(readPressed(el));`;
+
 // WHICH Facebook reaction is set, as the control's own label. Never parsed - only
 // compared between two picks, which is the one locale-proof way to prove the exact
 // -match table chose differently for ❤️ and 😂.
@@ -356,6 +367,9 @@ async function expectPickPressesAndUnReactReleases(site: "gitlab" | "github" | "
     expect(picker.gridVisible, `${site}: Emojery picker did not open (extension signed out?)`).toBe(true);
     await pickEmoji(b, "👍");
     expect(await pollState(b, control.state, "true", 8_000), siteSpecificHint(site, "👍")).toBe("true");
+    if (site === "github") {
+      expect(await b.evaluate<string | null>(shippedReadPressed(control.find)), "github: readPressed disagreed with the star control's own state").toBe("true");
+    }
     recordPressLanded();
   } finally {
     await unReact(b);
@@ -375,6 +389,7 @@ describe("auto-press probe serialization", () => {
       expect(() => new Function(control.state)).not.toThrow();
       expect(() => new Function(tagProbe(control.find))).not.toThrow();
     }
+    for (const control of [X_LIKE, GITHUB_STAR]) expect(() => new Function(shippedReadPressed(control.find))).not.toThrow();
     // The label read is not a NativeControl (nothing clicks it), so it is compiled here.
     expect(() => new Function(FB_LABEL)).not.toThrow();
   });
@@ -516,6 +531,7 @@ describe("auto-press probe serialization", () => {
         expect(picker.gridVisible, `x ${surface}: Emojery picker did not open (extension signed out?)`).toBe(true);
         await pickEmoji(b, "👍");
         expect(await pollState(b, X_LIKE.state, "true", 8_000), siteSpecificHint(`x ${surface}`, "👍")).toBe("true");
+        expect(await b.evaluate<string | null>(shippedReadPressed(X_LIKE.find)), `x ${surface}: readPressed disagreed with the Like control's own state`).toBe("true");
         recordPressLanded();
       } finally {
         await unReact(b);

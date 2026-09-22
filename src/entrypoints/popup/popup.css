@@ -4,7 +4,7 @@
 @import "../../styles/tokens.css";
 
 :root {
-  /* Every themed colour goes through a token except the `.history-*` row tints
+  /* Every themed color goes through a token except the `.history-*` row tints
      (see their own note), so the dark block at the bottom re-points tokens
      instead of restating rules. Theme-FIXED values sit in the `-fixed-` group at
      the end of this block. */
@@ -68,7 +68,7 @@
 
   /* appearance:none drops the native select arrow; the chevron is drawn as an
      inline SVG whose stroke has to follow the theme, so the whole url() is the
-     token rather than just a colour. */
+     token rather than just a color. */
   --khasky-emojery-select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2365676b' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
 
   /* Theme-FIXED, and named apart from the themed `-accent` / `-danger` precisely
@@ -273,7 +273,7 @@ label {
   padding: 4px 0;
 }
 /* Shared empty-tab copy (History first run, Report on an unsupported page):
-   centred and one step dimmer than the regular muted text, still >=4.5:1 on white. */
+   centered and one step dimmer than the regular muted text, still >=4.5:1 on white. */
 .history.empty,
 .empty-note {
   text-align: center;
@@ -431,8 +431,8 @@ label {
 .row-icon-danger {
   color: var(--khasky-emojery-danger);
 }
-/* Per-site vendor logo. Colour only drives the monochrome marks (filled with
-   currentColor); brand-coloured marks set their own fill inline. */
+/* Per-site vendor logo. Color only drives the monochrome marks (filled with
+   currentColor); brand-colored marks set their own fill inline. */
 .site-icon {
   width: 20px;
   height: 20px;
@@ -1169,7 +1169,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Clear the resting thumb so the text sits visually centred. */
+  /* Clear the resting thumb so the text sits visually centered. */
   padding-left: 26px;
   font-size: 12px;
   font-weight: 600;
@@ -1322,9 +1322,9 @@ a:hover {
   font-size: inherit;
   padding: 0;
   margin: 0;
-  /* A name the reader typed runs to 32 characters; the row does not. Truncated on
-     one line rather than wrapped, so a long one cannot stretch the row - the full
-     text is in the field the click opens. */
+  /* A typed name can outrun the row. Truncated on one line rather than wrapped, so
+     a long one cannot stretch the row - the full text is in the field the click
+     opens. */
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1332,8 +1332,8 @@ a:hover {
   vertical-align: bottom;
 }
 
-/* Width comes from the `size` attribute, which tracks what is typed (popup-account.tsx),
-   so the field grows with the name instead of scrolling a fixed box. */
+/* Width comes from the `size` attribute, set to the longest name that can exist
+   (popup-account.tsx), so the field never scrolls what is typed out of view. */
 .account-name-input {
   max-width: 100%;
   padding: 0 2px;

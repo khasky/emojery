@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// The value-level half of mount-style.ts: given lengths, colours and a style record -
+// The value-level half of mount-style.ts: given lengths, colors and a style record -
 // never an element, never a live box - decide the value to stamp on the host. Pure
 // arithmetic next to a module that reads a live page's computed styles: the split is
 // the boundary between the two, and it is what lets this half be unit-tested and
@@ -32,10 +32,16 @@ export function pickRepresentativeRadius(radii: readonly (string | undefined)[])
   return best;
 }
 
-// Leading px length of a radius, for tie-breaking only; non-px forms sort last (-1).
+// Largest px length in a radius, for tie-breaking only; non-px forms sort last (-1).
+// The whole shorthand is read because a segmented control spells its rounded end at
+// either position (`18px 0 0 18px` and `0px 18px 18px 0px` are the same shape).
 function parseRadiusPx(value: string): number {
-  const pxMatch = /(-?[\d.]+)px/.exec(value);
-  return pxMatch?.[1] ? Number.parseFloat(pxMatch[1]) : -1;
+  let max = -1;
+  for (const match of value.matchAll(/(-?[\d.]+)px/g)) {
+    const px = Number.parseFloat(match[1] ?? "");
+    if (Number.isFinite(px) && px > max) max = px;
+  }
+  return max;
 }
 
 // Largest corner radius in px across the four corners, resolving each length: px kept as-is,
@@ -87,7 +93,7 @@ export function marginPx(value: string): number {
 }
 
 /**
- * Snap a sampled text colour to something readable on the sampled background,
+ * Snap a sampled text color to something readable on the sampled background,
  * mutating `style` in place. `theme` is passed in rather than read from
  * shared/theme so this stays a decision over values.
  */
@@ -97,10 +103,10 @@ export function normalizeReadableColor(style: SiteButtonStyle, theme: "dark" | "
   const fg = parseRgb(style.color);
   if (!fg) return;
 
-  // A saturated sampled colour is a brand/link hue, not neutral text: Amazon's rating
+  // A saturated sampled color is a brand/link hue, not neutral text: Amazon's rating
   // strip exposes only links painted in its link blue, so the trigger copied that and the
   // reaction count rendered blue. The count reads as text, so snap a vivid hue to the
-  // readable neutral; neutral greys fall through to the contrast/luminance handling below.
+  // readable neutral; neutral grays fall through to the contrast/luminance handling below.
   if (colorfulness(fg) > 0.4) {
     style.color = bg ? bestTextColor(bg) : theme === "dark" ? LIGHT_TEXT : DARK_TEXT;
     return;

@@ -39,6 +39,14 @@ describe("pickRepresentativeRadius - the row's shape, not a stray wrapper's", ()
     expect(pickRepresentativeRadius(["0px", "18px"])).toBe("18px");
   });
 
+  // A segmented control rounded on one end spells its px lengths in either order.
+  // Reading only the leading one made the tie-break answer 0 for `0px 18px 18px 0px`
+  // and 18 for `18px 0 0 18px`, so the same shape won or lost on its spelling.
+  it("breaks a tie on the largest corner, whichever end the shorthand starts at", () => {
+    expect(pickRepresentativeRadius(["4px", "0px 18px 18px 0px"])).toBe("0px 18px 18px 0px");
+    expect(pickRepresentativeRadius(["4px", "18px 0 0 18px"])).toBe("18px 0 0 18px");
+  });
+
   it("sorts a non-px form last in a tie but still returns it when it is alone", () => {
     expect(pickRepresentativeRadius(["50%", "8px"])).toBe("8px");
     expect(pickRepresentativeRadius(["50%"])).toBe("50%");
@@ -102,15 +110,14 @@ describe("marginPx", () => {
   });
 });
 
-describe("normalizeReadableColor - the sampled colour has to stay legible", () => {
-  it("leaves a style with no sampled colour alone", () => {
+describe("normalizeReadableColor - the sampled color has to stay legible", () => {
+  it("leaves a style with no sampled color alone", () => {
     const style: SiteButtonStyle = { backgroundColor: "rgb(255, 255, 255)" };
     normalizeReadableColor(style, "light");
     expect(style.color).toBeUndefined();
   });
 
-  // The Amazon link-blue story lives on normalizeReadableColor in mount-style-math.ts.
-  it("snaps a saturated brand hue to the readable colour for its background", () => {
+  it("snaps a saturated brand hue to the readable color for its background", () => {
     const style: SiteButtonStyle = { color: "rgb(0, 113, 133)", contrastBackgroundColor: "rgb(255, 255, 255)" };
     normalizeReadableColor(style, "light");
     expect(style.color).toBe(DARK_TEXT);
@@ -122,21 +129,21 @@ describe("normalizeReadableColor - the sampled colour has to stay legible", () =
     expect(style.color).toBe(LIGHT_TEXT);
   });
 
-  it("rewrites a neutral colour that fails contrast against its background", () => {
+  it("rewrites a neutral color that fails contrast against its background", () => {
     const style: SiteButtonStyle = { color: "rgb(200, 200, 200)", contrastBackgroundColor: "rgb(255, 255, 255)" };
     normalizeReadableColor(style, "light");
     expect(style.color).toBe(DARK_TEXT);
   });
 
-  it("keeps a neutral colour that already passes contrast", () => {
+  it("keeps a neutral color that already passes contrast", () => {
     const style: SiteButtonStyle = { color: "rgb(40, 40, 40)", contrastBackgroundColor: "rgb(255, 255, 255)" };
     normalizeReadableColor(style, "light");
     expect(style.color).toBe("rgb(40, 40, 40)");
   });
 
-  // No background sampled: the only cue left is the theme, so a colour that would
+  // No background sampled: the only cue left is the theme, so a color that would
   // vanish into it gets swapped and anything mid-range is left as authored.
-  it("lifts a too-dark colour on a dark theme and darkens a too-light one on light", () => {
+  it("lifts a too-dark color on a dark theme and darkens a too-light one on light", () => {
     const onDark: SiteButtonStyle = { color: "rgb(20, 20, 20)" };
     normalizeReadableColor(onDark, "dark");
     expect(onDark.color).toBe(LIGHT_TEXT);
@@ -153,7 +160,7 @@ describe("normalizeReadableColor - the sampled colour has to stay legible", () =
     expect(midtone.color).toBe("rgb(180, 180, 180)");
   });
 
-  it("leaves an unparseable colour as authored rather than guessing", () => {
+  it("leaves an unparseable color as authored rather than guessing", () => {
     const style: SiteButtonStyle = { color: "currentColor" };
     normalizeReadableColor(style, "light");
     expect(style.color).toBe("currentColor");

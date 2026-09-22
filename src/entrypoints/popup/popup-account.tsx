@@ -105,9 +105,9 @@ function resumeDayLabel(resumesAt: number): string {
   }
 }
 
-// Shown while the API refuses this device a key for the current epoch
-// (shared/epoch-key-limit.ts): every vote until then is dropped, so the tab has
-// to say so - nothing else in the popup does.
+// Shown while the API is refusing this device's votes until the date it names
+// (shared/epoch-key-limit.ts). Nothing else in the popup says so, and a reader
+// whose reactions silently stop landing has no other way to find out.
 const DeviceLimitNotice = () => {
   const [notice, setNotice] = useState<EpochKeyLimitNotice | null>(null);
   useEffect(() => {
@@ -125,9 +125,6 @@ const DeviceLimitNotice = () => {
     </p>
   );
 };
-
-// Narrowest the rename field goes, so an empty one still shows its placeholder.
-const NAME_FIELD_MIN_CHARS = 12;
 
 // The name shown for the signed-in account, and the field that renames it. The
 // name is the reader's own or the emoji mark derived from the account id
@@ -190,10 +187,9 @@ const AccountName = ({ userId }: { userId: string }) => {
       type="text"
       value={draft}
       maxLength={ACCOUNT_NAME_MAX}
-      // Grows with what is typed instead of scrolling inside a fixed box. The floor
-      // keeps an empty field wide enough to read the placeholder in; the ceiling is
-      // what the name itself can reach, and the row's max-width holds it there.
-      size={Math.min(Math.max(draft.length + 1, NAME_FIELD_MIN_CHARS), ACCOUNT_NAME_MAX)}
+      // Sized to the longest name that can exist, so the placeholder and a full name
+      // both read without the field scrolling; the row's max-width holds it there.
+      size={ACCOUNT_NAME_MAX}
       aria-label={t("accountRenameBtn")}
       placeholder={t("accountNamePlaceholder")}
       onInput={(e: Event) => setDraft((e.target as HTMLInputElement).value)}

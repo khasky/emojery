@@ -52,10 +52,20 @@ function readEnvFile(rel: string): Record<string, string> {
 // retarget a store artifact at a host of its own; every other build reads one
 // from WXT_API_BASE or .env.<mode>, which is how a fork points its build at its
 // own backend.
+// Validated here rather than where it is consumed: the override feeds both the
+// compiled bundle and the manifest, and a value only one of them can parse is how
+// they end up pointing at different origins with the build still green.
 function resolveApiBaseOverride(mode: string): string {
   if (mode === "production") return "";
   const envOverride = process.env.WXT_API_BASE || "";
-  return envOverride || readEnvFile(`.env.${mode}.local`).WXT_API_BASE || readEnvFile(`.env.${mode}`).WXT_API_BASE || "";
+  const override = envOverride || readEnvFile(`.env.${mode}.local`).WXT_API_BASE || readEnvFile(`.env.${mode}`).WXT_API_BASE || "";
+  if (!override) return "";
+  try {
+    new URL(override);
+  } catch {
+    throw new Error(`WXT_API_BASE is not an absolute URL: ${override} (expected something like https://api.example.com)`);
+  }
+  return override;
 }
 const API_BASE_OVERRIDE = resolveApiBaseOverride(BUILD_MODE);
 
@@ -68,11 +78,7 @@ function resolveApiBase(mode: string | undefined): string {
 }
 
 function resolveApiOrigin(mode: string | undefined): string {
-  try {
-    return new URL(resolveApiBase(mode)).origin;
-  } catch {
-    return STAGING_API_BASE;
-  }
+  return new URL(resolveApiBase(mode)).origin;
 }
 
 // Removes the source-map entries from one of WXT's build-output file lists, in place:
@@ -103,7 +109,7 @@ export default defineConfig({
       // dictionary tree-shakes out of every bundle: inside an extension
       // `chrome.i18n.getMessage` always answers, and the fallback exists only for
       // Vitest/jsdom, where this constant is undefined. `src/shared/i18n.test.ts`
-      // pins the runtime behaviour; `scripts/check-bundle-budget.mjs` pins the drop.
+      // pins the runtime behavior; `scripts/check-bundle-budget.mjs` pins the drop.
       __EM_I18N_FALLBACK__: JSON.stringify(false),
       // Build stamp shown next to the version in the popup header, for a dev or staging
       // build to say which one it is. Empty in production, which leaves the bundle with
@@ -134,7 +140,7 @@ export default defineConfig({
     // the backend rather than the mode: a plain `pnpm build` talks to staging, and a
     // build carrying the store name while answering from another backend is the
     // confusing one.
-    name: resolveApiOrigin(mode) === PRODUCTION_API_BASE ? "__MSG_extName__" : "__MSG_extName__ (Staging)",
+    name: resolveApiOrigin(mode) === new URL(PRODUCTION_API_BASE).origin ? "__MSG_extName__" : "__MSG_extName__ (Staging)",
     // A literal rather than `__MSG_extShortName__`: Opera's uploader measures the raw
     // token against the 12-character `short_name` limit instead of substituting it first.
     // Every locale spelled it "Emojery" anyway.

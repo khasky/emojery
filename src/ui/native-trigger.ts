@@ -19,6 +19,7 @@ import { HOST_CLASS, OVERLAY_HOST_CLASS } from "../shared/dom";
 import { type FbReaction, type NativeAutoAction, resolveFbReaction, resolveSentiment } from "../shared/native-actions";
 import type { Reaction } from "../shared/reactions";
 import { getAutoNative, setAutoNative } from "../shared/storage";
+import { readPressed } from "./native-pressed";
 import { readContentSettings } from "./settings-cache";
 
 type FbReactionMenu = NonNullable<NativeVoteActions["reactionMenu"]>;
@@ -110,26 +111,6 @@ export function decideNativeTrigger(input: NativeTriggerInput): NativeTriggerDec
   // Unreachable: the three sentiments above are the whole union. Kept so a widened
   // union compiles here instead of falling through to an undefined decision.
   return { kind: "none" };
-}
-
-// Generic pressed-state read: adapter override first, then the locale-free
-// signals (aria-pressed, X's data-testid, GitHub's star/unstar form action).
-export function readPressed(el: HTMLElement | undefined, override?: () => boolean | null): boolean | null {
-  if (!el) return null;
-  if (override) {
-    const pressed = override();
-    if (pressed !== null) return pressed;
-  }
-  const ariaPressed = el.getAttribute("aria-pressed") ?? el.querySelector("[aria-pressed]")?.getAttribute("aria-pressed") ?? null;
-  if (ariaPressed === "true") return true;
-  if (ariaPressed === "false") return false;
-  const testid = el.getAttribute("data-testid");
-  if (testid === "unlike") return true;
-  if (testid === "like") return false;
-  const formAction = el.closest("form")?.getAttribute("action") ?? "";
-  if (formAction.endsWith("/unstar")) return true;
-  if (formAction.endsWith("/star")) return false;
-  return null;
 }
 
 // Facebook flyout driver. Protocol verified live (2026-08): re-hover needs a
@@ -241,7 +222,7 @@ async function pickFbReaction(menu: FbReactionMenu, index: number): Promise<bool
 }
 
 // Facebook's flyout, and only Facebook's: the protocol above (leave->enter reset, pointer
-// press sequence, flyout-position index) is FB's own behaviour, not a generic "this site has
+// press sequence, flyout-position index) is FB's own behavior, not a generic "this site has
 // a reaction menu" capability. Gating on the `kind` discriminator rather than the field's mere
 // presence means a second site's menu gets no press until its protocol lands - and widening
 // that union makes the compiler point at this line.

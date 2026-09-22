@@ -4,7 +4,7 @@
 // wall, EVERY post whose action row has entered the viewport must carry a
 // visible, correctly placed Emojery trigger. Born from the group-feed report:
 // a group photo-post's action row labels its Comment/Send as
-// icon-only buttons (aria «Залишити коментар» / «Надіслати», no text), which a
+// icon-only buttons (aria "Залишити коментар" / "Надіслати", no text), which a
 // text-required row-marker rule rejected - the post scrolled by with no pill
 // while its neighbours had one. `scrollAndCountHosts`' maxVisible > 0 cannot
 // see that class (SOME posts mounting hides the one that didn't), so this file
@@ -19,6 +19,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { HOST_SELECTOR } from "../lib/selectors";
 import type { Bridge } from "./bridge";
+import { FB_LIKE_READER_SRC } from "./facebook-like-src";
 import { bridgeFixture, gotoSettled, noHostMounted, openPickerState, readEvidence, SETUP_HOOK_TIMEOUT_MS, siteAuthEnabled, triggerStillClickable, waitForHost, wheelBySrc } from "./harness";
 import { postSurfaceHosts } from "./probes";
 import { authFacebookGroupPostUrl, authFacebookGroupWallUrl, authFacebookProfileWallUrl } from "./scenarios";
@@ -49,20 +50,18 @@ interface WallPost {
 // scrolled out: likeTop > -150). Nested articles are comments and never count;
 // units without a post Like (people-you-may-know, join prompts) are skipped.
 // The id prefers the post's own permalink (stable across steps), falling back
-// to aria-posinset.
+// to aria-posinset. The Like itself is found by the shared reader, so an
+// already-reacted post and a count summary are judged here exactly as the shipped
+// adapter and the auto-press probes judge them.
 const WALL_AUDIT_SRC = `
-const LIKE = /(?:\\bun)?like(?:d)?\\b|нрав|подоба|вподоб/iu;
-const REMOVE = /^(remove|убрать|удалить|видалити|скасувати)/i;
-const MENU = /\\breaction\\b|реакц/iu;
+${FB_LIKE_READER_SRC}
 const posts = [];
 const topArticles = [...document.querySelectorAll('[role="article"]')]
   .filter((a) => !(a.parentElement && a.parentElement.closest('[role="article"]')));
 for (const art of topArticles) {
   if (art.getBoundingClientRect().width === 0) continue;
   const like = [...art.querySelectorAll('[role="button"][aria-label]')].find((b) => {
-    const aria = b.getAttribute('aria-label') || '';
-    if (MENU.test(aria)) return false;
-    if (!(LIKE.test(aria) || REMOVE.test(aria))) return false;
+    if (!isFbLikeButton(b)) return false;
     if (b.closest('[role="article"]') !== art) return false;
     return b.getBoundingClientRect().width > 0;
   });
