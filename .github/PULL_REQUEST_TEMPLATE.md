@@ -1,35 +1,31 @@
-<!-- Thanks for contributing to Emojery! -->
+<!-- The title is what lands on main: a squash merge takes it verbatim, so it follows the
+     commit convention in CONTRIBUTING.md and carries no count of what changed.
 
-## What does this PR do
+     Keep the four sections. Write prose, not a form. Each heading takes a short lead
+     before any bullets, and that lead says what kind of thing the section holds rather
+     than summarizing its own list. Delete a comment once its section is written. -->
 
-<!-- A short summary of the change and why it's needed. Link any related issue
-     with "Closes #123". -->
+## Summary
 
-## Type of change
+<!-- What the change does, and how. Open on the change rather than on the breakage, and
+     name the things it touches instead of counting them. Link an issue with "Closes #123". -->
 
-- [ ] New site adapter
-- [ ] Bug fix
-- [ ] Feature / improvement
-- [ ] Docs / chore
+## Problem
 
-## Checklist
+<!-- What led to the change, how it surfaced, and why nothing caught it earlier. The last
+     part is the one a reviewer cannot reconstruct: a check that agreed with the defect, a
+     value with nothing comparing it against its twin, a path no lane reaches.
+     One bullet per item once there is more than one. -->
 
-<!-- One command runs the whole gate, and CI runs the same one. What each step is
-     for: CONTRIBUTING.md#pre-pr-gates. -->
+## Verification
 
-- [ ] `pnpm check` passes locally
-- [ ] A green `pnpm test` alone is not the gate — it excludes the `*.browser.test.*` specs, which `pnpm check` covers via `pnpm test:browser`
+<!-- What was run and what it showed. Leave out the gate that runs on every pull request
+     anyway; state the check that had to be written, the regression test made to fail
+     before the fix, the probe constructed to settle a question. A new site adapter has its
+     own list of steps in docs/adding-a-site.md. -->
 
-## For a new site adapter
+## Confidence
 
-<!-- Delete this section if not applicable. See docs/adding-a-site.md for the full checklist. -->
-
-- [ ] Site registered as one row in `src/shared/sites.ts` (everything else derives from it)
-- [ ] Brand glyph added to `SITE_BRAND` (`src/ui/brand-icons.ts`) — the popup's per-site list
-- [ ] Adapter + content entrypoint added
-- [ ] Unit tests added (`src/adapters/<site>.test.ts`); drift tests green
-- [ ] Lockstep row added for a URL-derivable id (`src/adapters/lockstep.test.ts`)
-- [ ] E2E scenario added (`e2e/supported-sites.ts` + `.env.e2e.example` URL)
-- [ ] Site placed in `DEEP_SITES` or `SMOKE_SITES` with its feed + content URLs (`e2e/site-auth/scenarios.ts`)
-- [ ] Supported-sites table row added in `README.md`
-- [ ] Staging round-trip verified and noted above (adding-a-site step 11)
+<!-- What is still unproven and what a mistake there would cost: a lane that could not run
+     here, a surface only a signed-in browser reaches, an assumption the change rests on.
+     A description that claims nothing is left is the one nobody believes. -->
