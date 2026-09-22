@@ -11,7 +11,9 @@ import { CATEGORIES } from "../shared/reactions";
 
 // The emoji grid is a roving tabindex: exactly one button is Tab-reachable and the
 // arrows move that one. Columns must match the grid in picker.css so ArrowUp/Down land a row away.
-const GRID_COLUMNS = 6;
+// Must equal the track count of `.khasky-emojery-grid` in picker.css, or ArrowUp/ArrowDown
+// land somewhere other than a row away. Exported so picker-css.test.ts can pin the pair.
+export const GRID_COLUMNS = 6;
 const SCROLL_SELECTOR = `.${POPOVER_SCROLL_CLASS}`;
 
 // Focus not obscured (WCAG). picker.css declares `scroll-padding` on the scroll
@@ -20,7 +22,7 @@ const SCROLL_SELECTOR = `.${POPOVER_SCROLL_CLASS}`;
 // back up left the cell just inside the scrollport and under the head, with the scroll
 // position unchanged. So correct it by hand, reading the very padding the
 // stylesheet declares (picker.tsx feeds it the head's measured height), which keeps one
-// source of truth for the offset and still lets an engine that honours it do the work
+// source of truth for the offset and still lets an engine that honors it do the work
 // first - this then finds nothing to do.
 function scrollIntoPaddedView(item: HTMLElement): void {
   const scroller = item.closest<HTMLElement>(SCROLL_SELECTOR);
@@ -43,15 +45,16 @@ type GridFocusMode = "first" | "last" | "next" | "previous" | "rowNext" | "rowPr
 const GRID_KEY_MODES: Readonly<Record<string, GridFocusMode>> = { ArrowRight: "next", ArrowLeft: "previous", ArrowDown: "rowNext", ArrowUp: "rowPrev", Home: "first", End: "last" };
 
 // Px fallbacks for the pre-measure pass only (`el.offsetWidth || POPOVER_W`): the
-// `width: 18em` / `max-height: 28em` picker.css declares, at a 16px base. Only
-// used before the popover has laid out.
+// `max(18em, ...)` width floor and the `max-height: 28em` picker.css declares, at a
+// 16px base. Only used before the popover has laid out, and only the floor - a
+// popover widened past it by a 10th category measures wider than this guess.
 const POPOVER_W = 288;
 const POPOVER_MAX_H = 448;
 // Gap kept between the popover and both the trigger and the viewport edges.
 const POPOVER_MARGIN = 8;
 // Height (px) of the "focus band" just below the sticky header. A category nav icon fades
-// from grayscale to full colour in proportion to how much of its section fills this band,
-// so the colour crosses over smoothly as you scroll from one category into the next.
+// from grayscale to full color in proportion to how much of its section fills this band,
+// so the color crosses over smoothly as you scroll from one category into the next.
 const CATEGORY_FOCUS_BAND = 64;
 
 // Keyboard navigation of the emoji grid, as one unit: the roving-tabindex upkeep when the
@@ -295,7 +298,7 @@ export function usePopoverDismiss({ open, triggerRef, popRef, close }: { open: b
 }
 
 // Category nav scroll-spy: score each category by how much of its section fills the focus band
-// under the sticky header, stored as its nav icon's colour intensity. rAF-throttled; re-runs
+// under the sticky header, stored as its nav icon's color intensity. rAF-throttled; re-runs
 // when content above the grid changes height.
 export function useCategoryScrollSpy({
   open,
