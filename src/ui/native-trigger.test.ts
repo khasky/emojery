@@ -8,7 +8,8 @@ import type { PickerInsertionPoint, TargetRef } from "../shared/adapter";
 import { resolveFbReaction } from "../shared/native-actions";
 import { getAutoNative, setAutoNative } from "../shared/storage";
 import { installFakeChrome } from "../test/fixtures";
-import { decideNativeTrigger, type NativeTriggerInput, readPressed, runAutoPress, setFbPickPending, startFbPrewarm, stopFbPrewarm } from "./native-trigger";
+import { readPressed } from "./native-pressed";
+import { decideNativeTrigger, type NativeTriggerInput, runAutoPress, setFbPickPending, startFbPrewarm, stopFbPrewarm } from "./native-trigger";
 import { invalidateContentSettings } from "./settings-cache";
 
 const base: NativeTriggerInput = {
@@ -129,26 +130,21 @@ describe("readPressed", () => {
     expect(readPressed(el, () => false)).toBe(false);
   });
 
-  // The markers below are allowed under the file's generic-sentinel rule: each is a lone
-  // control carrying the literal signal readPressed itself reads (X's data-testid, GitHub's
-  // star-form action), with no site markup simulated around it - cf.
-  // adapters/action-labels.test.ts.
-  it("falls back to aria-pressed, then data-testid, then form action", () => {
+  // Only the generic signal belongs here. The two site-owned markers readPressed also
+  // reads - X's data-testid and GitHub's star-form action - are each that site's to
+  // change, so a fixture of them keeps passing after the site moves; they are asserted
+  // against the real controls in e2e/site-auth/auto-press.test.ts instead.
+  it("falls back to aria-pressed, and answers null when nothing readable is there", () => {
     const pressed = document.createElement("button");
     pressed.setAttribute("aria-pressed", "true");
     expect(readPressed(pressed)).toBe(true);
 
-    const testid = document.createElement("button");
-    testid.setAttribute("data-testid", "unlike");
-    expect(readPressed(testid)).toBe(true);
-
-    const form = document.createElement("form");
-    form.setAttribute("action", "/o/r/unstar");
-    const inForm = document.createElement("button");
-    form.appendChild(inForm);
-    expect(readPressed(inForm)).toBe(true);
+    const released = document.createElement("button");
+    released.setAttribute("aria-pressed", "false");
+    expect(readPressed(released)).toBe(false);
 
     expect(readPressed(document.createElement("button"))).toBe(null);
+    expect(readPressed(undefined)).toBe(null);
   });
 });
 

@@ -167,7 +167,11 @@ const ROW_SIBLING_LABELS_SET: ReadonlySet<string> = new Set(ROW_SIBLING_KINDS.ma
 // of its action buttons, so English-only signals (POST_LIKE_ARIA, exact "Like")
 // never fire on a RU/UA UI - the adapter would fall back to fragile geometry and
 // mount on comment rows / skip posts. Our FB stems cover EN/RU/UA only (no
-// German), composed from STEM_PARTS, narrower than the STEM union.
+// German), composed from STEM_PARTS, narrower than the STEM union. Reply is the
+// exception, the same one Instagram makes: it is only ever used to REJECT a
+// comment row, so a locale it cannot read is a locale where no comment row is
+// recognized and the row guards fall through - "Antwort" is what keeps the picker
+// off a comment on a German UI.
 // The exact EN `ACTION_LABELS` are still checked FIRST in actionLabel
 // (their prefix-aware match - "Like Mark's post" -> "Like" - is not expressible as
 // the registry's exact equality), so an exact English label always wins.
@@ -176,11 +180,11 @@ export const FB_STEMS = {
   comment: STEM.comment,
   share: stem(STEM_PARTS.share.en, STEM_PARTS.share.ru, STEM_PARTS.share.ua),
   send: STEM.send,
-  reply: stem(STEM_PARTS.reply.en, STEM_PARTS.reply.ru, STEM_PARTS.reply.ua),
+  reply: stem(STEM_PARTS.reply.en, STEM_PARTS.reply.ru, STEM_PARTS.reply.ua, STEM_PARTS.reply.de),
 } as const;
 
 // A set reaction relabels the Like button "Remove Like"/"Remove Love"/... (EN),
-// «Убрать/Удалить...» (RU), «Видалити/Скасувати...» (UA) - our stems cover EN/RU/UA
+// "Убрать/Удалить..." (RU), "Видалити/Скасувати..." (UA) - our stems cover EN/RU/UA
 // here, same as above. Read both for auto-press (fbLikePressed) and, via
 // actionLabel, to keep recognizing a REACTED post's like control.
 export const FB_REMOVE_RE = /^(remove|убрать|удалить|видалити|скасувати)/i;
@@ -304,7 +308,7 @@ const HEADER_CTA_STEM =
 const PROFILE_HEADER_CTA_SELECTOR = 'a[href*="/stories/create"], a[href*="fb_profile_edit_entry_point"]';
 
 // Owner tools are route-based for the same reason: the Boost control is an
-// anchor into the ad centre in every UI language (captured live on an owned
+// anchor into the ad center in every UI language (captured live on an owned
 // Page), while OWNER_TOOLS_STEM below can only spell EN/RU/UA. A post action row
 // never links there.
 const OWNER_TOOLS_SELECTOR = 'a[href*="/ad_center/"]';
@@ -333,7 +337,7 @@ const VISUAL_ROW_WALK_DEPTH = 8;
 // Reel viewer only: how far up to look for the vertical action column. Verified
 // live: the column with >=2 action labels sits ~3 levels above the Like. Kept
 // SHALLOW so a comment-panel Like can't walk up and borrow the reel's column.
-export const REEL_ACTION_COLUMN_DEPTH = 6;
+const REEL_ACTION_COLUMN_DEPTH = 6;
 
 // The bounded sibling check MUST stay shallow: walking too far up reaches the
 // comments-section/post-content parent and spuriously discovers the real action
@@ -443,11 +447,12 @@ export function resolvePostAction(btn: HTMLElement, verdicts: PostRowVerdicts): 
 // icon (`aria-label="Like: 68 people"`) also exists atop the comments and must be
 // rejected.
 //
-// Detection is selector-light, on the two signals stable across
-// every redeploy since 2017 because they're accessibility-required:
-// `role="button"` and `aria-label="Like"` (else visible text exactly "Like").
-// Post-row vs comment-row is then decided by the ROW_SIBLING_LABELS_SET
-// asymmetry, read within a shallow sibling window (see SIBLING_UP_DEPTH).
+// The label read is `actionLabel`: the exact EN list, the localized table, the
+// locale stems, and the reactions-chevron pairing for a reacted post in a locale
+// with no "Remove <reaction>" vocabulary. `role="button"` is the scan's own
+// selector, one caller up. Post-row vs comment-row is then decided by the
+// ROW_SIBLING_LABELS_SET asymmetry, read within a shallow sibling window (see
+// SIBLING_UP_DEPTH).
 function readPostActionLikeButton(btn: HTMLElement): boolean {
   // Cheap label/aria rejection FIRST: the global `[role="button"]` scan visits
   // hundreds of buttons per re-scan, and paying the rect + computed-style walk in
@@ -483,7 +488,7 @@ const FILLED_SLOT_REJECT_COUNT = 2;
 // [role="button"] element itself; probe a few descendant levels.
 const FILLED_PROBE_DEPTH = 3;
 
-export function isFilledChipRow(slots: HTMLElement[]): boolean {
+function isFilledChipRow(slots: HTMLElement[]): boolean {
   let filled = 0;
   for (const slot of slots) {
     if (slotHasFilledControl(slot)) {
@@ -518,7 +523,7 @@ function hasBackgroundFill(el: HTMLElement): boolean {
   return isPaintedFill(getComputedStyle(el).backgroundColor) === true;
 }
 
-export function isNonPostActionRow(row: HTMLElement): boolean {
+function isNonPostActionRow(row: HTMLElement): boolean {
   // Route-based, so it holds in every FB UI language (see PROFILE_HEADER_CTA_SELECTOR).
   if (row.querySelector(PROFILE_HEADER_CTA_SELECTOR)) return true;
   if (row.querySelector(OWNER_TOOLS_SELECTOR)) return true;
@@ -564,7 +569,7 @@ const MESSENGER_WALK_DEPTH = 25;
 // composer. Post-in-a-dialog (photo viewer / permalink modal) is `role="dialog"`
 // and handled by the modal containment in findPostContainer, so dialogs are excluded
 // here to avoid rejecting real posts.
-export function isInMessengerThread(el: HTMLElement): boolean {
+function isInMessengerThread(el: HTMLElement): boolean {
   for (const node of ancestors(el, MESSENGER_WALK_DEPTH)) {
     if (isFixedPositioned(node) && !node.matches(MODAL_SELECTOR) && containsMessageComposer(node)) {
       return true;
@@ -590,7 +595,7 @@ function containsMessageComposer(root: Element): boolean {
 }
 
 // See rejectCommentRow: positive recognition only.
-export function looksLikeCommentRow(row: HTMLElement): boolean {
+function looksLikeCommentRow(row: HTMLElement): boolean {
   return fbCommentRowReject(row, fbLabels);
 }
 
@@ -612,7 +617,7 @@ export function isInNestedArticle(el: HTMLElement): boolean {
   return article.parentElement?.closest('[role="article"]') != null;
 }
 
-export function findFacebookVisualActionSlot(btn: HTMLElement): VisualActionSlot | null {
+function findFacebookVisualActionSlot(btn: HTMLElement): VisualActionSlot | null {
   if (btn.getAttribute("role") !== "button") return null;
   if (btn.closest(OWN_NODES_SELECTOR)) return null;
   if (!textOf(btn)) return null;
@@ -689,12 +694,12 @@ export function actionLabel(el: Element): string | null {
   if (aria) {
     // A pressed Like keeps its role under the reaction's own noun ("Remove Haha").
     // Checked BEFORE the chevron rejection: the RU/UA remove labels spell the word
-    // "reaction" out («Убрать реакцию...», «Видалити реакцію...»), so the реакц test
+    // "reaction" out ("Убрать реакцию...", "Видалити реакцію..."), so the реакц test
     // below would misread a reacted post's Like as the flyout chevron and the
     // trigger vanished from every reacted post on those locales (EN "Remove Like"
     // never contains "reaction", which is why only they broke). The chevron's own
-    // labels are Change-forms ("Change Haha reaction", «Змінити/Изменить
-    // реакцию...») - no remove verb, so they still fall through to the rejection.
+    // labels are Change-forms ("Change Haha reaction", "Змінити/Изменить
+    // реакцию...") - no remove verb, so they still fall through to the rejection.
     // Still gated by hasBoundedActionRowSibling downstream, so an unrelated
     // "Remove ..." control outside an action row cannot pass as a post Like.
     if (FB_REMOVE_RE.test(aria)) return "Like";
@@ -722,9 +727,9 @@ export function actionLabel(el: Element): string | null {
   return isChevronPairedLike(el) ? "Like" : null;
 }
 
-// The matchesActionLabel shapes against LOCALIZED_LABEL_KIND, reading the aria and
-// the text ONCE - the same lookup done per candidate label would re-read
-// textContent once per table entry.
+// The same three label shapes matchesActionLabel handles, looked up in
+// LOCALIZED_LABEL_KIND, reading the aria and the text ONCE - the same lookup done per
+// candidate label would re-read textContent once per table entry.
 function localizedActionLabel(el: Element): string | null {
   const aria = el.getAttribute("aria-label");
   if (aria?.includes(":")) return null;
@@ -776,7 +781,7 @@ function matchesActionLabel(el: Element, label: string): boolean {
 // Decided PER LEVEL, nearest first, and a Reply marker outvotes a row marker at
 // its level: a comment's Like meets its own Reply link at the first level, while
 // the comment COMPOSER a couple of levels up carries buttons whose aria spells
-// "comment" out ("Comment with a GIF", «Коментувати з GIF») and reads as a row
+// "comment" out ("Comment with a GIF", "Коментувати з GIF") and reads as a row
 // marker - one route into the comment escape isInNestedArticle documents. A real
 // post action row meets Comment/Share/Send at its first marker level and never a
 // Reply, so it still resolves at that level.
@@ -802,7 +807,7 @@ function hasBoundedActionRowSibling(el: HTMLElement): boolean {
 
 // The ROW_SIBLING_LABELS_SET check without the sibling walk - for reel-viewer
 // detection, where the column's buttons sit too deep for it.
-export function rowHasPostSibling(row: HTMLElement): boolean {
+function rowHasPostSibling(row: HTMLElement): boolean {
   for (const btn of row.querySelectorAll<HTMLElement>('[role="button"]')) {
     const label = actionLabel(btn);
     if (label && ROW_SIBLING_LABELS_SET.has(label)) return true;
@@ -817,7 +822,7 @@ export function rowHasPostSibling(row: HTMLElement): boolean {
 // post action row.
 //
 // Icon-only markers COUNT: a group photo-attachment's action row labels its
-// Comment/Send as bare icons (aria «Залишити коментар» / «Надіслати», no text -
+// Comment/Send as bare icons (aria "Залишити коментар" / "Надіслати", no text -
 // verified live on a public group's photo post, where a previous
 // text-required rule left the whole post without its trigger). Safe because the
 // comment surfaces that abuse the same aria are rejected structurally instead -
@@ -842,7 +847,7 @@ function containsRowOrReplyMarker(root: Element, maxDepth: number): "row" | "rep
 // Walk up until the parent contains >=2 distinct action-labeled buttons - that
 // parent is the flex action row and `node` the column slot to anchor on (the
 // picker becomes a sibling flex item between Like and Comment).
-export function actionRowSlot(likeBtn: HTMLElement, maxDepth = ROW_WALK_DEPTH): HTMLElement | null {
+function actionRowSlot(likeBtn: HTMLElement, maxDepth = ROW_WALK_DEPTH): HTMLElement | null {
   let node: HTMLElement | null = likeBtn;
   for (let i = 0; i < maxDepth && node; i++) {
     const parent: HTMLElement | null = node.parentElement;

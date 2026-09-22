@@ -38,12 +38,29 @@ describe("stem composition reproduces each adapter's pre-refactor vocabulary", (
     sameAtoms(IG_STEMS.reply, "\\breply\\b|ответ|відпов|antwort");
   });
 
-  it("Facebook - EN/RU/UA only (no German), reply marker without antwort", () => {
+  it("Facebook - EN/RU/UA, reply keeps the German marker", () => {
     sameAtoms(FB_STEMS.like, "\\b(?:un)?like(?:d)?\\b|нрав|подоба|вподоб");
     sameAtoms(FB_STEMS.comment, "\\bcomment\\b|комментир|комментар|коментув|коментар");
     sameAtoms(FB_STEMS.share, "\\bshare\\b|подели|поділи");
     sameAtoms(FB_STEMS.send, "\\bsend\\b|отправ|надісл|надсила|переслат");
-    sameAtoms(FB_STEMS.reply, "\\breply\\b|ответ|відпов");
+    sameAtoms(FB_STEMS.reply, "\\breply\\b|ответ|відпов|antwort");
+  });
+});
+
+// Reply is the one stem used ONLY to reject a comment row, never to accept a
+// Like, so a locale it cannot read is a locale where no comment row is
+// recognized at all and the row guards fall through. Both adapters run the same
+// rejectCommentRow, so both need every locale the Like stems carry plus German.
+describe("the reply stem rejects a comment row in every readable locale", () => {
+  const REPLY_LABELS = ["Reply", "Ответить", "Відповісти", "Antworten"];
+
+  it.each([
+    ["Facebook", FB_STEMS.reply],
+    ["Instagram", IG_STEMS.reply],
+  ])("%s", (name, reply) => {
+    for (const label of REPLY_LABELS) {
+      expect(reply.test(label), `${name}: "${label}" is not read as a reply, so its comment rows go unguarded`).toBe(true);
+    }
   });
 });
 

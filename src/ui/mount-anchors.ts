@@ -26,7 +26,9 @@ export function setPendingMount(key: TargetKey, point: PickerInsertionPoint): vo
 
 // How far ahead of the viewport a deferred mount fires - the observer's rootMargin
 // below and the synchronous probe next to it, so a scan cannot mount eagerly on an
-// anchor this observer is still waiting on and double-mount it.
+// anchor this observer is still waiting on and double-mount it. Vertical only, on
+// both halves: feeds scroll down, and a horizontal reach the observer does not have
+// is a band the probe alone answers for.
 const MOUNT_PREFETCH_MARGIN_PX = 200;
 
 // The synchronous half of that margin: is this element already inside the band the
@@ -37,7 +39,7 @@ export function isNearPrefetchMargin(el: HTMLElement): boolean {
   const width = window.innerWidth || document.documentElement.clientWidth;
   const height = window.innerHeight || document.documentElement.clientHeight;
   const margin = MOUNT_PREFETCH_MARGIN_PX;
-  return rect.bottom >= -margin && rect.right >= -margin && rect.top <= height + margin && rect.left <= width + margin;
+  return rect.bottom >= -margin && rect.top <= height + margin && rect.right >= 0 && rect.left <= width;
 }
 
 // ONE IntersectionObserver for every deferred mount (it used to be one instance
