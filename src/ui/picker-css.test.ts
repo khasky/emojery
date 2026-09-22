@@ -4,8 +4,9 @@
 // the engine lays the popover out either way, and the damage surfaces as a wrong
 // scroll height only in a browser that applies the property.
 import { describe, expect, it } from "vitest";
-import { GRID_ITEM_SELECTOR } from "../shared/dom";
+import { GRID_CLASS, GRID_ITEM_SELECTOR } from "../shared/dom";
 import { PICKER_STYLESHEET } from "./mount-shadow";
+import { GRID_COLUMNS } from "./picker-hooks";
 
 // Declarations only: the comments in these rules name the very properties being
 // asserted on, so leaving them in would let prose satisfy the check.
@@ -17,6 +18,17 @@ function ruleBody(selector: string): string {
   expect(match, `no rule found for ${selector}`).not.toBeNull();
   return (match?.[1] ?? "").replace(/\/\*[\s\S]*?\*\//g, "");
 }
+
+describe("emoji grid track count", () => {
+  // The keyboard's row step and the stylesheet's track count are one number in two
+  // artifacts, and nothing rendered catches a split: ArrowRight walks a single cell, so
+  // the picker suites stay green while ArrowUp/ArrowDown jump the wrong distance.
+  it("matches the row step the grid keyboard handler uses", () => {
+    const tracks = /repeat\(\s*(\d+)\s*,/.exec(ruleBody(`.${GRID_CLASS}`));
+    expect(tracks, "the grid rule should declare repeat(N, ...)").not.toBeNull();
+    expect(Number(tracks?.[1]), "picker.css track count vs GRID_COLUMNS in picker-hooks.ts").toBe(GRID_COLUMNS);
+  });
+});
 
 describe("emoji grid cell", () => {
   // Why the cells carry `content-visibility: auto` lives on .khasky-emojery-grid-item in

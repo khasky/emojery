@@ -62,7 +62,7 @@ async function seedHistoryRows(context: BrowserContext, count: number): Promise<
         req.onsuccess = () => resolve(req.result);
         req.onerror = () => reject(req.error);
       });
-      const reactions = ["❤️", "\u{1F525}", "\u{1F44D}", "\u{1F602}", "\u{1F389}"];
+      const reactions = ["\u{2764}\u{FE0F}", "\u{1F525}", "\u{1F44D}", "\u{1F602}", "\u{1F389}"];
       const actions = ["add", "change", "remove"];
       const newestTs = Date.now();
       await new Promise<void>((resolve, reject) => {

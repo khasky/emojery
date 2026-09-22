@@ -117,8 +117,11 @@ test("a deep feed scroll stays under the heap budget", async () => {
 
     // The whole renderer is measured, so the budget bounds "extension leak on
     // top of a heavy feed", not the extension alone. A local 12-step run on X
-    // settled at 25-30 MB; the default is 25 steps, so 200 MB is slack
-    // until the persisted perf-metrics.json gives a p95 for the real depth.
+    // settled at 25-30 MB; the default is 25 steps, so 200 MB is slack until the
+    // uploaded perf-metrics.json says what the real depth costs. It closes at 20
+    // green weekly runs: take their p95 at the default step count and set the
+    // limit to twice it, which is the first value that can fail on a leak rather
+    // than only on a catastrophe.
     const limitMb = Number(process.env.E2E_PERF_HEAP_LIMIT_MB ?? 200);
     expect(after, `renderer heap after ${steps}-step deep scroll: ${after} MB (before: ${before} MB, budget: ${limitMb} MB)`).toBeLessThan(limitMb);
   } finally {

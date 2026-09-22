@@ -8,10 +8,11 @@ import { h } from "preact";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { userEvent } from "vitest/browser";
 import { AUTH_KEY } from "../../shared/auth-session";
+import { NOTE_MAX } from "../../shared/messages";
 import { EMPTY_NOTE_SELECTOR, REPORT_ERROR_SELECTOR, REPORT_NOTE_HINT_SELECTOR, REPORT_SUCCESS_SELECTOR, SIGNIN_PROMPT_MSG_SELECTOR } from "../../shared/page-dom";
 import { mountContainer, renderAndSettle, requireEl, unmountContainer } from "../../test/browser-harness";
 import { type ChromeShimHandle, installChromeShim, makeLiveAuthSession } from "../../test/chrome-shim";
-import { ReportView } from "./popup-report";
+import { MIN_REPORT_NOTE_CHARS, ReportView } from "./popup-report";
 
 const GITHUB_TAB = { url: "https://github.com/torvalds/linux", id: 1 };
 const LIVE_AUTH = makeLiveAuthSession();
@@ -92,7 +93,10 @@ describe("ReportView - the note length rule", () => {
     // Pins the below-field hint and its aria-describedby wiring (rationale in
     // popup-report.tsx).
     const hint = container.querySelector(REPORT_NOTE_HINT_SELECTOR);
-    expect(hint?.textContent).toContain("10-500");
+    // Against the constants, not the literal: the bounds are spelled into the locale
+    // copy, so moving either one silently leaves 26 catalogs stating the old range.
+    expect(hint?.textContent).toContain(String(MIN_REPORT_NOTE_CHARS));
+    expect(hint?.textContent).toContain(String(NOTE_MAX));
     expect(noteField().getAttribute("aria-describedby")).toBe("report-note-hint");
 
     await userEvent.fill(noteField(), LONG_ENOUGH);

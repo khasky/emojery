@@ -17,6 +17,10 @@ import * as ext from "./lib/extension";
 // the tab-bound / extension-page sender checks. The extension needs no such
 // channel (all its messaging is content-script or own-page), so the key must be
 // absent - or, if ever added, name no web matches and no external extension ids.
+// Reads the built manifest off disk - no browser, no site, no backend - so a retry
+// could only mask a real regression.
+test.describe.configure({ retries: 0 });
+
 test("built manifest exposes no externally_connectable web-messaging channel", () => {
   const manifestPath = resolve(ext.resolveExtensionPath(), "manifest.json");
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as {
