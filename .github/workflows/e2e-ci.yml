@@ -293,18 +293,17 @@ jobs:
         if: always()
         run: node scripts/check-e2e-skips.mjs test-results/e2e-perf.json
 
-      # TODO: test this later, then re-enable.
       # Green runs included: the heap budget is tuned from this file's history,
       # and it is a metrics blob, not a trace tree - the failure-only policy
       # below covers the traces.
-      # - name: Upload perf metrics
-      #   if: always()
-      #   uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-      #   with:
-      #     name: perf-metrics
-      #     path: test-results/perf-metrics.json
-      #     if-no-files-found: ignore
-      #     retention-days: 90
+      - name: Upload perf metrics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: perf-metrics
+          path: test-results/perf-metrics.json
+          if-no-files-found: ignore
+          retention-days: 90
 
       # Failure only, and the same accepted risk as the placement sweep above.
       - name: Upload perf report

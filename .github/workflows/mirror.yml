@@ -13,7 +13,7 @@ name: Mirror
 # If the default branch is protected on the mirror, the token needs force-push
 # rights there or the push is rejected with "pre-receive hook declined".
 #
-# One job for every host, not a matrix: Actions bills each job rounded up to a
+# One job for all hosts, not a matrix: Actions bills each job rounded up to a
 # whole minute, and a push takes seconds. Three matrix jobs plus the archive
 # request cost a 4-minute floor per run for well under one minute of work.
 
