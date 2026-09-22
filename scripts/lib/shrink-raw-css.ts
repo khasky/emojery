@@ -5,13 +5,14 @@
 // comments the source is written with. This Vite plugin hands the `?raw` loader the
 // whitespace-minified text instead: esbuild parses the sheet and prints it back without
 // comments and layout whitespace, and `minifySyntax` stays off so no declaration is
-// rewritten. src/ui/picker-css.browser.test.tsx compares the two forms rule by rule in real
-// engines; scripts/check-bundle-budget.mjs holds the byte ceiling the saving serves.
+// rewritten. src/ui/picker-css.browser.test.tsx compares the plugin's two forms rule by
+// rule in real engines (`?raw` against `?raw&authored`); scripts/check-bundle-budget.mjs
+// holds the byte ceiling the saving serves.
 
 import { readFileSync } from "node:fs";
 import { transformSync } from "esbuild";
 
-export function shrinkCss(css: string, sourcefile?: string): string {
+function shrinkCss(css: string, sourcefile?: string): string {
   const { code, warnings } = transformSync(css, { loader: "css", minifyWhitespace: true, ...(sourcefile ? { sourcefile } : {}) });
   if (warnings.length > 0) throw new Error(`shrinkCss: esbuild warned:\n${warnings.map((w) => `${w.location?.file ?? ""}:${w.location?.line ?? 0} ${w.text}`).join("\n")}`);
   return code;

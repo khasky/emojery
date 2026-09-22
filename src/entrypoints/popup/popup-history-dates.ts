@@ -6,8 +6,7 @@
 // Everything here is local-time: a row is filed under the day the USER reacted.
 
 import { t } from "../../shared/i18n";
-
-const DAY_MS = 86_400_000;
+import { DAY_MS } from "../../shared/relative-time";
 
 // One formatter per option set, reused for the life of the popup: constructing an
 // Intl.DateTimeFormat is orders of magnitude dearer than formatting with one already built,

@@ -9,9 +9,9 @@
 // something from 23:50 yesterday is yesterday at 00:10, and a DST shift must not make
 // a day 0.96 of one.
 
-const MINUTE_MS = 60_000;
+export const MINUTE_MS = 60_000;
 const HOUR_MS = 3_600_000;
-const DAY_MS = 86_400_000;
+export const DAY_MS = 86_400_000;
 const DAYS_PER_WEEK = 7;
 const DAYS_PER_MONTH = 30;
 const DAYS_PER_YEAR = 365;

@@ -9,6 +9,11 @@
 //
 // Playwright pierces the open shadow roots, so these reach inside
 // `.khasky-emojery-host` / `.khasky-emojery-overlay-host`.
+//
+// The list is deliberately exhaustive rather than trimmed to what the suites
+// currently reach for: a name with no caller here still fails the typecheck when
+// the extension renames it, which is the whole point of re-exporting instead of
+// spelling the strings out.
 
 import { COUNTER_CLASS, TRIGGER_CLASS } from "../../src/shared/dom";
 

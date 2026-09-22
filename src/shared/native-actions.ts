@@ -19,6 +19,8 @@ export interface FbReaction {
   readonly emojis: readonly string[];
 }
 
+// Exported for native-actions.test.ts, which pins the emoji-to-reaction mapping against
+// this table; the app reads it through resolveFbReaction.
 export const FB_REACTIONS: readonly FbReaction[] = [
   { index: 0, name: "like", emojis: ["👍"] },
   { index: 1, name: "love", emojis: ["❤️", "🧡", "💛", "💚", "💙", "💜", "🤎", "🤍", "💖", "💗", "💓", "💞", "💕", "💘", "💝", "💟", "❣️", "😍"] },

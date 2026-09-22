@@ -10,13 +10,13 @@
 // own page machinery, and the two axe scans no Gecko case covers - the opt-in
 // Debug panel and the signed-in Account tab.
 //
-// Colour scheme is a launch pref on Firefox (the pages the bridge opens follow
+// Color scheme is a launch pref on Firefox (the pages the bridge opens follow
 // the OS setting, not Playwright's emulation), so the schemes are two sessions
 // rather than two emulateMedia calls.
 import { expect, test } from "@playwright/test";
-import { type AxeViolation, axeSource, COLOR_SCHEMES, formatViolations, POPUP_TABS, TEXT_SPACING_CSS, WCAG_TAGS } from "./lib/axe";
+import { type AxeViolation, axeSource, COLOR_SCHEMES, formatViolations, hasHorizontalOverflowProbe, POPUP_TABS, REFLOW_WIDTH_PX, TEXT_SPACING_CSS, TEXT_SPACING_SELECTORS, WCAG_TAGS } from "./lib/axe";
 import { closeSession, enMessage, type FirefoxExtensionTab, firefoxBridge, isFirefoxRun, launchSession } from "./lib/extension";
-import { AGREE_CHECKBOX_SELECTOR, AGREE_SELECTOR, CARD_SELECTOR, TAGLINE_SELECTOR } from "./lib/selectors";
+import { AGREE_CHECKBOX_SELECTOR } from "./lib/selectors";
 
 test.skip(!isFirefoxRun(), "the Chromium run scans these pages through Playwright pages in a11y.spec.ts");
 // Browser-local: no network, no account - a red run here is a product bug.
@@ -31,7 +31,7 @@ async function launch(scheme: Scheme) {
 }
 
 // An extension page in its own window at the size the Chromium spec gives its
-// Playwright page, with axe injected and the colour scheme confirmed - a page
+// Playwright page, with axe injected and the color scheme confirmed - a page
 // rendered under the wrong scheme would scan the wrong palette and pass.
 async function openSizedPage(context: Parameters<typeof firefoxBridge>[0], path: string, size: { width: number; height: number }, scheme: Scheme): Promise<FirefoxExtensionTab> {
   const page = await (await firefoxBridge(context)).openExtensionWindow(path, size);
@@ -56,7 +56,7 @@ async function waitInPage<A>(page: FirefoxExtensionTab, probe: (arg: A) => boole
   await expect.poll(() => page.evaluate(probe, arg), { message: what }).toBe(true);
 }
 
-const hasHorizontalOverflow = (page: FirefoxExtensionTab) => page.evaluate(() => Math.max(document.documentElement.scrollWidth - document.documentElement.clientWidth, document.body.scrollWidth - document.body.clientWidth) > 0);
+const hasHorizontalOverflow = (page: FirefoxExtensionTab) => page.evaluate(hasHorizontalOverflowProbe);
 
 for (const scheme of COLOR_SCHEMES) {
   test(`axe: every popup tab, the auth page and onboarding are WCAG A/AA clean (${scheme})`, async () => {
@@ -116,13 +116,10 @@ for (const scheme of COLOR_SCHEMES) {
 test("reflow: no horizontal scrolling at narrow widths (WCAG 1.4.10)", async () => {
   const session = await launch("light");
   try {
-    // The auth and onboarding pages are normal tabs, so the 320 CSS px reflow
-    // breakpoint applies as-is; the popup is fixed-size browser chrome with a
-    // declared 360px floor (popup.css min-width).
     const checks: Array<{ path: string; width: number; ready: (arg: string) => boolean; arg: string }> = [
-      { path: "auth.html", width: 320, ready: (selector) => document.querySelector(selector) !== null, arg: AGREE_CHECKBOX_SELECTOR },
-      { path: "onboarding.html", width: 320, ready: () => document.querySelector("h1") !== null, arg: "" },
-      { path: "popup.html", width: 360, ready: (tab) => Array.from(document.querySelectorAll('[role="tab"]')).some((el) => (el.textContent ?? "").includes(tab)), arg: "Settings" },
+      { path: "auth.html", width: REFLOW_WIDTH_PX.auth, ready: (selector) => document.querySelector(selector) !== null, arg: AGREE_CHECKBOX_SELECTOR },
+      { path: "onboarding.html", width: REFLOW_WIDTH_PX.onboarding, ready: () => document.querySelector("h1") !== null, arg: "" },
+      { path: "popup.html", width: REFLOW_WIDTH_PX.popup, ready: (tab) => Array.from(document.querySelectorAll('[role="tab"]')).some((el) => (el.textContent ?? "").includes(tab)), arg: "Settings" },
     ];
     for (const check of checks) {
       const page = await openSizedPage(session.context, check.path, { width: check.width, height: 480 }, "light");
@@ -142,10 +139,10 @@ test("text spacing: key text survives WCAG 1.4.12 overrides without clipping", a
   const session = await launch("light");
   const clipped: string[] = [];
   try {
-    const checks: { path: string; selectors: string[] }[] = [
-      { path: "auth.html", selectors: [`${CARD_SELECTOR} h1`, TAGLINE_SELECTOR, "label", `${AGREE_SELECTOR} span`, "button.primary"] },
-      { path: "onboarding.html", selectors: [".card h1", ".checklist .label"] },
-      { path: "popup.html", selectors: [".tab", ".row-label > span:first-child", ".brand-title span"] },
+    const checks: { path: string; selectors: readonly string[] }[] = [
+      { path: "auth.html", selectors: TEXT_SPACING_SELECTORS.auth },
+      { path: "onboarding.html", selectors: TEXT_SPACING_SELECTORS.onboarding },
+      { path: "popup.html", selectors: TEXT_SPACING_SELECTORS.popup },
     ];
     for (const { path, selectors } of checks) {
       const page = await openSizedPage(session.context, path, { width: 380, height: 560 }, "light");

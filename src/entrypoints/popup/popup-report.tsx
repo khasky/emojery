@@ -10,9 +10,13 @@ import { reportPageUrl } from "../../shared/report-url";
 import { safeHttpHref } from "../../shared/safe-href";
 import { detectSupportedSite, SITE_LABELS } from "../../shared/sites";
 import { sendRuntimeMessage } from "../../shared/webext";
-import { brandIcon, SignInPrompt, shortenUrl, svgIcon, useActiveTabUrl, useAutoFocus } from "./popup-shared";
+import { brandIcon, SignInPrompt, svgIcon, useActiveTabUrl, useAutoFocus } from "./popup-shared";
+import { shortenUrl } from "./shorten-url";
 
-const MIN_REPORT_NOTE_CHARS = 10;
+// Exported so popup-report.browser.test.tsx can check the rendered hint still names
+// this bound and NOTE_MAX: the numbers are also spelled into reportPlaceholder in 26
+// locale catalogs, which no typecheck ties to either constant.
+export const MIN_REPORT_NOTE_CHARS = 10;
 
 const ICON_EXT: ComponentChild[] = [<path d="M14 5h5v5M19 5l-8 8" />, <path d="M18 13.5V18a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 5 18V8a1.5 1.5 0 0 1 1.5-1.5H11" />];
 const ICON_CHECK: ComponentChild[] = [<path d="M5 12.5l4.2 4.2L19 7" />];
@@ -121,7 +125,9 @@ const ReportView = () => {
       site: tab.site,
       host: tab.host,
       url: tab.url,
-      // Required by the validated report envelope (message-guard); the popup runs no scan, so it is always 0.
+      // Required by the validated report envelope (message-guard), and the popup is
+      // the envelope's only sender, so this is always 0. It carries nothing: the
+      // field goes once the API stops requiring it.
       targetCount: 0,
       note: trimmedNote.slice(0, NOTE_MAX),
     })

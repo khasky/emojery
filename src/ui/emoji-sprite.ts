@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Wires the generated emoji sprite sheet into the picker's shadow-DOM hosts: stamps each
+// Wires the generated emoji sprite sheet into every host that renders emoji - the picker's
+// shadow roots and the light-DOM animation layer: stamps each
 // host with the sheet geometry as CSS variables (they inherit through the shadow boundary),
 // resolves a page-safe URL for the sheet, and decides whether to use the sprite at all - the
 // native glyph renders by default, switching to the sprite sheet only once a one-time probe
@@ -8,11 +9,11 @@
 // strict-CSP site can block the image; the picker then keeps the OS-font glyphs it always
 // showed - never empty boxes.
 
-import { EMOJI_CHAR_CLASS, EMOJI_CLASS, EMOJI_IMG_CLASS, SPRITE_COL_VAR, SPRITE_COLS_VAR, SPRITE_ROW_VAR, SPRITE_ROWS_VAR } from "../shared/dom";
+import { EMOJI_CHAR_CLASS, EMOJI_CLASS, EMOJI_IMG_CLASS, nsAttr, SPRITE_COL_VAR, SPRITE_COLS_VAR, SPRITE_ROW_VAR, SPRITE_ROWS_VAR } from "../shared/dom";
 import { REACTIONS } from "../shared/reactions";
 import { SPRITE_COLS, SPRITE_FILE, SPRITE_ROWS } from "./__generated__/emoji-sprite-map";
 
-export const EMOJI_SPRITE_MODE_ATTR = "data-khasky-emojery-emoji";
+export const EMOJI_SPRITE_MODE_ATTR = nsAttr("emoji");
 
 interface SpriteCssScope {
   /** Prefix for the default (OS-font) rules. Empty inside a shadow root. */
@@ -237,7 +238,7 @@ function settleProbe(next: Mode): void {
 
 // Kick off the fetch+decode as soon as a page is known to want a trigger (mount.ts, right after the
 // settings gate). Idempotent. Later - at the first host's applyEmojiSpriteHost - races the paint and
-// visibly swaps glyphs a beat later; earlier - at content-script startup - pays the sheet decode on
+// visibly swaps glyphs after a delay the reader can see; earlier - at content-script startup - pays the sheet decode on
 // every page of every supported host, including pages with no target at all.
 // applyEmojiSpriteHost calls this too, as the backstop for a host that never passed the
 // mount gate (the animation layer).

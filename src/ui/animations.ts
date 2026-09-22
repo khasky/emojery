@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-import { ANIMATION_LAYER_ID, ANIMATION_STYLE_ID, BUTTON_DROP_CLASS, BUTTON_DUST_CLASS, CLICK_FLOAT_CLASS, INTRO_PARTICLE_CLASS } from "../shared/dom";
+import { ANIMATION_LAYER_ID, BUTTON_DROP_CLASS, BUTTON_DUST_CLASS, CLICK_FLOAT_CLASS, INTRO_PARTICLE_CLASS } from "../shared/dom";
 import type { Reaction, ReactionCounts, TargetCounts } from "../shared/reactions";
 import animationsCss from "./animations.css?raw";
 import { applyEmojiSpriteHost, createEmojiSpriteElement, EMOJI_SPRITE_MODE_ATTR, emojiSpriteCss } from "./emoji-sprite";
@@ -11,9 +11,9 @@ export interface ReactionAnimationOrigin {
 }
 
 const MAX_INTRO_PARTICLES = 10;
-// Intro stagger: each emoji's group starts a beat after the previous one, each particle
-// within a group a shorter beat after the last, plus a random spread so the launches
-// never line up into a visible rank.
+// Intro stagger: each emoji's group launches INTRO_EMOJI_STAGGER_MS after the
+// previous one and each particle within a group INTRO_PARTICLE_STAGGER_MS after the
+// last, plus a random spread so the launches never line up into a visible rank.
 const INTRO_EMOJI_STAGGER_MS = 140;
 const INTRO_PARTICLE_STAGGER_MS = 90;
 const INTRO_STAGGER_JITTER_MS = 120;
@@ -24,8 +24,9 @@ const INTRO_PARTICLES_PER_EMOJI = 3;
 // Facebook disables CSS animations for descendants that do not carry this
 // escape class when its reduced-motion wrapper is active.
 const PAGE_ANIMATION_ESCAPE_CLASS = "always-enable-animations";
-// When the button hits the ground and the dust puffs: the 55% impact keyframe of
-// khasky-emojery-button-drop in animations.css.
+// When the button hits the ground and the dust puffs. Rounded from the 55% impact
+// keyframe of the 360ms khasky-emojery-button-drop in animations.css (198ms), so a
+// retimed drop needs this value moved with it.
 const BUTTON_DROP_IMPACT_MS = 200;
 const DUST_PARTICLE_COUNT = 7;
 
@@ -195,6 +196,10 @@ function ensureAnimationLayer(): HTMLElement | null {
   applyEmojiSpriteHost(layer);
   return layer;
 }
+
+// The <style> holding the keyframes. Written and read only here, so it is named
+// here rather than in shared/dom.ts, and no stylesheet selects on it.
+const ANIMATION_STYLE_ID = `${ANIMATION_LAYER_ID}-style`;
 
 function ensureAnimationStyle(): void {
   if (document.getElementById(ANIMATION_STYLE_ID)) return;

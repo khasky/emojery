@@ -155,7 +155,7 @@ function asAccountSettings(value: unknown): AccountSettings {
   return out;
 }
 
-export async function activeAccountKey(): Promise<string> {
+async function activeAccountKey(): Promise<string> {
   try {
     const stored = await storageLocalGet([ACTIVE_ACCOUNT_KEY]);
     const active = stored[ACTIVE_ACCOUNT_KEY];

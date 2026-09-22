@@ -45,7 +45,7 @@ export function providerAccountUrl(id: OidcProvider): string | null {
 // most people already carry. Everything else the API offers waits behind "more
 // sign-in options", in the order the API listed it, so a provider added or retired
 // on the backend still needs no release here.
-export const FEATURED_PROVIDERS: readonly OidcProvider[] = ["google", "apple", "microsoft"];
+const FEATURED_PROVIDERS: readonly OidcProvider[] = ["google", "apple", "microsoft"];
 
 export function splitFeaturedProviders(ids: readonly OidcProvider[]): { featured: OidcProvider[]; rest: OidcProvider[] } {
   return {

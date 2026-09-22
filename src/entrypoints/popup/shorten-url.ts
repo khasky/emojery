@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Pure helper, kept out of the JSX module so it is unit-testable;
-// popup-shared.tsx re-exports it to the app.
+// Pure helper, kept out of the JSX module so it is unit-testable.
 
 export function shortenUrl(url: string): string {
   // Drop the protocol and the fragment; everything that distinguishes a target (a Facebook
