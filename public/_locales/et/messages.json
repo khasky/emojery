@@ -574,6 +574,9 @@
   "onboardingStepPinBody": {
     "message": "Klõpsa tööriistaribal pusletüki ikooni {icon} ja kinnita Emojery, et see oleks alati käepärast."
   },
+  "onboardingStepPinBodyOpera": {
+    "message": "Klõpsa tööriistaribal laienduste ikooni {icon} ja kinnita Emojery, et see oleks alati käepärast."
+  },
   "onboardingStepPinDone": {
     "message": "Kinnitatud!"
   },

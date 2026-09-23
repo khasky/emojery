@@ -574,6 +574,9 @@
   "onboardingStepPinBody": {
     "message": "Kliknij ikonę puzzla {icon} na pasku narzędzi i przypnij Emojery, aby był zawsze pod ręką."
   },
+  "onboardingStepPinBodyOpera": {
+    "message": "Kliknij ikonę rozszerzeń {icon} na pasku narzędzi i przypnij Emojery, aby był zawsze pod ręką."
+  },
   "onboardingStepPinDone": {
     "message": "Przypięto!"
   },

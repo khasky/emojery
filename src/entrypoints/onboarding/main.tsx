@@ -7,7 +7,7 @@
 
 import { render } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
-import { t } from "../../shared/i18n";
+import { type I18nKey, t } from "../../shared/i18n";
 import { armTriggerSeen, hasReactedOnce, hasSeenTrigger, watchOnboardingFlags } from "../../shared/onboarding";
 import { bootstrapPage } from "../../shared/page-bootstrap";
 import { CARD_CLASS, CONFETTI_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
@@ -148,23 +148,52 @@ const Confetti = () => (
 );
 
 // The pin step names a button the user still has to find in their own toolbar,
-// so the browser's puzzle piece rides inside the sentence: every locale carries
-// this token right after its own word for the icon (i18n-locales.test.ts holds
-// that line). A locale that lost it renders the sentence without the glyph.
+// so the browser's own extensions icon rides inside the sentence: every locale
+// carries this token right after its own word for the icon (i18n-locales.test.ts
+// holds that line). A locale that lost it renders the sentence without the glyph.
 const PIN_ICON_TOKEN = "{icon}";
 // Material's `extension` glyph - the piece Chrome, Edge and Firefox all put on
 // the toolbar button this step is about.
 const PUZZLE_PATH = "M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7s2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z";
 
+interface ToolbarExtensionsButton {
+  body: I18nKey;
+  glyph: preact.ComponentChildren;
+}
+
+const PUZZLE_BUTTON: ToolbarExtensionsButton = {
+  body: "onboardingStepPinBody",
+  glyph: (
+    <svg class="pin-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d={PUZZLE_PATH} />
+    </svg>
+  ),
+};
+
+// Opera draws its extensions button as an outlined cube, so the sentence there
+// names the button without calling it a puzzle piece.
+const OPERA_BUTTON: ToolbarExtensionsButton = {
+  body: "onboardingStepPinBodyOpera",
+  glyph: (
+    <svg class="pin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 2.5 20.5 7v10L12 21.5 3.5 17V7zM3.5 7 12 11.5 20.5 7M12 11.5v10" />
+    </svg>
+  ),
+};
+
+// Opera (GX included) keeps Chrome's user agent and appends its own OPR/ token.
+function toolbarExtensionsButton(): ToolbarExtensionsButton {
+  return /\bOPR\//.test(navigator.userAgent) ? OPERA_BUTTON : PUZZLE_BUTTON;
+}
+
 function pinBody(): preact.ComponentChildren {
-  const parts = t("onboardingStepPinBody").split(PIN_ICON_TOKEN);
+  const button = toolbarExtensionsButton();
+  const parts = t(button.body).split(PIN_ICON_TOKEN);
   if (parts.length < 2) return parts[0];
   return (
     <>
       {parts[0]}
-      <svg class="pin-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d={PUZZLE_PATH} />
-      </svg>
+      {button.glyph}
       {parts[1]}
     </>
   );

@@ -574,6 +574,9 @@
   "onboardingStepPinBody": {
     "message": "Klicke auf das Puzzle-Symbol {icon} in der Symbolleiste und hefte Emojery an, damit es griffbereit bleibt."
   },
+  "onboardingStepPinBodyOpera": {
+    "message": "Klicke auf das Erweiterungen-Symbol {icon} in der Symbolleiste und hefte Emojery an, damit es griffbereit bleibt."
+  },
   "onboardingStepPinDone": {
     "message": "Angeheftet!"
   },

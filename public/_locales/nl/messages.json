@@ -574,6 +574,9 @@
   "onboardingStepPinBody": {
     "message": "Klik op het puzzelpictogram {icon} in de werkbalk en zet Emojery vast zodat het binnen handbereik blijft."
   },
+  "onboardingStepPinBodyOpera": {
+    "message": "Klik op het extensiespictogram {icon} in de werkbalk en zet Emojery vast zodat het binnen handbereik blijft."
+  },
   "onboardingStepPinDone": {
     "message": "Vastgezet!"
   },

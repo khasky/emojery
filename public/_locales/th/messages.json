@@ -574,6 +574,9 @@
   "onboardingStepPinBody": {
     "message": "คลิกไอคอนจิ๊กซอว์{icon}บนแถบเครื่องมือแล้วปักหมุด Emojery ให้อยู่ใกล้มือเสมอ"
   },
+  "onboardingStepPinBodyOpera": {
+    "message": "คลิกไอคอนส่วนขยาย{icon}บนแถบเครื่องมือแล้วปักหมุด Emojery ให้อยู่ใกล้มือเสมอ"
+  },
   "onboardingStepPinDone": {
     "message": "ปักหมุดแล้ว!"
   },

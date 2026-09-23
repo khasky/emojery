@@ -574,6 +574,9 @@
   "onboardingStepPinBody": {
     "message": "Klik på puslespilsikonet {icon} i værktøjslinjen, og fastgør Emojery, så det altid er ved hånden."
   },
+  "onboardingStepPinBodyOpera": {
+    "message": "Klik på udvidelsesikonet {icon} i værktøjslinjen, og fastgør Emojery, så det altid er ved hånden."
+  },
   "onboardingStepPinDone": {
     "message": "Fastgjort!"
   },

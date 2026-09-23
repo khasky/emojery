@@ -66,11 +66,13 @@ describe("i18n locales", () => {
   });
 
   // The onboarding pin step splits its sentence on this token to drop the
-  // browser's puzzle-piece glyph beside the word naming it (entrypoints/
+  // browser's extensions glyph beside the word naming it (entrypoints/
   // onboarding/main.tsx). A translation that loses the token loses the glyph -
   // silently, since the sentence still renders.
   it.each(LOCALES)("%s: keeps the pin step's {icon} token", (locale) => {
-    expect(readLocale(locale).onboardingStepPinBody?.message).toContain("{icon}");
+    const data = readLocale(locale);
+    expect(data.onboardingStepPinBody?.message).toContain("{icon}");
+    expect(data.onboardingStepPinBodyOpera?.message).toContain("{icon}");
   });
 
   it.each(NON_EN)("%s: defines no keys absent from en", (locale) => {

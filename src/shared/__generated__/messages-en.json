@@ -571,6 +571,9 @@
  "onboardingStepPinBody": {
   "message": "Click the puzzle-piece icon {icon} in the toolbar and pin Emojery so it stays in reach."
  },
+ "onboardingStepPinBodyOpera": {
+  "message": "Click the extensions icon {icon} in the toolbar and pin Emojery so it stays in reach."
+ },
  "onboardingStepPinDone": {
   "message": "Pinned!"
  },

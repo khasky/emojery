@@ -574,6 +574,9 @@
   "onboardingStepPinBody": {
     "message": "Нажмите значок-пазл {icon} на панели инструментов и закрепите Emojery, чтобы он был под рукой."
   },
+  "onboardingStepPinBodyOpera": {
+    "message": "Нажмите значок расширений {icon} на панели инструментов и закрепите Emojery, чтобы он был под рукой."
+  },
   "onboardingStepPinDone": {
     "message": "Закреплено!"
   },

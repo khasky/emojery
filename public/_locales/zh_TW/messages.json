@@ -574,6 +574,9 @@
   "onboardingStepPinBody": {
     "message": "點選工具列中的拼圖圖示{icon}並釘選 Emojery,方便隨時使用。"
   },
+  "onboardingStepPinBodyOpera": {
+    "message": "點選工具列中的擴充功能圖示{icon}並釘選 Emojery,方便隨時使用。"
+  },
   "onboardingStepPinDone": {
     "message": "已釘選!"
   },

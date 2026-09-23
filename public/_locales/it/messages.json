@@ -574,6 +574,9 @@
   "onboardingStepPinBody": {
     "message": "Fai clic sull'icona a puzzle {icon} nella barra degli strumenti e fissa Emojery per averlo sempre a portata di mano."
   },
+  "onboardingStepPinBodyOpera": {
+    "message": "Fai clic sull'icona delle estensioni {icon} nella barra degli strumenti e fissa Emojery per averlo sempre a portata di mano."
+  },
   "onboardingStepPinDone": {
     "message": "Fissato!"
   },

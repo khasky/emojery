@@ -574,6 +574,9 @@
   "onboardingStepPinBody": {
     "message": "Spustelėkite dėlionės piktogramą {icon} įrankių juostoje ir prisekite Emojery, kad visada būtų po ranka."
   },
+  "onboardingStepPinBodyOpera": {
+    "message": "Spustelėkite plėtinių piktogramą {icon} įrankių juostoje ir prisekite Emojery, kad visada būtų po ranka."
+  },
   "onboardingStepPinDone": {
     "message": "Prisegta!"
   },

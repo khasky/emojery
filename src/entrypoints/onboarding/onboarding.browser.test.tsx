@@ -62,6 +62,7 @@ afterEach(() => {
   unmountContainer(container);
   shim.uninstall();
   vi.useRealTimers();
+  vi.restoreAllMocks();
 });
 
 describe("onboarding checklist", () => {
@@ -113,6 +114,21 @@ describe("onboarding checklist", () => {
     const body = container.querySelector(".step .pin-icon")?.parentElement;
     expect(body?.textContent).toContain("puzzle-piece icon");
     expect(body?.textContent).not.toContain("{icon}");
+    expect(container.querySelector(".step .pin-icon")?.getAttribute("fill")).toBe("currentColor");
+  });
+
+  // Opera's extensions button is an outlined cube: the sentence must not send the
+  // user looking for a puzzle piece that toolbar never shows.
+  it("names Opera's extensions button without the puzzle piece", async () => {
+    vi.spyOn(navigator, "userAgent", "get").mockReturnValue("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 OPR/123.0.0.0");
+    stubPinState(false);
+    renderPage();
+
+    await expect.poll(() => container.querySelector(".step .pin-icon")).not.toBeNull();
+    const body = container.querySelector(".step .pin-icon")?.parentElement;
+    expect(body?.textContent).toContain("extensions icon");
+    expect(body?.textContent).not.toContain("puzzle");
+    expect(container.querySelector(".step .pin-icon")?.getAttribute("fill")).toBe("none");
   });
 
   it("drops the pin step where the browser cannot report pin state", async () => {

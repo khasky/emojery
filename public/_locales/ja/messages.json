@@ -574,6 +574,9 @@
   "onboardingStepPinBody": {
     "message": "ツールバーのパズルアイコン{icon}をクリックして Emojery をピン留めすると、いつでも使えます。"
   },
+  "onboardingStepPinBodyOpera": {
+    "message": "ツールバーの拡張機能アイコン{icon}をクリックして Emojery をピン留めすると、いつでも使えます。"
+  },
   "onboardingStepPinDone": {
     "message": "ピン留め完了!"
   },

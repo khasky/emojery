@@ -574,6 +574,9 @@
   "onboardingStepPinBody": {
     "message": "Nhấp vào biểu tượng ghép hình {icon} trên thanh công cụ và ghim Emojery để luôn trong tầm tay."
   },
+  "onboardingStepPinBodyOpera": {
+    "message": "Nhấp vào biểu tượng tiện ích {icon} trên thanh công cụ và ghim Emojery để luôn trong tầm tay."
+  },
   "onboardingStepPinDone": {
     "message": "Đã ghim!"
   },

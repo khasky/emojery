@@ -725,6 +725,10 @@
     "message": "Click the puzzle-piece icon {icon} in the toolbar and pin Emojery so it stays in reach.",
     "description": "Onboarding page, step 1 body — how to pin via the browser's puzzle-piece extensions menu. Keep {icon} right after the words naming the icon: the page swaps it for the puzzle glyph."
   },
+  "onboardingStepPinBodyOpera": {
+    "message": "Click the extensions icon {icon} in the toolbar and pin Emojery so it stays in reach.",
+    "description": "Onboarding page, step 1 body in Opera, whose extensions menu button is a cube rather than a puzzle piece. Keep {icon} right after the words naming the icon: the page swaps it for the cube glyph."
+  },
   "onboardingStepPinDone": {
     "message": "Pinned!",
     "description": "Replaces the step-1 body once the extension is detected as pinned."

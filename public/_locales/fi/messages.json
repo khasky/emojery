@@ -574,6 +574,9 @@
   "onboardingStepPinBody": {
     "message": "Napsauta työkalurivin palapelikuvaketta {icon} ja kiinnitä Emojery, niin se on aina käden ulottuvilla."
   },
+  "onboardingStepPinBodyOpera": {
+    "message": "Napsauta työkalurivin laajennuskuvaketta {icon} ja kiinnitä Emojery, niin se on aina käden ulottuvilla."
+  },
   "onboardingStepPinDone": {
     "message": "Kiinnitetty!"
   },

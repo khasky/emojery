@@ -574,6 +574,9 @@
   "onboardingStepPinBody": {
     "message": "Clique no ícone de quebra-cabeça {icon} na barra de ferramentas e fixe o Emojery para deixá-lo sempre à mão."
   },
+  "onboardingStepPinBodyOpera": {
+    "message": "Clique no ícone de extensões {icon} na barra de ferramentas e fixe o Emojery para deixá-lo sempre à mão."
+  },
   "onboardingStepPinDone": {
     "message": "Fixado!"
   },

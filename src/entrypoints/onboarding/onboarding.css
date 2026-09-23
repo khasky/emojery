@@ -157,7 +157,7 @@
   margin-top: 2px;
 }
 
-/* The browser's own puzzle piece, inline in the pin step's sentence, so the
+/* The browser's own extensions icon, inline in the pin step's sentence, so the
    toolbar button it names is recognizable before the user goes looking for it.
    Sized off the sentence and nudged onto its baseline. */
 .step .pin-icon {

@@ -574,6 +574,9 @@
   "onboardingStepPinBody": {
     "message": "Klik ikon teka-teki {icon} pada bar alat dan pinkan Emojery supaya sentiasa mudah dicapai."
   },
+  "onboardingStepPinBodyOpera": {
+    "message": "Klik ikon sambungan {icon} pada bar alat dan pinkan Emojery supaya sentiasa mudah dicapai."
+  },
   "onboardingStepPinDone": {
     "message": "Telah dipin!"
   },

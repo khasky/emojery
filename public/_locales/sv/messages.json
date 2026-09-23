@@ -574,6 +574,9 @@
   "onboardingStepPinBody": {
     "message": "Klicka på pusselikonen {icon} i verktygsfältet och fäst Emojery så att det alltid finns till hands."
   },
+  "onboardingStepPinBodyOpera": {
+    "message": "Klicka på tilläggsikonen {icon} i verktygsfältet och fäst Emojery så att det alltid finns till hands."
+  },
   "onboardingStepPinDone": {
     "message": "Fäst!"
   },
