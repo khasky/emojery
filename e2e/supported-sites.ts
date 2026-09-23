@@ -91,7 +91,8 @@ export const SUPPORTED_SITE_SCENARIOS: SiteScenarioSpec[] = [
     label: "Threads profile feed",
     urlKey: "THREADS_USER",
     mountKeyPattern: "^threads:",
-    nativeSelectors: ['svg[aria-label="Like"][role="img"]', 'svg[aria-label="Liked"][role="img"]', 'svg[aria-label="Unlike"][role="img"]', 'svg[role="img"][aria-label]'],
+    // See the post-detail scenario below for the <title> match.
+    nativeSelectors: ['svg[aria-label="Like"][role="img"]', 'svg[aria-label="Liked"][role="img"]', 'svg[aria-label="Unlike"][role="img"]', 'svg[role="img"][aria-label]', 'svg[role="img"]:has(> title)'],
     containerSelectors: ['a[href*="/post/"]', '[role="main"]', "main"],
     scrollSteps: [0, 450, 900, 1400, 1900],
     settleMs: 3_000,
@@ -101,7 +102,10 @@ export const SUPPORTED_SITE_SCENARIOS: SiteScenarioSpec[] = [
     label: "Threads post detail",
     urlKey: "THREADS_POST",
     mountKeyPattern: "^threads:",
-    nativeSelectors: ['svg[aria-label="Like"][role="img"]', 'svg[aria-label="Liked"][role="img"]', 'svg[aria-label="Unlike"][role="img"]', 'svg[role="img"][aria-label]'],
+    // Threads also serves a variant that names each action icon with a child <title>
+    // instead of aria-label, and with no role=main around the post - seen on a cold
+    // profile. Without the <title> match that variant has no native near the row at all.
+    nativeSelectors: ['svg[aria-label="Like"][role="img"]', 'svg[aria-label="Liked"][role="img"]', 'svg[aria-label="Unlike"][role="img"]', 'svg[role="img"][aria-label]', 'svg[role="img"]:has(> title)'],
     containerSelectors: ['a[href*="/post/"]', '[role="main"]', "main"],
     scrollSteps: [0, 450, 900, 1400],
     settleMs: 3_000,
