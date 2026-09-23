@@ -8,7 +8,8 @@
 //
 // Everything here is RELATIVE and read off the live page: the reference is whatever icon
 // the site itself draws inside its own `nativeSelectors` on THIS page, so a restyle moves
-// both numbers together.
+// both numbers together. A scenario marked `glyphReference: "text"` has no icon beside the
+// trigger, and its reference is the text of those controls instead.
 //
 // The regression it exists for: the per-site glyph memory used to outrank a row's own
 // measurement, so one visit to a surface with larger icons (YouTube's Shorts rail against
@@ -74,6 +75,11 @@ interface GlyphMeasurement {
   nativeIconPx: number | null;
   /** That control's icon sides, so a failure shows what the row contains. */
   nativeIconSides: number[];
+  /** Median font size of the text nearest our host inside those controls, CSS px - the
+   *  reference for a `glyphReference: "text"` scenario. */
+  nativeTextPx: number | null;
+  /** The font sizes that median came from. */
+  nativeTextSizes: number[];
 }
 
 // One page probe for both numbers. Source-string form: an evaluate callback is serialized
@@ -111,18 +117,12 @@ const MEASURE_SRC = `(() => {
     const mask = style.maskImage || style.webkitMaskImage;
     return (style.backgroundImage && style.backgroundImage !== "none") || (mask && mask !== "none");
   };
-  const iconSidesIn = (candidates) => {
-    const sides = [];
-    for (const candidate of candidates) {
-      const side = sideOf(candidate);
-      if (isIconSide(side)) sides.push(Math.round(side * 10) / 10);
-    }
-    return sides.sort((a, b) => a - b);
+  const iconsIn = (candidates) => candidates.map((el) => ({ el, side: sideOf(el) })).filter((icon) => isIconSide(icon.side));
+  const iconsOf = (native) => {
+    const drawn = iconsIn(native.matches("svg, img") ? [native] : Array.from(native.querySelectorAll("svg, img")));
+    return drawn.length > 0 ? drawn : iconsIn(Array.from(native.querySelectorAll("*")).filter(paintsCssIcon));
   };
-  const iconSidesOf = (native) => {
-    const drawn = iconSidesIn(native.matches("svg, img") ? [native] : Array.from(native.querySelectorAll("svg, img")));
-    return drawn.length > 0 ? drawn : iconSidesIn(Array.from(native.querySelectorAll("*")).filter(paintsCssIcon));
-  };
+  const median = (values) => (values.length > 0 ? values[Math.floor(values.length / 2)] : null);
   const centerDistance = (el) => {
     if (!hostRect) return 0;
     const r = el.getBoundingClientRect();
@@ -136,20 +136,38 @@ const MEASURE_SRC = `(() => {
   // nativeSelectors are as coarse as the site allows: Threads matches every labelled
   // <svg>, so its "nearest native" can be a 12px verified badge sitting beside a row whose
   // action icons are 20px. Pooling the closest few and taking the median outvotes that.
-  const sides = natives
-    .map((native) => ({ sides: iconSidesOf(native), distance: centerDistance(native) }))
-    .filter((entry) => entry.sides.length > 0)
+  //
+  // Nested selectors (a column and the score block inside it) reach the same icon more
+  // than once; the Map counts each element once, so one icon cannot outvote the rest.
+  const nearestIcons = natives
+    .map((native) => ({ icons: iconsOf(native), distance: centerDistance(native) }))
+    .filter((entry) => entry.icons.length > 0)
     .sort((a, b) => a.distance - b.distance)
     .slice(0, ${NATIVE_NEIGHBOURHOOD})
-    .flatMap((entry) => entry.sides)
+    .flatMap((entry) => entry.icons);
+  const sides = Array.from(new Map(nearestIcons.map((icon) => [icon.el, icon.side])).values())
+    .map((side) => Math.round(side * 10) / 10)
+    .sort((a, b) => a - b);
+
+  // For a surface with no icon beside the trigger: the font size of the nearest text the
+  // site sets inside those same controls, median over a few runs so one heading or one
+  // small button label cannot decide it.
+  const ownsText = (el) => Array.from(el.childNodes).some((node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== "");
+  const textSizes = Array.from(new Set(natives.flatMap((native) => Array.from(native.querySelectorAll("*")))))
+    .filter((el) => !el.closest("${HOST_SELECTOR}") && ownsText(el) && el.getBoundingClientRect().width > 0)
+    .sort((a, b) => centerDistance(a) - centerDistance(b))
+    .slice(0, ${NATIVE_NEIGHBOURHOOD})
+    .map((el) => Number.parseFloat(getComputedStyle(el).fontSize))
     .sort((a, b) => a - b);
 
   return {
     renderedEmojiPx: iconSlot ? Number.parseFloat(getComputedStyle(iconSlot).fontSize) : null,
     emojiBox: emojiRect ? { width: Math.round(emojiRect.width * 10) / 10, height: Math.round(emojiRect.height * 10) / 10 } : null,
     measuredGlyphPx: host ? Number.parseFloat(host.style.getPropertyValue("${GLYPH_H_VAR}")) || null : null,
-    nativeIconPx: sides.length > 0 ? sides[Math.floor(sides.length / 2)] : null,
+    nativeIconPx: median(sides),
     nativeIconSides: sides,
+    nativeTextPx: median(textSizes),
+    nativeTextSizes: textSizes,
   };
 })()`;
 
@@ -170,7 +188,8 @@ async function measureGlyph(page: Page, site: SupportedSiteScenario): Promise<Gl
 }
 
 function describeMeasurement(site: SupportedSiteScenario, m: GlyphMeasurement): string {
-  return `${site.label}: emoji ${m.renderedEmojiPx}px (glyph-h ${m.measuredGlyphPx ?? "unset"}, box ${m.emojiBox?.width}x${m.emojiBox?.height}) vs row icons ${JSON.stringify(m.nativeIconSides)} -> reference ${m.nativeIconPx}px`;
+  const reference = site.glyphReference === "text" ? `column text ${JSON.stringify(m.nativeTextSizes)} -> reference ${m.nativeTextPx}px` : `row icons ${JSON.stringify(m.nativeIconSides)} -> reference ${m.nativeIconPx}px`;
+  return `${site.label}: emoji ${m.renderedEmojiPx}px (glyph-h ${m.measuredGlyphPx ?? "unset"}, box ${m.emojiBox?.width}x${m.emojiBox?.height}) vs ${reference}`;
 }
 
 // Navigate, settle, require a mount - the same ladder site-injection applies (shared:
@@ -188,9 +207,20 @@ async function expectTriggerMatchesRow(page: Page, site: SupportedSiteScenario, 
   const label = `${context}${describeMeasurement(site, m)}`;
   expect(m.measuredGlyphPx ?? m.renderedEmojiPx, `${label} - a mounted host exposed neither an inherited glyph height nor a painted emoji`).not.toBeNull();
 
+  // No icon sits beside the trigger here, so the extension must stay on its em fallback:
+  // a glyph height means it sized the trigger after a picture that is not an action icon
+  // (the Metacritic award badge). The painted emoji is then judged against the column's
+  // own text.
+  if (site.glyphReference === "text") {
+    expect(m.measuredGlyphPx, `${label} - the trigger inherited a glyph height on a surface with no icon beside it, so it measured a picture that is not an action icon`).toBeNull();
+    expect(m.nativeTextPx, `${label} - no visible text inside this scenario's nativeSelectors, so there is no reference size (the selectors drifted)`).not.toBeNull();
+    expectRatio((m.renderedEmojiPx ?? 0) / (m.nativeTextPx ?? 1), FALLBACK_BAND, `${label} - the painted emoji does not read as part of this column's text`);
+    return;
+  }
+
   // A surface whose own icons this probe cannot see (a font glyph, which has no box
   // to measure, or a closed shadow root) leaves nothing to compare against - don't
-  // invent a reference. CSS-painted icons are NOT this case since iconSidesOf grew
+  // invent a reference. CSS-painted icons are NOT this case since iconsOf grew
   // its sprite fallback; a skip naming them again means the fallback stopped
   // reaching them. Skipped, not annotated-and-returned: the mount is all that would
   // be left asserted here, site-injection already covers that, and a green report

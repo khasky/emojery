@@ -40,6 +40,12 @@ export interface SiteScenarioSpec {
    *  stale-hide regression where SOMETHING got hidden (hiddenNativeCount > 0)
    *  while the real Like stayed visible. */
   replacedNativeInvisibleSelectors?: string[];
+  /** What glyph-size.spec.ts sizes the trigger against. Unset: the icons the site draws
+   *  inside `nativeSelectors`. `"text"`: a surface with no icon beside the trigger (a
+   *  score column), judged against the text of those controls instead - any picture
+   *  that does sit there is decoration that comes and goes with the content (an award
+   *  badge), not an icon the trigger should match. */
+  glyphReference?: "text";
 }
 
 export const SUPPORTED_SITE_SCENARIOS: SiteScenarioSpec[] = [
@@ -279,6 +285,9 @@ export const SUPPORTED_SITE_SCENARIOS: SiteScenarioSpec[] = [
     containerSelectors: [".product-hero", '[data-testid="product-hero"]', "main"],
     maxHosts: 1,
     expectHiddenNativeOnReplace: false,
+    // No icon sits beside the trigger; the Must-See/Must-Play badge by the Metascore
+    // shows only on acclaimed titles and is not one.
+    glyphReference: "text",
   },
   {
     site: "metacritic",
@@ -289,6 +298,7 @@ export const SUPPORTED_SITE_SCENARIOS: SiteScenarioSpec[] = [
     containerSelectors: [".product-hero", '[data-testid="product-hero"]', "main"],
     maxHosts: 1,
     expectHiddenNativeOnReplace: false,
+    glyphReference: "text",
   },
   {
     site: "metacritic",
@@ -299,6 +309,7 @@ export const SUPPORTED_SITE_SCENARIOS: SiteScenarioSpec[] = [
     containerSelectors: [".product-hero", '[data-testid="product-hero"]', "main"],
     maxHosts: 1,
     expectHiddenNativeOnReplace: false,
+    glyphReference: "text",
   },
   {
     site: "opencritic",
