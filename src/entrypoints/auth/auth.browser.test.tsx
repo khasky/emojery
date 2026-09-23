@@ -456,6 +456,23 @@ describe("auth page - a session it did not open", () => {
     expect(sentOfType("auth:signIn")).toHaveLength(0);
   });
 
+  // The background writes the session before it answers the sign-in, so the tab that
+  // performed it sees the key land too - and must still take the countdown its
+  // answer asks for.
+  it("keeps the countdown for its own sign-in when the key lands before the answer", async () => {
+    let settle: (value: unknown) => void = () => {};
+    install({ signInReply: new Promise((resolve) => (settle = resolve)) });
+    await loadPage();
+    await pick();
+    await vi.waitFor(() => expect(document.querySelector(SPINNER_SELECTOR)).not.toBeNull());
+
+    shim.emitChanged("local", { [AUTH_KEY]: { newValue: makeLiveAuthSession() } });
+    settle({ ...OK_SIGN_IN, returnsToPage: true });
+
+    await vi.waitFor(() => expect(document.querySelector(COUNTDOWN_SELECTOR)).not.toBeNull());
+    expect(requireEl(document, TAGLINE_SELECTOR).textContent).toBe("Taking you back to the page you were on.");
+  });
+
   it("stays on the sign-in card when the key is cleared rather than written", async () => {
     install();
     await loadPage();

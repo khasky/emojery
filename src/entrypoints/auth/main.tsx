@@ -413,6 +413,10 @@ function App() {
   // Whether the session on screen is the one this tab opened. A tab that only
   // watched it land shows the same copy and keeps itself open.
   const [signedInHere, setSignedInHere] = useState(false);
+  // The background writes the session before it answers the sign-in, so this tab's
+  // own sign-in trips the watcher below too. Its answer carries where to go next, so
+  // the step waits for that answer instead of settling on the key.
+  const signingIn = useRef(false);
 
   const loadProviders = useCallback(() => {
     setProviders(undefined);
@@ -459,7 +463,7 @@ function App() {
       if (live && authed) setStep("done");
     });
     const stop = watchSignedIn(() => {
-      if (live) setStep("done");
+      if (live && !signingIn.current) setStep("done");
     });
     return () => {
       live = false;
@@ -478,7 +482,9 @@ function App() {
     setError(null);
     setPicked(provider);
     setStep("busy");
+    signingIn.current = true;
     const res = await askSignIn(provider, chooser);
+    signingIn.current = false;
     if (res.ok) {
       setReturnsToPage(res.returnsToPage === true);
       setSignedInHere(true);
