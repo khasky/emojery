@@ -139,9 +139,23 @@ const MEASURE_SRC = `(() => {
   //
   // Nested selectors (a column and the score block inside it) reach the same icon more
   // than once; the Map counts each element once, so one icon cannot outvote the rest.
-  const nearestIcons = natives
-    .map((native) => ({ icons: iconsOf(native), distance: centerDistance(native) }))
-    .filter((entry) => entry.icons.length > 0)
+  //
+  // A match holding another icon-bearing match is the card around a control, not the
+  // control: Reddit's shreddit-post holds the 16px vote row AND 24px avatars, and on a
+  // profile feed three neighbouring cards' avatars outvoted the row. Only the innermost
+  // icon-bearing matches count; an inner match with no icon (GitHub's star count inside
+  // the star button) leaves its container standing. Containment crosses shadow roots:
+  // Reddit's vote row lives in the card's own shadow tree, where contains() stops.
+  const holds = (ancestor, node) => {
+    for (let current = node.parentNode ?? node.host; current; current = current.parentNode ?? current.host) {
+      if (current === ancestor) return true;
+    }
+    return false;
+  };
+  const withIcons = natives.map((native) => ({ native, icons: iconsOf(native) })).filter((entry) => entry.icons.length > 0);
+  const nearestIcons = withIcons
+    .filter((entry) => !withIcons.some((other) => other.native !== entry.native && holds(entry.native, other.native)))
+    .map((entry) => ({ icons: entry.icons, distance: centerDistance(entry.native) }))
     .sort((a, b) => a.distance - b.distance)
     .slice(0, ${NATIVE_NEIGHBOURHOOD})
     .flatMap((entry) => entry.icons);
