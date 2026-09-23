@@ -15,6 +15,7 @@ import { type BrowserContext, type ElementHandle, expect, type Page, test } from
 import * as ext from "./lib/extension";
 import { pollForValue } from "./lib/picker-probes";
 import { openHistoryTab } from "./lib/popup-probes";
+import { queuedVoteCount } from "./lib/reaction-surface";
 import { GRID_ITEM_SELECTOR, HISTORY_EMOJI_SELECTOR, HISTORY_LINK_SELECTOR, HISTORY_ROW_SELECTOR, HOST_SELECTOR, OVERLAY_HOST_SELECTOR } from "./lib/selectors";
 
 // Tracing OFF for this file, on every attempt. The snapshotter re-serializes the
@@ -77,6 +78,34 @@ function watchVoteResponses(context: BrowserContext): VoteResponse[] {
 
 const countedVotes = (responses: VoteResponse[]): number => responses.filter((r) => r.status === 200).length;
 const refusedVotes = (responses: VoteResponse[]): VoteResponse[] => responses.filter((r) => r.status === 429);
+
+// What the queue may take on top of a Retry-After before its next send: the
+// per-vote backoff jitter and the service worker's wake-up.
+const DRAIN_STALL_SLACK_MS = 30_000;
+
+// The re-send of a refused burst takes as many server windows as the account's
+// budget needs, and that budget is not the test's to know - a fixed deadline
+// passes on one account and times out one window short on another. What must hold
+// is that the queue keeps counting: each refusal says when to retry, so a drain
+// that counts nothing for longer than the longest Retry-After seen (plus slack)
+// has stalled. Time spent counting extends the test's own budget, which then
+// bounds only the stall, never the burst size.
+async function expectDrainCountsEveryClick(context: BrowserContext, seen: () => VoteResponse[], clicks: number): Promise<void> {
+  let counted = countedVotes(seen());
+  let lastProgressAt = Date.now();
+  const stallMs = (): number => Math.max(0, ...refusedVotes(seen()).map((r) => (r.retryAfterSec ?? 0) * 1000)) + DRAIN_STALL_SLACK_MS;
+  while (counted < clicks && Date.now() - lastProgressAt <= stallMs()) {
+    await new Promise((settle) => setTimeout(settle, 2_000));
+    const now = countedVotes(seen());
+    if (now > counted) {
+      test.setTimeout(test.info().timeout + (Date.now() - lastProgressAt));
+      counted = now;
+      lastProgressAt = Date.now();
+    }
+  }
+  const pending = await queuedVoteCount(context).catch(() => null);
+  expect(counted, `all ${clicks} clicks should be counted once the queue re-sends the 429'd ones - ${counted} counted, then nothing for ${Math.round((Date.now() - lastProgressAt) / 1000)}s with ${pending ?? "unknown"} vote(s) still queued (0 queued = the rest were dropped, not delayed)`).toBe(clicks);
+}
 
 // The grid lives in an OPEN shadow root, so reading it from that root directly is
 // what keeps a pick cheap: the document-wide shadow-piercing walk (lib/probe-src.ts)
@@ -313,13 +342,7 @@ test("a burst that meets a 429 is re-sent - no reaction is lost", async () => {
 
     // ...and none of them is dropped: the durable queue re-sends the 429'd
     // clicks, so the whole burst is counted in the end.
-    await expect
-      .poll(() => countedVotes(responses.slice(sinceBurst)), {
-        message: `all ${clicks.length} clicks should be counted once the queue re-sends the 429'd ones`,
-        timeout: DRAIN_TIMEOUT_MS,
-        intervals: [2_000],
-      })
-      .toBe(clicks.length);
+    await expectDrainCountsEveryClick(session.context, () => responses.slice(sinceBurst), clicks.length);
 
     expect(await topHistoryRows(session.context, clicks.length), "History should still list every click of the burst, newest first").toEqual([...clicks].reverse());
   } finally {

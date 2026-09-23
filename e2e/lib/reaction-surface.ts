@@ -551,27 +551,9 @@ export async function openPickerViewportFit(page: Page): Promise<{
 // page's fetches there (verified), so the proof is the queue itself - the vote lands
 // in the durable IndexedDB queue on the click and leaves it once the server has
 // answered. The thunk first gives the click a moment to enqueue, then waits for the
-// queue to drain. Store names mirror src/background/votequeue.ts.
+// queue to drain.
 function watchVoteQueueDrain(context: BrowserContext, timeoutMs: number): () => Promise<void> {
-  const queuedVotes = () =>
-    evalInBackground(context, async () => {
-      const { indexedDB } = globalThis as unknown as { indexedDB: IDBFactory };
-      const db = await new Promise<IDBDatabase>((resolveDb, reject) => {
-        const req = indexedDB.open("emojery-vote-queue");
-        req.onsuccess = () => resolveDb(req.result);
-        req.onerror = () => reject(req.error);
-      });
-      try {
-        if (!db.objectStoreNames.contains("votes")) return 0;
-        return await new Promise<number>((resolveCount, reject) => {
-          const req = db.transaction("votes", "readonly").objectStore("votes").count();
-          req.onsuccess = () => resolveCount(req.result);
-          req.onerror = () => reject(req.error);
-        });
-      } finally {
-        db.close();
-      }
-    });
+  const queuedVotes = () => queuedVoteCount(context);
   const armedAt = Date.now();
   return async () => {
     const enqueueDeadline = armedAt + 5_000;
@@ -584,4 +566,27 @@ function watchVoteQueueDrain(context: BrowserContext, timeoutMs: number): () => 
     }
     expect(pending, "the queued vote should flush to the server before teardown").toBe(0);
   };
+}
+
+// Votes still waiting in the durable IndexedDB queue. Store names mirror
+// src/background/votequeue.ts.
+export function queuedVoteCount(context: BrowserContext): Promise<number> {
+  return evalInBackground(context, async () => {
+    const { indexedDB } = globalThis as unknown as { indexedDB: IDBFactory };
+    const db = await new Promise<IDBDatabase>((resolveDb, reject) => {
+      const req = indexedDB.open("emojery-vote-queue");
+      req.onsuccess = () => resolveDb(req.result);
+      req.onerror = () => reject(req.error);
+    });
+    try {
+      if (!db.objectStoreNames.contains("votes")) return 0;
+      return await new Promise<number>((resolveCount, reject) => {
+        const req = db.transaction("votes", "readonly").objectStore("votes").count();
+        req.onsuccess = () => resolveCount(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    } finally {
+      db.close();
+    }
+  });
 }
