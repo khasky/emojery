@@ -207,7 +207,7 @@ export class FirefoxBridge {
         const url = browser.runtime.getURL(path);
         if (windowSize) {
           const win = await browser.windows.create({ url, type: "popup", width: windowSize.width, height: windowSize.height });
-          return { url, tabId: win.tabs?.[0]?.id ?? -1, windowId: win.id ?? -1, returnTo: null };
+          return { url, tabId: win?.tabs?.[0]?.id ?? -1, windowId: win?.id ?? -1, returnTo: null };
         }
         const [selected] = await browser.tabs.query({ active: true, currentWindow: true });
         const tab = await browser.tabs.create({ url });
