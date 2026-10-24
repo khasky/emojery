@@ -92,7 +92,7 @@
     "postinstall": "wxt prepare"
   },
   "dependencies": {
-    "@emojery/shared": "github:khasky/emojery-verifier#9f475f99f27a5b1bf2d3adea34bd1a10049b85da&path:/packages/shared",
+    "@emojery/shared": "github:khasky/emojery-verifier#806c4cf4f52fac4c47c3cf4430f4b02d47f13316&path:/packages/shared",
     "emojibase-data": "^17.0.0",
     "preact": "^10.29.8"
   },

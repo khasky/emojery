@@ -10,11 +10,11 @@
 // this module repeats the same request every 15 s, keeping the id_token and the salt in
 // storage.session only, until the key is enrolled or the token is about to expire.
 
-import { offeredProviders } from "@emojery/shared/api";
+import { offeredIn } from "@emojery/shared/api";
 import { fromBase64Url, refreshMessage, retireMessage, sessionMessage, toBase64Url } from "@emojery/shared/core";
 import { forgetAccount, noteAccountSeen } from "../shared/account-names";
 import { AUTH_KEY, isAuthSessionLive } from "../shared/auth-session";
-import { DEPLOYMENT, INITIAL_ORIGIN, LOG_NAME } from "../shared/deployment";
+import { INITIAL_ORIGIN, LOG_NAME, SIGN_IN_PROVIDERS } from "../shared/deployment";
 import type { SignInRefusal } from "../shared/messages";
 import { isProviderId, type OidcProvider } from "../shared/oidc-providers";
 import { randomId } from "../shared/random-id";
@@ -93,7 +93,7 @@ export type SignInResult = { ok: true } | { ok: false; refusal: SignInRefusal };
  *  the table does not name. Apple needs its return page, served by the API; until a build
  *  can use it, a provider with a web return address is not offered. */
 export async function listSignInProviders(): Promise<{ providers: OidcProvider[]; chooser: OidcProvider[] }> {
-  const rows = offeredProviders(DEPLOYMENT).filter((p) => !p.redirectUri);
+  const rows = offeredIn(SIGN_IN_PROVIDERS).filter((p) => !p.redirectUri);
   const providers = rows.map((p) => p.id);
   return { providers, chooser: providers.filter((id) => id === "google" || id === "microsoft") };
 }
@@ -168,7 +168,7 @@ function idTokenExp(idToken: string): number {
 }
 
 async function runSignIn(provider: OidcProvider, chooser: boolean): Promise<SignInResult> {
-  const row = offeredProviders(DEPLOYMENT).find((p) => p.id === provider && !p.redirectUri);
+  const row = offeredIn(SIGN_IN_PROVIDERS).find((p) => p.id === provider && !p.redirectUri);
   const redirect = identityRedirectUrl();
   if (!row || !redirect) return { ok: false, refusal: "unavailable" };
   const key = await ensureDeviceKey(provider);

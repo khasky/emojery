@@ -3,13 +3,17 @@
 // Which deployment this build talks to, read off the API origin the build was made for: the
 // provider table, the log's name and its first origin come from @emojery/shared/api by this.
 
-import { initialOrigin, LOG_NAMES } from "@emojery/shared/api";
+import { initialOrigin, LOG_NAMES, PRODUCTION_PROVIDERS, STAGING_PROVIDERS } from "@emojery/shared/api";
 import { PRODUCTION_API_BASE } from "./api-origins";
 import { API_BASE } from "./config";
 
 export type Deployment = "production" | "staging";
 
 export const DEPLOYMENT: Deployment = API_BASE === PRODUCTION_API_BASE ? "production" : "staging";
+
+/** This build's sign-in providers. Picked by a constant the bundler folds, so a production
+ *  build carries no staging table (scripts/scan-extension-artifact.sh refuses the staging host). */
+export const SIGN_IN_PROVIDERS = DEPLOYMENT === "production" ? PRODUCTION_PROVIDERS : STAGING_PROVIDERS;
 
 /** The log's name; every origin is `<LOG_NAME>/g<k>`. */
 export const LOG_NAME: string = LOG_NAMES[DEPLOYMENT];
