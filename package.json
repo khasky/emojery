@@ -101,7 +101,7 @@
     "@commitlint/cli": "^21.2.1",
     "@commitlint/config-conventional": "^21.2.0",
     "@guidepup/virtual-screen-reader": "0.32.1",
-    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@modelcontextprotocol/sdk": "^1.32.0",
     "@playwright/mcp": "^0.0.81",
     "@playwright/test": "^1.63.0",
     "@preact/preset-vite": "^2.10.6",
