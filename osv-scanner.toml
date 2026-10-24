@@ -10,3 +10,7 @@ reason = "image-size ICNS DoS via web-ext>addons-linter: dev-only, parses this r
 [[IgnoredVulns]]
 id = "GHSA-5p2g-fcmc-qvqq"
 reason = "image-size JXL/HEIF DoS via web-ext>addons-linter: dev-only, parses this repo's own icon assets during `web-ext lint`; no patched release on npm. Accepted 2026-08-07, revisit 2026-11."
+
+[[IgnoredVulns]]
+id = "GHSA-86w9-cpqp-85rv"
+reason = "node-forge via web-ext>@devicefarmer/adbkit: dev-only, the Android bridge of web-ext, which this repo never runs; no patched release on npm (the advisory names >=1.4.1, which does not exist). Accepted 2026-10-24, revisit 2026-11."
