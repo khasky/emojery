@@ -1,133 +1,71 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Vote-queue FIFO semantics against REAL IndexedDB (Vitest browser mode: WebKit and Firefox).
-// api.test.ts mocks this store wholesale, so these are the only checks on the real
-// cursor/autoincrement behavior the drain loop relies on.
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+// The vote queue against REAL IndexedDB (Vitest browser mode): one record per pair, a click
+// replacing the desire and raising the counter, the confirmed state a settled record leaves
+// behind, a settle that loses to a newer click, and the account-scoped wipe.
+import { afterEach, describe, expect, it } from "vitest";
 import type { TargetRef } from "../shared/adapter";
-import { type ChromeShimHandle, installChromeShim } from "../test/chrome-shim";
-import { bumpAttempt, clearQueuedVotes, deleteById, enqueue, getQueueStats, listQueuedVotes, peekNext, peekNextEligible, type QueuedVote, VOTE_QUEUE_MAX } from "./votequeue";
+import { clearQueuedVotes, getQueueStats, listQueuedVotes, pairKey, peekNextEligible, rememberPairs, settleVote, updateVote, upsertClick } from "./votequeue";
 
-const target = (n: number): TargetRef => ({ site: "github", targetId: `o/r${n}`, url: `https://github.com/o/r${n}` });
+const target: TargetRef = { site: "github", targetId: "khasky/emojery", url: "https://github.com/khasky/emojery" };
+const other: TargetRef = { ...target, targetId: "khasky/other", url: "https://github.com/khasky/other" };
 
-const vote = (n: number, overrides: Partial<QueuedVote> = {}): Omit<QueuedVote, "id"> => ({
-  target: target(n),
-  reaction: "👍",
-  ts: 1_000 + n,
-  attempts: 0,
-  userId: "user-a",
-  ...overrides,
-});
+function click(userId: string, t: TargetRef, desired: string | null, prevReaction: string | null, now = 1000) {
+  return upsertClick({ pair: pairKey(userId, t), userId, target: t, desired, prevReaction, now });
+}
 
-let chromeShim: ChromeShimHandle;
-beforeEach(async () => {
-  chromeShim = installChromeShim();
+afterEach(async () => {
   await clearQueuedVotes();
 });
-afterEach(() => chromeShim.uninstall());
 
-describe("vote queue - FIFO on real IndexedDB", () => {
-  it("assigns increasing ids and peeks the oldest entry", async () => {
-    const a = await enqueue(vote(1));
-    const b = await enqueue(vote(2));
-    expect(b).toBeGreaterThan(a);
-    await expect(peekNext()).resolves.toMatchObject({ id: a, target: target(1) });
+describe("the vote queue", () => {
+  it("keeps one record per pair, the latest desire, a counter past every earlier one, the first rollback target", async () => {
+    const first = await click("u1", target, "👍", null);
+    expect(first).toMatchObject({ desired: "👍", base: null, counter: 1, rollbackTo: null });
+    const second = await click("u1", target, "❤️", "👍", 2000);
+    expect(second).toMatchObject({ id: first.id, desired: "❤️", base: null, counter: 2, rollbackTo: null, firstQueuedAt: 1000 });
+    await click("u1", other, "🔥", null);
+    expect((await getQueueStats()).count).toBe(2);
   });
 
-  it("keeps the head until deleted, then yields the next in order", async () => {
-    const a = await enqueue(vote(1));
-    const b = await enqueue(vote(2));
-    const c = await enqueue(vote(3));
-    await expect(peekNext()).resolves.toMatchObject({ id: a });
-    await deleteById(a);
-    await expect(peekNext()).resolves.toMatchObject({ id: b });
-    await deleteById(b);
-    await expect(peekNext()).resolves.toMatchObject({ id: c });
+  it("builds the next click on the state a settled record confirmed, or on what /v2/mine reported", async () => {
+    const sent = await click("u1", target, "👍", null);
+    await settleVote(sent, { pair: sent.pair, reaction: "👍", counter: 1 });
+    expect((await getQueueStats()).count).toBe(0);
+    expect(await click("u1", target, "❤️", "👍")).toMatchObject({ base: "👍", counter: 2 });
+
+    await rememberPairs([{ pair: pairKey("u1", other), reaction: "🔥", counter: 9 }]);
+    expect(await click("u1", other, null, "🔥")).toMatchObject({ base: "🔥", counter: 10 });
   });
 
-  it("deleteById removes only the addressed row", async () => {
-    const a = await enqueue(vote(1));
-    const b = await enqueue(vote(2));
-    await deleteById(b);
-    await expect(peekNext()).resolves.toMatchObject({ id: a });
-    await deleteById(a);
-    await expect(peekNext()).resolves.toBeUndefined();
+  it("keeps a record a newer click replaced while its send was in flight", async () => {
+    const sent = await click("u1", target, "👍", null);
+    const newer = await click("u1", target, "❤️", "👍");
+    await settleVote(sent, { pair: sent.pair, reaction: "👍", counter: 1 });
+    const left = await listQueuedVotes(10);
+    expect(left).toHaveLength(1);
+    expect(left[0]).toMatchObject({ desired: "❤️", counter: newer.counter, base: "👍" });
+    // An update from the older send cannot overwrite the newer click either.
+    await updateVote({ ...sent, attempts: 5 });
+    expect((await listQueuedVotes(10))[0]?.attempts).toBe(0);
   });
 
-  it("clearQueuedVotes drops one account's entries and leaves another's", async () => {
-    await enqueue(vote(1));
-    const other = await enqueue(vote(2, { userId: "user-b" }));
-
-    await clearQueuedVotes("user-a");
-
-    await expect(listQueuedVotes(VOTE_QUEUE_MAX)).resolves.toMatchObject([{ id: other, userId: "user-b" }]);
+  it("serves records whose backoff passed, skipping those it was told to", async () => {
+    const a = await click("u1", target, "👍", null);
+    const b = await click("u1", other, "🔥", null);
+    await updateVote({ ...a, nextAttemptAt: 5_000 });
+    expect((await peekNextEligible(1_000))?.id).toBe(b.id);
+    expect(await peekNextEligible(1_000, new Set([b.id]))).toBeUndefined();
+    expect((await peekNextEligible(6_000))?.id).toBe(a.id);
   });
 
-  it("bumpAttempt increments in place without reordering the queue", async () => {
-    const a = await enqueue(vote(1));
-    await enqueue(vote(2));
-    await bumpAttempt(a);
-    await bumpAttempt(a);
-    await expect(peekNext()).resolves.toMatchObject({ id: a, attempts: 2 });
-  });
-
-  it("bumpAttempt on a missing id is a no-op", async () => {
-    await enqueue(vote(1));
-    await expect(bumpAttempt(9_999)).resolves.toBeUndefined();
-    await expect(peekNext()).resolves.toMatchObject({ attempts: 0 });
-  });
-
-  it("peekNextEligible skips a backed-off head instead of blocking on it", async () => {
-    // The head-of-line fix: a failing vote parks itself via nextAttemptAt and
-    // the vote behind it drains on time.
-    const a = await enqueue(vote(1));
-    const b = await enqueue(vote(2));
-    await bumpAttempt(a, Date.now() + 60_000);
-    await expect(peekNextEligible(Date.now())).resolves.toMatchObject({ id: b });
-    // Once its backoff expires the head is eligible again, still oldest-first.
-    await expect(peekNextEligible(Date.now() + 61_000)).resolves.toMatchObject({ id: a });
-  });
-
-  it("getQueueStats reports count and the earliest per-vote wake-up time", async () => {
-    await expect(getQueueStats()).resolves.toEqual({ count: 0 });
-    const a = await enqueue(vote(1));
-    const b = await enqueue(vote(2));
-    const wakeA = Date.now() + 60_000;
-    const wakeB = Date.now() + 30_000;
-    await bumpAttempt(a, wakeA);
-    await bumpAttempt(b, wakeB);
-    await expect(getQueueStats()).resolves.toEqual({ count: 2, earliestNextAttemptAt: wakeB });
-  });
-
-  it("listQueuedVotes returns the queue oldest-first, capped at the limit", async () => {
-    await expect(listQueuedVotes(10)).resolves.toEqual([]);
-    const a = await enqueue(vote(1));
-    const b = await enqueue(vote(2));
-    await enqueue(vote(3));
-    await expect(listQueuedVotes(10)).resolves.toMatchObject([{ id: a, target: target(1) }, { id: b }, { target: target(3) }]);
-    await expect(listQueuedVotes(2)).resolves.toMatchObject([{ id: a }, { id: b }]);
-  });
-
-  it("refuses to grow past VOTE_QUEUE_MAX", { timeout: 60_000 }, async () => {
-    // Parallel: readwrite transactions on one store serialize, so the
-    // count-then-add check stays race-safe AND this fills 500 rows in test time.
-    const ids = await Promise.all(Array.from({ length: VOTE_QUEUE_MAX }, (_, i) => enqueue(vote(i))));
-    await expect(enqueue(vote(VOTE_QUEUE_MAX))).rejects.toThrow("vote queue full");
-    await expect(getQueueStats()).resolves.toMatchObject({ count: VOTE_QUEUE_MAX });
-    await Promise.all(ids.map((id) => deleteById(id)));
-  });
-
-  it("round-trips the full queued payload, unreact included", async () => {
-    const full = vote(1, {
-      reaction: null,
-      historyReaction: "🔥",
-      historyAction: "remove",
-      optimisticHistoryId: "opt-1",
-      analyticsConsent: false,
-      lang: "ru",
-      title: "queued title",
-    });
-    await enqueue(full);
-    await expect(peekNext()).resolves.toMatchObject(full);
+  it("wipes one account's records and known pairs, leaving another's", async () => {
+    await click("u1", target, "👍", null);
+    await click("u2", target, "❤️", null);
+    await rememberPairs([{ pair: pairKey("u1", other), reaction: "🔥", counter: 3 }]);
+    await clearQueuedVotes("u1");
+    const left = await listQueuedVotes(10);
+    expect(left.map((v) => v.userId)).toEqual(["u2"]);
+    expect(await click("u1", other, "😂", "🔥")).toMatchObject({ base: "🔥", counter: 1 });
   });
 });

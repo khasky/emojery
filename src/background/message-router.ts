@@ -167,7 +167,7 @@ const HANDLERS: HandlerTable = {
         type: "queue:snapshot",
         // Rebuilt field by field: a queued vote also carries its owner, the page
         // title and the language, none of which the Debug tab prints.
-        votes: votes.map((vote) => defined({ id: vote.id, target: vote.target, reaction: vote.reaction, attempts: vote.attempts, nextAttemptAt: vote.nextAttemptAt })),
+        votes: votes.map((vote) => defined({ id: vote.id, target: vote.target, reaction: vote.desired, attempts: vote.attempts, nextAttemptAt: vote.nextAttemptAt })),
         flush: { nextAttemptAt: flush.nextAttemptAt, consecutiveFailures: flush.consecutiveFailures },
       };
     });

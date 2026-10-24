@@ -89,12 +89,6 @@
   "sentimentReset": {
     "message": "デフォルトに戻す"
   },
-  "settingAnalyticsConsent": {
-    "message": "コミュニティの傾向"
-  },
-  "settingAnalyticsConsentHint": {
-    "message": "リアクションを地域別の集計に含める"
-  },
   "sectionPerSite": {
     "message": "選択したサイトのみ"
   },
@@ -516,15 +510,6 @@
     "message": "これはどういうことか",
     "description": "Link shown beside both device-limit messages (the sign-in refusal and the Account-tab notice). It opens the help article that says what the monthly key limit is, what to do while it holds, and how to reach the operator. Deliberately short: it sits at the end of a sentence that already carries the news."
   },
-  "voteDeviceLimit": {
-    "message": "今月の端末数の上限に達しました。$DATE$ から再び投票できます。",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "October 1, 2026"
-      }
-    }
-  },
   "loadError": {
     "message": "問題が発生しました。もう一度お試しください。"
   },
@@ -637,5 +622,14 @@
   },
   "onboardingAllSet": {
     "message": "準備完了です!"
+  },
+  "voteDailyLimit": {
+    "message": "今日のリアクション上限に達しました。$TIME$ に再び投票できます。",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "02:00"
+      }
+    }
   }
 }

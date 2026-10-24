@@ -89,12 +89,6 @@
   "sentimentReset": {
     "message": "Palauta oletukset"
   },
-  "settingAnalyticsConsent": {
-    "message": "Yhteisönäkemykset"
-  },
-  "settingAnalyticsConsentHint": {
-    "message": "Laske reaktioni mukaan aluekohtaisiin tilastoihin"
-  },
   "sectionPerSite": {
     "message": "Vain valitut sivustot"
   },
@@ -516,15 +510,6 @@
     "message": "Mitä tämä tarkoittaa",
     "description": "Link shown beside both device-limit messages (the sign-in refusal and the Account-tab notice). It opens the help article that says what the monthly key limit is, what to do while it holds, and how to reach the operator. Deliberately short: it sits at the end of a sentence that already carries the news."
   },
-  "voteDeviceLimit": {
-    "message": "Tämän kuun laiterajoitus on täynnä. Äänestäminen jatkuu $DATE$.",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "October 1, 2026"
-      }
-    }
-  },
   "loadError": {
     "message": "Jotain meni pieleen. Yritä uudelleen."
   },
@@ -637,5 +622,14 @@
   },
   "onboardingAllSet": {
     "message": "Kaikki valmista!"
+  },
+  "voteDailyLimit": {
+    "message": "Tämän päivän reaktioraja on täynnä. Äänestys jatkuu klo $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "02:00"
+      }
+    }
   }
 }

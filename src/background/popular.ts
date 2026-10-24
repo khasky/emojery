@@ -36,7 +36,7 @@ export async function ensurePopularFresh(): Promise<void> {
   inflight = (async () => {
     if (isFresh(await readStored())) return;
     try {
-      const reply = await apiRequest("/reactions/popular", { method: "GET" });
+      const reply = await apiRequest("/v2/reactions/popular", { method: "GET" });
       if (!reply.ok) return;
       const emojis = sanitizePopular(isRecord(reply.body) ? reply.body.emojis : undefined);
       if (!emojis) return;

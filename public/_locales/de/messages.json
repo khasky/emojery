@@ -89,12 +89,6 @@
   "sentimentReset": {
     "message": "Auf Standard zurücksetzen"
   },
-  "settingAnalyticsConsent": {
-    "message": "Community-Einblicke"
-  },
-  "settingAnalyticsConsentHint": {
-    "message": "Meine Reaktionen in regionale Auswertungen einbeziehen"
-  },
   "sectionPerSite": {
     "message": "Nur ausgewählte Websites"
   },
@@ -516,15 +510,6 @@
     "message": "Was bedeutet das?",
     "description": "Link shown beside both device-limit messages (the sign-in refusal and the Account-tab notice). It opens the help article that says what the monthly key limit is, what to do while it holds, and how to reach the operator. Deliberately short: it sits at the end of a sentence that already carries the news."
   },
-  "voteDeviceLimit": {
-    "message": "Das Gerätelimit für diesen Monat ist erreicht. Abstimmen geht wieder ab $DATE$.",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "October 1, 2026"
-      }
-    }
-  },
   "loadError": {
     "message": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
   },
@@ -637,5 +622,14 @@
   },
   "onboardingAllSet": {
     "message": "Fertig!"
+  },
+  "voteDailyLimit": {
+    "message": "Das heutige Reaktionslimit ist erreicht. Abstimmen geht wieder ab $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "02:00"
+      }
+    }
   }
 }

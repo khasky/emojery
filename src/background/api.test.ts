@@ -1,944 +1,244 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Sending the vote queue against a fake API: each record built and signed at send time over
+// the log's origin and the key's enroll_hash, and the answer table - accepted, rebuilt after a
+// conflict, re-signed under a signed new origin, refreshed, held, backed off, rolled back.
+// The queue is an in-memory stand-in with votequeue.ts's semantics; its IndexedDB form is
+// votequeue.browser.test.ts's.
+import { fromBase64Url, reactMessage, toBase64Url } from "@emojery/shared/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { installFakeChrome, lastFetchCall, stubFetchJson, stubFirefoxDataConsent } from "../test/fixtures";
-
-vi.mock("./votequeue", () => ({
-  enqueue: vi.fn().mockResolvedValue(1),
-  peekNext: vi.fn(),
-  peekNextEligible: vi.fn(),
-  getQueueStats: vi.fn().mockResolvedValue({ count: 0 }),
-  deleteById: vi.fn(),
-  bumpAttempt: vi.fn(),
-}));
-vi.mock("./identity", () => ({
-  getAuth: vi.fn(),
-  clearAuth: vi.fn(),
-}));
-// The key store needs a real IndexedDB (epoch-keys.browser.test.ts); here only
-// the drain's use of it matters: which key it asks for, what it signs, and what
-// it does when the API refuses the key.
-const PUBLIC_KEY = new Uint8Array(32).fill(7);
-const SIGNATURE = new Uint8Array(64).fill(9);
-vi.mock("./epoch-keys", async (importOriginal) => ({
-  // The real refusal class: the drain tells the device-limit refusal apart by it.
-  EpochKeyRefusal: (await importOriginal<typeof import("./epoch-keys")>()).EpochKeyRefusal,
-  currentEpoch: vi.fn((epochMs: number) => Math.floor(Date.now() / epochMs)),
-  ensureEpochKey: vi.fn(async (_session: unknown, epoch: number) => ({ epoch, publicKey: PUBLIC_KEY })),
-  reRegisterEpochKey: vi.fn(async () => {}),
-  signVote: vi.fn(async () => SIGNATURE),
-}));
-vi.mock("./history", () => ({
-  pushHistory: vi.fn().mockResolvedValue(undefined),
-  removeHistoryEntry: vi.fn().mockResolvedValue(undefined),
-}));
-vi.mock("../shared/storage", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../shared/storage")>()),
-  clearOwnReactionIfMatches: vi.fn().mockResolvedValue(undefined),
-}));
-
 import type { TargetRef } from "../shared/adapter";
-import { EPOCH_KEY_LIMIT_KEY } from "../shared/epoch-key-limit";
-import { REACTION_BYTES_MAX } from "../shared/messages";
-import { clearOwnReactionIfMatches } from "../shared/storage";
-import { enqueueVote, flushOwnedVotesForSignOut, flushVotes, voteRetryDelayMs } from "./api";
-import { ApiHttpError, apiErrorCode } from "./api-client";
-import { clearFailedReads, clearPendingMineBatch, fetchCount, MINE_BATCH_WINDOW_MS } from "./api-read";
-import { EpochKeyRefusal, ensureEpochKey, reRegisterEpochKey, signVote } from "./epoch-keys";
-import { pushHistory, removeHistoryEntry } from "./history";
-import { clearAuth, getAuth } from "./identity";
-import { bytesToBase64Url, voteSignatureMessage } from "./vote-signing";
-import { bumpAttempt, deleteById, enqueue, peekNext, peekNextEligible, type StoredVote } from "./votequeue";
+import { installFakeChrome } from "../test/fixtures";
+import type { KnownPair, QueuedVote, StoredVote } from "./votequeue";
 
-const target: TargetRef = {
-  site: "facebook",
-  targetId: "1",
-  url: "https://www.facebook.com/zuck/posts/1",
-};
+const LOG = "log-staging.emojery.app";
+const EH = toBase64Url(new Uint8Array(32).fill(9));
 
-// One vote as the drain reads it back; each case overrides only what it pins.
-function queued(overrides: Partial<StoredVote> = {}): StoredVote {
-  return { id: 7, target, reaction: "❤️", ts: 100, attempts: 0, userId: "u1", analyticsConsent: true, ...overrides };
-}
+// ---- the queue, in memory --------------------------------------------------------------
+const q = vi.hoisted(() => ({ rows: new Map<number, unknown>(), known: new Map<string, unknown>(), nextId: 1 }));
+vi.mock("./votequeue", () => ({
+  pairKey: (userId: string, t: { site: string; targetId: string }) => `${userId}|${t.site}|${t.targetId}`,
+  upsertClick: async (click: QueuedVote & { now: number; prevReaction: string | null }) => {
+    const cur = [...q.rows.values()].find((r) => (r as StoredVote).pair === click.pair) as StoredVote | undefined;
+    const k = q.known.get(click.pair) as KnownPair | undefined;
+    const { now, prevReaction, ...fields } = click;
+    const id = cur?.id ?? q.nextId++;
+    const row: StoredVote = { ...fields, id, base: cur ? cur.base : k ? k.reaction : prevReaction, counter: Math.max(cur?.counter ?? 0, k?.counter ?? 0) + 1, attempts: 0, firstQueuedAt: cur?.firstQueuedAt ?? now, rollbackTo: cur ? cur.rollbackTo : prevReaction };
+    q.rows.set(id, row);
+    return row;
+  },
+  peekNextEligible: async (now: number, skip: Set<number> = new Set()) => [...q.rows.values()].find((r) => ((r as StoredVote).nextAttemptAt ?? 0) <= now && !skip.has((r as StoredVote).id)),
+  getQueueStats: async () => ({ count: q.rows.size }),
+  updateVote: async (v: StoredVote) => {
+    const cur = q.rows.get(v.id) as StoredVote | undefined;
+    if (cur && cur.counter <= v.counter) q.rows.set(v.id, v);
+  },
+  settleVote: async (v: StoredVote, confirmed: KnownPair | null) => {
+    const cur = q.rows.get(v.id) as StoredVote | undefined;
+    if (cur && cur.counter === v.counter) q.rows.delete(v.id);
+    if (confirmed) q.known.set(confirmed.pair, confirmed);
+  },
+  clearQueuedVotes: async () => {
+    q.rows.clear();
+  },
+}));
 
-beforeEach(() => {
-  vi.clearAllMocks();
-  // clearAllMocks keeps unconsumed mockResolvedValueOnce entries: a drain that
-  // breaks on backoff before emptying its peek queue would leak them here.
-  vi.mocked(peekNext).mockReset();
-  vi.mocked(peekNextEligible).mockReset();
-  // The negative read cache is module state; a failure test would otherwise
-  // short-circuit the next test's read of the same target.
-  clearFailedReads();
-  // Same reason: an open /reactions/mine batch would collect the next test's target.
-  clearPendingMineBatch();
-  vi.useFakeTimers();
-  local = installFakeChrome().local;
-  vi.stubGlobal("navigator", { language: "uk-UA" });
-  vi.mocked(getAuth).mockResolvedValue({
-    userId: "u1",
-    token: "jwt",
-    expiresAt: 9999999999,
-    provider: "google",
-    epochMs: EPOCH_MS,
-  } as Awaited<ReturnType<typeof getAuth>>);
+// ---- the session and the device key --------------------------------------------------
+const session = vi.hoisted(() => ({ auth: null as Record<string, unknown> | null, key: null as CryptoKeyPair | null }));
+const refreshSession = vi.fn(async () => true);
+const setAuthOrigin = vi.fn(async (origin: string) => {
+  if (session.auth) session.auth.origin = origin;
 });
+vi.mock("./identity", () => ({
+  getAuth: async () => session.auth,
+  getLiveAuth: async () => session.auth,
+  clearAuth: async () => {
+    session.auth = null;
+  },
+  refreshSession: () => refreshSession(),
+  setAuthOrigin: (o: string) => setAuthOrigin(o),
+}));
+vi.mock("./device-keys", () => ({
+  signWithDeviceKey: async (_p: string, m: Uint8Array) => new Uint8Array(await crypto.subtle.sign("Ed25519", (session.key as CryptoKeyPair).privateKey, m as BufferSource)),
+}));
+const originIsSigned = vi.fn(async (_o: string) => true);
+vi.mock("./origin-switch", () => ({ originIsSigned: (o: string) => originIsSigned(o) }));
+const pushHistory = vi.fn(async () => {});
+const removeHistoryEntry = vi.fn(async () => {});
+vi.mock("./history", () => ({ pushHistory: (...a: unknown[]) => pushHistory(...(a as [])), removeHistoryEntry: (...a: unknown[]) => removeHistoryEntry(...(a as [])) }));
+const broadcastVoteDelta = vi.fn(async () => {});
+vi.mock("./vote-sync", () => ({ broadcastVoteDelta: (...a: unknown[]) => broadcastVoteDelta(...(a as [])) }));
+const own = vi.hoisted(() => new Map<string, string | null>());
+vi.mock("../shared/storage", () => ({
+  getOwnReaction: async (t: { targetId: string }) => own.get(t.targetId) ?? null,
+  setOwnReaction: async (t: { targetId: string }, r: string | null) => void own.set(t.targetId, r),
+}));
+vi.mock("../shared/onboarding", () => ({ markReactedOnce: async () => {} }));
 
-// One day, so the epoch the drain derives is a small round number.
-const EPOCH_MS = 86_400_000;
-let local: Record<string, unknown>;
+const { enqueueVote, flushVotes, getFlushState } = await import("./api");
+
+const target: TargetRef = { site: "github", targetId: "khasky/emojery", url: "https://github.com/khasky/emojery" };
+
+beforeEach(async () => {
+  vi.useFakeTimers({ toFake: ["Date", "setTimeout", "clearTimeout"], now: Date.UTC(2026, 9, 24) });
+  installFakeChrome();
+  Object.assign(globalThis.chrome, { alarms: { create: vi.fn(), clear: vi.fn() } });
+  q.rows.clear();
+  q.known.clear();
+  own.clear();
+  session.key = (await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"])) as CryptoKeyPair;
+  session.auth = { userId: "test:pk", token: "tok", expiresAt: 2_000_000_000, provider: "test", pk: "pk", enrollHash: EH, enrollSeq: 7, origin: `${LOG}/g0` };
+  for (const f of [refreshSession, setAuthOrigin, originIsSigned, pushHistory, removeHistoryEntry, broadcastVoteDelta]) f.mockClear();
+});
 
 afterEach(() => {
   vi.useRealTimers();
   vi.unstubAllGlobals();
 });
 
-// Locks the optimistic-vote ownership contract: the content script computes
-// `prevReaction` (ui/vote-client.ts) and the service worker only enqueues it - never
-// re-derives it. See the unreact case especially.
-describe("enqueueVote", () => {
-  // The optimistic history row must carry the same generated id the queue entry
-  // holds - the flush later confirms or rolls the row back by that id.
-  function expectHistoryPushedWithEnqueuedId(reaction: string, action: string): void {
-    const { optimisticHistoryId } = vi.mocked(enqueue).mock.calls[0]![0] as { optimisticHistoryId: string };
-    expect(pushHistory).toHaveBeenCalledWith("u1", target, reaction, { historyId: optimisticHistoryId, ts: 100, action });
-  }
+type Reply = { status: number; body?: unknown; headers?: Record<string, string> };
+function api(replies: Reply[]): { calls: Record<string, unknown>[] } {
+  const calls: Record<string, unknown>[] = [];
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (_url: string, init: RequestInit) => {
+      calls.push(JSON.parse(String(init.body)) as Record<string, unknown>);
+      const r = replies.shift() ?? { status: 200 };
+      return new Response(r.body === undefined ? null : JSON.stringify(r.body), { status: r.status, headers: r.headers ?? {} });
+    }),
+  );
+  return { calls };
+}
 
-  it("carries the clicked emoji as historyReaction on a fresh react (prevReaction null)", async () => {
-    await enqueueVote({ target, reaction: "❤️", prevReaction: null, ts: 100 });
-    expect(enqueue).toHaveBeenCalledWith({
-      target,
-      reaction: "❤️",
-      ts: 100,
-      attempts: 0,
-      nonce: expect.any(String),
-      userId: "u1",
-      analyticsConsent: true,
-      lang: "uk-UA",
-      historyReaction: "❤️",
-      historyAction: "add",
-      optimisticHistoryId: expect.any(String),
-    });
-    expectHistoryPushedWithEnqueuedId("❤️", "add");
-  });
+async function signedOver(body: Record<string, unknown>, origin: string): Promise<boolean> {
+  const message = reactMessage({ origin, enrollHash: fromBase64Url(EH), site: body.site as string, targetId: body.targetId as string, reaction: body.reaction as string, prevReaction: body.prevReaction as string, counter: body.counter as number });
+  return crypto.subtle.verify("Ed25519", (session.key as CryptoKeyPair).publicKey, fromBase64Url(body.sig as string) as BufferSource, message as BufferSource);
+}
 
-  it("carries the new emoji as historyReaction when switching reactions", async () => {
-    await enqueueVote({ target, reaction: "❤️", prevReaction: "👍", ts: 100 });
-    expect(enqueue).toHaveBeenCalledWith({
-      target,
-      reaction: "❤️",
-      ts: 100,
-      attempts: 0,
-      nonce: expect.any(String),
-      userId: "u1",
-      analyticsConsent: true,
-      lang: "uk-UA",
-      historyReaction: "❤️",
-      historyAction: "change",
-      optimisticHistoryId: expect.any(String),
-    });
-    expectHistoryPushedWithEnqueuedId("❤️", "change");
-  });
+const click = (reaction: string | null, prevReaction: string | null) => enqueueVote({ target, reaction, prevReaction, ts: Date.now() });
 
-  it("carries the removed emoji (not null) as historyReaction when unreacting", async () => {
-    await enqueueVote({ target, reaction: null, prevReaction: "👍", ts: 100 });
-    expect(enqueue).toHaveBeenCalledWith({
-      target,
-      reaction: null,
-      ts: 100,
-      attempts: 0,
-      nonce: expect.any(String),
-      userId: "u1",
-      analyticsConsent: true,
-      lang: "uk-UA",
-      // The toggle-off click still belongs in "Recently Used" - carried as the
-      // emoji that was removed, which only works because prevReaction survives.
-      historyReaction: "👍",
-      historyAction: "remove",
-      optimisticHistoryId: expect.any(String),
-    });
-    expectHistoryPushedWithEnqueuedId("👍", "remove");
-  });
-
-  it("stores opt-out on queued votes and omits language fallback", async () => {
-    globalThis.chrome.storage.sync.get = vi.fn().mockResolvedValue({
-      settings: { analyticsConsent: false },
-    });
-
-    await enqueueVote({ target, reaction: "❤️", prevReaction: null, ts: 100 });
-
-    expect(enqueue).toHaveBeenCalledWith({
-      target,
-      reaction: "❤️",
-      ts: 100,
-      attempts: 0,
-      nonce: expect.any(String),
-      userId: "u1",
-      analyticsConsent: false,
-      historyReaction: "❤️",
-      historyAction: "add",
-      optimisticHistoryId: expect.any(String),
-    });
-    expectHistoryPushedWithEnqueuedId("❤️", "add");
-  });
-
-  it("stamps each queued vote with its own nonce", async () => {
-    // The nonce must not be derived from the row id at send time: IndexedDB hands
-    // out ids from 1 again whenever the store is recreated, which would replay a
-    // key the server has already consumed.
-    await enqueueVote({ target, reaction: "❤️", prevReaction: null, ts: 100 });
-    await enqueueVote({ target, reaction: "👍", prevReaction: null, ts: 100 });
-
-    const nonces = vi.mocked(enqueue).mock.calls.map(([vote]) => (vote as { nonce: string }).nonce);
-    expect(nonces).toHaveLength(2);
-    expect(nonces[0]).toEqual(expect.any(String));
-    expect(nonces[0]).not.toBe(nonces[1]);
-  });
-
-  it("drops the vote instead of queueing it unowned when signed out", async () => {
-    vi.mocked(getAuth).mockResolvedValue(null);
-    await enqueueVote({ target, reaction: "❤️", prevReaction: null, ts: 100 });
-    expect(enqueue).not.toHaveBeenCalled();
-    expect(pushHistory).not.toHaveBeenCalled();
-  });
-
-  it("propagates an unreadable session instead of dropping the vote as signed-out", async () => {
-    // Absorbing this read swallowed the vote while the click stayed on screen:
-    // the caller must be able to answer "error" and roll its optimistic UI back.
-    vi.mocked(getAuth).mockRejectedValue(new Error("storage unavailable"));
-    await expect(enqueueVote({ target, reaction: "❤️", prevReaction: null, ts: 100 })).rejects.toThrow("storage unavailable");
-    expect(enqueue).not.toHaveBeenCalled();
-  });
-
-  it("treats denied Firefox technical data consent as analytics opt-out", async () => {
-    stubFirefoxDataConsent([]);
-
-    await enqueueVote({
-      target,
-      reaction: "❤️",
-      prevReaction: null,
-      ts: 100,
-      lang: "en-US",
-    });
-
-    expect(enqueue).toHaveBeenCalledWith({
-      target,
-      reaction: "❤️",
-      ts: 100,
-      attempts: 0,
-      nonce: expect.any(String),
-      userId: "u1",
-      analyticsConsent: false,
-      historyReaction: "❤️",
-      historyAction: "add",
-      optimisticHistoryId: expect.any(String),
-    });
-  });
-});
-
-describe("vote retry backoff", () => {
-  it("keeps ten retryable attempts around ten minutes with neutral jitter", () => {
-    const delays = Array.from({ length: 9 }, (_, i) => voteRetryDelayMs(i + 1, undefined, () => 0.5));
-
-    expect(delays).toEqual([2_000, 4_000, 8_000, 16_000, 32_000, 64_000, 128_000, 180_000, 180_000]);
-    expect(delays.reduce((sum, delay) => sum + delay, 0)).toBe(614_000);
-  });
-
-  it("honors a longer Retry-After header", () => {
-    expect(voteRetryDelayMs(1, 90, () => 0.5)).toBe(90_000);
-  });
-
-  it("caps a Retry-After at the same ceiling as the backoff", () => {
-    expect(voteRetryDelayMs(1, 86_400, () => 0.5)).toBe(180_000);
-  });
-});
-
-describe("flushVotes", () => {
-  // Both opt-out paths must emit the same wire shape. One request = one vote:
-  // the body is a single vote object, not { votes: [...] }, consent stamped
-  // false, no `lang` in the body - the language rides only the header.
-  function expectOptOutVoteBody(fetchMock: ReturnType<typeof vi.fn>): void {
-    const [, init] = lastFetchCall(fetchMock);
-    const body = JSON.parse(init.body as string) as Record<string, unknown>;
-    expect(body).toMatchObject({
-      targetId: target.targetId,
-      site: target.site,
-      reaction: "❤️",
-      ts: 100,
-      analyticsConsent: false,
-      nonce: "7:100",
-    });
-    expect(body).not.toHaveProperty("lang");
-    expect(init.headers).toMatchObject({ "accept-language": "uk-UA" });
-    expect(deleteById).toHaveBeenCalledWith(7);
-  }
-
-  it("sends the nonce stored on the queued vote, not one derived from its row id", async () => {
-    vi.mocked(peekNextEligible)
-      .mockResolvedValueOnce(queued({ nonce: "queued-nonce" }))
-      .mockResolvedValueOnce(undefined);
-    const fetchMock = stubFetchJson(200, { accepted: true });
-
+describe("the vote queue's send", () => {
+  it("signs the pair's desired state over the current origin and the key's enroll_hash, then settles it", async () => {
+    const { calls } = api([{ status: 200 }]);
+    expect(await click("👍", null)).toBe(true);
     await flushVotes();
-
-    const [, init] = lastFetchCall(fetchMock);
-    expect(JSON.parse(init.body as string)).toMatchObject({ nonce: "queued-nonce" });
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toMatchObject({ site: "github", targetId: "khasky/emojery", reaction: "👍", prevReaction: "", counter: 1 });
+    expect(await signedOver(calls[0] as Record<string, unknown>, `${LOG}/g0`)).toBe(true);
+    expect(q.rows.size).toBe(0);
+    expect(q.known.get("test:pk|github|khasky/emojery")).toEqual({ pair: "test:pk|github|khasky/emojery", reaction: "👍", counter: 1 });
+    expect(pushHistory).toHaveBeenCalledTimes(2);
   });
 
-  it("sends opt-out votes without JSON language fallback", async () => {
-    vi.mocked(peekNextEligible)
-      .mockResolvedValueOnce(queued({ analyticsConsent: false, lang: "uk-UA" }))
-      .mockResolvedValueOnce(undefined);
-    const fetchMock = stubFetchJson(200, { accepted: true });
-
+  it("collapses clicks on one pair into one record whose counter passes every earlier one", async () => {
+    const { calls } = api([{ status: 200 }]);
+    await click("👍", null);
+    await click("❤️", "👍");
     await flushVotes();
-
-    expectOptOutVoteBody(fetchMock);
+    expect(calls).toEqual([expect.objectContaining({ reaction: "❤️", prevReaction: "", counter: 2 })]);
   });
 
-  it("re-checks Firefox technical data consent before sending queued opt-in votes", async () => {
-    stubFirefoxDataConsent([]);
-    vi.mocked(peekNextEligible)
-      .mockResolvedValueOnce(queued({ lang: "uk-UA" }))
-      .mockResolvedValueOnce(undefined);
-    const fetchMock = stubFetchJson(200, { accepted: true });
-
+  it("holds every record while the key waits for its registration", async () => {
+    const { calls } = api([]);
+    (session.auth as Record<string, unknown>).enrollHash = undefined;
+    (session.auth as Record<string, unknown>).enrollSeq = undefined;
+    await click("👍", null);
     await flushVotes();
-
-    expectOptOutVoteBody(fetchMock);
+    expect(calls).toHaveLength(0);
+    expect(q.rows.size).toBe(1);
   });
 
-  it("confirms optimistic history when accepted:true is returned", async () => {
-    vi.mocked(peekNextEligible)
-      .mockResolvedValueOnce(queued({ historyReaction: "❤️", optimisticHistoryId: "hist-7" }))
-      .mockResolvedValueOnce(undefined);
-    stubFetchJson(200, { accepted: true });
-
+  it("rebuilds once from a state_conflict, and rolls back on a second", async () => {
+    const { calls } = api([{ status: 409, body: { error: "state_conflict", reaction: "🔥", counter: 4 } }, { status: 200 }]);
+    await click("👍", null);
     await flushVotes();
+    expect(calls[1]).toMatchObject({ reaction: "👍", prevReaction: "🔥", counter: 5 });
+    expect(q.rows.size).toBe(0);
 
-    expect(pushHistory).toHaveBeenCalledWith("u1", target, "❤️", {
-      historyId: "hist-7",
-      ts: 100,
-    });
-    expect(removeHistoryEntry).not.toHaveBeenCalled();
-    expect(deleteById).toHaveBeenCalledWith(7);
+    own.set("khasky/emojery", "😂");
+    api([
+      { status: 409, body: { error: "state_conflict", reaction: "🔥", counter: 6 } },
+      { status: 409, body: { error: "state_conflict", reaction: "❤️", counter: 9 } },
+    ]);
+    await click("😂", "👍");
+    await flushVotes();
+    expect(q.rows.size).toBe(0);
+    expect(own.get("khasky/emojery")).toBe("👍");
+    expect(broadcastVoteDelta).toHaveBeenCalledWith(undefined, { target, reaction: "👍", prevReaction: "😂" });
   });
 
-  // What a server-corrected targetId does to the durable record; the rationale
-  // for adopting it lives in handleVoteResponse (api.ts).
-  describe("server-corrected target key", () => {
-    const queuedVote = queued({ historyReaction: "❤️", optimisticHistoryId: "hist-7" });
+  it("re-signs under a new origin only when the log's index carries its signed record", async () => {
+    const { calls } = api([{ status: 409, body: { error: "stale_origin", origin: `${LOG}/g1` } }, { status: 200 }]);
+    await click("👍", null);
+    await flushVotes();
+    expect(originIsSigned).toHaveBeenCalledWith(`${LOG}/g1`);
+    expect(await signedOver(calls[1] as Record<string, unknown>, `${LOG}/g1`)).toBe(true);
 
-    it("writes history under the server's targetId and drops the wrongly-keyed optimistic row", async () => {
-      vi.mocked(peekNextEligible).mockResolvedValueOnce(queuedVote).mockResolvedValueOnce(undefined);
-      stubFetchJson(200, { accepted: true, targetId: "server-key" });
+    originIsSigned.mockResolvedValueOnce(false);
+    api([{ status: 409, body: { error: "stale_origin", origin: `${LOG}/g2` } }]);
+    await click("❤️", "👍");
+    await flushVotes();
+    expect(q.rows.size).toBe(1);
+    expect((await getFlushState()).reason).toBe("origin_unverified");
+  });
 
+  it("refreshes a revoked session and sends again", async () => {
+    const { calls } = api([{ status: 401, body: { error: "session_revoked" } }, { status: 200 }]);
+    await click("👍", null);
+    await flushVotes();
+    expect(refreshSession).toHaveBeenCalledTimes(1);
+    expect(calls).toHaveLength(2);
+    expect(q.rows.size).toBe(0);
+  });
+
+  it("holds the whole queue on the daily budget, the red button and a pending key", async () => {
+    for (const [reply, reason] of [
+      [{ status: 429, body: { error: "daily_limit" }, headers: { "retry-after": "3600" } }, "daily_limit"],
+      [{ status: 503, body: { error: "reactions_unavailable" } }, "reactions_unavailable"],
+      [{ status: 503, body: { error: "key_pending" }, headers: { "retry-after": "15" } }, "key_pending"],
+    ] as const) {
+      api([reply]);
+      await click("👍", null);
       await flushVotes();
-
-      expect(removeHistoryEntry).toHaveBeenCalledWith("hist-7");
-      expect(pushHistory).toHaveBeenCalledWith("u1", { ...target, targetId: "server-key" }, "❤️", { ts: 100 });
-    });
-
-    it("keeps the optimistic row when the server agrees with our key", async () => {
-      vi.mocked(peekNextEligible).mockResolvedValueOnce(queuedVote).mockResolvedValueOnce(undefined);
-      stubFetchJson(200, { accepted: true, targetId: target.targetId });
-
-      await flushVotes();
-
-      expect(removeHistoryEntry).not.toHaveBeenCalled();
-      expect(pushHistory).toHaveBeenCalledWith("u1", target, "❤️", { historyId: "hist-7", ts: 100 });
-    });
-
-    it("keeps our key when an older build answers without the field", async () => {
-      vi.mocked(peekNextEligible).mockResolvedValueOnce(queuedVote).mockResolvedValueOnce(undefined);
-      stubFetchJson(200, { accepted: true });
-
-      await flushVotes();
-
-      expect(removeHistoryEntry).not.toHaveBeenCalled();
-      expect(pushHistory).toHaveBeenCalledWith("u1", target, "❤️", { historyId: "hist-7", ts: 100 });
-    });
-  });
-
-  it("drops a queued vote from a different account instead of submitting it", async () => {
-    // The first account signs out with this vote still pending; a second signs in before the
-    // flush runs. Submitting it now would record it as the second account's vote.
-    vi.mocked(peekNextEligible)
-      .mockResolvedValueOnce(queued({ id: 11, userId: "u-old", historyReaction: "❤️", optimisticHistoryId: "hist-11" }))
-      .mockResolvedValueOnce(undefined);
-    const fetchMock = vi.fn();
-    vi.stubGlobal("fetch", fetchMock);
-
-    await flushVotes();
-
-    expect(fetchMock).not.toHaveBeenCalled();
-    expect(pushHistory).not.toHaveBeenCalled();
-    expect(removeHistoryEntry).toHaveBeenCalledWith("hist-11");
-    // The dropped vote's own-reaction is cleared for ITS owner, not for u1.
-    expect(clearOwnReactionIfMatches).toHaveBeenCalledWith(target, "❤️", "u-old");
-    expect(deleteById).toHaveBeenCalledWith(11);
-  });
-
-  it("drops pre-stamp legacy entries that carry no owner", async () => {
-    const legacyVote = queued({ id: 12 });
-    delete legacyVote.userId; // pre-stamp rows carry no owner at all
-    vi.mocked(peekNextEligible).mockResolvedValueOnce(legacyVote).mockResolvedValueOnce(undefined);
-    const fetchMock = vi.fn();
-    vi.stubGlobal("fetch", fetchMock);
-
-    await flushVotes();
-
-    expect(fetchMock).not.toHaveBeenCalled();
-    expect(clearOwnReactionIfMatches).not.toHaveBeenCalled();
-    expect(deleteById).toHaveBeenCalledWith(12);
-  });
-
-  it("parks the queue when the session ends instead of emptying it", async () => {
-    // The clicks are this account's own; a session that ended (sign-out, expiry, a
-    // refused token) must not cost them. peekNextEligible keeps offering the same
-    // entry, so a drain that walked on would delete it - and 49 more after it.
-    vi.mocked(getAuth).mockResolvedValue(null);
-    vi.mocked(peekNextEligible).mockResolvedValue(queued({ id: 13, historyReaction: "❤️", optimisticHistoryId: "hist-13" }));
-    const fetchMock = vi.fn();
-    vi.stubGlobal("fetch", fetchMock);
-
-    await flushVotes();
-
-    expect(fetchMock).not.toHaveBeenCalled();
-    expect(deleteById).not.toHaveBeenCalled();
-    expect(removeHistoryEntry).not.toHaveBeenCalled();
-    expect(clearOwnReactionIfMatches).not.toHaveBeenCalled();
-  });
-
-  it("keeps the vote a 401 refused and stops the drain on the cleared session", async () => {
-    // clearAuth does end the session, so the mock does too: without that the
-    // next lap would re-send the same vote under a token the API just refused.
-    vi.mocked(clearAuth).mockImplementationOnce(async () => {
-      vi.mocked(getAuth).mockResolvedValue(null);
-    });
-    vi.mocked(peekNextEligible).mockResolvedValue(queued({ id: 14, historyReaction: "❤️", optimisticHistoryId: "hist-14" }));
-    const fetchMock = vi.fn(async () => new Response("unauthorized", { status: 401 }));
-    vi.stubGlobal("fetch", fetchMock);
-
-    await flushVotes();
-
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(clearAuth).toHaveBeenCalled();
-    expect(deleteById).not.toHaveBeenCalled();
-    expect(removeHistoryEntry).not.toHaveBeenCalled();
-  });
-
-  it("writes history for queued votes without an optimistic history id", async () => {
-    vi.mocked(peekNextEligible)
-      .mockResolvedValueOnce(queued({ historyReaction: "❤️" }))
-      .mockResolvedValueOnce(undefined);
-    stubFetchJson(200, { accepted: true });
-
-    await flushVotes();
-
-    expect(pushHistory).toHaveBeenCalledWith("u1", target, "❤️", undefined);
-    expect(deleteById).toHaveBeenCalledWith(7);
-  });
-
-  it("keeps optimistic history when a re-sent vote comes back accepted:false", async () => {
-    // Regression: a re-sent vote whose response was lost comes back accepted:false, and the
-    // handler deleted its history row; the accepted:false rationale lives in handleVoteResponse (api.ts).
-    vi.mocked(peekNextEligible)
-      .mockResolvedValueOnce(queued({ id: 8, attempts: 1, historyReaction: "❤️", optimisticHistoryId: "hist-8" }))
-      .mockResolvedValueOnce(undefined);
-    stubFetchJson(200, { accepted: false });
-
-    await flushVotes();
-
-    expect(pushHistory).toHaveBeenCalledWith("u1", target, "❤️", { historyId: "hist-8", ts: 100 });
-    expect(removeHistoryEntry).not.toHaveBeenCalled();
-    expect(clearOwnReactionIfMatches).not.toHaveBeenCalled();
-    // Still terminal - dropped so it can't retry forever.
-    expect(deleteById).toHaveBeenCalledWith(8);
-  });
-
-  it("drains one at a time: a second flush racing an in-flight one never double-submits the head vote", async () => {
-    // Regression: scheduleFlush() clears its timer before the async drain finishes,
-    // so a concurrent flushVotes() peeked the SAME head vote and POSTed it twice
-    // under one nonce. The duplicate returns accepted:false, whose handler dropped
-    // the optimistic history / own-reaction the accepted send had just recorded.
-    vi.mocked(peekNextEligible)
-      .mockResolvedValueOnce(queued({ id: 9, historyReaction: "❤️", optimisticHistoryId: "hist-9" }))
-      .mockResolvedValue(undefined);
-    let releaseFetch: () => void = () => {};
-    const fetchGate = new Promise<void>((resolve) => {
-      releaseFetch = resolve;
-    });
-    const fetchMock = vi.fn(async () => {
-      await fetchGate;
-      return new Response(JSON.stringify({ accepted: true }), { status: 200 });
-    });
-    vi.stubGlobal("fetch", fetchMock);
-
-    const first = flushVotes();
-    const second = flushVotes(); // races while `first` is mid-send
-    releaseFetch();
-    await Promise.all([first, second]);
-
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(deleteById).toHaveBeenCalledTimes(1);
-    // The accepted send's optimistic history must survive - there is no rejected
-    // duplicate to drop it.
-    expect(removeHistoryEntry).not.toHaveBeenCalled();
-    expect(clearOwnReactionIfMatches).not.toHaveBeenCalled();
-  });
-
-  it("runs one more drain lap when a flush lands mid-drain instead of dropping it", async () => {
-    // Regression: the in-flight guard used to swallow a flush whose timer fired
-    // during an active drain - nothing re-armed, and the vote enqueued mid-drain
-    // waited for the periodic wake alarm (VOTE_WAKE_PERIOD_MINUTES).
-    const voteA = { id: 1, target, reaction: "❤️" as const, ts: 100, attempts: 0, userId: "u1" };
-    const voteB = { id: 2, target, reaction: "👍" as const, ts: 200, attempts: 0, userId: "u1" };
-    vi.mocked(peekNextEligible).mockResolvedValueOnce(voteA).mockResolvedValueOnce(undefined).mockResolvedValueOnce(voteB).mockResolvedValue(undefined);
-    let releaseFetch: () => void = () => {};
-    const fetchGate = new Promise<void>((resolve) => {
-      releaseFetch = resolve;
-    });
-    let calls = 0;
-    const fetchMock = vi.fn(async () => {
-      calls++;
-      if (calls === 1) await fetchGate;
-      return new Response(JSON.stringify({ accepted: true }), { status: 200 });
-    });
-    vi.stubGlobal("fetch", fetchMock);
-
-    const first = flushVotes();
-    const second = flushVotes(); // the flush for voteB arrives while voteA is mid-send
-    releaseFetch();
-    await Promise.all([first, second]);
-
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(deleteById).toHaveBeenCalledWith(1);
-    expect(deleteById).toHaveBeenCalledWith(2);
-  });
-
-  it("keeps optimistic history on a 5xx while the vote waits for retry", async () => {
-    vi.mocked(peekNextEligible)
-      .mockResolvedValueOnce(queued({ id: 9, historyReaction: "❤️", optimisticHistoryId: "hist-9" }))
-      .mockResolvedValueOnce(undefined);
-    stubFetchJson(503);
-
-    await flushVotes();
-
-    expect(pushHistory).not.toHaveBeenCalled();
-    expect(removeHistoryEntry).not.toHaveBeenCalled();
-    expect(deleteById).not.toHaveBeenCalled();
-    // The failure backs off THIS vote (per-vote nextAttemptAt), not just the
-    // global flush state - so the rest of the queue stays eligible behind it.
-    expect(bumpAttempt).toHaveBeenCalledWith(9, expect.any(Number));
-  });
-});
-
-// The vote is signed at send time, with the key of the epoch the send lands in:
-// the API rejects a body without `epoch`/`pubkey`/`sig` from this build.
-describe("flushVotes - signing", () => {
-  it("signs the vote with the current epoch's key and sends the key alongside", async () => {
-    vi.setSystemTime(EPOCH_MS * 42 + 5);
-    vi.mocked(peekNextEligible)
-      .mockResolvedValueOnce(queued({ nonce: "queued-nonce" }))
-      .mockResolvedValueOnce(undefined);
-    const fetchMock = stubFetchJson(200, { accepted: true });
-
-    await flushVotes();
-
-    expect(ensureEpochKey).toHaveBeenCalledWith(expect.objectContaining({ userId: "u1", token: "jwt" }), 42);
-    // The signed bytes are the wire contract (vote-signing.ts): site, target, the
-    // reaction and the SAME nonce the body carries.
-    expect(signVote).toHaveBeenCalledWith(expect.objectContaining({ userId: "u1", token: "jwt" }), 42, voteSignatureMessage({ site: target.site, targetId: target.targetId, reaction: "❤️", nonce: "queued-nonce" }));
-    const [, init] = lastFetchCall(fetchMock);
-    expect(JSON.parse(init.body as string)).toMatchObject({ nonce: "queued-nonce", epoch: 42, pubkey: bytesToBase64Url(PUBLIC_KEY), sig: bytesToBase64Url(SIGNATURE) });
-  });
-
-  it("signs an un-react over the NULL reaction, not an empty string", async () => {
-    vi.mocked(peekNextEligible)
-      .mockResolvedValueOnce(queued({ reaction: null, nonce: "n" }))
-      .mockResolvedValueOnce(undefined);
-    stubFetchJson(200, { accepted: true });
-
-    await flushVotes();
-
-    expect(signVote).toHaveBeenCalledWith(expect.anything(), expect.any(Number), voteSignatureMessage({ site: target.site, targetId: target.targetId, reaction: null, nonce: "n" }));
-  });
-
-  it("backs the vote off without sending when no key can be minted", async () => {
-    vi.mocked(ensureEpochKey).mockRejectedValueOnce(new Error("epoch key refused: refused"));
-    vi.mocked(peekNextEligible)
-      .mockResolvedValueOnce(queued({ id: 21 }))
-      .mockResolvedValueOnce(undefined);
-    const fetchMock = vi.fn();
-    vi.stubGlobal("fetch", fetchMock);
-
-    await flushVotes();
-
-    expect(fetchMock).not.toHaveBeenCalled();
-    expect(deleteById).not.toHaveBeenCalled();
-    expect(bumpAttempt).toHaveBeenCalledWith(21, expect.any(Number));
-  });
-
-  // The API will not issue this device a key before the next epoch, so a retry
-  // could only fail the same way: the vote and its optimistic row go at once, and
-  // the notice the Account tab renders names when voting resumes.
-  it("drops the vote without retry on epoch_key_limit, rolls the optimistic state back and leaves the notice", async () => {
-    vi.setSystemTime(EPOCH_MS * 42 + 5);
-    vi.mocked(ensureEpochKey).mockRejectedValueOnce(new EpochKeyRefusal("epoch_key_limit"));
-    vi.mocked(peekNextEligible)
-      .mockResolvedValueOnce(queued({ id: 24, historyReaction: "❤️", optimisticHistoryId: "hist-24" }))
-      .mockResolvedValueOnce(undefined);
-    const fetchMock = vi.fn();
-    vi.stubGlobal("fetch", fetchMock);
-
-    await flushVotes();
-
-    expect(fetchMock).not.toHaveBeenCalled();
-    expect(bumpAttempt).not.toHaveBeenCalled();
-    expect(deleteById).toHaveBeenCalledWith(24);
-    expect(removeHistoryEntry).toHaveBeenCalledWith("hist-24");
-    expect(clearOwnReactionIfMatches).toHaveBeenCalledWith(target, "❤️", "u1");
-    expect(local[EPOCH_KEY_LIMIT_KEY]).toEqual({ epoch: 42, resumesAt: EPOCH_MS * 43 });
-  });
-
-  it("re-registers the key and re-sends once on unknown_key, then drops the vote", async () => {
-    const refused = queued({ id: 22, historyReaction: "❤️", optimisticHistoryId: "hist-22" });
-    vi.mocked(peekNextEligible).mockResolvedValueOnce(refused).mockResolvedValueOnce(refused).mockResolvedValueOnce(undefined);
-    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ error: "unknown_key" }), { status: 403 }));
-    vi.stubGlobal("fetch", fetchMock);
-
-    await flushVotes();
-
-    expect(reRegisterEpochKey).toHaveBeenCalledTimes(1);
-    expect(reRegisterEpochKey).toHaveBeenCalledWith(expect.objectContaining({ userId: "u1", token: "jwt" }), expect.any(Number));
-    // Two sends: the refused one and the one retry. The second refusal is a
-    // permanent 4xx like any other: the vote and its optimistic row go.
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(deleteById).toHaveBeenCalledWith(22);
-    expect(removeHistoryEntry).toHaveBeenCalledWith("hist-22");
-  });
-
-  it("re-sends once on key_epoch_mismatch with the epoch derived anew, and needs no re-register", async () => {
-    vi.mocked(peekNextEligible)
-      .mockResolvedValueOnce(queued({ id: 23 }))
-      .mockResolvedValueOnce(queued({ id: 23 }))
-      .mockResolvedValueOnce(undefined);
-    let calls = 0;
-    const fetchMock = vi.fn(async () => {
-      calls++;
-      return calls === 1 ? new Response(JSON.stringify({ error: "key_epoch_mismatch" }), { status: 409 }) : new Response(JSON.stringify({ accepted: true }), { status: 200 });
-    });
-    vi.stubGlobal("fetch", fetchMock);
-
-    await flushVotes();
-
-    expect(reRegisterEpochKey).not.toHaveBeenCalled();
-    expect(ensureEpochKey).toHaveBeenCalledTimes(2);
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(deleteById).toHaveBeenCalledWith(23);
-  });
-
-  it("does not spend a retry on a 4xx that is not a key refusal", async () => {
-    vi.mocked(peekNextEligible)
-      .mockResolvedValueOnce(queued({ id: 24 }))
-      .mockResolvedValueOnce(undefined);
-    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ error: "invalid_input" }), { status: 400 }));
-    vi.stubGlobal("fetch", fetchMock);
-
-    await flushVotes();
-
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(reRegisterEpochKey).not.toHaveBeenCalled();
-    expect(deleteById).toHaveBeenCalledWith(24);
-  });
-});
-
-describe("flushOwnedVotesForSignOut", () => {
-  it("sends the signed-in account's queued vote before the session ends", async () => {
-    vi.mocked(peekNext).mockResolvedValueOnce({ id: 7, target, reaction: "❤️", ts: 100, attempts: 0, userId: "u1" }).mockResolvedValue(undefined);
-    vi.mocked(peekNextEligible).mockResolvedValueOnce({ id: 7, target, reaction: "❤️", ts: 100, attempts: 0, userId: "u1" }).mockResolvedValue(undefined);
-    const fetchMock = stubFetchJson(200, { accepted: true });
-
-    await flushOwnedVotesForSignOut();
-
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(deleteById).toHaveBeenCalledWith(7);
-  });
-
-  it("leaves a vote owned by a different account untouched", async () => {
-    vi.mocked(peekNext).mockResolvedValue({ id: 11, target, reaction: "❤️", ts: 100, attempts: 0, userId: "u-old" });
-    const fetchMock = vi.fn();
-    vi.stubGlobal("fetch", fetchMock);
-
-    await flushOwnedVotesForSignOut();
-
-    expect(fetchMock).not.toHaveBeenCalled();
-    expect(deleteById).not.toHaveBeenCalled();
-  });
-});
-
-describe("fetchCount", () => {
-  it("anonymous: one GET to /reactions/count, no /reactions/mine", async () => {
-    vi.mocked(getAuth).mockResolvedValue(null);
-    const fetchMock = vi.fn(async (_url: string) => new Response(JSON.stringify({ counts: { "👍": 3 }, total: 3, loaded: 1, hasMore: false }), { status: 200 }));
-    vi.stubGlobal("fetch", fetchMock);
-
-    const data = await fetchCount(target, 6);
-
-    expect(data).toMatchObject({ counts: { "👍": 3 }, total: 3, myReaction: null });
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    const url = fetchMock.mock.calls[0]![0];
-    expect(url).toContain("/reactions/count?t=");
-    expect(url).not.toContain("/reactions/mine");
-    // Reads bypass the browser HTTP cache so a stale response can't resurface
-    // counts the user already changed.
-    const [, init] = lastFetchCall(fetchMock);
-    expect(init.cache).toBe("no-store");
-  });
-
-  // Every authed count read fans out to /reactions/mine AND the count endpoint. Only the two
-  // response bodies differ per case, so the routing lives here once and each case below
-  // states just its payloads.
-  const stubMineAndCount = (reactions: Record<string, unknown>, counts: object) => vi.fn(async (url: string) => new Response(JSON.stringify(url.includes("/reactions/mine") ? { reactions } : counts), { status: 200 }));
-
-  it("authed: merges myReaction from /reactions/mine", async () => {
-    vi.mocked(getAuth).mockResolvedValue({ token: "tok", userId: "u" } as never);
-    // The wire key is the `site/targetId` token the request sent; `targetKey()` keeps
-    // its own `site:targetId` shape for local storage (api-read.ts wireTargetToken).
-    const key = `${target.site}/${target.targetId}`;
-    const fetchMock = stubMineAndCount({ [key]: "❤️" }, { counts: { "❤️": 1 }, total: 1, loaded: 1, hasMore: false });
-    vi.stubGlobal("fetch", fetchMock);
-
-    const read = fetchCount(target, 6);
-    await vi.advanceTimersByTimeAsync(MINE_BATCH_WINDOW_MS);
-    const data = await read;
-
-    expect(data.myReaction).toBe("❤️");
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-  });
-
-  it("collects the own-reaction reads of one mount burst into a single /reactions/mine", async () => {
-    // A feed mounts a screenful of triggers at once; /reactions/mine answers for
-    // every target in one call, so the burst must not spend one request per trigger.
-    vi.mocked(getAuth).mockResolvedValue({ token: "tok", userId: "u" } as never);
-    const second: TargetRef = { ...target, targetId: "2", url: "https://www.facebook.com/zuck/posts/2" };
-    const fetchMock = stubMineAndCount({ [`${target.site}/1`]: "❤️", [`${target.site}/2`]: "🔥" }, { counts: {}, total: 0, loaded: 0, hasMore: false });
-    vi.stubGlobal("fetch", fetchMock);
-
-    const reads = Promise.all([fetchCount(target, 6), fetchCount(second, 6)]);
-    await vi.advanceTimersByTimeAsync(MINE_BATCH_WINDOW_MS);
-    const [first, other] = await reads;
-
-    expect(first?.myReaction).toBe("❤️");
-    expect(other?.myReaction).toBe("🔥");
-    const mineCalls = fetchMock.mock.calls.filter((call) => String(call[0]).includes("/reactions/mine"));
-    expect(mineCalls).toHaveLength(1);
-    expect(mineCalls[0]?.[0]).toContain("t=facebook%2F1&t=facebook%2F2");
-  });
-
-  it("dedups concurrent reads of the same target into one request", async () => {
-    vi.mocked(getAuth).mockResolvedValue(null);
-    let calls = 0;
-    const fetchMock = vi.fn(async (..._args: Parameters<typeof fetch>) => {
-      calls++;
-      return new Response(JSON.stringify({ counts: {}, total: 0, loaded: 0, hasMore: false }), { status: 200 });
-    });
-    vi.stubGlobal("fetch", fetchMock);
-
-    const [a, b] = await Promise.all([fetchCount(target, 6), fetchCount(target, 6)]);
-
-    expect(calls).toBe(1);
-    expect(a).toEqual(b);
-  });
-
-  it("bypasses the browser cache on BOTH the count and mine reads (no-store)", async () => {
-    vi.mocked(getAuth).mockResolvedValue({ token: "tok", userId: "u" } as never);
-    const key = `${target.site}/${target.targetId}`;
-    const fetchMock = stubMineAndCount({ [key]: "❤️" }, { counts: { "❤️": 1 }, total: 1, loaded: 1, hasMore: false });
-    vi.stubGlobal("fetch", fetchMock);
-
-    const read = fetchCount(target, 6);
-    await vi.advanceTimersByTimeAsync(MINE_BATCH_WINDOW_MS);
-    await read;
-
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    for (const call of fetchMock.mock.calls) {
-      const init = (call as unknown as [string, RequestInit])[1];
-      expect(init.cache, `${call[0]} must be no-store`).toBe("no-store");
+      const hold = await getFlushState();
+      expect(hold.reason).toBe(reason);
+      expect(hold.nextAttemptAt).toBeGreaterThan(Date.now());
+      expect(q.rows.size).toBe(1);
+      vi.setSystemTime(hold.nextAttemptAt + 1);
     }
   });
 
-  it("holds the counts body to its contract: junk entries dropped, extra fields shed", async () => {
-    vi.mocked(getAuth).mockResolvedValue(null);
-    const oversized = "x".repeat(REACTION_BYTES_MAX + 1);
-    const body = { counts: { "👍": 3, [oversized]: 5, "❤️": -1, "🔥": "9" }, total: 3, loaded: 1, hasMore: false, junk: true };
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => new Response(JSON.stringify(body), { status: 200 })),
-    );
-
-    const data = await fetchCount(target, 6);
-
-    expect(data).toEqual({ counts: { "👍": 3 }, total: 3, loaded: 1, hasMore: false, myReaction: null });
+  it("backs one record off on a 5xx without holding the others", async () => {
+    api([{ status: 500 }]);
+    await click("👍", null);
+    await flushVotes();
+    const row = [...q.rows.values()][0] as StoredVote;
+    expect(row.attempts).toBe(1);
+    expect(row.nextAttemptAt).toBeGreaterThan(Date.now());
+    expect((await getFlushState()).nextAttemptAt).toBe(0);
   });
 
-  it("normalizes padded emoji from the response the way the message guard does", async () => {
-    vi.mocked(getAuth).mockResolvedValue({ token: "tok", userId: "u" } as never);
-    const key = `${target.site}/${target.targetId}`;
-    const fetchMock = stubMineAndCount({ [key]: " 👍 " }, { counts: { " ❤️ ": 2 }, total: 2, loaded: 1, hasMore: false });
-    vi.stubGlobal("fetch", fetchMock);
+  it("drops another account's records and rolls back a record older than a day", async () => {
+    const { calls } = api([]);
+    await click("👍", null);
+    (session.auth as Record<string, unknown>).userId = "test:other";
+    await flushVotes();
+    expect(calls).toHaveLength(0);
+    expect(q.rows.size).toBe(0);
 
-    const read = fetchCount(target, 6);
-    await vi.advanceTimersByTimeAsync(MINE_BATCH_WINDOW_MS);
-    const data = await read;
-
-    expect(data).toEqual({ counts: { "❤️": 2 }, total: 2, loaded: 1, hasMore: false, myReaction: "👍" });
+    (session.auth as Record<string, unknown>).userId = "test:pk";
+    own.set("khasky/emojery", "👍");
+    await click("👍", null);
+    vi.setSystemTime(Date.now() + 25 * 3_600_000);
+    await flushVotes();
+    expect(calls).toHaveLength(0);
+    expect(q.rows.size).toBe(0);
+    expect(own.get("khasky/emojery")).toBeNull();
   });
 
-  it("caps the counts breakdown at the requested limit", async () => {
-    vi.mocked(getAuth).mockResolvedValue(null);
-    const emojis = ["😀", "😁", "😂", "🤣", "😃", "😄", "😅", "😆"];
-    const counts = Object.fromEntries(emojis.map((emoji, i) => [emoji, i + 1]));
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => new Response(JSON.stringify({ counts, total: 36, loaded: 8, hasMore: false }), { status: 200 })),
-    );
-
-    const data = await fetchCount(target, 6);
-
-    expect(Object.keys(data.counts)).toEqual(emojis.slice(0, 6));
-    // `loaded` counts the entries that survived the cap. The response said 8, and a
-    // number that disagrees with the map beside it is what nothing reading the field
-    // would ever surface.
-    expect(data.loaded).toBe(6);
-  });
-
-  it("rejects a counts body whose top-level shape breaks the contract", async () => {
-    vi.mocked(getAuth).mockResolvedValue(null);
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => new Response(JSON.stringify({ counts: [], total: "3" }), { status: 200 })),
-    );
-
-    await expect(fetchCount(target, 6)).rejects.toThrow("malformed counts response");
-  });
-
-  it("still reads a counts body that omits the two fields nothing renders", async () => {
-    vi.mocked(getAuth).mockResolvedValue(null);
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => new Response(JSON.stringify({ counts: { "👍": 3 }, total: 3 }), { status: 200 })),
-    );
-
-    const data = await fetchCount(target, 6);
-
-    expect(data).toEqual({ counts: { "👍": 3 }, total: 3, loaded: 1, hasMore: false, myReaction: null });
-  });
-
-  it("drops a junk own-reaction value instead of surfacing it as myReaction", async () => {
-    vi.mocked(getAuth).mockResolvedValue({ token: "tok", userId: "u" } as never);
-    const key = `${target.site}/${target.targetId}`;
-    const fetchMock = stubMineAndCount({ [key]: 42, "facebook:unrequested": "🔥" }, { counts: {}, total: 0, loaded: 0, hasMore: false });
-    vi.stubGlobal("fetch", fetchMock);
-
-    const read = fetchCount(target, 6);
-    await vi.advanceTimersByTimeAsync(MINE_BATCH_WINDOW_MS);
-    const data = await read;
-
-    expect(data.myReaction).toBeNull();
-  });
-
-  it("rejects a non-ok count read instead of resolving a stale body", async () => {
-    // A non-ok /count surfaces as a failed read, never a silently-served stale
-    // (long-removed reactions resurfacing). `Retry-After` past the retry cap
-    // means the server wants a longer pause than a page read can wait for, so
-    // this rejects on the first response instead of coming back early.
-    vi.mocked(getAuth).mockResolvedValue(null);
-    const fetchMock = vi.fn(async () => new Response("rate limited", { status: 429, headers: { "retry-after": "600" } }));
-    vi.stubGlobal("fetch", fetchMock);
-
-    await expect(fetchCount(target, 6)).rejects.toThrow("http 429");
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-  });
-
-  it("retries a transient count read once and resolves the retry's body", async () => {
-    vi.mocked(getAuth).mockResolvedValue(null);
-    let attempt = 0;
-    const fetchMock = vi.fn(async () => {
-      attempt++;
-      if (attempt === 1) return new Response("busy", { status: 503 });
-      return new Response(JSON.stringify({ counts: { "👍": 2 }, total: 2, loaded: 1, hasMore: false }), { status: 200 });
-    });
-    vi.stubGlobal("fetch", fetchMock);
-
-    const read = fetchCount(target, 6);
-    await vi.advanceTimersByTimeAsync(500);
-
-    await expect(read).resolves.toMatchObject({ total: 2 });
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-  });
-
-  it("spends one deadline across both count attempts, not one per attempt", async () => {
-    // The page gives up on the round trip after RUNTIME_MESSAGE_TIMEOUT_MS. A deadline
-    // per attempt lets the retry outlast that: an error in the trigger, then counts
-    // written for nobody.
-    vi.mocked(getAuth).mockResolvedValue(null);
-    let attempt = 0;
-    const fetchMock = vi.fn(async (..._args: Parameters<typeof fetch>) => {
-      attempt++;
-      if (attempt === 1) return new Response("busy", { status: 503 });
-      return new Response(JSON.stringify({ counts: {}, total: 0, loaded: 0, hasMore: false }), { status: 200 });
-    });
-    vi.stubGlobal("fetch", fetchMock);
-
-    const read = fetchCount(target, 6);
-    await vi.advanceTimersByTimeAsync(500);
-    await read;
-
-    const [first, second] = fetchMock.mock.calls.map((call) => call[1]?.signal);
-    expect(first).toBeInstanceOf(AbortSignal);
-    expect(second).toBe(first);
-  });
-
-  it("does not re-fetch a target whose read just failed (negative cache)", async () => {
-    // Outage behavior: feed rescans re-request every visible target; a failed
-    // read must short-circuit for its TTL instead of re-issuing the same failing
-    // request once per rebuilt mount.
-    vi.mocked(getAuth).mockResolvedValue(null);
-    const fetchMock = vi.fn(async () => new Response("nope", { status: 404 }));
-    vi.stubGlobal("fetch", fetchMock);
-
-    await expect(fetchCount(target, 6)).rejects.toThrow("http 404");
-    await expect(fetchCount(target, 6)).rejects.toThrow("http 404");
-
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-  });
-
-  it("classifies a rejected read so the popup can tell rate-limited from offline", async () => {
-    expect(apiErrorCode(new ApiHttpError(429))).toBe("rate_limited");
-    expect(apiErrorCode(new ApiHttpError(503))).toBe("server");
-    expect(apiErrorCode(new ApiHttpError(404))).toBe("unavailable");
-    expect(apiErrorCode(new TypeError("Failed to fetch"))).toBe("network");
-  });
-
-  it("sends nothing more after clearPendingMineBatch, and settles the read it cancelled", async () => {
-    vi.mocked(getAuth).mockResolvedValue({ token: "tok", userId: "u" } as never);
-    const fetchMock = vi.fn(async (..._args: Parameters<typeof fetch>) => new Response(JSON.stringify({ counts: {}, total: 0, loaded: 0, hasMore: false }), { status: 200 }));
-    vi.stubGlobal("fetch", fetchMock);
-
-    const read = fetchCount(target, 6);
-    // The count read going out means the /reactions/mine batch is open behind it
-    // (fetchTargetCountsAndOwnReaction starts both in the same tick). Poll every
-    // 1ms, not the waitFor default of 50ms: that overshoots MINE_BATCH_WINDOW_MS, so a slower poll
-    // lets it flush on its own and the reset under test is never exercised.
-    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalled(), { interval: 1, timeout: 1_000 });
-    clearPendingMineBatch();
-    // Well past the window: a timer the cancel failed to clear would have fired by now.
-    await vi.advanceTimersByTimeAsync(MINE_BATCH_WINDOW_MS * 4);
-
-    expect(fetchMock.mock.calls.filter((call) => String(call[0]).includes("/reactions/mine"))).toHaveLength(0);
-    // A cancelled batch costs the "you reacted" marker and nothing else: the read still
-    // settles, frees its slot, and the target stays readable.
-    await expect(read).resolves.toMatchObject({ total: 0, myReaction: null });
+  it("refuses a click when no one is signed in", async () => {
+    session.auth = null;
+    expect(await click("👍", null)).toBe(false);
+    expect(q.rows.size).toBe(0);
   });
 });

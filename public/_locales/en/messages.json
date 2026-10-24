@@ -119,14 +119,6 @@
     "message": "Reset to defaults",
     "description": "Button restoring the default sentiment lists."
   },
-  "settingAnalyticsConsent": {
-    "message": "Community insights",
-    "description": "Label for the popup toggle controlling whether reactions carry coarse context (country, language) for aggregate community views."
-  },
-  "settingAnalyticsConsentHint": {
-    "message": "Let my reactions count in regional breakdowns",
-    "description": "Helper text below the community-insights toggle; the exact fields are listed in the privacy policy."
-  },
   "sectionPerSite": {
     "message": "Only selected sites",
     "description": "Label for the toggle that limits the picker to the sites the user selects."
@@ -655,16 +647,6 @@
     "message": "What this means",
     "description": "Link shown beside both device-limit messages (the sign-in refusal and the Account-tab notice). It opens the help article that says what the monthly key limit is, what to do while it holds, and how to reach the operator. Deliberately short: it sits at the end of a sentence that already carries the news."
   },
-  "voteDeviceLimit": {
-    "message": "Device limit for this month is reached. Voting resumes on $DATE$.",
-    "description": "Account tab notice while the account has reached its device limit for the current key epoch: every reaction is refused until the next epoch. $DATE$ is the day voting resumes, in the UI locale.",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "October 1, 2026"
-      }
-    }
-  },
   "loadError": {
     "message": "Something went wrong. Please try again.",
     "description": "Shown when the popup could not read locally stored data (history, stats, export)."
@@ -806,5 +788,15 @@
   "onboardingAllSet": {
     "message": "All set!",
     "description": "Replaces the progress label once every checklist step is ticked."
+  },
+  "voteDailyLimit": {
+    "message": "Today's reaction limit is reached. Voting resumes at $TIME$.",
+    "description": "Account tab notice while the account's votes for this UTC day are spent: every new reaction waits until the day turns. $TIME$ is when voting resumes, in the reader's local time.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "02:00"
+      }
+    }
   }
 }

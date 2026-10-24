@@ -92,8 +92,7 @@
     "postinstall": "wxt prepare"
   },
   "dependencies": {
-    "@cloudflare/blindrsa-ts": "0.4.6",
-    "@noble/ed25519": "3.2.0",
+    "@emojery/shared": "github:khasky/emojery-verifier#806c4cf4f52fac4c47c3cf4430f4b02d47f13316&path:/packages/shared",
     "emojibase-data": "^17.0.0",
     "preact": "^10.29.8"
   },

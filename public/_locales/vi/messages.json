@@ -89,12 +89,6 @@
   "sentimentReset": {
     "message": "Đặt lại mặc định"
   },
-  "settingAnalyticsConsent": {
-    "message": "Thông tin chi tiết cộng đồng"
-  },
-  "settingAnalyticsConsentHint": {
-    "message": "Tính phản ứng của tôi vào thống kê theo khu vực"
-  },
   "sectionPerSite": {
     "message": "Chỉ các trang đã chọn"
   },
@@ -516,15 +510,6 @@
     "message": "Điều này nghĩa là gì",
     "description": "Link shown beside both device-limit messages (the sign-in refusal and the Account-tab notice). It opens the help article that says what the monthly key limit is, what to do while it holds, and how to reach the operator. Deliberately short: it sits at the end of a sentence that already carries the news."
   },
-  "voteDeviceLimit": {
-    "message": "Đã đạt giới hạn thiết bị của tháng này. Bạn có thể bình chọn lại từ $DATE$.",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "October 1, 2026"
-      }
-    }
-  },
   "loadError": {
     "message": "Đã có lỗi xảy ra. Vui lòng thử lại."
   },
@@ -637,5 +622,14 @@
   },
   "onboardingAllSet": {
     "message": "Xong hết rồi!"
+  },
+  "voteDailyLimit": {
+    "message": "Đã đạt giới hạn bày tỏ cảm xúc hôm nay. Có thể bình chọn lại lúc $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "02:00"
+      }
+    }
   }
 }

@@ -89,12 +89,6 @@
   "sentimentReset": {
     "message": "Standaardwaarden herstellen"
   },
-  "settingAnalyticsConsent": {
-    "message": "Community-inzichten"
-  },
-  "settingAnalyticsConsentHint": {
-    "message": "Mijn reacties meetellen in regionale overzichten"
-  },
   "sectionPerSite": {
     "message": "Alleen geselecteerde sites"
   },
@@ -516,15 +510,6 @@
     "message": "Wat dit betekent",
     "description": "Link shown beside both device-limit messages (the sign-in refusal and the Account-tab notice). It opens the help article that says what the monthly key limit is, what to do while it holds, and how to reach the operator. Deliberately short: it sits at the end of a sentence that already carries the news."
   },
-  "voteDeviceLimit": {
-    "message": "De apparaatlimiet voor deze maand is bereikt. Stemmen kan weer vanaf $DATE$.",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "October 1, 2026"
-      }
-    }
-  },
   "loadError": {
     "message": "Er is iets misgegaan. Probeer het opnieuw."
   },
@@ -637,5 +622,14 @@
   },
   "onboardingAllSet": {
     "message": "Helemaal klaar!"
+  },
+  "voteDailyLimit": {
+    "message": "De reactielimiet voor vandaag is bereikt. Stemmen kan weer om $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "02:00"
+      }
+    }
   }
 }

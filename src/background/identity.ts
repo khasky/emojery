@@ -1,73 +1,83 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Extension-local auth session state.
+//
+// The session of a device key (design L): client-side OpenID, the device key's signature, and
+// the background registration of a new key.
+//
+// Sign-in: the extension opens the provider's authorize page itself with
+// nonce = hex(SHA-256("emojery-nonce-v1" || device pubkey || nonce salt)), takes the id_token
+// from the fragment, signs the session message with the device key and posts it to
+// /v2/auth/session. A new key answers "pending" at once: its proof runs on the server while
+// this module repeats the same request every 15 s, keeping the id_token and the salt in
+// storage.session only, until the key is enrolled or the token is about to expire.
 
+import { offeredIn } from "@emojery/shared/api";
+import { fromBase64Url, refreshMessage, retireMessage, sessionMessage, toBase64Url } from "@emojery/shared/core";
 import { forgetAccount, noteAccountSeen } from "../shared/account-names";
 import { AUTH_KEY, isAuthSessionLive } from "../shared/auth-session";
-import { API_BASE } from "../shared/config";
-import { defined } from "../shared/defined";
-import { deadlineSignal } from "../shared/fetch-deadline";
+import { INITIAL_ORIGIN, LOG_NAME, SIGN_IN_PROVIDERS } from "../shared/deployment";
 import type { SignInRefusal } from "../shared/messages";
 import { isProviderId, type OidcProvider } from "../shared/oidc-providers";
+import { randomId } from "../shared/random-id";
 import { activateAccountSettings, clearAutoNativesForUser, clearOwnReactionsForUser, SIGNED_OUT_ACCOUNT } from "../shared/storage";
-import { identityRedirectUrl, launchWebAuthFlow, storageLocalGet, storageLocalRemove, storageLocalSet, storageSessionGet, storageSessionRemove, storageSessionSet } from "../shared/webext";
-import { clearAccountKey, clearAccountKeys, ensureAccountKey, signInNonce } from "./account-keys";
-import { apiErrorString, apiRequest, isRecord, requestLanguage } from "./api-client";
+import { clearAlarm, createAlarm, identityRedirectUrl, launchWebAuthFlow, storageLocalGet, storageLocalRemove, storageLocalSet, storageSessionGet, storageSessionRemove, storageSessionSet } from "../shared/webext";
+import { apiErrorString, apiRequest, isRecord } from "./api-client";
 import { logBackgroundError } from "./debug";
-import { clearEpochKeysForUser } from "./epoch-keys";
-import { clearHistory, clearHistoryForUser } from "./history";
-import { bytesToBase64Url } from "./vote-signing";
-import { clearQueuedVotes } from "./votequeue";
-
-// The exchange registers the device's account key on a first sign-in, which the
-// API takes tens of seconds to do; the default deadline would cut it off.
-const EXCHANGE_TIMEOUT_MS = 90_000;
+import { dropDeviceKey, ensureDeviceKey, getDeviceKey, replaceDeviceKey, signWithDeviceKey } from "./device-keys";
+import { clearHistoryForUser } from "./history";
 
 export interface AuthState {
+  /** The local account: provider and device key. Device-local stores (history, settings,
+   *  own reactions) are scoped by it; the server knows no such number. */
   userId: string;
   token: string;
-  /** Seconds-epoch expiry. */
+  /** Seconds-epoch expiry of the token. */
   expiresAt: number;
-  /** The provider the account signed in with; the popup labels the account by it. */
   provider: OidcProvider;
-  /** Length of one key epoch in ms, as the API stated it at sign-in - the drain
-   *  derives the epoch number of every vote from it (background/epoch-keys.ts). */
-  epochMs: number;
+  /** The device key, base64url. */
+  pk: string;
+  /** The key's ENROLL hash and seq once it is enrolled; votes are signed with the hash. */
+  enrollHash?: string;
+  enrollSeq?: number;
+  /** The log's current origin, `<log name>/g<k>`, which every vote signs. */
+  origin: string;
 }
 
-// Every field the rest of the extension relies on, checked before the record is
-// trusted: shared/auth-session.ts reads a non-finite `expiresAt` as expired,
-// `userId` scopes the own-reaction and auto-native stores, so a missing one would
-// silently widen their lookups across accounts, and a session without `epochMs`
-// cannot sign a vote. A record the email-code builds wrote lacks the last two,
-// so it reads as signed out and the account signs in again through a provider.
+const localAccountId = (provider: string, pk: string): string => `${provider}:${pk}`;
+
 function isStoredAuthState(value: unknown): value is AuthState {
-  if (!value || typeof value !== "object") return false;
-  const record = value as Record<string, unknown>;
-  return typeof record.token === "string" && record.token.length > 0 && typeof record.userId === "string" && record.userId.length > 0 && typeof record.expiresAt === "number" && Number.isFinite(record.expiresAt) && isProviderId(record.provider) && typeof record.epochMs === "number" && record.epochMs > 0;
+  if (!isRecord(value)) return false;
+  const r = value;
+  const enrolledOk = (r.enrollHash === undefined && r.enrollSeq === undefined) || (typeof r.enrollHash === "string" && typeof r.enrollSeq === "number");
+  return typeof r.token === "string" && r.token.length > 0 && typeof r.userId === "string" && r.userId.length > 0 && typeof r.expiresAt === "number" && Number.isFinite(r.expiresAt) && isProviderId(r.provider) && typeof r.pk === "string" && typeof r.origin === "string" && enrolledOk;
 }
 
 export async function getAuth(): Promise<AuthState | null> {
-  const stored = await storageLocalGet([AUTH_KEY]);
-  const auth = stored[AUTH_KEY];
+  const auth = (await storageLocalGet([AUTH_KEY]))[AUTH_KEY];
   if (!isStoredAuthState(auth)) {
-    // A record this malformed can never be repaired into a usable session, and
-    // leaving it behind means re-reading the same garbage on every call.
+    // A record of the 1.0.0 shape (userId + epochMs) or anything malformed reads as signed out.
     if (auth !== undefined) await storageLocalRemove([AUTH_KEY]);
-    return null;
-  }
-  if (!isAuthSessionLive(auth.expiresAt)) {
-    await storageLocalRemove([AUTH_KEY]);
     return null;
   }
   return auth;
 }
 
+/** The session when its token is still valid; an expired one is refreshed first. */
+export async function getLiveAuth(): Promise<AuthState | null> {
+  const auth = await getAuth();
+  if (!auth) return null;
+  if (isAuthSessionLive(auth.expiresAt)) return auth;
+  return (await refreshSession(auth)) ? getAuth() : null;
+}
+
 async function setAuth(auth: AuthState): Promise<void> {
   await storageLocalSet({ [AUTH_KEY]: auth });
-  // Settings belong to the account, so the session and the settings move together
-  // (shared/settings.ts). Failing here must not fail a sign-in that has otherwise
-  // succeeded: the reader would be left signed out of an account the server made.
   await activateAccountSettings(auth.userId).catch((error: unknown) => logBackgroundError("setAuth.activateAccountSettings", error));
+}
+
+/** A new origin, already checked against the log's signed rewind record (origin-switch.ts). */
+export async function setAuthOrigin(origin: string): Promise<void> {
+  const auth = await getAuth();
+  if (auth) await setAuth({ ...auth, origin });
 }
 
 export async function clearAuth(): Promise<void> {
@@ -75,62 +85,54 @@ export async function clearAuth(): Promise<void> {
   await activateAccountSettings(SIGNED_OUT_ACCOUNT).catch((error: unknown) => logBackgroundError("clearAuth.activateAccountSettings", error));
 }
 
+// ---- sign-in -------------------------------------------------------------------------------
+
 export type SignInResult = { ok: true } | { ok: false; refusal: SignInRefusal };
 
-// What the API's `#error=` fragment becomes on screen. The API's `error` string
-// is a machine diagnostic that stays in the background's request log; the ones
-// matched below are the refusals whose copy differs from the generic one.
-const CALLBACK_REFUSALS: Record<string, SignInRefusal> = {
-  access_denied: "provider_denied",
-  oidc_upstream_failed: "provider_denied",
-  oidc_token_invalid: "provider_denied",
-  enroll_unavailable: "enrollment_failed",
-};
+/** The providers this build offers, in the table's order; none can be asked for a chooser
+ *  the table does not name. Apple needs its return page, served by the API; until a build
+ *  can use it, a provider with a web return address is not offered. */
+export async function listSignInProviders(): Promise<{ providers: OidcProvider[]; chooser: OidcProvider[] }> {
+  const rows = offeredIn(SIGN_IN_PROVIDERS).filter((p) => !p.redirectUri);
+  const providers = rows.map((p) => p.id);
+  return { providers, chooser: providers.filter((id) => id === "google" || id === "microsoft") };
+}
 
-// The same for a refused exchange, keyed by `status error`. The status is part of
-// the key so an error string is never trusted on a status it does not belong to.
-const EXCHANGE_REFUSALS: Record<string, SignInRefusal> = {
-  "403 client_outdated": "client_outdated",
-  "409 epoch_key_limit": "device_limit",
-  "503 enroll_unavailable": "enrollment_failed",
-};
+async function sha256(bytes: Uint8Array): Promise<Uint8Array> {
+  return new Uint8Array(await crypto.subtle.digest("SHA-256", bytes as BufferSource));
+}
 
-// The identity window rejects with a message rather than a code. A closed window
-// (Chrome: "The user did not approve access.", Firefox: "User cancelled or denied
-// access.") is the user's choice; anything else is the flow failing to run.
+const hex = (b: Uint8Array): string => Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
+const utf8 = (s: string): Uint8Array => new TextEncoder().encode(s);
+
+async function signInNonce(pubkey: Uint8Array, nonceSalt: Uint8Array): Promise<string> {
+  const msg = new Uint8Array(16 + 32 + 32);
+  msg.set(utf8("emojery-nonce-v1"), 0);
+  msg.set(pubkey, 16);
+  msg.set(nonceSalt, 48);
+  return hex(await sha256(msg));
+}
+
+// The identity window rejects with a message rather than a code: a closed window is the
+// user's choice, anything else is the flow failing to run.
 function launchRefusal(error: unknown): SignInRefusal {
   const message = error instanceof Error ? error.message : String(error);
   return /approve|cancel|denied|closed/i.test(message) ? "cancelled" : "unavailable";
 }
 
-// The `#code=` / `#error=` fragment the API redirects the identity window to.
-function parseCallbackFragment(responseUrl: string): { code: string } | { error: string } {
-  let params: URLSearchParams;
-  try {
-    params = new URLSearchParams(new URL(responseUrl).hash.replace(/^#/, ""));
-  } catch {
-    return { error: "malformed_callback" };
-  }
-  const code = params.get("code");
-  if (code) return { code };
-  return { error: params.get("error") || "malformed_callback" };
-}
+// What a refused /v2/auth/session becomes on screen, keyed by `status error`.
+const SESSION_REFUSALS: Record<string, SignInRefusal> = {
+  "401 bad_token": "provider_denied",
+  "403 token_unsupported": "provider_denied",
+  "403 account_type_unsupported": "provider_denied",
+  "403 account_restricted": "provider_denied",
+  "403 provider_paused": "unavailable",
+  "429 too_many_keys": "device_limit",
+  "409 key_failed": "enrollment_failed",
+};
 
-// One flow per (provider, chooser) at a time. Two auth tabs are one click each from
-// asking for the same sign-in twice, and each ask opens its own provider window for an
-// answer that is already settled: the account key is shared, so by the time the second
-// call lands the pair is registered and it can only re-ask the same question. Joining
-// the calls costs the second caller nothing: the answer it waits for is the answer it
-// asked for.
-//
-// Keyed by the chooser flag too, so "use a different account" is never silently served
-// the plain sign-in's result - that one carries the intent to pick, and a live provider
-// session would otherwise swallow it.
 const signInFlows = new Map<string, Promise<SignInResult>>();
 
-// Carries no AuthState: the session (bearer token included) is already persisted
-// via setAuth and read back through getAuth, so returning it would only widen the
-// credential's exposure surface.
 export function signInWithProvider(provider: OidcProvider, chooser = false): Promise<SignInResult> {
   const key = `${provider}|${chooser}`;
   const running = signInFlows.get(key);
@@ -140,73 +142,192 @@ export function signInWithProvider(provider: OidcProvider, chooser = false): Pro
   return flow;
 }
 
+/** The pending registration: the request repeated until the key is enrolled. Session storage
+ *  only - never written to disk - and dropped once the key is enrolled or failed. */
+const ENROLL_PENDING_KEY = "enroll_pending_v2";
+export const ENROLL_RETRY_ALARM = "enroll-retry";
+const ENROLL_RETRY_MS = 15_000;
+
+interface EnrollPending {
+  provider: string;
+  idToken: string;
+  nonceSalt: string;
+  sig: string;
+  pk: string;
+  /** The id_token's exp, seconds: the retries stop 30 s before it. */
+  tokenExp: number;
+}
+
+function idTokenExp(idToken: string): number {
+  try {
+    const payload = JSON.parse(new TextDecoder().decode(fromBase64Url(idToken.split(".")[1] ?? ""))) as { exp?: unknown };
+    return typeof payload.exp === "number" ? payload.exp : 0;
+  } catch {
+    return 0;
+  }
+}
+
 async function runSignIn(provider: OidcProvider, chooser: boolean): Promise<SignInResult> {
+  const row = offeredIn(SIGN_IN_PROVIDERS).find((p) => p.id === provider && !p.redirectUri);
   const redirect = identityRedirectUrl();
-  if (!redirect) return { ok: false, refusal: "unavailable" };
-  // The nonce the provider signs into its token commits to this device's account
-  // key; the key and the salt behind it reach the API only with the exchange,
-  // after the provider has already answered, so the API cannot swap the key.
-  const accountKey = await ensureAccountKey(provider);
+  if (!row || !redirect) return { ok: false, refusal: "unavailable" };
+  const key = await ensureDeviceKey(provider);
   const nonceSalt = crypto.getRandomValues(new Uint8Array(32));
-  const nonce = await signInNonce(accountKey.publicKey, nonceSalt);
-  // Absent unless the reader asked to pick an account: a provider holding a live
-  // session returns it without a screen, which is what the plain button is for.
-  const startUrl = `${API_BASE}/auth/oidc/start?provider=${encodeURIComponent(provider)}&redirect=${encodeURIComponent(redirect)}&nonce=${nonce}${chooser ? "&chooser=1" : ""}`;
+  const state = randomId();
+  const params = new URLSearchParams({ client_id: row.clientId, response_type: row.responseType, redirect_uri: redirect, nonce: await signInNonce(key.publicKey, nonceSalt), state });
+  if (row.scope) params.set("scope", row.scope);
+  if (row.responseMode) params.set("response_mode", row.responseMode);
+  if (chooser) params.set("prompt", "select_account");
 
   let responseUrl: string | null;
   try {
-    responseUrl = await launchWebAuthFlow(startUrl);
+    responseUrl = await launchWebAuthFlow(`${row.authorize}?${params}`);
   } catch (error) {
     return { ok: false, refusal: launchRefusal(error) };
   }
   if (!responseUrl) return { ok: false, refusal: "cancelled" };
+  const fragment = new URLSearchParams(new URL(responseUrl).hash.replace(/^#/, ""));
+  const idToken = fragment.get("id_token");
+  if (fragment.get("state") !== state || !idToken) return { ok: false, refusal: fragment.get("error") ? "provider_denied" : "unavailable" };
 
-  const callback = parseCallbackFragment(responseUrl);
-  if ("error" in callback) return { ok: false, refusal: CALLBACK_REFUSALS[callback.error] ?? "unavailable" };
+  const sig = await signWithDeviceKey(provider, sessionMessage(LOG_NAME, nonceSalt, await sha256(utf8(idToken))));
+  const pending: EnrollPending = { provider, idToken, nonceSalt: toBase64Url(nonceSalt), sig: toBase64Url(sig), pk: toBase64Url(key.publicKey), tokenExp: idTokenExp(idToken) };
+  return postSession(pending, true);
+}
 
-  const reply = await apiRequest("/auth/oidc/exchange", {
-    method: "POST",
-    lang: requestLanguage(),
-    body: { code: callback.code, accountPubkey: bytesToBase64Url(accountKey.publicKey), nonceSalt: bytesToBase64Url(nonceSalt) },
-    ...defined({ signal: deadlineSignal(EXCHANGE_TIMEOUT_MS) }),
-  });
-  if (!reply.ok) return { ok: false, refusal: EXCHANGE_REFUSALS[`${reply.status} ${apiErrorString(reply.body)}`] ?? "unavailable" };
-  // The wire field is `expiresAtSec` (seconds). The stored AuthState keeps its own
-  // `expiresAt` name (documented as seconds).
-  const session = reply.body;
-  if (!isRecord(session) || typeof session.userId !== "string" || !session.userId || typeof session.token !== "string" || !session.token || typeof session.expiresAtSec !== "number" || !Number.isFinite(session.expiresAtSec) || typeof session.epochMs !== "number" || !(session.epochMs > 0)) {
-    // A 2xx without a usable session is a contract break, not a refused code.
-    logBackgroundError("signInWithProvider.session", new Error("malformed session body"));
+/** One /v2/auth/session call; stores the session it answers and keeps or drops the pending
+ *  registration accordingly. */
+async function postSession(p: EnrollPending, firstCall: boolean): Promise<SignInResult> {
+  const reply = await apiRequest("/v2/auth/session", { method: "POST", body: { provider: p.provider, idToken: p.idToken, accountPubkey: p.pk, nonceSalt: p.nonceSalt, sig: p.sig } });
+  if (!reply.ok) {
+    const error = apiErrorString(reply.body);
+    if (reply.status === 409 && error === "key_in_use") {
+      // Our key sits under another live account: a fresh key and a new sign-in.
+      await replaceDeviceKey(p.provider);
+    }
+    if (!firstCall && (reply.status >= 500 || reply.status === 429)) {
+      scheduleEnrollRetry(reply.retryAfterSeconds);
+      return { ok: false, refusal: "unavailable" };
+    }
+    await dropPendingEnroll();
+    if (error === "key_failed") await replaceDeviceKey(p.provider);
+    return { ok: false, refusal: SESSION_REFUSALS[`${reply.status} ${error}`] ?? "unavailable" };
+  }
+  const s = reply.body;
+  if (!isRecord(s) || typeof s.accessToken !== "string" || typeof s.expiresAt !== "number" || typeof s.origin !== "string" || !isRecord(s.enroll)) {
+    logBackgroundError("postSession", new Error("malformed session body"));
     return { ok: false, refusal: "unavailable" };
   }
-  await setAuth({ userId: session.userId, token: session.token, expiresAt: session.expiresAtSec, provider, epochMs: session.epochMs });
-  // Remembered for the sign-in page, which runs before any account is known and is
-  // exactly where a reader with two accounts at one provider needs the hint. A
-  // failure here costs a hint, never the sign-in.
-  await noteAccountSeen(provider, session.userId).catch((error: unknown) => logBackgroundError("signInWithProvider.noteAccountSeen", error));
+  const enrolled = s.enroll.state === "enrolled" && typeof s.enrollHash === "string" && typeof s.enroll.seq === "number";
+  const auth: AuthState = {
+    userId: localAccountId(p.provider, p.pk),
+    token: s.accessToken,
+    expiresAt: s.expiresAt,
+    provider: p.provider,
+    pk: p.pk,
+    origin: s.origin,
+    ...(enrolled ? { enrollHash: s.enrollHash as string, enrollSeq: s.enroll.seq as number } : {}),
+  };
+  await setAuth(auth);
+  await noteAccountSeen(p.provider, auth.userId).catch((error: unknown) => logBackgroundError("postSession.noteAccountSeen", error));
+  if (enrolled) {
+    await dropPendingEnroll();
+    onEnrolled?.();
+  } else {
+    await storageSessionSet({ [ENROLL_PENDING_KEY]: p });
+    scheduleEnrollRetry();
+  }
   return { ok: true };
 }
 
-// The providers the API offers this build, in the order the page shows them, and
-// which of them can be asked for a different account. An unreadable list rejects:
-// the page has nothing to render without it. A build talking to an API that
-// predates `chooser` reads an empty set and offers the control nowhere.
-export async function listSignInProviders(): Promise<{ providers: OidcProvider[]; chooser: OidcProvider[] }> {
-  const reply = await apiRequest("/auth/oidc/providers", { method: "GET", cache: "no-store" });
-  if (!reply.ok || !isRecord(reply.body) || !Array.isArray(reply.body.providers)) throw new Error(`providers list unavailable: http ${reply.status}`);
-  const chooser = Array.isArray(reply.body.chooser) ? reply.body.chooser.filter(isProviderId) : [];
-  return { providers: reply.body.providers.filter(isProviderId), chooser };
+/** Called once a key becomes enrolled: the vote queue sends what it held. */
+let onEnrolled: (() => void) | null = null;
+export function setOnEnrolled(fn: () => void): void {
+  onEnrolled = fn;
 }
 
-// End this account's session server-side; clearing the local token alone does not.
-//
-// The caller clears local state regardless of the answer: a sign-out that fails
-// when the network is down would strand the user signed in.
-// `keepalive` so the request survives the popup closing right after the click.
+let enrollTimer = 0;
+function scheduleEnrollRetry(retryAfterSeconds?: number): void {
+  const delay = Math.max(ENROLL_RETRY_MS, (retryAfterSeconds ?? 0) * 1000);
+  if (!enrollTimer) {
+    enrollTimer = self.setTimeout(() => {
+      enrollTimer = 0;
+      void resumeEnrollment().catch((error: unknown) => logBackgroundError("resumeEnrollment", error));
+    }, delay);
+  }
+  // The worker may sleep before the timer fires; the alarm brings it back.
+  createAlarm(ENROLL_RETRY_ALARM, { delayInMinutes: 0.5, periodInMinutes: 0.5 });
+}
+
+async function dropPendingEnroll(): Promise<void> {
+  await storageSessionRemove([ENROLL_PENDING_KEY]);
+  clearAlarm(ENROLL_RETRY_ALARM);
+}
+
+/** One retry of a pending registration; nothing to do when none is pending. */
+export async function resumeEnrollment(): Promise<void> {
+  const p = (await storageSessionGet([ENROLL_PENDING_KEY]))[ENROLL_PENDING_KEY] as EnrollPending | undefined;
+  if (!p) {
+    clearAlarm(ENROLL_RETRY_ALARM);
+    return;
+  }
+  // Past the token's exp less 30 s the server would refuse it: a new sign-in, same key.
+  if (p.tokenExp && Date.now() / 1000 > p.tokenExp - 30) {
+    await dropPendingEnroll();
+    return;
+  }
+  await postSession(p, false);
+}
+
+// ---- the session of a signed-in key ---------------------------------------------------------
+
+/** GET /v2/auth/me: the key's state; a token with eh when the key became enrolled. */
+export async function readMe(): Promise<{ state: "pending" | "enrolled" | "failed" } | null> {
+  const auth = await getLiveAuth();
+  if (!auth) return null;
+  const reply = await apiRequest("/v2/auth/me", { method: "GET", token: auth.token, cache: "no-store" });
+  if (reply.status === 401) {
+    const error = apiErrorString(reply.body);
+    if (error === "account_deleted") await clearLocalAccount(auth);
+    else await clearAuth();
+    return null;
+  }
+  if (!reply.ok || !isRecord(reply.body) || !isRecord(reply.body.enroll)) return null;
+  const me = reply.body;
+  const enroll = reply.body.enroll;
+  const state = enroll.state === "enrolled" ? "enrolled" : enroll.state === "failed" ? "failed" : "pending";
+  const next: AuthState = { ...auth, ...(typeof me.origin === "string" ? { origin: me.origin } : {}) };
+  if (typeof me.accessToken === "string" && typeof me.enrollHash === "string" && typeof enroll.seq === "number") {
+    next.token = me.accessToken;
+    next.enrollHash = me.enrollHash;
+    next.enrollSeq = enroll.seq;
+  }
+  await setAuth(next);
+  if (state === "enrolled" && auth.enrollHash === undefined) onEnrolled?.();
+  return { state };
+}
+
+/** POST /v2/auth/refresh, signed by the device key over the presented token's exp. */
+export async function refreshSession(auth: AuthState): Promise<boolean> {
+  try {
+    const sig = await signWithDeviceKey(auth.provider, refreshMessage(LOG_NAME, auth.expiresAt));
+    const reply = await apiRequest("/v2/auth/refresh", { method: "POST", token: auth.token, body: { sig: toBase64Url(sig) } });
+    if (!reply.ok || !isRecord(reply.body) || typeof reply.body.accessToken !== "string" || typeof reply.body.expiresAt !== "number") {
+      if (reply.status === 401) await clearAuth();
+      return false;
+    }
+    await setAuth({ ...auth, token: reply.body.accessToken, expiresAt: reply.body.expiresAt });
+    return true;
+  } catch (error) {
+    logBackgroundError("refreshSession", error);
+    return false;
+  }
+}
+
+// Ends this device's session server-side; the caller clears local state whatever the answer.
 export async function revokeSessionServerSide(token: string): Promise<boolean> {
   try {
-    const reply = await apiRequest("/auth/logout", { method: "POST", token, lang: requestLanguage(), keepalive: true });
-    // 401 means the server already considers it dead - the goal either way.
+    const reply = await apiRequest("/v2/auth/logout", { method: "POST", token, keepalive: true });
     return reply.ok || reply.status === 401;
   } catch (error) {
     logBackgroundError("revokeSessionServerSide", error);
@@ -214,116 +335,62 @@ export async function revokeSessionServerSide(token: string): Promise<boolean> {
   }
 }
 
+// ---- deletion ----------------------------------------------------------------------------
+
+// Kept until the server answers 401 account_deleted: a deletion the server has not yet
+// taken is repeated at the next start, signed in again if need be.
 const DELETION_PENDING_KEY = "deletion_pending_v1";
 
 interface DeletionPending {
-  token: string;
-  /** Account the deletion belongs to, so the local wipe stays scoped to it.
-   *  Absent on a marker written before this field existed - see
-   *  clearLocalAccountStateAfterDeletion. */
-  userId?: string;
-  /** The provider the account signed in with, naming the account key to drop.
-   *  Absent on a marker written before this field existed. */
-  provider?: OidcProvider;
-  /** The token's own seconds-epoch expiry, copied from AuthState. This record is
-   *  the one place a bearer token outlives clearAuth(), so a marker whose token has
-   *  already expired is dropped rather than kept around. Absent on a marker written
-   *  before this field existed - those keep the old open-ended behavior rather than
-   *  being dropped on sight. */
-  expiresAt?: number;
+  provider: string;
+  pk: string;
 }
 
-async function setDeletionPending(token: string, userId: string, provider: OidcProvider, expiresAt: number): Promise<void> {
-  await storageSessionSet({ [DELETION_PENDING_KEY]: { token, userId, provider, expiresAt } satisfies DeletionPending });
-}
-
-async function getDeletionPending(): Promise<DeletionPending | null> {
-  // The marker lives in storage.session (trusted contexts only). A copy written by
-  // an older version may still sit in storage.local, so fall back to it - an
-  // interrupted deletion still resumes, and clearPendingDeletion below sweeps both.
-  const stored = await storageSessionGet([DELETION_PENDING_KEY]);
-  let pending = stored[DELETION_PENDING_KEY] as DeletionPending | undefined;
-  if (!pending) {
-    const legacy = await storageLocalGet([DELETION_PENDING_KEY]);
-    pending = legacy[DELETION_PENDING_KEY] as DeletionPending | undefined;
-  }
-  if (!pending || typeof pending.token !== "string") return null;
-  if (typeof pending.expiresAt === "number" && !isAuthSessionLive(pending.expiresAt)) {
-    // Past its expiry the token can no longer authenticate the retry this marker
-    // exists for, so keeping the copy buys nothing and only widens exposure.
-    await clearPendingDeletion();
-    return null;
-  }
-  const out: DeletionPending = { token: pending.token };
-  if (typeof pending.userId === "string" && pending.userId) out.userId = pending.userId;
-  if (isProviderId(pending.provider)) out.provider = pending.provider;
-  return out;
-}
-
-// Drop the deletion-resume token copy. Called on fresh install so a reinstall
-// never inherits a stale token; the deletion flow clears it on completion. Removes
-// the local copy too, in case an older version wrote the marker there.
 export async function clearPendingDeletion(): Promise<void> {
   await storageSessionRemove([DELETION_PENDING_KEY]);
   await storageLocalRemove([DELETION_PENDING_KEY]);
 }
 
-async function requestAccountDeletion(token: string): Promise<boolean> {
-  try {
-    const lang = requestLanguage();
-    const reply = await apiRequest("/auth/delete", { method: "POST", token, lang, body: { ...(lang ? { lang } : {}) }, keepalive: true });
-    return reply.ok || reply.status === 401;
-  } catch (error) {
-    logBackgroundError("requestAccountDeletion", error);
-    return false;
-  }
-}
-
-// Deleting ONE account must not take another's device-local data with it: every
-// store below is userId-scoped, so a second account signed in on the same browser
-// keeps its records. `userId` is undefined only for a pre-`userId` deletion-resume
-// marker, where nothing names the account - history then falls back to the
-// wholesale wipe, and the two capped, self-evicting map stores keep the deleted
-// account's inert entries rather than taking a live account's with them.
-async function clearLocalAccountStateAfterDeletion(userId: string | undefined, provider: OidcProvider | undefined): Promise<void> {
-  // The account key is per provider, not per account: the one this account signed
-  // in through goes, so the next sign-in registers a fresh device. A marker that
-  // names no provider drops every provider's key, as history falls back below.
-  if (provider) await clearAccountKey(provider);
-  else await clearAccountKeys();
-  if (userId) {
-    await clearHistoryForUser(userId);
-    await clearOwnReactionsForUser(userId);
-    await clearAutoNativesForUser(userId);
-    // The signing keys go with the account and only with it (background/epoch-keys.ts).
-    await clearEpochKeysForUser(userId);
-    // Its name and its place in the sign-in page's list of seen accounts go too.
-    await forgetAccount(userId);
-  } else {
-    await clearHistory();
-  }
-  // Votes still queued outlive the session now, so the deleted account's pending
-  // entries need a wipe of their own - nothing else would ever send or clear them.
-  await clearQueuedVotes(userId);
+async function clearLocalAccount(auth: Pick<AuthState, "userId" | "provider">): Promise<void> {
+  await dropDeviceKey(auth.provider);
+  await clearHistoryForUser(auth.userId);
+  await clearOwnReactionsForUser(auth.userId);
+  await clearAutoNativesForUser(auth.userId);
+  await forgetAccount(auth.userId);
   await clearAuth();
-  // Last: a wipe that throws (IndexedDB unavailable) must leave the resume marker
-  // behind, or nothing is left to retry the deletion the server already performed.
   await clearPendingDeletion();
 }
 
+async function requestDeletion(auth: AuthState): Promise<boolean> {
+  const body = auth.enrollHash ? { sig: toBase64Url(await signWithDeviceKey(auth.provider, retireMessage(LOG_NAME, fromBase64Url(auth.enrollHash)))) } : {};
+  const reply = await apiRequest("/v2/auth/delete", { method: "POST", token: auth.token, body, keepalive: true });
+  if (reply.status === 202) return true;
+  if (reply.status === 401 && apiErrorString(reply.body) === "account_deleted") return true;
+  return false;
+}
+
 export async function deleteAccount(): Promise<boolean> {
-  const auth = await getAuth();
+  const auth = await getLiveAuth();
   if (!auth) return finishPendingDeletion();
-  await setDeletionPending(auth.token, auth.userId, auth.provider, auth.expiresAt);
-  const done = await requestAccountDeletion(auth.token);
-  if (done) await clearLocalAccountStateAfterDeletion(auth.userId, auth.provider);
+  await storageLocalSet({ [DELETION_PENDING_KEY]: { provider: auth.provider, pk: auth.pk } satisfies DeletionPending });
+  const done = await requestDeletion(auth).catch((error: unknown) => {
+    logBackgroundError("deleteAccount", error);
+    return false;
+  });
+  if (done) await clearLocalAccount(auth);
   return done;
 }
 
+/** Repeats a deletion the server has not confirmed; needs the same key's session. */
 export async function finishPendingDeletion(): Promise<boolean> {
-  const pending = await getDeletionPending();
+  const pending = (await storageLocalGet([DELETION_PENDING_KEY]))[DELETION_PENDING_KEY] as DeletionPending | undefined;
   if (!pending) return false;
-  const done = await requestAccountDeletion(pending.token);
-  if (done) await clearLocalAccountStateAfterDeletion(pending.userId, pending.provider);
+  const auth = await getLiveAuth();
+  const key = await getDeviceKey(pending.provider);
+  if (!auth || auth.provider !== pending.provider || auth.pk !== pending.pk || !key) return false;
+  const done = await requestDeletion(auth).catch(() => false);
+  if (done) await clearLocalAccount(auth);
   return done;
 }
+
+export { INITIAL_ORIGIN };

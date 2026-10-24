@@ -89,12 +89,6 @@
   "sentimentReset": {
     "message": "Återställ till standard"
   },
-  "settingAnalyticsConsent": {
-    "message": "Communityinsikter"
-  },
-  "settingAnalyticsConsentHint": {
-    "message": "Låt mina reaktioner räknas i regionala översikter"
-  },
   "sectionPerSite": {
     "message": "Endast valda webbplatser"
   },
@@ -516,15 +510,6 @@
     "message": "Vad betyder det?",
     "description": "Link shown beside both device-limit messages (the sign-in refusal and the Account-tab notice). It opens the help article that says what the monthly key limit is, what to do while it holds, and how to reach the operator. Deliberately short: it sits at the end of a sentence that already carries the news."
   },
-  "voteDeviceLimit": {
-    "message": "Enhetsgränsen för den här månaden är nådd. Du kan rösta igen från $DATE$.",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "October 1, 2026"
-      }
-    }
-  },
   "loadError": {
     "message": "Något gick fel. Försök igen."
   },
@@ -637,5 +622,14 @@
   },
   "onboardingAllSet": {
     "message": "Allt klart!"
+  },
+  "voteDailyLimit": {
+    "message": "Dagens gräns för reaktioner är nådd. Du kan rösta igen kl. $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "02:00"
+      }
+    }
   }
 }

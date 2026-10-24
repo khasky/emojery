@@ -7,6 +7,11 @@
     "exactOptionalPropertyTypes": true,
     "jsx": "preserve",
     "jsxImportSource": "preact",
+    // @emojery/shared ships JavaScript typed with JSDoc and no declaration files: read its
+    // JSDoc for types, check nothing of it.
+    "allowJs": true,
+    "checkJs": false,
+    "maxNodeModuleJsDepth": 3,
     "paths": {
       "react": ["./node_modules/preact/compat"],
       "react-dom": ["./node_modules/preact/compat"]

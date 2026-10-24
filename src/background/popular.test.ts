@@ -51,7 +51,7 @@ describe("ensurePopularFresh", () => {
     await ensurePopularFresh();
     // The client identity headers are a required part of the request.
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://api.test/reactions/popular",
+      "https://api.test/v2/reactions/popular",
       expect.objectContaining({
         method: "GET",
         headers: expect.objectContaining({ "x-emojery-client": "extension" }),

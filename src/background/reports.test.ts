@@ -70,45 +70,17 @@ describe("reportProblem outcome", () => {
 });
 
 describe("reportProblem", () => {
-  it("includes explicit technical fields when Firefox consent is granted", async () => {
-    stubChrome(["technicalAndInteraction"]);
-
-    await reportProblem(reportPayload);
-
-    const [url, init] = lastFetchCall(fetchMock);
-    expect(url).toMatch(/\/report$/);
-    const body = JSON.parse(init.body as string) as Record<string, unknown>;
-    expect(body).toMatchObject({
-      event: "report",
-      ...reportPayload,
-      ua: "Mozilla/5.0 Test",
-      version: "0.1.203",
-    });
-    expect(init.headers).toMatchObject({
-      "x-emojery-client": "extension",
-      "accept-language": "uk-UA",
-    });
-  });
-
-  it("omits explicit technical fields when Firefox consent is denied", async () => {
+  it("posts to /v2/report with the extension's version and no browser fingerprint", async () => {
     stubChrome([]);
 
     await reportProblem(reportPayload);
 
-    const [, init] = lastFetchCall(fetchMock);
+    const [url, init] = lastFetchCall(fetchMock);
+    expect(url).toMatch(/\/v2\/report$/);
     const body = JSON.parse(init.body as string) as Record<string, unknown>;
-    expect(body).toMatchObject({
-      event: "report",
-      ...reportPayload,
-    });
+    expect(body).toMatchObject({ event: "report", ...reportPayload, version: "0.1.203" });
     expect(body).not.toHaveProperty("ua");
-    expect(body).not.toHaveProperty("version");
-    // The session token and the UI language ride as headers, as on every JSON POST.
-    expect(init.headers).toMatchObject({
-      authorization: "Bearer jwt",
-      "x-emojery-client": "extension",
-      "accept-language": "uk-UA",
-    });
+    expect(init.headers).toMatchObject({ authorization: "Bearer jwt", "accept-language": "uk-UA" });
     expect(init.keepalive).toBe(true);
   });
 });

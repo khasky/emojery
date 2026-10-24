@@ -3,40 +3,17 @@ import { type ComponentChild, Fragment } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { accountLabel } from "../../shared/account-label";
 import { ACCOUNT_NAME_MAX, accountDisplayName, accountOrdinal, providerTag, setAccountName } from "../../shared/account-names";
-import { removeTechnicalAndInteractionConsent, requestTechnicalAndInteractionConsent } from "../../shared/data-consent";
 import { getEmojiLabel, onLocalesChanged } from "../../shared/emoji-meta";
-import { type EpochKeyLimitNotice, readEpochKeyLimitNotice } from "../../shared/epoch-key-limit";
 import { t } from "../../shared/i18n";
 import { ACCOUNT_LIST_CLASS, ACCOUNT_NAME_CLASS, ACCOUNT_NAME_INPUT_CLASS, DELETE_CONFIRM_WARN_CLASS, DEVICE_LIMIT_NOTICE_CLASS } from "../../shared/page-dom";
-import type { Settings } from "../../shared/storage";
-import { HELP_DEVICE_LIMIT_URL, withExtensionUtm } from "../../shared/tracking-links";
+import { type DailyLimitPause, readDailyLimitPause } from "../../shared/vote-pause";
 import { sendRuntimeMessage } from "../../shared/webext";
 import { HistoryDataSection } from "./popup-history-data";
 import { IconRow, SignInPrompt } from "./popup-shared";
 import { SlideToConfirm } from "./popup-slide-confirm";
 
 const ICON_USER: ComponentChild[] = [<circle cx="12" cy="8" r="3.4" />, <path d="M5.5 19.2a6.6 6.6 0 0 1 13 0" />];
-const ICON_CHART: ComponentChild[] = [<path d="M5 20.5V11M12 20.5V4M19 20.5v-6.5" />, <path d="M3.5 20.5h17" />];
 const ICON_TRASH: ComponentChild[] = [<path d="M4 7h16M9 7V5.2a1.2 1.2 0 0 1 1.2-1.2h3.6A1.2 1.2 0 0 1 15 5.2V7m2.5 0v11.5a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2V7" />, <path d="M10 11v5.5M14 11v5.5" />];
-
-const AnalyticsConsentSection = ({ settings, update }: { settings: Settings; update: (patch: Partial<Settings>) => Promise<void> }) => {
-  const updateAnalyticsConsent = async (enabled: boolean) => {
-    if (!enabled) {
-      await removeTechnicalAndInteractionConsent();
-      await update({ analyticsConsent: false });
-      return;
-    }
-
-    const granted = await requestTechnicalAndInteractionConsent();
-    await update({ analyticsConsent: granted });
-  };
-
-  return (
-    <IconRow tag="label" rowClass="row arow" icon={ICON_CHART} label={t("settingAnalyticsConsent")} hint={t("settingAnalyticsConsentHint")}>
-      <input class="toggle" type="checkbox" checked={settings.analyticsConsent} onChange={(e: Event) => void updateAnalyticsConsent((e.currentTarget as HTMLInputElement).checked)} />
-    </IconRow>
-  );
-};
 
 // `refresh` re-reads auth status, flipping the view to signed-out after a delete.
 const DeleteAccountRow = ({ refresh }: { refresh: () => void }) => {
@@ -94,34 +71,31 @@ const DeleteAccountRow = ({ refresh }: { refresh: () => void }) => {
   );
 };
 
-// The day voting resumes, in the UI locale. An engine that rejects the tag
-// falls back to its default formatting rather than showing no date.
-function resumeDayLabel(resumesAt: number): string {
+// When voting resumes, in the reader's local time. An engine that rejects the tag falls back
+// to its default formatting rather than showing no time.
+function resumeTimeLabel(resumesAt: number): string {
   const date = new Date(resumesAt);
   try {
-    return date.toLocaleDateString(navigator.language || undefined, { year: "numeric", month: "long", day: "numeric" });
+    return date.toLocaleTimeString(navigator.language || undefined, { hour: "2-digit", minute: "2-digit" });
   } catch {
-    return date.toLocaleDateString();
+    return date.toLocaleTimeString();
   }
 }
 
-// Shown while the API is refusing this device's votes until the date it names
-// (shared/epoch-key-limit.ts). Nothing else in the popup says so, and a reader
-// whose reactions silently stop landing has no other way to find out.
-const DeviceLimitNotice = () => {
-  const [notice, setNotice] = useState<EpochKeyLimitNotice | null>(null);
+// Shown while the account's votes for this UTC day are spent (shared/vote-pause.ts): the
+// queue holds every new reaction until midnight UTC, and a reader whose reactions stop
+// landing has no other way to find out.
+const DailyLimitNotice = () => {
+  const [pause, setPause] = useState<DailyLimitPause | null>(null);
   useEffect(() => {
-    void readEpochKeyLimitNotice()
-      .then(setNotice)
-      .catch(() => setNotice(null));
+    void readDailyLimitPause()
+      .then(setPause)
+      .catch(() => setPause(null));
   }, []);
-  if (!notice) return null;
+  if (!pause) return null;
   return (
     <p class={DEVICE_LIMIT_NOTICE_CLASS} role="status">
-      {t("voteDeviceLimit", resumeDayLabel(notice.resumesAt))}{" "}
-      <a class="linkish" href={withExtensionUtm(HELP_DEVICE_LIMIT_URL, { campaign: "auth_device_limit", content: "popup" })} target="_blank" rel="noopener noreferrer">
-        {t("deviceLimitHelpLink")}
-      </a>
+      {t("voteDailyLimit", resumeTimeLabel(pause.resumesAt))}
     </p>
   );
 };
@@ -203,7 +177,7 @@ const AccountName = ({ userId }: { userId: string }) => {
   );
 };
 
-const AccountView = ({ settings, update }: { settings: Settings; update: (patch: Partial<Settings>) => Promise<void> }) => {
+const AccountView = () => {
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [provider, setProvider] = useState<string | null>(null);
@@ -257,9 +231,8 @@ const AccountView = ({ settings, update }: { settings: Settings; update: (patch:
           {t("signOutBtn")}
         </button>
       </IconRow>
-      <DeviceLimitNotice />
+      <DailyLimitNotice />
       <HistoryDataSection />
-      <AnalyticsConsentSection settings={settings} update={update} />
       <DeleteAccountRow refresh={refresh} />
     </div>
   );
