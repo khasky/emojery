@@ -113,7 +113,7 @@
     "@vitest/coverage-v8": "^4.1.12",
     "axe-core": "4.13.0",
     "commit-and-tag-version": "12.7.3",
-    "dotenv": "^17.4.2",
+    "dotenv": "^18.0.8",
     "esbuild": "0.28.2",
     "fast-check": "4.10.1",
     "husky": "9.1.7",
