@@ -90,13 +90,13 @@ export function installFakeChrome(options: FakeChromeOptions = {}): FakeChrome {
   return { local, sync, session };
 }
 
-// The Firefox-only optional data-collection manifest. Spread it into a
+// The Firefox-only data-collection manifest (required categories). Spread it into a
 // version-carrying manifest where getManifest() must also report a version.
 export const firefoxDataConsentManifest = {
   browser_specific_settings: {
     gecko: {
       data_collection_permissions: {
-        optional: ["technicalAndInteraction"],
+        required: ["authenticationInfo", "websiteContent"],
       },
     },
   },

@@ -89,12 +89,6 @@
   "sentimentReset": {
     "message": "기본값으로 재설정"
   },
-  "settingAnalyticsConsent": {
-    "message": "커뮤니티 인사이트"
-  },
-  "settingAnalyticsConsentHint": {
-    "message": "내 반응을 지역별 통계에 포함"
-  },
   "sectionPerSite": {
     "message": "선택한 사이트만"
   },
@@ -516,15 +510,6 @@
     "message": "무슨 뜻인가요",
     "description": "Link shown beside both device-limit messages (the sign-in refusal and the Account-tab notice). It opens the help article that says what the monthly key limit is, what to do while it holds, and how to reach the operator. Deliberately short: it sits at the end of a sentence that already carries the news."
   },
-  "voteDeviceLimit": {
-    "message": "이번 달 기기 한도에 도달했습니다. $DATE$부터 다시 투표할 수 있습니다.",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "October 1, 2026"
-      }
-    }
-  },
   "loadError": {
     "message": "문제가 발생했습니다. 다시 시도하세요."
   },
@@ -637,5 +622,14 @@
   },
   "onboardingAllSet": {
     "message": "모두 완료됐어요!"
+  },
+  "voteDailyLimit": {
+    "message": "오늘의 반응 한도에 도달했습니다. $TIME$에 다시 투표할 수 있습니다.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "02:00"
+      }
+    }
   }
 }

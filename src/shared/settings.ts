@@ -36,12 +36,6 @@ export interface Settings {
    */
   emojiSentiment: EmojiSentiment;
   /**
-   * Whether reaction submissions include coarse context for aggregate
-   * breakdowns (country/city/language/browser/OS). Default-on locally;
-   * Firefox also gates this on its optional data permission.
-   */
-  analyticsConsent: boolean;
-  /**
    * Reveal the popup's Debug tab (the pending reaction queue and the flush
    * loop's state). Off by default, and shipped in every build - a user setting
    * the build mode does not control.
@@ -60,7 +54,6 @@ export const DEFAULT_SETTINGS: Settings = {
     positive: [...DEFAULT_EMOJI_SENTIMENT.positive],
     negative: [...DEFAULT_EMOJI_SENTIMENT.negative],
   },
-  analyticsConsent: true,
   debugMode: false,
   sites: { ...DEFAULT_SITE_TOGGLES },
 };
@@ -103,7 +96,6 @@ export function resolveSettings(raw: unknown): Settings {
     replaceNative: storedBoolean(storedSettings?.replaceNative, DEFAULT_SETTINGS.replaceNative),
     reactionAnimations: storedBoolean(storedSettings?.reactionAnimations, DEFAULT_SETTINGS.reactionAnimations),
     autoTriggerNative: storedBoolean(storedSettings?.autoTriggerNative, DEFAULT_SETTINGS.autoTriggerNative),
-    analyticsConsent: storedBoolean(storedSettings?.analyticsConsent, DEFAULT_SETTINGS.analyticsConsent),
     debugMode: storedBoolean(storedSettings?.debugMode, DEFAULT_SETTINGS.debugMode),
     theme: storedTheme(storedSettings?.theme),
     sites: storedSites(storedSettings?.sites),

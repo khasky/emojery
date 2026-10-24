@@ -2,7 +2,6 @@
 import type { ComponentChild } from "preact";
 import { render } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
-import { effectiveAnalyticsConsent } from "../../shared/data-consent";
 import { isOwnHomepage } from "../../shared/homepage";
 import { t } from "../../shared/i18n";
 import { bootstrapPage } from "../../shared/page-bootstrap";
@@ -45,12 +44,9 @@ function App() {
   };
 
   useEffect(() => {
-    void getSettings().then(async (loaded) => {
-      const revoked = loaded.analyticsConsent !== false && !(await effectiveAnalyticsConsent(true));
-      const hydrated = revoked ? { ...loaded, analyticsConsent: false } : loaded;
-      setLocal(mergeSettings(hydrated, preHydrationPatch.current));
+    void getSettings().then((loaded) => {
+      setLocal(mergeSettings(loaded, preHydrationPatch.current));
       preHydrationPatch.current = {};
-      if (revoked) await setSettings({ analyticsConsent: false });
     });
   }, []);
 
@@ -120,7 +116,7 @@ function App() {
       <main class="tab-panel" id={TAB_PANEL_ID} role={shown === "debug" ? "region" : "tabpanel"} aria-labelledby={`${TAB_ID_PREFIX}${shown}`} tabIndex={0}>
         {shown === "settings" && <SettingsView settings={settings} update={update} />}
         {shown === "history" && <HistoryView />}
-        {shown === "account" && <AccountView settings={settings} update={update} />}
+        {shown === "account" && <AccountView />}
         {shown === "report" && <ReportView />}
         {shown === "debug" && <QueueView />}
       </main>

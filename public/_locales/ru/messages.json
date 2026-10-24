@@ -89,12 +89,6 @@
   "sentimentReset": {
     "message": "Сбросить по умолчанию"
   },
-  "settingAnalyticsConsent": {
-    "message": "Активность сообщества"
-  },
-  "settingAnalyticsConsentHint": {
-    "message": "Учитывать мои реакции в региональной статистике"
-  },
   "sectionPerSite": {
     "message": "Только выбранные сайты"
   },
@@ -516,15 +510,6 @@
     "message": "Что это значит",
     "description": "Link shown beside both device-limit messages (the sign-in refusal and the Account-tab notice). It opens the help article that says what the monthly key limit is, what to do while it holds, and how to reach the operator. Deliberately short: it sits at the end of a sentence that already carries the news."
   },
-  "voteDeviceLimit": {
-    "message": "Лимит устройств на этот месяц исчерпан. Голосование возобновится $DATE$.",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "October 1, 2026"
-      }
-    }
-  },
   "loadError": {
     "message": "Неизвестная ошибка. Попробуйте снова."
   },
@@ -637,5 +622,14 @@
   },
   "onboardingAllSet": {
     "message": "Готово!"
+  },
+  "voteDailyLimit": {
+    "message": "Лимит реакций на сегодня исчерпан. Голосование возобновится в $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "02:00"
+      }
+    }
   }
 }

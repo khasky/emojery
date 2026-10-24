@@ -71,6 +71,12 @@ const API_BASE_OVERRIDE = resolveApiBaseOverride(BUILD_MODE);
 
 // The single API base this build talks to, compiled into the bundle as
 // __EM_API_BASE__ (shared/config.ts) and, as its origin, into the manifest host
+// The log host of the same deployment: the extension reads its index.json, and only at an
+// origin switch (background/origin-switch.ts). A production build reads the production log.
+function resolveLogOrigin(mode: string): string {
+  return resolveApiOrigin(mode) === new URL(PRODUCTION_API_BASE).origin ? "https://log.emojery.app" : "https://log-staging.emojery.app";
+}
+
 // permission and the CSP `connect-src` below - one function, so a bundle can
 // never fetch an origin the manifest does not allow.
 function resolveApiBase(mode: string | undefined): string {
@@ -162,9 +168,16 @@ export default defineConfig({
     // (background/identity.ts). No `identity.email`: the browser profile's account is
     // never read.
     permissions: ["storage", "unlimitedStorage", "alarms", "activeTab", "scripting", "identity"],
+    // WebCrypto signs with Ed25519 from Chrome 137: the device key needs it.
+    ...(browser === "firefox" ? {} : { minimum_chrome_version: "137" }),
     // The homepage pattern lets the popup read the active tab's URL on emojery.app so its
     // header logo switches to the homepage variant (shared/homepage.ts, which owns the host).
     host_permissions: [...ALL_SITE_MATCH_PATTERNS, HOMEPAGE_MATCH_PATTERN, `${resolveApiOrigin(mode)}/*`],
+    // Declared, never requested: should a provider switch off the implicit flow, a release can
+    // move its sign-in to code + PKCE from the background and ask for its host at sign-in
+    // time, instead of an update that adds a required host permission and disables the
+    // extension until the reader accepts it. An optional permission adds no install warning.
+    ...(browser === "firefox" ? {} : { optional_host_permissions: ["https://oauth2.googleapis.com/*", "https://login.microsoftonline.com/*", "https://appleid.apple.com/*"] }),
     // Pin the CSP explicitly rather than inheriting the tool default, and lock down
     // base-uri/frame-ancestors. `connect-src` is the one that carries security weight:
     // the auth page and the background worker both hold a bearer token, so an injection
@@ -178,7 +191,7 @@ export default defineConfig({
     // form fetches via a preventDefault handler) - so they close the fallback native
     // submit / frame / worker sinks a future injection could otherwise reach.
     content_security_policy: {
-      extension_pages: `script-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'; child-src 'none'; connect-src 'self' ${resolveApiOrigin(mode)}`,
+      extension_pages: `script-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'; child-src 'none'; connect-src 'self' ${resolveApiOrigin(mode)} ${resolveLogOrigin(mode)}`,
     },
     action: {
       default_title: "__MSG_extActionTitle__",
@@ -213,22 +226,16 @@ export default defineConfig({
           browser_specific_settings: {
             gecko: {
               id: "extension@emojery.app",
-              // 128 is the floor the code itself needs; the data-consent floor sits at 140/142.
-              // Pinning 140/142 would be the shortcut for Mozilla's built-in consent screen,
-              // but it locks out every fork still on the previous ESR. The highest API this
-              // build actually needs is `inert` (Firefox 112); 128 is the nearest ESR above it.
-              // Older builds get our own disclosure instead - see needsLegacyDataConsentNotice
-              // in shared/data-consent.ts.
-              strict_min_version: "128.0",
+              // 130: the device key is an Ed25519 CryptoKey, and WebCrypto has Ed25519 from
+              // Firefox 130 (background/device-keys.ts).
+              strict_min_version: "130.0",
               data_collection_permissions: {
                 required: ["authenticationInfo", "websiteContent"],
-                optional: ["technicalAndInteraction"],
               },
             },
             gecko_android: {
-              // General add-on support (any AMO listing, not just the curated collection) landed
-              // in Firefox for Android 120; keep desktop and Android on the same ESR floor.
-              strict_min_version: "128.0",
+              // The same Ed25519 floor as desktop.
+              strict_min_version: "130.0",
             },
           },
         }

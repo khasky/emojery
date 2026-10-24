@@ -13,6 +13,7 @@ import { markReactedOnce } from "../shared/onboarding";
 import { randomId } from "../shared/random-id";
 import type { Reaction } from "../shared/reactions";
 import { getOwnReaction, setOwnReaction } from "../shared/storage";
+import { VOTE_FLUSH_STATE_KEY as FLUSH_STATE_KEY } from "../shared/vote-pause";
 import { clearAlarm, createAlarm, storageLocalGet, storageLocalSet } from "../shared/webext";
 import { type ApiReply, apiErrorString, apiRequest, isRecord } from "./api-client";
 import { logBackgroundError } from "./debug";
@@ -31,7 +32,6 @@ const RATE_HOLD_MAX_MS = 60_000;
 const ORIGIN_RETRY_MS = 10 * 60_000;
 const EXPIRY_MS = 24 * 3_600_000;
 const MAX_SENDS_PER_DRAIN = 50;
-const FLUSH_STATE_KEY = "vote_flush_state_v2";
 
 export const VOTE_WAKE_ALARM = "vote-flush-wake";
 const VOTE_WAKE_PERIOD_MINUTES = 5;

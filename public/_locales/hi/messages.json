@@ -89,12 +89,6 @@
   "sentimentReset": {
     "message": "डिफ़ॉल्ट पर रीसेट करें"
   },
-  "settingAnalyticsConsent": {
-    "message": "सामुदायिक जानकारी"
-  },
-  "settingAnalyticsConsentHint": {
-    "message": "मेरी प्रतिक्रियाओं को क्षेत्रीय आँकड़ों में शामिल करें"
-  },
   "sectionPerSite": {
     "message": "केवल चयनित साइटें"
   },
@@ -516,15 +510,6 @@
     "message": "इसका मतलब क्या है",
     "description": "Link shown beside both device-limit messages (the sign-in refusal and the Account-tab notice). It opens the help article that says what the monthly key limit is, what to do while it holds, and how to reach the operator. Deliberately short: it sits at the end of a sentence that already carries the news."
   },
-  "voteDeviceLimit": {
-    "message": "इस महीने की डिवाइस सीमा पूरी हो गई है। वोटिंग $DATE$ से फिर शुरू होगी।",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "October 1, 2026"
-      }
-    }
-  },
   "loadError": {
     "message": "कुछ गलत हो गया। कृपया पुनः प्रयास करें।"
   },
@@ -637,5 +622,14 @@
   },
   "onboardingAllSet": {
     "message": "सब तैयार है!"
+  },
+  "voteDailyLimit": {
+    "message": "आज की प्रतिक्रियाओं की सीमा पूरी हो गई है। $TIME$ पर फिर से वोट कर सकेंगे।",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "02:00"
+      }
+    }
   }
 }

@@ -89,12 +89,6 @@
   "sentimentReset": {
     "message": "Скинути до типових"
   },
-  "settingAnalyticsConsent": {
-    "message": "Інсайти спільноти"
-  },
-  "settingAnalyticsConsentHint": {
-    "message": "Враховувати мої реакції в регіональній статистиці"
-  },
   "sectionPerSite": {
     "message": "Лише вибрані сайти"
   },
@@ -516,15 +510,6 @@
     "message": "Що це означає",
     "description": "Link shown beside both device-limit messages (the sign-in refusal and the Account-tab notice). It opens the help article that says what the monthly key limit is, what to do while it holds, and how to reach the operator. Deliberately short: it sits at the end of a sentence that already carries the news."
   },
-  "voteDeviceLimit": {
-    "message": "Ліміт пристроїв на цей місяць вичерпано. Голосування відновиться $DATE$.",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "October 1, 2026"
-      }
-    }
-  },
   "loadError": {
     "message": "Щось пішло не так. Спробуйте знову."
   },
@@ -637,5 +622,14 @@
   },
   "onboardingAllSet": {
     "message": "Готово!"
+  },
+  "voteDailyLimit": {
+    "message": "Ліміт реакцій на сьогодні вичерпано. Голосування відновиться о $TIME$.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "02:00"
+      }
+    }
   }
 }

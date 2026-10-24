@@ -89,12 +89,6 @@
  "sentimentReset": {
   "message": "Reset to defaults"
  },
- "settingAnalyticsConsent": {
-  "message": "Community insights"
- },
- "settingAnalyticsConsentHint": {
-  "message": "Let my reactions count in regional breakdowns"
- },
  "sectionPerSite": {
   "message": "Only selected sites"
  },
@@ -513,15 +507,6 @@
  "deviceLimitHelpLink": {
   "message": "What this means"
  },
- "voteDeviceLimit": {
-  "message": "Device limit for this month is reached. Voting resumes on $DATE$.",
-  "placeholders": {
-   "date": {
-    "content": "$1",
-    "example": "October 1, 2026"
-   }
-  }
- },
  "loadError": {
   "message": "Something went wrong. Please try again."
  },
@@ -634,5 +619,14 @@
  },
  "onboardingAllSet": {
   "message": "All set!"
+ },
+ "voteDailyLimit": {
+  "message": "Today's reaction limit is reached. Voting resumes at $TIME$.",
+  "placeholders": {
+   "time": {
+    "content": "$1",
+    "example": "02:00"
+   }
+  }
  }
 }

@@ -89,12 +89,6 @@
   "sentimentReset": {
     "message": "恢复默认设置"
   },
-  "settingAnalyticsConsent": {
-    "message": "社区洞察"
-  },
-  "settingAnalyticsConsentHint": {
-    "message": "让我的反应计入地区统计"
-  },
   "sectionPerSite": {
     "message": "仅选定的网站"
   },
@@ -516,15 +510,6 @@
     "message": "这是什么意思",
     "description": "Link shown beside both device-limit messages (the sign-in refusal and the Account-tab notice). It opens the help article that says what the monthly key limit is, what to do while it holds, and how to reach the operator. Deliberately short: it sits at the end of a sentence that already carries the news."
   },
-  "voteDeviceLimit": {
-    "message": "本月的设备数量已达上限。$DATE$ 起可以继续投票。",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "October 1, 2026"
-      }
-    }
-  },
   "loadError": {
     "message": "出错了。请重试。"
   },
@@ -637,5 +622,14 @@
   },
   "onboardingAllSet": {
     "message": "全部就绪!"
+  },
+  "voteDailyLimit": {
+    "message": "今天的回应次数已达上限。$TIME$ 后可再次投票。",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "02:00"
+      }
+    }
   }
 }

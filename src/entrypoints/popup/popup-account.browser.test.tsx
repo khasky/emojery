@@ -11,9 +11,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { userEvent } from "vitest/browser";
 import { accountLabel } from "../../shared/account-label";
 import { ACCOUNTS_SEEN_KEY, accountDisplayName } from "../../shared/account-names";
-import { EPOCH_KEY_LIMIT_KEY } from "../../shared/epoch-key-limit";
 import { ACCOUNT_LIST_SELECTOR, ACCOUNT_NAME_INPUT_SELECTOR, ACCOUNT_NAME_SELECTOR, DELETE_CONFIRM_WARN_SELECTOR, DEVICE_LIMIT_NOTICE_SELECTOR, SIGNIN_PROMPT_MSG_SELECTOR } from "../../shared/page-dom";
-import { DEFAULT_SETTINGS } from "../../shared/storage";
+import { VOTE_FLUSH_STATE_KEY } from "../../shared/vote-pause";
 import { mountContainer, renderAndSettle, unmountContainer } from "../../test/browser-harness";
 import { type ChromeShimHandle, installChromeShim } from "../../test/chrome-shim";
 import { AccountView } from "./popup-account";
@@ -55,10 +54,8 @@ function install({ authed = true, provider = "google", deleteReply = { type: "ok
   });
 }
 
-const noopUpdate = async (): Promise<void> => {};
-
 /** The view renders null until auth:status lands - wait for either settled state. */
-const mountAndSettle = () => renderAndSettle(container, h(AccountView, { settings: DEFAULT_SETTINGS, update: noopUpdate }), ".acct-list, .signin-prompt-msg");
+const mountAndSettle = () => renderAndSettle(container, h(AccountView, {}), ".acct-list, .signin-prompt-msg");
 
 const button = (label: string): HTMLButtonElement => {
   const found = [...container.querySelectorAll<HTMLButtonElement>("button")].find((b) => b.textContent?.trim() === label);
@@ -167,30 +164,22 @@ describe("AccountView - session states", () => {
   });
 });
 
-describe("AccountView - device limit notice", () => {
-  const RESUMES_AT = Date.UTC(2026, 9, 1, 12);
-
-  it("says until when voting is paused while the notice stands", async () => {
-    install({ local: { [EPOCH_KEY_LIMIT_KEY]: { epoch: 41, resumesAt: RESUMES_AT } } });
+describe("AccountView - daily limit notice", () => {
+  it("says when voting resumes while the queue holds on the daily budget", async () => {
+    const resumesAt = Date.now() + 3_600_000;
+    install({ local: { [VOTE_FLUSH_STATE_KEY]: { nextAttemptAt: resumesAt, consecutiveFailures: 1, reason: "daily_limit" } } });
     await mountAndSettle();
 
     await vi.waitFor(() => expect(container.querySelector(DEVICE_LIMIT_NOTICE_SELECTOR)).not.toBeNull());
-    const notice = container.querySelector(DEVICE_LIMIT_NOTICE_SELECTOR)!;
+    const notice = container.querySelector(DEVICE_LIMIT_NOTICE_SELECTOR) as Element;
     expect(notice.getAttribute("role")).toBe("status");
-    expect(notice.textContent).toContain(`Device limit for this month is reached. Voting resumes on ${new Date(RESUMES_AT).toLocaleDateString(navigator.language, { year: "numeric", month: "long", day: "numeric" })}.`);
-    // The date alone does not say what to do about it, and nothing in the popup can:
-    // the remedies live on the site, so the notice carries the article.
-    const help = notice.querySelector<HTMLAnchorElement>("a");
-    expect(help?.textContent).toBe("What this means");
-    expect(help?.href.startsWith("https://emojery.app/help/device-limit-reached")).toBe(true);
-    expect(help?.target).toBe("_blank");
+    const time = new Date(resumesAt).toLocaleTimeString(navigator.language, { hour: "2-digit", minute: "2-digit" });
+    expect(notice.textContent).toBe(`Today's reaction limit is reached. Voting resumes at ${time}.`);
   });
 
-  it("shows nothing once the epoch it names has passed, and drops the stale notice", async () => {
-    install({ local: { [EPOCH_KEY_LIMIT_KEY]: { epoch: 1, resumesAt: Date.now() - 1 } } });
+  it("shows nothing for any other hold, or once the hold has passed", async () => {
+    install({ local: { [VOTE_FLUSH_STATE_KEY]: { nextAttemptAt: Date.now() + 60_000, consecutiveFailures: 1, reason: "rate_limited" } } });
     await mountAndSettle();
-
-    await vi.waitFor(() => expect(shim.local.has(EPOCH_KEY_LIMIT_KEY)).toBe(false));
     expect(container.querySelector(DEVICE_LIMIT_NOTICE_SELECTOR)).toBeNull();
   });
 
