@@ -25,7 +25,7 @@ vi.mock("./api", () => ({
   VOTE_WAKE_ALARM: "vote-wake",
 }));
 vi.mock("./votequeue", () => ({
-  listQueuedVotes: vi.fn(async () => [{ id: 7, target: { site: "github", targetId: "o/r", url: "https://github.com/o/r" }, reaction: "👍", ts: 5, attempts: 3, userId: "u1", title: "secret page title", lang: "uk", nextAttemptAt: 2_000 }]),
+  listQueuedVotes: vi.fn(async () => [{ id: 7, target: { site: "github", targetId: "o/r", url: "https://github.com/o/r" }, desired: "👍", base: null, counter: 2, firstQueuedAt: 5, attempts: 3, userId: "u1", pair: "u1|github|o/r", rollbackTo: null, title: "secret page title", nextAttemptAt: 2_000 }]),
   VOTE_QUEUE_MAX: 500,
 }));
 vi.mock("./api-client", () => ({ apiErrorCode: vi.fn(() => "unavailable") }));
@@ -48,10 +48,13 @@ vi.mock("./history", () => ({
 vi.mock("./identity", () => ({
   clearAuth: vi.fn(async () => {}),
   deleteAccount: vi.fn(async () => true),
+  ENROLL_RETRY_ALARM: "enroll-retry",
   finishPendingDeletion: vi.fn(async () => {}),
-  getAuth: vi.fn(async () => ({ userId: "u1", provider: "google", token: "tok", epochMs: 1000 })),
+  getAuth: vi.fn(async () => ({ userId: "u1", provider: "google", token: "tok", expiresAt: 1, pk: "pk", origin: "log-staging.emojery.app/g0" })),
   listSignInProviders: vi.fn(async () => ({ providers: ["google", "test"], chooser: ["google"] })),
+  resumeEnrollment: vi.fn(async () => {}),
   revokeSessionServerSide: vi.fn(async () => true),
+  setOnEnrolled: vi.fn(),
   // WIDER than the real SignInResult, which carries no AuthState (identity.ts says
   // so at the type). The handler must forward only ok/refusal, and a mock that
   // cannot hand it a token proves nothing about that.

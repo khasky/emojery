@@ -64,11 +64,13 @@ export function createIdbHandle(dbName: string, version: number, upgrade: (db: I
 // on the store and returns a thunk read at `complete` time for the resolve value;
 // it may also reject early through the `reject` it is handed (a guard that then
 // aborts the transaction). An abort with no `tx.error` rejects with a DOMException
-// carrying `abortMessage`.
-export function runTransaction<T>(db: IDBDatabase, storeName: string, mode: IDBTransactionMode, abortMessage: string, run: (store: IDBObjectStore, reject: (reason: unknown) => void) => () => T): Promise<T> {
+// carrying `abortMessage`. Several store names span one transaction over all of them; `run`
+// gets the first, and reaches the others through `store.transaction`.
+export function runTransaction<T>(db: IDBDatabase, storeName: string | readonly string[], mode: IDBTransactionMode, abortMessage: string, run: (store: IDBObjectStore, reject: (reason: unknown) => void) => () => T): Promise<T> {
+  const names = typeof storeName === "string" ? [storeName] : [...storeName];
   return new Promise<T>((resolve, reject) => {
-    const tx = db.transaction(storeName, mode);
-    const getResult = run(tx.objectStore(storeName), reject);
+    const tx = db.transaction(names, mode);
+    const getResult = run(tx.objectStore(names[0] as string), reject);
     tx.oncomplete = () => resolve(getResult());
     tx.onerror = () => reject(tx.error);
     tx.onabort = () => reject(tx.error ?? new DOMException(abortMessage));

@@ -4,6 +4,7 @@
 // reaction. Kept apart from api.ts (the durable vote-write queue): the read path
 // shares only the API client and the session with it.
 
+import { countsPath } from "@emojery/shared/api";
 import type { TargetRef } from "../shared/adapter";
 import { COUNTS_READ_BUDGET_MS } from "../shared/config";
 import { deadlineSignal } from "../shared/fetch-deadline";
@@ -12,8 +13,9 @@ import { DEFAULT_BREAKDOWN_LIMIT } from "../shared/reactions";
 import { targetKey } from "../shared/storage";
 import { ApiHttpError, type ApiReply, apiRequest, isRecord } from "./api-client";
 import { logBackgroundError } from "./debug";
-import { clearAuth, getAuth } from "./identity";
+import { getLiveAuth } from "./identity";
 import { normalizeReaction } from "./message-guard";
+import { type KnownPair, pairKey, rememberPairs } from "./votequeue";
 
 // One retry is all a page read can afford. A `Retry-After` longer than this is
 // more than a mounted trigger can wait through, so give up rather than retry late.
@@ -74,6 +76,8 @@ const MINE_MAX_TARGETS = 50;
 interface MineBatch {
   /** Batches are per-token: a session change mid-window must not ride along. */
   token: string;
+  /** The local account the pairs are remembered under (votequeue.ts KNOWN). */
+  userId: string;
   targets: TargetRef[];
   flush: () => void;
   /** Drop the window timer without sending; the waiting reads settle on an empty map. */
@@ -91,7 +95,7 @@ export function clearPendingMineBatch(): void {
   pendingMine = null;
 }
 
-function openMineBatch(token: string): MineBatch {
+function openMineBatch(token: string, userId: string): MineBatch {
   const targets: TargetRef[] = [];
   let timer = 0;
   let cancelled = false;
@@ -101,6 +105,7 @@ function openMineBatch(token: string): MineBatch {
   });
   const batch: MineBatch = {
     token,
+    userId,
     targets,
     flush: () => {
       if (timer === 0) return;
@@ -118,15 +123,15 @@ function openMineBatch(token: string): MineBatch {
     // A cancelled batch answers like a failed request - an empty map. Left pending, it
     // would hang every read waiting on it, and each one keeps its `inflightReads` slot,
     // so those targets stay unreadable until the worker restarts.
-    reactions: gate.then(() => (cancelled ? {} : sendMineRequest(token, targets))),
+    reactions: gate.then(() => (cancelled ? {} : sendMineRequest(token, userId, targets))),
   };
   timer = self.setTimeout(batch.flush, MINE_BATCH_WINDOW_MS);
   pendingMine = batch;
   return batch;
 }
 
-function requestMyReactions(target: TargetRef, token: string): Promise<Record<string, string>> {
-  const batch = pendingMine?.token === token ? pendingMine : openMineBatch(token);
+function requestMyReactions(target: TargetRef, token: string, userId: string): Promise<Record<string, string>> {
+  const batch = pendingMine?.token === token ? pendingMine : openMineBatch(token, userId);
   batch.targets.push(target);
   if (batch.targets.length >= MINE_MAX_TARGETS) batch.flush();
   return batch.reactions;
@@ -141,18 +146,14 @@ function wireTargetToken(target: TargetRef): string {
 // Resolves to a (possibly empty) map, never rejects: a missing own-reaction only
 // costs the "you reacted" marker, and the shared promise is awaited by every
 // target in the batch - one rejection would surface as that many failures.
-async function sendMineRequest(token: string, targets: readonly TargetRef[]): Promise<Record<string, string>> {
+async function sendMineRequest(token: string, userId: string, targets: readonly TargetRef[]): Promise<Record<string, string>> {
   const query = targets.map((target) => `t=${encodeURIComponent(wireTargetToken(target))}`).join("&");
   try {
     // `no-store` for the same reason as the counts read below.
-    const reply = await apiRequest(`/reactions/mine?${query}`, { method: "GET", token, cache: "no-store" });
-    if (reply.status === 401) {
-      await clearAuth();
-      return {};
-    }
+    const reply = await apiRequest(`/v2/mine?${query}`, { method: "GET", token, cache: "no-store" });
     if (!reply.ok) return {};
-    // `{ reactions: { "<site>/<targetId>": "🤣" } }` - the map is wrapped so
-    // the response can grow a field without colliding with a target key.
+    // `{ reactions: { "<site>/<targetId>": { reaction, counter, seq } } }`: the reaction marks
+    // the trigger, the counter is what the next vote on the pair builds on.
     // Filtered to the requested targets and to emoji-shaped values rather than
     // trusted from a cast: the shared map is read per target key, so nothing
     // beyond this batch's keys has a reader, and a junk value would otherwise
@@ -160,10 +161,15 @@ async function sendMineRequest(token: string, targets: readonly TargetRef[]): Pr
     // wireTargetToken's.
     const raw = isRecord(reply.body) && isRecord(reply.body.reactions) ? reply.body.reactions : {};
     const reactions: Record<string, string> = {};
+    const known: KnownPair[] = [];
     for (const target of targets) {
-      const value = normalizeReaction(raw[wireTargetToken(target)]);
+      const pair = raw[wireTargetToken(target)];
+      if (!isRecord(pair) || !isCount(pair.counter)) continue;
+      const value = pair.reaction === "" ? null : normalizeReaction(pair.reaction);
       if (value !== null) reactions[targetKey(target)] = value;
+      known.push({ pair: pairKey(userId, target), reaction: value, counter: pair.counter });
     }
+    await rememberPairs(known).catch((error: unknown) => logBackgroundError("sendMineRequest.rememberPairs", error));
     return reactions;
   } catch (error) {
     logBackgroundError("sendMineRequest", error);
@@ -197,7 +203,7 @@ function parseTargetCounts(raw: unknown, limit: number): TargetCounts {
     counts[emoji] = count;
     kept++;
   }
-  return { counts, total: raw.total, loaded: kept, hasMore: !!raw.hasMore };
+  return { counts, total: raw.total, loaded: kept, hasMore: false };
 }
 
 function isCount(value: unknown): value is number {
@@ -205,15 +211,15 @@ function isCount(value: unknown): value is number {
 }
 
 async function fetchTargetCountsAndOwnReaction(target: TargetRef, limit: number): Promise<TargetCounts> {
-  const targetParam = wireTargetToken(target);
-  const auth = await getAuth();
+  const auth = await getLiveAuth();
   // Both reads use `no-store`: the extension has its own read cache
   // (READ_CACHE_TTL_MS), so letting the browser HTTP layer also cache these could
   // resurface counts the user changed minutes ago.
-  const countsP = fetchCountsWithRetry(`/reactions/count?t=${encodeURIComponent(targetParam)}&limit=${limit}`);
+  // The one canonical path per target (@emojery/shared/api); the API refuses any other.
+  const countsP = fetchCountsWithRetry(countsPath(target.site, target.targetId));
   // `mine` runs concurrently with `count`; a non-ok `count` throws below while
   // it is still in flight, which is safe because the batched read never rejects.
-  const mineP = auth ? requestMyReactions(target, auth.token) : null;
+  const mineP = auth ? requestMyReactions(target, auth.token, auth.userId) : null;
 
   const base = parseTargetCounts((await countsP).body, limit);
 

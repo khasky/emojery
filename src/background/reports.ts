@@ -12,7 +12,7 @@ export async function reportProblem(payload: { site: string; host: string; url: 
   try {
     const auth = await getAuth();
     if (!auth) return false;
-    const reply = await apiRequest("/report", {
+    const reply = await apiRequest("/v2/report", {
       method: "POST",
       token: auth.token,
       lang: requestLanguage(),

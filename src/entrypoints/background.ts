@@ -3,7 +3,7 @@ import { defineBackground } from "wxt/utils/define-background";
 import { scheduleFlush, VOTE_WAKE_ALARM } from "../background/api";
 import { logBackgroundError } from "../background/debug";
 import { migrateLegacyHistory } from "../background/history";
-import { finishPendingDeletion } from "../background/identity";
+import { ENROLL_RETRY_ALARM, finishPendingDeletion, resumeEnrollment, setOnEnrolled } from "../background/identity";
 import { installFreshInstallAuthReset } from "../background/install";
 import { isExtensionPageSender } from "../background/message-guard";
 import { handleRuntimeMessage } from "../background/message-router";
@@ -39,6 +39,22 @@ export default defineBackground(() => {
   // Pre-account-scoping store carries no owner, so v2 never reads it - drop the orphaned key.
   void storageLocalRemove([LEGACY_OWN_REACTIONS_KEY]).catch((error: unknown) => logBackgroundError("dropLegacyOwnReactions", error));
 
+  // The 1.0.0 key stores (extractable account keys, epoch keys), its click-per-row queue and
+  // its install id: nothing of 1.1.0 reads them.
+  if (typeof indexedDB !== "undefined") {
+    for (const name of ["emojery-epoch-keys", "emojery-vote-queue"]) {
+      const req = indexedDB.deleteDatabase(name);
+      req.onerror = () => logBackgroundError(`dropLegacyDatabase.${name}`, req.error);
+    }
+  }
+  void storageLocalRemove(["security_context_v1", "vote_flush_state_v1"]).catch((error: unknown) => logBackgroundError("dropLegacyKeys", error));
+
+  // A key that became enrolled releases the votes held for it.
+  setOnEnrolled(() => {
+    void scheduleFlush();
+  });
+  void resumeEnrollment().catch((error: unknown) => logBackgroundError("resumeEnrollment", error));
+
   void setUninstallURL(UNINSTALL_FEEDBACK_URL).catch((error: unknown) => logBackgroundError("setUninstallURL", error));
 
   // Migrate pre-IndexedDB history before the first flush can confirm new rows,
@@ -66,6 +82,7 @@ export default defineBackground(() => {
   addAlarmListener((alarm) => {
     if (alarm.name === VOTE_WAKE_ALARM) void scheduleFlush();
     if (alarm.name === "popular-refresh") void ensurePopularFresh();
+    if (alarm.name === ENROLL_RETRY_ALARM) void resumeEnrollment().catch((error: unknown) => logBackgroundError("resumeEnrollment", error));
   });
 
   // The extension's own pages hold a port open while they are; the dot follows.
