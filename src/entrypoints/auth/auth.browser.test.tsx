@@ -33,7 +33,7 @@ let loads = 0;
 
 // `signInReply` may be a promise, for the case that watches the page while the
 // identity window is open.
-function install({ providersReply = PROVIDERS, signInReply = OK_SIGN_IN, returnReply = OK_RETURN, closeReply = OK_RETURN }: { providersReply?: unknown; signInReply?: unknown; returnReply?: unknown; closeReply?: unknown } = {}): void {
+function install({ providersReply = PROVIDERS, signInReply = OK_SIGN_IN, returnReply = OK_RETURN, closeReply = OK_RETURN, statusReply = undefined }: { providersReply?: unknown; signInReply?: unknown; returnReply?: unknown; closeReply?: unknown; statusReply?: unknown } = {}): void {
   sent = [];
   shim = installChromeShim({
     onMessage: (msg) => {
@@ -43,6 +43,7 @@ function install({ providersReply = PROVIDERS, signInReply = OK_SIGN_IN, returnR
       if (type === "auth:signIn") return signInReply;
       if (type === "auth:returnToOrigin") return returnReply;
       if (type === "auth:closeTab") return closeReply;
+      if (type === "auth:status") return statusReply;
       return undefined;
     },
   });
@@ -365,12 +366,17 @@ describe("auth page - the provider step", () => {
 
     await vi.waitFor(() => expect(errorText()).toContain(copy));
     expect(heading()).toBe("Sign in to react");
-    // The device limit is the one refusal a reader cannot act on from here, so it
-    // carries the article that says what to do; every other one stands alone.
+    // The two refusals a reader cannot fix from here carry a link: the device limit to
+    // the article that says what to do, a retired build to its store page. Every other
+    // one stands alone.
     const help = document.querySelector<HTMLAnchorElement>(`${AUTH_ERROR_SELECTOR} a`);
     if (refusal === "device_limit") {
       expect(help?.textContent).toBe("What this means");
       expect(help?.href.startsWith("https://emojery.app/help/device-limit-reached")).toBe(true);
+      expect(help?.target).toBe("_blank");
+    } else if (refusal === "client_outdated") {
+      expect(help?.textContent).toBe("Update from the store");
+      expect(help?.href).toMatch(/^https:\/\/(chromewebstore\.google\.com|microsoftedge\.microsoft\.com|addons\.mozilla\.org)\//);
       expect(help?.target).toBe("_blank");
     } else {
       expect(help).toBeNull();
@@ -381,6 +387,14 @@ describe("auth page - the provider step", () => {
     expect(document.querySelector(PROVIDER_LIST_SELECTOR)?.getAttribute("aria-describedby")).toBe(AUTH_ERROR_ID);
     // The list is still usable: the consent survives, so a second pick is one click.
     expect(providerButtons().every((b) => !b.disabled)).toBe(true);
+  });
+
+  it("opens on the update notice when the API has retired this build", async () => {
+    install({ statusReply: { type: "auth:status", authed: true, userId: "u1", provider: null, outdated: true } });
+    await loadPage();
+
+    await vi.waitFor(() => expect(errorText()).toContain("This version of Emojery is out of date. Update it to sign in."));
+    expect(document.querySelector<HTMLAnchorElement>(`${AUTH_ERROR_SELECTOR} a`)?.textContent).toBe("Update from the store");
   });
 
   it("keeps the longer list open after a refusal sends the page back to it", async () => {

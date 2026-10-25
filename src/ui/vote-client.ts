@@ -30,7 +30,8 @@ export function createOnPick(ctx: { point: PickerInsertionPoint; settings: Setti
     // Unauthed click -> open the auth tab and drop this vote entirely (no optimistic UI,
     // no cache write, no queue entry). Reads work without auth, so counts still render.
     const status = (await sendMessage({ type: "auth:status" }).catch(() => null)) as RuntimeResponse | null;
-    if (status?.type !== "auth:status" || !status.authed || !status.userId) {
+    // A retired build votes nothing: the auth tab tells the user to update (it reads the same flag).
+    if (status?.type !== "auth:status" || status.outdated || !status.authed || !status.userId) {
       setFbPickPending(false);
       void sendMessage({ type: "auth:openTab" }).catch(() => {});
       return false;

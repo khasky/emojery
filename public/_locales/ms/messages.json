@@ -503,6 +503,12 @@
   "authErrOutdated": {
     "message": "Versi Emojery ini sudah lapuk. Kemas kini untuk log masuk."
   },
+  "clientOutdatedNotice": {
+    "message": "Versi Emojery ini sudah lapuk. Kemas kini untuk mengundi dan log masuk semula."
+  },
+  "clientOutdatedStoreLink": {
+    "message": "Kemas kini dari kedai"
+  },
   "authErrDeviceLimit": {
     "message": "Had peranti untuk bulan ini telah dicapai. Sila cuba lagi bulan depan."
   },

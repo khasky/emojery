@@ -503,6 +503,12 @@
   "authErrOutdated": {
     "message": "Az Emojery ezen verziója elavult. A bejelentkezéshez frissítse."
   },
+  "clientOutdatedNotice": {
+    "message": "Az Emojery ezen verziója elavult. Frissítsd, hogy újra szavazhass és bejelentkezhess."
+  },
+  "clientOutdatedStoreLink": {
+    "message": "Frissítés az áruházból"
+  },
   "authErrDeviceLimit": {
     "message": "Elérted az e havi eszközkorlátot. Próbáld újra jövő hónapban."
   },

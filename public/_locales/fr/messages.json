@@ -503,6 +503,12 @@
   "authErrOutdated": {
     "message": "Cette version d’Emojery est obsolète. Mettez-la à jour pour vous connecter."
   },
+  "clientOutdatedNotice": {
+    "message": "Cette version d'Emojery est obsolète. Mettez-la à jour pour voter et vous connecter à nouveau."
+  },
+  "clientOutdatedStoreLink": {
+    "message": "Mettre à jour depuis la boutique"
+  },
   "authErrDeviceLimit": {
     "message": "La limite d'appareils de ce mois est atteinte. Réessayez le mois prochain."
   },
