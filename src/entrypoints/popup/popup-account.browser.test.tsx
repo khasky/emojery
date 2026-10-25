@@ -48,7 +48,7 @@ function install({ authed = true, provider = "google", deleteReply = { type: "ok
         if ((deleteReply as { type?: string }).type === "ok") signedIn = false;
         return deleteReply;
       }
-      if (type === "auth:status") return { type: "auth:status", authed: signedIn, userId: signedIn ? USER_ID : null, provider: signedIn ? provider : null };
+      if (type === "auth:status") return { type: "auth:status", authed: signedIn, userId: signedIn ? USER_ID : null, provider: signedIn ? provider : null, outdated: false };
       return undefined;
     },
   });

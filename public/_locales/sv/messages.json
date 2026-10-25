@@ -503,6 +503,12 @@
   "authErrOutdated": {
     "message": "Den här versionen av Emojery är föråldrad. Uppdatera den för att logga in."
   },
+  "clientOutdatedNotice": {
+    "message": "Den här versionen av Emojery är inaktuell. Uppdatera den för att rösta och logga in igen."
+  },
+  "clientOutdatedStoreLink": {
+    "message": "Uppdatera från butiken"
+  },
   "authErrDeviceLimit": {
     "message": "Enhetsgränsen för den här månaden är nådd. Försök igen nästa månad."
   },

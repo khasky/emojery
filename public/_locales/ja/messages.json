@@ -503,6 +503,12 @@
   "authErrOutdated": {
     "message": "このバージョンの Emojery は古くなっています。サインインするには更新してください。"
   },
+  "clientOutdatedNotice": {
+    "message": "このバージョンの Emojery は古くなっています。再び投票・サインインするには更新してください。"
+  },
+  "clientOutdatedStoreLink": {
+    "message": "ストアから更新"
+  },
   "authErrDeviceLimit": {
     "message": "今月の端末数の上限に達しました。来月もう一度お試しください。"
   },

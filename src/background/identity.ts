@@ -14,6 +14,7 @@ import { offeredIn } from "@emojery/shared/api";
 import { fromBase64Url, refreshMessage, retireMessage, sessionMessage, toBase64Url } from "@emojery/shared/core";
 import { forgetAccount, noteAccountSeen } from "../shared/account-names";
 import { AUTH_KEY, isAuthSessionLive } from "../shared/auth-session";
+import { readClientOutdated } from "../shared/client-outdated";
 import { INITIAL_ORIGIN, LOG_NAME, SIGN_IN_PROVIDERS } from "../shared/deployment";
 import type { SignInRefusal } from "../shared/messages";
 import { isProviderId, type OidcProvider } from "../shared/oidc-providers";
@@ -129,6 +130,7 @@ const SESSION_REFUSALS: Record<string, SignInRefusal> = {
   "403 provider_paused": "unavailable",
   "429 too_many_keys": "device_limit",
   "409 key_failed": "enrollment_failed",
+  "410 client_outdated": "client_outdated",
 };
 
 const signInFlows = new Map<string, Promise<SignInResult>>();
@@ -168,6 +170,8 @@ function idTokenExp(idToken: string): number {
 }
 
 async function runSignIn(provider: OidcProvider, chooser: boolean): Promise<SignInResult> {
+  // A build the API retired cannot sign in; no provider window is opened for it.
+  if (await readClientOutdated()) return { ok: false, refusal: "client_outdated" };
   const row = offeredIn(SIGN_IN_PROVIDERS).find((p) => p.id === provider && !p.redirectUri);
   const redirect = identityRedirectUrl();
   if (!row || !redirect) return { ok: false, refusal: "unavailable" };

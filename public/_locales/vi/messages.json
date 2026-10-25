@@ -503,6 +503,12 @@
   "authErrOutdated": {
     "message": "Phiên bản Emojery này đã lỗi thời. Hãy cập nhật để đăng nhập."
   },
+  "clientOutdatedNotice": {
+    "message": "Phiên bản Emojery này đã cũ. Hãy cập nhật để bình chọn và đăng nhập lại."
+  },
+  "clientOutdatedStoreLink": {
+    "message": "Cập nhật từ cửa hàng"
+  },
   "authErrDeviceLimit": {
     "message": "Đã đạt giới hạn thiết bị của tháng này. Vui lòng thử lại vào tháng sau."
   },

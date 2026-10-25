@@ -503,6 +503,12 @@
   "authErrOutdated": {
     "message": "Эта версия Emojery устарела. Обновите её, чтобы войти."
   },
+  "clientOutdatedNotice": {
+    "message": "Эта версия Emojery устарела. Обновите её, чтобы снова голосовать и входить."
+  },
+  "clientOutdatedStoreLink": {
+    "message": "Обновить в магазине"
+  },
   "authErrDeviceLimit": {
     "message": "Лимит устройств на этот месяц исчерпан. Попробуйте снова в следующем месяце."
   },

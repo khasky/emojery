@@ -9,6 +9,7 @@
 // (content-type, the install id, accept-language when a language is given); a
 // GET carries only the client identity headers. A bearer token rides on either.
 
+import { markClientOutdated } from "../shared/client-outdated";
 import { API_BASE, API_TIMEOUT_MS } from "../shared/config";
 import { deadlineSignal } from "../shared/fetch-deadline";
 import { normalizeLanguageTag } from "../shared/language-tag";
@@ -79,6 +80,8 @@ export async function apiRequest(path: string, options: ApiRequestOptions): Prom
     }
   }
   logApiExchange(url, init, { status: response.status, body: loggedBody }, startedAt);
+  // The API retired this build (shared/client-outdated.ts): any route may say so.
+  if (response.status === 410 && apiErrorString(body) === "client_outdated") await markClientOutdated().catch((error: unknown) => logBackgroundError("apiRequest.markClientOutdated", error));
   return {
     ok: response.ok,
     status: response.status,

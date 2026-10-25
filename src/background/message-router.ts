@@ -6,6 +6,7 @@
 // and the sender's promise rejects. Every payload has already passed
 // `parseRuntimeMessage` (message-guard.ts), the trust boundary that also decides
 // which sender may send which type; nothing below re-validates.
+import { readClientOutdated } from "../shared/client-outdated";
 import { defined } from "../shared/defined";
 import { EMPTY_HISTORY_STATS, type RuntimeMessage, type RuntimeResponse } from "../shared/messages";
 import { setCachedCounts, targetKey } from "../shared/storage";
@@ -205,8 +206,8 @@ const HANDLERS: HandlerTable = {
     // from stays on the extension's own pages.
     const includeProvider = isExtensionPageSender(sender, extensionBaseUrl);
     respondWith(sendResponse, "auth:status", async () => {
-      const auth = await getAuth();
-      return { type: "auth:status", authed: auth !== null, userId: auth?.userId ?? null, provider: includeProvider ? (auth?.provider ?? null) : null };
+      const [auth, outdated] = await Promise.all([getAuth(), readClientOutdated()]);
+      return { type: "auth:status", authed: auth !== null, userId: auth?.userId ?? null, provider: includeProvider ? (auth?.provider ?? null) : null, outdated };
     });
     return ANSWER_LATER;
   },

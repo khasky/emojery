@@ -503,6 +503,12 @@
   "authErrOutdated": {
     "message": "Emojery का यह संस्करण पुराना हो चुका है। साइन इन करने के लिए इसे अपडेट करें।"
   },
+  "clientOutdatedNotice": {
+    "message": "Emojery का यह संस्करण पुराना है। फिर से वोट करने और साइन इन करने के लिए इसे अपडेट करें।"
+  },
+  "clientOutdatedStoreLink": {
+    "message": "स्टोर से अपडेट करें"
+  },
   "authErrDeviceLimit": {
     "message": "इस महीने की डिवाइस सीमा पूरी हो गई है। अगले महीने फिर से कोशिश करें।"
   },

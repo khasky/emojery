@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { CLIENT_OUTDATED_KEY } from "../shared/client-outdated";
 import { installFakeChrome, lastFetchCall, stubFetch, stubFetchJson } from "../test/fixtures";
 import { ApiHttpError, apiErrorCode, apiErrorString, apiRequest, requestLanguage } from "./api-client";
 
@@ -118,6 +119,16 @@ describe("reply", () => {
     expect(apiErrorString({ error: "" })).toBeUndefined();
     expect(apiErrorString({ error: 7 })).toBeUndefined();
     expect(apiErrorString(null)).toBeUndefined();
+  });
+
+  it("records this build as retired on 410 client_outdated, and on no other 410", async () => {
+    stubFetchJson(410, { error: "gone" });
+    await apiRequest("/v2/vote", { method: "POST", body: {} });
+    expect(localStore).not.toHaveProperty(CLIENT_OUTDATED_KEY);
+
+    stubFetchJson(410, { error: "client_outdated" });
+    await apiRequest("/v2/vote", { method: "POST", body: {} });
+    expect(localStore[CLIENT_OUTDATED_KEY]).toBe("0.1.203");
   });
 });
 

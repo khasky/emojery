@@ -7,6 +7,7 @@
 
 import { fromBase64Url, reactMessage, toBase64Url } from "@emojery/shared/core";
 import type { TargetRef } from "../shared/adapter";
+import { readClientOutdated } from "../shared/client-outdated";
 import { defined } from "../shared/defined";
 import type { ReactionAction } from "../shared/messages";
 import { markReactedOnce } from "../shared/onboarding";
@@ -179,6 +180,8 @@ export async function flushOwnedVotesForSignOut(): Promise<void> {
 }
 
 async function drain(): Promise<void> {
+  // A retired build keeps its votes: an update from the store may still send them.
+  if (await readClientOutdated()) return;
   const tried = new Set<number>();
   for (let sends = 0; sends < MAX_SENDS_PER_DRAIN; sends++) {
     const now = Date.now();

@@ -36,8 +36,8 @@ const settings = {
 // The sendMessage stub every case repeats: auth:status answers as an authed "u1"
 // (fields overridable per case); every other message goes through `reply` - ok
 // unless the case makes the vote itself fail.
-function mockAuthedSend(status: Partial<{ authed: boolean; userId: string | null }> = {}, reply: (msg: RuntimeMessage) => Promise<RuntimeResponse> = () => Promise.resolve({ type: "ok" })): void {
-  vi.mocked(sendMessage).mockImplementation((msg) => (msg.type === "auth:status" ? Promise.resolve({ type: "auth:status", authed: true, userId: "u1", provider: null, ...status }) : reply(msg)));
+function mockAuthedSend(status: Partial<{ authed: boolean; userId: string | null; outdated: boolean }> = {}, reply: (msg: RuntimeMessage) => Promise<RuntimeResponse> = () => Promise.resolve({ type: "ok" })): void {
+  vi.mocked(sendMessage).mockImplementation((msg) => (msg.type === "auth:status" ? Promise.resolve({ type: "auth:status", authed: true, userId: "u1", provider: null, outdated: false, ...status }) : reply(msg)));
 }
 
 beforeEach(() => {
@@ -85,6 +85,15 @@ describe("createOnPick", () => {
       prevReaction: "👍",
       lang: "uk-UA",
     });
+  });
+
+  it("a retired build votes nothing and opens the auth tab, even while signed in", async () => {
+    mockAuthedSend({ outdated: true });
+    const onPick = createOnPick({ point, settings });
+    const result = await onPick("❤️");
+    expect(result).toBe(false);
+    expect(sendMessage).toHaveBeenCalledWith({ type: "auth:openTab" });
+    expect(applyOptimisticReaction).not.toHaveBeenCalled();
   });
 
   it("treats an authed status without a userId as unauthed (no unowned writes)", async () => {
