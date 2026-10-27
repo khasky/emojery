@@ -76,7 +76,7 @@ jobs:
       # decision the day any scheduled sweep runs authenticated.
       - name: Upload e2e report
         if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: e2e-ci-report
           path: test-results/
@@ -121,7 +121,7 @@ jobs:
       # account state: every case runs signed out.
       - name: Upload own-surfaces report
         if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: own-surfaces-report
           path: test-results/
@@ -184,7 +184,7 @@ jobs:
       # Failure only, same policy and accepted risk as the Chromium sweep above.
       - name: Upload Firefox e2e report
         if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: e2e-firefox-report
           path: test-results/
@@ -220,7 +220,7 @@ jobs:
       # Failure only, and the same accepted risk as the placement sweep above.
       - name: Upload replace-native report
         if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: replace-native-report
           path: test-results/
@@ -257,7 +257,7 @@ jobs:
       # Failure only, and the same accepted risk as the placement sweep above.
       - name: Upload theme-contrast report
         if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: theme-contrast-report
           path: test-results/
@@ -298,7 +298,7 @@ jobs:
       # below covers the traces.
       - name: Upload perf metrics
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: perf-metrics
           path: test-results/perf-metrics.json
@@ -308,7 +308,7 @@ jobs:
       # Failure only, and the same accepted risk as the placement sweep above.
       - name: Upload perf report
         if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: perf-report
           path: test-results/
