@@ -90,11 +90,32 @@ export async function clearAuth(): Promise<void> {
 
 export type SignInResult = { ok: true } | { ok: false; refusal: SignInRefusal };
 
+// The builds the API's Apple return page can hand a sign-in back to, by extension id: the
+// page forwards by the code in front of `state` to an address it pins per code, never to one
+// the request names. Firefox has one id for every build. A build that is none of these (an
+// unpacked production build) is not offered a provider with a web return address.
+const BUILD_CODES: Readonly<Record<string, string>> = {
+  nlkebphkgappggophjobchogdmdiaajd: "chrome",
+  jbmbhihbhpnidhfmepifgkeblikjdpcp: "edge",
+  aooajklhnjjhmmffihjjofjkhpekbpaa: "staging",
+};
+
+export function buildCode(): string | null {
+  const redirect = identityRedirectUrl();
+  if (!redirect) return null;
+  if (/^https:\/\/[0-9a-f]{40}\.extensions\.allizom\.org\/$/.test(redirect)) return "firefox";
+  return BUILD_CODES[chrome.runtime.id] ?? null;
+}
+
+function signInRows() {
+  const code = buildCode();
+  return offeredIn(SIGN_IN_PROVIDERS).filter((p) => !p.redirectUri || code !== null);
+}
+
 /** The providers this build offers, in the table's order; none can be asked for a chooser
- *  the table does not name. Apple needs its return page, served by the API; until a build
- *  can use it, a provider with a web return address is not offered. */
+ *  the table does not name. */
 export async function listSignInProviders(): Promise<{ providers: OidcProvider[]; chooser: OidcProvider[] }> {
-  const rows = offeredIn(SIGN_IN_PROVIDERS).filter((p) => !p.redirectUri);
+  const rows = signInRows();
   const providers = rows.map((p) => p.id);
   return { providers, chooser: providers.filter((id) => id === "google" || id === "microsoft") };
 }
@@ -172,13 +193,17 @@ function idTokenExp(idToken: string): number {
 async function runSignIn(provider: OidcProvider, chooser: boolean): Promise<SignInResult> {
   // A build the API retired cannot sign in; no provider window is opened for it.
   if (await readClientOutdated()) return { ok: false, refusal: "client_outdated" };
-  const row = offeredIn(SIGN_IN_PROVIDERS).find((p) => p.id === provider && !p.redirectUri);
+  const row = signInRows().find((p) => p.id === provider);
   const redirect = identityRedirectUrl();
-  if (!row || !redirect) return { ok: false, refusal: "unavailable" };
+  const code = buildCode();
+  if (!row || !redirect || (row.redirectUri && !code)) return { ok: false, refusal: "unavailable" };
   const key = await ensureDeviceKey(provider);
   const nonceSalt = crypto.getRandomValues(new Uint8Array(32));
-  const state = randomId();
-  const params = new URLSearchParams({ client_id: row.clientId, response_type: row.responseType, redirect_uri: redirect, nonce: await signInNonce(key.publicKey, nonceSalt), state });
+  // A provider that returns to a web page (Apple) gets the build code first: the API's return
+  // page forwards to the address it pins for that code. The browser still ends the flow on
+  // this build's own return address.
+  const state = row.redirectUri ? `${code}.${randomId()}` : randomId();
+  const params = new URLSearchParams({ client_id: row.clientId, response_type: row.responseType, redirect_uri: row.redirectUri ?? redirect, nonce: await signInNonce(key.publicKey, nonceSalt), state });
   if (row.scope) params.set("scope", row.scope);
   if (row.responseMode) params.set("response_mode", row.responseMode);
   if (chooser) params.set("prompt", "select_account");

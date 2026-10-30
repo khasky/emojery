@@ -16,6 +16,11 @@ import { WEB_ACCESSIBLE_RESOURCES } from "./src/shared/web-accessible-resources"
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+// The public half of the key that pins the non-production Chromium builds' id (see `key` in
+// the manifest below). Its private half was never kept: an unpacked build needs only this.
+const STAGING_MANIFEST_KEY =
+  "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzcTQrAEoGyTJLaRjeCJUTvMm4HTRZ0JO0nqx2ZWTvKAz+xhQrMd5a6pG52JJZsl/zEd09Qc54J7hx1wru+ws5u0mvEnxm124quhWzJq8AprTU0rkj0WVohMBA5wglfHxAnd/5VtfI2Ydu312yrEuoIQX7wb9axUMZVgYpcr5pOJGafsW9KxlJHyIZCrgY3k38G1eRwxbqJ5T0VQs+VYTY0mfPo7PUl8/uKzKooJvhrghlU0ZB12EmtBaRZE1rOBZfPY4BS1ijnXMGzxqEWdQluIm4Qj1cneIMdjvESy676cTvDgq2ZlEAIOrb/gHAxibirtGP5SVj4sfTAa0E4KKowIDAQAB";
+
 function resolveBuildMode(): string {
   const argv = process.argv;
   const flag = argv.findIndex((a) => a === "--mode" || a === "-m");
@@ -153,6 +158,11 @@ export default defineConfig({
     short_name: "Emojery",
     description: "__MSG_extDescription__",
     ...(browser === "firefox" ? { developer: { name: "khasky", url: "https://github.com/khasky" } } : {}),
+    // A public key only, for the non-production Chromium builds: it pins their extension id
+    // (aooajklhnjjhmmffihjjofjkhpekbpaa) on every machine, so the API's Apple return page can
+    // name the staging build's return address (background/identity.ts BUILD_CODES). The
+    // store builds carry none; the stores assign theirs.
+    ...(mode !== "production" && browser !== "firefox" ? { key: STAGING_MANIFEST_KEY } : {}),
     // Surfaces as "Open extension website" on the browser's extension page.
     homepage_url: withExtensionUtm("https://emojery.app/", {
       campaign: "manifest_links",
