@@ -24,7 +24,7 @@ overrides:
   nanoid: ^3.3.18 # GHSA-2v37-7h3g-55p8
   postcss: ^8.5.23 # GHSA-r28c-9q8g-f849, GHSA-fxqj-rqcc-2cmp
   proxy-addr: ^2.0.8 # GHSA-jqcg-44mw-7w3h
-  qs: ^6.16.0 # GHSA-4mjr-xmp4-gh2g, GHSA-x5fp-wj9c-mxmx
+  qs: ^6.16.1 # GHSA-4mjr-xmp4-gh2g, GHSA-x5fp-wj9c-mxmx, GHSA-6pq8-jhm2-2vcw
   shell-quote: ^1.11.0 # GHSA-395f-4hp3-45gv, GHSA-pqg4-j6r4-53mv
   smol-toml: ^1.9.0 # GHSA-7w5x-hrqm-74c2, GHSA-r4xh-jqrq-34v2
   source-map-js: ^1.2.2 # GHSA-68fv-2mgg-jv7q
@@ -32,7 +32,7 @@ overrides:
   "undici@7": ^7.30.1 # GHSA-2gqq-gqf2-x968, GHSA-2jfj-6hjv-fm6j, GHSA-3wwx-pv8p-q78v, GHSA-3xpg-4rpp-hhhm, GHSA-4qv8-2p9j-2685, GHSA-8436-99hf-9mmv, GHSA-f72v-6w45-q472, GHSA-pmjh-fq2x-6v4x, GHSA-r53p-7pc4-xj5r, GHSA-rfgv-xxqx-mfg5, GHSA-rx4f-c7p8-82vq, GHSA-w293-vg96-wgc3, GHSA-xjj6-f33q-929c
   "undici@8": ^8.12.2 # GHSA-2gqq-gqf2-x968, GHSA-2jfj-6hjv-fm6j, GHSA-3wwx-pv8p-q78v, GHSA-3xpg-4rpp-hhhm, GHSA-4qv8-2p9j-2685, GHSA-8436-99hf-9mmv, GHSA-f72v-6w45-q472, GHSA-pmjh-fq2x-6v4x, GHSA-r53p-7pc4-xj5r, GHSA-rfgv-xxqx-mfg5, GHSA-rx4f-c7p8-82vq, GHSA-w293-vg96-wgc3, GHSA-xjj6-f33q-929c, GHSA-vp8m-p9jh-q5pm
   uuid: ^11.1.1 # GHSA-w5hq-g745-h8pq
-  "vite@6": ^6.4.4 # GHSA-587h-7wmj-h5pm, GHSA-698v-4r3x-3vcv, GHSA-9jrq-w75r-8gcw, GHSA-r825-w8mm-5pxw, GHSA-rq7h-c2jc-7f22
+  "vite@6": ^6.4.5 # GHSA-587h-7wmj-h5pm, GHSA-698v-4r3x-3vcv, GHSA-9jrq-w75r-8gcw, GHSA-r825-w8mm-5pxw, GHSA-rq7h-c2jc-7f22, GHSA-8g5g-mxqh-grgj
   zod: ^4.6.6 # GHSA-mrhx-c7xc-m3w5
   # GHSA-67mh-4wv8-2f99 is fixed in 0.25.0, and 0.27.2 also stays below the
   # 0.27.3-0.28.0 window of GHSA-g7r4-m6w7-qqqr. Exact on purpose: raise to
@@ -55,15 +55,21 @@ allowBuilds:
 # Revisit 2026-11: re-check npm for a patched image-size, or re-accept with a new
 # date.
 #
-# node-forge 1.4.0 (via web-ext>@devicefarmer/adbkit): GHSA-86w9-cpqp-85rv. Dev-only -
-# adbkit is web-ext's Android bridge, which this repo never runs (no `web-ext run
-# -t firefox-android`). The advisory names >=1.4.1 as patched but npm has no such
-# version; drop both entries once one ships and resolves here. Revisit 2026-11.
+# deepmerge 4.3.1 (via web-ext>addons-linter): GHSA-gcqx-w48m-w2h4. Dev-only - it
+# merges the linter's own config objects during `web-ext lint`. No patched release
+# on npm; drop both entries once one ships and resolves here. Revisit 2027-02.
+#
+# minimatch 3.1.5 (via eslint 9 under web-ext>addons-linter, and
+# commit-and-tag-version>dotgitignore): GHSA-g3hv-75wg-m249. Dev-only - it expands
+# this repo's own config and ignore globs. The fix exists only in 11.x, which
+# neither parent's range accepts; drop both entries once they move off 3.x.
+# Revisit 2027-02.
 auditConfig:
   ignoreGhsas:
     - GHSA-w3rx-r6r6-pgpr # accepted 2026-08-07, revisit 2026-11
     - GHSA-5p2g-fcmc-qvqq # accepted 2026-08-07, revisit 2026-11
-    - GHSA-86w9-cpqp-85rv # accepted 2026-10-24, revisit 2026-11
+    - GHSA-gcqx-w48m-w2h4 # accepted 2026-11-03, revisit 2027-02
+    - GHSA-g3hv-75wg-m249 # accepted 2026-11-03, revisit 2027-02
 
 # A transitive dependency may only come from the registry - never a git, http
 # or local reference a compromised publish slipped into someone's manifest.

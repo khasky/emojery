@@ -12,5 +12,9 @@ id = "GHSA-5p2g-fcmc-qvqq"
 reason = "image-size JXL/HEIF DoS via web-ext>addons-linter: dev-only, parses this repo's own icon assets during `web-ext lint`; no patched release on npm. Accepted 2026-08-07, revisit 2026-11."
 
 [[IgnoredVulns]]
-id = "GHSA-86w9-cpqp-85rv"
-reason = "node-forge via web-ext>@devicefarmer/adbkit: dev-only, the Android bridge of web-ext, which this repo never runs; no patched release on npm (the advisory names >=1.4.1, which does not exist). Accepted 2026-10-24, revisit 2026-11."
+id = "GHSA-gcqx-w48m-w2h4"
+reason = "deepmerge via web-ext>addons-linter: dev-only, merges the linter's own config objects during `web-ext lint`; no patched release on npm. Accepted 2026-11-03, revisit 2027-02."
+
+[[IgnoredVulns]]
+id = "GHSA-g3hv-75wg-m249"
+reason = "minimatch 3 via eslint 9 (web-ext>addons-linter) and commit-and-tag-version>dotgitignore: dev-only, expands this repo's own config and ignore globs; the fix is only in 11.x, which neither parent's range accepts. Accepted 2026-11-03, revisit 2027-02."
