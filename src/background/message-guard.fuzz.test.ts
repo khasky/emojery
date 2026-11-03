@@ -177,9 +177,10 @@ describe("parseRuntimeMessage under generated input", () => {
     let rowsSeen = 0;
     // One malformed row rejects the WHOLE import, so a row here is hostile in one field at a
     // time - otherwise the odds of a fully valid batch are nil and the accepted path, the only
-    // one with anything to assert, is never reached.
+    // one with anything to assert, is never reached. The valid site is github alone: the target
+    // fields are a GitHub repository, which no other site's rules accept.
     const rowField = <T>(...valid: T[]) => fc.oneof({ arbitrary: fc.constantFrom(...valid) as fc.Arbitrary<unknown>, weight: 12 }, { arbitrary: hostile, weight: 1 });
-    const row = fc.record({ site: rowField(...ALL_SITES), targetId: rowField("owner/repo"), targetUrl: rowField("https://github.com/owner/repo"), reaction: rowField("👍", "❤️"), ts: rowField(0, 1_700_000_000_000), action: rowField("add", "remove", "change") });
+    const row = fc.record({ site: rowField("github"), targetId: rowField("owner/repo"), targetUrl: rowField("https://github.com/owner/repo"), reaction: rowField("👍", "❤️"), ts: rowField(0, 1_700_000_000_000), action: rowField("add", "remove", "change") });
     fc.assert(
       fc.property(fc.array(fc.oneof({ arbitrary: row, weight: 8 }, { arbitrary: hostile, weight: 1 }), { minLength: 1, maxLength: 4 }), (rows) => {
         const parsed = parseRuntimeMessage({ type: "history:import", rows }, extensionPage(), RUNTIME_ID, EXT_BASE) as { rows?: Array<{ site: string; targetUrl: string; ts: number }> } | null;
