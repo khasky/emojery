@@ -25,6 +25,7 @@ overrides:
   postcss: ^8.5.23 # GHSA-r28c-9q8g-f849, GHSA-fxqj-rqcc-2cmp
   proxy-addr: ^2.0.8 # GHSA-jqcg-44mw-7w3h
   qs: ^6.16.1 # GHSA-4mjr-xmp4-gh2g, GHSA-x5fp-wj9c-mxmx, GHSA-6pq8-jhm2-2vcw
+  re2js: ^2.8.7 # GHSA-gg6h-894w-4m9c (markdownlint, docs lint only)
   shell-quote: ^1.11.0 # GHSA-395f-4hp3-45gv, GHSA-pqg4-j6r4-53mv
   smol-toml: ^1.9.0 # GHSA-7w5x-hrqm-74c2, GHSA-r4xh-jqrq-34v2
   source-map-js: ^1.2.2 # GHSA-68fv-2mgg-jv7q
@@ -47,14 +48,6 @@ allowBuilds:
 # Each entry carries a revisit date: an acceptance with no review date is how a
 # temporary one becomes permanent.
 #
-# image-size <=2.0.2 (via web-ext>addons-linter): DoS via crafted ICNS/JXL/HEIF.
-# Dev-only - addons-linter parses this repo's own icon assets during
-# `web-ext lint`, so there is no attacker-controlled input. The advisories name
-# >=2.0.3 as patched but no such version exists on npm; drop both entries (and
-# the osv-scanner.toml ones) once a fixed release ships and resolves here.
-# Revisit 2026-11: re-check npm for a patched image-size, or re-accept with a new
-# date.
-#
 # deepmerge 4.3.1 (via web-ext>addons-linter): GHSA-gcqx-w48m-w2h4. Dev-only - it
 # merges the linter's own config objects during `web-ext lint`. No patched release
 # on npm; drop both entries once one ships and resolves here. Revisit 2027-02.
@@ -66,8 +59,6 @@ allowBuilds:
 # Revisit 2027-02.
 auditConfig:
   ignoreGhsas:
-    - GHSA-w3rx-r6r6-pgpr # accepted 2026-08-07, revisit 2026-11
-    - GHSA-5p2g-fcmc-qvqq # accepted 2026-08-07, revisit 2026-11
     - GHSA-gcqx-w48m-w2h4 # accepted 2026-11-03, revisit 2027-02
     - GHSA-g3hv-75wg-m249 # accepted 2026-11-03, revisit 2027-02
 
@@ -84,7 +75,7 @@ trustPolicy: no-downgrade
 # a dev-only transitive pinned by its parent. Drop a line once the parent's
 # range resolves to a version published with provenance.
 trustPolicyExclude:
-  - '@webext-core/isolated-element@1.1.5'
+  - "@webext-core/isolated-element@1.1.5"
   - semver@5.7.2
   - semver@6.3.1
 

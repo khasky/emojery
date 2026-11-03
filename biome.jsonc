@@ -1,8 +1,8 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.13/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.6.3/schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
-    "includes": ["**", "!**/*.min.js", "!public", "!assets", "!src/shared/__generated__", "!src/ui/__generated__"]
+    "includes": ["**", "!**/*.min.js", "!public", "!assets", "!src/shared/__generated__", "!src/ui/__generated__", "!**/*.md", "!pnpm-lock.yaml"]
   },
   "formatter": { "enabled": true, "indentStyle": "space", "indentWidth": 2, "lineWidth": 320 },
   "linter": {
@@ -68,6 +68,10 @@
       "style": { "noNonNullAssertion": "off" }
     }
   },
+  // e2e reads what a user would see: whether a page carries real text past an anti-bot
+  // shell, whether a raw message key reached the screen, what an auth error says. That is
+  // `innerText` by definition; `textContent` would count hidden nodes and inline scripts.
+  "overrides": [{ "includes": ["e2e/**"], "linter": { "rules": { "performance": { "useDomNodeTextContent": "off" } } } }],
   "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "css": { "formatter": { "enabled": true }, "linter": { "enabled": true } }
 }
