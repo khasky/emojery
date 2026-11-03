@@ -4,14 +4,6 @@
 # carries its own revisit date - an acceptance nobody re-reads is a permanent one.
 
 [[IgnoredVulns]]
-id = "GHSA-w3rx-r6r6-pgpr"
-reason = "image-size ICNS DoS via web-ext>addons-linter: dev-only, parses this repo's own icon assets during `web-ext lint`; no patched release on npm. Accepted 2026-08-07, revisit 2026-11."
-
-[[IgnoredVulns]]
-id = "GHSA-5p2g-fcmc-qvqq"
-reason = "image-size JXL/HEIF DoS via web-ext>addons-linter: dev-only, parses this repo's own icon assets during `web-ext lint`; no patched release on npm. Accepted 2026-08-07, revisit 2026-11."
-
-[[IgnoredVulns]]
 id = "GHSA-gcqx-w48m-w2h4"
 reason = "deepmerge via web-ext>addons-linter: dev-only, merges the linter's own config objects during `web-ext lint`; no patched release on npm. Accepted 2026-11-03, revisit 2027-02."
 
