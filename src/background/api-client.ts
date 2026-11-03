@@ -14,8 +14,6 @@ import { API_BASE, API_TIMEOUT_MS } from "../shared/config";
 import { deadlineSignal } from "../shared/fetch-deadline";
 import { normalizeLanguageTag } from "../shared/language-tag";
 import type { RuntimeErrorCode } from "../shared/messages";
-import { randomId } from "../shared/random-id";
-import { storageLocalGet, storageLocalSet } from "../shared/webext";
 import { logApiExchange, logBackgroundError } from "./debug";
 
 export interface ApiRequestOptions {
@@ -43,7 +41,7 @@ export interface ApiReply {
 
 export async function apiRequest(path: string, options: ApiRequestOptions): Promise<ApiReply> {
   const url = `${API_BASE}${path}`;
-  const headers = options.method === "POST" ? await jsonHeaders(options) : clientHeaders(options);
+  const headers = options.method === "POST" ? jsonHeaders(options) : clientHeaders(options);
   const init: RequestInit = {
     method: options.method,
     headers,
@@ -136,82 +134,20 @@ function parseRetryAfterSeconds(value: string | null): number | undefined {
 }
 
 // No two sources share a header name, so spread order never changes the result.
-//
-// The install id is part of the request shape, so a failure to read or create it
-// propagates to the caller instead of sending a request without it.
-async function jsonHeaders(options: ApiRequestOptions): Promise<Record<string, string>> {
-  const installIdHeader = { "x-emojery-install-id": await installId() };
+function jsonHeaders(options: ApiRequestOptions): Record<string, string> {
   return {
     "content-type": "application/json",
     ...clientHeaders(options),
     ...(options.lang ? { "accept-language": options.lang } : {}),
-    ...installIdHeader,
   };
 }
 
 // Client identity headers. Not secrets.
 function clientHeaders(options: ApiRequestOptions): Record<string, string> {
-  const runtime = globalThis.chrome?.runtime;
-  const manifest = runtime?.getManifest?.();
-  const runtimeOrigin = extensionRuntimeOrigin(runtime);
+  const manifest = globalThis.chrome?.runtime?.getManifest?.();
   return {
     ...(options.token ? { authorization: `Bearer ${options.token}` } : {}),
     "x-emojery-client": "extension",
     "x-emojery-client-version": manifest?.version ?? "0.0.0",
-    ...(runtime?.id ? { "x-emojery-runtime-id": runtime.id } : {}),
-    ...(runtimeOrigin ? { "x-emojery-runtime-origin": runtimeOrigin } : {}),
   };
-}
-
-function extensionRuntimeOrigin(runtime: typeof chrome.runtime | undefined): string {
-  try {
-    const root = runtime?.getURL?.("");
-    if (!root) return "";
-    const url = new URL(root);
-    if (url.protocol === "chrome-extension:" || url.protocol === "moz-extension:" || url.protocol === "safari-web-extension:") {
-      return `${url.protocol}//${url.host}`;
-    }
-    return url.origin;
-  } catch {
-    return "";
-  }
-}
-
-// Opaque client identifier sent with every JSON POST. Not a secret, and random
-// rather than user-derived; it persists for the lifetime of the installation.
-//
-// storage.local is not a trusted store: an older build, a synced profile or a
-// hand-edited one can leave anything under this key, and the id goes straight
-// out as a request header. The readback rejects whatever the generator could not
-// have produced and generates a fresh id.
-const SECURITY_CONTEXT_KEY = "security_context_v1";
-
-interface StoredSecurityContext {
-  installId?: unknown;
-  sessionId?: unknown;
-  sessionStartedAt?: unknown;
-}
-
-async function installId(): Promise<string> {
-  const stored = await storageLocalGet([SECURITY_CONTEXT_KEY]);
-  const raw = stored[SECURITY_CONTEXT_KEY] as StoredSecurityContext | undefined;
-
-  let id = normalizeStoredId(raw?.installId);
-  // An older build stored a self-reported session next to the install id.
-  const staleSession = raw !== undefined && ("sessionId" in raw || "sessionStartedAt" in raw);
-
-  if (!id) id = randomId();
-
-  if (id !== raw?.installId || staleSession) {
-    await storageLocalSet({ [SECURITY_CONTEXT_KEY]: { installId: id } });
-  }
-
-  return id;
-}
-
-function normalizeStoredId(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  const id = value.trim();
-  if (!/^[A-Za-z0-9_-]{16,128}$/.test(id)) return null;
-  return id;
 }
