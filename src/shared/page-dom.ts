@@ -63,6 +63,10 @@ export const IMPORT_CONFIRM_COUNT_SELECTOR = `.${IMPORT_CONFIRM_COUNT_CLASS}`;
 export const ROW_SELECT_CLASS = "row-select";
 export const ROW_SELECT_SELECTOR = `select.${ROW_SELECT_CLASS}`;
 
+// The popup's line under the header once the API has retired this build (shared/client-outdated.ts).
+export const CLIENT_OUTDATED_NOTICE_CLASS = "client-outdated";
+export const CLIENT_OUTDATED_NOTICE_SELECTOR = `.${CLIENT_OUTDATED_NOTICE_CLASS}`;
+
 // --- Account tab (entrypoints/popup/popup-account.tsx) ---
 
 export const ACCOUNT_LIST_CLASS = "acct-list";

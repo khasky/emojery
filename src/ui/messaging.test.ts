@@ -11,7 +11,7 @@ vi.mock("../shared/webext", () => ({ sendRuntimeMessage: vi.fn() }));
 import { sendRuntimeMessage } from "../shared/webext";
 import { activeUserId, authStatus, sendMessage } from "./messaging";
 
-const AUTHED = { type: "auth:status", authed: true, userId: "u1", provider: null } as const;
+const AUTHED = { type: "auth:status", authed: true, userId: "u1", provider: null, outdated: false } as const;
 
 function reply(response: unknown): void {
   vi.mocked(sendRuntimeMessage).mockResolvedValue(response as never);
@@ -52,7 +52,7 @@ describe("authStatus", () => {
   });
 
   it("reports signed out when the background says so", async () => {
-    reply({ type: "auth:status", authed: false, userId: null, provider: null });
+    reply({ type: "auth:status", authed: false, userId: null, provider: null, outdated: false });
     await expect(authStatus()).resolves.toEqual({ authed: false, userId: null });
   });
 

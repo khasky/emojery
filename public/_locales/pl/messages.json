@@ -503,6 +503,12 @@
   "authErrOutdated": {
     "message": "Ta wersja Emojery jest nieaktualna. Zaktualizuj ją, aby się zalogować."
   },
+  "clientOutdatedNotice": {
+    "message": "Ta wersja Emojery jest nieaktualna. Zaktualizuj ją, aby znów głosować i się logować."
+  },
+  "clientOutdatedStoreLink": {
+    "message": "Zaktualizuj ze sklepu"
+  },
   "authErrDeviceLimit": {
     "message": "Osiągnięto limit urządzeń na ten miesiąc. Spróbuj ponownie w przyszłym miesiącu."
   },

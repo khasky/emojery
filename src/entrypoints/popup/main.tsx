@@ -2,10 +2,11 @@
 import type { ComponentChild } from "preact";
 import { render } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
+import { readClientOutdated, storeUrl } from "../../shared/client-outdated";
 import { isOwnHomepage } from "../../shared/homepage";
 import { t } from "../../shared/i18n";
 import { bootstrapPage } from "../../shared/page-bootstrap";
-import { BUILD_INFO_CLASS, DEBUG_TAB_ID, POPUP_CLASS, TAB_ID_PREFIX, TAB_PANEL_ID } from "../../shared/page-dom";
+import { BUILD_INFO_CLASS, CLIENT_OUTDATED_NOTICE_CLASS, DEBUG_TAB_ID, POPUP_CLASS, TAB_ID_PREFIX, TAB_PANEL_ID } from "../../shared/page-dom";
 import { DEFAULT_SETTINGS, getSettings, mergeSettings, type Settings, setSettings } from "../../shared/storage";
 import { applyDocumentTheme } from "../../shared/theme";
 import { withExtensionUtm } from "../../shared/tracking-links";
@@ -27,6 +28,24 @@ const BUILD_TIME = typeof __EM_BUILD_TIME__ !== "undefined" ? __EM_BUILD_TIME__ 
 
 // Question mark in a circle, drawn to the same 24px grid and 1.8 stroke as ICON_BUG beside it.
 const ICON_HELP: ComponentChild[] = [<circle cx="12" cy="12" r="9" />, <path d="M9.6 9.6a2.5 2.5 0 1 1 3.2 2.8c-.5.2-.8.7-.8 1.2v.5" />, <path d="M12 17.3h.01" />];
+
+// Shown once the API has retired this build: votes stay queued and sign-in is refused until
+// the user updates, and nothing else in the popup says why.
+function ClientOutdatedNotice() {
+  const [outdated, setOutdated] = useState(false);
+  useEffect(() => {
+    void readClientOutdated().then(setOutdated);
+  }, []);
+  if (!outdated) return null;
+  return (
+    <p class={CLIENT_OUTDATED_NOTICE_CLASS} role="status">
+      {t("clientOutdatedNotice")}{" "}
+      <a href={storeUrl()} target="_blank" rel="noopener noreferrer">
+        {t("clientOutdatedStoreLink")}
+      </a>
+    </p>
+  );
+}
 
 function App() {
   const [view, setViewState] = useState<View>(storedView);
@@ -109,6 +128,7 @@ function App() {
           ))}
         </nav>
       </header>
+      <ClientOutdatedNotice />
       {/* The panel is a Tab stop per the WAI-ARIA tabs pattern - it scrolls, so
           keyboard users must reach it. Debug is opened by the header button rather than a
           tab, so for it the panel drops to a plain region: calling it a tabpanel while no

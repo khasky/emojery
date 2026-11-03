@@ -503,6 +503,12 @@
   "authErrOutdated": {
     "message": "See Emojery versioon on aegunud. Sisselogimiseks uuenda seda."
   },
+  "clientOutdatedNotice": {
+    "message": "See Emojery versioon on aegunud. Uuenda seda, et uuesti hääletada ja sisse logida."
+  },
+  "clientOutdatedStoreLink": {
+    "message": "Uuenda poest"
+  },
   "authErrDeviceLimit": {
     "message": "Selle kuu seadmete limiit on täis. Proovi järgmisel kuul uuesti."
   },

@@ -226,6 +226,8 @@ export type RuntimeResponse =
       /** The provider the session was signed in with; null for a content script,
        *  which only needs the flag, and for a signed-out state. */
       provider: OidcProvider | null;
+      /** The API retired this build (shared/client-outdated.ts): no vote, no sign-in. */
+      outdated: boolean;
     }
   // `chooser` is the subset of `providers` that can be asked for a different
   // account; the page offers that control for those and no others.

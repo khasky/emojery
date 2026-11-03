@@ -503,6 +503,12 @@
   "authErrOutdated": {
     "message": "Tämä Emojeryn versio on vanhentunut. Päivitä se kirjautuaksesi sisään."
   },
+  "clientOutdatedNotice": {
+    "message": "Tämä Emojery-versio on vanhentunut. Päivitä se, niin voit taas äänestää ja kirjautua sisään."
+  },
+  "clientOutdatedStoreLink": {
+    "message": "Päivitä kaupasta"
+  },
   "authErrDeviceLimit": {
     "message": "Tämän kuun laiterajoitus on täynnä. Yritä uudelleen ensi kuussa."
   },

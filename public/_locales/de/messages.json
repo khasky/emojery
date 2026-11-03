@@ -503,6 +503,12 @@
   "authErrOutdated": {
     "message": "Diese Version von Emojery ist veraltet. Aktualisieren Sie sie, um sich anzumelden."
   },
+  "clientOutdatedNotice": {
+    "message": "Diese Emojery-Version ist veraltet. Aktualisiere sie, um wieder abzustimmen und dich anzumelden."
+  },
+  "clientOutdatedStoreLink": {
+    "message": "Im Store aktualisieren"
+  },
   "authErrDeviceLimit": {
     "message": "Das Gerätelimit für diesen Monat ist erreicht. Versuche es nächsten Monat erneut."
   },

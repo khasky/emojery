@@ -503,6 +503,12 @@
   "authErrOutdated": {
     "message": "Ši „Emojery“ versija pasenusi. Norėdami prisijungti, ją atnaujinkite."
   },
+  "clientOutdatedNotice": {
+    "message": "Ši Emojery versija pasenusi. Atnaujinkite ją, kad vėl galėtumėte balsuoti ir prisijungti."
+  },
+  "clientOutdatedStoreLink": {
+    "message": "Atnaujinti parduotuvėje"
+  },
   "authErrDeviceLimit": {
     "message": "Pasiektas šio mėnesio įrenginių limitas. Pabandykite dar kartą kitą mėnesį."
   },

@@ -6,6 +6,7 @@ import { type ComponentChild, Fragment, render } from "preact";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import { lastAccountPerProvider, providerTag } from "../../shared/account-names";
 import { AUTH_KEY } from "../../shared/auth-session";
+import { storeUrl } from "../../shared/client-outdated";
 import { type I18nKey, t } from "../../shared/i18n";
 import type { RuntimeResponse, SignInRefusal } from "../../shared/messages";
 import { type OidcProvider, providerAccountUrl, providerLabel, splitFeaturedProviders } from "../../shared/oidc-providers";
@@ -53,9 +54,11 @@ async function askSignIn(provider: OidcProvider, chooser: boolean): Promise<Sign
 
 // Whether a session already exists. An unreachable background answers "no", which
 // leaves the page on the sign-in card - the same place it would be without this call.
+// A retired build counts as signed out: its session votes nothing, and the card is
+// where the update notice lives.
 async function askSignedIn(): Promise<boolean> {
   const res = await sendRuntimeMessage({ type: "auth:status" }).catch(() => undefined);
-  return res?.type === "auth:status" && res.authed;
+  return res?.type === "auth:status" && res.authed && !res.outdated;
 }
 
 // The session is stored under one key, and every page that must notice a sign-in it
@@ -344,6 +347,14 @@ function ProviderStep({ providers, lastAccounts, chooserProviders, error, accept
                 </a>
               </>
             ) : null}
+            {error === "client_outdated" ? (
+              <>
+                {" "}
+                <a class="linkish" href={storeUrl()} target="_blank" rel="noopener noreferrer">
+                  {t("clientOutdatedStoreLink")}
+                </a>
+              </>
+            ) : null}
           </div>
         ) : null}
         {providers === null ? (
@@ -427,6 +438,16 @@ function App() {
   }, []);
 
   useEffect(loadProviders, [loadProviders]);
+
+  // A build the API retired says so before the reader picks a provider; the background
+  // refuses its sign-in anyway.
+  useEffect(() => {
+    void sendRuntimeMessage({ type: "auth:status" })
+      .then((res) => {
+        if (res?.type === "auth:status" && res.outdated) setError("client_outdated");
+      })
+      .catch(() => {});
+  }, []);
 
   // Device-local, so it never blocks the list: the hint appears when it appears.
   useEffect(() => {

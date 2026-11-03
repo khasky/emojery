@@ -503,6 +503,12 @@
   "authErrOutdated": {
     "message": "Emojery-এর এই সংস্করণটি পুরোনো। সাইন ইন করতে এটি আপডেট করুন।"
   },
+  "clientOutdatedNotice": {
+    "message": "Emojery-এর এই সংস্করণটি পুরোনো। আবার ভোট দিতে ও সাইন ইন করতে এটি আপডেট করুন।"
+  },
+  "clientOutdatedStoreLink": {
+    "message": "স্টোর থেকে আপডেট করুন"
+  },
   "authErrDeviceLimit": {
     "message": "এই মাসের ডিভাইস সীমা পূর্ণ হয়েছে। পরের মাসে আবার চেষ্টা করুন।"
   },

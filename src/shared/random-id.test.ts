@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// The id behind the optimistic history row and the install-id header. The contract
-// that matters is the one background/api-client.ts reads back in normalizeStoredId:
+// The id behind the optimistic history row and the sign-in state. Its shape is
 // /^[A-Za-z0-9_-]{16,128}$/. Each generator branch is pinned against it, because
 // the fallbacks only ever run where the branch above them is missing - which is exactly
 // where nobody looks until a stored id fails validation.
 
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { installFakeChrome } from "../test/fixtures";
 import { randomId } from "./random-id";
 
 // The same readback validation normalizeStoredId applies in background/api-client.ts.
@@ -55,17 +53,6 @@ describe("randomId", () => {
     // are not, and the branch that skips BOTH of them is the one no other case walks.
     vi.stubGlobal("crypto", {});
     expect(() => randomId()).toThrow(/no Web Crypto/);
-  });
-
-  it("fails the API request rather than send it without an install id", async () => {
-    // The install id is part of the request shape; apiRequest lets the failure propagate.
-    vi.stubGlobal("crypto", undefined);
-    installFakeChrome();
-    const fetchMock = vi.fn();
-    vi.stubGlobal("fetch", fetchMock);
-    const { apiRequest } = await import("../background/api-client");
-    await expect(apiRequest("/auth/oidc/exchange", { method: "POST", body: {} })).rejects.toThrow(/no Web Crypto/);
-    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("does not repeat itself", () => {

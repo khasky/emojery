@@ -262,7 +262,7 @@ describe("message router", () => {
   });
 
   it("auth:status withholds the provider from content scripts and reveals it to extension pages", async () => {
-    await expect(dispatch({ type: "auth:status" }).response).resolves.toEqual({ type: "auth:status", authed: true, userId: "u1", provider: null });
+    await expect(dispatch({ type: "auth:status" }).response).resolves.toEqual({ type: "auth:status", authed: true, userId: "u1", provider: null, outdated: false });
     vi.mocked(isExtensionPageSender).mockReturnValueOnce(true);
     await expect(dispatch({ type: "auth:status" }).response).resolves.toMatchObject({ provider: "google" });
   });

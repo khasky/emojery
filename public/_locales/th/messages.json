@@ -503,6 +503,12 @@
   "authErrOutdated": {
     "message": "Emojery เวอร์ชันนี้ล้าสมัยแล้ว โปรดอัปเดตเพื่อลงชื่อเข้าใช้"
   },
+  "clientOutdatedNotice": {
+    "message": "Emojery เวอร์ชันนี้ล้าสมัยแล้ว อัปเดตเพื่อโหวตและลงชื่อเข้าใช้อีกครั้ง"
+  },
+  "clientOutdatedStoreLink": {
+    "message": "อัปเดตจากสโตร์"
+  },
   "authErrDeviceLimit": {
     "message": "ถึงขีดจำกัดจำนวนอุปกรณ์ของเดือนนี้แล้ว โปรดลองอีกครั้งในเดือนหน้า"
   },

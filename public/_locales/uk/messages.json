@@ -503,6 +503,12 @@
   "authErrOutdated": {
     "message": "Ця версія Emojery застаріла. Оновіть її, щоб увійти."
   },
+  "clientOutdatedNotice": {
+    "message": "Ця версія Emojery застаріла. Оновіть її, щоб знову голосувати та входити."
+  },
+  "clientOutdatedStoreLink": {
+    "message": "Оновити в магазині"
+  },
   "authErrDeviceLimit": {
     "message": "Ліміт пристроїв на цей місяць вичерпано. Спробуйте ще раз наступного місяця."
   },

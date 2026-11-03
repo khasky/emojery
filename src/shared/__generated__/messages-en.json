@@ -501,6 +501,12 @@
  "authErrOutdated": {
   "message": "This version of Emojery is out of date. Update it to sign in."
  },
+ "clientOutdatedNotice": {
+  "message": "This version of Emojery is out of date. Update it to vote and sign in again."
+ },
+ "clientOutdatedStoreLink": {
+  "message": "Update from the store"
+ },
  "authErrDeviceLimit": {
   "message": "Device limit for this month is reached. Try again next month."
  },

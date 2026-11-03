@@ -503,6 +503,12 @@
   "authErrOutdated": {
     "message": "Questa versione di Emojery non è aggiornata. Aggiornala per accedere."
   },
+  "clientOutdatedNotice": {
+    "message": "Questa versione di Emojery non è aggiornata. Aggiornala per votare e accedere di nuovo."
+  },
+  "clientOutdatedStoreLink": {
+    "message": "Aggiorna dallo store"
+  },
   "authErrDeviceLimit": {
     "message": "Il limite di dispositivi di questo mese è stato raggiunto. Riprova il mese prossimo."
   },

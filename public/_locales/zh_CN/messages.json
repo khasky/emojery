@@ -503,6 +503,12 @@
   "authErrOutdated": {
     "message": "此版本的 Emojery 已过期。请更新后再登录。"
   },
+  "clientOutdatedNotice": {
+    "message": "此版本的 Emojery 已过时。请更新后再投票和登录。"
+  },
+  "clientOutdatedStoreLink": {
+    "message": "从商店更新"
+  },
   "authErrDeviceLimit": {
     "message": "本月的设备数量已达上限。请下个月再试。"
   },
