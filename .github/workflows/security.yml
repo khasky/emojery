@@ -55,11 +55,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_ENABLE_COMMENTS: "false"
 
+      # Minor pinned: semgrep-core segfaults (exit -11) under Python 3.15, which
+      # "3.x" started resolving to. Raise it once a Semgrep release scans clean there.
       - name: Setup Python
         if: ${{ !cancelled() }}
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version: "3.x"
+          python-version: "3.14"
 
       - name: Install Semgrep
         if: ${{ !cancelled() }}
