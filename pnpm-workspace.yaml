@@ -55,15 +55,21 @@ allowBuilds:
 # Revisit 2026-11: re-check npm for a patched image-size, or re-accept with a new
 # date.
 #
-# node-forge 1.4.0 (via web-ext>@devicefarmer/adbkit): GHSA-86w9-cpqp-85rv. Dev-only -
-# adbkit is web-ext's Android bridge, which this repo never runs (no `web-ext run
-# -t firefox-android`). The advisory names >=1.4.1 as patched but npm has no such
-# version; drop both entries once one ships and resolves here. Revisit 2026-11.
+# deepmerge 4.3.1 (via web-ext>addons-linter): GHSA-gcqx-w48m-w2h4. Dev-only - it
+# merges the linter's own config objects during `web-ext lint`. No patched release
+# on npm; drop both entries once one ships and resolves here. Revisit 2027-02.
+#
+# minimatch 3.1.5 (via eslint 9 under web-ext>addons-linter, and
+# commit-and-tag-version>dotgitignore): GHSA-g3hv-75wg-m249. Dev-only - it expands
+# this repo's own config and ignore globs. The fix exists only in 11.x, which
+# neither parent's range accepts; drop both entries once they move off 3.x.
+# Revisit 2027-02.
 auditConfig:
   ignoreGhsas:
     - GHSA-w3rx-r6r6-pgpr # accepted 2026-08-07, revisit 2026-11
     - GHSA-5p2g-fcmc-qvqq # accepted 2026-08-07, revisit 2026-11
     - GHSA-gcqx-w48m-w2h4 # accepted 2026-11-03, revisit 2027-02
+    - GHSA-g3hv-75wg-m249 # accepted 2026-11-03, revisit 2027-02
 
 # A transitive dependency may only come from the registry - never a git, http
 # or local reference a compromised publish slipped into someone's manifest.
