@@ -41,8 +41,8 @@ importers:
         specifier: github:khasky/emojery-verifier#806c4cf4f52fac4c47c3cf4430f4b02d47f13316&path:/packages/shared
         version: https://codeload.github.com/khasky/emojery-verifier/tar.gz/806c4cf4f52fac4c47c3cf4430f4b02d47f13316#path:/packages/shared
       emojibase-data:
-        specifier: ^17.0.0
-        version: 17.0.0(emojibase@17.0.0)
+        specifier: ^18.0.0
+        version: 18.0.0(emojibase@17.0.0)
       preact:
         specifier: ^10.29.8
         version: 10.29.8
@@ -2082,8 +2082,8 @@ packages:
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
 
-  emojibase-data@17.0.0:
-    resolution: {integrity: sha512-Yvgb5AWoHViHV/gq1qr5ZAarcBip+B27/ZLRsUJkbgAEaLlZ/fof9g882LTpmEpyhBNEC0m2SEmItljHsTygjA==}
+  emojibase-data@18.0.0:
+    resolution: {integrity: sha512-TPPRRYv2zPd0jKI+pTpMquwWNZXYAsC3IVsCMeg2X8y8fEzKwOks4/5bz0YavF5r6d71aGPpb6oDnUEwSLLMoA==}
     peerDependencies:
       emojibase: '*'
 
@@ -6123,7 +6123,7 @@ snapshots:
 
   emoji-regex@8.0.0: {}
 
-  emojibase-data@17.0.0(emojibase@17.0.0):
+  emojibase-data@18.0.0(emojibase@17.0.0):
     dependencies:
       emojibase: 17.0.0
 
