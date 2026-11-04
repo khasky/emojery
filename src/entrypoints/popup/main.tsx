@@ -132,14 +132,15 @@ function App() {
       {/* The panel is a Tab stop per the WAI-ARIA tabs pattern - it scrolls, so
           keyboard users must reach it. Debug is opened by the header button rather than a
           tab, so for it the panel drops to a plain region: calling it a tabpanel while no
-          tab is selected would be a lie. */}
-      <main class="tab-panel" id={TAB_PANEL_ID} role={shown === "debug" ? "region" : "tabpanel"} aria-labelledby={`${TAB_ID_PREFIX}${shown}`} tabIndex={0}>
+          tab is selected would be a lie. A section, not <main>: ARIA in HTML lets <main> carry no
+          role but its own, while a section may be either of these. */}
+      <section class="tab-panel" id={TAB_PANEL_ID} role={shown === "debug" ? "region" : "tabpanel"} aria-labelledby={`${TAB_ID_PREFIX}${shown}`} tabIndex={0}>
         {shown === "settings" && <SettingsView settings={settings} update={update} />}
         {shown === "history" && <HistoryView />}
         {shown === "account" && <AccountView />}
         {shown === "report" && <ReportView />}
         {shown === "debug" && <QueueView />}
-      </main>
+      </section>
     </div>
   );
 }
