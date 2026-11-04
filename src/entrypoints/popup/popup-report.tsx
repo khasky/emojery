@@ -53,11 +53,12 @@ const ReportForm = ({ tab, note, setNote, canSubmit, noteTooShort, sendError, su
   // Leaving the success panel unmounts the "Report another" button that held focus, so the
   // returning form takes it onto the note field. A first open is left alone.
   useAutoFocus(noteRef, autoFocus);
+  const headHref = safeHttpHref(tab.url);
   return (
     <section class="report">
       {/* Contextual header - the detected site + page URL, and the whole row links
           out to the page being reported (the external-link icon signals it). */}
-      <a class="report-head" href={safeHttpHref(tab.url) ?? undefined} target="_blank" rel="noopener noreferrer">
+      <a class="report-head" {...(headHref ? { href: headHref } : {})} target="_blank" rel="noopener noreferrer">
         {brandIcon(tab.site)}
         <div class="report-head-txt">
           <b>{SITE_LABELS[tab.site]}</b>
