@@ -5,7 +5,7 @@
 // behind, a settle that loses to a newer click, and the account-scoped wipe.
 import { afterEach, describe, expect, it } from "vitest";
 import type { TargetRef } from "../shared/adapter";
-import { clearQueuedVotes, getQueueStats, listQueuedVotes, pairKey, peekNextEligible, rememberPairs, settleVote, updateVote, upsertClick } from "./votequeue";
+import { clearQueuedVotes, getQueuedVote, getQueueStats, listQueuedVotes, pairKey, peekNextEligible, rememberPairs, settleVote, updateVote, upsertClick } from "./votequeue";
 
 const target: TargetRef = { site: "github", targetId: "khasky/emojery", url: "https://github.com/khasky/emojery" };
 const other: TargetRef = { ...target, targetId: "khasky/other", url: "https://github.com/khasky/other" };
@@ -26,6 +26,8 @@ describe("the vote queue", () => {
     expect(second).toMatchObject({ id: first.id, desired: "❤️", base: null, counter: 2, rollbackTo: null, firstQueuedAt: 1000 });
     await click("u1", other, "🔥", null);
     expect((await getQueueStats()).count).toBe(2);
+    expect(await getQueuedVote(pairKey("u1", target))).toMatchObject({ desired: "❤️" });
+    expect(await getQueuedVote(pairKey("u2", target))).toBeUndefined();
   });
 
   it("builds the next click on the state a settled record confirmed, or on what /v2/mine reported", async () => {
