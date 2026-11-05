@@ -8,6 +8,7 @@ import { countsPath } from "@emojery/shared/api";
 import type { TargetRef } from "../shared/adapter";
 import { COUNTS_READ_BUDGET_MS } from "../shared/config";
 import { deadlineSignal } from "../shared/fetch-deadline";
+import { applyReactionTransition } from "../shared/reaction-delta";
 import type { ReactionCounts, TargetCounts } from "../shared/reactions";
 import { DEFAULT_BREAKDOWN_LIMIT } from "../shared/reactions";
 import { targetKey } from "../shared/storage";
@@ -15,7 +16,7 @@ import { ApiHttpError, type ApiReply, apiRequest, isRecord } from "./api-client"
 import { logBackgroundError } from "./debug";
 import { getLiveAuth } from "./identity";
 import { normalizeReaction } from "./message-guard";
-import { type KnownPair, pairKey, rememberPairs } from "./votequeue";
+import { getQueuedVote, type KnownPair, pairKey, rememberPairs } from "./votequeue";
 
 // One retry is all a page read can afford. A `Retry-After` longer than this is
 // more than a mounted trigger can wait through, so give up rather than retry late.
@@ -230,7 +231,12 @@ async function fetchTargetCountsAndOwnReaction(target: TargetRef, limit: number)
   const base = parseTargetCounts((await countsP).body, limit);
 
   const myReaction = mineP ? ((await mineP)[targetKey(target)] ?? null) : null;
-  return { ...base, myReaction };
+  // A vote still in the queue is the user's latest word on the pair, and the server answers
+  // for the state before it: painting that answer would undo the click on screen until the
+  // vote lands (a read on sign-in or key registration races the queue's first send).
+  const queued = auth ? await getQueuedVote(pairKey(auth.userId, target)).catch(() => undefined) : undefined;
+  if (!queued) return { ...base, myReaction };
+  return { ...applyReactionTransition(base, myReaction, queued.desired), myReaction: queued.desired };
 }
 
 // The counts read, retried once on a transient failure (429/5xx). A permanent

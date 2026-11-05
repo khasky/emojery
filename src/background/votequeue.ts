@@ -136,6 +136,18 @@ export function peekNextEligible(now: number, skip: ReadonlySet<number> = new Se
   });
 }
 
+/** The pair's record still waiting for the server, if any. */
+export function getQueuedVote(pair: string): Promise<StoredVote | undefined> {
+  return tx<StoredVote | undefined>(STORE, "readonly", "getQueuedVote", (store) => {
+    let found: StoredVote | undefined;
+    const req = store.index(PAIR_INDEX).get(pair);
+    req.onsuccess = () => {
+      found = req.result as StoredVote | undefined;
+    };
+    return () => found;
+  });
+}
+
 export function listQueuedVotes(limit: number): Promise<StoredVote[]> {
   return tx<StoredVote[]>(STORE, "readonly", "listQueuedVotes", (store) => {
     let votes: StoredVote[] = [];
