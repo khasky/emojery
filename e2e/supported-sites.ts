@@ -152,6 +152,7 @@ export const SUPPORTED_SITE_SCENARIOS: SiteScenarioSpec[] = [
     // to compare the trigger against (it skipped GitHub entirely). The octicon
     // match is locale-independent and covers the starred state (`octicon-star-fill`).
     nativeSelectors: [
+      'a[data-testid="star-button"]',
       'a.btn:has(svg[class*="octicon-star"])',
       "#repo-stars-counter-star",
       'div[data-component="ReactStarringButton"]',
@@ -161,7 +162,7 @@ export const SUPPORTED_SITE_SCENARIOS: SiteScenarioSpec[] = [
       'button[aria-label^="Unstar "][aria-label*="/"]',
       'button[data-testid$="star-button"]',
     ],
-    containerSelectors: ["ul.pagehead-actions", "#repository-details-container", '[data-testid="repos-header-action-bar"]', 'react-app[app-name="react-code-view"]'],
+    containerSelectors: ['ul[data-testid="repo-header-actions"]', "ul.pagehead-actions", "#repository-details-container", '[data-testid="repos-header-action-bar"]', 'react-app[app-name="react-code-view"]'],
     maxHosts: 1,
   },
   {
@@ -170,7 +171,7 @@ export const SUPPORTED_SITE_SCENARIOS: SiteScenarioSpec[] = [
     urlKey: "GITLAB",
     mountKeyPattern: "^gitlab:",
     nativeSelectors: ['[data-testid="star-button"]', '[data-testid="star-count"]', ".project-repo-buttons .star-btn", ".project-repo-buttons .star-count", 'a[href$="/-/starrers"]', 'button[title*="star" i]', 'a[title*="star" i]'],
-    containerSelectors: [".project-home-panel .project-repo-buttons", "header.project-home-panel .project-repo-buttons"],
+    containerSelectors: [".panel-header .project-repo-buttons", ".project-home-panel .project-repo-buttons", "header.project-home-panel .project-repo-buttons"],
     maxHosts: 1,
   },
   {

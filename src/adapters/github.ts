@@ -12,8 +12,9 @@ import { parseSiteHref, pathSegments, urlTargetResolver } from "./url-target";
 // header dropped `#repo-stars-counter-star`, `ReactStarringButton` and the
 // `/star` `/unstar` forms, so the first four match older layouts only; today's
 // header matches on the aria-label pair (`Star torvalds/linux` / `Unstar ...`),
-// which is also the most stable across redesigns and both auth states.
-const STAR_SELECTORS = ["#repo-stars-counter-star", 'div[data-component="ReactStarringButton"]', 'form[action$="/star"]', 'form[action$="/unstar"]', 'button[aria-label^="Star "][aria-label*="/"]', 'button[aria-label^="Unstar "][aria-label*="/"]', 'button[data-testid$="star-button"]', 'button[data-ga-click*="star" i]'];
+// which is also the most stable across redesigns and both auth states. The test id
+// is matched on any tag: signed out the control is an `<a href="/login?...">`.
+const STAR_SELECTORS = ["#repo-stars-counter-star", 'div[data-component="ReactStarringButton"]', 'form[action$="/star"]', 'form[action$="/unstar"]', 'button[aria-label^="Star "][aria-label*="/"]', 'button[aria-label^="Unstar "][aria-label*="/"]', '[data-testid$="star-button"]', 'button[data-ga-click*="star" i]'];
 
 // Preferred search scope (avoids false positives elsewhere on the page). Current
 // Primer layout tags the action row `data-testid="repo-header-actions"`; older
