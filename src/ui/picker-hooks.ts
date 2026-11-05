@@ -67,8 +67,9 @@ export function useGridRovingFocus({ open, itemSetKey, popRef }: { open: boolean
   };
 
   // Whenever the grid's item set changes (open, search, recents/popular arriving,
-  // locale), keep exactly one item Tab-reachable.
-  useEffect(() => {
+  // locale), keep exactly one item Tab-reachable. A layout effect, so a Tab pressed right
+  // after typing a search already finds the new results' stop; a passive one runs a frame late.
+  useLayoutEffect(() => {
     if (!open) return;
     const items = gridItems();
     const first = items[0];

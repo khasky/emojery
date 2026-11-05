@@ -7,7 +7,8 @@ import { findFirstAnchor, findSiblingAction } from "./placement";
 import { closestWithin } from "./runtime";
 import { parseSiteHref, pathSegments } from "./url-target";
 
-const ACTION_CONTAINER_SELECTORS = [".project-home-panel .project-repo-buttons", "header.project-home-panel .project-repo-buttons"];
+// The paneled layout moved the project buttons from the home panel into the panel header.
+const ACTION_CONTAINER_SELECTORS = [".panel-header .project-repo-buttons", ".project-home-panel .project-repo-buttons", "header.project-home-panel .project-repo-buttons"];
 const STAR_CONTROL_SELECTORS = ['[data-testid="star-button"]', '[data-testid="star-count"]', ".project-repo-buttons .star-btn", ".project-repo-buttons .star-count", 'a[href$="/-/starrers"]', 'button[title*="star" i]', 'a[title*="star" i]'];
 const MORE_BUTTON_SELECTORS = ["#project-more-action-dropdown"];
 const FORK_BUTTON_SELECTORS = ['[data-testid="fork-button"]', '[data-testid="forks-count"]', 'a[href*="/-/forks"]'];
