@@ -177,14 +177,16 @@ interface EnrollPending {
   nonceSalt: string;
   sig: string;
   pk: string;
-  /** The id_token's exp, seconds: the retries stop 30 s before it. */
-  tokenExp: number;
+  /** Local ms after which the retries stop: 30 s short of the id_token's own lifetime, counted
+   *  from its arrival, so a device clock set wrong cannot end them early or keep them going. */
+  retryUntil: number;
 }
 
-function idTokenExp(idToken: string): number {
+function idTokenRetryUntil(idToken: string, receivedAt: number): number {
   try {
-    const payload = JSON.parse(new TextDecoder().decode(fromBase64Url(idToken.split(".")[1] ?? ""))) as { exp?: unknown };
-    return typeof payload.exp === "number" ? payload.exp : 0;
+    const payload = JSON.parse(new TextDecoder().decode(fromBase64Url(idToken.split(".")[1] ?? ""))) as { iat?: unknown; exp?: unknown };
+    if (typeof payload.iat !== "number" || typeof payload.exp !== "number") return 0;
+    return receivedAt + (payload.exp - payload.iat - 30) * 1000;
   } catch {
     return 0;
   }
@@ -215,12 +217,13 @@ async function runSignIn(provider: OidcProvider, chooser: boolean): Promise<Sign
     return { ok: false, refusal: launchRefusal(error) };
   }
   if (!responseUrl) return { ok: false, refusal: "cancelled" };
+  const receivedAt = Date.now();
   const fragment = new URLSearchParams(new URL(responseUrl).hash.replace(/^#/, ""));
   const idToken = fragment.get("id_token");
   if (fragment.get("state") !== state || !idToken) return { ok: false, refusal: fragment.get("error") ? "provider_denied" : "unavailable" };
 
   const sig = await signWithDeviceKey(provider, sessionMessage(LOG_NAME, nonceSalt, await sha256(utf8(idToken))));
-  const pending: EnrollPending = { provider, idToken, nonceSalt: toBase64Url(nonceSalt), sig: toBase64Url(sig), pk: toBase64Url(key.publicKey), tokenExp: idTokenExp(idToken) };
+  const pending: EnrollPending = { provider, idToken, nonceSalt: toBase64Url(nonceSalt), sig: toBase64Url(sig), pk: toBase64Url(key.publicKey), retryUntil: idTokenRetryUntil(idToken, receivedAt) };
   return postSession(pending, true);
 }
 
@@ -301,7 +304,7 @@ export async function resumeEnrollment(): Promise<void> {
     return;
   }
   // Past the token's exp less 30 s the server would refuse it: a new sign-in, same key.
-  if (p.tokenExp && Date.now() / 1000 > p.tokenExp - 30) {
+  if (p.retryUntil && Date.now() > p.retryUntil) {
     await dropPendingEnroll();
     return;
   }

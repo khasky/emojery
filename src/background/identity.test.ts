@@ -52,9 +52,9 @@ async function verify(provider: string, sig: string, message: Uint8Array): Promi
   return crypto.subtle.verify("Ed25519", k.pair.publicKey, fromBase64Url(sig) as BufferSource, message as BufferSource);
 }
 
-function idToken(exp = FROZEN_SEC + 600): string {
+function idToken(lifetimeSec = 600, iat = FROZEN_SEC): string {
   const enc = (o: unknown) => toBase64Url(new TextEncoder().encode(JSON.stringify(o)));
-  return `${enc({ alg: "RS256" })}.${enc({ sub: "e2e", exp })}.c2ln`;
+  return `${enc({ alg: "RS256" })}.${enc({ sub: "e2e", iat, exp: iat + lifetimeSec })}.c2ln`;
 }
 
 const STAGING_ID = "aooajklhnjjhmmffihjjofjkhpekbpaa";
@@ -177,13 +177,23 @@ describe("signInWithProvider", () => {
   });
 
   it("stops repeating once the id_token is about to expire", async () => {
-    stubIdentity((url) => `${REDIRECT}#state=${url.searchParams.get("state")}&id_token=${idToken(FROZEN_SEC + 40)}`);
+    stubIdentity((url) => `${REDIRECT}#state=${url.searchParams.get("state")}&id_token=${idToken(40)}`);
     const fetchMock = stubFetch(async () => json(200, pendingBody));
     await signInWithProvider("test");
     vi.setSystemTime(FROZEN_NOW + 15_000);
     await resumeEnrollment();
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(chromeFake.session.enroll_pending_v2).toBeUndefined();
+  });
+
+  it("counts the id_token's lifetime from its arrival, so a device clock an hour fast still repeats", async () => {
+    stubIdentity((url) => `${REDIRECT}#state=${url.searchParams.get("state")}&id_token=${idToken(300, FROZEN_SEC - 3600)}`);
+    const fetchMock = stubFetch(async () => json(200, pendingBody));
+    await signInWithProvider("test");
+    vi.setSystemTime(FROZEN_NOW + 15_000);
+    await resumeEnrollment();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(chromeFake.session.enroll_pending_v2).toMatchObject({ provider: "test" });
   });
 
   it("refuses a fragment for another state, and maps the API's refusals", async () => {
