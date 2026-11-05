@@ -7,6 +7,7 @@ import { installFakeChrome, lastFetchCall } from "../test/fixtures";
 
 vi.mock("./identity", () => ({ getLiveAuth: vi.fn() }));
 vi.mock("./votequeue", () => ({
+  getQueuedVote: vi.fn(async () => undefined),
   pairKey: (userId: string, t: { site: string; targetId: string }) => `${userId}|${t.site}|${t.targetId}`,
   rememberPairs: vi.fn(async () => {}),
 }));
@@ -16,7 +17,7 @@ import { REACTION_BYTES_MAX } from "../shared/messages";
 import { ApiHttpError, apiErrorCode } from "./api-client";
 import { clearFailedReads, clearPendingMineBatch, fetchCount, MINE_BATCH_WINDOW_MS } from "./api-read";
 import { getLiveAuth } from "./identity";
-import { rememberPairs } from "./votequeue";
+import { getQueuedVote, rememberPairs } from "./votequeue";
 
 const target: TargetRef = {
   site: "x",
@@ -75,6 +76,20 @@ describe("fetchCount", () => {
 
     expect(data.myReaction).toBe("❤️");
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("answers with a vote still in the queue over the server's state before it", async () => {
+    vi.mocked(getLiveAuth).mockResolvedValue({ token: "tok", userId: "u" } as never);
+    vi.mocked(getQueuedVote).mockResolvedValueOnce({ desired: null } as never);
+    const key = `${target.site}/${target.targetId}`;
+    vi.stubGlobal("fetch", stubMineAndCount({ [key]: { reaction: "❤️", counter: 1, seq: 3 } }, { counts: { "❤️": 2, "🔥": 1 }, total: 3, loaded: 2, hasMore: false }));
+
+    const read = fetchCount(target, 6);
+    await vi.advanceTimersByTimeAsync(MINE_BATCH_WINDOW_MS);
+    const data = await read;
+
+    expect(getQueuedVote).toHaveBeenCalledWith("u|x|1");
+    expect(data).toMatchObject({ myReaction: null, counts: { "❤️": 1, "🔥": 1 }, total: 2 });
   });
 
   it("collects the own-reaction reads of one mount burst into a single /v2/mine", async () => {
