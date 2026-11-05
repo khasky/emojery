@@ -274,6 +274,29 @@ describe("fetchCount", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it("reads a failed target again only after the server's Retry-After, or 10 s without one", async () => {
+    vi.mocked(getLiveAuth).mockResolvedValue(null);
+    const fetchMock = vi.fn(async () => new Response("slow down", { status: 429, headers: { "retry-after": "30" } }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(fetchCount(target, 6)).rejects.toThrow("http 429");
+    await vi.advanceTimersByTimeAsync(29_000);
+    await expect(fetchCount(target, 6)).rejects.toThrow("http 429");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    fetchMock.mockImplementation(async () => new Response("nope", { status: 404 }));
+    await vi.advanceTimersByTimeAsync(1_000);
+    await expect(fetchCount(target, 6)).rejects.toThrow("http 404");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    await vi.advanceTimersByTimeAsync(9_999);
+    await expect(fetchCount(target, 6)).rejects.toThrow("http 404");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    await vi.advanceTimersByTimeAsync(1);
+    await expect(fetchCount(target, 6)).rejects.toThrow("http 404");
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
   it("classifies a rejected read so the popup can tell rate-limited from offline", async () => {
     expect(apiErrorCode(new ApiHttpError(429))).toBe("rate_limited");
     expect(apiErrorCode(new ApiHttpError(503))).toBe("server");

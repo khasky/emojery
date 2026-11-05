@@ -2,10 +2,11 @@
 import { h, render } from "preact";
 import type { PickerInsertionPoint, SiteAdapter } from "../shared/adapter";
 import { AUTH_KEY } from "../shared/auth-session";
+import { READ_CACHE_TTL_MS } from "../shared/config";
 import { HIDDEN_SELECTOR, HOST_CLASS, LAYOUT_ATTR, PLACEMENT_ATTR } from "../shared/dom";
 import { ensureEnLoaded } from "../shared/emoji-meta";
 import { markCoachSeen } from "../shared/onboarding";
-import { isSiteEnabled, resolveSettings, type Settings, type TargetKey, targetKey } from "../shared/storage";
+import { getCachedCounts, isSiteEnabled, resolveSettings, type Settings, type TargetKey, targetKey } from "../shared/storage";
 import { setThemePreference } from "../shared/theme";
 import { maybePlayPublicReactionIntro, playButtonPlacement } from "./animations";
 import { maybeShowCoachMark } from "./coach-mark";
@@ -14,7 +15,7 @@ import { consumeReactHint } from "./deep-link";
 import { applyEmojiSpriteHost, preloadEmojiSprite } from "./emoji-sprite";
 import { authStatus, sendMessage } from "./messaging";
 import { cancelPendingMount, isNearPrefetchMargin, observePendingAnchor, pendingMountPoint, reobservePendingAnchor, setPendingAnchorHandler, setPendingMount } from "./mount-anchors";
-import { hydrateDeferredCounts, loadInitial, primeCachedCounts, refreshTarget } from "./mount-counts";
+import { hydrateDeferredCounts, loadInitial, primeCachedCounts, refreshTarget, rereadTarget } from "./mount-counts";
 import { isFallbackPlacement, placementModeChanged, resolveResponsivePlacement } from "./mount-placement";
 import { scheduleStyleReblend } from "./mount-reblend";
 import {
@@ -70,6 +71,34 @@ function installAuthChangeListener(): void {
         Array.from({ length: AUTH_REFRESH_CONCURRENCY }, async () => {
           for (const { cb, target } of queue) {
             await refreshTarget(cb, target, nowAuthed).catch((error: unknown) => logContentError("authChange.refreshTarget", error));
+          }
+        }),
+      );
+    })();
+  });
+}
+
+// A tab coming back into view re-reads its mounted pickers whose cached counts have
+// expired, at most once per cache lifetime, through the same bounded pool.
+let lastVisibleReread = 0;
+let visibilityListenerInstalled = false;
+function installVisibilityReread(): void {
+  if (visibilityListenerInstalled) return;
+  visibilityListenerInstalled = true;
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden || Date.now() - lastVisibleReread < READ_CACHE_TTL_MS) return;
+    lastVisibleReread = Date.now();
+    pruneDisconnected();
+    void (async () => {
+      const entries = authRefreshEntries();
+      const { misses } = await getCachedCounts(entries.map((entry) => entry.target));
+      const expired = new Set(misses.map(targetKey));
+      const { authed } = await authStatus();
+      const queue = entries.filter((entry) => expired.has(targetKey(entry.target))).values();
+      await Promise.all(
+        Array.from({ length: AUTH_REFRESH_CONCURRENCY }, async () => {
+          for (const { cb, target } of queue) {
+            await rereadTarget(cb, target, authed).catch((error: unknown) => logContentError("visibility.rereadTarget", error));
           }
         }),
       );
@@ -314,6 +343,7 @@ async function renderPicker(host: HTMLElement, point: PickerInsertionPoint, key:
   const onPick = createOnPick({ point, settings });
 
   installAuthChangeListener();
+  installVisibilityReread();
 
   const onSignIn = (): void => {
     void sendMessage({ type: "auth:openTab" }).catch((error: unknown) => logContentError("openAuthTab", error));

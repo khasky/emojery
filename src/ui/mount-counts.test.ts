@@ -15,7 +15,7 @@ import { DEFAULT_BREAKDOWN_LIMIT } from "../shared/reactions";
 import { type CachedTarget, getCachedCounts, getOwnReaction, setCachedCounts, targetKey } from "../shared/storage";
 import { maybePlayPublicReactionIntro } from "./animations";
 import { sendMessage } from "./messaging";
-import { clearCachedCountsPrime, hydrateDeferredCounts, loadInitial, pickAggregateCounts, primeCachedCounts, refreshTarget } from "./mount-counts";
+import { clearCachedCountsPrime, hydrateDeferredCounts, loadInitial, pickAggregateCounts, primeCachedCounts, refreshTarget, rereadTarget } from "./mount-counts";
 import { resetMountRegistryForTests, subscribeMount } from "./mount-registry";
 
 const point: PickerInsertionPoint = {
@@ -67,6 +67,15 @@ describe("refreshTarget", () => {
     const cb = vi.fn();
     await refreshTarget(cb, point.target, true);
     expect(cb).not.toHaveBeenCalled();
+  });
+});
+
+describe("rereadTarget", () => {
+  it("signed out, applies the server aggregate without a mine marker", async () => {
+    vi.mocked(sendMessage).mockResolvedValue(countResponse);
+    const cb = vi.fn();
+    await rereadTarget(cb, point.target, false);
+    expect(cb).toHaveBeenCalledWith({ value: aggregate, myReaction: null, authed: false });
   });
 });
 
