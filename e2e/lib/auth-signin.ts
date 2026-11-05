@@ -240,12 +240,34 @@ async function signInThroughTestProvider(authPage: Page, opts: AuthSignInOptions
       .catch(() => "");
     throw new Error(`the identity window never appeared${reported ? ` - the auth page reported: ${reported}` : ""}`);
   }
-  // The resolver drives the provider's own page, so when it fails the raw error is
-  // about a selector or a closed target and says nothing about WHY the window went
-  // away. The window's last URL does: a redirect back to the extension means the
-  // provider already answered (and the form was never shown), anything else means it
-  // died where it stood. Pair that with whatever the auth page is reporting and the
-  // failure names its own cause instead of handing over a Playwright message.
+  // A provider answer for an account another device key serves makes the extension
+  // run the sign-in once more with that key: a second identity window, completed the
+  // same way. Registered before the first is completed, so it is not missed.
+  const again = pageMatching(authPage.context(), (url) => url.startsWith("http"), 120_000);
+  await completeIdentityWindow(authPage, window, opts);
+
+  // The window closes itself once the API redirects it back; the auth page then
+  // exchanges the code and lands on the done step, or shows its refusal. A first
+  // sign-in registers the device's account key during the exchange, which the
+  // API takes tens of seconds to do, so the wait spans that.
+  const signedIn = authPage.getByRole("heading", { name: localeMessage(locale, "authDoneTitle") });
+  const outcome = expect(signedIn.or(authPage.locator(AUTH_ERROR_SELECTOR)))
+    .toBeVisible({ timeout: 120_000 })
+    .then(() => true)
+    .catch(() => false);
+  const second = await Promise.race([outcome.then(() => null), again]);
+  if (second) await completeIdentityWindow(authPage, second, opts);
+  if (!(await outcome)) return false;
+  return signedIn.isVisible();
+}
+
+// The resolver drives the provider's own page, so when it fails the raw error is
+// about a selector or a closed target and says nothing about WHY the window went
+// away. The window's last URL does: a redirect back to the extension means the
+// provider already answered (and the form was never shown), anything else means it
+// died where it stood. Pair that with whatever the auth page is reporting and the
+// failure names its own cause instead of handing over a Playwright message.
+async function completeIdentityWindow(authPage: Page, window: Page, opts: AuthSignInOptions): Promise<void> {
   try {
     await opts.completeSignIn(window);
   } catch (cause) {
@@ -258,16 +280,4 @@ async function signInThroughTestProvider(authPage: Page, opts: AuthSignInOptions
     const where = `the identity window ${closed ? "closed" : "was still open"} at ${window.url() || "an unknown URL"}`;
     throw new Error(`the provider sign-in could not be completed - ${where}${reported ? `; the auth page reported: ${reported}` : ""}`, { cause });
   }
-
-  // The window closes itself once the API redirects it back; the auth page then
-  // exchanges the code and lands on the done step, or shows its refusal. A first
-  // sign-in registers the device's account key during the exchange, which the
-  // API takes tens of seconds to do, so the wait spans that.
-  const signedIn = authPage.getByRole("heading", { name: localeMessage(locale, "authDoneTitle") });
-  const resolved = await expect(signedIn.or(authPage.locator(AUTH_ERROR_SELECTOR)))
-    .toBeVisible({ timeout: 120_000 })
-    .then(() => true)
-    .catch(() => false);
-  if (!resolved) return false;
-  return signedIn.isVisible();
 }

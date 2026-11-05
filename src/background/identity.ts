@@ -23,7 +23,7 @@ import { activateAccountSettings, clearAutoNativesForUser, clearOwnReactionsForU
 import { clearAlarm, createAlarm, identityRedirectUrl, launchWebAuthFlow, storageLocalGet, storageLocalRemove, storageLocalSet, storageSessionGet, storageSessionRemove, storageSessionSet } from "../shared/webext";
 import { apiErrorString, apiRequest, isRecord } from "./api-client";
 import { logBackgroundError } from "./debug";
-import { dropDeviceKey, ensureDeviceKey, getDeviceKey, replaceDeviceKey, signWithDeviceKey } from "./device-keys";
+import { deviceKeyForSignIn, dropDeviceKey, getDeviceKey, replaceDeviceKey, settleAccountKey, signWithDeviceKey } from "./device-keys";
 import { clearHistoryForUser } from "./history";
 
 export interface AuthState {
@@ -182,24 +182,38 @@ interface EnrollPending {
   retryUntil: number;
 }
 
-function idTokenRetryUntil(idToken: string, receivedAt: number): number {
+// The id_token's claims, read unverified: they only choose local things (the retry deadline,
+// the device key); the API verifies the token itself.
+function idTokenClaims(idToken: string): { iat?: unknown; exp?: unknown; sub?: unknown } {
   try {
-    const payload = JSON.parse(new TextDecoder().decode(fromBase64Url(idToken.split(".")[1] ?? ""))) as { iat?: unknown; exp?: unknown };
-    if (typeof payload.iat !== "number" || typeof payload.exp !== "number") return 0;
-    return receivedAt + (payload.exp - payload.iat - 30) * 1000;
+    const payload: unknown = JSON.parse(new TextDecoder().decode(fromBase64Url(idToken.split(".")[1] ?? "")));
+    return isRecord(payload) ? payload : {};
   } catch {
-    return 0;
+    return {};
   }
 }
 
-async function runSignIn(provider: OidcProvider, chooser: boolean): Promise<SignInResult> {
+function idTokenRetryUntil(claims: { iat?: unknown; exp?: unknown }, receivedAt: number): number {
+  if (typeof claims.iat !== "number" || typeof claims.exp !== "number") return 0;
+  return receivedAt + (claims.exp - claims.iat - 30) * 1000;
+}
+
+/** The provider account a device key is bound to, as stored: a hash, not the subject. */
+async function accountTag(provider: string, sub: string): Promise<string> {
+  return hex(await sha256(utf8(`emojery-account-v1\n${provider}\n${sub}`)));
+}
+
+/** `again`: the provider answered for an account another device key serves, so the sign-in
+ *  runs once more with that key, without the account chooser, which answers at once for the
+ *  account the provider is now signed in with. */
+async function runSignIn(provider: OidcProvider, chooser: boolean, again = true): Promise<SignInResult> {
   // A build the API retired cannot sign in; no provider window is opened for it.
   if (await readClientOutdated()) return { ok: false, refusal: "client_outdated" };
   const row = signInRows().find((p) => p.id === provider);
   const redirect = identityRedirectUrl();
   const code = buildCode();
   if (!row || !redirect || (row.redirectUri && !code)) return { ok: false, refusal: "unavailable" };
-  const key = await ensureDeviceKey(provider);
+  const key = await deviceKeyForSignIn(provider);
   const nonceSalt = crypto.getRandomValues(new Uint8Array(32));
   // A provider that returns to a web page (Apple) gets the build code first: the API's return
   // page forwards to the address it pins for that code. The browser still ends the flow on
@@ -222,8 +236,14 @@ async function runSignIn(provider: OidcProvider, chooser: boolean): Promise<Sign
   const idToken = fragment.get("id_token");
   if (fragment.get("state") !== state || !idToken) return { ok: false, refusal: fragment.get("error") ? "provider_denied" : "unavailable" };
 
-  const sig = await signWithDeviceKey(provider, sessionMessage(LOG_NAME, nonceSalt, await sha256(utf8(idToken))));
-  const pending: EnrollPending = { provider, idToken, nonceSalt: toBase64Url(nonceSalt), sig: toBase64Url(sig), pk: toBase64Url(key.publicKey), retryUntil: idTokenRetryUntil(idToken, receivedAt) };
+  const claims = idTokenClaims(idToken);
+  if (typeof claims.sub !== "string" || !claims.sub) return { ok: false, refusal: "provider_denied" };
+  if (!(await settleAccountKey(provider, await accountTag(provider, claims.sub), key.pk))) {
+    return again ? runSignIn(provider, false, false) : { ok: false, refusal: "unavailable" };
+  }
+
+  const sig = await signWithDeviceKey(key.pk, sessionMessage(LOG_NAME, nonceSalt, await sha256(utf8(idToken))));
+  const pending: EnrollPending = { provider, idToken, nonceSalt: toBase64Url(nonceSalt), sig: toBase64Url(sig), pk: key.pk, retryUntil: idTokenRetryUntil(claims, receivedAt) };
   return postSession(pending, true);
 }
 
@@ -235,14 +255,14 @@ async function postSession(p: EnrollPending, firstCall: boolean): Promise<SignIn
     const error = apiErrorString(reply.body);
     if (reply.status === 409 && error === "key_in_use") {
       // Our key sits under another live account: a fresh key and a new sign-in.
-      await replaceDeviceKey(p.provider);
+      await replaceDeviceKey(p.provider, p.pk);
     }
     if (!firstCall && (reply.status >= 500 || reply.status === 429)) {
       scheduleEnrollRetry(reply.retryAfterSeconds);
       return { ok: false, refusal: "unavailable" };
     }
     await dropPendingEnroll();
-    if (error === "key_failed") await replaceDeviceKey(p.provider);
+    if (error === "key_failed") await replaceDeviceKey(p.provider, p.pk);
     return { ok: false, refusal: SESSION_REFUSALS[`${reply.status} ${error}`] ?? "unavailable" };
   }
   const s = reply.body;
@@ -342,7 +362,7 @@ export async function readMe(): Promise<{ state: "pending" | "enrolled" | "faile
 /** POST /v2/auth/refresh, signed by the device key over the presented token's exp. */
 export async function refreshSession(auth: AuthState): Promise<boolean> {
   try {
-    const sig = await signWithDeviceKey(auth.provider, refreshMessage(LOG_NAME, auth.expiresAt));
+    const sig = await signWithDeviceKey(auth.pk, refreshMessage(LOG_NAME, auth.expiresAt));
     const reply = await apiRequest("/v2/auth/refresh", { method: "POST", token: auth.token, body: { sig: toBase64Url(sig) } });
     if (!reply.ok || !isRecord(reply.body) || typeof reply.body.accessToken !== "string" || typeof reply.body.expiresAt !== "number") {
       if (reply.status === 401) await clearAuth();
@@ -383,8 +403,8 @@ export async function clearPendingDeletion(): Promise<void> {
   await storageLocalRemove([DELETION_PENDING_KEY]);
 }
 
-async function clearLocalAccount(auth: Pick<AuthState, "userId" | "provider">): Promise<void> {
-  await dropDeviceKey(auth.provider);
+async function clearLocalAccount(auth: Pick<AuthState, "userId" | "pk">): Promise<void> {
+  await dropDeviceKey(auth.pk);
   await clearHistoryForUser(auth.userId);
   await clearOwnReactionsForUser(auth.userId);
   await clearAutoNativesForUser(auth.userId);
@@ -394,7 +414,7 @@ async function clearLocalAccount(auth: Pick<AuthState, "userId" | "provider">): 
 }
 
 async function requestDeletion(auth: AuthState): Promise<boolean> {
-  const body = auth.enrollHash ? { sig: toBase64Url(await signWithDeviceKey(auth.provider, retireMessage(LOG_NAME, fromBase64Url(auth.enrollHash)))) } : {};
+  const body = auth.enrollHash ? { sig: toBase64Url(await signWithDeviceKey(auth.pk, retireMessage(LOG_NAME, fromBase64Url(auth.enrollHash)))) } : {};
   const reply = await apiRequest("/v2/auth/delete", { method: "POST", token: auth.token, body, keepalive: true });
   if (reply.status === 202) return true;
   if (reply.status === 401 && apiErrorString(reply.body) === "account_deleted") return true;
@@ -418,7 +438,7 @@ export async function finishPendingDeletion(): Promise<boolean> {
   const pending = (await storageLocalGet([DELETION_PENDING_KEY]))[DELETION_PENDING_KEY] as DeletionPending | undefined;
   if (!pending) return false;
   const auth = await getLiveAuth();
-  const key = await getDeviceKey(pending.provider);
+  const key = await getDeviceKey(pending.pk);
   if (!auth || auth.provider !== pending.provider || auth.pk !== pending.pk || !key) return false;
   const done = await requestDeletion(auth).catch(() => false);
   if (done) await clearLocalAccount(auth);
