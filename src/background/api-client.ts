@@ -91,7 +91,10 @@ export async function apiRequest(path: string, options: ApiRequestOptions): Prom
 // A non-ok API response. Carries the status so callers classify the failure from
 // a field instead of re-parsing a message string.
 export class ApiHttpError extends Error {
-  constructor(readonly status: number) {
+  constructor(
+    readonly status: number,
+    readonly retryAfterSeconds?: number,
+  ) {
     super(`http ${status}`);
     this.name = "ApiHttpError";
   }

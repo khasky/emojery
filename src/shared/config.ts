@@ -14,8 +14,9 @@ declare const __EM_API_BASE__: string;
 export const API_BASE: string = (typeof __EM_API_BASE__ !== "undefined" && __EM_API_BASE__) || STAGING_API_BASE;
 
 // TTL for the local read-through counts cache, read by getCachedCounts in
-// shared/counts-cache.ts.
-export const READ_CACHE_TTL_MS = 60_000;
+// shared/counts-cache.ts. Feeds that rebuild their nodes on every scroll remount one
+// target dozens of times a minute; this keeps that to two reads a minute per target.
+export const READ_CACHE_TTL_MS = 30_000;
 
 // Deadline for a single outbound fetch. Every caller sits under a memoized promise, so a
 // fetch that never settles pins that slot for the life of the service worker or page.

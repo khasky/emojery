@@ -32,13 +32,18 @@ export async function refreshTarget(cb: RefreshCallback, target: PickerInsertion
     cb({ myReaction: null, authed: false });
     return;
   }
+  await rereadTarget(cb, target, true);
+}
+
+// One mounted picker re-read from the server: after a sign-in, and when its tab comes back into view.
+export async function rereadTarget(cb: RefreshCallback, target: PickerInsertionPoint["target"], authed: boolean): Promise<void> {
   const fresh = (await sendMessage({ type: "fetchCount", target, limit: DEFAULT_BREAKDOWN_LIMIT }).catch(() => null)) as RuntimeResponse | null;
   if (fresh?.type !== "count") return;
   const serverCounts = fresh.data;
   cb({
     value: pickAggregateCounts(serverCounts),
-    myReaction: serverCounts.myReaction ?? null,
-    authed: true,
+    myReaction: authed ? (serverCounts.myReaction ?? null) : null,
+    authed,
   });
 }
 

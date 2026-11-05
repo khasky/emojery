@@ -32,9 +32,15 @@ const inflightReads = new Map<string, Promise<TargetCounts>>();
 
 // Negative cache: virtualized feeds rebuild mounts continuously, so an outage would
 // re-issue a failed read per rebuilt mount. The stored rejection keeps its error class.
-const FAILED_READ_TTL_MS = 60_000;
+// A failed target is not read again until the server's `Retry-After`, or this hold
+// when it named none (the counts limiter's window).
+const FAILED_READ_HOLD_MS = 10_000;
 const FAILED_READ_MAX_ENTRIES = 500;
-const failedReads = new Map<string, { at: number; error: unknown }>();
+const failedReads = new Map<string, { until: number; error: unknown }>();
+
+function failedReadHoldMs(error: unknown): number {
+  return error instanceof ApiHttpError && error.retryAfterSeconds !== undefined ? error.retryAfterSeconds * 1000 : FAILED_READ_HOLD_MS;
+}
 
 /** Test-only reset: the negative cache is module state and outlives a test's stubbed fetch. */
 export function clearFailedReads(): void {
@@ -47,7 +53,7 @@ export function fetchCount(target: TargetRef, limit: number = DEFAULT_BREAKDOWN_
   if (live) return live;
   const failed = failedReads.get(key);
   if (failed) {
-    if (Date.now() - failed.at < FAILED_READ_TTL_MS) return Promise.reject(failed.error);
+    if (Date.now() < failed.until) return Promise.reject(failed.error);
     failedReads.delete(key);
   }
   const read = fetchTargetCountsAndOwnReaction(target, limit)
@@ -56,7 +62,7 @@ export function fetchCount(target: TargetRef, limit: number = DEFAULT_BREAKDOWN_
       return counts;
     })
     .catch((error: unknown) => {
-      failedReads.set(key, { at: Date.now(), error });
+      failedReads.set(key, { until: Date.now() + failedReadHoldMs(error), error });
       if (failedReads.size > FAILED_READ_MAX_ENTRIES) {
         const oldest = failedReads.keys().next().value;
         if (oldest !== undefined) failedReads.delete(oldest);
@@ -238,11 +244,11 @@ async function fetchCountsWithRetry(path: string): Promise<ApiReply> {
   const reply = await apiRequest(path, options);
   if (reply.ok) return reply;
   const retryInMs = readRetryDelayMs(reply);
-  if (retryInMs === null) throw new ApiHttpError(reply.status);
+  if (retryInMs === null) throw new ApiHttpError(reply.status, reply.retryAfterSeconds);
   await new Promise<void>((resolve) => {
     self.setTimeout(resolve, retryInMs);
   });
   const retried = await apiRequest(path, options);
-  if (!retried.ok) throw new ApiHttpError(retried.status);
+  if (!retried.ok) throw new ApiHttpError(retried.status, retried.retryAfterSeconds);
   return retried;
 }
