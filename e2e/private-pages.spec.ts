@@ -137,14 +137,24 @@ test.describe("private-page gate", () => {
   });
 
   // Variant A of the GitHub heuristic: no visibility meta at all, the only
-  // signal is the lock octicon in the repo header (older/partial server renders).
-  test("github: suppressed when only the header lock octicon marks it private", async () => {
+  // signal is the "Private" badge in the repo header. The header is rendered
+  // client-side from the page's embedded repo data, so that data is what turns
+  // private here; markup injected into the header would be rendered over.
+  test("github: suppressed when only the header badge marks it private", async () => {
     const priv = await session().context.newPage();
     try {
-      const countRewrites = await routeRewrittenDocument(priv, /github\.com\/[^/]+\/[^/?#]+/, (html) => html.replace(/<meta name="octolytics-dimension-repository_public"[^>]*>/g, "").replace(/(<div[^>]*id="repository-container-header"[^>]*>)/, '$1<svg class="octicon octicon-lock" aria-hidden="true"></svg>'));
+      const countRewrites = await routeRewrittenDocument(priv, /github\.com\/[^/]+\/[^/?#]+/, (html) =>
+        html
+          .replace(/<meta name="octolytics-dimension-repository_public"[^>]*>/g, "")
+          .replace(/"isPrivate":false/g, '"isPrivate":true')
+          .replace(/"private":false/g, '"private":true')
+          .replace(/"public":true/g, '"public":false')
+          .replace(/"visibilityLabel":"Public"/g, '"visibilityLabel":"Private"'),
+      );
       await gotoSettled(priv, GITHUB_PUBLIC, { tolerateNavError: true });
       const probe = await githubProbe(priv);
-      expect(countRewrites(), "meta should be stripped and the lock injected").toBeGreaterThan(0);
+      expect(countRewrites(), "meta should be stripped and the repo data marked private").toBeGreaterThan(0);
+      await expect(priv.locator("#repo-title-component span", { hasText: /^Private$/ }), "the header should render the Private badge").toHaveCount(1);
       expect(probe.metaPublic, JSON.stringify(probe)).toBeNull();
       // The meta is stripped here, so the rewrite count is what proves a
       // real repo document came back.

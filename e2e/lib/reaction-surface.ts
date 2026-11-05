@@ -399,7 +399,7 @@ export async function reactWith(page: Page, emoji: string): Promise<void> {
 // a fixed sleep lost that race live (the close cancelled the POST mid-flight).
 export function watchNextVoteFlush(context: BrowserContext, timeoutMs = 60_000): () => Promise<void> {
   if (isFirefoxRun()) return watchVoteQueueDrain(context, timeoutMs);
-  const flushed = context.waitForEvent("response", { predicate: (response) => response.url().includes("/reactions/vote"), timeout: timeoutMs }).then(
+  const flushed = context.waitForEvent("response", { predicate: (response) => new URL(response.url()).pathname === "/v2/react", timeout: timeoutMs }).then(
     () => true,
     () => false,
   );

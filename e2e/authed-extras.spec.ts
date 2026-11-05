@@ -372,7 +372,7 @@ test("a reaction in flight survives a reload (slow network)", async () => {
     // Hold the vote POST open so it is mid-flight at reload (the background service worker
     // sends it; context.route intercepts service-worker requests too). If it still
     // completes fast, the durable queue makes it persist either way.
-    await session.context.route("**/reactions/vote", async (route) => {
+    await session.context.route("**/v2/react", async (route) => {
       await new Promise((r) => setTimeout(r, 4_000));
       // The reload this test performs can cancel the held request; continuing a
       // cancelled route throws ("Route is already handled") and would fail the
@@ -390,7 +390,7 @@ test("a reaction in flight survives a reload (slow network)", async () => {
       })
       .toBe(true);
   } finally {
-    await session.context.unroute("**/reactions/vote").catch(() => {});
+    await session.context.unroute("**/v2/react").catch(() => {});
     await ext.ensureSignedOut(session.context).catch(() => {});
     await ext.closeSession(session);
   }

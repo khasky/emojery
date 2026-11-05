@@ -65,7 +65,7 @@ interface VoteResponse {
 function watchVoteResponses(context: BrowserContext): VoteResponse[] {
   const seen: VoteResponse[] = [];
   context.on("response", (response) => {
-    if (!response.url().includes("/reactions/vote")) return;
+    if (new URL(response.url()).pathname !== "/v2/react") return;
     const retryAfter = Number(response.headers()["retry-after"]);
     seen.push({
       status: response.status(),

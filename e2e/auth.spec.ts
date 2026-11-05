@@ -224,7 +224,7 @@ function hostPermissionForApiBase(apiBase: string): string {
 
 // Probes the same public read endpoint the extension uses; any response below 500 proves the API is up.
 async function assertApiReachable(apiBase: string): Promise<void> {
-  const probeUrl = new URL("/reactions/count", apiBase);
+  const probeUrl = new URL("/v2/reactions/popular", apiBase);
   const res = await fetch(probeUrl);
   if (res.status >= 500) {
     throw new Error(`Auth e2e API is not reachable at ${probeUrl}: ${res.status}`);
