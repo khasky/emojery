@@ -53,7 +53,7 @@ The **When CI runs it** column is the honest map of what a green pipeline has ac
 | `auth.spec.ts` | The provider sign-in through the test provider: consent gating the buttons, a cancelled window, a refused sign-in, sign-in/out, the localized provider step | Yes | Manual only |
 | `accounts.spec.ts` | Multi-account: identity isolation across switches, independent counter moves, provider-account recovery (all on GitHub) | Yes | Manual only |
 | `authed-extras.spec.ts` | Master toggle, react/un-react counter math, offline queue flush, account deletion, the Report tab, rapid reaction switching, an in-flight vote surviving a reload, the analytics-consent default | Yes | Manual only |
-| `reaction-burst.spec.ts` | A fast burst of reactions: every accepted click is counted and listed in History; a refused one is re-sent by the durable queue, losing nothing | Yes | Manual only |
+| `reaction-burst.spec.ts` | A fast burst of reactions: every click is listed in History and the server ends on each target's last pick; a 429 is waited out and the last pick still lands | Yes | Manual only |
 | `persistence.spec.ts` | Settings and reactions surviving a full browser restart; a fresh profile starts from defaults | Yes | Manual only |
 | `history-pagination.spec.ts` | Popup History paging + background IndexedDB search over a seeded 10k-row account | Yes | Manual only |
 | `settings-extras.spec.ts` | The "Reaction animations" toggle, a second open popup not live-syncing a settings change (characterized), the popup reopening on the tab it was left on, per-site off restoring the native control replace-native hid, the Theme setting repainting a live trigger and the extension's own pages, and Debug revealing the queue panel | Only the animations cases | The Theme + Debug cases every scheduled slot (`e2e-ci.yml`, own-surfaces job); the rest manual |
@@ -137,7 +137,7 @@ Every spec marked "Yes" above covers the gaps the site loops don't, **autonomous
   - rapid back-to-back reaction switches settle on the last pick without corrupting the counter;
   - a vote still in flight survives a reload;
   - the analytics-consent toggle is authed-only and defaults ON.
-- **`reaction-burst.spec.ts`** — reacting fast must not lose reactions ("I placed a lot of reactions quickly and not all of them were counted"). Clicks go through the real picker; the accounting is read from the vote responses and the popup, never from storage.
+- **`reaction-burst.spec.ts`** — reacting fast must not lose reactions ("I placed a lot of reactions quickly and not all of them were counted"). Clicks go through the real picker; the accounting is read from the vote responses and the popup, and the queue's drain from its IndexedDB store. The 429 is the harness's own answer to the first vote of the burst.
   - One case bursts across 2 targets (GitHub + GitLab): every click must be counted on the wire and appear as its own History row, right emoji, right target, newest first.
   - The other keeps clicking until a refusal comes back. Nothing extra may be counted while it does, and the durable queue must re-send every refused click afterwards, so History still holds exactly 1 row per click.
 - **`persistence.spec.ts`** — changed settings survive a full browser restart; a reaction made before a restart is still the user's reaction afterwards (re-login: `--load-extension` clears the session each launch, unlike a store install); a fresh profile starts from defaults.
@@ -196,10 +196,10 @@ Bundled Chromium by default (stable unpacked-extension loading), realistic-clien
 - `E2E_KEEP_OPEN_MS`, `E2E_KEEP_PROFILE` — keep the browser/profile after a run.
 - `E2E_RETRIES` — live-flake retry budget, 2 by default; set it to `0` to reproduce a failure raw (that also switches tracing to `retain-on-failure`). Not in `.env.e2e.example`.
 - `E2E_PERF=1` — opt in to the heap-budget run; `E2E_PERF_HEAP_LIMIT_MB` and `E2E_PERF_SCROLL_STEPS` retune it for a machine that isn't nightly CI, `E2E_PERF_METRICS_FILE` writes the measurements to a file.
-- `E2E_REFUSAL_PATH_ROUNDS`, `E2E_REFUSAL_PATH_ROUND_MS`, `E2E_REFUSAL_PATH_CLICKS`, `E2E_BURST_CLEAN_GITHUB`, `E2E_BURST_CLEAN_GITLAB` — shape of the `reaction-burst.spec.ts` runs: how many rounds and how long each one is, the click cap that makes a round that never draws a 429 fail loudly instead of clicking forever, and the click counts of the clean burst.
+- `E2E_BURST_CLEAN_GITHUB`, `E2E_BURST_CLEAN_GITLAB` — the click counts of the `reaction-burst.spec.ts` bursts.
 - `E2E_MIN_CONTRAST`, `E2E_FG_TOLERANCE` — the minimum contrast ratio `theme-contrast.spec.ts` holds the trigger to, and the per-channel tolerance when checking that the trigger color tracks the sampled site foreground.
 - `E2E_GLYPH_SETTLE_MS` [13s] — how long `glyph-size.spec.ts` lets a trigger's size stop moving before judging it. The size is allowed to converge (a late-hydrating row paints a stand-in first); the spec asserts where it lands.
-- `E2E_*_TEST_TIMEOUT_MS` (`E2E_DELETE_`, `E2E_TWO_ACCOUNT_`, `E2E_BURST_`, `E2E_REFUSAL_PATH_`, `E2E_COEXT_`, `E2E_I18N_`, `E2E_INTRO_`) plus `E2E_AUTHED_SITE_TIMEOUT_MS` — per-case budgets for the long authed flows.
+- `E2E_*_TEST_TIMEOUT_MS` (`E2E_DELETE_`, `E2E_TWO_ACCOUNT_`, `E2E_BURST_`, `E2E_COEXT_`, `E2E_I18N_`, `E2E_INTRO_`) plus `E2E_AUTHED_SITE_TIMEOUT_MS` — per-case budgets for the long authed flows.
 
 What a run is pointed at, all with a checked-in default in `.env.e2e.example`:
 

@@ -5,10 +5,12 @@
 // (no anti-bot exposure); the popup's own page doubles as the unsupported-page fixture.
 // Verification is VISUAL: the shadow-hosted trigger/counter and the extension's own
 // popup DOM - exactly what a user perceives.
-import { expect, type Page, test } from "@playwright/test";
+import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import * as ext from "./lib/extension";
 import { pollForValue } from "./lib/picker-probes";
+import { openHistoryTab } from "./lib/popup-probes";
 import { reloadAndSettle } from "./lib/reload-settle";
+import { HISTORY_ROW_SELECTOR } from "./lib/selectors";
 
 const REQUIRES_SIGNIN = ext.signInSkipReason("authed extras");
 
@@ -348,6 +350,51 @@ test("rapid reaction switching settles on the last pick without corrupting the c
     // is mandatory - and the poll surfaces it as a mismatch rather than a crash.
     await expect.poll(async () => (await ext.readCounter(page)).total, { message: "one held reaction should raise the aggregate by exactly one" }).toBe(base + 1);
   } finally {
+    await ext.ensureSignedOut(session.context).catch(() => {});
+    await ext.closeSession(session);
+  }
+});
+
+// History rows the popup lists, read once the view has rendered its rows or its
+// empty state: it shows the empty state while its storage read is in flight.
+async function historyRowCount(context: BrowserContext): Promise<number> {
+  const popup = await openHistoryTab(context);
+  try {
+    const rows = popup.locator(HISTORY_ROW_SELECTOR);
+    await expect(rows.first().or(popup.getByText(ext.enMessage("historyEmpty"), { exact: true }))).toBeVisible();
+    await popup.waitForTimeout(1_000);
+    return await rows.count();
+  } finally {
+    await popup.close().catch(() => {});
+  }
+}
+
+// A vote the server refuses with a plain 4xx can never land: the queue drops it,
+// the page goes back to what it showed before the click, and History loses the
+// click's row. The refusal is the harness's; nothing reaches the server.
+test("a vote refused with a 4xx rolls the reaction back", async () => {
+  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_SIGN_IN);
+  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
+  const session = await ext.launchSession();
+  try {
+    const page = await ext.signedInGithubPage(session.context, ext.authAccount("rollback"));
+    await ext.ensureNoOwnReaction(session.context, page);
+    const rowsBefore = await historyRowCount(session.context);
+
+    let refusals = 0;
+    await session.context.route("**/v2/react", async (route) => {
+      refusals += 1;
+      await route.fulfill({ status: 400, headers: { "content-type": "application/json", "cache-control": "no-store" }, body: JSON.stringify({ error: "bad_request" }) });
+    });
+    await ext.reactWith(page, ext.REACTIONS.heart);
+
+    await expect.poll(() => refusals, { message: "the vote should reach the wire" }).toBeGreaterThan(0);
+    await expect.poll(() => ext.hasOwnReaction(page), { message: "the refused reaction should roll back on the page", timeout: 30_000 }).toBe(false);
+    await expect.poll(() => ext.queuedVoteCount(session.context), { message: "the refused vote should leave the queue" }).toBe(0);
+    expect(await historyRowCount(session.context), "History should drop the refused click's row").toBe(rowsBefore);
+    expect(refusals, "a 4xx is final, never re-sent").toBe(1);
+  } finally {
+    await session.context.unroute("**/v2/react").catch(() => {});
     await ext.ensureSignedOut(session.context).catch(() => {});
     await ext.closeSession(session);
   }

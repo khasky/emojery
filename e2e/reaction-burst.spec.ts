@@ -1,16 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // What a user gets when they react FAST, reported as "I placed a lot of
-// reactions quickly and not all of them were counted". Per click, end to end: a
-// burst answered 200 throughout must reach History in full (right emoji, right
-// target, right order); one that meets a 429 must leave those clicks uncounted in
-// that window and still not lose them - the durable queue re-sends them, so
-// History again holds exactly one row per click.
+// reactions quickly and not all of them were counted". The queue holds one record
+// per target, the reaction the user wants there: a click made while the previous
+// vote is still on the wire replaces that record instead of queueing behind it, so
+// a burst sends fewer votes than clicks and the server ends on the LAST pick of
+// each target. End to end: History lists every click (right emoji, right target,
+// right order), the last vote the server took for each target carries its last
+// pick, and the queue drains; a burst that meets a 429 waits out its Retry-After
+// and still lands that last pick.
 //
-// Nothing is simulated: the real picker on the login-free GitHub/GitLab surfaces,
-// the real staging API, the result read from the extension's own popup. The
-// wire record below is the black-box answer to "was it counted" - the queue
-// flushes from the service worker, whose requests context-level events see too.
+// The picker, the login-free GitHub/GitLab surfaces and the staging API are real;
+// the 429 alone is answered by the harness, since the server's own limit is not
+// the test's to know. The wire record below is the black-box answer to "what was
+// counted" - the queue flushes from the service worker, whose requests
+// context-level events see too.
 import { type BrowserContext, type ElementHandle, expect, type Page, test } from "@playwright/test";
 import * as ext from "./lib/extension";
 import { pollForValue } from "./lib/picker-probes";
@@ -21,8 +25,8 @@ import { GRID_ITEM_SELECTOR, HISTORY_EMOJI_SELECTOR, HISTORY_LINK_SELECTOR, HIST
 // Tracing OFF for this file, on every attempt. The snapshotter re-serializes the
 // picker's ~600-button grid after each action, which costs seconds per pick (the
 // measurement behind the `on-first-retry` default in playwright.config.ts): a burst
-// that slow never draws a 429 at all, so a traced run of the refusal path
-// would go red for a reason that is purely the harness. Failure screenshots are
+// that slow never outruns the wire, so no click ever replaces a vote in flight and
+// the traced run tests a different queue path. Failure screenshots are
 // unaffected.
 test.use({ trace: "off" });
 
@@ -33,10 +37,8 @@ const REQUIRES_SIGNIN = ext.signInSkipReason("the reaction-burst accounting chec
 // counted 0 on the wire with every click recorded in history) - chromium-only.
 test.skip(ext.isFirefoxRun(), 'the vote responses are read off context.on("response"), which does not see Firefox\'s background-page fetches');
 
-// A burst plus the popup round-trip. The refusal path additionally waits for the
-// 429'd clicks to be re-sent, so it gets its own, longer budget.
+// A burst plus the popup round-trip.
 const BURST_TIMEOUT_MS = Number(process.env.E2E_BURST_TEST_TIMEOUT_MS ?? 300_000);
-const REFUSAL_PATH_TIMEOUT_MS = Number(process.env.E2E_REFUSAL_PATH_TEST_TIMEOUT_MS ?? 600_000);
 const DRAIN_TIMEOUT_MS = 240_000;
 
 // A clean burst: this case is about the accounting, so it stays modest and
@@ -44,20 +46,17 @@ const DRAIN_TIMEOUT_MS = 240_000;
 const GITHUB_CLICKS = Number(process.env.E2E_BURST_CLEAN_GITHUB ?? 8);
 const GITLAB_CLICKS = Number(process.env.E2E_BURST_CLEAN_GITLAB ?? 2);
 
-// Shape of the refusal path: clicks per round, how many rounds, and how long a
-// round is staggered from the one before it. Configured, never defaulted in the
-// tree. Unset (or non-positive) => that case skips, like the sign-in gate above.
-const MAX_BURST_CLICKS = Number(process.env.E2E_REFUSAL_PATH_CLICKS);
-const BURST_ROUNDS = Number(process.env.E2E_REFUSAL_PATH_ROUNDS);
-const BURST_ROUND_MS = Number(process.env.E2E_REFUSAL_PATH_ROUND_MS);
-const burstShapeConfigured = (): boolean => [MAX_BURST_CLICKS, BURST_ROUNDS, BURST_ROUND_MS].every((value) => Number.isFinite(value) && value > 0);
-const REQUIRES_BURST_SHAPE = "Set E2E_REFUSAL_PATH_CLICKS, E2E_REFUSAL_PATH_ROUNDS and E2E_REFUSAL_PATH_ROUND_MS in .env.e2e.local (see .env.e2e.example) to run the refusal-path accounting check.";
+// The Retry-After of the harness's 429: short, so the case measures the wait
+// without spending a minute on it.
+const REFUSAL_RETRY_AFTER_SEC = 3;
 
 interface VoteResponse {
   status: number;
   /** `retry-after` seconds, present on a 429. */
   retryAfterSec: number | null;
   at: number;
+  site: string;
+  reaction: string;
 }
 
 // Every vote POST the extension makes, in wire order, without reaching into the
@@ -67,50 +66,43 @@ function watchVoteResponses(context: BrowserContext): VoteResponse[] {
   context.on("response", (response) => {
     if (new URL(response.url()).pathname !== "/v2/react") return;
     const retryAfter = Number(response.headers()["retry-after"]);
+    const vote = (response.request().postDataJSON() ?? {}) as { site?: string; reaction?: string };
     seen.push({
       status: response.status(),
       retryAfterSec: Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : null,
       at: Date.now(),
+      site: vote.site ?? "",
+      reaction: vote.reaction ?? "",
     });
   });
   return seen;
 }
 
-const countedVotes = (responses: VoteResponse[]): number => responses.filter((r) => r.status === 200).length;
 const refusedVotes = (responses: VoteResponse[]): VoteResponse[] => responses.filter((r) => r.status === 429);
 
-// What the queue may take on top of a Retry-After before its next send: the
-// per-vote backoff jitter and the service worker's wake-up.
-const DRAIN_STALL_SLACK_MS = 30_000;
+// The reaction the server last took for each site, from the votes it answered 200.
+function lastCountedBySite(responses: VoteResponse[]): Record<string, string> {
+  const last: Record<string, string> = {};
+  for (const r of responses) if (r.status === 200) last[r.site] = r.reaction;
+  return last;
+}
 
-// The re-send of a refused burst takes as many server windows as the account's
-// budget needs, and that budget is not the test's to know - a fixed deadline
-// passes on one account and times out one window short on another. What must hold
-// is that the queue keeps counting: each refusal says when to retry, so a drain
-// that counts nothing for longer than the longest Retry-After seen (plus slack)
-// has stalled. Time spent counting extends the test's own budget, which then
-// bounds only the stall, never the burst size.
-async function expectDrainCountsEveryClick(context: BrowserContext, seen: () => VoteResponse[], clicks: number): Promise<void> {
-  let counted = countedVotes(seen());
-  let lastProgressAt = Date.now();
-  const stallMs = (): number => Math.max(0, ...refusedVotes(seen()).map((r) => (r.retryAfterSec ?? 0) * 1000)) + DRAIN_STALL_SLACK_MS;
-  while (counted < clicks && Date.now() - lastProgressAt <= stallMs()) {
-    await new Promise((settle) => setTimeout(settle, 2_000));
-    const now = countedVotes(seen());
-    if (now > counted) {
-      test.setTimeout(test.info().timeout + (Date.now() - lastProgressAt));
-      counted = now;
-      lastProgressAt = Date.now();
-    }
-  }
-  const pending = await queuedVoteCount(context).catch(() => null);
-  expect(counted, `all ${clicks} clicks should be counted once the queue re-sends the 429'd ones - ${counted} counted, then nothing for ${Math.round((Date.now() - lastProgressAt) / 1000)}s with ${pending ?? "unknown"} vote(s) still queued (0 queued = the rest were dropped, not delayed)`).toBe(clicks);
+// The burst is over once the queue holds nothing and the server took each target's
+// last pick; asserting earlier only sees the votes sent so far.
+async function expectBurstSettles(context: BrowserContext, seen: () => VoteResponse[], lastPicks: Record<string, string>): Promise<void> {
+  await expect
+    .poll(async () => ({ queued: await queuedVoteCount(context).catch(() => null), lastCounted: lastCountedBySite(seen()) }), {
+      message: "the queue should drain with the server holding each target's last pick",
+      timeout: DRAIN_TIMEOUT_MS,
+      intervals: [1_000],
+    })
+    .toEqual({ queued: 0, lastCounted: lastPicks });
 }
 
 // The grid lives in an OPEN shadow root, so reading it from that root directly is
 // what keeps a pick cheap: the document-wide shadow-piercing walk (lib/probe-src.ts)
 // costs seconds per call on a heavy page like a big repo header, and per click
-// that is what decides whether the refusal path can draw a 429 at all.
+// that is what decides whether a burst outruns the wire at all.
 const PICKER_GRID_ITEMS_SRC = `const pickerGridItems = () => {
   const out = [];
   for (const host of document.querySelectorAll("${OVERLAY_HOST_SELECTOR}, ${HOST_SELECTOR}")) {
@@ -145,8 +137,8 @@ function pickerOption(page: Page, emoji: string, timeoutMs = 10_000): Promise<El
 //
 // Keyboard, not a mouse click: clicking an option waits for the popover to stop moving
 // and scrolls the whole palette grid, which costs seconds per pick - a burst that slow
-// never draws a 429, which is the whole point of the refusal path
-// below. Enter on a focused <button> is the trusted activation the picker
+// never has a click replace a vote in flight. Enter on a focused <button> is the
+// trusted activation the picker
 // requires, and it is coordinate-free like openPickerTray.
 async function pickEmoji(page: Page, emoji: string): Promise<void> {
   await ext.openPickerTray(page);
@@ -181,11 +173,6 @@ async function pickerGlyphs(page: Page, count: number): Promise<string[]> {
   await page.keyboard.press("Escape").catch(() => {});
   expect(glyphs.length, "the picker grid should render enough distinct emoji for the burst").toBeGreaterThanOrEqual(count);
   return glyphs.slice(0, count);
-}
-
-// Successive rounds are staggered; the stagger is configured, not derived.
-async function waitForRoundStart(page: Page): Promise<void> {
-  await page.waitForTimeout(BURST_ROUND_MS);
 }
 
 // The host of the row's link is what says WHICH target the row belongs to.
@@ -242,9 +229,11 @@ test("a fast burst answered 200 throughout is counted in full and every click sh
     const glyphs = await pickerGlyphs(github, GITHUB_CLICKS + GITLAB_CLICKS);
     const sinceBurst = responses.length;
     const clicks: ReactionRow[] = [];
+    const lastPicks: Record<string, string> = {};
     for (const glyph of glyphs.slice(0, GITHUB_CLICKS)) {
       await pickEmoji(github, glyph);
       clicks.push({ emoji: glyph, host: hostOf(ext.githubUrl()) });
+      lastPicks.github = glyph;
     }
 
     // A second target, because the report is about reactions spread over
@@ -252,24 +241,19 @@ test("a fast burst answered 200 throughout is counted in full and every click sh
     // rather than failed when its header does not mount - that is a site-side
     // condition the placement suites own.
     // Not reset like the first target: an un-react here would land INSIDE the
-    // counted burst as a vote and a row of its own. A reaction left on GitLab by
-    // an earlier run at worst turns one pick into a toggle-off, which is still
-    // one vote and one row carrying that same emoji.
+    // burst as a row of its own. A reaction left on GitLab by an earlier run at
+    // worst turns its first pick into a toggle-off, which is still one row carrying
+    // that same emoji, and the picks after it are switches again.
     const gitlab = await ext.openSite(session.context, ext.gitlabUrl(), { requireHost: false });
     if (await ext.firstMountedKey(gitlab, "gitlab:")) {
       for (const glyph of glyphs.slice(GITHUB_CLICKS, GITHUB_CLICKS + GITLAB_CLICKS)) {
         await pickEmoji(gitlab, glyph);
         clicks.push({ emoji: glyph, host: hostOf(ext.gitlabUrl()) });
+        lastPicks.gitlab = glyph;
       }
     }
 
-    await expect
-      .poll(() => countedVotes(responses.slice(sinceBurst)), {
-        message: `every one of the ${clicks.length} clicks should reach the wire and be counted`,
-        timeout: DRAIN_TIMEOUT_MS,
-        intervals: [1_000],
-      })
-      .toBe(clicks.length);
+    await expectBurstSettles(session.context, () => responses.slice(sinceBurst), lastPicks);
 
     // Newest first, one row per click: a lost reaction shifts an older row into
     // the compared window, a doubled one repeats a glyph.
@@ -280,10 +264,9 @@ test("a fast burst answered 200 throughout is counted in full and every click sh
   }
 });
 
-test("a burst that meets a 429 is re-sent - no reaction is lost", async () => {
+test("a burst that meets a 429 waits out its Retry-After and still lands the last pick", async () => {
   test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
-  test.skip(!burstShapeConfigured(), REQUIRES_BURST_SHAPE);
-  test.setTimeout(REFUSAL_PATH_TIMEOUT_MS);
+  test.setTimeout(BURST_TIMEOUT_MS);
   const session = await ext.launchSession();
   const responses = watchVoteResponses(session.context);
   try {
@@ -291,61 +274,45 @@ test("a burst that meets a 429 is re-sent - no reaction is lost", async () => {
     const page = await ext.signedInGithubPage(session.context, ext.authAccount("burst-limit"));
     await resetTarget(session.context, page);
 
-    const glyphs = await pickerGlyphs(page, MAX_BURST_CLICKS * BURST_ROUNDS);
+    const glyphs = await pickerGlyphs(page, GITHUB_CLICKS);
     const sinceBurst = responses.length;
+    // The burst's first vote is refused the way the server refuses an account over
+    // its minute budget; every later one goes to the server.
+    let refused = false;
+    await session.context.route("**/v2/react", async (route) => {
+      if (refused) {
+        await route.fallback();
+        return;
+      }
+      refused = true;
+      await route.fulfill({
+        status: 429,
+        headers: { "content-type": "application/json", "retry-after": String(REFUSAL_RETRY_AFTER_SEC), "cache-control": "no-store" },
+        body: JSON.stringify({ error: "rate_limited", scope: "account" }),
+      });
+    });
+
     const host = hostOf(ext.githubUrl());
     const clicks: ReactionRow[] = [];
-    for (let round = 0; round < BURST_ROUNDS && refusedVotes(responses.slice(sinceBurst)).length === 0; round += 1) {
-      await waitForRoundStart(page);
-      const roundEnds = Date.now() + BURST_ROUND_MS;
-      for (const glyph of glyphs.slice(clicks.length, clicks.length + MAX_BURST_CLICKS)) {
-        if (refusedVotes(responses.slice(sinceBurst)).length > 0 || Date.now() >= roundEnds) break;
-        await pickEmoji(page, glyph);
-        clicks.push({ emoji: glyph, host });
-      }
+    for (const glyph of glyphs) {
+      await pickEmoji(page, glyph);
+      clicks.push({ emoji: glyph, host });
     }
 
-    // The click count alone cannot say why no 429 came: a burst that never
-    // reached the wire and one answered 200 throughout look identical from
-    // it. Report what the wire carried, and over how long.
-    const wireSummary = (): string => {
-      const seen = responses.slice(sinceBurst);
-      const spanSec = seen.length > 1 ? Math.round((seen[seen.length - 1]!.at - seen[0]!.at) / 100) / 10 : 0;
-      const byStatus: Record<number, number> = {};
-      for (const r of seen) byStatus[r.status] = (byStatus[r.status] ?? 0) + 1;
-      return `${clicks.length} clicks fired, ${seen.length} vote request(s) over ${spanSec}s, statuses ${JSON.stringify(byStatus)}`;
-    };
+    await expectBurstSettles(session.context, () => responses.slice(sinceBurst), { github: glyphs[glyphs.length - 1] ?? "" });
 
-    // Clicking outruns the queue: each vote is a serial round trip, so a burst is
-    // still draining long after the last press - measured 40 clicks against 3
-    // requests on the wire when the loop ended. The refusal therefore lands during
-    // the DRAIN, and asserting the instant the loop exits only ever saw the first
-    // few sends. Wait for the wire to settle one way: a 429, or the whole
-    // burst counted (which is the real "no refusal path drawn" failure).
-    await expect
-      .poll(() => refusedVotes(responses.slice(sinceBurst)).length > 0 || countedVotes(responses.slice(sinceBurst)) >= clicks.length, {
-        message: `the burst should reach the wire (${wireSummary()})`,
-        timeout: DRAIN_TIMEOUT_MS,
-        intervals: [2_000],
-      })
-      .toBe(true);
-
-    const firstRefusal = refusedVotes(responses.slice(sinceBurst))[0];
-    expect(firstRefusal, `part of the burst should draw a 429 (${wireSummary()})`).toBeDefined();
+    const seen = responses.slice(sinceBurst);
+    const firstRefusal = refusedVotes(seen)[0];
+    expect(firstRefusal, "the burst's first vote should have met the 429").toBeDefined();
     if (!firstRefusal) return;
-    expect(firstRefusal.retryAfterSec, "a 429 should tell the client when to retry").not.toBeNull();
-
-    // The 429 is real accounting: at that point fewer clicks had been counted
-    // than the user had made.
-    const countedAtRefusal = responses.slice(sinceBurst).filter((r) => r.status === 200 && r.at <= firstRefusal.at).length;
-    expect(countedAtRefusal, "the 429'd clicks should not be counted").toBeLessThan(clicks.length);
-
-    // ...and none of them is dropped: the durable queue re-sends the 429'd
-    // clicks, so the whole burst is counted in the end.
-    await expectDrainCountsEveryClick(session.context, () => responses.slice(sinceBurst), clicks.length);
+    // The account waits out the Retry-After: no vote of it answers sooner.
+    const nextAnswer = seen.find((r) => r.at > firstRefusal.at);
+    expect(nextAnswer, "a vote should follow the 429").toBeDefined();
+    expect((nextAnswer?.at ?? 0) - firstRefusal.at, `the next vote should wait out the ${REFUSAL_RETRY_AFTER_SEC} s Retry-After`).toBeGreaterThanOrEqual(REFUSAL_RETRY_AFTER_SEC * 1000);
 
     expect(await topHistoryRows(session.context, clicks.length), "History should still list every click of the burst, newest first").toEqual([...clicks].reverse());
   } finally {
+    await session.context.unroute("**/v2/react").catch(() => {});
     await ext.ensureSignedOut(session.context).catch(() => {});
     await ext.closeSession(session);
   }

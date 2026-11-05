@@ -573,15 +573,18 @@ function watchVoteQueueDrain(context: BrowserContext, timeoutMs: number): () => 
 export function queuedVoteCount(context: BrowserContext): Promise<number> {
   return evalInBackground(context, async () => {
     const { indexedDB } = globalThis as unknown as { indexedDB: IDBFactory };
+    // Opening a database that does not exist yet would create it empty at version 1,
+    // and the extension's own open would then skip the upgrade that makes its stores.
+    if (!(await indexedDB.databases()).some((info) => info.name === "emojery-react-queue")) return 0;
     const db = await new Promise<IDBDatabase>((resolveDb, reject) => {
-      const req = indexedDB.open("emojery-vote-queue");
+      const req = indexedDB.open("emojery-react-queue");
       req.onsuccess = () => resolveDb(req.result);
       req.onerror = () => reject(req.error);
     });
     try {
-      if (!db.objectStoreNames.contains("votes")) return 0;
+      if (!db.objectStoreNames.contains("pairs")) return 0;
       return await new Promise<number>((resolveCount, reject) => {
-        const req = db.transaction("votes", "readonly").objectStore("votes").count();
+        const req = db.transaction("pairs", "readonly").objectStore("pairs").count();
         req.onsuccess = () => resolveCount(req.result);
         req.onerror = () => reject(req.error);
       });
