@@ -227,7 +227,7 @@ async function send(vote: StoredVote, auth: AuthState): Promise<ApiReply> {
   const reaction = vote.desired ?? "";
   const prevReaction = vote.base ?? "";
   const message = reactMessage({ origin: auth.origin, enrollHash: fromBase64Url(auth.enrollHash as string), site: vote.target.site, targetId: vote.target.targetId, reaction, prevReaction, counter: vote.counter });
-  const sig = await signWithDeviceKey(auth.provider, message);
+  const sig = await signWithDeviceKey(auth.pk, message);
   return apiRequest("/v2/react", { method: "POST", token: auth.token, body: { site: vote.target.site, targetId: vote.target.targetId, reaction, prevReaction, counter: vote.counter, sig: toBase64Url(sig) }, keepalive: true });
 }
 

@@ -14,29 +14,38 @@ const LOG = "log-staging.emojery.app";
 const ORIGIN = `${LOG}/g0`;
 const REDIRECT = "https://abcdefghijklmnopabcdefghijklmnop.chromiumapp.org/";
 
-// The device key: a real key pair per provider, in memory.
-const keys = new Map<string, { pair: CryptoKeyPair; publicKey: Uint8Array }>();
-async function newKey(provider: string): Promise<{ provider: string; publicKey: Uint8Array }> {
+// The device keys: real key pairs in memory, by public key; a sign-in starts with the newest.
+// Which key serves which account is device-keys.browser.test.ts's; here the settle answer is
+// set per test.
+const keys = new Map<string, { provider: string; pair: CryptoKeyPair; publicKey: Uint8Array }>();
+async function newKey(provider: string): Promise<{ provider: string; pk: string; publicKey: Uint8Array }> {
   const pair = (await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"])) as CryptoKeyPair;
   const publicKey = new Uint8Array((await crypto.subtle.exportKey("raw", pair.publicKey)) as ArrayBuffer);
-  keys.set(provider, { pair, publicKey });
-  return { provider, publicKey };
+  const pk = toBase64Url(publicKey);
+  keys.set(pk, { provider, pair, publicKey });
+  return { provider, pk, publicKey };
 }
-const replaceDeviceKey = vi.fn(newKey);
-const dropDeviceKey = vi.fn(async (provider: string) => void keys.delete(provider));
+const newest = (provider: string) => [...keys.entries()].reverse().find(([, k]) => k.provider === provider);
+const replaceDeviceKey = vi.fn(async (provider: string, pk: string) => {
+  keys.delete(pk);
+  await newKey(provider);
+});
+const dropDeviceKey = vi.fn(async (pk: string) => void keys.delete(pk));
+const settleAccountKey = vi.fn(async (_provider: string, _account: string, _pk: string) => true);
 vi.mock("./device-keys", () => ({
-  ensureDeviceKey: async (provider: string) => {
-    const k = keys.get(provider);
-    return k ? { provider, publicKey: k.publicKey } : newKey(provider);
+  deviceKeyForSignIn: async (provider: string) => {
+    const found = newest(provider);
+    return found ? { provider, pk: found[0], publicKey: found[1].publicKey } : newKey(provider);
   },
-  getDeviceKey: async (provider: string) => {
-    const k = keys.get(provider);
-    return k ? { provider, publicKey: k.publicKey } : null;
+  settleAccountKey: (provider: string, account: string, pk: string) => settleAccountKey(provider, account, pk),
+  getDeviceKey: async (pk: string) => {
+    const k = keys.get(pk);
+    return k ? { provider: k.provider, pk, publicKey: k.publicKey } : null;
   },
-  replaceDeviceKey: (provider: string) => replaceDeviceKey(provider),
-  dropDeviceKey: (provider: string) => dropDeviceKey(provider),
-  signWithDeviceKey: async (provider: string, message: Uint8Array) => {
-    const k = keys.get(provider);
+  replaceDeviceKey: (provider: string, pk: string) => replaceDeviceKey(provider, pk),
+  dropDeviceKey: (pk: string) => dropDeviceKey(pk),
+  signWithDeviceKey: async (pk: string, message: Uint8Array) => {
+    const k = keys.get(pk);
     if (!k) throw new Error("no key");
     return new Uint8Array(await crypto.subtle.sign("Ed25519", k.pair.privateKey, message as BufferSource));
   },
@@ -47,7 +56,7 @@ vi.mock("./history", () => ({ clearHistoryForUser: (u: string) => clearHistoryFo
 const { deleteAccount, getAuth, listSignInProviders, readMe, refreshSession, resumeEnrollment, setOnEnrolled, signInWithProvider } = await import("./identity");
 
 async function verify(provider: string, sig: string, message: Uint8Array): Promise<boolean> {
-  const k = keys.get(provider);
+  const k = newest(provider)?.[1];
   if (!k) return false;
   return crypto.subtle.verify("Ed25519", k.pair.publicKey, fromBase64Url(sig) as BufferSource, message as BufferSource);
 }
@@ -92,6 +101,7 @@ afterEach(() => {
   keys.clear();
   replaceDeviceKey.mockClear();
   dropDeviceKey.mockClear();
+  settleAccountKey.mockReset();
   clearHistoryForUser.mockClear();
   launched = null;
 });
@@ -145,7 +155,7 @@ describe("signInWithProvider", () => {
     expect(url.searchParams.get("client_id")).toBe("emojery-staging-test");
     expect(url.searchParams.get("response_type")).toBe("id_token");
     expect(url.searchParams.get("redirect_uri")).toBe(REDIRECT);
-    const key = keys.get("test")?.publicKey as Uint8Array;
+    const key = newest("test")?.[1].publicKey as Uint8Array;
     const body = JSON.parse(String((fetchMock.mock.calls[0] as [string, RequestInit])[1].body)) as Record<string, string>;
     const salt = fromBase64Url(body.nonceSalt as string);
     const nonceInput = new Uint8Array([...new TextEncoder().encode("emojery-nonce-v1"), ...key, ...salt]);
@@ -220,6 +230,47 @@ describe("signInWithProvider", () => {
     expect(replaceDeviceKey).toHaveBeenCalledTimes(2);
   });
 
+  it("settles the key against the account the id_token names, by a hash of it", async () => {
+    stubFetch(async () => json(200, enrolledBody()));
+    await signInWithProvider("test");
+    const [provider, account, pk] = settleAccountKey.mock.calls[0] as [string, string, string];
+    expect(provider).toBe("test");
+    expect(account).toMatch(/^[0-9a-f]{64}$/);
+    expect(pk).toBe((await getAuth())?.pk);
+  });
+
+  it("signs in again, without the chooser, when the provider answered for another key's account", async () => {
+    const launches: URL[] = [];
+    stubIdentity((url) => {
+      launches.push(url);
+      return `${REDIRECT}#state=${url.searchParams.get("state")}&id_token=${idToken()}`;
+    });
+    const fetchMock = stubFetch(async () => json(200, enrolledBody()));
+    settleAccountKey.mockResolvedValueOnce(false);
+    expect(await signInWithProvider("test", true)).toEqual({ ok: true });
+    expect(launches).toHaveLength(2);
+    expect(launches[0]?.searchParams.get("prompt")).toBe("select_account");
+    expect(launches[1]?.searchParams.has("prompt")).toBe(false);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("stops after one repeat when the provider again answers for another key's account", async () => {
+    const fetchMock = stubFetch(async () => json(200, enrolledBody()));
+    settleAccountKey.mockResolvedValueOnce(false).mockResolvedValueOnce(false);
+    expect(await signInWithProvider("test")).toEqual({ ok: false, refusal: "unavailable" });
+    expect(settleAccountKey).toHaveBeenCalledTimes(2);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("refuses an id_token that names no subject", async () => {
+    const enc = (o: unknown) => toBase64Url(new TextEncoder().encode(JSON.stringify(o)));
+    const noSub = `${enc({ alg: "RS256" })}.${enc({ iat: FROZEN_SEC, exp: FROZEN_SEC + 600 })}.c2ln`;
+    stubIdentity((url) => `${REDIRECT}#state=${url.searchParams.get("state")}&id_token=${noSub}`);
+    const fetchMock = stubFetch(async () => json(200, enrolledBody()));
+    expect(await signInWithProvider("test")).toEqual({ ok: false, refusal: "provider_denied" });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("treats a closed identity window as cancelled", async () => {
     Object.assign(globalThis.chrome, { identity: { getRedirectURL: () => REDIRECT, launchWebAuthFlow: vi.fn(async () => Promise.reject(new Error("The user did not approve access."))) } });
     expect(await signInWithProvider("test")).toEqual({ ok: false, refusal: "cancelled" });
@@ -246,16 +297,18 @@ describe("the session of a signed-in key", () => {
 
   it("forgets the local account when /v2/auth/me says it was deleted", async () => {
     await signedIn();
+    const pk = (await getAuth())?.pk;
     stubFetch(async () => json(401, { error: "account_deleted" }));
     expect(await readMe()).toBeNull();
     expect(await getAuth()).toBeNull();
-    expect(dropDeviceKey).toHaveBeenCalledWith("test");
+    expect(dropDeviceKey).toHaveBeenCalledWith(pk);
   });
 
   it("deletes the account with a RETIRE the device key signed, then wipes the local account", async () => {
     await signedIn();
     // Kept before the deletion drops it from the store.
-    const publicKey = keys.get("test")?.pair.publicKey as CryptoKey;
+    const publicKey = newest("test")?.[1].pair.publicKey as CryptoKey;
+    const pk = (await getAuth())?.pk;
     const fetchMock = stubFetch(async () => new Response(null, { status: 202 }));
     expect(await deleteAccount()).toBe(true);
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
@@ -264,7 +317,7 @@ describe("the session of a signed-in key", () => {
     const signed = retireMessage(LOG, new Uint8Array(32).fill(9));
     expect(await crypto.subtle.verify("Ed25519", publicKey, fromBase64Url(sig) as BufferSource, signed as BufferSource)).toBe(true);
     expect(await crypto.subtle.verify("Ed25519", publicKey, fromBase64Url(sig) as BufferSource, retireMessage(LOG, new Uint8Array(32).fill(8)) as BufferSource)).toBe(false);
-    expect(dropDeviceKey).toHaveBeenCalledWith("test");
+    expect(dropDeviceKey).toHaveBeenCalledWith(pk);
     expect(clearHistoryForUser).toHaveBeenCalled();
     expect(await getAuth()).toBeNull();
     expect(chromeFake.local.deletion_pending_v1).toBeUndefined();
