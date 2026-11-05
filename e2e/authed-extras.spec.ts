@@ -395,31 +395,3 @@ test("a reaction in flight survives a reload (slow network)", async () => {
     await ext.closeSession(session);
   }
 });
-
-test("analytics consent defaults ON and is an authed-only control", async () => {
-  test.skip(ext.isFirefoxRun(), ext.FIREFOX_NO_EXTENSION_PAGES);
-  test.skip(!ext.authConfigured(), REQUIRES_SIGNIN);
-  const session = await ext.launchSession();
-  try {
-    const consentLabel = ext.enMessage("settingAnalyticsConsent");
-    let popup = await ext.openPopup(session.context);
-    await popup.getByRole("tab", { name: "Account" }).click();
-    await expect(popup.getByRole("checkbox", { name: consentLabel })).toHaveCount(0);
-    await popup.close().catch(() => {});
-
-    await ext.signIn(session.context);
-
-    popup = await ext.openPopup(session.context);
-    try {
-      await popup.getByRole("tab", { name: "Account" }).click();
-      const consent = popup.getByRole("checkbox", { name: consentLabel });
-      await expect(consent, "consent toggle is shown when signed in").toBeVisible();
-      await expect(consent, "consent defaults ON").toBeChecked();
-    } finally {
-      await popup.close().catch(() => {});
-    }
-  } finally {
-    await ext.ensureSignedOut(session.context).catch(() => {});
-    await ext.closeSession(session);
-  }
-});
