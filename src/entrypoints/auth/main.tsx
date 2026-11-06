@@ -70,8 +70,11 @@ function watchSignedIn(onSignedIn: () => void): () => void {
     if (area !== "local") return;
     if (changes[AUTH_KEY]?.newValue !== undefined) onSignedIn();
   };
-  chrome.storage.onChanged.addListener(listener);
-  return () => chrome.storage.onChanged.removeListener(listener);
+  // Held, not looked up again at teardown: a page orphaned by an extension update has no
+  // `chrome` left when it unmounts.
+  const changed = chrome.storage.onChanged;
+  changed.addListener(listener);
+  return () => changed.removeListener(listener);
 }
 
 async function askProviders(): Promise<{ providers: OidcProvider[]; chooser: OidcProvider[] } | null> {
