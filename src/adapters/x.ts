@@ -91,9 +91,9 @@ function findActionClusterRow(likeButton: HTMLElement, tweet: HTMLElement): HTML
 }
 
 // LANGUAGE-INDEPENDENT action recognition for logged-out X, which drops every
-// data-testid but keeps a stable `data-icon` per action (verified live:
-// like=icon-heart, reply=icon-reply, repost=icon-retweet, bookmark=icon-bookmark,
-// share=icon-outgoing). Matching the ICON makes EVERY language work identically -
+// data-testid but keeps a stable icon name per action, drawn from a sprite as
+// `<svg><use href="#icon-heart">` (verified live: like=icon-heart, reply=icon-reply,
+// repost=icon-repost, bookmark=icon-bookmark, share=icon-share-ios). Matching the ICON makes EVERY language work identically -
 // the stems below are only the fallback for a layout that omits it, which is why
 // the registry needs neither a text fallback nor count-summary rejection. Repost
 // omits `reshare` (X exposes Repost/Retweet only).

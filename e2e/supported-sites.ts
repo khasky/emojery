@@ -63,6 +63,8 @@ export const SUPPORTED_SITE_SCENARIOS: SiteScenarioSpec[] = [
       // ICON, which is language-independent - so this unauth check VERIFIES the
       // mount in EVERY language instead of skipping (anti-bot) or only English.
       'article button:has(svg[data-icon^="icon-heart" i])',
+      // The same icon drawn from a sprite: `<svg><use href="#icon-heart">`.
+      'article button:has(svg use[href^="#icon-heart" i])',
     ],
     containerSelectors: ['article[data-testid="tweet"]', 'div[role="group"][aria-label]', "article[data-tweet-id]", "article"],
     scrollSteps: [0, 450, 900, 1350, 1800],
@@ -80,6 +82,8 @@ export const SUPPORTED_SITE_SCENARIOS: SiteScenarioSpec[] = [
       'article[data-testid="tweet"] button[aria-label$=". Unlike" i]',
       // Logged-out (incognito) status page: Like by language-independent icon.
       'article button:has(svg[data-icon^="icon-heart" i])',
+      // The same icon drawn from a sprite: `<svg><use href="#icon-heart">`.
+      'article button:has(svg use[href^="#icon-heart" i])',
     ],
     containerSelectors: ['article[data-testid="tweet"]', 'div[role="group"][aria-label]', "article[data-tweet-id]", "article"],
     scrollSteps: [0, 450, 900],

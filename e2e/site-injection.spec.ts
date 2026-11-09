@@ -544,7 +544,8 @@ for (const site of supportedSiteScenarios) {
 
 // Multi-language logged-out coverage for X. Signed out, X exposes NO data-testids; the
 // adapter finds the action row and Like control by each action's stable,
-// language-INDEPENDENT `svg[data-icon]` (the `xLabels` registry in src/adapters/x.ts).
+// language-INDEPENDENT icon name, `svg[data-icon]` or a sprite's `<use href="#icon-heart">` (the
+// `xLabels` registry in src/adapters/x.ts).
 // Running the real feed in several languages keeps detection from regressing to an
 // enumerated-language list (verified live on x.com/romero: ru/uk/de/ja/zh all mount on
 // icon-heart). The CJK pair is the load-bearing half - unit coverage proves the stems miss
@@ -566,7 +567,7 @@ for (const locale of ["ru-RU", "uk-UA", "de-DE", "ja-JP", "zh-CN"]) {
 }
 
 // Theme coverage for X's logged-out (icon-based) mount. The action icons are
-// theme-INDEPENDENT (the same data-icon in light and dark, verified live), and
+// theme-INDEPENDENT (the same icon name in light and dark, verified live), and
 // logged-out X follows the system color scheme - so the picker must mount and
 // place correctly in BOTH themes. Verified here in the site-injection harness
 // (which reliably reveals X's action row, unlike the contrast harness).

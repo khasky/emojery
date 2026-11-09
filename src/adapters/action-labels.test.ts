@@ -4,13 +4,18 @@ import { type ActionKind, type ActionRegistry, defineLabelRegistry, type LabelRe
 
 const SVGNS = "http://www.w3.org/2000/svg";
 
-function control(opts: { aria?: string; text?: string; dataIcon?: string; svgAria?: string; path?: string }): HTMLElement {
+function control(opts: { aria?: string; text?: string; dataIcon?: string; spriteIcon?: string; svgAria?: string; path?: string }): HTMLElement {
   const btn = document.createElement("button");
   if (opts.aria != null) btn.setAttribute("aria-label", opts.aria);
   if (opts.text) btn.textContent = opts.text;
-  if (opts.dataIcon || opts.svgAria || opts.path) {
+  if (opts.dataIcon || opts.spriteIcon || opts.svgAria || opts.path) {
     const svg = document.createElementNS(SVGNS, "svg");
     if (opts.dataIcon) svg.setAttribute("data-icon", opts.dataIcon);
+    if (opts.spriteIcon) {
+      const use = document.createElementNS(SVGNS, "use");
+      use.setAttribute("href", `#${opts.spriteIcon}`);
+      svg.appendChild(use);
+    }
     if (opts.svgAria) svg.setAttribute("aria-label", opts.svgAria);
     if (opts.path) {
       const p = document.createElementNS(SVGNS, "path");
@@ -54,6 +59,9 @@ describe("defineLabelRegistry", () => {
       ["repost by icon (retweet)", "repost", { dataIcon: "icon-retweet" }],
       ["bookmark by icon", "bookmark", { dataIcon: "icon-bookmark" }],
       ["share by icon (outgoing)", "share", { dataIcon: "icon-outgoing" }],
+      ["like by sprite icon", "like", { spriteIcon: "icon-heart", aria: "2623 件のいいね。いいねする" }],
+      ["repost by sprite icon", "repost", { spriteIcon: "icon-repost" }],
+      ["bookmark by sprite icon", "bookmark", { spriteIcon: "icon-bookmark" }],
       ["like RU stem", "like", { aria: "Нравится" }],
       ["like UA stem", "like", { aria: "Подобається" }],
       ["like DE stem", "like", { aria: "Gefällt mir" }],
