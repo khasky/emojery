@@ -15,7 +15,7 @@ interface ActionMatcher {
   exact?: readonly string[];
   /** aria-label / visible-text regex stems (use the `/iu` flags). */
   stems?: RegExp;
-  /** Stable SVG `data-icon` value (X), tested against a descendant svg[data-icon]. */
+  /** Stable SVG icon name (X), read from a descendant svg[data-icon] or a sprite's `use` href. */
   dataIcon?: RegExp;
   /** Distinctive `svg path[d]` prefix(es) (Threads), whitespace-normalized. */
   iconPathPrefix?: string | readonly string[];
@@ -143,6 +143,11 @@ export function defineLabelRegistry(registry: ActionRegistry, options: LabelRegi
     for (const svg of Array.from(el.querySelectorAll("svg[data-icon]"))) {
       const icon = svg.getAttribute("data-icon");
       if (icon) out.push(icon);
+    }
+    // The same icon name drawn from a sprite: `<svg><use href="#icon-heart">`.
+    for (const use of Array.from(el.querySelectorAll("svg use"))) {
+      const ref = use.getAttribute("href") ?? use.getAttribute("xlink:href");
+      if (ref?.startsWith("#")) out.push(ref.slice(1));
     }
     return out;
   };
