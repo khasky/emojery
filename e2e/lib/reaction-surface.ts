@@ -235,6 +235,27 @@ export async function waitForSettledTotal(page: Page, opts: { timeout?: number; 
   return prev;
 }
 
+// The rendered total once it reaches `minimum` and then holds still for `stableMs`. A read can
+// trail the server by the extension's read cache plus the Worker's counts cache (about 50 s
+// together), so two equal reads a poll apart can both come from one stale copy; a vote another
+// spec left in flight lands inside that window. Holding still past it is what makes the value
+// safe to anchor a later delta on. Returns the last read when the timeout runs out first.
+export async function waitForStableTotalAtLeast(page: Page, minimum: number, opts: { timeout: number; interval: number; stableMs?: number }): Promise<number> {
+  const stableMs = opts.stableMs ?? 60_000;
+  const deadline = Date.now() + opts.timeout;
+  let value = (await reloadAndReadTotal(page)) ?? 0;
+  let since = Date.now();
+  while (Date.now() < deadline && !(value >= minimum && Date.now() - since >= stableMs)) {
+    await page.waitForTimeout(opts.interval);
+    const next = (await reloadAndReadTotal(page)) ?? 0;
+    if (next !== value) {
+      value = next;
+      since = Date.now();
+    }
+  }
+  return value;
+}
+
 // Whether the signed-in user has an own reaction on the page's (single) target, via the stable
 // `data-active="true"` marker - sprite-proof, unlike a textContent read. NOT key-scoped: it
 // reads the first VISIBLE host, because a host can land in a different DOM node than its keyed
@@ -568,28 +589,43 @@ function watchVoteQueueDrain(context: BrowserContext, timeoutMs: number): () => 
   };
 }
 
+// Records in one of the extension's IndexedDB stores, read from its background.
+function idbStoreCount(context: BrowserContext, dbName: string, storeName: string): Promise<number> {
+  return evalInBackground(
+    context,
+    async ([name, store]) => {
+      const { indexedDB } = globalThis as unknown as { indexedDB: IDBFactory };
+      // Opening a database that does not exist yet would create it empty at version 1,
+      // and the extension's own open would then skip the upgrade that makes its stores.
+      if (!(await indexedDB.databases()).some((info) => info.name === name)) return 0;
+      const db = await new Promise<IDBDatabase>((resolveDb, reject) => {
+        const req = indexedDB.open(name);
+        req.onsuccess = () => resolveDb(req.result);
+        req.onerror = () => reject(req.error);
+      });
+      try {
+        if (!db.objectStoreNames.contains(store)) return 0;
+        return await new Promise<number>((resolveCount, reject) => {
+          const req = db.transaction(store, "readonly").objectStore(store).count();
+          req.onsuccess = () => resolveCount(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      } finally {
+        db.close();
+      }
+    },
+    [dbName, storeName] as const,
+  );
+}
+
 // Votes still waiting in the durable IndexedDB queue. Store names mirror
 // src/background/votequeue.ts.
 export function queuedVoteCount(context: BrowserContext): Promise<number> {
-  return evalInBackground(context, async () => {
-    const { indexedDB } = globalThis as unknown as { indexedDB: IDBFactory };
-    // Opening a database that does not exist yet would create it empty at version 1,
-    // and the extension's own open would then skip the upgrade that makes its stores.
-    if (!(await indexedDB.databases()).some((info) => info.name === "emojery-react-queue")) return 0;
-    const db = await new Promise<IDBDatabase>((resolveDb, reject) => {
-      const req = indexedDB.open("emojery-react-queue");
-      req.onsuccess = () => resolveDb(req.result);
-      req.onerror = () => reject(req.error);
-    });
-    try {
-      if (!db.objectStoreNames.contains("pairs")) return 0;
-      return await new Promise<number>((resolveCount, reject) => {
-        const req = db.transaction("pairs", "readonly").objectStore("pairs").count();
-        req.onsuccess = () => resolveCount(req.result);
-        req.onerror = () => reject(req.error);
-      });
-    } finally {
-      db.close();
-    }
-  });
+  return idbStoreCount(context, "emojery-react-queue", "pairs");
+}
+
+// History rows of every account on this profile. Store names mirror
+// src/background/history.ts.
+export function historyEntryCount(context: BrowserContext): Promise<number> {
+  return idbStoreCount(context, "emojery-history", "history");
 }

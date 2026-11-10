@@ -50,6 +50,27 @@ function hasStoredAuthSession(context: BrowserContext): Promise<boolean> {
   );
 }
 
+// A fresh device key signs in pending: the vote the gate held is sent only once the
+// log seals its registration, and only then can history gain the row. That wait
+// belongs to the log's seal cadence, not to the flush the history timeout is sized for.
+export async function waitForEnrolledKey(context: BrowserContext, timeout = 120_000): Promise<void> {
+  await expect
+    .poll(
+      () =>
+        evalInBackground(
+          context,
+          async (key) => {
+            const api = (globalThis as { browser?: typeof browser }).browser ?? (chrome as unknown as typeof browser);
+            const stored = (await api.storage.local.get(key))[key] as { enrollSeq?: unknown } | undefined;
+            return typeof stored?.enrollSeq === "number";
+          },
+          AUTH_STORAGE_KEY,
+        ),
+      { message: "the signed-in device key should become enrolled", timeout },
+    )
+    .toBe(true);
+}
+
 export async function resolveExtensionId(context: BrowserContext): Promise<string | null> {
   // Firefox: the moz-extension "id" is the internal UUID, pinned at launch by
   // pref - the install is part of the launch, so no waiting is involved.
