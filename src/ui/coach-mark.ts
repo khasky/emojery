@@ -41,6 +41,19 @@ export async function maybeShowCoachMark(host: HTMLElement): Promise<void> {
   attemptedOnThisPage = true;
   const trigger = host.shadowRoot?.querySelector<HTMLElement>(`.${TRIGGER_CLASS}, .${COUNTER_CLASS}`);
   if (!trigger) return;
+  // A trigger used before the tip shows has taught itself: its picker (or the sign-in
+  // gate) is open by then, and a tip shown after that would sit on top of it, its
+  // dismissal listeners armed too late to see the click that opened it.
+  let used = false;
+  const onUse = (): void => {
+    used = true;
+  };
+  const stopWatchingUse = (): void => {
+    host.removeEventListener("pointerdown", onUse, true);
+    host.removeEventListener("keydown", onUse, true);
+  };
+  host.addEventListener("pointerdown", onUse, true);
+  host.addEventListener("keydown", onUse, true);
   // A mount in a background tab is not something the user witnessed. The install
   // replays content scripts into every already-open supported tab
   // (background/install.ts), so claiming there would spend the one-shot on a
@@ -48,11 +61,15 @@ export async function maybeShowCoachMark(host: HTMLElement): Promise<void> {
   await whenVisible();
   // The wait can outlive the mount - a feed recycles cards, and a tab can sit
   // hidden for hours before it is looked at.
-  if (!host.isConnected || !trigger.isConnected) return;
-  if (!(await claimCoachMark())) return;
+  if (!host.isConnected || !trigger.isConnected || !(await claimCoachMark())) {
+    stopWatchingUse();
+    return;
+  }
   // Claimed but the host may die before the delay fires; the claim stays spent -
   // a coach-mark that reappears later on some other page would read as a bug.
   window.setTimeout(() => {
+    stopWatchingUse();
+    if (used) return;
     if (!host.isConnected || !trigger.isConnected) return;
     const rect = trigger.getBoundingClientRect();
     if (rect.width === 0 && rect.height === 0) return;
