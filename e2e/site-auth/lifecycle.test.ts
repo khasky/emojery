@@ -136,7 +136,7 @@ const DEEP_SCROLL_TIMEOUT_MS = 420_000;
     // The two waits inside are hydration beats, not arbitrary: FB fetches the hovercard
     // after a dwell (150ms per link), and the trailing 800ms lets the last one land.
     await b.act(
-      `const links = await page.locator('div[role="article"] a[role="link"]').elementHandles();
+      `const links = await page.locator(':is([aria-posinset], div[role="article"]) a[role="link"]').elementHandles();
        for (const h of links.slice(0, 8)) { try { await h.hover({ timeout: 1000 }); await page.waitForTimeout(150); } catch {} }
        await page.waitForTimeout(800);`,
     );
@@ -285,7 +285,7 @@ const DEEP_SCROLL_TIMEOUT_MS = 420_000;
   test("facebook: group feed mounts hosts with no duplicate keys", async (ctx) => {
     const b = fx.need();
     await gotoSettled(b, authFacebookGroupUrl(), 4500);
-    const articles = await b.run<number>(`return await page.locator('div[role="article"]').count().catch(() => 0);`);
+    const articles = await b.run<number>(`return await page.locator('[aria-posinset], div[role="article"]').count().catch(() => 0);`);
     if (articles === 0) {
       ctx.skip(); // no group posts - set E2E_WARMUP_FACEBOOK_GROUP (auto-join+leave) or E2E_AUTHURL_FACEBOOK_GROUP
     }

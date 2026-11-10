@@ -391,9 +391,9 @@ export interface ActionMatch {
 
 export function resolvePostAction(btn: HTMLElement, verdicts: PostRowVerdicts): ActionMatch | null {
   // Structural comment rejection FIRST - covers every branch below (labeled,
-  // reel, geometry). See isInNestedArticle for why the label guards alone
+  // reel, geometry). See isInCommentArticle for why the label guards alone
   // cannot keep a comment's reaction cluster out.
-  if (isInNestedArticle(btn)) return null;
+  if (isInCommentArticle(btn)) return null;
   if (verdicts.isPostActionLikeButton(btn)) {
     // The Messenger popup's composer toolbar pairs a thumbs-up Like with a Send
     // button, which reads as a post Like - but a conversation is never a post.
@@ -599,22 +599,28 @@ function looksLikeCommentRow(row: HTMLElement): boolean {
   return fbCommentRowReject(row, fbLabels);
 }
 
-// A control inside a NESTED [role="article"] is a comment's: Facebook wraps
-// every comment in its own article INSIDE the post's article (verified live on
-// the feed and on permalink/modal surfaces - post controls sit at article
-// depth 1, comment controls at depth 2). This is the structural, language-blind
-// backstop the label guards can't be: a comment's reaction cluster (bare
-// localized Like aria + a count as text) sitting near the TOP of its comment
-// can reach the POST's own counts row within the sibling walk and borrow the
-// genuine, text-bearing comment-count chip there as its "post row" proof -
-// which mounted a picker on the first comment under a post (user report,
-// reproduced by injection). Posts themselves never nest: a standalone
-// photo/reel viewer has no article at all and a feed/permalink post's article
-// is top-level, so the guard cannot cost a real post its trigger.
-export function isInNestedArticle(el: HTMLElement): boolean {
+// The element Facebook renders one feed post as. It used to be
+// `[role="article"][aria-posinset]`; the current layout drops the role and keeps
+// `[aria-posinset]`, leaving `[role="article"]` to comments alone (verified live
+// on the home feed, a profile wall, a group wall and a permalink dialog).
+export const FB_POST_UNIT_SELECTOR = "[aria-posinset]";
+
+// A control inside a comment's [role="article"] is a comment's. A comment's
+// article always sits inside its post: in an outer post article in the older
+// layout, in the `[aria-posinset]` post unit in the current one. This is the
+// structural, language-blind backstop
+// the label guards can't be: a comment's reaction cluster (bare localized Like
+// aria + a count as text) sitting near the TOP of its comment can reach the
+// POST's own counts row within the sibling walk and borrow the genuine,
+// text-bearing comment-count chip there as its "post row" proof - which mounted
+// a picker on the first comment under a post (user report, reproduced by
+// injection). A post's own article, where one exists, is the post unit itself
+// or top-level, and a standalone photo/reel viewer has no article at all, so the
+// guard cannot cost a real post its trigger.
+export function isInCommentArticle(el: HTMLElement): boolean {
   const article = el.closest('[role="article"]');
   if (!article) return false;
-  return article.parentElement?.closest('[role="article"]') != null;
+  return article.parentElement?.closest(`[role="article"], ${FB_POST_UNIT_SELECTOR}`) != null;
 }
 
 function findFacebookVisualActionSlot(btn: HTMLElement): VisualActionSlot | null {
@@ -782,7 +788,7 @@ function matchesActionLabel(el: Element, label: string): boolean {
 // its level: a comment's Like meets its own Reply link at the first level, while
 // the comment COMPOSER a couple of levels up carries buttons whose aria spells
 // "comment" out ("Comment with a GIF", "Коментувати з GIF") and reads as a row
-// marker - one route into the comment escape isInNestedArticle documents. A real
+// marker - one route into the comment escape isInCommentArticle documents. A real
 // post action row meets Comment/Share/Send at its first marker level and never a
 // Reply, so it still resolves at that level.
 function hasBoundedActionRowSibling(el: HTMLElement): boolean {
@@ -826,7 +832,7 @@ function rowHasPostSibling(row: HTMLElement): boolean {
 // verified live on a public group's photo post, where a previous
 // text-required rule left the whole post without its trigger). Safe because the
 // comment surfaces that abuse the same aria are rejected structurally instead -
-// isInNestedArticle (checked before every branch) plus the Reply their classic
+// isInCommentArticle (checked before every branch) plus the Reply their classic
 // link row carries, which outranks any row marker here.
 function containsRowOrReplyMarker(root: Element, maxDepth: number): "row" | "reply" | null {
   let row = false;

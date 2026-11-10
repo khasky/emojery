@@ -278,7 +278,8 @@ async function scrollFacebookPageToFirstPost(page: Page): Promise<void> {
         });
         return;
       }
-      const articles = Array.from(document.querySelectorAll<HTMLElement>('[role="article"]'));
+      // A post is `[aria-posinset]` in the current layout, `[role="article"]` in the older one.
+      const articles = Array.from(document.querySelectorAll<HTMLElement>('[aria-posinset], [role="article"]'));
       const post =
         articles.find((article) => {
           const text = (article.textContent ?? "").replace(/\s+/g, " ");

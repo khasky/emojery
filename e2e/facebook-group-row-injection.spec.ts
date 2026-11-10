@@ -7,7 +7,7 @@
 // scrolled by with no trigger while its text-labeled neighbours had one.
 // The fix keeps icon-only markers valid in
 // facebook-post-row.ts containsRowOrReplyMarker; comments abusing the same aria
-// stay rejected structurally (isInNestedArticle + Reply-outranks-row).
+// stay rejected structurally (isInCommentArticle + Reply-outranks-row).
 //
 // The group content itself sits behind a login, so this spec is deterministic
 // the same way facebook-comment-injection.spec.ts is: it INJECTS the captured

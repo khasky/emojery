@@ -7,8 +7,8 @@
 // UI ships NO textual Reply link for the comment-row guard to catch. That pair
 // passed as a post action row and the picker mounted ON THE COMMENT, keyed to
 // the comment's attached photo (verified live, a `facebook:photo:<id>` key on a
-// pinned comment). What rejects it now is structural: every comment lives in a
-// NESTED [role="article"] (isInNestedArticle).
+// pinned comment). What rejects it now is structural: every comment lives in its
+// own [role="article"] inside the post (isInCommentArticle).
 //
 // So the assert is "no mount sits inside a comment", NOT "the page mounts once":
 // Facebook appends rotating SUGGESTED posts under a permalink, each a real
@@ -30,15 +30,16 @@ import { authFacebookPinnedUrl } from "./scenarios";
 // scans - hold the assert open long enough for them to have happened.
 const COMMENT_HYDRATE_MS = Number(process.env.E2E_FB_COMMENT_HYDRATE_MS ?? 8_000);
 
-// `onComments` is the bug: a comment's [role="article"] is nested inside the
-// post's, so a mount that closes onto a nested one sits on a comment.
+// `onComments` is the bug: a comment's [role="article"] sits inside its post -
+// the post's own article in the older layout, the `[aria-posinset]` post unit in
+// the current one - so a mount that closes onto such an article sits on a comment.
 const VISIBLE_MOUNTS_SRC = `
 ${DQ_SRC}
 const anchors = dq('${MOUNTED_SELECTOR}').filter((a) => a.getBoundingClientRect().width > 0);
 const keyOf = (a) => a.getAttribute('${MOUNT_ATTR}');
 const onComment = (a) => {
   const article = a.closest('[role="article"]');
-  return !!article && !!article.parentElement?.closest('[role="article"]');
+  return !!article && !!article.parentElement?.closest('[role="article"], [aria-posinset]');
 };
 return { all: anchors.map(keyOf).sort(), onComments: anchors.filter(onComment).map(keyOf).sort() };
 `;
