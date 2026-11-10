@@ -82,6 +82,9 @@ export async function setAuthOrigin(origin: string): Promise<void> {
 }
 
 export async function clearAuth(): Promise<void> {
+  // A registration still repeating in the background would store a session again and sign the
+  // user back in seconds after they signed out.
+  await dropPendingEnroll();
   await storageLocalRemove([AUTH_KEY]);
   await activateAccountSettings(SIGNED_OUT_ACCOUNT).catch((error: unknown) => logBackgroundError("clearAuth.activateAccountSettings", error));
 }
@@ -270,6 +273,9 @@ async function postSession(p: EnrollPending, firstCall: boolean): Promise<SignIn
     logBackgroundError("postSession", new Error("malformed session body"));
     return { ok: false, refusal: "unavailable" };
   }
+  // A repeat answered after sign-out dropped its registration: the session it carries is no
+  // longer wanted.
+  if (!firstCall && ((await storageSessionGet([ENROLL_PENDING_KEY]))[ENROLL_PENDING_KEY] as EnrollPending | undefined)?.idToken !== p.idToken) return { ok: false, refusal: "cancelled" };
   const enrolled = s.enroll.state === "enrolled" && typeof s.enrollHash === "string" && typeof s.enroll.seq === "number";
   const auth: AuthState = {
     userId: localAccountId(p.provider, p.pk),
