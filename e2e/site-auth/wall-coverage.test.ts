@@ -45,10 +45,12 @@ interface WallPost {
   placed: boolean;
 }
 
-// In-page audit of every TOP-LEVEL post article whose Like control is well
+// In-page audit of every TOP-LEVEL post unit whose Like control is well
 // inside the viewport (past the IntersectionObserver pending margin: likeTop < vh - 250, and not
-// scrolled out: likeTop > -150). Nested articles are comments and never count;
-// units without a post Like (people-you-may-know, join prompts) are skipped.
+// scrolled out: likeTop > -150). A post unit is `[aria-posinset]` in the current
+// layout and `[role="article"][aria-posinset]` in the older one; an article inside
+// a unit is a comment, and its Like, trigger and links never count for the post.
+// Units without a post Like (people-you-may-know, join prompts) are skipped.
 // The id prefers the post's own permalink (stable across steps), falling back
 // to aria-posinset. The Like itself is found by the shared reader, so an
 // already-reacted post and a count summary are judged here exactly as the shipped
@@ -56,22 +58,25 @@ interface WallPost {
 const WALL_AUDIT_SRC = `
 ${FB_LIKE_READER_SRC}
 const posts = [];
-const topArticles = [...document.querySelectorAll('[role="article"]')]
-  .filter((a) => !(a.parentElement && a.parentElement.closest('[role="article"]')));
+const UNIT = '[aria-posinset], [role="article"]';
+const own = (el, art) => el.closest(UNIT) === art;
+const topArticles = [...document.querySelectorAll(UNIT)]
+  .filter((a) => !(a.parentElement && a.parentElement.closest(UNIT)));
 for (const art of topArticles) {
   if (art.getBoundingClientRect().width === 0) continue;
   const like = [...art.querySelectorAll('[role="button"][aria-label]')].find((b) => {
     if (!isFbLikeButton(b)) return false;
-    if (b.closest('[role="article"]') !== art) return false;
+    if (!own(b, art)) return false;
     return b.getBoundingClientRect().width > 0;
   });
   if (!like) continue;
   const likeTop = Math.round(like.getBoundingClientRect().top);
   if (likeTop <= -150 || likeTop >= innerHeight - 250) continue;
   const host = [...art.querySelectorAll('${HOST_SELECTOR}')]
-    .find((h) => h.getBoundingClientRect().width > 0);
+    .find((h) => own(h, art) && h.getBoundingClientRect().width > 0);
   const hostTop = host ? Math.round(host.getBoundingClientRect().top) : null;
   const link = [...art.querySelectorAll('a[href]')]
+    .filter((a) => own(a, art))
     .map((a) => a.getAttribute('href') || '')
     .find((h) => /\\/posts\\/|\\/photo|pfbid|permalink|\\/videos\\/|\\/reel\\//.test(h));
   posts.push({

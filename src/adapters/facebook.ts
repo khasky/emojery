@@ -9,7 +9,7 @@
 
 import type { TargetRef } from "../shared/adapter";
 import { queryAll, queryFirst } from "../shared/dom-query";
-import { fbLikePressed, findFbReactionsMenu, findLocalStoryContainer, MODAL_SELECTOR, type PostRowVerdicts, postRowVerdicts, resolvePostAction, SCAN_SELECTORS, widenToPostUnit } from "./facebook-post-row";
+import { FB_POST_UNIT_SELECTOR, fbLikePressed, findFbReactionsMenu, findLocalStoryContainer, MODAL_SELECTOR, type PostRowVerdicts, postRowVerdicts, resolvePostAction, SCAN_SELECTORS, widenToPostUnit } from "./facebook-post-row";
 import { extractTarget, findGroupStoryPermalinkNear, recordClickedPhotoStory } from "./facebook-target";
 import { currentPagePostUrl, extractPhotoFbid, isStandalonePhotoViewerPage, isStandaloneReelViewerPage, normalizePhotoHref } from "./facebook-urls";
 import { defineSiteAdapter, type ScanContext } from "./framework";
@@ -34,7 +34,9 @@ const POST_LINK_SELECTORS = ['a[href*="/posts/"]', 'a[href*="/permalink/"]', 'a[
 
 const LAZY_LINK_SELECTOR = 'a[role="link"], a[href*="__cft__"], a[href*="__tn__"]';
 
-const POST_CONTAINER_SELECTORS = ['[role="article"]', '[data-pagelet^="FeedUnit"]'];
+// The post unit last: in the older layout it is the article itself, and a comment's
+// article inside a current-layout unit is rejected before any container search.
+const POST_CONTAINER_SELECTORS = ['[role="article"]', '[data-pagelet^="FeedUnit"]', FB_POST_UNIT_SELECTOR];
 
 function photoClickContextCapture(): ObserverPlugin {
   return {

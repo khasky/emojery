@@ -64,7 +64,7 @@ export interface MountEvidence {
   siteKeyCount: number; // mount keys matching the site prefix
   duplicateKeys: string[]; // a key on >1 connected anchor (invariant violation)
   // Posts carrying more than one picker (anchors grouped by their CLOSEST
-  // [role="article"]). Complements duplicateKeys: two pickers on ONE post can
+  // [role="article"] or Facebook `[aria-posinset]` post unit). Complements duplicateKeys: two pickers on ONE post can
   // carry two DIFFERENT keys - e.g. the page-admin "View insights / Boost post"
   // row mounting a second host that steals the post's canonical photo key while
   // the real action row re-keys onto the CFT fallback - which the same-key
@@ -122,11 +122,12 @@ const keys = anchors.map((a) => a.getAttribute('${MOUNT_ATTR}')).filter(Boolean)
 const keyCount = {};
 for (const k of keys) keyCount[k] = (keyCount[k] || 0) + 1;
 const duplicateKeys = Object.keys(keyCount).filter((k) => keyCount[k] > 1);
-// Group anchors by their closest article so a quoted/nested post counts as its
-// own group; anchors outside any article (photo/reel viewers) are skipped.
+// Group anchors by their closest article or Facebook post unit ([aria-posinset],
+// which carries no role in the current layout) so a quoted/nested post counts as
+// its own group; anchors outside both (photo/reel viewers) are skipped.
 const perArticle = new Map();
 for (const a of anchors) {
-  const art = a.closest && a.closest('[role="article"]');
+  const art = a.closest && a.closest('[role="article"], [aria-posinset]');
   if (art) perArticle.set(art, (perArticle.get(art) || 0) + 1);
 }
 const multiAnchorPostCount = [...perArticle.values()].filter((n) => n > 1).length;

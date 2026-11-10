@@ -8,8 +8,8 @@
 // borrowed marker is a real post control), so the picker mounted on comments
 // with large reaction clusters (user-reported feeds, UA UI; reproduced live by
 // injecting the exact shape). The structural fix: a control
-// inside a NESTED article is a comment's and is never a candidate
-// (facebook-post-row.ts isInNestedArticle).
+// inside a comment article (one sitting inside its post) is a comment's and is never a candidate
+// (facebook-post-row.ts isInCommentArticle).
 //
 // This spec is deterministic where the live shape is not: Facebook A/B-serves
 // the cluster aria (a bare like label vs a "Like: N people" count summary that
