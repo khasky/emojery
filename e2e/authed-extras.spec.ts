@@ -7,7 +7,6 @@
 // popup DOM - exactly what a user perceives.
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import * as ext from "./lib/extension";
-import { pollForValue } from "./lib/picker-probes";
 import { openHistoryTab } from "./lib/popup-probes";
 import { reloadAndSettle } from "./lib/reload-settle";
 import { HISTORY_ROW_SELECTOR } from "./lib/selectors";
@@ -180,14 +179,11 @@ test("account deletion: signs out and reverses its reactions", async () => {
     // else's vote - an absolute expectation then misses by one and only passes on
     // the retry, which re-reads a settled baseline (seen live: 82 vs 81).
     for (const { page, mountKey, minimum } of reacted) {
-      // pollForValue, not expect.poll: the assertion below is `>=`, but the drop check
-      // after the deletion needs the value this settled on.
-      const countWith = await pollForValue(
-        async () => (await ext.reloadAndReadTotal(page)) ?? 0,
-        (total) => total >= minimum,
-        CACHE_WAIT,
-        COUNT_SETTLE_POLL_MS,
-      );
+      // Not the first read past the minimum but one that has held still: the drop check
+      // after the deletion is anchored on it, and a vote the previous spec left in flight
+      // on the same public target can still be landing (seen live: anchored on 18 while
+      // the server already held 19, then the deletion "only" reached 18).
+      const countWith = await ext.waitForStableTotalAtLeast(page, minimum, { timeout: CACHE_WAIT, interval: COUNT_SETTLE_POLL_MS });
       expect(countWith, `rendered counter for ${mountKey} should reach at least ${minimum} once the counts settle`).toBeGreaterThanOrEqual(minimum);
       withVote.push({ page, mountKey, countWith });
     }

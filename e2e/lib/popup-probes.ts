@@ -50,10 +50,12 @@ export type AuthTabHandle = Pick<Page, "close">;
 export async function authPageFromUserAction(browserContext: BrowserContext, loadedExtensionId: string, action: () => Promise<void>): Promise<AuthTabHandle | null> {
   if (isFirefoxRun()) return authTabFromUserActionOverBridge(browserContext, action);
   const expectedUrl = extensionPageUrl(loadedExtensionId, "auth.html");
-  const pagePromise = browserContext.waitForEvent("page", { timeout: 5_000 }).catch(() => null);
+  // Armed before the action and kept open past it: the action itself (open the palette,
+  // pick, press Sign in) can outlast any fixed window, and the tab opens after its last step.
+  const pagePromise = browserContext.waitForEvent("page", { timeout: 120_000 }).catch(() => null);
 
   await action().catch(() => {});
-  const openedPage = await pagePromise;
+  const openedPage = await Promise.race([pagePromise, new Promise<null>((settle) => setTimeout(() => settle(null), 5_000))]);
   const candidates = [...(openedPage ? [openedPage] : []), ...browserContext.pages().filter((candidate) => candidate !== openedPage)];
 
   for (const candidate of candidates) {

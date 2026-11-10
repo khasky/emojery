@@ -195,7 +195,14 @@ export async function selectedReactionInOpenPicker(page: Page): Promise<string |
 }
 
 export async function pickReactionOnMatchingHost(page: Page, site: SupportedSiteScenario, evidence: MountEvidence): Promise<PickedReaction> {
-  const trigger = await findMatchingEmojeryTrigger(page, site);
+  // Polled: a page still hydrating after the sign-in reload swaps the row under the host,
+  // and the remount leaves a moment with no trigger at all.
+  const trigger = await pollForValue(
+    () => findMatchingEmojeryTrigger(page, site),
+    (found) => found !== null,
+    10_000,
+    250,
+  );
   expect(trigger, debugEvidence(evidence)).not.toBeNull();
   if (!trigger) throw new Error("Missing matching Emojery trigger");
 

@@ -2,7 +2,26 @@
 
 import { type BrowserContext, type ElementHandle, expect, type Page, test } from "@playwright/test";
 import { IG_PUBLIC_ACTION_ICON_PATH_PREFIXES } from "../src/adapters/instagram";
-import { authConfigured, closeSession, ensureSignedOut, envUrl, extensionPageUrl, FIREFOX_NO_EXTENSION_PAGES, FIREFOX_NO_SIGN_IN, isFirefoxRun, localeMessage, openPopup, REACTIONS, removeProfileUnlessKept, resolveExtensionId, searchTermFor, signInSkipReason } from "./lib/extension";
+import {
+  authConfigured,
+  closeSession,
+  ensureSignedOut,
+  envUrl,
+  extensionPageUrl,
+  FIREFOX_NO_EXTENSION_PAGES,
+  FIREFOX_NO_SIGN_IN,
+  historyEntryCount,
+  isFirefoxRun,
+  localeMessage,
+  openPopup,
+  queuedVoteCount,
+  REACTIONS,
+  removeProfileUnlessKept,
+  resolveExtensionId,
+  searchTermFor,
+  signInSkipReason,
+  waitForEnrolledKey,
+} from "./lib/extension";
 import { expectLocalizedNativePlacement, type I18nLocaleCase, type LocalizedAdapterCheck } from "./lib/localized-placement";
 import { debugEvidence, handleKnownInterstitials, hasLoginWallText, isNoActionSurface, safeGoto, safeReload, settleFullLoad, settlePage, waitForDisabledSiteEvidence, waitForMountEvidence } from "./lib/page-settle";
 import {
@@ -17,6 +36,8 @@ import {
   findMatchingEmojeryTrigger,
   firstMatchingEvidenceTargetKey,
   pickReactionOnMatchingHost,
+  pollForValue,
+  visibleReactionOptionCount,
   waitForMountedTargetKey,
   waitForVisibleEmojeryTrigger,
 } from "./lib/picker-probes";
@@ -132,6 +153,7 @@ test.describe("shared picker behavior", () => {
       // signing in through the gate casts exactly the one reaction it was holding -
       // anything but a single row means something earlier in this run wrote one.
       if (session.generatedUserDataDir) {
+        await waitForEnrolledKey(session.context);
         await expectHistoryRowCount(session.context, 1);
       }
       const targetKey = firstMatchingEvidenceTargetKey(site, evidence);
@@ -736,8 +758,18 @@ async function signInOnSupportedSite(browserContext: BrowserContext, page: Page,
   expect(authPage, "Unauthenticated click should open auth.html").not.toBeNull();
   if (!authPage) return evidence;
 
+  const historyBefore = await historyEntryCount(browserContext);
   await signInTestAccount(browserContext, locale);
   await authPage.close().catch(() => {});
+  // The gate casts the pick it held once its tab is back on screen, and the cast lives
+  // in that page until the background takes it: a reload before then drops the pick.
+  await page.bringToFront();
+  await expect
+    .poll(async () => (await queuedVoteCount(browserContext)) > 0 || (await historyEntryCount(browserContext)) > historyBefore, {
+      message: "the pick the sign-in gate held should be cast once its tab is on screen",
+      timeout: 15_000,
+    })
+    .toBe(true);
   await safeReload(page);
   await settleFullLoad(page);
   await handleKnownInterstitials(page, site);
@@ -791,7 +823,15 @@ async function verifyUnauthClickOpensAuthTab(browserContext: BrowserContext, pag
   let sawTrigger = false;
   for (const attempt of attempts) {
     await page.bringToFront().catch(() => {});
-    const trigger = await findMatchingEmojeryTrigger(page, site);
+    // Polled: a page still hydrating swaps the row under the host, and the remount
+    // leaves a moment with no trigger at all; three attempts read back to back all
+    // land in it.
+    const trigger = await pollForValue(
+      () => findMatchingEmojeryTrigger(page, site),
+      (found) => found !== null,
+      10_000,
+      250,
+    );
     if (!trigger) continue;
     sawTrigger = true;
     try {
@@ -802,6 +842,14 @@ async function verifyUnauthClickOpensAuthTab(browserContext: BrowserContext, pag
       // root's open shadow to reach the gate button.
       authPage = await authPageFromUserAction(browserContext, loadedExtensionId, async () => {
         await attempt(trigger);
+        // The palette opens a beat after the trigger's activation; a pick read before it
+        // finds no option, clicks nothing, and the gate it waits for never comes.
+        await pollForValue(
+          () => visibleReactionOptionCount(page),
+          (n) => n > 0,
+          10_000,
+          250,
+        );
         await clickFirstUnselectedReactionOption(page);
         await page.locator(`.${GATE_SIGNIN_CLASS}`).click({ timeout: 10_000 });
       });
