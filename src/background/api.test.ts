@@ -218,6 +218,24 @@ describe("the vote queue's send", () => {
     expect((await getFlushState()).nextAttemptAt).toBe(0);
   });
 
+  it("retries a send that failed on the network within 30 s (+jitter), however many times it failed", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new TypeError("Failed to fetch");
+      }),
+    );
+    await click("👍", null);
+    for (let i = 0; i < 10; i++) {
+      await flushVotes();
+      const row = [...q.rows.values()][0] as StoredVote;
+      expect(row.attempts).toBe(i + 1);
+      expect((row.nextAttemptAt as number) - Date.now()).toBeLessThanOrEqual(37_500);
+      vi.setSystemTime(row.nextAttemptAt as number);
+    }
+    expect((await getFlushState()).nextAttemptAt).toBe(0);
+  });
+
   it("drops another account's records and rolls back a record older than a day", async () => {
     const { calls } = api([]);
     await click("👍", null);

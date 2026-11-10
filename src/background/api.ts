@@ -28,6 +28,10 @@ import { clearQueuedVotes, getQueueStats, pairKey, peekNextEligible, type Stored
 const DEBOUNCE_MS = 250;
 const RETRY_MIN_MS = 2_000;
 const RETRY_MAX_MS = 5 * 60_000;
+// A send that failed on the network (offline, DNS, a dropped connection) got no answer to
+// slow down for, and the worker hears no event when the network returns, so the retry is the
+// only way the vote leaves: past this ceiling a reconnect would wait minutes for it.
+const NETWORK_RETRY_MAX_MS = 30_000;
 const HOLD_MAX_MS = 5 * 60_000;
 const RATE_HOLD_MAX_MS = 60_000;
 const ORIGIN_RETRY_MS = 10 * 60_000;
@@ -106,8 +110,8 @@ async function clearHold(): Promise<void> {
   await storageLocalSet({ [FLUSH_STATE_KEY]: { nextAttemptAt: 0, consecutiveFailures: 0 } satisfies FlushState });
 }
 
-export function retryDelayMs(attempts: number, random: () => number = Math.random): number {
-  const exp = Math.min(RETRY_MAX_MS, RETRY_MIN_MS * 2 ** Math.max(0, attempts - 1));
+export function retryDelayMs(attempts: number, random: () => number = Math.random, max = RETRY_MAX_MS): number {
+  const exp = Math.min(max, RETRY_MIN_MS * 2 ** Math.max(0, attempts - 1));
   return Math.max(RETRY_MIN_MS, Math.floor(exp + exp * 0.25 * (random() * 2 - 1)));
 }
 
@@ -233,7 +237,7 @@ async function send(vote: StoredVote, auth: AuthState): Promise<ApiReply> {
 
 async function backOff(vote: StoredVote, reply?: ApiReply): Promise<void> {
   const attempts = vote.attempts + 1;
-  const delay = reply ? Math.max(retryDelayMs(attempts), retryAfterMs(reply, RETRY_MAX_MS, 0)) : retryDelayMs(attempts);
+  const delay = reply ? Math.max(retryDelayMs(attempts), retryAfterMs(reply, RETRY_MAX_MS, 0)) : retryDelayMs(attempts, Math.random, NETWORK_RETRY_MAX_MS);
   await updateVote({ ...vote, attempts, nextAttemptAt: Date.now() + delay, ...(reply ? { lastError: `${reply.status} ${apiErrorString(reply.body) ?? ""}`.trim() } : {}) });
 }
 
