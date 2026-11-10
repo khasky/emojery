@@ -77,6 +77,15 @@ describe("maybeShowCoachMark", () => {
     expect(host.getAttribute(COACH_ATTR)).toBe("1");
   });
 
+  it("never shows over a picker the trigger opened during the settle delay", async () => {
+    await maybeShowCoachMark(host);
+    host.dispatchEvent(new Event("pointerdown"));
+    await vi.advanceTimersByTimeAsync(1000);
+
+    expect(tip()).toBeNull();
+    expect(host.hasAttribute(COACH_ATTR)).toBe(false);
+  });
+
   it("is once per install: a second page never claims it again", async () => {
     await showMark();
     tip()?.remove();
