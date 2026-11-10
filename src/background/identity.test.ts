@@ -53,7 +53,7 @@ vi.mock("./device-keys", () => ({
 const clearHistoryForUser = vi.fn(async (_userId: string) => {});
 vi.mock("./history", () => ({ clearHistoryForUser: (u: string) => clearHistoryForUser(u) }));
 
-const { deleteAccount, getAuth, listSignInProviders, readMe, refreshSession, resumeEnrollment, setOnEnrolled, signInWithProvider } = await import("./identity");
+const { clearAuth, deleteAccount, getAuth, listSignInProviders, readMe, refreshSession, resumeEnrollment, setOnEnrolled, signInWithProvider } = await import("./identity");
 
 async function verify(provider: string, sig: string, message: Uint8Array): Promise<boolean> {
   const k = newest(provider)?.[1];
@@ -184,6 +184,30 @@ describe("signInWithProvider", () => {
     expect(enrolled).toHaveBeenCalledTimes(1);
     expect(await getAuth()).toMatchObject({ token: "tok-enrolled", enrollSeq: 7 });
     expect(chromeFake.session.enroll_pending_v2).toBeUndefined();
+  });
+
+  it("drops a pending registration at sign-out, so no repeat signs the user back in", async () => {
+    const fetchMock = stubFetch(async () => json(200, pendingBody));
+    await signInWithProvider("test");
+    await clearAuth();
+    expect(chromeFake.session.enroll_pending_v2).toBeUndefined();
+    fetchMock.mockImplementation(async () => json(200, enrolledBody()));
+    await resumeEnrollment();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(await getAuth()).toBeNull();
+  });
+
+  it("stores no session from a repeat that was in flight when the user signed out", async () => {
+    let answer: (r: Response) => void = () => {};
+    const fetchMock = stubFetch(async () => json(200, pendingBody));
+    await signInWithProvider("test");
+    fetchMock.mockImplementation(() => new Promise<Response>((settle) => (answer = settle)));
+    const repeat = resumeEnrollment();
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    await clearAuth();
+    answer(json(200, enrolledBody()));
+    await repeat;
+    expect(await getAuth()).toBeNull();
   });
 
   it("stops repeating once the id_token is about to expire", async () => {
