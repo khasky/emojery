@@ -283,6 +283,16 @@ export async function connectBridge(): Promise<Bridge> {
     })
     .catch(() => false);
 
+  // The run plays video and audio in someone's real browser (YouTube, Reels, X): every
+  // media element in the tabs it drives starts muted and stays muted.
+  await runAction(
+    `await page.context().addInitScript(() => {
+       const play = HTMLMediaElement.prototype.play;
+       HTMLMediaElement.prototype.play = function () { this.muted = true; return play.call(this); };
+       document.addEventListener('volumechange', (e) => { if (e.target instanceof HTMLMediaElement && !e.target.muted) e.target.muted = true; }, true);
+     });`,
+  ).catch(() => {});
+
   return {
     async goto(u) {
       await runAction(`${FOCUS_TAB_SRC} await page.goto(${JSON.stringify(u)}, { waitUntil: 'commit', timeout: ${NAV_TIMEOUT_MS} }).catch(() => {});`);
