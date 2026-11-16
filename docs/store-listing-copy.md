@@ -206,7 +206,7 @@ Emojery adds an emoji reaction control next to the native like/share/star button
 
 The reaction buttons and counts appear on the supported sites (x.com, facebook.com, reddit.com, instagram.com, youtube.com, github.com, gitlab.com, threads.com, amazon.com, rottentomatoes.com, themoviedb.org, imdb.com, metacritic.com, opencritic.com) without signing in — install and browse any of them. github.com/torvalds/linux is a reliable page to check without signing in.
 
-To test voting (optional): open the extension, choose Sign in, tick the consent box and pick a provider (Google, Microsoft or Twitch). The provider's own login page opens in a browser window; sign in there with any account you have and the extension's page confirms the sign-in. No account details reach the add-on: the provider's answer is exchanged for a session by the backend.
+To test voting (optional): open the extension, choose Sign in, tick the consent box and pick a provider (Google, Apple, Microsoft or Twitch). The provider's own login page opens in a browser window; sign in there with any account you have and the extension's page confirms the sign-in. No account details reach the add-on: the provider's answer is exchanged for a session by the backend.
 
 VALIDATION WARNINGS
 

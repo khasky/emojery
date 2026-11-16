@@ -120,28 +120,36 @@ describe("listSignInProviders", () => {
     expect((await listSignInProviders()).providers).toContain("apple");
   });
 
-  it("does not offer Apple in Firefox, whose identity flow refuses a web return address", async () => {
-    installFakeChrome({ id: "{random-uuid}", manifest: { version: "1.1.0" } });
+  it("offers Apple in Firefox, whose one id names every build", async () => {
+    installFakeChrome({ id: "extension@emojery.app", manifest: { version: "1.1.0" } });
     stubIdentity(() => "", "https://819e436ab7fc25b53a44230b14659ddc78459b06.extensions.allizom.org/");
-    const { providers } = await listSignInProviders();
-    expect(providers).toContain("google");
-    expect(providers).not.toContain("apple");
+    expect((await listSignInProviders()).providers).toContain("apple");
   });
 });
 
 describe("signing in with Apple", () => {
-  it("returns through the API's page with the build code in front of the state", async () => {
+  it("opens the API's start address with the build code in front of the state and no redirect_uri", async () => {
     installFakeChrome({ id: STAGING_ID, manifest: { version: "1.1.0" } });
     stubIdentity((url) => `${REDIRECT}#code=c1&state=${url.searchParams.get("state")}&id_token=${idToken()}`);
     stubFetch(async () => json(200, enrolledBody()));
     expect(await signInWithProvider("apple")).toEqual({ ok: true });
     const url = launched as URL;
-    expect(url.origin + url.pathname).toBe("https://appleid.apple.com/auth/authorize");
-    expect(url.searchParams.get("redirect_uri")).toBe("https://api-staging.emojery.app/v2/auth/apple/return");
-    expect(url.searchParams.get("response_type")).toBe("code id_token");
-    expect(url.searchParams.get("response_mode")).toBe("fragment");
-    expect(url.searchParams.has("scope")).toBe(false);
+    expect(url.origin + url.pathname).toBe("https://api-staging.emojery.app/v2/auth/apple/start");
+    expect([...url.searchParams.keys()].sort()).toEqual(["nonce", "state"]);
+    expect(url.searchParams.get("nonce")).toMatch(/^[0-9a-f]{64}$/);
     expect(url.searchParams.get("state")).toMatch(/^staging\.[0-9a-f-]{36}$/);
+  });
+
+  it("opens the same address in Firefox, with its build code", async () => {
+    const firefoxReturn = "https://819e436ab7fc25b53a44230b14659ddc78459b06.extensions.allizom.org/";
+    installFakeChrome({ id: "extension@emojery.app", manifest: { version: "1.1.0" } });
+    stubIdentity((url) => `${firefoxReturn}#code=c1&state=${url.searchParams.get("state")}&id_token=${idToken()}`, firefoxReturn);
+    stubFetch(async () => json(200, enrolledBody()));
+    expect(await signInWithProvider("apple")).toEqual({ ok: true });
+    const url = launched as URL;
+    expect(url.origin + url.pathname).toBe("https://api-staging.emojery.app/v2/auth/apple/start");
+    expect(url.searchParams.has("redirect_uri")).toBe(false);
+    expect(url.searchParams.get("state")).toMatch(/^firefox\./);
   });
 
   it("is refused to a build the return page does not know", async () => {
