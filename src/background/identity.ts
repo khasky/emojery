@@ -95,14 +95,13 @@ export type SignInResult = { ok: true } | { ok: false; refusal: SignInRefusal };
 
 // The builds the API's Apple return page can hand a sign-in back to, by extension id: the
 // page forwards by the code in front of `state` to an address it pins per code, never to one
-// the request names. A build that is none of these (an unpacked production build, every
-// Firefox build) is not offered a provider with a web return address. Firefox refuses such a
-// flow before opening it: its launchWebAuthFlow rejects any redirect_uri outside the
-// extension's own return address with "redirect_uri not allowed".
+// the request names. Firefox has one id for every build. A build that is none of these (an
+// unpacked production build) is not offered a provider with a web return address.
 const BUILD_CODES: Readonly<Record<string, string>> = {
   nlkebphkgappggophjobchogdmdiaajd: "chrome",
   jbmbhihbhpnidhfmepifgkeblikjdpcp: "edge",
   aooajklhnjjhmmffihjjofjkhpekbpaa: "staging",
+  "extension@emojery.app": "firefox",
 };
 
 export function buildCode(): string | null {
@@ -222,14 +221,19 @@ async function runSignIn(provider: OidcProvider, chooser: boolean, again = true)
   // page forwards to the address it pins for that code. The browser still ends the flow on
   // this build's own return address.
   const state = row.redirectUri ? `${code}.${randomId()}` : randomId();
-  const params = new URLSearchParams({ client_id: row.clientId, response_type: row.responseType, redirect_uri: row.redirectUri ?? redirect, nonce: await signInNonce(key.publicKey, nonceSalt), state });
+  const nonce = await signInNonce(key.publicKey, nonceSalt);
+  // Such a provider's window opens on the API's start address beside its return page, which
+  // sends it on with the deployment's client id and return page: Firefox refuses a window
+  // whose URL carries a redirect_uri outside this build's own return address.
+  const startUrl = row.redirectUri ? `${new URL("start", row.redirectUri)}?${new URLSearchParams({ state, nonce })}` : null;
+  const params = new URLSearchParams({ client_id: row.clientId, response_type: row.responseType, redirect_uri: redirect, nonce, state });
   if (row.scope) params.set("scope", row.scope);
   if (row.responseMode) params.set("response_mode", row.responseMode);
   if (chooser) params.set("prompt", "select_account");
 
   let responseUrl: string | null;
   try {
-    responseUrl = await launchWebAuthFlow(`${row.authorize}?${params}`);
+    responseUrl = await launchWebAuthFlow(startUrl ?? `${row.authorize}?${params}`);
   } catch (error) {
     const refusal = launchRefusal(error);
     // A closed window is the user's choice; anything else is the flow failing, and the
