@@ -95,8 +95,10 @@ export type SignInResult = { ok: true } | { ok: false; refusal: SignInRefusal };
 
 // The builds the API's Apple return page can hand a sign-in back to, by extension id: the
 // page forwards by the code in front of `state` to an address it pins per code, never to one
-// the request names. Firefox has one id for every build. A build that is none of these (an
-// unpacked production build) is not offered a provider with a web return address.
+// the request names. A build that is none of these (an unpacked production build, every
+// Firefox build) is not offered a provider with a web return address. Firefox refuses such a
+// flow before opening it: its launchWebAuthFlow rejects any redirect_uri outside the
+// extension's own return address with "redirect_uri not allowed".
 const BUILD_CODES: Readonly<Record<string, string>> = {
   nlkebphkgappggophjobchogdmdiaajd: "chrome",
   jbmbhihbhpnidhfmepifgkeblikjdpcp: "edge",
@@ -104,9 +106,7 @@ const BUILD_CODES: Readonly<Record<string, string>> = {
 };
 
 export function buildCode(): string | null {
-  const redirect = identityRedirectUrl();
-  if (!redirect) return null;
-  if (/^https:\/\/[0-9a-f]{40}\.extensions\.allizom\.org\/$/.test(redirect)) return "firefox";
+  if (!identityRedirectUrl()) return null;
   return BUILD_CODES[chrome.runtime.id] ?? null;
 }
 
@@ -231,7 +231,11 @@ async function runSignIn(provider: OidcProvider, chooser: boolean, again = true)
   try {
     responseUrl = await launchWebAuthFlow(`${row.authorize}?${params}`);
   } catch (error) {
-    return { ok: false, refusal: launchRefusal(error) };
+    const refusal = launchRefusal(error);
+    // A closed window is the user's choice; anything else is the flow failing, and the
+    // refusal on screen names no cause.
+    if (refusal !== "cancelled") logBackgroundError("runSignIn.launchWebAuthFlow", error);
+    return { ok: false, refusal };
   }
   if (!responseUrl) return { ok: false, refusal: "cancelled" };
   const receivedAt = Date.now();

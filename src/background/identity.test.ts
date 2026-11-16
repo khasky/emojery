@@ -114,13 +114,18 @@ describe("listSignInProviders", () => {
     expect(providers).not.toContain("apple");
   });
 
-  it("offers Apple to a build the return page knows: the staging id, and Firefox", async () => {
+  it("offers Apple to a build the return page knows", async () => {
     installFakeChrome({ id: STAGING_ID, manifest: { version: "1.1.0" } });
     stubIdentity(() => "");
     expect((await listSignInProviders()).providers).toContain("apple");
+  });
+
+  it("does not offer Apple in Firefox, whose identity flow refuses a web return address", async () => {
     installFakeChrome({ id: "{random-uuid}", manifest: { version: "1.1.0" } });
     stubIdentity(() => "", "https://819e436ab7fc25b53a44230b14659ddc78459b06.extensions.allizom.org/");
-    expect((await listSignInProviders()).providers).toContain("apple");
+    const { providers } = await listSignInProviders();
+    expect(providers).toContain("google");
+    expect(providers).not.toContain("apple");
   });
 });
 
