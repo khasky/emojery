@@ -73,17 +73,6 @@ async function tryConnect(): Promise<Bridge> {
   }
 }
 
-// Real Chrome has user tabs. A throwaway shows a single about:blank. This says nothing
-// about whether the current tab is an ordinary one: with nothing selected in the
-// Playwright Extension the relay hands over its own connect.html page, and the first
-// goto legitimately navigates that tab onto the site (bridge.ts closes it on teardown).
-async function attachedToRealBrowser(bridge: Bridge): Promise<boolean> {
-  const urls = await bridge.tabUrls().catch(() => [] as string[]);
-  if (urls.length === 0) return false;
-  if (urls.length === 1 && urls[0] === "about:blank") return false;
-  return true;
-}
-
 export function mountKeyPattern(site: SiteId): string {
   // Union of the site's scenario patterns from the shared registry. Reddit and the
   // critic sites are uniformly tight; the social and code-hosting sites each have at
@@ -650,7 +639,9 @@ export async function assertEmojerySignedIn(bridge: Bridge): Promise<void> {
     hosts = await waitForHost(bridge, "github", 12_000);
   }
   if (hosts < 1) {
-    throw recordSetupFault("Emojery did not mount on GitHub via the bridge - load + enable the Emojery extension (Load unpacked .output/chrome-mv3-staging) in the connected Chrome.");
+    throw recordSetupFault(
+      "Emojery did not mount on GitHub via the bridge - load + enable the Emojery extension (Load unpacked .output/chrome-mv3-staging) in the connected browser. If it is loaded there, the bridge drove another browser: check the token, PLAYWRIGHT_MCP_BROWSER, and that an E2E_MCP_URL server runs with --extension.",
+    );
   }
   const picker = await openPickerState(bridge);
   await bridge.press("Escape").catch(() => {});
@@ -701,9 +692,6 @@ export function bridgeFixture(): BridgeFixture {
       for (let attempt = 1; attempt <= SETUP_ATTEMPTS; attempt++) {
         try {
           bridge = await tryConnect();
-          if (!(await attachedToRealBrowser(bridge))) {
-            throw new Error("Site-auth bridge did not attach to your real Chrome (saw only about:blank). The Playwright Extension isn't bridged - re-copy the token from its popup and retry.");
-          }
           await assertEmojerySignedIn(bridge);
           return;
         } catch (err) {

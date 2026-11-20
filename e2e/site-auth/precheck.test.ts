@@ -7,7 +7,7 @@
 // red while it does its job - they are backstops that keep the
 // invariants asserted should setup's own checks ever weaken.
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
-import { bridgeFixture, gotoSettled, openPickerState, SETUP_HOOK_TIMEOUT_MS, siteAuthEnabled } from "./harness";
+import { bridgeFixture, gotoSettled, openPickerState, SETUP_HOOK_TIMEOUT_MS, siteAuthEnabled, waitForHost } from "./harness";
 import { authContentUrl } from "./scenarios";
 
 const fx = bridgeFixture();
@@ -18,13 +18,12 @@ const fx = bridgeFixture();
   beforeAll(fx.setup, SETUP_HOOK_TIMEOUT_MS);
   afterAll(fx.teardown);
 
-  test("bridge is attached to the real, human-launched Chrome", async () => {
+  test("bridge drives a browser where Emojery is loaded", async () => {
     const b = fx.need();
-    const urls = await b.tabUrls();
-    // A single about:blank means the server launched its own browser instead of
-    // attaching to yours (token/extension misconfig).
-    expect(urls.length === 1 && urls[0] === "about:blank", "bridge launched a throwaway browser; check the Playwright Extension + token").toBe(false);
-    expect(urls.length).toBeGreaterThan(0);
+    // The tab list proves nothing here: an attached extension-mode bridge sees only
+    // its own tab. A mounted trigger does - a throwaway browser has no Emojery.
+    await gotoSettled(b, authContentUrl("github"));
+    expect(await waitForHost(b, "github"), "no Emojery trigger on GitHub - the bridge drove a browser without the staging build loaded; check the token, PLAYWRIGHT_MCP_BROWSER and E2E_MCP_URL").toBeGreaterThan(0);
   });
 
   test("Emojery extension is signed in (emoji grid opens)", async () => {
