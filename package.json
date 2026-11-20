@@ -94,7 +94,7 @@
   "dependencies": {
     "@emojery/shared": "github:khasky/emojery-verifier#ca93f4512c4cf358ec49ffe5316dde1f2211a720&path:/packages/shared",
     "emojibase-data": "^18.0.0",
-    "preact": "^11.1.0"
+    "preact": "^11.2.0"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.3",
