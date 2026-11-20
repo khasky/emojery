@@ -39,8 +39,8 @@ importers:
   .:
     dependencies:
       '@emojery/shared':
-        specifier: github:khasky/emojery-verifier#769ec44ce0b5ee125d2e4bb7c15b20e48d04c485&path:/packages/shared
-        version: https://codeload.github.com/khasky/emojery-verifier/tar.gz/769ec44ce0b5ee125d2e4bb7c15b20e48d04c485#path:/packages/shared
+        specifier: github:khasky/emojery-verifier#ca93f4512c4cf358ec49ffe5316dde1f2211a720&path:/packages/shared
+        version: https://codeload.github.com/khasky/emojery-verifier/tar.gz/ca93f4512c4cf358ec49ffe5316dde1f2211a720#path:/packages/shared
       emojibase-data:
         specifier: ^18.0.0
         version: 18.0.0(emojibase@17.0.0)
@@ -489,8 +489,8 @@ packages:
     engines: {node: '>= 0.10.4'}
     hasBin: true
 
-  '@emojery/shared@https://codeload.github.com/khasky/emojery-verifier/tar.gz/769ec44ce0b5ee125d2e4bb7c15b20e48d04c485#path:/packages/shared':
-    resolution: {gitHosted: true, path: /packages/shared, tarball: https://codeload.github.com/khasky/emojery-verifier/tar.gz/769ec44ce0b5ee125d2e4bb7c15b20e48d04c485}
+  '@emojery/shared@https://codeload.github.com/khasky/emojery-verifier/tar.gz/ca93f4512c4cf358ec49ffe5316dde1f2211a720#path:/packages/shared':
+    resolution: {gitHosted: true, path: /packages/shared, tarball: https://codeload.github.com/khasky/emojery-verifier/tar.gz/ca93f4512c4cf358ec49ffe5316dde1f2211a720}
     version: 1.0.0
     engines: {node: '>=22'}
 
@@ -4374,7 +4374,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@emojery/shared@https://codeload.github.com/khasky/emojery-verifier/tar.gz/769ec44ce0b5ee125d2e4bb7c15b20e48d04c485#path:/packages/shared': {}
+  '@emojery/shared@https://codeload.github.com/khasky/emojery-verifier/tar.gz/ca93f4512c4cf358ec49ffe5316dde1f2211a720#path:/packages/shared': {}
 
   '@esbuild/aix-ppc64@0.25.12':
     optional: true
