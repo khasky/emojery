@@ -55,6 +55,8 @@ export PLAYWRIGHT_MCP_EXTENSION_TOKEN="<token from the Playwright Extension popu
 pnpm run test:e2e:siteauth
 ```
 
+To drive Edge instead of Chrome, also set `PLAYWRIGHT_MCP_BROWSER=msedge` (the Playwright Extension and the token then come from the Edge profile).
+
 ### One flow needs a popup toggle, so it runs on its own
 
 The bridge cannot open `chrome-extension://` pages, so it can neither read nor change the extension's settings — you set them by hand in the popup. Only the auto-press flow needs a non-default one, so only it is split out:
@@ -77,7 +79,7 @@ pnpm exec vitest run -c e2e/site-auth/vitest.config.ts precheck
 ```
 
 - OK: precheck green → bridge attached to your real Chrome + Emojery is signed in.
-- FAIL: "bridge launched a throwaway browser" → the token/extension is wrong; the server didn't attach (your real tabs should be visible, not one `about:blank`).
+- FAIL: "no Emojery trigger on GitHub" → the bridge drove a browser without the staging build: the token belongs to another profile, `PLAYWRIGHT_MCP_BROWSER` names another browser, or the `E2E_MCP_URL` server runs without `--extension`. The tab list cannot tell: an attached bridge sees only its own tab.
 - FAIL: "Emojery picker grid did not open" → sign in to Emojery through a provider in that Chrome.
 - FAIL: "Emojery is SIGNED OUT" → the Emojery popup in that Chrome is signed out. Sign in there by hand and re-run.
 - FAIL: "pointed at the WRONG BUILD" → the loaded build is not the one this suite drives. Rebuild with `pnpm run build:chrome` and load `.output/chrome-mv3-staging` unpacked ("Emojery (Staging)" on `chrome://extensions`).

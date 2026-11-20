@@ -125,8 +125,6 @@ export interface Bridge {
   /** page.evaluate of a probe source string (a function body with return). */
   evaluate<T>(probeSource: string): Promise<T>;
   press(key: string): Promise<void>;
-  /** URLs of all open tabs - used to confirm we attached to the real browser. */
-  tabUrls(): Promise<string[]>;
   /** Open a second tab. Callers address it as the LAST page (see close()). */
   openTab(url: string): Promise<void>;
   /** Escape hatch: a custom async (page) body that returns a value. */
@@ -316,9 +314,6 @@ export async function connectBridge(): Promise<Bridge> {
     },
     async press(key) {
       await runAction(`await page.keyboard.press(${JSON.stringify(key)});`);
-    },
-    async tabUrls() {
-      return runData<string[]>(`return page.context().pages().map((p) => p.url());`);
     },
     async openTab(u) {
       await runAction(`const np = await page.context().newPage(); await np.goto(${JSON.stringify(u)}, { waitUntil: 'commit', timeout: ${NAV_TIMEOUT_MS} }).catch(() => {}); await np.waitForLoadState('domcontentloaded', { timeout: ${HYDRATE_WAIT_MS} }).catch(() => {});`);
