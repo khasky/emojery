@@ -317,6 +317,9 @@ test("the coach-mark shows once on the first live trigger, then never again", as
   try {
     await page.goto(REPO_PAGE_URL);
     const tip = page.locator(`.${COACH_TIP_CLASS}`);
+    // On Firefox, visibility polling from the moment of navigation keeps the tip
+    // from ever showing; waiting for it in the DOM first does not.
+    await tip.waitFor({ state: "attached", timeout: 30_000 });
     await expect(tip).toBeVisible({ timeout: 30_000 });
 
     await page.keyboard.press("Escape");
