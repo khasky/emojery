@@ -12,14 +12,18 @@ allowColdModuleReset();
 // The published log public keys, in the shape LOG_PUBKEYS has.
 const PINNED = {
   production: "z0z5ZBrlz67P2+FD+kz5ayXyFQyCCB2rQzPxPUtery4=",
-  staging: "P37N5YTTgfbn4L1oW4lLnQM7BsHQEYgY4QpnkYLNEaM=",
+  staging: "i9b56p+dFKKOyC5/RLR1FEwqN3on09JfqIM2JSVGcj0=",
 } as const;
 
-// The first two rewind records of the staging log, as published.
-const STAGING_REWINDS = [
+// The first two rewind records of the staging log, as published, under the key retired at g6.
+const RETIRED_KEY_REWINDS = [
   "emojery-rewind-v1\nlog-staging.emojery.app/g1\nlog-staging.emojery.app/g0\n1792885238394\n0\n47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=\n18\n9sslimOhIqVj1n7qY9UaTz2iiFZVOM+9ZWutC60Pz88=\nrehearsal: M2 exit, rewind to g1\n\n\u2014 log-staging.emojery.app J8ukzUV+2UCAwU3Nxv2e6mLlj1LsQ+9XqHlEyXUHUfc8vbPnAg5aBd4f42q/DKAUYGVfAN9e0vZDZnASA1UmVogh0Aw=\n",
   "emojery-rewind-v1\nlog-staging.emojery.app/g2\nlog-staging.emojery.app/g1\n1793658364543\n0\n47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=\n54311\n8AzGtiS/1hXLmuv0IkgvTUQ2GWWalbdbGebi+4A60S0=\nstaging reset\n\n\u2014 log-staging.emojery.app J8ukzahvwQ1bGqGi0aSmV0OMG2Ni91fkfq9xxSR25JEPw7/e7lp5PARsvgAVU6leFqwVjs+ix5E9MpSrMOoEcCxE+Qs=\n",
 ];
+
+// The record that opened g6, the first one under the current staging key, as published.
+const STAGING_G6 =
+  "emojery-rewind-v1\nlog-staging.emojery.app/g6\nlog-staging.emojery.app/g5\n1795596657369\n0\n47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=\n0\n47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=\nrotate the staging log key: g6 opens under the new key (g5 opened before the LogWriter took it)\n\n\u2014 log-staging.emojery.app 5gngrpbB/btwpg6rBN9+sppIr47r8XpCGSizl3n72J/koS72d422SFF9CpBLWMtZV0bL16xGy6qBSlvrGfZzfCZA2Qg=\n";
 
 function indexFetcher(records: { kind: string; note: string }[]) {
   return vi.fn(async (_url: string) => new Response(JSON.stringify({ records }), { status: 200 }));
@@ -69,26 +73,31 @@ describe("log pins", () => {
 });
 
 describe("originIsSigned", () => {
-  const records = STAGING_REWINDS.map((note) => ({ kind: "rewind", note }));
+  const records = [...RETIRED_KEY_REWINDS, STAGING_G6].map((note) => ({ kind: "rewind", note }));
 
   it("takes an origin a staging rewind record signed by the pinned key opens", async () => {
     const { originIsSigned } = await loadFor("https://api-staging.emojery.app");
     const fetcher = indexFetcher(records);
-    await expect(originIsSigned("log-staging.emojery.app/g2", fetcher as unknown as typeof fetch)).resolves.toBe(true);
+    await expect(originIsSigned("log-staging.emojery.app/g6", fetcher as unknown as typeof fetch)).resolves.toBe(true);
     expect(fetcher).toHaveBeenCalledWith("https://log-staging.emojery.app/index.json", expect.anything());
   });
 
   it("refuses an origin no record opens, and a record whose text was changed", async () => {
     const { originIsSigned } = await loadFor("https://api-staging.emojery.app");
     await expect(originIsSigned("log-staging.emojery.app/g9", indexFetcher(records) as unknown as typeof fetch)).resolves.toBe(false);
-    const forged = records.map((r) => ({ ...r, note: r.note.replace("/g2\n", "/g9\n") }));
+    const forged = records.map((r) => ({ ...r, note: r.note.replace("/g6\n", "/g9\n") }));
     await expect(originIsSigned("log-staging.emojery.app/g9", indexFetcher(forged) as unknown as typeof fetch)).resolves.toBe(false);
+  });
+
+  it("refuses an origin only a record under the retired staging key opens", async () => {
+    const { originIsSigned } = await loadFor("https://api-staging.emojery.app");
+    await expect(originIsSigned("log-staging.emojery.app/g2", indexFetcher(records) as unknown as typeof fetch)).resolves.toBe(false);
   });
 
   it("reads the production log in a production build and trusts no staging signature there", async () => {
     const { originIsSigned } = await loadFor("https://api.emojery.app");
     const fetcher = indexFetcher(records.map((r) => ({ ...r, note: r.note.replaceAll("log-staging.emojery.app", "log.emojery.app") })));
-    await expect(originIsSigned("log.emojery.app/g2", fetcher as unknown as typeof fetch)).resolves.toBe(false);
+    await expect(originIsSigned("log.emojery.app/g6", fetcher as unknown as typeof fetch)).resolves.toBe(false);
     expect(fetcher).toHaveBeenCalledWith("https://log.emojery.app/index.json", expect.anything());
   });
 });
