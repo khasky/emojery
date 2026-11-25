@@ -25,9 +25,10 @@ export const INITIAL_ORIGIN: string = initialOrigin(DEPLOYMENT);
 export const LOG_BASE_URL: string = `https://${LOG_NAME}`;
 
 // The log's signing key per deployment (base64, raw 32-byte Ed25519): a new origin is taken
-// only from a rewind record in index.json signed by it.
+// only from a rewind record in index.json signed by it. The staging key signs from g6 on; the
+// records before it are under a retired key and open nothing here.
 export const LOG_PUBKEYS: Readonly<Record<Deployment, string>> = {
   production: "z0z5ZBrlz67P2+FD+kz5ayXyFQyCCB2rQzPxPUtery4=",
-  staging: "P37N5YTTgfbn4L1oW4lLnQM7BsHQEYgY4QpnkYLNEaM=",
+  staging: "i9b56p+dFKKOyC5/RLR1FEwqN3on09JfqIM2JSVGcj0=",
 };
 export const LOG_PUBKEY: string = LOG_PUBKEYS[DEPLOYMENT];
