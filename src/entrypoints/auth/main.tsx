@@ -14,7 +14,7 @@ import { bootstrapPage } from "../../shared/page-bootstrap";
 import { AGREE_CLASS, AGREE_LINKS_CLASS, AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, CONSENT_FACTS_CLASS, CONSENT_NOTE_CLASS, COUNTDOWN_CLASS, LAST_ACCOUNT_CLASS, MORE_PROVIDERS_CLASS, OTHER_ACCOUNT_CLASS, PROVIDER_BUTTON_CLASS, PROVIDER_LIST_CLASS, SPINNER_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
 import { relativeTime } from "../../shared/relative-time";
 import { noteTermsAccepted, termsAccepted } from "../../shared/terms-consent";
-import { HELP_DEVICE_LIMIT_URL, HELP_WHAT_IS_PUBLIC_URL, withExtensionUtm } from "../../shared/tracking-links";
+import { HELP_DEVICE_LIMIT_URL, HELP_SIGNING_IN_URL, HELP_WHAT_IS_PUBLIC_URL, withExtensionUtm } from "../../shared/tracking-links";
 import { sendRuntimeMessage } from "../../shared/webext";
 
 // Fresh installs on pre-140 Firefox open this page with `?consent=1` (background/install.ts) to get
@@ -33,6 +33,7 @@ type SignedIn = Extract<RuntimeResponse, { type: "auth:signedIn" }>;
 const REFUSAL_COPY: Record<SignInRefusal, I18nKey> = {
   cancelled: "authErrCancelled",
   provider_denied: "authErrProviderDenied",
+  account_type_unsupported: "authErrAccountTypeUnsupported",
   enrollment_failed: "authErrEnrollFailed",
   client_outdated: "authErrOutdated",
   device_limit: "authErrDeviceLimit",
@@ -291,6 +292,9 @@ type ProviderStepProps = {
   /** The refusal to show, not its copy: the device limit is the one that also
    *  carries a link, and a rendered string cannot say which refusal it came from. */
   error: SignInRefusal | null;
+  /** The provider the refused sign-in went to, for the refusal that offers another
+   *  account there. */
+  refusedProvider: OidcProvider | null;
   consent: Consent;
   showAll: boolean;
   onPick: (provider: OidcProvider, chooser: boolean) => void;
@@ -302,7 +306,7 @@ type ProviderStepProps = {
 // `providers` is undefined while the list loads, null when it could not be read
 // (the API unreachable, the worker gone) - that state shows the generic error
 // with a retry, since nothing else on the page can be done without the list.
-function ProviderStep({ providers, lastAccounts, chooserProviders, error, consent, showAll, onPick, onRetryProviders, onConsent, setShowAll }: ProviderStepProps) {
+function ProviderStep({ providers, lastAccounts, chooserProviders, error, refusedProvider, consent, showAll, onPick, onRetryProviders, onConsent, setShowAll }: ProviderStepProps) {
   const accepted = consent.terms && consent.publicLog;
   const firstButton = useRef<HTMLButtonElement>(null);
   const firstRevealed = useRef<HTMLButtonElement>(null);
@@ -367,6 +371,22 @@ function ProviderStep({ providers, lastAccounts, chooserProviders, error, consen
                 <a class="linkish" href={withExtensionUtm(HELP_DEVICE_LIMIT_URL, { campaign: "auth_device_limit", content: "auth" })} target="_blank" rel="noopener noreferrer">
                   {t("deviceLimitHelpLink")}
                 </a>
+              </>
+            ) : null}
+            {error === "account_type_unsupported" ? (
+              <>
+                {" "}
+                <a class="linkish" href={withExtensionUtm(HELP_SIGNING_IN_URL, { campaign: "auth_account_type", content: refusedProvider ?? "auth" })} target="_blank" rel="noopener noreferrer">
+                  {t("authAccountTypeHelpLink")}
+                </a>
+                {/* Straight back to the provider's account picker, where it has one:
+                    the browser most likely still holds the work account, and a plain
+                    retry would hand the same one back. */}
+                {refusedProvider && chooserProviders.includes(refusedProvider) ? (
+                  <button class={`linkish ${OTHER_ACCOUNT_CLASS}`} type="button" data-provider={refusedProvider} disabled={!accepted} onClick={() => onPick(refusedProvider, true)}>
+                    {t("authOtherAccountBtn", providerLabel(refusedProvider))}
+                  </button>
+                ) : null}
               </>
             ) : null}
             {error === "client_outdated" ? (
@@ -546,7 +566,21 @@ function App() {
 
   if (step === "done") return <DoneStep returnsToPage={returnsToPage} autoClose={signedInHere} />;
   if (step === "busy" && picked) return <BusyStep provider={picked} />;
-  return <ProviderStep providers={providers} lastAccounts={lastAccounts} chooserProviders={chooserProviders} error={error} consent={consent} showAll={showAll} onPick={(provider, chooser) => void pick(provider, chooser)} onRetryProviders={loadProviders} onConsent={onConsent} setShowAll={setShowAll} />;
+  return (
+    <ProviderStep
+      providers={providers}
+      lastAccounts={lastAccounts}
+      chooserProviders={chooserProviders}
+      error={error}
+      refusedProvider={error ? picked : null}
+      consent={consent}
+      showAll={showAll}
+      onPick={(provider, chooser) => void pick(provider, chooser)}
+      onRetryProviders={loadProviders}
+      onConsent={onConsent}
+      setShowAll={setShowAll}
+    />
+  );
 }
 
 // Shown ahead of the sign-in form on browsers that never prompted for data collection themselves.

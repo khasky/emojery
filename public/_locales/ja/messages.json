@@ -518,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "プロバイダーがサインインを完了できませんでした。もう一度試すか、別のアカウントを選んでください。"
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "職場や学校のアカウントではサインインできません。個人アカウントを使ってください。"
+  },
+  "authAccountTypeHelpLink": {
+    "message": "個人アカウントのみの理由"
+  },
   "authErrEnrollFailed": {
     "message": "現在アカウントを登録できません。1 分ほど待ってからもう一度お試しください。"
   },

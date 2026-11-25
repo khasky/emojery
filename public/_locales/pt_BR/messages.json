@@ -518,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "O provedor não concluiu o login. Tente novamente ou escolha outra conta."
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "Contas de trabalho e de escola não podem entrar. Use uma conta pessoal."
+  },
+  "authAccountTypeHelpLink": {
+    "message": "Por que só contas pessoais"
+  },
   "authErrEnrollFailed": {
     "message": "Não foi possível registrar sua conta agora. Tente novamente em um minuto."
   },

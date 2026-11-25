@@ -518,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "Palveluntarjoaja ei saattanut kirjautumista loppuun. Yritä uudelleen tai valitse toinen tili."
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "Työ- ja koulutileillä ei voi kirjautua. Käytä sen sijaan henkilökohtaista tiliä."
+  },
+  "authAccountTypeHelpLink": {
+    "message": "Miksi vain henkilökohtaiset tilit"
+  },
   "authErrEnrollFailed": {
     "message": "Tiliäsi ei voitu rekisteröidä juuri nyt. Yritä uudelleen minuutin kuluttua."
   },

@@ -518,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "Провайдер не завершив вхід. Спробуйте ще раз або виберіть інший акаунт."
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "Робочими та навчальними акаунтами увійти не можна. Використовуйте особистий акаунт."
+  },
+  "authAccountTypeHelpLink": {
+    "message": "Чому лише особисті акаунти"
+  },
   "authErrEnrollFailed": {
     "message": "Не вдалося зареєструвати акаунт. Спробуйте ще раз за хвилину."
   },

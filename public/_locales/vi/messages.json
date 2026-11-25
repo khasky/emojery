@@ -518,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "Nhà cung cấp chưa hoàn tất đăng nhập. Hãy thử lại hoặc chọn tài khoản khác."
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "Không thể đăng nhập bằng tài khoản cơ quan hoặc trường học. Hãy dùng tài khoản cá nhân."
+  },
+  "authAccountTypeHelpLink": {
+    "message": "Vì sao chỉ nhận tài khoản cá nhân"
+  },
   "authErrEnrollFailed": {
     "message": "Hiện không thể đăng ký tài khoản của bạn. Vui lòng thử lại sau một phút."
   },

@@ -518,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "Le fournisseur n'a pas terminé la connexion. Réessayez ou choisissez un autre compte."
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "Les comptes professionnels et scolaires ne peuvent pas se connecter. Utilisez plutôt un compte personnel."
+  },
+  "authAccountTypeHelpLink": {
+    "message": "Pourquoi seulement des comptes personnels"
+  },
   "authErrEnrollFailed": {
     "message": "Impossible d'enregistrer votre compte pour le moment. Réessayez dans une minute."
   },

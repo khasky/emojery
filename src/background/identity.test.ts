@@ -249,7 +249,7 @@ describe("signInWithProvider", () => {
     stubIdentity((url) => `${REDIRECT}#state=${url.searchParams.get("state")}&id_token=${idToken()}`);
     for (const [status, error, refusal] of [
       [401, "bad_token", "provider_denied"],
-      [403, "account_type_unsupported", "provider_denied"],
+      [403, "account_type_unsupported", "account_type_unsupported"],
       [429, "too_many_keys", "device_limit"],
       [409, "key_failed", "enrollment_failed"],
     ] as const) {

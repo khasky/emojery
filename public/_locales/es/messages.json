@@ -518,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "El proveedor no completó el inicio de sesión. Vuelve a intentarlo o elige otra cuenta."
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "Las cuentas del trabajo y de centros educativos no pueden iniciar sesión. Usa una cuenta personal."
+  },
+  "authAccountTypeHelpLink": {
+    "message": "Por qué solo cuentas personales"
+  },
   "authErrEnrollFailed": {
     "message": "No se pudo registrar tu cuenta ahora mismo. Vuelve a intentarlo en un minuto."
   },

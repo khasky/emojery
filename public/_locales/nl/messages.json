@@ -518,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "De aanbieder heeft de aanmelding niet voltooid. Probeer het opnieuw of kies een ander account."
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "Met werk- en schoolaccounts kun je je niet aanmelden. Gebruik in plaats daarvan een persoonlijk account."
+  },
+  "authAccountTypeHelpLink": {
+    "message": "Waarom alleen persoonlijke accounts"
+  },
   "authErrEnrollFailed": {
     "message": "Je account kon nu niet worden geregistreerd. Probeer het over een minuut opnieuw."
   },

@@ -518,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "Teenusepakkuja ei viinud sisselogimist lõpule. Proovi uuesti või vali teine konto."
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "Töö- ja koolikontodega ei saa sisse logida. Kasuta selle asemel isiklikku kontot."
+  },
+  "authAccountTypeHelpLink": {
+    "message": "Miks ainult isiklikud kontod"
+  },
   "authErrEnrollFailed": {
     "message": "Sinu kontot ei õnnestunud praegu registreerida. Proovi minuti pärast uuesti."
   },

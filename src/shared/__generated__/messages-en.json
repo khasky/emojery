@@ -516,6 +516,12 @@
  "authErrProviderDenied": {
   "message": "The provider did not complete the sign-in. Try again or choose another account."
  },
+ "authErrAccountTypeUnsupported": {
+  "message": "Work and school accounts can't sign in. Use a personal account instead."
+ },
+ "authAccountTypeHelpLink": {
+  "message": "Why personal accounts only"
+ },
  "authErrEnrollFailed": {
   "message": "Could not register your account right now. Please try again in a minute."
  },

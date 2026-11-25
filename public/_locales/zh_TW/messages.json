@@ -518,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "提供者未完成登入。請重試或選擇其他帳號。"
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "工作和學校帳號無法登入。請改用個人帳號。"
+  },
+  "authAccountTypeHelpLink": {
+    "message": "為什麼只支援個人帳號"
+  },
   "authErrEnrollFailed": {
     "message": "目前無法註冊你的帳號。請稍後再試。"
   },

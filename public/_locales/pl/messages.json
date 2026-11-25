@@ -518,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "Dostawca nie zakończył logowania. Spróbuj ponownie lub wybierz inne konto."
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "Na konta służbowe i szkolne nie można się zalogować. Użyj zamiast tego konta prywatnego."
+  },
+  "authAccountTypeHelpLink": {
+    "message": "Dlaczego tylko konta prywatne"
+  },
   "authErrEnrollFailed": {
     "message": "Nie udało się teraz zarejestrować konta. Spróbuj ponownie za minutę."
   },

@@ -436,6 +436,7 @@ describe("auth page - the provider step", () => {
   it.each([
     ["cancelled", "Sign-in was cancelled. Try again when you're ready."],
     ["provider_denied", "The provider did not complete the sign-in. Try again or choose another account."],
+    ["account_type_unsupported", "Work and school accounts can't sign in. Use a personal account instead."],
     ["enrollment_failed", "Could not register your account right now. Please try again in a minute."],
     ["client_outdated", "This version of Emojery is out of date. Update it to sign in."],
     ["device_limit", "Device limit for this month is reached. Try again next month."],
@@ -455,6 +456,10 @@ describe("auth page - the provider step", () => {
       expect(help?.textContent).toBe("What this means");
       expect(help?.href.startsWith("https://emojery.app/help/device-limit-reached")).toBe(true);
       expect(help?.target).toBe("_blank");
+    } else if (refusal === "account_type_unsupported") {
+      expect(help?.textContent).toBe("Why personal accounts only");
+      expect(help?.href.startsWith("https://emojery.app/help/signing-in")).toBe(true);
+      expect(help?.target).toBe("_blank");
     } else if (refusal === "client_outdated") {
       expect(help?.textContent).toBe("Update from the store");
       expect(help?.href).toMatch(/^https:\/\/(chromewebstore\.google\.com|microsoftedge\.microsoft\.com|addons\.mozilla\.org)\//);
@@ -468,6 +473,29 @@ describe("auth page - the provider step", () => {
     expect(document.querySelector(PROVIDER_LIST_SELECTOR)?.getAttribute("aria-describedby")).toBe(AUTH_ERROR_ID);
     // The list is still usable: the consent survives, so a second pick is one click.
     expect(providerButtons().every((b) => !b.disabled)).toBe(true);
+  });
+
+  // The browser most likely still holds the work account, so a plain retry would
+  // hand the same one back: the refusal reopens the provider's account picker.
+  it("offers another account at the same provider after a work-account refusal", async () => {
+    install({ signInReply: { type: "auth:signedIn", ok: false, refusal: "account_type_unsupported" } });
+    await loadPage();
+    await pick("google");
+
+    const other = await vi.waitFor(() => requireEl<HTMLButtonElement>(document, `${AUTH_ERROR_SELECTOR} ${otherAccountSelector("google")}`));
+    expect(other.textContent).toBe("Use a different Google account");
+    await userEvent.click(other);
+    await vi.waitFor(() => expect(sentOfType("auth:signIn")).toHaveLength(2));
+    expect(sentOfType("auth:signIn")[1]).toEqual({ type: "auth:signIn", provider: "google", chooser: true });
+  });
+
+  it("offers no picker after a work-account refusal where the provider has none", async () => {
+    install({ signInReply: { type: "auth:signedIn", ok: false, refusal: "account_type_unsupported" } });
+    await loadPage();
+    await pick("apple");
+
+    await vi.waitFor(() => expect(errorText()).toContain("Work and school accounts can't sign in."));
+    expect(document.querySelector(`${AUTH_ERROR_SELECTOR} button`)).toBeNull();
   });
 
   it("opens on the update notice when the API has retired this build", async () => {

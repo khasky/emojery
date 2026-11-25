@@ -518,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "Leverantören slutförde inte inloggningen. Försök igen eller välj ett annat konto."
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "Jobb- och skolkonton kan inte logga in. Använd ett personligt konto i stället."
+  },
+  "authAccountTypeHelpLink": {
+    "message": "Varför bara personliga konton"
+  },
   "authErrEnrollFailed": {
     "message": "Kontot kunde inte registreras just nu. Försök igen om en minut."
   },

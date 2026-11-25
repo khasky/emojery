@@ -19,6 +19,11 @@ export const HELP_DEVICE_LIMIT_URL = "https://emojery.app/help/device-limit-reac
 // public-log agreement on the sign-in page.
 export const HELP_WHAT_IS_PUBLIC_URL = "https://emojery.app/help/what-is-public";
 
+// Why only personal accounts sign in, and how to tell a work or school account:
+// linked from the refusal the API gives one. The API names the same article in
+// its answer; the address is held here so the page links nothing it was sent.
+export const HELP_SIGNING_IN_URL = "https://emojery.app/help/signing-in";
+
 const EXTENSION_UTM_SOURCE = "emojery";
 const EXTENSION_UTM_MEDIUM = "browser_extension";
 

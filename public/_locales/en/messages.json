@@ -659,6 +659,14 @@
     "message": "The provider did not complete the sign-in. Try again or choose another account.",
     "description": "Auth error: the provider refused the sign-in or its answer could not be validated."
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "Work and school accounts can't sign in. Use a personal account instead.",
+    "description": "Auth error: the API refused a work, school or otherwise organization-managed account; only personal accounts sign in."
+  },
+  "authAccountTypeHelpLink": {
+    "message": "Why personal accounts only",
+    "description": "Link after the work-account refusal on the auth page, opening the help article on why only personal accounts sign in and how to tell them apart."
+  },
   "authErrEnrollFailed": {
     "message": "Could not register your account right now. Please try again in a minute.",
     "description": "Auth error: the provider accepted the sign-in, but the account could not be registered right now."

@@ -518,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "Der Anbieter hat die Anmeldung nicht abgeschlossen. Versuche es erneut oder wähle ein anderes Konto."
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "Mit Arbeits- und Schulkonten ist keine Anmeldung möglich. Verwende stattdessen ein privates Konto."
+  },
+  "authAccountTypeHelpLink": {
+    "message": "Warum nur private Konten"
+  },
   "authErrEnrollFailed": {
     "message": "Dein Konto konnte gerade nicht registriert werden. Bitte versuche es in einer Minute erneut."
   },

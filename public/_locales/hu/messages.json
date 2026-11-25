@@ -518,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "A szolgáltató nem fejezte be a bejelentkezést. Próbáld újra, vagy válassz másik fiókot."
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "Munkahelyi és iskolai fiókkal nem lehet bejelentkezni. Használj helyette személyes fiókot."
+  },
+  "authAccountTypeHelpLink": {
+    "message": "Miért csak személyes fiókok"
+  },
   "authErrEnrollFailed": {
     "message": "A fiókodat most nem sikerült regisztrálni. Próbáld újra egy perc múlva."
   },

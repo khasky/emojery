@@ -518,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "Teikėjas neužbaigė prisijungimo. Pabandykite dar kartą arba pasirinkite kitą paskyrą."
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "Su darbo ir mokyklos paskyromis prisijungti negalima. Naudokite asmeninę paskyrą."
+  },
+  "authAccountTypeHelpLink": {
+    "message": "Kodėl tik asmeninės paskyros"
+  },
   "authErrEnrollFailed": {
     "message": "Šiuo metu nepavyko užregistruoti jūsų paskyros. Pabandykite dar kartą po minutės."
   },

@@ -518,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "Penyedia tidak melengkapkan log masuk. Cuba lagi atau pilih akaun lain."
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "Akaun kerja dan sekolah tidak boleh log masuk. Gunakan akaun peribadi."
+  },
+  "authAccountTypeHelpLink": {
+    "message": "Mengapa akaun peribadi sahaja"
+  },
   "authErrEnrollFailed": {
     "message": "Akaun anda tidak dapat didaftarkan sekarang. Sila cuba lagi seminit lagi."
   },

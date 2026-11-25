@@ -518,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "Il provider non ha completato l'accesso. Riprova o scegli un altro account."
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "Gli account di lavoro e della scuola non possono accedere. Usa invece un account personale."
+  },
+  "authAccountTypeHelpLink": {
+    "message": "Perché solo account personali"
+  },
   "authErrEnrollFailed": {
     "message": "Impossibile registrare il tuo account in questo momento. Riprova tra un minuto."
   },
