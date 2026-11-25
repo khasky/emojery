@@ -537,7 +537,7 @@
     "message": "Im Store aktualisieren"
   },
   "authErrDeviceLimit": {
-    "message": "Das Gerätelimit für diesen Monat ist erreicht. Versuche es nächsten Monat erneut."
+    "message": "Dieses Konto hat heute so viele neue Geräte hinzugefügt, wie möglich sind. Versuche es nach Mitternacht UTC erneut."
   },
   "deviceLimitHelpLink": {
     "message": "Was bedeutet das?",

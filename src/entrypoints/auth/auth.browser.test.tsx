@@ -439,7 +439,7 @@ describe("auth page - the provider step", () => {
     ["account_type_unsupported", "Work and school accounts can't sign in. Use a personal account instead."],
     ["enrollment_failed", "Could not register your account right now. Please try again in a minute."],
     ["client_outdated", "This version of Emojery is out of date. Update it to sign in."],
-    ["device_limit", "Device limit for this month is reached. Try again next month."],
+    ["device_limit", "This account has added as many new devices as it can today. Try again after midnight UTC."],
     ["unavailable", "Something went wrong. Please try again."],
   ])("maps %s to its own copy and hands the provider list back", async (refusal, copy) => {
     install({ signInReply: { type: "auth:signedIn", ok: false, refusal } });

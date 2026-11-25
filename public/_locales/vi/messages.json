@@ -537,7 +537,7 @@
     "message": "Cập nhật từ cửa hàng"
   },
   "authErrDeviceLimit": {
-    "message": "Đã đạt giới hạn thiết bị của tháng này. Vui lòng thử lại vào tháng sau."
+    "message": "Tài khoản này đã thêm đủ số thiết bị mới cho phép trong hôm nay. Hãy thử lại sau nửa đêm UTC."
   },
   "deviceLimitHelpLink": {
     "message": "Điều này nghĩa là gì",

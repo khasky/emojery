@@ -537,7 +537,7 @@
     "message": "Atualizar pela loja"
   },
   "authErrDeviceLimit": {
-    "message": "O limite de dispositivos deste mês foi atingido. Tente novamente no mês que vem."
+    "message": "Esta conta já adicionou hoje todos os dispositivos novos que pode. Tente novamente depois da meia-noite UTC."
   },
   "deviceLimitHelpLink": {
     "message": "O que isso significa",

@@ -537,7 +537,7 @@
     "message": "ストアから更新"
   },
   "authErrDeviceLimit": {
-    "message": "今月の端末数の上限に達しました。来月もう一度お試しください。"
+    "message": "このアカウントで今日追加できる新しい端末の数に達しました。UTC の午前 0 時以降にもう一度お試しください。"
   },
   "deviceLimitHelpLink": {
     "message": "これはどういうことか",

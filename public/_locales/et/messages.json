@@ -537,7 +537,7 @@
     "message": "Uuenda poest"
   },
   "authErrDeviceLimit": {
-    "message": "Selle kuu seadmete limiit on täis. Proovi järgmisel kuul uuesti."
+    "message": "See konto on täna lisanud nii palju uusi seadmeid, kui saab. Proovi uuesti pärast südaööd UTC järgi."
   },
   "deviceLimitHelpLink": {
     "message": "Mida see tähendab",

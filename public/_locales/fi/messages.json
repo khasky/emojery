@@ -537,7 +537,7 @@
     "message": "Päivitä kaupasta"
   },
   "authErrDeviceLimit": {
-    "message": "Tämän kuun laiterajoitus on täynnä. Yritä uudelleen ensi kuussa."
+    "message": "Tälle tilille on lisätty tänään niin monta uutta laitetta kuin voi. Yritä uudelleen UTC-keskiyön jälkeen."
   },
   "deviceLimitHelpLink": {
     "message": "Mitä tämä tarkoittaa",

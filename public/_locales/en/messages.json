@@ -684,12 +684,12 @@
     "description": "Link label next to the outdated-build notice; opens this browser's store page for Emojery."
   },
   "authErrDeviceLimit": {
-    "message": "Device limit for this month is reached. Try again next month.",
-    "description": "Auth error: the account already has as many signed-in devices as the current key epoch allows; a new device can sign in once the next epoch starts."
+    "message": "This account has added as many new devices as it can today. Try again after midnight UTC.",
+    "description": "Auth error: the account has registered as many new devices as it may in one day (the day runs in UTC); a new device can sign in after midnight UTC."
   },
   "deviceLimitHelpLink": {
     "message": "What this means",
-    "description": "Link shown beside both device-limit messages (the sign-in refusal and the Account-tab notice). It opens the help article that says what the monthly key limit is, what to do while it holds, and how to reach the operator. Deliberately short: it sits at the end of a sentence that already carries the news."
+    "description": "Link shown beside the device-limit refusal on the auth page. It opens the help article that says what the daily new-device limit is, what to do while it holds, and how to reach the operator. Deliberately short: it sits at the end of a sentence that already carries the news."
   },
   "loadError": {
     "message": "Something went wrong. Please try again.",

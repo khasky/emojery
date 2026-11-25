@@ -537,7 +537,7 @@
     "message": "从商店更新"
   },
   "authErrDeviceLimit": {
-    "message": "本月的设备数量已达上限。请下个月再试。"
+    "message": "此账号今天添加的新设备已达上限。请在 UTC 午夜之后再试。"
   },
   "deviceLimitHelpLink": {
     "message": "这是什么意思",

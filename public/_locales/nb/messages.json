@@ -537,7 +537,7 @@
     "message": "Oppdater fra butikken"
   },
   "authErrDeviceLimit": {
-    "message": "Enhetsgrensen for denne måneden er nådd. Prøv igjen neste måned."
+    "message": "Denne kontoen har lagt til så mange nye enheter som den kan i dag. Prøv igjen etter midnatt UTC."
   },
   "deviceLimitHelpLink": {
     "message": "Hva betyr dette?",

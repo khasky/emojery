@@ -537,7 +537,7 @@
     "message": "Frissítés az áruházból"
   },
   "authErrDeviceLimit": {
-    "message": "Elérted az e havi eszközkorlátot. Próbáld újra jövő hónapban."
+    "message": "Ez a fiók ma már annyi új eszközt adott hozzá, amennyit lehet. Próbáld újra UTC szerint éjfél után."
   },
   "deviceLimitHelpLink": {
     "message": "Mit jelent ez?",

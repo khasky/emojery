@@ -537,7 +537,7 @@
     "message": "Atnaujinti parduotuvėje"
   },
   "authErrDeviceLimit": {
-    "message": "Pasiektas šio mėnesio įrenginių limitas. Pabandykite dar kartą kitą mėnesį."
+    "message": "Ši paskyra šiandien jau pridėjo tiek naujų įrenginių, kiek galima. Pabandykite dar kartą po vidurnakčio UTC."
   },
   "deviceLimitHelpLink": {
     "message": "Ką tai reiškia",

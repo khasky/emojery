@@ -537,7 +537,7 @@
     "message": "Mettre à jour depuis la boutique"
   },
   "authErrDeviceLimit": {
-    "message": "La limite d'appareils de ce mois est atteinte. Réessayez le mois prochain."
+    "message": "Ce compte a ajouté aujourd'hui autant de nouveaux appareils que possible. Réessayez après minuit UTC."
   },
   "deviceLimitHelpLink": {
     "message": "Ce que cela signifie",

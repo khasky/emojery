@@ -206,8 +206,8 @@ export type SignInRefusal =
   | "enrollment_failed"
   // The API stopped serving this build; the fix is an update.
   | "client_outdated"
-  // The account has as many devices as this key epoch allows; sign in again once
-  // the next one starts.
+  // The account has registered as many new devices as a day allows; a new one
+  // signs in after midnight UTC.
   | "device_limit"
   | "unavailable";
 

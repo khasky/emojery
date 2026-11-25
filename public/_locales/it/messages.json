@@ -537,7 +537,7 @@
     "message": "Aggiorna dallo store"
   },
   "authErrDeviceLimit": {
-    "message": "Il limite di dispositivi di questo mese è stato raggiunto. Riprova il mese prossimo."
+    "message": "Questo account ha già aggiunto oggi tutti i nuovi dispositivi consentiti. Riprova dopo la mezzanotte UTC."
   },
   "deviceLimitHelpLink": {
     "message": "Che cosa significa",

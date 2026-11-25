@@ -537,7 +537,7 @@
     "message": "Kemas kini dari kedai"
   },
   "authErrDeviceLimit": {
-    "message": "Had peranti untuk bulan ini telah dicapai. Sila cuba lagi bulan depan."
+    "message": "Akaun ini telah menambah seberapa banyak peranti baharu yang dibenarkan hari ini. Cuba lagi selepas tengah malam UTC."
   },
   "deviceLimitHelpLink": {
     "message": "Apa maksudnya",

@@ -537,7 +537,7 @@
     "message": "Bijwerken via de winkel"
   },
   "authErrDeviceLimit": {
-    "message": "De apparaatlimiet voor deze maand is bereikt. Probeer het volgende maand opnieuw."
+    "message": "Dit account heeft vandaag zoveel nieuwe apparaten toegevoegd als mogelijk is. Probeer het opnieuw na middernacht UTC."
   },
   "deviceLimitHelpLink": {
     "message": "Wat dit betekent",
