@@ -501,7 +501,7 @@
     "message": "Apa yang Emojery hantar"
   },
   "dataConsentBody": {
-    "message": "Emojery menghantar alamat halaman tempat anda bertindak balas, reaksi anda dan token log masuk sekali guna daripada penyedia yang anda pilih; nama dan e-mel anda tidak diminta. Reaksi diterbitkan secara kekal dalam log awam di bawah nama samaran, dan negara serta rangkaian setiap undian disimpan selama 30 hari untuk mencegah penyalahgunaan."
+    "message": "Emojery menghantar laman web dan ID siaran tempat anda bertindak balas, reaksi anda dan token log masuk sekali guna daripada penyedia yang anda pilih; nama dan e-mel anda tidak diminta. Reaksi diterbitkan secara kekal dalam log awam di bawah nama samaran, dan negara serta rangkaian setiap undian disimpan selama 30 hari untuk mencegah penyalahgunaan."
   },
   "dataConsentPolicyLink": {
     "message": "Dasar Privasi."

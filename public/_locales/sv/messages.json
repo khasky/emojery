@@ -501,7 +501,7 @@
     "message": "Vad Emojery skickar"
   },
   "dataConsentBody": {
-    "message": "Emojery skickar adressen till sidan du reagerar på, din reaktion och en engångstoken för inloggning från leverantören du väljer; ditt namn och din e-post efterfrågas inte. Reaktioner publiceras permanent i en offentlig logg under en pseudonym, och land och nätverk för varje röst sparas i 30 dagar för att motverka missbruk."
+    "message": "Emojery skickar webbplatsen och id:t för inlägget du reagerar på, din reaktion och en engångstoken för inloggning från leverantören du väljer; ditt namn och din e-post efterfrågas inte. Reaktioner publiceras permanent i en offentlig logg under en pseudonym, och land och nätverk för varje röst sparas i 30 dagar för att motverka missbruk."
   },
   "dataConsentPolicyLink": {
     "message": "Integritetspolicy."

@@ -501,7 +501,7 @@
     "message": "Ce qu’Emojery envoie"
   },
   "dataConsentBody": {
-    "message": "Emojery envoie l'adresse de la page sur laquelle vous réagissez, votre réaction et un jeton de connexion à usage unique du fournisseur que vous choisissez ; votre nom et votre e-mail ne sont pas demandés. Les réactions sont publiées pour toujours dans un journal public sous un pseudonyme, et le pays et le réseau de chaque vote sont conservés 30 jours pour lutter contre les abus."
+    "message": "Emojery envoie le site et l'identifiant de la publication à laquelle vous réagissez, votre réaction et un jeton de connexion à usage unique du fournisseur que vous choisissez ; votre nom et votre e-mail ne sont pas demandés. Les réactions sont publiées pour toujours dans un journal public sous un pseudonyme, et le pays et le réseau de chaque vote sont conservés 30 jours pour lutter contre les abus."
   },
   "dataConsentPolicyLink": {
     "message": "Politique de confidentialité."

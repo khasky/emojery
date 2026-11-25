@@ -501,7 +501,7 @@
     "message": "Emojery gửi những gì"
   },
   "dataConsentBody": {
-    "message": "Emojery gửi địa chỉ của trang bạn bày tỏ cảm xúc, cảm xúc của bạn và một mã đăng nhập dùng một lần từ nhà cung cấp bạn chọn; không yêu cầu tên và email của bạn. Cảm xúc được công bố vĩnh viễn trong một nhật ký công khai dưới bút danh, và quốc gia cùng mạng của mỗi lượt bình chọn được lưu 30 ngày để chống lạm dụng."
+    "message": "Emojery gửi trang web và ID của bài đăng bạn bày tỏ cảm xúc, cảm xúc của bạn và một mã đăng nhập dùng một lần từ nhà cung cấp bạn chọn; không yêu cầu tên và email của bạn. Cảm xúc được công bố vĩnh viễn trong một nhật ký công khai dưới bút danh, và quốc gia cùng mạng của mỗi lượt bình chọn được lưu 30 ngày để chống lạm dụng."
   },
   "dataConsentPolicyLink": {
     "message": "Chính sách quyền riêng tư."

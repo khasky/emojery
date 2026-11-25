@@ -26,7 +26,7 @@ export async function resetAuthOnFreshInstall(): Promise<void> {
 }
 
 // Pre-140 Firefox shows no data-collection prompt of its own, so the first thing a fresh
-// install there sees is our disclosure - before any page URL reaches the API. The auth page
+// install there sees is our disclosure - before any post ID reaches the API. The auth page
 // carries it (same card chrome, no second entrypoint); `?consent=1` swaps the sign-in form for
 // the notice.
 export async function openLegacyDataConsentNotice(): Promise<void> {
