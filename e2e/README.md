@@ -52,7 +52,7 @@ The **When CI runs it** column is the honest map of what a green pipeline has ac
 | `facebook-group-row-injection.spec.ts` | The icon-only Comment/Send action row (the group photo-post shape, which live sits behind a group login) still mounts a trigger: injects the captured row beside a live public post | No | Manual only |
 | `auth.spec.ts` | The provider sign-in through the test provider: consent gating the buttons, a cancelled window, a refused sign-in, sign-in/out, the localized provider step | Yes | Manual only |
 | `accounts.spec.ts` | Multi-account: identity isolation across switches, independent counter moves, provider-account recovery (all on GitHub) | Yes | Manual only |
-| `authed-extras.spec.ts` | Master toggle, react/un-react counter math, offline queue flush, account deletion, the Report tab, rapid reaction switching, an in-flight vote surviving a reload, the analytics-consent default | Yes | Manual only |
+| `authed-extras.spec.ts` | Master toggle, react/un-react counter math, offline queue flush, account deletion, the Report tab, rapid reaction switching, an in-flight vote surviving a reload | Yes | Manual only |
 | `reaction-burst.spec.ts` | A fast burst of reactions: every click is listed in History and the server ends on each target's last pick; a 429 is waited out and the last pick still lands | Yes | Manual only |
 | `persistence.spec.ts` | Settings and reactions surviving a full browser restart; a fresh profile starts from defaults | Yes | Manual only |
 | `history-pagination.spec.ts` | Popup History paging + background IndexedDB search over a seeded 10k-row account | Yes | Manual only |
@@ -135,8 +135,7 @@ Every spec marked "Yes" above covers the gaps the site loops don't, **autonomous
   - deleting the account signs out;
   - the Report tab shows the unsupported-page notice off a supported site, and submits a report on a supported page (the popup opens as a background tab, so the active tab stays a supported site and the form renders);
   - rapid back-to-back reaction switches settle on the last pick without corrupting the counter;
-  - a vote still in flight survives a reload;
-  - the analytics-consent toggle is authed-only and defaults ON.
+  - a vote still in flight survives a reload.
 - **`reaction-burst.spec.ts`** — reacting fast must not lose reactions ("I placed a lot of reactions quickly and not all of them were counted"). Clicks go through the real picker; the accounting is read from the vote responses and the popup, and the queue's drain from its IndexedDB store. The 429 is the harness's own answer to the first vote of the burst.
   - One case bursts across 2 targets (GitHub + GitLab): every click must be counted on the wire and appear as its own History row, right emoji, right target, newest first.
   - The other keeps clicking until a refusal comes back. Nothing extra may be counted while it does, and the durable queue must re-send every refused click afterwards, so History still holds exactly 1 row per click.

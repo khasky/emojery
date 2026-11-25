@@ -56,7 +56,7 @@ import {
 } from "./lib/popup-probes";
 import { DEEP_QUERY_ALL_SRC } from "./lib/probe-src";
 import { clearReactionOnTarget, clickReactionBySearchOnTarget, expectPickerClosed, expectReactionOptionSelected, expectSelectedReaction, expectVisibleReactionOptions, pickReactionBySearchOnTarget } from "./lib/reaction-actions";
-import { AGREE_CHECKBOX_SELECTOR, GATE_SIGNIN_CLASS, HIDDEN_SELECTOR } from "./lib/selectors";
+import { AGREE_TERMS_CHECKBOX_SELECTOR, GATE_SIGNIN_CLASS, HIDDEN_SELECTOR } from "./lib/selectors";
 import type { MountEvidence, SupportedSiteScenario } from "./lib/site-evidence";
 import { keyMatchDiagnostic, launchE2eBrowserSession, settleAndRequireMount, skipWithShot } from "./lib/site-session";
 import { isBlockUrl } from "./lib/site-walls";
@@ -107,7 +107,7 @@ test("extension is loaded in the browser profile", async () => {
   const auth = await context.newPage();
   try {
     await auth.goto(extensionPageUrl(extensionId, "auth.html"));
-    await expect(auth.locator(AGREE_CHECKBOX_SELECTOR)).toBeVisible();
+    await expect(auth.locator(AGREE_TERMS_CHECKBOX_SELECTOR)).toBeVisible();
   } finally {
     await auth.close().catch(() => {});
   }
@@ -128,7 +128,7 @@ test("private window: supported site button opens auth.html", async () => {
     expect(authPage, "A private-window supported-site click should open visible auth.html").not.toBeNull();
     if (!authPage) return;
     // Chromium-only above, so the handle is the Playwright page.
-    await expect((authPage as Page).locator(AGREE_CHECKBOX_SELECTOR)).toBeVisible();
+    await expect((authPage as Page).locator(AGREE_TERMS_CHECKBOX_SELECTOR)).toBeVisible();
   } finally {
     await authPage?.close().catch(() => {});
     await page.close().catch(() => {});

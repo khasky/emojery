@@ -2,12 +2,12 @@
 //
 // The one way the background talks to the API. A call names a path and what it
 // sends; everything the wire needs on top - the client identity headers, the
-// install id, the deadline, `Retry-After`, the JSON body read - happens here, so
-// no caller assembles a request or casts a response.
+// deadline, `Retry-After`, the JSON body read - happens here, so no caller
+// assembles a request or casts a response.
 //
 // Two header shapes the client sends: a POST carries the JSON headers
-// (content-type, the install id, accept-language when a language is given); a
-// GET carries only the client identity headers. A bearer token rides on either.
+// (content-type, accept-language when a language is given); a GET carries only
+// the client identity headers. A bearer token rides on either.
 
 import { markClientOutdated } from "../shared/client-outdated";
 import { API_BASE, API_TIMEOUT_MS } from "../shared/config";

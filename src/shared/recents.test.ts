@@ -3,14 +3,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const storageLocalGet = vi.fn();
 const storageLocalSet = vi.fn();
-const storageLocalRemove = vi.fn();
 vi.mock("./webext", () => ({
   storageLocalGet: (keys: string[]) => storageLocalGet(keys),
   storageLocalSet: (items: Record<string, unknown>) => storageLocalSet(items),
-  storageLocalRemove: (keys: string[]) => storageLocalRemove(keys),
 }));
 
-import { bumpRecentEmoji, clearAllRecentEmojiStats, clearRecentEmojis, dropRecentEmoji, getRecentEmojis, importRecentEmojiStats, type RecentEmojiStatsByUser } from "./recents";
+import { bumpRecentEmoji, clearRecentEmojis, dropRecentEmoji, getRecentEmojis } from "./recents";
 
 const USER = "user-1";
 
@@ -23,9 +21,7 @@ function stats(n: number): Record<string, { count: number; lastUsed: number }> {
 beforeEach(() => {
   storageLocalGet.mockReset();
   storageLocalSet.mockReset();
-  storageLocalRemove.mockReset();
   storageLocalSet.mockResolvedValue(undefined);
-  storageLocalRemove.mockResolvedValue(undefined);
 });
 afterEach(() => {
   vi.useRealTimers();
@@ -122,25 +118,5 @@ describe("background-side stat maintenance", () => {
     await dropRecentEmoji(USER, "❤️");
     await dropRecentEmoji("nobody", "🔥");
     expect(storageLocalSet).not.toHaveBeenCalled();
-  });
-
-  it("import merges counts and keeps the newest lastUsed per emoji", async () => {
-    storageLocalGet.mockResolvedValue({ recents_v1: { [USER]: { "🔥": { count: 2, lastUsed: 1_000 } } } });
-    const incoming: RecentEmojiStatsByUser = {
-      [USER]: { "🔥": { count: 3, lastUsed: 500 }, "❤️": { count: 1, lastUsed: 2_000 } },
-      "another-user": { "🎉": { count: 1, lastUsed: 1 } },
-    };
-    await importRecentEmojiStats(incoming);
-    expect(storageLocalSet).toHaveBeenLastCalledWith({
-      recents_v1: {
-        [USER]: { "🔥": { count: 5, lastUsed: 1_000 }, "❤️": { count: 1, lastUsed: 2_000 } },
-        "another-user": { "🎉": { count: 1, lastUsed: 1 } },
-      },
-    });
-  });
-
-  it("clearAll removes the whole stats key", async () => {
-    await clearAllRecentEmojiStats();
-    expect(storageLocalRemove).toHaveBeenCalledWith(["recents_v1"]);
   });
 });

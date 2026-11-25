@@ -449,20 +449,41 @@
   "authRetryBtn": {
     "message": "Prøv igen"
   },
-  "authAgreeIntro": {
-    "message": "Jeg accepterer "
+  "authFactPublic": {
+    "message": "Det er offentligt: dine reaktioner, under et pseudonym — permanent; uafhængige arkiver kan beholde kopier, selv efter vi har slettet vores."
+  },
+  "authFactNotPublic": {
+    "message": "Det er ikke offentligt: dit navn, din e-mail, din IP."
+  },
+  "authFactSensitive": {
+    "message": "Reaktioner på politiske eller religiøse opslag kan afsløre dine holdninger."
+  },
+  "authPersonalOnly": {
+    "message": "Arbejds- og skolekonti understøttes ikke — brug en personlig Google- eller Microsoft-konto."
+  },
+  "authSeparateAccounts": {
+    "message": "Logger du ind med en anden udbyder, oprettes en separat konto med sine egne reaktioner og sin egen historik."
+  },
+  "authAgreeTerms": {
+    "message": "Jeg accepterer Brugsvilkårene og bekræfter, at jeg er 16 år eller ældre."
   },
   "authTermsLinkLabel": {
-    "message": "Servicevilkårene"
-  },
-  "authAgreeConjunction": {
-    "message": " og "
+    "message": "Brugsvilkår"
   },
   "authPrivacyLinkLabel": {
-    "message": "Privatlivspolitikken"
+    "message": "Privatlivspolitik"
   },
-  "authAgreeOutro": {
-    "message": "."
+  "authAgreePublicLog": {
+    "message": "Jeg accepterer, at hver reaktion, jeg giver, offentliggøres for alle, permanent, i Emojerys offentlige log under mit pseudonym — også reaktioner, der kan afsløre mine politiske, religiøse eller andre holdninger eller mit helbred."
+  },
+  "authWhatIsPublicLink": {
+    "message": "Hvad er offentligt →"
+  },
+  "authObjectAnyTime": {
+    "message": "Du kan til enhver tid gøre indsigelse mod vores brug af dine data til den offentlige log og til misbrugsbekæmpelse — se Privatlivspolitik › Dine rettigheder. Den hurtigste vej er at slette din konto."
+  },
+  "authDeletionNote": {
+    "message": "Hvis du sletter din konto, fjerner vi dine reaktioner fra optællingerne; poster, der allerede er offentliggjort, bliver i loggen under dit pseudonym."
   },
   "authDoneTitle": {
     "message": "Du er logget ind"
@@ -480,7 +501,7 @@
     "message": "Hvad Emojery sender"
   },
   "dataConsentBody": {
-    "message": "Emojery sender adressen på den side, du reagerer på, et tilfældigt installations-id og et engangs-logintoken fra den udbyder, du vælger; kun en envejshash af dit konto-id gemmes. Valgfri kontekst forbliver slået fra i denne browser."
+    "message": "Emojery sender adressen på den side, du reagerer på, din reaktion og et engangs-login-token fra den udbyder, du vælger; dit navn og din e-mail efterspørges ikke. Reaktioner offentliggøres permanent i en offentlig log under et pseudonym, og land og netværk for hver stemme gemmes i 30 dage for at bekæmpe misbrug."
   },
   "dataConsentPolicyLink": {
     "message": "Privatlivspolitik."
@@ -497,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "Udbyderen fuldførte ikke login. Prøv igen, eller vælg en anden konto."
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "Arbejds- og skolekonti kan ikke logge ind. Brug en personlig konto i stedet."
+  },
+  "authAccountTypeHelpLink": {
+    "message": "Hvorfor kun personlige konti"
+  },
   "authErrEnrollFailed": {
     "message": "Din konto kunne ikke registreres lige nu. Prøv igen om et minut."
   },
@@ -510,7 +537,7 @@
     "message": "Opdater fra butikken"
   },
   "authErrDeviceLimit": {
-    "message": "Enhedsgrænsen for denne måned er nået. Prøv igen næste måned."
+    "message": "Denne konto har tilføjet så mange nye enheder, som den kan i dag. Prøv igen efter midnat UTC."
   },
   "deviceLimitHelpLink": {
     "message": "Hvad betyder det?",

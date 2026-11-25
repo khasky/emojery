@@ -449,20 +449,41 @@
   "authRetryBtn": {
     "message": "重試"
   },
-  "authAgreeIntro": {
-    "message": "我同意"
+  "authFactPublic": {
+    "message": "公開的內容：你的反應，以化名形式——永久公開；即使我們刪除了自己的副本，獨立封存仍可能保留副本。"
+  },
+  "authFactNotPublic": {
+    "message": "不公開的內容：你的姓名、電子郵件、IP。"
+  },
+  "authFactSensitive": {
+    "message": "對政治或宗教貼文的反應可能透露你的觀點。"
+  },
+  "authPersonalOnly": {
+    "message": "不支援工作或學校帳號——請使用個人 Google 或 Microsoft 帳號。"
+  },
+  "authSeparateAccounts": {
+    "message": "使用其他提供者登入會建立一個獨立的帳號，擁有各自的反應和歷史記錄。"
+  },
+  "authAgreeTerms": {
+    "message": "我接受使用條款，並確認我已年滿 16 歲。"
   },
   "authTermsLinkLabel": {
-    "message": "服務條款"
-  },
-  "authAgreeConjunction": {
-    "message": "和"
+    "message": "使用條款"
   },
   "authPrivacyLinkLabel": {
     "message": "隱私政策"
   },
-  "authAgreeOutro": {
-    "message": "。"
+  "authAgreePublicLog": {
+    "message": "我同意我的每一個反應都以我的化名永久公開發布在 Emojery 的公開日誌中，任何人都可查看——包括可能透露我的政治、宗教或其他觀點或我的健康狀況的反應。"
+  },
+  "authWhatIsPublicLink": {
+    "message": "哪些內容公開 →"
+  },
+  "authObjectAnyTime": {
+    "message": "你可以隨時反對我們將你的資料用於公開日誌和防範濫用——請參閱 隱私政策 › 你的權利。刪除帳號是最快的方式。"
+  },
+  "authDeletionNote": {
+    "message": "如果你刪除帳號，我們會把你的反應從計數中移除；已發布的項目仍以你的化名保留在日誌中。"
   },
   "authDoneTitle": {
     "message": "您已登入"
@@ -480,7 +501,7 @@
     "message": "Emojery 會傳送什麼"
   },
   "dataConsentBody": {
-    "message": "Emojery 會傳送你做出反應的頁面網址、一個隨機的安裝識別碼，以及所選提供者的一次性登入權杖；只保留你帳號 ID 的單向雜湊。選用的內容在此瀏覽器中維持關閉。"
+    "message": "Emojery 會傳送你做出反應的頁面網址、你的反應，以及你所選提供者的一次性登入權杖；不會索取你的姓名和電子郵件。反應以化名永久發布在公開日誌中，每次投票的國家和網路會保留 30 天，用於防範濫用。"
   },
   "dataConsentPolicyLink": {
     "message": "隱私政策。"
@@ -497,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "提供者未完成登入。請重試或選擇其他帳號。"
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "工作和學校帳號無法登入。請改用個人帳號。"
+  },
+  "authAccountTypeHelpLink": {
+    "message": "為什麼只支援個人帳號"
+  },
   "authErrEnrollFailed": {
     "message": "目前無法註冊你的帳號。請稍後再試。"
   },
@@ -510,7 +537,7 @@
     "message": "從商店更新"
   },
   "authErrDeviceLimit": {
-    "message": "本月的裝置數量已達上限。請下個月再試。"
+    "message": "此帳號今天新增的裝置已達上限。請在 UTC 午夜之後再試。"
   },
   "deviceLimitHelpLink": {
     "message": "這是什麼意思",
