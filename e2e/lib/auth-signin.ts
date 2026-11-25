@@ -50,8 +50,7 @@ export function localeMessage(locale: string, key: string, substitutions?: strin
 }
 
 // The shipped EN string behind a locator, so a copy edit renames the locator
-// with it instead of leaving a spec waiting on text nobody ships any more (the
-// "Analytics" -> "Community insights" rename cost two suites exactly that).
+// with it instead of leaving a spec waiting on text nobody ships any more.
 // localeMessage returns the KEY when a message is missing; turn that back into a
 // loud failure so a renamed KEY cannot quietly become an unmatched locator.
 export function enMessage(key: string, substitutions?: string | string[]): string {

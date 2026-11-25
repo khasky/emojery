@@ -20,10 +20,6 @@ export function targetKey(t: TargetRef): TargetKey {
   return `${t.site}:${t.targetId}` as TargetKey;
 }
 
-// Pre-account-scoping store (no owner) - entries can't be attributed to an
-// account, so the background drops the key at service-worker startup instead of migrating.
-export const LEGACY_OWN_REACTIONS_KEY = "own_reactions_v1";
-
 // Both durable per-target stores below are one storage.local key holding
 // `<site>:<targetId>` -> an owner-stamped entry, read-modify-written IN FULL on
 // the click path, so their size is a per-click parse/serialize cost as well as a

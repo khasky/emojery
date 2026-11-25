@@ -39,8 +39,8 @@ export function providerAccountUrl(id: OidcProvider): string | null {
 }
 
 // The providers the sign-in page shows straight away, in this order - the accounts
-// most people already carry. Everything else the build offers (the staging test
-// provider) waits behind "more sign-in options", in the order it was listed.
+// most people already carry. Everything else the build offers waits behind "more
+// sign-in options", in the order its table lists it.
 const FEATURED_PROVIDERS: readonly OidcProvider[] = ["google", "apple", "microsoft"];
 
 export function splitFeaturedProviders(ids: readonly OidcProvider[]): { featured: OidcProvider[]; rest: OidcProvider[] } {

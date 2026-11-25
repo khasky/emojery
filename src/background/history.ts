@@ -1,16 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // Device-local reaction history in IndexedDB, uncapped - the History tab's stats and facets
-// read the full record. The legacy storage.local format is imported once by
-// migrateLegacyHistory() on service-worker startup (see there for its shape) and its key
-// removed. Reads and search are paged here, never loading the whole store; the picker's recents
+// read the full record. Reads and search are paged here, never loading the whole store; the picker's recents
 // stats update on write (shared/recents.ts), so content scripts never touch it.
 
 import type { SupportedSite, TargetRef } from "../shared/adapter";
 import type { HistoryStats, PortableHistoryRow, ReactionAction, ReactionHistoryItem } from "../shared/messages";
 import type { Reaction } from "../shared/reactions";
-import { bumpRecentEmoji, clearAllRecentEmojiStats, clearRecentEmojis, dropRecentEmoji, importRecentEmojiStats, type RecentEmojiStatsByUser } from "../shared/recents";
-import { storageLocalGet, storageLocalRemove } from "../shared/webext";
+import { bumpRecentEmoji, clearRecentEmojis, dropRecentEmoji } from "../shared/recents";
 import { logBackgroundError } from "./debug";
 import { createIdbHandle, runTransaction } from "./idb-open";
 
@@ -24,10 +21,6 @@ const USER_INDEX = "byUserAndId";
 // Optimistic-row dedupe/rollback lookups; rows without a historyId are absent
 // from this index.
 const HISTORY_ID_INDEX = "byHistoryId";
-
-// The pre-IndexedDB storage.local keys migrateLegacyHistory() consumes.
-const LEGACY_HISTORY_KEY = "history";
-const LEGACY_RECENTS_CLEARED_KEY = "frequent_cleared_v1";
 
 interface HistoryPage {
   items: ReactionHistoryItem[];
@@ -421,47 +414,4 @@ export async function clearHistoryForUser(userId: string): Promise<void> {
     return () => undefined;
   });
   await clearRecentEmojis(userId).catch((error: unknown) => logBackgroundError("clearHistoryForUser.clearRecentEmojis", error));
-}
-
-// Wholesale wipe of every account's rows. Only the pre-`userId` deletion-resume
-// marker still needs it (background/identity.ts) - a scoped delete is impossible
-// there because nothing in that marker names the account.
-export async function clearHistory(): Promise<void> {
-  const db = await openDb();
-  await runInvalidatingWrite<void>(db, "history clear aborted", (store) => {
-    store.clear();
-    return () => undefined;
-  });
-  await clearAllRecentEmojiStats().catch((error: unknown) => logBackgroundError("clearHistory.clearRecentEmojiStats", error));
-}
-
-// One-time import of the pre-IndexedDB storage.local history array (newest first, <=1000 rows
-// per account) plus the picker's old per-user "recents cleared at" marker. Removing the storage
-// keys marks the migration done; a failed remove would re-import duplicates on the next wake -
-// a broken-profile case, accepted.
-export async function migrateLegacyHistory(): Promise<void> {
-  const stored = await storageLocalGet([LEGACY_HISTORY_KEY, LEGACY_RECENTS_CLEARED_KEY]);
-  const legacyRows = stored[LEGACY_HISTORY_KEY] as ReactionHistoryItem[] | undefined;
-  const hadMarker = stored[LEGACY_RECENTS_CLEARED_KEY] !== undefined;
-  if (!Array.isArray(legacyRows)) {
-    if (hadMarker) await storageLocalRemove([LEGACY_RECENTS_CLEARED_KEY]);
-    return;
-  }
-  if (legacyRows.length > 0) {
-    await importHistoryRows([...legacyRows].reverse());
-    const clearedAt = (stored[LEGACY_RECENTS_CLEARED_KEY] as Record<string, number> | undefined) ?? {};
-    const stats: RecentEmojiStatsByUser = {};
-    for (const row of legacyRows) {
-      if (row.ts <= (clearedAt[row.userId] ?? 0)) continue;
-      const userStats = stats[row.userId] ?? {};
-      stats[row.userId] = userStats;
-      const current = userStats[row.reaction];
-      userStats[row.reaction] = {
-        count: (current?.count ?? 0) + 1,
-        lastUsed: Math.max(current?.lastUsed ?? 0, row.ts),
-      };
-    }
-    await importRecentEmojiStats(stats).catch((error: unknown) => logBackgroundError("migrateLegacyHistory.importRecentEmojiStats", error));
-  }
-  await storageLocalRemove([LEGACY_HISTORY_KEY, LEGACY_RECENTS_CLEARED_KEY]);
 }

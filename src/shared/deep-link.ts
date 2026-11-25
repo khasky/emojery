@@ -17,11 +17,6 @@ export const BEACON_DATASET_KEY = "emojery";
 // specific target.
 const HINT_PREFIX = "emojery-react";
 
-// The name this hint shipped under first. Still parsed, never emitted: links
-// already shared carry it, and so does any emojery.app deploy older than the
-// rename. Drop it only once those links can no longer reach a user.
-const LEGACY_HINT_PREFIX = "em-react";
-
 export interface ReactHint {
   // The `site:targetId` mount key to open, or null to open the first target.
   targetKey: string | null;
@@ -31,20 +26,17 @@ export interface ReactHint {
 // leading '#'. The keyed form carries a percent-encoded `site:targetId`.
 export function parseReactHint(hash: string): ReactHint | null {
   const raw = hash.startsWith("#") ? hash.slice(1) : hash;
-  for (const prefix of [HINT_PREFIX, LEGACY_HINT_PREFIX]) {
-    if (raw === prefix) return { targetKey: null };
-    const eq = `${prefix}=`;
-    if (!raw.startsWith(eq)) continue;
-    const rest = raw.slice(eq.length);
-    let key: string;
-    try {
-      key = decodeURIComponent(rest);
-    } catch {
-      key = rest;
-    }
-    return { targetKey: key || null };
+  if (raw === HINT_PREFIX) return { targetKey: null };
+  const eq = `${HINT_PREFIX}=`;
+  if (!raw.startsWith(eq)) return null;
+  const rest = raw.slice(eq.length);
+  let key: string;
+  try {
+    key = decodeURIComponent(rest);
+  } catch {
+    key = rest;
   }
-  return null;
+  return { targetKey: key || null };
 }
 
 // The documented emit half of the deep-link contract: the emojery.app /react

@@ -124,7 +124,7 @@ Open Emojery from the browser toolbar and the popup lists everything you've reac
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/output/captures/hiw-seal-dark.png" />
-  <img src="assets/output/captures/hiw-seal-light.png" alt="A sealed record, with copies running out to GitHub, Bitcoin, Sigstore Rekor and Software Heritage" width="100%" />
+  <img src="assets/output/captures/hiw-seal-light.png" alt="A sealed record, with copies running out to GitHub, Sigstore Rekor and Software Heritage" width="100%" />
 </picture>
 
 </td>
@@ -132,7 +132,7 @@ Open Emojery from the browser toolbar and the popup lists everything you've reac
 
 **Your reaction gets sealed in public**
 
-Every reaction joins a public record. It's regularly published to GitHub, sealed into Bitcoin and copied to independent logs and archives no single party runs.
+Every reaction joins a public log under a pseudonym, never your name or email. About every 30 minutes the log is anchored in Sigstore's public Rekor log and mirrored to a public GitHub repository, which Software Heritage archives on its own.
 
 </td>
 </tr>
@@ -176,9 +176,9 @@ You see the same numbers everyone else sees, and anyone can prove they add up.
 
 Counts you can actually believe, in a picker you'll actually enjoy.
 
-- 🛡️ **Real people behind every count** — the count is continuously protected against manipulation. AI anti-abuse blocks bots and outside scripts upfront, then continuously audits accepted reactions and revokes anything later identified as spam or padding.
-- 🔎 **Counts you can check yourself** — don't take our word for the numbers. Every reaction lands in a public, add-only record, sealed into Bitcoin, mirrored by Sigstore Rekor and Software Heritage, and recountable by a free, open-source tool anyone can run.
-- 🔒 **Private by design** — change or take back reactions whenever you want. Delete your account and they are removed from the totals, leaving only the reversal needed to keep the record accurate. Your history stays on your device — no ads, profiling, or tracking.
+- 🛡️ **Real people behind every count** — one personal account gets one reaction per post, and each reaction is signed on your device. Reactions found to be spam or padding are revoked, and every revocation is public.
+- 🔎 **Counts you can check yourself** — don't take our word for the numbers. Every reaction lands in a public, append-only log, anchored in Sigstore Rekor, mirrored to GitHub and archived by Software Heritage, so anyone can recount the totals with a free, open-source verifier.
+- 🔒 **Private by design** — change or take back reactions whenever you want. Delete your account and your reactions are removed from the counts; entries already published stay in the log under your pseudonym. Your reaction history stays on your device. No ads, no third-party trackers; the server keeps each reaction's country and network for 30 days, for anti-abuse only.
 - 🎨 **A full emoji palette** — over 600 emoji, not the site's defaults. Pick the one that actually fits, or type a word and the picker finds it, with your recently used kept one tap away, all rendered from the same art on every device.
 - 🧩 **Fits every page** — takes on the page's styling and slots into the existing button row, like it always belonged there. And you decide where: switch it off per site, or swap out the native Like/Star entirely.
 - 👍 **Auto-press original buttons** — your emoji can also press the site's own control. A positive pick presses Like or upvote, a negative one Dislike or downvote where the site has it. You sort which emoji count as which by dragging them between lists.
@@ -228,9 +228,13 @@ Installing an extension is an act of trust. These questions get straight answers
 | Store | Covers |
 | --- | --- |
 | [Chrome Web Store](https://chromewebstore.google.com/detail/emojery/nlkebphkgappggophjobchogdmdiaajd) | Chrome · Brave · Vivaldi · Opera · Arc · Yandex · and any other Chromium-based desktop browser |
-| [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/emojery/) | Firefox 128+ on desktop and Android · LibreWolf and other forks built on ESR 128 or newer |
+| [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/emojery/) | Firefox 130+ on desktop and Android · LibreWolf and other forks built on Firefox 130 or newer |
 | [Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/emojery/jbmbhihbhpnidhfmepifgkeblikjdpcp) | Microsoft Edge — also installs from the Chrome Web Store |
-| Safari | Coming soon |
+| Safari | Not in the App Store yet |
+
+### Browsers
+
+Voting needs the browser's sign-in window (`identity.launchWebAuthFlow`) and Ed25519 keys in WebCrypto. Chrome, Edge and other Chromium browsers from version 137 and Firefox 130+ on desktop have both. Firefox for Android and Safari show counts only: no sign-in and no voting.
 
 ### From source
 

@@ -5,7 +5,7 @@
 // background updates it alongside each history write, so the picker - a content
 // script that cannot reach the history IndexedDB - reads a tiny blob instead.
 
-import { storageLocalGet, storageLocalRemove, storageLocalSet } from "./webext";
+import { storageLocalGet, storageLocalSet } from "./webext";
 
 const RECENTS_KEY = "recents_v1";
 
@@ -92,27 +92,4 @@ export async function dropRecentEmoji(userId: string, emoji: string): Promise<vo
     else stats[emoji] = { count: current.count - 1, lastUsed: current.lastUsed };
     return true;
   });
-}
-
-// Merge externally derived stats in (adding counts, keeping the newest
-// lastUsed) - used once by the legacy-history migration.
-export async function importRecentEmojiStats(statsByUser: RecentEmojiStatsByUser): Promise<void> {
-  await updateStats((blob) => {
-    for (const [userId, stats] of Object.entries(statsByUser)) {
-      const userStats = blob[userId] ?? {};
-      blob[userId] = userStats;
-      for (const [emoji, stat] of Object.entries(stats)) {
-        const current = userStats[emoji];
-        userStats[emoji] = {
-          count: (current?.count ?? 0) + stat.count,
-          lastUsed: Math.max(current?.lastUsed ?? 0, stat.lastUsed),
-        };
-      }
-    }
-    return true;
-  });
-}
-
-export async function clearAllRecentEmojiStats(): Promise<void> {
-  await storageLocalRemove([RECENTS_KEY]);
 }
