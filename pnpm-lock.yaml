@@ -49,8 +49,8 @@ importers:
         version: 11.2.0
     devDependencies:
       '@biomejs/biome':
-        specifier: 2.6.3
-        version: 2.6.3
+        specifier: 2.6.8
+        version: 2.6.8
       '@commitlint/cli':
         specifier: ^21.2.4
         version: 21.2.4(conventional-commits-filter@6.0.1)(conventional-commits-parser@7.1.3)(typescript@7.0.2)
@@ -64,14 +64,14 @@ importers:
         specifier: ^1.32.2
         version: 1.32.2(supports-color@7.2.0)(zod@4.6.7)
       '@playwright/mcp':
-        specifier: ^0.0.83
-        version: 0.0.83
+        specifier: ^0.0.85
+        version: 0.0.85
       '@playwright/test':
-        specifier: ^1.64.1
-        version: 1.64.1
+        specifier: ^1.65.1
+        version: 1.65.1
       '@preact/preset-vite':
         specifier: ^2.10.6
-        version: 2.10.6(@babel/core@7.29.7(supports-color@7.2.0))(preact@11.2.0)(rollup@4.62.0)(supports-color@7.2.0)(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))
+        version: 2.10.6(@babel/core@7.29.7(supports-color@7.2.0))(preact@11.2.0)(rollup@4.62.0)(supports-color@7.2.0)(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))
       '@types/chrome':
         specifier: ^0.3.7
         version: 0.3.7
@@ -79,26 +79,26 @@ importers:
         specifier: ^143.0.1
         version: 143.0.1
       '@types/node':
-        specifier: ^26.6.5
-        version: 26.6.5
+        specifier: ^26.6.6
+        version: 26.6.6
       '@vitest/browser':
         specifier: ^4.1.12
-        version: 4.1.12(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.12)
+        version: 4.1.12(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.12)
       '@vitest/browser-playwright':
         specifier: ^4.1.12
-        version: 4.1.12(playwright@1.64.1)(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.12)
+        version: 4.1.12(playwright@1.65.1)(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.12)
       '@vitest/coverage-v8':
         specifier: ^4.1.12
         version: 4.1.12(@vitest/browser@4.1.12)(vitest@4.1.12)
       axe-core:
-        specifier: 4.14.0
-        version: 4.14.0
+        specifier: 4.14.1
+        version: 4.14.1
       commit-and-tag-version:
         specifier: 13.3.0
         version: 13.3.0(conventional-commits-filter@6.0.1)(conventional-commits-parser@7.1.3)
       dotenv:
-        specifier: ^18.0.9
-        version: 18.0.9
+        specifier: ^18.0.10
+        version: 18.0.10
       esbuild:
         specifier: 0.28.2
         version: 0.28.2
@@ -112,23 +112,23 @@ importers:
         specifier: ^30.1.3
         version: 30.1.3
       markdownlint-cli2:
-        specifier: 0.24.0
-        version: 0.24.0(supports-color@7.2.0)
+        specifier: 0.24.1
+        version: 0.24.1(supports-color@7.2.0)
       playwright:
-        specifier: ^1.64.1
-        version: 1.64.1
+        specifier: ^1.65.1
+        version: 1.65.1
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
         specifier: ^4.1.12
-        version: 4.1.12(@types/node@26.6.5)(@vitest/browser-playwright@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@30.1.3)(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))
+        version: 4.1.12(@types/node@26.6.6)(@vitest/browser-playwright@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@30.1.3)(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))
       web-ext:
         specifier: 10.8.0
         version: 10.8.0(express@5.3.0(supports-color@7.2.0))(jiti@2.7.0)(supports-color@7.2.0)
       wxt:
         specifier: ^0.21.5
-        version: 0.21.5(esbuild@0.28.2)(eslint@9.39.4(jiti@2.7.0)(supports-color@7.2.0))(rollup@4.62.0)(typescript@7.0.2)(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))(web-ext@10.8.0(express@5.3.0(supports-color@7.2.0))(jiti@2.7.0)(supports-color@7.2.0))
+        version: 0.21.5(esbuild@0.28.2)(eslint@9.39.4(jiti@2.7.0)(supports-color@7.2.0))(rollup@4.62.0)(typescript@7.0.2)(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))(web-ext@10.8.0(express@5.3.0(supports-color@7.2.0))(jiti@2.7.0)(supports-color@7.2.0))
 
 packages:
 
@@ -267,71 +267,71 @@ packages:
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
 
-  '@biomejs/biome@2.6.3':
-    resolution: {integrity: sha512-va/0xPku7wnfzv+D8Zpdm5uKiGJWiV8neqoEPnRjvNQQwhl4tVXS4fETs4H0CCB2rGeqJ4cu9y4iOZOnOYKAUA==}
+  '@biomejs/biome@2.6.8':
+    resolution: {integrity: sha512-kqZUFvX6/aYQOmzfRN5ANcfNS9wLH4aHLWWP/dQKyhRZVoA6rdWszA7DGugFcxPbMiznUyVYyukVl+ExZN4PQA==}
     engines: {node: '>=14.21.3'}
     hasBin: true
 
-  '@biomejs/cli-android-arm64@2.6.3':
-    resolution: {integrity: sha512-5JD7QQDEHxdeEb4sftEHG+lsuUyu8Cob/hVLqRELbgGlFl68Rldv/PPi2k4dRjERZ/EItJ3O6Xmv8lqsEtUBiw==}
+  '@biomejs/cli-android-arm64@2.6.8':
+    resolution: {integrity: sha512-X4JKPLK85kfUTwuuaORFplnBfGjKkp62PsFhhcL7F/Tpltc7pyUofjlkkMnlZZLWsifFl7LNB8ngVrwJg1uo1Q==}
     engines: {node: '>=14.21.3'}
     cpu: [arm64]
     os: [android]
 
-  '@biomejs/cli-android-x64@2.6.3':
-    resolution: {integrity: sha512-70WOGKCgpT+Uqg6LFdTLqefV54/DypdZg+LnBQDO6AWvkgXO+9xhVClajQyDsIHYjnXMtI1pRO5sP+zMXlS/bw==}
+  '@biomejs/cli-android-x64@2.6.8':
+    resolution: {integrity: sha512-C3Hk485vl+deEj53K08+SYYelPIPkdSZL3qHuD31Xi+qydVa4q2ze+aCYo1k3iJGWtvWtjHaGkDh7S2sX6wk8w==}
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [android]
 
-  '@biomejs/cli-darwin-arm64@2.6.3':
-    resolution: {integrity: sha512-ezf+XEKeyJ2yYlBhrzyEEHLvfRYrhtNKc6maLzR/WcAcBccb4RVDeFxsymjBve2LO0bpIMRUAiS90D4bUBRT0A==}
+  '@biomejs/cli-darwin-arm64@2.6.8':
+    resolution: {integrity: sha512-DHyj+JnRHcn4YdvpiqgTFZMYKSPELMCfFpNNlEuu1L8DKTGXhzW7raIwdsbo2Ie9nCljQLAQkVWQk/mwM0ueiA==}
     engines: {node: '>=14.21.3'}
     cpu: [arm64]
     os: [darwin]
 
-  '@biomejs/cli-darwin-x64@2.6.3':
-    resolution: {integrity: sha512-Lg2tFdg4elJo+7i707PpLMs6N1hATVt4kqDo6MD/q/VnPs8rsKReKXsz1TA5GNdfRVAQNJ5GRiyK2EwNptK+MA==}
+  '@biomejs/cli-darwin-x64@2.6.8':
+    resolution: {integrity: sha512-QWWUPjlA0RnkkgYnFLUHZu+RrDc0FdK0A+wEPA+dENQJwsuSHMH89lspnAw2QUWWc9VHyfluGx1Xmp6Y2GZi8Q==}
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [darwin]
 
-  '@biomejs/cli-linux-arm64-musl@2.6.3':
-    resolution: {integrity: sha512-dYU70A89OFHzakQPE9VOPbE60JNcQt4mtxvUGQl+EgTkGtqCFxLD2RUn1SbiMu8Mu5xFscS1bfYDpoasaUrqNA==}
+  '@biomejs/cli-linux-arm64-musl@2.6.8':
+    resolution: {integrity: sha512-WB9PhOitX+bRc0G3+GNJGlvbKoWn3JoB9z4E04JQizIC9aPCQyIvwvWG7QZHxw6k20Fi+dHLmZ2fSEmBa9HqiA==}
     engines: {node: '>=14.21.3'}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@biomejs/cli-linux-arm64@2.6.3':
-    resolution: {integrity: sha512-8Stcvq98n1gs9VyLKuaWrnsd8kbXE2nKDAHtuLHGSYdGyNWN5JIIm5a28xdnmgdKzKHmiDgYyATetkEv7+zGow==}
+  '@biomejs/cli-linux-arm64@2.6.8':
+    resolution: {integrity: sha512-0Bjim8lKwnrvXUHoI4k3Tb51BjoiLEwDnovCI8nSzkk6wj3dShiuAjrx6+X0Hjf4ejR1sRZgTQiSDHlpy9vB7w==}
     engines: {node: '>=14.21.3'}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@biomejs/cli-linux-x64-musl@2.6.3':
-    resolution: {integrity: sha512-j6eFjUcWSphmgVTbrobEMA0wdbfNHKrGi8hRsFkc17jeS1n7nHwFACxp6jWqe9sxQqyFAeyOgt2/1bOGVcbATA==}
+  '@biomejs/cli-linux-x64-musl@2.6.8':
+    resolution: {integrity: sha512-64Yzo+J4fEk7Kf9SMnVdVxC+Y2A2e/L86QTP9JjGQ57lsddyELLpbBcNMxSJggre2T1AvISwwSrOApkBAHDqNA==}
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@biomejs/cli-linux-x64@2.6.3':
-    resolution: {integrity: sha512-CShmx0bO6BngywT3minv8K1xsQX1ig1vsBqYTLnmDY3mBiDYHlaLRIsdHoM1pEU9dV3BN5a0uiH0IGDtYh9TWA==}
+  '@biomejs/cli-linux-x64@2.6.8':
+    resolution: {integrity: sha512-XIk3pLQT56I6Tti+u0DF8FtSNXjCMTPbxVTzfJ9cS2t1ImVKvrqV5b52GuEaJg6/wuiXvz0sjfb5saB4TPRjzA==}
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@biomejs/cli-win32-arm64@2.6.3':
-    resolution: {integrity: sha512-00SthDxBPwNiT7IL/mOneif6fiEU1PXK875zhr+InpeZjovY1mF5tCuDhXo1Hh0GYyiKHKzLbItzn58SAyLhJQ==}
+  '@biomejs/cli-win32-arm64@2.6.8':
+    resolution: {integrity: sha512-ezjCEZzHIWE2pdh83a7zLVcAAcDaERcTcvfA7uWlxqz/1CuDxgtfO19pDg9B6YY4wKYIDvYBw2QCMnqIshSwmw==}
     engines: {node: '>=14.21.3'}
     cpu: [arm64]
     os: [win32]
 
-  '@biomejs/cli-win32-x64@2.6.3':
-    resolution: {integrity: sha512-GhtOPphBWlnCepqpNk/w5eGN5oGRCzL20EbAkL1XCIpyboeVC9R642noyT43l8LSenGS4qz9IL8sKPfwY37V/Q==}
+  '@biomejs/cli-win32-x64@2.6.8':
+    resolution: {integrity: sha512-cD6HvGczZUiAYsY8s2TxxXj2AHFzEdMomvVJfEjzOjBM45nGqIDfBpbtvwGQzDCN8X2yKKk9u1jnDZisT2nxIg==}
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [win32]
@@ -941,13 +941,13 @@ packages:
   '@pinojs/redact@0.4.0':
     resolution: {integrity: sha512-k2ENnmBugE/rzQfEcdWHcCY+/FM3VLzH9cYEsbdsoqrvzAKRhUZeRNhAZvB8OitQJ1TBed3yqWtdjzS6wJKBwg==}
 
-  '@playwright/mcp@0.0.83':
-    resolution: {integrity: sha512-oNcl+Ae2/IAjhfPeP46BfIkSakfmprY+aOtkv5MjrQ4lPav4/yNtPhL0iq8SlIM90oApWgBDUxaNKvktazUKOg==}
+  '@playwright/mcp@0.0.85':
+    resolution: {integrity: sha512-bSfECMbLXhJdWkGhLzNMxTZuazG+9IDJ679gflji3yyD94e7ARnGdqmJmG6lTPB+gYX+OiFLmX5myBl62+wZEw==}
     engines: {node: '>=18'}
     hasBin: true
 
-  '@playwright/test@1.64.1':
-    resolution: {integrity: sha512-IaYGml/nSOiZWROfPtuIL7neuu9qDOZ3TNvNljUIrhDMxiGTgPjzj/g9p9RxpS2tSepPDRY+UwAaEeiKtUvIAg==}
+  '@playwright/test@1.65.1':
+    resolution: {integrity: sha512-y+NCIRm2LvY4slUVWvGh1nujJ8RF/hEisIsq2mtUPgdQC4L701bq5hZGMhrpeXjACvwvO9tj5dJqhvM6TP9lbw==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -1213,8 +1213,8 @@ packages:
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
 
-  '@types/node@26.6.5':
-    resolution: {integrity: sha512-uMzsv9stDdofIZBx4UGh4Z9ZgXnGC9seRDscilBcTHAeOFk67MZg/k9bWVfO+bk4qZmG+l52hRnLwUiH2LnJTg==}
+  '@types/node@26.6.6':
+    resolution: {integrity: sha512-MzQj+8Kx3XI40OmUAE6Qoh58ZMNstNNMwn2nfd3qWsfe7nDNSqJNzes4njhz6AHwrSHOffSLwXU6yb474Q4aog==}
 
   '@types/unist@2.0.11':
     resolution: {integrity: sha512-CmBKiL6NNo/OqgmMn95Fk9Whlp2mtvIv+KNpQKN2F4SjvrEesubTRWGYSg+BnWZOnlCaSTU1sMpsBOzgbYhnsA==}
@@ -1522,8 +1522,8 @@ packages:
   atomically@2.1.1:
     resolution: {integrity: sha512-P4w9o2dqARji6P7MHprklbfiArZAWvo07yW7qs3pdljb3BWr12FIB7W+p0zJiuiVsUpRO0iZn1kFFcpPegg0tQ==}
 
-  axe-core@4.14.0:
-    resolution: {integrity: sha512-9WTZxEjsZ7b13TH8JPmbV2z8CHbl80/2hm3XPEG4JgNdQLK81IBRXmSxHfMAOkSqQeRxT/0dwNDz2GOm3zzpcQ==}
+  axe-core@4.14.1:
+    resolution: {integrity: sha512-FHfa+lmNjQZfJz1q8wKqIDwC6DExcHt/pkjNQb09a3NPjCKg2rhu5qb2S4r76ASyFNNtuFooJpZe37OgudVGtQ==}
     engines: {node: '>=4'}
 
   babel-plugin-transform-hook-names@1.0.2:
@@ -1969,8 +1969,8 @@ packages:
     resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
     engines: {node: '>=12'}
 
-  dotenv@18.0.9:
-    resolution: {integrity: sha512-3fVOW4cB02R066PUSwn8O4TJyz9NckQl7F81blIbaq9jKBm2tSmOKky7ZHIXzGvkVPXCSn6jkpziBPZdGFs8Tw==}
+  dotenv@18.0.10:
+    resolution: {integrity: sha512-89FAA1xchzK2mxVWdr5F/0rldwiueXs6zJM86rO66EzekR1iBdiXRthyG+m5GvkJaFH3C2LESzamTkgndmLT2A==}
     engines: {node: '>=12'}
     hasBin: true
 
@@ -2794,13 +2794,13 @@ packages:
     peerDependencies:
       markdownlint-cli2: '>=0.0.4'
 
-  markdownlint-cli2@0.24.0:
-    resolution: {integrity: sha512-c5hU2MDoTlS230MLzdNlkIyxImXq5acxGKz4nYz4aDhH/2BgFtpsA7iK9/OoTHMgZ4FuR0wedTQA31K6Lp9I/Q==}
+  markdownlint-cli2@0.24.1:
+    resolution: {integrity: sha512-nLhes/MIPJQLm+Gmh+3jQEnwMOaalaN0wfCD2qz1247zNZ7R3r2WDHJB191x4hcy6soKAUTybp1bFK7aJGw/WA==}
     engines: {node: '>=22'}
     hasBin: true
 
-  markdownlint@0.42.0:
-    resolution: {integrity: sha512-kzsCV/rPWRFn3jUhcB919YF4Qgeh0g9tcogoXFadGSo6Zxj6662YOqWXv0jDn8nv5KCCxDfMKJZv6N4HkNkvTg==}
+  markdownlint@0.42.1:
+    resolution: {integrity: sha512-Otolm9JX12iO2NG5cetlKfzGygpiLSlHuqXKxoT6HGhN5HtbxprJPicKZqqCQd88qOvUi/TEs3o1AmcYioVscA==}
     engines: {node: '>=22'}
 
   marky@1.3.0:
@@ -2828,9 +2828,6 @@ packages:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
 
-  micromark-core-commonmark@2.0.3:
-    resolution: {integrity: sha512-RDBrHEMSxVFLg6xvnXmb1Ayr2WzLAWjeSATAoxwKYJV94TeNavgoIdA0a9ytzDSVzBy2YKFK+emCPOEibLeCrg==}
-
   micromark-core-commonmark@2.0.4:
     resolution: {integrity: sha512-wxEeE8v8XVvOrxn1TZj74qYhAtTQsSqufHVS3uNVyT1MupXxhyaHk8/9xDNPh9BmL77QNDgWTkZ3RsYHB2ry7w==}
 
@@ -2854,9 +2851,6 @@ packages:
 
   micromark-factory-label@2.0.1:
     resolution: {integrity: sha512-VFMekyQExqIW7xIChcXn4ok29YE3rnuyveW3wZQWWqF4Nv9Wk5rgJ99KzPvHjkmPXF93FXIbBp6YdW3t71/7Vg==}
-
-  micromark-factory-space@2.0.1:
-    resolution: {integrity: sha512-zRkxjtBxxLd2Sc0d+fbnEunsTj46SWXgXciZmHq0kDYGnck/ZSGj9/wULTV95uoeYiK5hRXP2mJ98Uo4cq/LQg==}
 
   micromark-factory-space@2.1.0:
     resolution: {integrity: sha512-fS8hnLIjnjvdQIj39Geug8wWsR0HrYZ43KShKxNfwT7t2LOHo/LbWZEzEaSOjwtjdCsjoE6syHhonEzW0zv0+Q==}
@@ -2905,9 +2899,6 @@ packages:
 
   micromark-util-symbol@2.0.1:
     resolution: {integrity: sha512-vs5t8Apaud9N28kgCrRUdEed4UJ+wWNvicHLPxCa9ENlYuAY31M0ETy5y1vA33YoNPDFTghEbnh6efaE8h4x0Q==}
-
-  micromark-util-types@2.0.2:
-    resolution: {integrity: sha512-Yw0ECSpJoViF1qTU4DC6NwtC4aWGt1EkzaQB8KPPyCRR8z9TWeV0HbEFGTO+ZY1wB22zmxnJqhPyTpOVCpeHTA==}
 
   micromark-util-types@2.0.3:
     resolution: {integrity: sha512-oxB2Ik03hI0gv+VNn9tnh1t1YEe9MDPptViAEgfdf3YQHsn0pzGTgCdlSCJXcwhqm8phaEuM7zeEu3QQzVBrPg==}
@@ -3145,23 +3136,23 @@ packages:
   pkg-types@2.4.0:
     resolution: {integrity: sha512-07Fys7iVx0X6TcviMOgogM1Lk33ZyqOezMnU79S+kffWqwolG/5W9V8EgQSeYCIfFTYVgssRbnH630Oa2+soBA==}
 
-  playwright-core@1.64.0-alpha-1790635538000:
-    resolution: {integrity: sha512-pNwaXirhXMRLaRQs4NQ18EpTdtDoFwyPH9FOaaDC7YXG4hpwE2xmwCic/1srbuExVQC7zT9LJSJpDBAru+Vo9A==}
+  playwright-core@1.65.1:
+    resolution: {integrity: sha512-hqPpz7blSMPxWVdoeE1yiBSzXsKiVOd2k+kjCvmUywD2GPO2Dd9HfcWnq9NN0GHbNZDFgZ9JfBFr+X5/BLo0qw==}
     engines: {node: '>=20'}
     hasBin: true
 
-  playwright-core@1.64.1:
-    resolution: {integrity: sha512-BC4s8y6SEVA6Q1rSxZTto8hI1KUI3xXlHGZgvGqP4IqPdI/a6FX9H29IDNz7vKo9l21b6LfYosScPL6M3xxyDQ==}
+  playwright-core@1.66.0-alpha-2026-11-09:
+    resolution: {integrity: sha512-HZVc/E3nqrasH7PPvJNwc7aCNsKXKjvtViZBpeFfopGOeB0zr3r5q4TKfqzkrdIcCKWCulyLVVGtla/LYbmxUQ==}
     engines: {node: '>=20'}
     hasBin: true
 
-  playwright@1.64.0-alpha-1790635538000:
-    resolution: {integrity: sha512-/5XDUMxpOd/9AojJtWDFIRV3EJZNQ0AwvK69wgt3CPzy8wTgiBG9pX45VfxtqtvIRGwfWzMhrvawNKreG69Snw==}
+  playwright@1.65.1:
+    resolution: {integrity: sha512-vJ1FuoOrNwOKHUIVEvSt3jT1L+wjjDpwhwIstKtfvTh8XIG4FG4bIFuvNdMxi81LGfAhUgUZleVFaOLY4RIUUw==}
     engines: {node: '>=20'}
     hasBin: true
 
-  playwright@1.64.1:
-    resolution: {integrity: sha512-HCrVhHr5QQuwYoswEUGTb7gGp522yflbv/ST8nF4sFWGuLjQCt17Q/EubpGGSNKYn1tsTCPZxqHhHCfVURu7UA==}
+  playwright@1.66.0-alpha-2026-11-09:
+    resolution: {integrity: sha512-raaHhtTYsm9ydMdGa11MEIwI8KM9RP4CuyvAb/lbd6e3bYhsBHXPMVGvyYJWldQxwUgMYnngY2VY5vCpimB2Dg==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -4158,47 +4149,47 @@ snapshots:
 
   '@bcoe/v8-coverage@1.0.2': {}
 
-  '@biomejs/biome@2.6.3':
+  '@biomejs/biome@2.6.8':
     optionalDependencies:
-      '@biomejs/cli-android-arm64': 2.6.3
-      '@biomejs/cli-android-x64': 2.6.3
-      '@biomejs/cli-darwin-arm64': 2.6.3
-      '@biomejs/cli-darwin-x64': 2.6.3
-      '@biomejs/cli-linux-arm64': 2.6.3
-      '@biomejs/cli-linux-arm64-musl': 2.6.3
-      '@biomejs/cli-linux-x64': 2.6.3
-      '@biomejs/cli-linux-x64-musl': 2.6.3
-      '@biomejs/cli-win32-arm64': 2.6.3
-      '@biomejs/cli-win32-x64': 2.6.3
+      '@biomejs/cli-android-arm64': 2.6.8
+      '@biomejs/cli-android-x64': 2.6.8
+      '@biomejs/cli-darwin-arm64': 2.6.8
+      '@biomejs/cli-darwin-x64': 2.6.8
+      '@biomejs/cli-linux-arm64': 2.6.8
+      '@biomejs/cli-linux-arm64-musl': 2.6.8
+      '@biomejs/cli-linux-x64': 2.6.8
+      '@biomejs/cli-linux-x64-musl': 2.6.8
+      '@biomejs/cli-win32-arm64': 2.6.8
+      '@biomejs/cli-win32-x64': 2.6.8
 
-  '@biomejs/cli-android-arm64@2.6.3':
+  '@biomejs/cli-android-arm64@2.6.8':
     optional: true
 
-  '@biomejs/cli-android-x64@2.6.3':
+  '@biomejs/cli-android-x64@2.6.8':
     optional: true
 
-  '@biomejs/cli-darwin-arm64@2.6.3':
+  '@biomejs/cli-darwin-arm64@2.6.8':
     optional: true
 
-  '@biomejs/cli-darwin-x64@2.6.3':
+  '@biomejs/cli-darwin-x64@2.6.8':
     optional: true
 
-  '@biomejs/cli-linux-arm64-musl@2.6.3':
+  '@biomejs/cli-linux-arm64-musl@2.6.8':
     optional: true
 
-  '@biomejs/cli-linux-arm64@2.6.3':
+  '@biomejs/cli-linux-arm64@2.6.8':
     optional: true
 
-  '@biomejs/cli-linux-x64-musl@2.6.3':
+  '@biomejs/cli-linux-x64-musl@2.6.8':
     optional: true
 
-  '@biomejs/cli-linux-x64@2.6.3':
+  '@biomejs/cli-linux-x64@2.6.8':
     optional: true
 
-  '@biomejs/cli-win32-arm64@2.6.3':
+  '@biomejs/cli-win32-arm64@2.6.8':
     optional: true
 
-  '@biomejs/cli-win32-x64@2.6.3':
+  '@biomejs/cli-win32-x64@2.6.8':
     optional: true
 
   '@blazediff/core@1.9.1': {}
@@ -4672,14 +4663,14 @@ snapshots:
 
   '@pinojs/redact@0.4.0': {}
 
-  '@playwright/mcp@0.0.83':
+  '@playwright/mcp@0.0.85':
     dependencies:
-      playwright: 1.64.0-alpha-1790635538000
-      playwright-core: 1.64.0-alpha-1790635538000
+      playwright: 1.66.0-alpha-2026-11-09
+      playwright-core: 1.66.0-alpha-2026-11-09
 
-  '@playwright/test@1.64.1':
+  '@playwright/test@1.65.1':
     dependencies:
-      playwright: 1.64.1
+      playwright: 1.65.1
 
   '@pnpm/config.env-replace@1.1.0': {}
 
@@ -4695,19 +4686,19 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@preact/preset-vite@2.10.6(@babel/core@7.29.7(supports-color@7.2.0))(preact@11.2.0)(rollup@4.62.0)(supports-color@7.2.0)(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))':
+  '@preact/preset-vite@2.10.6(@babel/core@7.29.7(supports-color@7.2.0))(preact@11.2.0)(rollup@4.62.0)(supports-color@7.2.0)(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))':
     dependencies:
       '@babel/core': 7.29.7(supports-color@7.2.0)
       '@babel/plugin-transform-react-jsx': 7.29.7(@babel/core@7.29.7(supports-color@7.2.0))(supports-color@7.2.0)
       '@babel/plugin-transform-react-jsx-development': 7.29.7(@babel/core@7.29.7(supports-color@7.2.0))(supports-color@7.2.0)
-      '@prefresh/vite': 2.4.12(preact@11.2.0)(supports-color@7.2.0)(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))
+      '@prefresh/vite': 2.4.12(preact@11.2.0)(supports-color@7.2.0)(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))
       '@rollup/pluginutils': 5.4.0(rollup@4.62.0)
       babel-plugin-transform-hook-names: 1.0.2(@babel/core@7.29.7(supports-color@7.2.0))
       debug: 4.4.3(supports-color@7.2.0)
       magic-string: 0.30.21
       picocolors: 1.1.1
-      vite: 6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0)
-      vite-prerender-plugin: 0.5.13(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))
+      vite: 6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0)
+      vite-prerender-plugin: 0.5.13(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))
       zimmerframe: 1.1.4
     transitivePeerDependencies:
       - preact
@@ -4722,7 +4713,7 @@ snapshots:
 
   '@prefresh/utils@1.2.1': {}
 
-  '@prefresh/vite@2.4.12(preact@11.2.0)(supports-color@7.2.0)(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))':
+  '@prefresh/vite@2.4.12(preact@11.2.0)(supports-color@7.2.0)(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))':
     dependencies:
       '@babel/core': 7.29.7(supports-color@7.2.0)
       '@prefresh/babel-plugin': 0.5.3
@@ -4730,7 +4721,7 @@ snapshots:
       '@prefresh/utils': 1.2.1
       '@rollup/pluginutils': 4.2.1
       preact: 11.2.0
-      vite: 6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0)
+      vite: 6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -4887,7 +4878,7 @@ snapshots:
 
   '@types/ms@2.1.0': {}
 
-  '@types/node@26.6.5':
+  '@types/node@26.6.6':
     dependencies:
       undici-types: 8.9.0
 
@@ -4953,29 +4944,29 @@ snapshots:
   '@typescript/typescript-win32-x64@7.0.2':
     optional: true
 
-  '@vitest/browser-playwright@4.1.12(playwright@1.64.1)(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.12)':
+  '@vitest/browser-playwright@4.1.12(playwright@1.65.1)(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.12)':
     dependencies:
-      '@vitest/browser': 4.1.12(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.12)
-      '@vitest/mocker': 4.1.12(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))
-      playwright: 1.64.1
+      '@vitest/browser': 4.1.12(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.12)
+      '@vitest/mocker': 4.1.12(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))
+      playwright: 1.65.1
       tinyrainbow: 3.2.0
-      vitest: 4.1.12(@types/node@26.6.5)(@vitest/browser-playwright@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@30.1.3)(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))
+      vitest: 4.1.12(@types/node@26.6.6)(@vitest/browser-playwright@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@30.1.3)(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))
     transitivePeerDependencies:
       - bufferutil
       - msw
       - utf-8-validate
       - vite
 
-  '@vitest/browser@4.1.12(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.12)':
+  '@vitest/browser@4.1.12(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.12)':
     dependencies:
       '@blazediff/core': 1.9.1
-      '@vitest/mocker': 4.1.12(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))
+      '@vitest/mocker': 4.1.12(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))
       '@vitest/utils': 4.1.12
       magic-string: 0.30.21
       pngjs: 7.0.0
       sirv: 3.0.2
       tinyrainbow: 3.2.0
-      vitest: 4.1.12(@types/node@26.6.5)(@vitest/browser-playwright@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@30.1.3)(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))
+      vitest: 4.1.12(@types/node@26.6.6)(@vitest/browser-playwright@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@30.1.3)(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))
       ws: 8.22.0
     transitivePeerDependencies:
       - bufferutil
@@ -4995,9 +4986,9 @@ snapshots:
       obug: 2.2.1
       std-env: 4.3.0
       tinyrainbow: 3.2.0
-      vitest: 4.1.12(@types/node@26.6.5)(@vitest/browser-playwright@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@30.1.3)(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))
+      vitest: 4.1.12(@types/node@26.6.6)(@vitest/browser-playwright@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@30.1.3)(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))
     optionalDependencies:
-      '@vitest/browser': 4.1.12(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.12)
+      '@vitest/browser': 4.1.12(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.12)
 
   '@vitest/expect@4.1.12':
     dependencies:
@@ -5008,13 +4999,13 @@ snapshots:
       chai: 6.3.0
       tinyrainbow: 3.2.0
 
-  '@vitest/mocker@4.1.12(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))':
+  '@vitest/mocker@4.1.12(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))':
     dependencies:
       '@vitest/spy': 4.1.12
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0)
+      vite: 6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0)
 
   '@vitest/pretty-format@4.1.12':
     dependencies:
@@ -5188,7 +5179,7 @@ snapshots:
       stubborn-fs: 2.0.0
       when-exit: 2.1.5
 
-  axe-core@4.14.0: {}
+  axe-core@4.14.1: {}
 
   babel-plugin-transform-hook-names@1.0.2(@babel/core@7.29.7(supports-color@7.2.0)):
     dependencies:
@@ -5340,7 +5331,7 @@ snapshots:
 
   chrome-launcher@1.2.0(supports-color@7.2.0):
     dependencies:
-      '@types/node': 26.6.5
+      '@types/node': 26.6.6
       escape-string-regexp: 4.0.0
       is-wsl: 2.2.0
       lighthouse-logger: 2.0.2(supports-color@7.2.0)
@@ -5649,7 +5640,7 @@ snapshots:
 
   dotenv@17.4.2: {}
 
-  dotenv@18.0.9: {}
+  dotenv@18.0.10: {}
 
   dotgitignore@2.1.0:
     dependencies:
@@ -6504,25 +6495,25 @@ snapshots:
       punycode.js: 2.3.1
       uc.micro: 2.1.0
 
-  markdownlint-cli2-formatter-default@0.0.6(markdownlint-cli2@0.24.0(supports-color@7.2.0)):
+  markdownlint-cli2-formatter-default@0.0.6(markdownlint-cli2@0.24.1(supports-color@7.2.0)):
     dependencies:
-      markdownlint-cli2: 0.24.0(supports-color@7.2.0)
+      markdownlint-cli2: 0.24.1(supports-color@7.2.0)
 
-  markdownlint-cli2@0.24.0(supports-color@7.2.0):
+  markdownlint-cli2@0.24.1(supports-color@7.2.0):
     dependencies:
       globby: 16.2.4
       js-yaml: 5.5.0
       jsonc-parser: 3.3.1
       jsonpointer: 5.0.1
       markdown-it: 14.3.3
-      markdownlint: 0.42.0(supports-color@7.2.0)
-      markdownlint-cli2-formatter-default: 0.0.6(markdownlint-cli2@0.24.0(supports-color@7.2.0))
+      markdownlint: 0.42.1(supports-color@7.2.0)
+      markdownlint-cli2-formatter-default: 0.0.6(markdownlint-cli2@0.24.1(supports-color@7.2.0))
       micromatch: 4.0.8
       smol-toml: 1.9.1
     transitivePeerDependencies:
       - supports-color
 
-  markdownlint@0.42.0(supports-color@7.2.0):
+  markdownlint@0.42.1(supports-color@7.2.0):
     dependencies:
       micromark: 4.0.3(supports-color@7.2.0)
       micromark-core-commonmark: 2.0.4
@@ -6551,25 +6542,6 @@ snapshots:
 
   merge2@1.4.1: {}
 
-  micromark-core-commonmark@2.0.3:
-    dependencies:
-      decode-named-character-reference: 1.3.0
-      devlop: 1.1.0
-      micromark-factory-destination: 2.0.1
-      micromark-factory-label: 2.0.1
-      micromark-factory-space: 2.0.1
-      micromark-factory-title: 2.0.1
-      micromark-factory-whitespace: 2.0.1
-      micromark-util-character: 2.1.1
-      micromark-util-chunked: 2.0.1
-      micromark-util-classify-character: 2.0.1
-      micromark-util-html-tag-name: 2.0.1
-      micromark-util-normalize-identifier: 2.0.1
-      micromark-util-resolve-all: 2.0.1
-      micromark-util-subtokenize: 2.1.0
-      micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.2
-
   micromark-core-commonmark@2.0.4:
     dependencies:
       decode-named-character-reference: 1.3.0
@@ -6593,11 +6565,11 @@ snapshots:
   micromark-extension-directive@4.0.0:
     dependencies:
       devlop: 1.1.0
-      micromark-factory-space: 2.0.1
+      micromark-factory-space: 2.1.0
       micromark-factory-whitespace: 2.0.1
       micromark-util-character: 2.1.1
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.2
+      micromark-util-types: 2.0.3
       parse-entities: 4.0.2
 
   micromark-extension-gfm-autolink-literal@2.1.0:
@@ -6605,78 +6577,73 @@ snapshots:
       micromark-util-character: 2.1.1
       micromark-util-sanitize-uri: 2.0.1
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.2
+      micromark-util-types: 2.0.3
 
   micromark-extension-gfm-footnote@2.1.0:
     dependencies:
       devlop: 1.1.0
-      micromark-core-commonmark: 2.0.3
-      micromark-factory-space: 2.0.1
+      micromark-core-commonmark: 2.0.4
+      micromark-factory-space: 2.1.0
       micromark-util-character: 2.1.1
       micromark-util-normalize-identifier: 2.0.1
       micromark-util-sanitize-uri: 2.0.1
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.2
+      micromark-util-types: 2.0.3
 
   micromark-extension-gfm-table@2.1.2:
     dependencies:
       devlop: 1.1.0
-      micromark-factory-space: 2.0.1
+      micromark-factory-space: 2.1.0
       micromark-util-character: 2.1.1
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.2
+      micromark-util-types: 2.0.3
 
   micromark-extension-math@3.1.0:
     dependencies:
       '@types/katex': 0.16.8
       devlop: 1.1.0
       katex: 0.18.11
-      micromark-factory-space: 2.0.1
+      micromark-factory-space: 2.1.0
       micromark-util-character: 2.1.1
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.2
+      micromark-util-types: 2.0.3
 
   micromark-factory-destination@2.0.1:
     dependencies:
       micromark-util-character: 2.1.1
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.2
+      micromark-util-types: 2.0.3
 
   micromark-factory-label@2.0.1:
     dependencies:
       devlop: 1.1.0
       micromark-util-character: 2.1.1
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.2
-
-  micromark-factory-space@2.0.1:
-    dependencies:
-      micromark-util-character: 2.1.1
-      micromark-util-types: 2.0.2
+      micromark-util-types: 2.0.3
 
   micromark-factory-space@2.1.0:
     dependencies:
       micromark-util-character: 2.1.1
-      micromark-util-types: 2.0.2
+      micromark-util-types: 2.0.3
 
   micromark-factory-title@2.0.1:
     dependencies:
-      micromark-factory-space: 2.0.1
+      micromark-factory-space: 2.1.0
       micromark-util-character: 2.1.1
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.2
+      micromark-util-types: 2.0.3
 
   micromark-factory-whitespace@2.0.1:
     dependencies:
-      micromark-factory-space: 2.0.1
+      micromark-factory-space: 2.1.0
       micromark-util-character: 2.1.1
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.2
+      micromark-util-types: 2.0.3
 
   micromark-util-character@2.1.1:
     dependencies:
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.2
+      micromark-util-types: 2.0.3
 
   micromark-util-chunked@2.0.1:
     dependencies:
@@ -6686,12 +6653,12 @@ snapshots:
     dependencies:
       micromark-util-character: 2.1.1
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.2
+      micromark-util-types: 2.0.3
 
   micromark-util-combine-extensions@2.0.1:
     dependencies:
       micromark-util-chunked: 2.0.1
-      micromark-util-types: 2.0.2
+      micromark-util-types: 2.0.3
 
   micromark-util-decode-numeric-character-reference@2.0.2:
     dependencies:
@@ -6699,7 +6666,7 @@ snapshots:
 
   micromark-util-edit-map@1.0.0:
     dependencies:
-      micromark-util-types: 2.0.2
+      micromark-util-types: 2.0.3
 
   micromark-util-encode@2.0.1: {}
 
@@ -6711,7 +6678,7 @@ snapshots:
 
   micromark-util-resolve-all@2.0.1:
     dependencies:
-      micromark-util-types: 2.0.2
+      micromark-util-types: 2.0.3
 
   micromark-util-sanitize-uri@2.0.1:
     dependencies:
@@ -6724,11 +6691,9 @@ snapshots:
       devlop: 1.1.0
       micromark-util-chunked: 2.0.1
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.2
+      micromark-util-types: 2.0.3
 
   micromark-util-symbol@2.0.1: {}
-
-  micromark-util-types@2.0.2: {}
 
   micromark-util-types@2.0.3: {}
 
@@ -6738,8 +6703,8 @@ snapshots:
       debug: 4.4.3(supports-color@7.2.0)
       decode-named-character-reference: 1.3.0
       devlop: 1.1.0
-      micromark-core-commonmark: 2.0.3
-      micromark-factory-space: 2.0.1
+      micromark-core-commonmark: 2.0.4
+      micromark-factory-space: 2.1.0
       micromark-util-character: 2.1.1
       micromark-util-chunked: 2.0.1
       micromark-util-combine-extensions: 2.0.1
@@ -6751,7 +6716,7 @@ snapshots:
       micromark-util-sanitize-uri: 2.0.1
       micromark-util-subtokenize: 2.1.0
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.2
+      micromark-util-types: 2.0.3
     transitivePeerDependencies:
       - supports-color
 
@@ -7008,17 +6973,17 @@ snapshots:
       exsolve: 1.2.0
       pathe: 2.0.3
 
-  playwright-core@1.64.0-alpha-1790635538000: {}
+  playwright-core@1.65.1: {}
 
-  playwright-core@1.64.1: {}
+  playwright-core@1.66.0-alpha-2026-11-09: {}
 
-  playwright@1.64.0-alpha-1790635538000:
+  playwright@1.65.1:
     dependencies:
-      playwright-core: 1.64.0-alpha-1790635538000
+      playwright-core: 1.65.1
 
-  playwright@1.64.1:
+  playwright@1.66.0-alpha-2026-11-09:
     dependencies:
-      playwright-core: 1.64.1
+      playwright-core: 1.66.0-alpha-2026-11-09
 
   pngjs@7.0.0: {}
 
@@ -7476,7 +7441,7 @@ snapshots:
 
   unicorn-magic@0.4.0: {}
 
-  unimport@6.5.0(esbuild@0.28.2)(rollup@4.62.0)(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0)):
+  unimport@6.5.0(esbuild@0.28.2)(rollup@4.62.0)(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0)):
     dependencies:
       acorn: 8.19.0
       escape-string-regexp: 5.0.0
@@ -7490,7 +7455,7 @@ snapshots:
       scule: 1.3.0
       strip-literal: 4.0.0
       tinyglobby: 0.2.17
-      unplugin: 3.5.0(esbuild@0.28.2)(rollup@4.62.0)(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))
+      unplugin: 3.5.0(esbuild@0.28.2)(rollup@4.62.0)(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))
       unplugin-utils: 0.3.2
     transitivePeerDependencies:
       - '@farmfe/core'
@@ -7512,7 +7477,7 @@ snapshots:
       pathe: 2.0.3
       picomatch: 4.0.7
 
-  unplugin@3.5.0(esbuild@0.28.2)(rollup@4.62.0)(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0)):
+  unplugin@3.5.0(esbuild@0.28.2)(rollup@4.62.0)(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0)):
     dependencies:
       '@jridgewell/remapping': 2.3.5
       picomatch: 4.0.7
@@ -7520,7 +7485,7 @@ snapshots:
     optionalDependencies:
       esbuild: 0.28.2
       rollup: 4.62.0
-      vite: 6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0)
+      vite: 6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0)
 
   upath@3.0.8: {}
 
@@ -7553,7 +7518,7 @@ snapshots:
 
   verkit@0.5.0: {}
 
-  vite-prerender-plugin@0.5.13(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0)):
+  vite-prerender-plugin@0.5.13(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0)):
     dependencies:
       kolorist: 1.8.0
       magic-string: 0.30.21
@@ -7561,9 +7526,9 @@ snapshots:
       simple-code-frame: 1.3.0
       source-map: 0.7.6
       stack-trace: 1.0.0
-      vite: 6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0)
+      vite: 6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0)
 
-  vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0):
+  vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0):
     dependencies:
       esbuild: 0.25.12
       fdir: 6.5.0(picomatch@4.0.7)
@@ -7572,15 +7537,15 @@ snapshots:
       rollup: 4.62.0
       tinyglobby: 0.2.17
     optionalDependencies:
-      '@types/node': 26.6.5
+      '@types/node': 26.6.6
       fsevents: 2.3.3
       jiti: 2.7.0
       yaml: 2.9.0
 
-  vitest@4.1.12(@types/node@26.6.5)(@vitest/browser-playwright@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@30.1.3)(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0)):
+  vitest@4.1.12(@types/node@26.6.6)(@vitest/browser-playwright@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@30.1.3)(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0)):
     dependencies:
       '@vitest/expect': 4.1.12
-      '@vitest/mocker': 4.1.12(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))
+      '@vitest/mocker': 4.1.12(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))
       '@vitest/pretty-format': 4.1.12
       '@vitest/runner': 4.1.12
       '@vitest/snapshot': 4.1.12
@@ -7597,11 +7562,11 @@ snapshots:
       tinyexec: 1.3.1
       tinyglobby: 0.2.17
       tinyrainbow: 3.2.0
-      vite: 6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0)
+      vite: 6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 26.6.5
-      '@vitest/browser-playwright': 4.1.12(playwright@1.64.1)(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.12)
+      '@types/node': 26.6.6
+      '@vitest/browser-playwright': 4.1.12(playwright@1.65.1)(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.12)
       '@vitest/coverage-v8': 4.1.12(@vitest/browser@4.1.12)(vitest@4.1.12)
       jsdom: 30.1.3
     transitivePeerDependencies:
@@ -7719,7 +7684,7 @@ snapshots:
       is-wsl: 3.1.1
       powershell-utils: 0.2.1
 
-  wxt@0.21.5(esbuild@0.28.2)(eslint@9.39.4(jiti@2.7.0)(supports-color@7.2.0))(rollup@4.62.0)(typescript@7.0.2)(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))(web-ext@10.8.0(express@5.3.0(supports-color@7.2.0))(jiti@2.7.0)(supports-color@7.2.0)):
+  wxt@0.21.5(esbuild@0.28.2)(eslint@9.39.4(jiti@2.7.0)(supports-color@7.2.0))(rollup@4.62.0)(typescript@7.0.2)(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))(web-ext@10.8.0(express@5.3.0(supports-color@7.2.0))(jiti@2.7.0)(supports-color@7.2.0)):
     dependencies:
       '@1natsu/wait-element': 5.0.0
       '@aklinker1/rollup-plugin-visualizer': 5.12.0(rollup@4.62.0)
@@ -7748,8 +7713,8 @@ snapshots:
       tiny-open: 1.3.0
       tinyexec: 1.3.1
       tinyglobby: 0.2.17
-      unimport: 6.5.0(esbuild@0.28.2)(rollup@4.62.0)(vite@6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0))
-      vite: 6.4.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.0)
+      unimport: 6.5.0(esbuild@0.28.2)(rollup@4.62.0)(vite@6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0))
+      vite: 6.4.5(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.0)
     optionalDependencies:
       eslint: 9.39.4(jiti@2.7.0)(supports-color@7.2.0)
       typescript: 7.0.2
