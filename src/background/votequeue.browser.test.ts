@@ -15,7 +15,8 @@ function click(userId: string, t: TargetRef, desired: string | null, prevReactio
 }
 
 afterEach(async () => {
-  await clearQueuedVotes();
+  // Every account a case queues under.
+  for (const userId of ["u1", "u2"]) await clearQueuedVotes(userId);
 });
 
 describe("the vote queue", () => {

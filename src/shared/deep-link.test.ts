@@ -17,21 +17,12 @@ describe("parseReactHint", () => {
     expect(parseReactHint("#emojery-react=")).toEqual({ targetKey: null });
   });
 
-  // The two sides of this contract deploy separately: an updated extension can
-  // meet an emojery.app that still emits the short name, and that must still
-  // open the picker rather than land the user on a page that ignores them.
-  it("still reads the short `em-react` name the /react page used to emit", () => {
-    expect(parseReactHint("#em-react")).toEqual({ targetKey: null });
-    expect(parseReactHint(`#em-react=${encodeURIComponent("github:owner/repo")}`)).toEqual({ targetKey: "github:owner/repo" });
-  });
-
   it("returns null for anything that isn't our hint", () => {
     expect(parseReactHint("")).toBeNull();
     expect(parseReactHint("#")).toBeNull();
     expect(parseReactHint("#readme")).toBeNull();
     expect(parseReactHint("#emojery-reaction")).toBeNull();
-    // The pre-rename hash the /react page emitted before the website switched
-    // to `em-react` - no longer recognized.
+    expect(parseReactHint("#em-react")).toBeNull();
     expect(parseReactHint("#wr-react")).toBeNull();
   });
 

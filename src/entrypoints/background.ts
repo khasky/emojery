@@ -2,7 +2,6 @@
 import { defineBackground } from "wxt/utils/define-background";
 import { scheduleFlush, VOTE_WAKE_ALARM } from "../background/api";
 import { logBackgroundError } from "../background/debug";
-import { migrateLegacyHistory } from "../background/history";
 import { ENROLL_RETRY_ALARM, finishPendingDeletion, resumeEnrollment, setOnEnrolled } from "../background/identity";
 import { installFreshInstallAuthReset } from "../background/install";
 import { isExtensionPageSender } from "../background/message-guard";
@@ -12,7 +11,7 @@ import { clearInjectedBadge, trackExtensionPage } from "../background/toolbar-ba
 import { applyToolbarIconForTab } from "../background/toolbar-icon";
 import { AUTH_KEY } from "../shared/auth-session";
 import { PAGE_PRESENCE_PORT } from "../shared/page-presence";
-import { clearCountsCache, LEGACY_OWN_REACTIONS_KEY, maybeSweepCountsCache } from "../shared/storage";
+import { clearCountsCache, maybeSweepCountsCache } from "../shared/storage";
 import { addAlarmListener, createAlarm, getTab, queryActiveTab, setUninstallURL, storageLocalRemove } from "../shared/webext";
 
 // Opened by the browser when the extension is removed. First-party: a
@@ -36,9 +35,6 @@ export default defineBackground(() => {
   installFailureBoundary();
   installFreshInstallAuthReset();
 
-  // Pre-account-scoping store carries no owner, so v2 never reads it - drop the orphaned key.
-  void storageLocalRemove([LEGACY_OWN_REACTIONS_KEY]).catch((error: unknown) => logBackgroundError("dropLegacyOwnReactions", error));
-
   // The 1.0.0 key stores (extractable account keys, epoch keys), its click-per-row queue and
   // its install id: nothing of 1.1.0 reads them.
   if (typeof indexedDB !== "undefined") {
@@ -57,13 +53,7 @@ export default defineBackground(() => {
 
   void setUninstallURL(UNINSTALL_FEEDBACK_URL).catch((error: unknown) => logBackgroundError("setUninstallURL", error));
 
-  // Migrate pre-IndexedDB history before the first flush can confirm new rows,
-  // so legacy rows keep their place in insertion order. No-ops once migrated.
-  void migrateLegacyHistory()
-    .catch((error: unknown) => logBackgroundError("migrateLegacyHistory", error))
-    .finally(() => {
-      void scheduleFlush();
-    });
+  void scheduleFlush();
 
   void finishPendingDeletion().catch((error: unknown) => logBackgroundError("finishPendingDeletion", error));
 
