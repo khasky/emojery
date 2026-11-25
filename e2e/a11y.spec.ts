@@ -15,7 +15,7 @@
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import { type AxeViolation, axeSource, COLOR_SCHEMES, formatViolations, hasHorizontalOverflowProbe, POPUP_TABS, REFLOW_WIDTH_PX, TEXT_SPACING_CSS, TEXT_SPACING_SELECTORS, WCAG_TAGS } from "./lib/axe";
 import { authConfigured, closeSession, extensionPageUrl, FIREFOX_NO_EXTENSION_PAGES, isFirefoxRun, launchSession, openPerSiteList, resolveExtensionId, type Session, signIn, signInSkipReason } from "./lib/extension";
-import { AGREE_CHECKBOX_SELECTOR } from "./lib/selectors";
+import { AGREE_TERMS_CHECKBOX_SELECTOR } from "./lib/selectors";
 
 // Whole file drives the extension's own pages through Playwright locators, keyboard
 // and aria snapshots; a11y-firefox.spec.ts runs the axe / reflow / text-spacing
@@ -151,7 +151,7 @@ test("axe: the auth page is WCAG A/AA clean in both color schemes", async () => 
   for (const scheme of COLOR_SCHEMES) {
     await page.emulateMedia({ colorScheme: scheme });
     await page.goto(authUrl());
-    await expect(page.locator(AGREE_CHECKBOX_SELECTOR)).toBeVisible();
+    await expect(page.locator(AGREE_TERMS_CHECKBOX_SELECTOR)).toBeVisible();
     violations.push(...(await runAxe(page, `auth (${scheme})`)));
   }
   expect(violations).toEqual([]);
@@ -213,15 +213,22 @@ test("aria structure: popup header, tablist and settings panel", async () => {
 test("aria structure: auth provider step", async () => {
   const page = await openA11yPage();
   await page.goto(authUrl());
-  await expect(page.locator(AGREE_CHECKBOX_SELECTOR)).toBeVisible();
+  await expect(page.locator(AGREE_TERMS_CHECKBOX_SELECTOR)).toBeVisible();
   // Subset match: the provider buttons come from the API and vary by
-  // environment, so the landmark, heading and consent row are what is pinned.
+  // environment, so the landmark, heading and the two consent rows are what is
+  // pinned - each box named by its own sentence, its links beside it.
   await expect(page.locator("body")).toMatchAriaSnapshot(`
     - main:
       - heading [level=1]
-      - checkbox /I agree to the/
-      - link "Terms of Service"
+      - list:
+        - listitem: /What's public/
+        - listitem: /What's not/
+        - listitem: /political or religious/
+      - checkbox /I accept the Terms of Use/
+      - link "Terms of Use"
       - link "Privacy Policy"
+      - checkbox /I agree that every reaction I make is published/
+      - link /What's public/
   `);
   await page.close();
 });
@@ -275,7 +282,7 @@ test("reflow: no horizontal scrolling at narrow widths (WCAG 1.4.10)", async () 
 
   await page.setViewportSize({ width: REFLOW_WIDTH_PX.auth, height: 480 });
   await page.goto(authUrl());
-  await expect(page.locator(AGREE_CHECKBOX_SELECTOR)).toBeVisible();
+  await expect(page.locator(AGREE_TERMS_CHECKBOX_SELECTOR)).toBeVisible();
   expect(await hasHorizontalOverflow(page), `auth page overflows at ${REFLOW_WIDTH_PX.auth}px`).toBe(false);
 
   await page.setViewportSize({ width: REFLOW_WIDTH_PX.onboarding, height: 480 });

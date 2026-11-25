@@ -200,12 +200,14 @@ export type SignInRefusal =
   | "cancelled"
   // The provider refused or the API could not validate its answer.
   | "provider_denied"
+  // A work, school or otherwise managed account: only personal accounts sign in.
+  | "account_type_unsupported"
   // The account exists at the provider, but the API could not register it now.
   | "enrollment_failed"
   // The API stopped serving this build; the fix is an update.
   | "client_outdated"
-  // The account has as many devices as this key epoch allows; sign in again once
-  // the next one starts.
+  // The account has registered as many new devices as a day allows; a new one
+  // signs in after midnight UTC.
   | "device_limit"
   | "unavailable";
 

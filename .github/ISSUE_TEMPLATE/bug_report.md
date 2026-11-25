@@ -32,7 +32,7 @@ labels: ["bug"]
 
 ## Environment
 
-- **Browser & version:** <!-- e.g. Chrome 126, Firefox 128 -->
+- **Browser & version:** <!-- e.g. Chrome 140, Firefox 140 -->
 - **Extension version & build:** <!-- open the Emojery popup — the version and build stamp are in the header (hover it for the exact build) -->
 - **OS:** <!-- e.g. Windows 11, macOS 14 -->
 - **"Hide original buttons" setting:** <!-- on / off -->

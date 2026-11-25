@@ -208,8 +208,6 @@ const AccountView = () => {
   if (authed === null) return null;
 
   if (!authed) {
-    // Analytics consent stays hidden until sign-in: the toggle governs data
-    // tied to the signed-in identity, so it has nothing to govern here.
     return <SignInPrompt message={t("signInMsgAccount")} />;
   }
 

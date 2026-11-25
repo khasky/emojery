@@ -447,20 +447,41 @@
  "authRetryBtn": {
   "message": "Try again"
  },
- "authAgreeIntro": {
-  "message": "I agree to the "
+ "authFactPublic": {
+  "message": "What's public: your reactions, under a pseudonym — permanently; independent archives may keep copies even after we delete ours."
+ },
+ "authFactNotPublic": {
+  "message": "What's not: your name, email, IP."
+ },
+ "authFactSensitive": {
+  "message": "Reactions to political or religious posts can reveal your views."
+ },
+ "authPersonalOnly": {
+  "message": "Work or school accounts aren't supported — use a personal Google or Microsoft account."
+ },
+ "authSeparateAccounts": {
+  "message": "Signing in with a different provider creates a separate account with its own reactions and history."
+ },
+ "authAgreeTerms": {
+  "message": "I accept the Terms of Use and confirm I am 16 or older."
  },
  "authTermsLinkLabel": {
-  "message": "Terms of Service"
- },
- "authAgreeConjunction": {
-  "message": " and "
+  "message": "Terms of Use"
  },
  "authPrivacyLinkLabel": {
   "message": "Privacy Policy"
  },
- "authAgreeOutro": {
-  "message": "."
+ "authAgreePublicLog": {
+  "message": "I agree that every reaction I make is published to anyone, permanently, in Emojery's public log under my pseudonym — including reactions that may reveal my political, religious or other views or my health."
+ },
+ "authWhatIsPublicLink": {
+  "message": "What's public →"
+ },
+ "authObjectAnyTime": {
+  "message": "You can object at any time to our use of your data for the public log and anti-abuse — see Privacy Policy › Your rights. Deleting your account is the quickest way."
+ },
+ "authDeletionNote": {
+  "message": "If you delete your account, we remove your reactions from the counts; entries already published stay in the log under your pseudonym."
  },
  "authDoneTitle": {
   "message": "You're signed in"
@@ -478,7 +499,7 @@
   "message": "What Emojery sends"
  },
  "dataConsentBody": {
-  "message": "Emojery sends the address of the page you react on, a random install identifier, and a one-time sign-in token from the provider you choose; only a one-way hash of your account id is kept. Optional context stays off in this browser."
+  "message": "Emojery sends the address of the page you react on, your reaction, and a one-time sign-in token from the provider you choose; your name and email are not requested. Reactions are published permanently in a public log under a pseudonym, and the country and network of each vote are kept for 30 days to fight abuse."
  },
  "dataConsentPolicyLink": {
   "message": "Privacy Policy."
@@ -495,6 +516,12 @@
  "authErrProviderDenied": {
   "message": "The provider did not complete the sign-in. Try again or choose another account."
  },
+ "authErrAccountTypeUnsupported": {
+  "message": "Work and school accounts can't sign in. Use a personal account instead."
+ },
+ "authAccountTypeHelpLink": {
+  "message": "Why personal accounts only"
+ },
  "authErrEnrollFailed": {
   "message": "Could not register your account right now. Please try again in a minute."
  },
@@ -508,7 +535,7 @@
   "message": "Update from the store"
  },
  "authErrDeviceLimit": {
-  "message": "Device limit for this month is reached. Try again next month."
+  "message": "This account has added as many new devices as it can today. Try again after midnight UTC."
  },
  "deviceLimitHelpLink": {
   "message": "What this means"

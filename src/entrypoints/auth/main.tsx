@@ -11,10 +11,10 @@ import { type I18nKey, t } from "../../shared/i18n";
 import type { RuntimeResponse, SignInRefusal } from "../../shared/messages";
 import { type OidcProvider, providerAccountUrl, providerLabel, splitFeaturedProviders } from "../../shared/oidc-providers";
 import { bootstrapPage } from "../../shared/page-bootstrap";
-import { AGREE_CLASS, AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, COUNTDOWN_CLASS, LAST_ACCOUNT_CLASS, MORE_PROVIDERS_CLASS, OTHER_ACCOUNT_CLASS, PROVIDER_BUTTON_CLASS, PROVIDER_LIST_CLASS, SPINNER_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
+import { AGREE_CLASS, AGREE_LINKS_CLASS, AUTH_ERROR_CLASS, AUTH_ERROR_ID, CARD_CLASS, CONSENT_FACTS_CLASS, CONSENT_NOTE_CLASS, COUNTDOWN_CLASS, LAST_ACCOUNT_CLASS, MORE_PROVIDERS_CLASS, OTHER_ACCOUNT_CLASS, PROVIDER_BUTTON_CLASS, PROVIDER_LIST_CLASS, SPINNER_CLASS, TAGLINE_CLASS } from "../../shared/page-dom";
 import { relativeTime } from "../../shared/relative-time";
 import { noteTermsAccepted, termsAccepted } from "../../shared/terms-consent";
-import { HELP_DEVICE_LIMIT_URL, withExtensionUtm } from "../../shared/tracking-links";
+import { HELP_DEVICE_LIMIT_URL, HELP_SIGNING_IN_URL, HELP_WHAT_IS_PUBLIC_URL, withExtensionUtm } from "../../shared/tracking-links";
 import { sendRuntimeMessage } from "../../shared/webext";
 
 // Fresh installs on pre-140 Firefox open this page with `?consent=1` (background/install.ts) to get
@@ -33,6 +33,7 @@ type SignedIn = Extract<RuntimeResponse, { type: "auth:signedIn" }>;
 const REFUSAL_COPY: Record<SignInRefusal, I18nKey> = {
   cancelled: "authErrCancelled",
   provider_denied: "authErrProviderDenied",
+  account_type_unsupported: "authErrAccountTypeUnsupported",
   enrollment_failed: "authErrEnrollFailed",
   client_outdated: "authErrOutdated",
   device_limit: "authErrDeviceLimit",
@@ -91,11 +92,6 @@ const PROVIDER_MARKS: Record<string, ComponentChild> = {
     <path d="M16.4 12.7c0-2.4 2-3.6 2.1-3.7-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.8-1.6 0-3.1 1-4 2.4-1.7 3-.4 7.3 1.2 9.7.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.2-.8 1.5 0 1.9.8 3.2.8 1.3 0 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.3-2.8 0 0-2.6-1-2.6-3.8zM14 5.4c.7-.8 1.1-2 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4z" />
   ),
   microsoft: <path d="M3 3h8.5v8.5H3zm9.5 0H21v8.5h-8.5zM3 12.5h8.5V21H3zm9.5 0H21V21h-8.5z" />,
-  facebook: <path d="M13.5 22v-8h2.7l.4-3.2h-3.1V8.8c0-.9.3-1.6 1.6-1.6h1.7V4.4c-.3 0-1.3-.1-2.5-.1-2.5 0-4.1 1.5-4.1 4.2v2.3H7.4V14h2.8v8h3.3z" />,
-  twitch: <path d="M4.3 2 2.5 6.4v14.9h5.1V24h2.8l2.6-2.7h4.1l5.4-5.4V2H4.3zm16.4 12.9-3.1 3.1h-5l-2.6 2.6v-2.6H5.9V3.8h14.8v11.1zM16.4 7.2h-1.8v5.4h1.8V7.2zm-4.9 0h-1.8v5.4h1.8V7.2z" />,
-  slack: (
-    <path d="M9.4 2.5a2 2 0 0 0 0 4.1h2V4.5a2 2 0 0 0-2-2zm0 5.4H4.1a2 2 0 1 0 0 4.1h5.3a2 2 0 1 0 0-4.1zm12.1 2a2 2 0 1 0-4.1 0v2h2a2 2 0 0 0 2.1-2zm-5.4 0V4.5a2 2 0 1 0-4.1 0v5.4a2 2 0 1 0 4.1 0zm-2 12.1a2 2 0 1 0 0-4.1h-2v2a2 2 0 0 0 2 2.1zm0-5.4h5.3a2 2 0 1 0 0-4.1h-5.3a2 2 0 1 0 0 4.1zm-12.1-2a2 2 0 1 0 4.1 0v-2h-2a2 2 0 0 0-2.1 2zm5.4 0v5.3a2 2 0 1 0 4.1 0v-5.3a2 2 0 1 0-4.1 0z" />
-  ),
 };
 const GENERIC_MARK: ComponentChild = <path d="M14.5 2A7.5 7.5 0 0 0 7.3 11.7L2 17v5h5v-3h3v-3h3l1.4-1.4A7.5 7.5 0 1 0 14.5 2zm2 5a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" />;
 
@@ -265,6 +261,21 @@ function lastAccountHint(provider: OidcProvider, last: LastAccount): string {
   return [providerTag(provider, last.ordinal), last.name, when].filter((part) => part !== null && part !== "").join(" · ");
 }
 
+/** The two agreements a sign-in needs, ticked separately: accepting the terms is
+ *  not agreeing to have every reaction published, and neither box stands in for
+ *  the other. */
+type Consent = { terms: boolean; publicLog: boolean };
+
+const NO_CONSENT: Consent = { terms: false, publicLog: false };
+
+function consentLink(href: string, content: string, label: string) {
+  return (
+    <a href={withExtensionUtm(href, { campaign: "auth_consent_links", content })} target="_blank" rel="noopener noreferrer">
+      {label}
+    </a>
+  );
+}
+
 type ProviderStepProps = {
   providers: OidcProvider[] | null | undefined;
   /** The account last used with each provider on this device, for the hint under its
@@ -276,18 +287,22 @@ type ProviderStepProps = {
   /** The refusal to show, not its copy: the device limit is the one that also
    *  carries a link, and a rendered string cannot say which refusal it came from. */
   error: SignInRefusal | null;
-  accepted: boolean;
+  /** The provider the refused sign-in went to, for the refusal that offers another
+   *  account there. */
+  refusedProvider: OidcProvider | null;
+  consent: Consent;
   showAll: boolean;
   onPick: (provider: OidcProvider, chooser: boolean) => void;
   onRetryProviders: () => void;
-  onAccept: (value: boolean) => void;
+  onConsent: (item: keyof Consent, value: boolean) => void;
   setShowAll: (value: boolean) => void;
 };
 
 // `providers` is undefined while the list loads, null when it could not be read
 // (the API unreachable, the worker gone) - that state shows the generic error
 // with a retry, since nothing else on the page can be done without the list.
-function ProviderStep({ providers, lastAccounts, chooserProviders, error, accepted, showAll, onPick, onRetryProviders, onAccept, setShowAll }: ProviderStepProps) {
+function ProviderStep({ providers, lastAccounts, chooserProviders, error, refusedProvider, consent, showAll, onPick, onRetryProviders, onConsent, setShowAll }: ProviderStepProps) {
+  const accepted = consent.terms && consent.publicLog;
   const firstButton = useRef<HTMLButtonElement>(null);
   const firstRevealed = useRef<HTMLButtonElement>(null);
   const wasShowingAll = useRef(showAll);
@@ -311,34 +326,37 @@ function ProviderStep({ providers, lastAccounts, chooserProviders, error, accept
       <div class={CARD_CLASS}>
         <h1>{t("authSignInTitle")}</h1>
         <p class={TAGLINE_CLASS}>{t("authSignInTagline")}</p>
-        <label class={AGREE_CLASS}>
-          <input type="checkbox" checked={accepted} onChange={(e: Event) => onAccept((e.target as HTMLInputElement).checked)} />
-          <span>
-            {t("authAgreeIntro")}
-            <a
-              href={withExtensionUtm("https://emojery.app/terms", {
-                campaign: "auth_consent_links",
-                content: "terms_of_service",
-              })}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {t("authTermsLinkLabel")}
-            </a>
-            {t("authAgreeConjunction")}
-            <a
-              href={withExtensionUtm("https://emojery.app/privacy", {
-                campaign: "auth_consent_links",
-                content: "privacy_policy",
-              })}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {t("authPrivacyLinkLabel")}
-            </a>
-            {t("authAgreeOutro")}
-          </span>
+        {/* What a sign-in commits the reader to, said before either box: what the
+            public log shows, what it does not, and what a reaction can reveal. */}
+        <ul class={CONSENT_FACTS_CLASS}>
+          <li>{t("authFactPublic")}</li>
+          <li>{t("authFactNotPublic")}</li>
+          <li>{t("authFactSensitive")}</li>
+        </ul>
+        {/* Before the provider round trip rather than after it: a work account is
+            refused only once the provider has answered. */}
+        <p class={CONSENT_NOTE_CLASS}>{t("authPersonalOnly")}</p>
+        <p class={CONSENT_NOTE_CLASS}>{t("authSeparateAccounts")}</p>
+        {/* The links sit beside each box, outside its label: a click on a link
+            inside a label would also flip the box. */}
+        <label class={AGREE_CLASS} data-consent="terms">
+          <input type="checkbox" checked={consent.terms} onChange={(e: Event) => onConsent("terms", (e.target as HTMLInputElement).checked)} />
+          <span>{t("authAgreeTerms")}</span>
         </label>
+        <p class={AGREE_LINKS_CLASS}>
+          {consentLink("https://emojery.app/terms", "terms_of_use", t("authTermsLinkLabel"))}
+          {" · "}
+          {consentLink("https://emojery.app/privacy", "privacy_policy", t("authPrivacyLinkLabel"))}
+        </p>
+        <label class={AGREE_CLASS} data-consent="public-log">
+          <input type="checkbox" checked={consent.publicLog} onChange={(e: Event) => onConsent("publicLog", (e.target as HTMLInputElement).checked)} />
+          <span>{t("authAgreePublicLog")}</span>
+        </label>
+        <p class={AGREE_LINKS_CLASS}>{consentLink(HELP_WHAT_IS_PUBLIC_URL, "what_is_public", t("authWhatIsPublicLink"))}</p>
+        {/* Lines of their own at body size, not a footnote: the right to object is
+            stated where the agreement is given. */}
+        <p class={CONSENT_NOTE_CLASS}>{t("authObjectAnyTime")}</p>
+        <p class={CONSENT_NOTE_CLASS}>{t("authDeletionNote")}</p>
         {error ? (
           <div class={AUTH_ERROR_CLASS} id={AUTH_ERROR_ID} role="alert">
             {t(REFUSAL_COPY[error])}
@@ -348,6 +366,22 @@ function ProviderStep({ providers, lastAccounts, chooserProviders, error, accept
                 <a class="linkish" href={withExtensionUtm(HELP_DEVICE_LIMIT_URL, { campaign: "auth_device_limit", content: "auth" })} target="_blank" rel="noopener noreferrer">
                   {t("deviceLimitHelpLink")}
                 </a>
+              </>
+            ) : null}
+            {error === "account_type_unsupported" ? (
+              <>
+                {" "}
+                <a class="linkish" href={withExtensionUtm(HELP_SIGNING_IN_URL, { campaign: "auth_account_type", content: refusedProvider ?? "auth" })} target="_blank" rel="noopener noreferrer">
+                  {t("authAccountTypeHelpLink")}
+                </a>
+                {/* Straight back to the provider's account picker, where it has one:
+                    the browser most likely still holds the work account, and a plain
+                    retry would hand the same one back. */}
+                {refusedProvider && chooserProviders.includes(refusedProvider) ? (
+                  <button class={`linkish ${OTHER_ACCOUNT_CLASS}`} type="button" data-provider={refusedProvider} disabled={!accepted} onClick={() => onPick(refusedProvider, true)}>
+                    {t("authOtherAccountBtn", providerLabel(refusedProvider))}
+                  </button>
+                ) : null}
               </>
             ) : null}
             {error === "client_outdated" ? (
@@ -419,7 +453,7 @@ function App() {
   // The refusal itself, not its rendered copy: the device limit is the one that
   // also gets a link, and a string cannot say which refusal produced it.
   const [error, setError] = useState<SignInRefusal | null>(null);
-  const [accepted, setAccepted] = useState(false);
+  const [consent, setConsent] = useState<Consent>(NO_CONSENT);
   // Held here, not in the step: a refused sign-in comes back to the list, and a
   // reader who already opened the longer list should not have to open it again.
   const [showAll, setShowAll] = useState(false);
@@ -459,21 +493,27 @@ function App() {
       .catch(() => {});
   }, []);
 
-  // An agreement already given for the revision in force ticks the box back, so a
-  // second sign-in does not ask twice for the same consent. Read once, on mount:
-  // after that the reader owns the box.
+  // Both boxes open unticked, unless this device already gave both agreements for
+  // the revision in force: then they are ticked back, so a second sign-in does not
+  // ask twice for the same consent. Read once, on mount: after that the reader owns
+  // the boxes.
   useEffect(() => {
     void termsAccepted().then((remembered) => {
-      if (remembered) setAccepted(true);
+      if (remembered) setConsent({ terms: true, publicLog: true });
     });
   }, []);
 
-  // Remembered as it is ticked rather than at the sign-in, so the agreement is
-  // recorded even when the reader closes the page without picking a provider.
-  const onAccept = useCallback((value: boolean) => {
-    setAccepted(value);
-    void noteTermsAccepted(value);
-  }, []);
+  // Remembered as the second box is ticked rather than at the sign-in, so the
+  // agreement is recorded even when the reader closes the page without picking a
+  // provider; clearing either box forgets it.
+  const onConsent = useCallback(
+    (item: keyof Consent, value: boolean) => {
+      const next = { ...consent, [item]: value };
+      setConsent(next);
+      void noteTermsAccepted(next.terms && next.publicLog);
+    },
+    [consent],
+  );
 
   // A tab that did not perform the sign-in still has to stop offering one: a second
   // auth tab left open while the first signs in would otherwise keep a live-looking
@@ -521,13 +561,25 @@ function App() {
 
   if (step === "done") return <DoneStep returnsToPage={returnsToPage} autoClose={signedInHere} />;
   if (step === "busy" && picked) return <BusyStep provider={picked} />;
-  return <ProviderStep providers={providers} lastAccounts={lastAccounts} chooserProviders={chooserProviders} error={error} accepted={accepted} showAll={showAll} onPick={(provider, chooser) => void pick(provider, chooser)} onRetryProviders={loadProviders} onAccept={onAccept} setShowAll={setShowAll} />;
+  return (
+    <ProviderStep
+      providers={providers}
+      lastAccounts={lastAccounts}
+      chooserProviders={chooserProviders}
+      error={error}
+      refusedProvider={error ? picked : null}
+      consent={consent}
+      showAll={showAll}
+      onPick={(provider, chooser) => void pick(provider, chooser)}
+      onRetryProviders={loadProviders}
+      onConsent={onConsent}
+      setShowAll={setShowAll}
+    />
+  );
 }
 
 // Shown ahead of the sign-in form on browsers that never prompted for data collection themselves.
-// Read-only: the only toggleable bucket is `technicalAndInteraction`, and pre-140 Firefox
-// rejects `permissions.request({ data_collection })`, so analytics is already forced off there
-// (shared/data-consent.ts) and a toggle here could only ever fail.
+// Read-only: every category the extension declares is required, so there is nothing to toggle.
 function ConsentGate() {
   const [acknowledged, setAcknowledged] = useState(false);
   if (acknowledged) return <App />;

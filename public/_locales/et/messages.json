@@ -449,20 +449,41 @@
   "authRetryBtn": {
     "message": "Proovi uuesti"
   },
-  "authAgreeIntro": {
-    "message": "Nõustun "
+  "authFactPublic": {
+    "message": "Avalik: sinu reaktsioonid, pseudonüümi all — jäädavalt; sõltumatud arhiivid võivad koopiaid alles hoida ka pärast seda, kui oleme enda omad kustutanud."
+  },
+  "authFactNotPublic": {
+    "message": "Mitte avalik: sinu nimi, e-post, IP."
+  },
+  "authFactSensitive": {
+    "message": "Reaktsioonid poliitilistele või usulistele postitustele võivad sinu vaateid paljastada."
+  },
+  "authPersonalOnly": {
+    "message": "Töö- ja koolikontosid ei toetata — kasuta isiklikku Google'i või Microsofti kontot."
+  },
+  "authSeparateAccounts": {
+    "message": "Teise teenusepakkujaga sisselogimine loob eraldi konto, millel on oma reaktsioonid ja ajalugu."
+  },
+  "authAgreeTerms": {
+    "message": "Nõustun kasutustingimustega ja kinnitan, et olen vähemalt 16-aastane."
   },
   "authTermsLinkLabel": {
-    "message": "kasutustingimustega"
-  },
-  "authAgreeConjunction": {
-    "message": " ja "
+    "message": "Kasutustingimused"
   },
   "authPrivacyLinkLabel": {
-    "message": "privaatsuspoliitikaga"
+    "message": "Privaatsuspoliitika"
   },
-  "authAgreeOutro": {
-    "message": "."
+  "authAgreePublicLog": {
+    "message": "Nõustun, et iga minu reaktsioon avaldatakse kõigile ja jäädavalt Emojery avalikus logis minu pseudonüümi all — ka reaktsioonid, mis võivad paljastada minu poliitilised, usulised või muud vaated või minu tervise."
+  },
+  "authWhatIsPublicLink": {
+    "message": "Mis on avalik →"
+  },
+  "authObjectAnyTime": {
+    "message": "Võid igal ajal esitada vastuväite sinu andmete kasutamisele avaliku logi ja kuritarvituste tõkestamise jaoks — vt Privaatsuspoliitika › Sinu õigused. Kiireim viis on konto kustutamine."
+  },
+  "authDeletionNote": {
+    "message": "Kui kustutad oma konto, eemaldame sinu reaktsioonid loenduritest; juba avaldatud kirjed jäävad logisse sinu pseudonüümi all."
   },
   "authDoneTitle": {
     "message": "Olete sisse logitud"
@@ -480,7 +501,7 @@
     "message": "Mida Emojery saadab"
   },
   "dataConsentBody": {
-    "message": "Emojery saadab selle lehe aadressi, millel reageerid, juhusliku paigaldustunnuse ja valitud teenusepakkuja ühekordse sisselogimistõendi; alles jääb vaid sinu kontotunnuse ühesuunaline räsi. Valikuline kontekst jääb selles brauseris välja lülitatuks."
+    "message": "Emojery saadab lehe aadressi, millel reageerid, sinu reaktsiooni ja sinu valitud teenusepakkuja ühekordse sisselogimistõendi; sinu nime ega e-posti ei küsita. Reaktsioonid avaldatakse jäädavalt avalikus logis pseudonüümi all ning iga hääle riiki ja võrku hoitakse kuritarvituste tõkestamiseks 30 päeva."
   },
   "dataConsentPolicyLink": {
     "message": "Privaatsuspoliitika."
@@ -497,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "Teenusepakkuja ei viinud sisselogimist lõpule. Proovi uuesti või vali teine konto."
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "Töö- ja koolikontodega ei saa sisse logida. Kasuta selle asemel isiklikku kontot."
+  },
+  "authAccountTypeHelpLink": {
+    "message": "Miks ainult isiklikud kontod"
+  },
   "authErrEnrollFailed": {
     "message": "Sinu kontot ei õnnestunud praegu registreerida. Proovi minuti pärast uuesti."
   },
@@ -510,7 +537,7 @@
     "message": "Uuenda poest"
   },
   "authErrDeviceLimit": {
-    "message": "Selle kuu seadmete limiit on täis. Proovi järgmisel kuul uuesti."
+    "message": "See konto on täna lisanud nii palju uusi seadmeid, kui saab. Proovi uuesti pärast südaööd UTC järgi."
   },
   "deviceLimitHelpLink": {
     "message": "Mida see tähendab",

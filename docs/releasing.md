@@ -28,16 +28,14 @@ A release that adds a supported site goes out only once that site is live on the
 
 ## Versions and branches
 
-The extension's `major.minor` is the API line it is built for: a `1.2.x` build talks to the `1.2` API. A build the API no longer serves gets `403 client_outdated`, which the sign-in page turns into an update prompt. So:
+The extension's `major.minor` is the API line it is built for: a `1.2.x` build talks to the `1.2` API. The API has no version floor: an incompatible API line retires the path prefix the older builds call, and every request under a retired prefix answers `410 client_outdated`. A build that gets that answer stops sending votes, keeps the ones it has queued, and shows an update prompt in the popup and on the sign-in page. So:
 
-- **A minor bump means the API moved.** It is released only after the matching API line is live; a patch (`X.Y.Z`) is this repo's own business and needs nothing on the other side.
+- **A minor bump means the API moved.** The build is submitted to the stores before the matching API line goes live and published right after the production smoke passes, so the window in which installed copies of the previous line get `410` stays short. Where a store offers deferred publication (the Chrome Web Store does) the approved build waits for that moment; where it does not (Edge Add-ons publishes a certified build on its own, AMO documents no deferral), the package is uploaded right after the smoke. A patch (`X.Y.Z`) is this repo's own business and needs nothing on the other side.
 - **`main` is the permanent branch and the next line.** Every change lands there first, experiments included, and every minor is tagged on it. A `pnpm build` of `main` is where the next minor is exercised before it ships.
 - **`release/X.Y` is cut from `main` at `vX.Y.0`** and carries the patches of that line: a fix lands on `main` first, then reaches the branch by cherry-pick, and the patch tag `vX.Y.Z` sits on the branch. Patch tags are not merged back.
 - Release branches stay. A line is closed, not deleted: no patch goes there any more, and the branch remains the record of what shipped.
 
 The 1.0.0 release predates this procedure, so `release/1.0` was created after the fact (2026-09-10) from the existing `v1.0.0` tag.
-
-**The 1.0.1 exception.** 1.0.1 replaces the email-code sign-in with the provider sign-in, which the API had to grow first (the OIDC, epoch-key and signed-vote endpoints), so it is a patch that needs the other side after all: it is released only once that API is live, the way a minor is. It is tagged on `main` with `pnpm exec commit-and-tag-version --release-as 1.0.1` rather than cherry-picked onto the branch, and `release/1.0` is then fast-forwarded to the tag (`git branch -f release/1.0 v1.0.1`) so the line still ends at what shipped. Once the API retires the email-code sign-in, 1.0.0 gets `403 client_outdated` and the update prompt.
 
 ## The first release
 

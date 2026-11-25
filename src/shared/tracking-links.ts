@@ -9,11 +9,20 @@
 export const TRY_IT_LIVE_URL = "https://github.com/khasky/emojery#emojery-react";
 
 // The one refusal a reader cannot act on from inside the extension: the account
-// holds as many signing keys as a month allows. What to do about it depends on
-// facts the popup does not have (another profile, the date, whether to ask the
-// operator to raise it), so the article carries them and can be corrected without
-// a release. Both places that show the limit link here.
+// has registered as many new devices as a day allows. What to do about it depends
+// on facts the page does not have (another profile, the time, whether to ask the
+// operator), so the article carries them and can be corrected without a release.
+// The sign-in page links here from that refusal.
 export const HELP_DEVICE_LIMIT_URL = "https://emojery.app/help/device-limit-reached";
+
+// What a reaction publishes, read off one real log entry: linked from the
+// public-log agreement on the sign-in page.
+export const HELP_WHAT_IS_PUBLIC_URL = "https://emojery.app/help/what-is-public";
+
+// Why only personal accounts sign in, and how to tell a work or school account:
+// linked from the refusal the API gives one. The API names the same article in
+// its answer; the address is held here so the page links nothing it was sent.
+export const HELP_SIGNING_IN_URL = "https://emojery.app/help/signing-in";
 
 const EXTENSION_UTM_SOURCE = "emojery";
 const EXTENSION_UTM_MEDIUM = "browser_extension";
