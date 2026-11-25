@@ -449,20 +449,41 @@
   "authRetryBtn": {
     "message": "Prøv igjen"
   },
-  "authAgreeIntro": {
-    "message": "Jeg godtar "
+  "authFactPublic": {
+    "message": "Dette er offentlig: reaksjonene dine, under et pseudonym — permanent; uavhengige arkiver kan beholde kopier selv etter at vi har slettet våre."
+  },
+  "authFactNotPublic": {
+    "message": "Dette er ikke offentlig: navnet ditt, e-posten din, IP-en din."
+  },
+  "authFactSensitive": {
+    "message": "Reaksjoner på politiske eller religiøse innlegg kan avsløre synspunktene dine."
+  },
+  "authPersonalOnly": {
+    "message": "Jobb- og skolekontoer støttes ikke — bruk en personlig Google- eller Microsoft-konto."
+  },
+  "authSeparateAccounts": {
+    "message": "Logger du inn med en annen leverandør, opprettes en egen konto med egne reaksjoner og egen historikk."
+  },
+  "authAgreeTerms": {
+    "message": "Jeg godtar vilkårene for bruk og bekrefter at jeg er 16 år eller eldre."
   },
   "authTermsLinkLabel": {
-    "message": "Vilkårene for bruk"
-  },
-  "authAgreeConjunction": {
-    "message": " og "
+    "message": "Vilkår for bruk"
   },
   "authPrivacyLinkLabel": {
-    "message": "Personvernerklæringen"
+    "message": "Personvernerklæring"
   },
-  "authAgreeOutro": {
-    "message": "."
+  "authAgreePublicLog": {
+    "message": "Jeg samtykker i at hver reaksjon jeg gir, publiseres for alle, permanent, i Emojerys offentlige logg under pseudonymet mitt — også reaksjoner som kan avsløre mine politiske, religiøse eller andre synspunkter eller helsen min."
+  },
+  "authWhatIsPublicLink": {
+    "message": "Hva som er offentlig →"
+  },
+  "authObjectAnyTime": {
+    "message": "Du kan når som helst protestere mot at vi bruker dataene dine til den offentlige loggen og til misbruksbekjempelse — se Personvernerklæring › Dine rettigheter. Raskest er å slette kontoen din."
+  },
+  "authDeletionNote": {
+    "message": "Hvis du sletter kontoen, fjerner vi reaksjonene dine fra tellingene; oppføringer som allerede er publisert, blir liggende i loggen under pseudonymet ditt."
   },
   "authDoneTitle": {
     "message": "Du er innlogget"
@@ -480,7 +501,7 @@
     "message": "Hva Emojery sender"
   },
   "dataConsentBody": {
-    "message": "Emojery sender adressen til siden du reagerer på, en tilfeldig installasjons-id og et engangstoken for innlogging fra leverandøren du velger; bare en enveis-hash av konto-id-en din lagres. Valgfri kontekst forblir av i denne nettleseren."
+    "message": "Emojery sender adressen til siden du reagerer på, reaksjonen din og et engangs innloggingstoken fra leverandøren du velger; navn og e-post blir ikke spurt om. Reaksjoner publiseres permanent i en offentlig logg under et pseudonym, og land og nettverk for hver stemme lagres i 30 dager for å bekjempe misbruk."
   },
   "dataConsentPolicyLink": {
     "message": "Personvernerklæring."

@@ -449,20 +449,41 @@
   "authRetryBtn": {
     "message": "Réessayer"
   },
-  "authAgreeIntro": {
-    "message": "J'accepte les "
+  "authFactPublic": {
+    "message": "Ce qui est public : vos réactions, sous un pseudonyme — pour toujours ; des archives indépendantes peuvent en garder des copies même après que nous avons supprimé les nôtres."
+  },
+  "authFactNotPublic": {
+    "message": "Ce qui ne l'est pas : votre nom, votre e-mail, votre IP."
+  },
+  "authFactSensitive": {
+    "message": "Réagir à des publications politiques ou religieuses peut révéler vos opinions."
+  },
+  "authPersonalOnly": {
+    "message": "Les comptes professionnels ou scolaires ne sont pas pris en charge — utilisez un compte Google ou Microsoft personnel."
+  },
+  "authSeparateAccounts": {
+    "message": "Se connecter avec un autre fournisseur crée un compte distinct, avec ses propres réactions et son propre historique."
+  },
+  "authAgreeTerms": {
+    "message": "J'accepte les Conditions d'utilisation et je confirme avoir 16 ans ou plus."
   },
   "authTermsLinkLabel": {
     "message": "Conditions d'utilisation"
   },
-  "authAgreeConjunction": {
-    "message": " et la "
-  },
   "authPrivacyLinkLabel": {
     "message": "Politique de confidentialité"
   },
-  "authAgreeOutro": {
-    "message": "."
+  "authAgreePublicLog": {
+    "message": "J'accepte que chacune de mes réactions soit publiée pour tous, pour toujours, dans le journal public d'Emojery sous mon pseudonyme — y compris les réactions susceptibles de révéler mes opinions politiques, religieuses ou autres, ou ma santé."
+  },
+  "authWhatIsPublicLink": {
+    "message": "Ce qui est public →"
+  },
+  "authObjectAnyTime": {
+    "message": "Vous pouvez vous opposer à tout moment à l'utilisation de vos données pour le journal public et la lutte contre les abus — voir Politique de confidentialité › Vos droits. Supprimer votre compte est le moyen le plus rapide."
+  },
+  "authDeletionNote": {
+    "message": "Si vous supprimez votre compte, nous retirons vos réactions des compteurs ; les entrées déjà publiées restent dans le journal sous votre pseudonyme."
   },
   "authDoneTitle": {
     "message": "Vous êtes connecté"
@@ -480,7 +501,7 @@
     "message": "Ce qu’Emojery envoie"
   },
   "dataConsentBody": {
-    "message": "Emojery envoie l'adresse de la page sur laquelle vous réagissez, un identifiant d'installation aléatoire et un jeton de connexion à usage unique du fournisseur choisi ; seul un hachage à sens unique de l'identifiant de votre compte est conservé. Le contexte facultatif reste désactivé dans ce navigateur."
+    "message": "Emojery envoie l'adresse de la page sur laquelle vous réagissez, votre réaction et un jeton de connexion à usage unique du fournisseur que vous choisissez ; votre nom et votre e-mail ne sont pas demandés. Les réactions sont publiées pour toujours dans un journal public sous un pseudonyme, et le pays et le réseau de chaque vote sont conservés 30 jours pour lutter contre les abus."
   },
   "dataConsentPolicyLink": {
     "message": "Politique de confidentialité."

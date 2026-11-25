@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import { identityWindowAfter, pageMatching, revealTestProvider, TEST_PROVIDER } from "./lib/auth-signin";
 import { authAccount, authConfigured, closeSession, completeSignIn, enMessage, extensionPageUrl, FIREFOX_NO_EXTENSION_PAGES, isFirefoxRun, launchSession, localeMessage, removeProfileUnlessKept, resolveExtensionId, resolveExtensionPath, signInSkipReason } from "./lib/extension";
-import { ACCOUNT_LIST_SELECTOR, ACCOUNT_NAME_SELECTOR, AGREE_CHECKBOX_SELECTOR, PROVIDER_BUTTON_SELECTOR, providerButtonSelector } from "./lib/selectors";
+import { ACCOUNT_LIST_SELECTOR, ACCOUNT_NAME_SELECTOR, AGREE_PUBLIC_LOG_CHECKBOX_SELECTOR, AGREE_TERMS_CHECKBOX_SELECTOR, PROVIDER_BUTTON_SELECTOR, providerButtonSelector } from "./lib/selectors";
 
 // Whole file drives auth.html/popup.html, which Playwright Firefox cannot reach.
 test.skip(isFirefoxRun(), FIREFOX_NO_EXTENSION_PAGES);
@@ -76,11 +76,15 @@ test.describe("extension account auth", () => {
     if (!authPage) return;
 
     // The provider list is the API's: this build lists the test provider beside the
-    // real ones, and every button waits for the consent box.
-    const agreeCheckbox = authPage.locator(AGREE_CHECKBOX_SELECTOR);
-    await expect(agreeCheckbox).not.toBeChecked();
+    // real ones, and every button waits for both consent boxes - one is not enough.
+    const termsCheckbox = authPage.locator(AGREE_TERMS_CHECKBOX_SELECTOR);
+    const publicLogCheckbox = authPage.locator(AGREE_PUBLIC_LOG_CHECKBOX_SELECTOR);
+    await expect(termsCheckbox).not.toBeChecked();
+    await expect(publicLogCheckbox).not.toBeChecked();
     for (const button of await authPage.locator(PROVIDER_BUTTON_SELECTOR).all()) await expect(button).toBeDisabled();
-    await agreeCheckbox.check();
+    await termsCheckbox.check();
+    for (const button of await authPage.locator(PROVIDER_BUTTON_SELECTOR).all()) await expect(button).toBeDisabled();
+    await publicLogCheckbox.check();
     await revealTestProvider(authPage);
     const testButton = authPage.locator(providerButtonSelector(TEST_PROVIDER));
     await expect(testButton).toBeVisible();
@@ -93,7 +97,8 @@ test.describe("extension account auth", () => {
     expect(windowToCancel, "the identity window should open on the first click").not.toBeNull();
     await windowToCancel!.close();
     await expect(authPage.getByText(enMessage("authErrCancelled"), { exact: true })).toBeVisible();
-    await expect(agreeCheckbox).toBeChecked();
+    await expect(termsCheckbox).toBeChecked();
+    await expect(publicLogCheckbox).toBeChecked();
     await expect(testButton).toBeEnabled();
 
     // A sign-in the provider refuses: the auth page reports the provider's
@@ -155,7 +160,8 @@ test.describe("extension account auth", () => {
             name: localeMessage(locale, "authSignInTitle"),
           }),
         ).toBeVisible();
-        await authPage.locator(AGREE_CHECKBOX_SELECTOR).check();
+        await authPage.locator(AGREE_TERMS_CHECKBOX_SELECTOR).check();
+        await authPage.locator(AGREE_PUBLIC_LOG_CHECKBOX_SELECTOR).check();
         await revealTestProvider(authPage);
         const testButton = authPage.locator(providerButtonSelector(TEST_PROVIDER));
         await expect(testButton).toHaveText(localeMessage(locale, "authProviderBtn", TEST_PROVIDER));

@@ -449,20 +449,41 @@
   "authRetryBtn": {
     "message": "Erneut versuchen"
   },
-  "authAgreeIntro": {
-    "message": "Ich akzeptiere die "
+  "authFactPublic": {
+    "message": "Öffentlich: deine Reaktionen, unter einem Pseudonym — dauerhaft; unabhängige Archive können Kopien behalten, auch nachdem wir unsere gelöscht haben."
+  },
+  "authFactNotPublic": {
+    "message": "Nicht öffentlich: dein Name, deine E-Mail-Adresse, deine IP."
+  },
+  "authFactSensitive": {
+    "message": "Reaktionen auf politische oder religiöse Beiträge können deine Ansichten verraten."
+  },
+  "authPersonalOnly": {
+    "message": "Arbeits- oder Schulkonten werden nicht unterstützt — verwende ein privates Google- oder Microsoft-Konto."
+  },
+  "authSeparateAccounts": {
+    "message": "Wer sich mit einem anderen Anbieter anmeldet, erhält ein separates Konto mit eigenen Reaktionen und eigenem Verlauf."
+  },
+  "authAgreeTerms": {
+    "message": "Ich akzeptiere die Nutzungsbedingungen und bestätige, dass ich mindestens 16 Jahre alt bin."
   },
   "authTermsLinkLabel": {
     "message": "Nutzungsbedingungen"
   },
-  "authAgreeConjunction": {
-    "message": " und die "
-  },
   "authPrivacyLinkLabel": {
     "message": "Datenschutzrichtlinie"
   },
-  "authAgreeOutro": {
-    "message": "."
+  "authAgreePublicLog": {
+    "message": "Ich bin einverstanden, dass jede meiner Reaktionen für alle sichtbar und dauerhaft im öffentlichen Log von Emojery unter meinem Pseudonym veröffentlicht wird — auch Reaktionen, die meine politischen, religiösen oder sonstigen Ansichten oder meine Gesundheit offenbaren können."
+  },
+  "authWhatIsPublicLink": {
+    "message": "Was öffentlich ist →"
+  },
+  "authObjectAnyTime": {
+    "message": "Du kannst jederzeit widersprechen, dass wir deine Daten für das öffentliche Log und die Missbrauchsabwehr verwenden — siehe Datenschutzrichtlinie › Deine Rechte. Am schnellsten geht es, indem du dein Konto löschst."
+  },
+  "authDeletionNote": {
+    "message": "Wenn du dein Konto löschst, nehmen wir deine Reaktionen aus den Zählern; bereits veröffentlichte Einträge bleiben unter deinem Pseudonym im Log."
   },
   "authDoneTitle": {
     "message": "Sie sind angemeldet"
@@ -480,7 +501,7 @@
     "message": "Was Emojery sendet"
   },
   "dataConsentBody": {
-    "message": "Emojery sendet die Adresse der Seite, auf der du reagierst, eine zufällige Installations-ID und ein einmaliges Anmelde-Token des gewählten Anbieters; gespeichert wird nur ein Einweg-Hash deiner Konto-ID. Optionaler Kontext bleibt in diesem Browser aus."
+    "message": "Emojery sendet die Adresse der Seite, auf der du reagierst, deine Reaktion und ein einmaliges Anmeldetoken des Anbieters, den du wählst; Name und E-Mail-Adresse werden nicht abgefragt. Reaktionen werden dauerhaft in einem öffentlichen Log unter einem Pseudonym veröffentlicht, und Land und Netzwerk jeder Stimme werden 30 Tage lang zur Missbrauchsabwehr gespeichert."
   },
   "dataConsentPolicyLink": {
     "message": "Datenschutzrichtlinie."

@@ -449,20 +449,41 @@
   "authRetryBtn": {
     "message": "Thử lại"
   },
-  "authAgreeIntro": {
-    "message": "Tôi đồng ý với "
+  "authFactPublic": {
+    "message": "Điều công khai: các cảm xúc của bạn, dưới một bút danh — vĩnh viễn; các kho lưu trữ độc lập có thể giữ bản sao ngay cả sau khi chúng tôi xóa bản của mình."
+  },
+  "authFactNotPublic": {
+    "message": "Điều không công khai: tên, email, IP của bạn."
+  },
+  "authFactSensitive": {
+    "message": "Cảm xúc với các bài đăng chính trị hoặc tôn giáo có thể để lộ quan điểm của bạn."
+  },
+  "authPersonalOnly": {
+    "message": "Không hỗ trợ tài khoản cơ quan hoặc trường học — hãy dùng tài khoản Google hoặc Microsoft cá nhân."
+  },
+  "authSeparateAccounts": {
+    "message": "Đăng nhập bằng nhà cung cấp khác sẽ tạo một tài khoản riêng với cảm xúc và lịch sử riêng."
+  },
+  "authAgreeTerms": {
+    "message": "Tôi chấp nhận Điều khoản sử dụng và xác nhận mình từ 16 tuổi trở lên."
   },
   "authTermsLinkLabel": {
-    "message": "Điều khoản dịch vụ"
-  },
-  "authAgreeConjunction": {
-    "message": " và "
+    "message": "Điều khoản sử dụng"
   },
   "authPrivacyLinkLabel": {
     "message": "Chính sách quyền riêng tư"
   },
-  "authAgreeOutro": {
-    "message": "."
+  "authAgreePublicLog": {
+    "message": "Tôi đồng ý rằng mọi cảm xúc tôi bày tỏ đều được công bố cho bất kỳ ai, vĩnh viễn, trong nhật ký công khai của Emojery dưới bút danh của tôi — kể cả những cảm xúc có thể để lộ quan điểm chính trị, tôn giáo hoặc quan điểm khác, hay sức khỏe của tôi."
+  },
+  "authWhatIsPublicLink": {
+    "message": "Điều gì công khai →"
+  },
+  "authObjectAnyTime": {
+    "message": "Bạn có thể phản đối bất cứ lúc nào việc chúng tôi dùng dữ liệu của bạn cho nhật ký công khai và chống lạm dụng — xem Chính sách quyền riêng tư › Quyền của bạn. Xóa tài khoản là cách nhanh nhất."
+  },
+  "authDeletionNote": {
+    "message": "Nếu bạn xóa tài khoản, chúng tôi gỡ cảm xúc của bạn khỏi bộ đếm; các mục đã công bố vẫn nằm trong nhật ký dưới bút danh của bạn."
   },
   "authDoneTitle": {
     "message": "Bạn đã đăng nhập"
@@ -480,7 +501,7 @@
     "message": "Emojery gửi những gì"
   },
   "dataConsentBody": {
-    "message": "Emojery gửi địa chỉ trang bạn phản ứng, một mã định danh cài đặt ngẫu nhiên và một mã thông báo đăng nhập dùng một lần từ nhà cung cấp bạn chọn; chỉ giữ lại một hàm băm một chiều của id tài khoản. Ngữ cảnh tùy chọn vẫn tắt trong trình duyệt này."
+    "message": "Emojery gửi địa chỉ của trang bạn bày tỏ cảm xúc, cảm xúc của bạn và một mã đăng nhập dùng một lần từ nhà cung cấp bạn chọn; không yêu cầu tên và email của bạn. Cảm xúc được công bố vĩnh viễn trong một nhật ký công khai dưới bút danh, và quốc gia cùng mạng của mỗi lượt bình chọn được lưu 30 ngày để chống lạm dụng."
   },
   "dataConsentPolicyLink": {
     "message": "Chính sách quyền riêng tư."

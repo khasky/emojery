@@ -567,25 +567,53 @@
     "message": "Try again",
     "description": "Auth page: button that re-requests the provider list after it could not be loaded."
   },
-  "authAgreeIntro": {
-    "message": "I agree to the ",
-    "description": "Start of the consent checkbox label, before the Terms of Service link."
+  "authFactPublic": {
+    "message": "What's public: your reactions, under a pseudonym — permanently; independent archives may keep copies even after we delete ours.",
+    "description": "Auth page, first of three lines above the consent checkboxes: what the public log shows. 'Independent archives' are third-party copies of the log the operator does not control."
+  },
+  "authFactNotPublic": {
+    "message": "What's not: your name, email, IP.",
+    "description": "Auth page, second line above the consent checkboxes: what the public log does not show. IP is the network address; keep it as 'IP'."
+  },
+  "authFactSensitive": {
+    "message": "Reactions to political or religious posts can reveal your views.",
+    "description": "Auth page, third line above the consent checkboxes: a reaction to a political or religious post can reveal the reader's views."
+  },
+  "authPersonalOnly": {
+    "message": "Work or school accounts aren't supported — use a personal Google or Microsoft account.",
+    "description": "Auth page line before the provider buttons: work, school and other organization-managed accounts are refused; only personal accounts sign in. Google and Microsoft are product names."
+  },
+  "authSeparateAccounts": {
+    "message": "Signing in with a different provider creates a separate account with its own reactions and history.",
+    "description": "Auth page line before the provider buttons: each sign-in provider is its own account, so a second provider starts with no reactions or history."
+  },
+  "authAgreeTerms": {
+    "message": "I accept the Terms of Use and confirm I am 16 or older.",
+    "description": "Label of the first required consent checkbox on the auth page: accepting the Terms of Use and confirming the minimum age. The Terms of Use and Privacy Policy links sit under it."
   },
   "authTermsLinkLabel": {
-    "message": "Terms of Service",
-    "description": "Text inside the inline Terms of Service link in the consent checkbox."
-  },
-  "authAgreeConjunction": {
-    "message": " and ",
-    "description": "Connector between the Terms of Service and Privacy Policy links in the consent checkbox."
+    "message": "Terms of Use",
+    "description": "Link under the first consent checkbox, opening the Terms of Use page. Stands alone, so use the plain (nominative) form of the title."
   },
   "authPrivacyLinkLabel": {
     "message": "Privacy Policy",
-    "description": "Text inside the inline Privacy Policy link in the consent checkbox."
+    "description": "Link beside the Terms of Use link under the first consent checkbox, opening the Privacy Policy page. Stands alone, so use the plain (nominative) form of the title."
   },
-  "authAgreeOutro": {
-    "message": ".",
-    "description": "End of the consent checkbox label, after the Privacy Policy link."
+  "authAgreePublicLog": {
+    "message": "I agree that every reaction I make is published to anyone, permanently, in Emojery's public log under my pseudonym — including reactions that may reveal my political, religious or other views or my health.",
+    "description": "Label of the second required consent checkbox on the auth page: explicit agreement that every reaction is published permanently in the public log under a pseudonym, including reactions that reveal sensitive views or health. Keep every element; it is a legal consent."
+  },
+  "authWhatIsPublicLink": {
+    "message": "What's public →",
+    "description": "Link under the second consent checkbox, opening the help article that shows what a published reaction contains. The arrow marks it as a link out."
+  },
+  "authObjectAnyTime": {
+    "message": "You can object at any time to our use of your data for the public log and anti-abuse — see Privacy Policy › Your rights. Deleting your account is the quickest way.",
+    "description": "Auth page line under the consent checkboxes: the right to object to the public log and anti-abuse processing. 'Privacy Policy > Your rights' names the policy page and its section; translate both as the website does."
+  },
+  "authDeletionNote": {
+    "message": "If you delete your account, we remove your reactions from the counts; entries already published stay in the log under your pseudonym.",
+    "description": "Auth page line under the consent checkboxes: what deleting the account removes (the reactions from the counts) and what stays (entries already published in the log)."
   },
   "authDoneTitle": {
     "message": "You're signed in",
@@ -608,8 +636,8 @@
     "description": "Heading of the data-collection disclosure shown on first install in browsers without Firefox's built-in consent screen."
   },
   "dataConsentBody": {
-    "message": "Emojery sends the address of the page you react on, a random install identifier, and a one-time sign-in token from the provider you choose; only a one-way hash of your account id is kept. Optional context stays off in this browser.",
-    "description": "Body of the data-collection disclosure shown on first install in browsers without Firefox's built-in consent screen."
+    "message": "Emojery sends the address of the page you react on, your reaction, and a one-time sign-in token from the provider you choose; your name and email are not requested. Reactions are published permanently in a public log under a pseudonym, and the country and network of each vote are kept for 30 days to fight abuse.",
+    "description": "Body of the data-collection disclosure shown on first install in browsers without Firefox's built-in consent screen: what the extension sends, that reactions are published under a pseudonym, and the country and network kept per vote for 30 days against abuse."
   },
   "dataConsentPolicyLink": {
     "message": "Privacy Policy.",

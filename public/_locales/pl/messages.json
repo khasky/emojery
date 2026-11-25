@@ -449,20 +449,41 @@
   "authRetryBtn": {
     "message": "Spróbuj ponownie"
   },
-  "authAgreeIntro": {
-    "message": "Akceptuję "
+  "authFactPublic": {
+    "message": "Co jest publiczne: twoje reakcje, pod pseudonimem — na zawsze; niezależne archiwa mogą zachować kopie nawet po usunięciu naszych."
+  },
+  "authFactNotPublic": {
+    "message": "Co nie jest: twoje imię i nazwisko, e-mail, IP."
+  },
+  "authFactSensitive": {
+    "message": "Reakcje na posty polityczne lub religijne mogą ujawnić twoje poglądy."
+  },
+  "authPersonalOnly": {
+    "message": "Konta służbowe i szkolne nie są obsługiwane — użyj prywatnego konta Google lub Microsoft."
+  },
+  "authSeparateAccounts": {
+    "message": "Zalogowanie się u innego dostawcy tworzy osobne konto z własnymi reakcjami i historią."
+  },
+  "authAgreeTerms": {
+    "message": "Akceptuję Warunki korzystania i potwierdzam, że mam co najmniej 16 lat."
   },
   "authTermsLinkLabel": {
     "message": "Warunki korzystania"
   },
-  "authAgreeConjunction": {
-    "message": " i "
-  },
   "authPrivacyLinkLabel": {
-    "message": "Politykę prywatności"
+    "message": "Polityka prywatności"
   },
-  "authAgreeOutro": {
-    "message": "."
+  "authAgreePublicLog": {
+    "message": "Zgadzam się, aby każda moja reakcja była publikowana dla wszystkich, na zawsze, w publicznym dzienniku Emojery pod moim pseudonimem — w tym reakcje, które mogą ujawnić moje poglądy polityczne, religijne lub inne albo mój stan zdrowia."
+  },
+  "authWhatIsPublicLink": {
+    "message": "Co jest publiczne →"
+  },
+  "authObjectAnyTime": {
+    "message": "W każdej chwili możesz wnieść sprzeciw wobec wykorzystywania twoich danych do publicznego dziennika i przeciwdziałania nadużyciom — zobacz Polityka prywatności › Twoje prawa. Najszybciej jest usunąć konto."
+  },
+  "authDeletionNote": {
+    "message": "Jeśli usuniesz konto, usuniemy twoje reakcje z liczników; wpisy już opublikowane pozostaną w dzienniku pod twoim pseudonimem."
   },
   "authDoneTitle": {
     "message": "Zalogowano"
@@ -480,7 +501,7 @@
     "message": "Co wysyła Emojery"
   },
   "dataConsentBody": {
-    "message": "Emojery wysyła adres strony, na której reagujesz, losowy identyfikator instalacji i jednorazowy token logowania od wybranego dostawcy; przechowywany jest tylko jednokierunkowy skrót identyfikatora konta. Opcjonalny kontekst pozostaje w tej przeglądarce wyłączony."
+    "message": "Emojery wysyła adres strony, na której reagujesz, twoją reakcję i jednorazowy token logowania od wybranego dostawcy; nie prosimy o imię ani e-mail. Reakcje są publikowane na zawsze w publicznym dzienniku pod pseudonimem, a kraj i sieć każdego głosu przechowujemy przez 30 dni, aby przeciwdziałać nadużyciom."
   },
   "dataConsentPolicyLink": {
     "message": "Polityka prywatności."

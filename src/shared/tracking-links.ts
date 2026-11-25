@@ -15,6 +15,10 @@ export const TRY_IT_LIVE_URL = "https://github.com/khasky/emojery#emojery-react"
 // a release. Both places that show the limit link here.
 export const HELP_DEVICE_LIMIT_URL = "https://emojery.app/help/device-limit-reached";
 
+// What a reaction publishes, read off one real log entry: linked from the
+// public-log agreement on the sign-in page.
+export const HELP_WHAT_IS_PUBLIC_URL = "https://emojery.app/help/what-is-public";
+
 const EXTENSION_UTM_SOURCE = "emojery";
 const EXTENSION_UTM_MEDIUM = "browser_extension";
 

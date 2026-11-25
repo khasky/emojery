@@ -449,20 +449,41 @@
   "authRetryBtn": {
     "message": "重试"
   },
-  "authAgreeIntro": {
-    "message": "我同意"
+  "authFactPublic": {
+    "message": "公开的内容：你的反应，以化名形式——永久公开；即使我们删除了自己的副本，独立存档仍可能保留副本。"
+  },
+  "authFactNotPublic": {
+    "message": "不公开的内容：你的姓名、邮箱、IP。"
+  },
+  "authFactSensitive": {
+    "message": "对政治或宗教帖子的反应可能透露你的观点。"
+  },
+  "authPersonalOnly": {
+    "message": "不支持工作或学校账号——请使用个人 Google 或 Microsoft 账号。"
+  },
+  "authSeparateAccounts": {
+    "message": "使用其他提供方登录会创建一个独立的账号，拥有各自的反应和历史记录。"
+  },
+  "authAgreeTerms": {
+    "message": "我接受使用条款，并确认我已年满 16 周岁。"
   },
   "authTermsLinkLabel": {
-    "message": "服务条款"
-  },
-  "authAgreeConjunction": {
-    "message": "和"
+    "message": "使用条款"
   },
   "authPrivacyLinkLabel": {
     "message": "隐私政策"
   },
-  "authAgreeOutro": {
-    "message": "。"
+  "authAgreePublicLog": {
+    "message": "我同意我的每一个反应都以我的化名永久公开发布在 Emojery 的公开日志中，任何人都可查看——包括可能透露我的政治、宗教或其他观点或我的健康状况的反应。"
+  },
+  "authWhatIsPublicLink": {
+    "message": "哪些内容公开 →"
+  },
+  "authObjectAnyTime": {
+    "message": "你可以随时反对我们将你的数据用于公开日志和反滥用——参见 隐私政策 › 你的权利。删除账号是最快的方式。"
+  },
+  "authDeletionNote": {
+    "message": "如果你删除账号，我们会把你的反应从计数中移除；已发布的条目仍以你的化名保留在日志中。"
   },
   "authDoneTitle": {
     "message": "您已登录"
@@ -480,7 +501,7 @@
     "message": "Emojery 会发送什么"
   },
   "dataConsentBody": {
-    "message": "Emojery 会发送你做出反应的页面地址、一个随机的安装标识符以及所选提供方的一次性登录令牌；只保留你账号 ID 的单向哈希。可选上下文在此浏览器中保持关闭。"
+    "message": "Emojery 会发送你做出反应的页面地址、你的反应，以及你所选提供方的一次性登录令牌；不会索取你的姓名和邮箱。反应以化名永久发布在公开日志中，每次投票的国家和网络会保留 30 天，用于防止滥用。"
   },
   "dataConsentPolicyLink": {
     "message": "隐私政策。"

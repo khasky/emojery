@@ -449,20 +449,41 @@
   "authRetryBtn": {
     "message": "Próbáld újra"
   },
-  "authAgreeIntro": {
-    "message": "Elfogadom a "
+  "authFactPublic": {
+    "message": "Ami nyilvános: a reakcióid, álnév alatt — véglegesen; független archívumok akkor is megőrizhetnek másolatokat, ha mi a sajátunkat már töröltük."
+  },
+  "authFactNotPublic": {
+    "message": "Ami nem: a neved, az e-mail-címed, az IP-címed."
+  },
+  "authFactSensitive": {
+    "message": "A politikai vagy vallási bejegyzésekre adott reakciók elárulhatják a nézeteidet."
+  },
+  "authPersonalOnly": {
+    "message": "Munkahelyi és iskolai fiókok nem támogatottak — használj személyes Google- vagy Microsoft-fiókot."
+  },
+  "authSeparateAccounts": {
+    "message": "Ha másik szolgáltatóval jelentkezel be, külön fiók jön létre, saját reakciókkal és előzményekkel."
+  },
+  "authAgreeTerms": {
+    "message": "Elfogadom a Felhasználási feltételeket, és megerősítem, hogy elmúltam 16 éves."
   },
   "authTermsLinkLabel": {
-    "message": "Szolgáltatási feltételeket"
-  },
-  "authAgreeConjunction": {
-    "message": " és az "
+    "message": "Felhasználási feltételek"
   },
   "authPrivacyLinkLabel": {
-    "message": "Adatvédelmi szabályzatot"
+    "message": "Adatvédelmi szabályzat"
   },
-  "authAgreeOutro": {
-    "message": "."
+  "authAgreePublicLog": {
+    "message": "Hozzájárulok, hogy minden reakcióm mindenki számára, véglegesen megjelenjen az Emojery nyilvános naplójában az álnevem alatt — azok a reakciók is, amelyek elárulhatják politikai, vallási vagy egyéb nézeteimet vagy az egészségi állapotomat."
+  },
+  "authWhatIsPublicLink": {
+    "message": "Mi nyilvános →"
+  },
+  "authObjectAnyTime": {
+    "message": "Bármikor tiltakozhatsz az ellen, hogy adataidat a nyilvános naplóhoz és a visszaélések elleni védekezéshez használjuk — lásd Adatvédelmi szabályzat › Jogaid. A leggyorsabb mód a fiókod törlése."
+  },
+  "authDeletionNote": {
+    "message": "Ha törlöd a fiókodat, eltávolítjuk a reakcióidat a számlálókból; a már közzétett bejegyzések az álneved alatt a naplóban maradnak."
   },
   "authDoneTitle": {
     "message": "Bejelentkezett"
@@ -480,7 +501,7 @@
     "message": "Mit küld az Emojery"
   },
   "dataConsentBody": {
-    "message": "Az Emojery elküldi annak az oldalnak a címét, amelyen reagálsz, egy véletlen telepítési azonosítót és a választott szolgáltató egyszeri bejelentkezési tokenjét; csak a fiókazonosítód egyirányú hash-e marad meg. Az opcionális kontextus ebben a böngészőben kikapcsolva marad."
+    "message": "Az Emojery elküldi annak az oldalnak a címét, amelyen reagálsz, a reakciódat és a választott szolgáltató egyszer használható bejelentkezési tokenjét; a nevedet és az e-mail-címedet nem kéri. A reakciók véglegesen megjelennek egy nyilvános naplóban álnév alatt, és minden szavazat országát és hálózatát 30 napig megőrizzük a visszaélések ellen."
   },
   "dataConsentPolicyLink": {
     "message": "Adatvédelmi szabályzat."

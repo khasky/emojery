@@ -16,7 +16,7 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type BrowserContext, expect, type Page } from "@playwright/test";
-import { AGREE_CHECKBOX_SELECTOR, AUTH_ERROR_SELECTOR, MORE_PROVIDERS_SELECTOR, PROVIDER_LIST_SELECTOR, providerButtonSelector } from "./selectors";
+import { AGREE_PUBLIC_LOG_CHECKBOX_SELECTOR, AGREE_TERMS_CHECKBOX_SELECTOR, AUTH_ERROR_SELECTOR, MORE_PROVIDERS_SELECTOR, PROVIDER_LIST_SELECTOR, providerButtonSelector } from "./selectors";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 export const EXTENSION_ROOT = resolve(__dirname, "..", "..");
@@ -207,8 +207,15 @@ export function identityWindowAfter(authPage: Page, open: () => Promise<void>): 
 }
 
 // The page opens with the featured providers only; the test provider sits behind
-// "more sign-in options", which is gated by the same consent box, so this runs after
-// the box is ticked. A build that lists nothing extra has no button.
+// "more sign-in options", which is gated by the same consent boxes, so this runs after
+// they are ticked. A build that lists nothing extra has no button.
+// Both agreements, the Terms of Use and the public log: each box ships unchecked,
+// and every provider button stays disabled until the two are ticked.
+export async function acceptConsent(authPage: Page): Promise<void> {
+  await authPage.locator(AGREE_TERMS_CHECKBOX_SELECTOR).check();
+  await authPage.locator(AGREE_PUBLIC_LOG_CHECKBOX_SELECTOR).check();
+}
+
 export async function revealTestProvider(authPage: Page): Promise<void> {
   await expect(authPage.locator(PROVIDER_LIST_SELECTOR), "the auth page should list the providers the API offers").toBeVisible({ timeout: 30_000 });
   if (await authPage.locator(providerButtonSelector(TEST_PROVIDER)).isVisible()) return;
@@ -220,9 +227,9 @@ export async function revealTestProvider(authPage: Page): Promise<void> {
 // never reaching the provider list, the identity window never opening - still throw.
 async function signInThroughTestProvider(authPage: Page, opts: AuthSignInOptions, locale: string): Promise<boolean> {
   await authPage.reload();
-  // The Terms/Privacy box ships unchecked, so consent is a required step of
-  // every sign-in, and every provider button stays disabled until it is ticked.
-  await authPage.locator(AGREE_CHECKBOX_SELECTOR).check();
+  // Consent is a required step of every sign-in (a reload reads back an agreement
+  // already given, and checking a ticked box is a no-op).
+  await acceptConsent(authPage);
   await revealTestProvider(authPage);
   const providerButton = authPage.locator(providerButtonSelector(TEST_PROVIDER));
   await expect(providerButton, "this build should list the test provider").toBeVisible({ timeout: 30_000 });

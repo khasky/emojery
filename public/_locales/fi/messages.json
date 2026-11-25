@@ -449,20 +449,41 @@
   "authRetryBtn": {
     "message": "Yritä uudelleen"
   },
-  "authAgreeIntro": {
-    "message": "Hyväksyn "
+  "authFactPublic": {
+    "message": "Julkista: reaktiosi nimimerkin alla — pysyvästi; riippumattomat arkistot voivat säilyttää kopioita senkin jälkeen, kun olemme poistaneet omamme."
+  },
+  "authFactNotPublic": {
+    "message": "Ei julkista: nimesi, sähköpostisi, IP-osoitteesi."
+  },
+  "authFactSensitive": {
+    "message": "Reaktiot poliittisiin tai uskonnollisiin julkaisuihin voivat paljastaa näkemyksesi."
+  },
+  "authPersonalOnly": {
+    "message": "Työ- ja koulutilejä ei tueta — käytä henkilökohtaista Google- tai Microsoft-tiliä."
+  },
+  "authSeparateAccounts": {
+    "message": "Kirjautuminen toisella palveluntarjoajalla luo erillisen tilin, jolla on omat reaktiot ja historia."
+  },
+  "authAgreeTerms": {
+    "message": "Hyväksyn käyttöehdot ja vahvistan olevani vähintään 16-vuotias."
   },
   "authTermsLinkLabel": {
-    "message": "käyttöehdot"
-  },
-  "authAgreeConjunction": {
-    "message": " ja "
+    "message": "Käyttöehdot"
   },
   "authPrivacyLinkLabel": {
-    "message": "tietosuojakäytännön"
+    "message": "Tietosuojakäytäntö"
   },
-  "authAgreeOutro": {
-    "message": "."
+  "authAgreePublicLog": {
+    "message": "Hyväksyn, että jokainen reaktioni julkaistaan kaikkien nähtäväksi ja pysyvästi Emojeryn julkisessa lokissa nimimerkkini alla — myös reaktiot, jotka voivat paljastaa poliittiset, uskonnolliset tai muut näkemykseni tai terveyteni."
+  },
+  "authWhatIsPublicLink": {
+    "message": "Mikä on julkista →"
+  },
+  "authObjectAnyTime": {
+    "message": "Voit milloin tahansa vastustaa tietojesi käyttöä julkiseen lokiin ja väärinkäytösten torjuntaan — katso Tietosuojakäytäntö › Oikeutesi. Nopein tapa on poistaa tilisi."
+  },
+  "authDeletionNote": {
+    "message": "Jos poistat tilisi, poistamme reaktiosi laskureista; jo julkaistut merkinnät jäävät lokiin nimimerkkisi alle."
   },
   "authDoneTitle": {
     "message": "Olet kirjautunut"
@@ -480,7 +501,7 @@
     "message": "Mitä Emojery lähettää"
   },
   "dataConsentBody": {
-    "message": "Emojery lähettää sen sivun osoitteen, jolla reagoit, satunnaisen asennustunnisteen ja valitsemasi palveluntarjoajan kertakäyttöisen kirjautumistunnuksen; vain tilitunnisteesi yksisuuntainen tiiviste säilytetään. Valinnainen konteksti pysyy tässä selaimessa pois päältä."
+    "message": "Emojery lähettää sen sivun osoitteen, jolla reagoit, reaktiosi ja valitsemasi palveluntarjoajan kertakäyttöisen kirjautumistunnuksen; nimeäsi tai sähköpostiasi ei pyydetä. Reaktiot julkaistaan pysyvästi julkisessa lokissa nimimerkin alla, ja jokaisen äänen maa ja verkko säilytetään 30 päivää väärinkäytösten torjumiseksi."
   },
   "dataConsentPolicyLink": {
     "message": "Tietosuojakäytäntö."

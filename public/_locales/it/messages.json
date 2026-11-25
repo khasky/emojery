@@ -449,20 +449,41 @@
   "authRetryBtn": {
     "message": "Riprova"
   },
-  "authAgreeIntro": {
-    "message": "Accetto i "
+  "authFactPublic": {
+    "message": "Cosa è pubblico: le tue reazioni, sotto uno pseudonimo — per sempre; archivi indipendenti possono conservarne copie anche dopo che avremo eliminato le nostre."
+  },
+  "authFactNotPublic": {
+    "message": "Cosa non lo è: il tuo nome, la tua email, il tuo IP."
+  },
+  "authFactSensitive": {
+    "message": "Le reazioni a post politici o religiosi possono rivelare le tue opinioni."
+  },
+  "authPersonalOnly": {
+    "message": "Gli account di lavoro o della scuola non sono supportati — usa un account Google o Microsoft personale."
+  },
+  "authSeparateAccounts": {
+    "message": "Accedere con un altro provider crea un account separato, con le sue reazioni e la sua cronologia."
+  },
+  "authAgreeTerms": {
+    "message": "Accetto i Termini di utilizzo e confermo di avere almeno 16 anni."
   },
   "authTermsLinkLabel": {
-    "message": "Termini di servizio"
-  },
-  "authAgreeConjunction": {
-    "message": " e l'"
+    "message": "Termini di utilizzo"
   },
   "authPrivacyLinkLabel": {
     "message": "Informativa sulla privacy"
   },
-  "authAgreeOutro": {
-    "message": "."
+  "authAgreePublicLog": {
+    "message": "Acconsento a che ogni mia reazione sia pubblicata per chiunque, per sempre, nel registro pubblico di Emojery sotto il mio pseudonimo — comprese le reazioni che possono rivelare le mie opinioni politiche, religiose o di altro tipo, o la mia salute."
+  },
+  "authWhatIsPublicLink": {
+    "message": "Cosa è pubblico →"
+  },
+  "authObjectAnyTime": {
+    "message": "Puoi opporti in qualsiasi momento all'uso dei tuoi dati per il registro pubblico e la lotta agli abusi — vedi Informativa sulla privacy › I tuoi diritti. Eliminare l'account è la via più rapida."
+  },
+  "authDeletionNote": {
+    "message": "Se elimini l'account, togliamo le tue reazioni dai conteggi; le voci già pubblicate restano nel registro sotto il tuo pseudonimo."
   },
   "authDoneTitle": {
     "message": "Hai effettuato l'accesso"
@@ -480,7 +501,7 @@
     "message": "Cosa invia Emojery"
   },
   "dataConsentBody": {
-    "message": "Emojery invia l'indirizzo della pagina su cui reagisci, un identificatore di installazione casuale e un token di accesso monouso del provider scelto; viene conservato solo un hash unidirezionale dell'id del tuo account. Il contesto facoltativo resta disattivato in questo browser."
+    "message": "Emojery invia l'indirizzo della pagina su cui reagisci, la tua reazione e un token di accesso monouso del provider che scegli; nome ed email non vengono richiesti. Le reazioni sono pubblicate per sempre in un registro pubblico sotto uno pseudonimo, e il paese e la rete di ogni voto sono conservati per 30 giorni contro gli abusi."
   },
   "dataConsentPolicyLink": {
     "message": "Informativa sulla privacy."

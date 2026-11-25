@@ -449,20 +449,41 @@
   "authRetryBtn": {
     "message": "Opnieuw proberen"
   },
-  "authAgreeIntro": {
-    "message": "Ik ga akkoord met de "
+  "authFactPublic": {
+    "message": "Wat openbaar is: je reacties, onder een pseudoniem — permanent; onafhankelijke archieven kunnen kopieën bewaren, ook nadat wij de onze hebben verwijderd."
+  },
+  "authFactNotPublic": {
+    "message": "Wat niet: je naam, e-mailadres, IP."
+  },
+  "authFactSensitive": {
+    "message": "Reacties op politieke of religieuze berichten kunnen je opvattingen verraden."
+  },
+  "authPersonalOnly": {
+    "message": "Werk- of schoolaccounts worden niet ondersteund — gebruik een persoonlijk Google- of Microsoft-account."
+  },
+  "authSeparateAccounts": {
+    "message": "Aanmelden bij een andere aanbieder maakt een apart account aan, met eigen reacties en geschiedenis."
+  },
+  "authAgreeTerms": {
+    "message": "Ik accepteer de Gebruiksvoorwaarden en bevestig dat ik 16 jaar of ouder ben."
   },
   "authTermsLinkLabel": {
-    "message": "Servicevoorwaarden"
-  },
-  "authAgreeConjunction": {
-    "message": " en het "
+    "message": "Gebruiksvoorwaarden"
   },
   "authPrivacyLinkLabel": {
     "message": "Privacybeleid"
   },
-  "authAgreeOutro": {
-    "message": "."
+  "authAgreePublicLog": {
+    "message": "Ik ga ermee akkoord dat elke reactie die ik geef voor iedereen en permanent wordt gepubliceerd in het openbare logboek van Emojery onder mijn pseudoniem — ook reacties die mijn politieke, religieuze of andere opvattingen of mijn gezondheid kunnen onthullen."
+  },
+  "authWhatIsPublicLink": {
+    "message": "Wat openbaar is →"
+  },
+  "authObjectAnyTime": {
+    "message": "Je kunt op elk moment bezwaar maken tegen ons gebruik van je gegevens voor het openbare logboek en misbruikbestrijding — zie Privacybeleid › Je rechten. Je account verwijderen is de snelste weg."
+  },
+  "authDeletionNote": {
+    "message": "Als je je account verwijdert, halen we je reacties uit de tellingen; items die al gepubliceerd zijn, blijven onder je pseudoniem in het logboek staan."
   },
   "authDoneTitle": {
     "message": "Je bent ingelogd"
@@ -480,7 +501,7 @@
     "message": "Wat Emojery verstuurt"
   },
   "dataConsentBody": {
-    "message": "Emojery verstuurt het adres van de pagina waarop je reageert, een willekeurige installatie-id en een eenmalig aanmeldtoken van de gekozen aanbieder; alleen een eenrichtingshash van je account-id wordt bewaard. Optionele context blijft in deze browser uit."
+    "message": "Emojery verstuurt het adres van de pagina waarop je reageert, je reactie en een eenmalig aanmeldtoken van de aanbieder die je kiest; je naam en e-mailadres worden niet gevraagd. Reacties worden permanent gepubliceerd in een openbaar logboek onder een pseudoniem, en het land en netwerk van elke stem worden 30 dagen bewaard om misbruik tegen te gaan."
   },
   "dataConsentPolicyLink": {
     "message": "Privacybeleid."
