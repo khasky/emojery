@@ -4,14 +4,18 @@
 // sign-in starts with, the key each provider account keeps across a switch to another account
 // and back, signatures that verify under the stored public key, replacement and deletion.
 import { afterEach, describe, expect, it } from "vitest";
+import { server } from "vitest/browser";
 import { DEVICE_KEYS_DB_NAME, deviceKeyForSignIn, dropDeviceKey, getDeviceKey, replaceDeviceKey, settleAccountKey, signWithDeviceKey } from "./device-keys";
 
-// The Safari build signs nothing (no identity flow, counts only), and Playwright's WebKit has
-// no Ed25519 in WebCrypto: the store is exercised where it runs, decided by the engine itself.
-const ed25519 = await crypto.subtle.generateKey({ name: "Ed25519" }, false, ["sign"]).then(
-  () => true,
-  () => false,
-);
+// The store is exercised only where it runs: the Safari build signs nothing (no identity flow,
+// counts only), so WebKit is left out by name. Playwright's WebKit now has Ed25519, and a key it
+// stores in IndexedDB intermittently fails with OperationError - a path no shipped build takes.
+const ed25519 =
+  server.browser !== "webkit" &&
+  (await crypto.subtle.generateKey({ name: "Ed25519" }, false, ["sign"]).then(
+    () => true,
+    () => false,
+  ));
 
 afterEach(async () => {
   if (!ed25519) return;
