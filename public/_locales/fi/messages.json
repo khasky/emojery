@@ -501,7 +501,7 @@
     "message": "Mitä Emojery lähettää"
   },
   "dataConsentBody": {
-    "message": "Emojery lähettää sen sivun osoitteen, jolla reagoit, reaktiosi ja valitsemasi palveluntarjoajan kertakäyttöisen kirjautumistunnuksen; nimeäsi tai sähköpostiasi ei pyydetä. Reaktiot julkaistaan pysyvästi julkisessa lokissa nimimerkin alla, ja jokaisen äänen maa ja verkko säilytetään 30 päivää väärinkäytösten torjumiseksi."
+    "message": "Näyttääkseen määrät Emojery lähettää näkemiesi julkaisujen sivuston ja tunnisteen. Kun reagoit, se lähettää myös reaktiosi ja valitsemasi palveluntarjoajan kertakäyttöisen kirjautumistunnuksen; nimeäsi tai sähköpostiasi ei pyydetä. Reaktiot julkaistaan pysyvästi julkisessa lokissa nimimerkin alla, ja jokaisen äänen maa ja verkko säilytetään 30 päivää väärinkäytösten torjumiseksi."
   },
   "dataConsentPolicyLink": {
     "message": "Tietosuojakäytäntö."

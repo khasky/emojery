@@ -501,7 +501,7 @@
     "message": "Ką siunčia „Emojery“"
   },
   "dataConsentBody": {
-    "message": "Emojery siunčia puslapio, kuriame reaguojate, adresą, jūsų reakciją ir vienkartinį prisijungimo žetoną iš jūsų pasirinkto teikėjo; vardo ir el. pašto neprašoma. Reakcijos visam laikui skelbiamos viešajame žurnale slapyvardžiu, o kiekvieno balso šalis ir tinklas saugomi 30 dienų piktnaudžiavimui stabdyti."
+    "message": "Kad parodytų skaičius, Emojery siunčia matomų įrašų svetainę ir ID. Kai reaguojate, ji taip pat siunčia jūsų reakciją ir vienkartinį prisijungimo žetoną iš jūsų pasirinkto teikėjo; vardo ir el. pašto neprašoma. Reakcijos visam laikui skelbiamos viešajame žurnale slapyvardžiu, o kiekvieno balso šalis ir tinklas saugomi 30 dienų piktnaudžiavimui stabdyti."
   },
   "dataConsentPolicyLink": {
     "message": "Privatumo politika."
