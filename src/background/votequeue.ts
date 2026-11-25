@@ -211,10 +211,10 @@ export function rememberPairs(pairs: KnownPair[]): Promise<void> {
   });
 }
 
-/** Drops an account's records (undefined: every record) and their known pairs. */
-export function clearQueuedVotes(userId?: string): Promise<void> {
+/** Drops an account's records and its known pairs. */
+export function clearQueuedVotes(userId: string): Promise<void> {
   return tx<void>([STORE, KNOWN], "readwrite", "clearQueuedVotes", (store) => {
-    const prefix = userId === undefined ? "" : `${userId}|`;
+    const prefix = `${userId}|`;
     for (const name of [STORE, KNOWN]) {
       const cursor = store.transaction.objectStore(name).openCursor();
       cursor.onsuccess = () => {

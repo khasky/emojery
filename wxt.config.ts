@@ -239,8 +239,11 @@ export default defineConfig({
               // 130: the device key is an Ed25519 CryptoKey, and WebCrypto has Ed25519 from
               // Firefox 130 (background/device-keys.ts).
               strict_min_version: "130.0",
+              // What leaves the device with a signed-in reaction: the account it is signed
+              // with, which public page it is on and that page's id, and the country the API
+              // records for it. Nothing is optional: no toggle collects anything more.
               data_collection_permissions: {
-                required: ["authenticationInfo", "websiteContent"],
+                required: ["authenticationInfo", "websiteActivity", "websiteContent", "locationInfo"],
               },
             },
             gecko_android: {
