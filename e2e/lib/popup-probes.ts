@@ -20,7 +20,7 @@ import { type FirefoxExtensionTab, firefoxBridge } from "./firefox-bridge";
 import { handleKnownInterstitials } from "./page-settle";
 import { openVisiblePickerAndReadSelectedReaction, pollForValue, selectedReactionOnMatchingHost, waitForMountedTargetKey, waitForVisibleEmojeryTrigger } from "./picker-probes";
 import { setPopupCheckbox } from "./popup-settings";
-import { AGREE_CHECKBOX_SELECTOR, HISTORY_EMOJI_SELECTOR, HISTORY_LINK_SELECTOR, HISTORY_NOMATCH_SELECTOR, HISTORY_ROW_SELECTOR, HISTORY_SEARCH_INPUT_SELECTOR } from "./selectors";
+import { AGREE_CHECKBOX_SELECTOR, AGREE_TERMS_CHECKBOX_SELECTOR, HISTORY_EMOJI_SELECTOR, HISTORY_LINK_SELECTOR, HISTORY_NOMATCH_SELECTOR, HISTORY_ROW_SELECTOR, HISTORY_SEARCH_INPUT_SELECTOR } from "./selectors";
 import type { PickedReaction, SupportedSiteScenario } from "./site-evidence";
 import { siteLabel } from "./site-evidence";
 import { dismissLoginWalls } from "./site-walls";
@@ -63,7 +63,7 @@ export async function authPageFromUserAction(browserContext: BrowserContext, loa
       await candidate.waitForURL(expectedUrl, { timeout: 750 }).catch(() => {});
     }
     if (!candidate.url().startsWith(expectedUrl)) continue;
-    await expect(candidate.locator(AGREE_CHECKBOX_SELECTOR)).toBeVisible();
+    await expect(candidate.locator(AGREE_TERMS_CHECKBOX_SELECTOR)).toBeVisible();
     return candidate;
   }
 

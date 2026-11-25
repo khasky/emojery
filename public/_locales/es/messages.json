@@ -449,20 +449,41 @@
   "authRetryBtn": {
     "message": "Reintentar"
   },
-  "authAgreeIntro": {
-    "message": "Acepto los "
+  "authFactPublic": {
+    "message": "Lo público: tus reacciones, con un seudónimo — para siempre; archivos independientes pueden conservar copias incluso después de que borremos las nuestras."
+  },
+  "authFactNotPublic": {
+    "message": "Lo que no: tu nombre, tu correo, tu IP."
+  },
+  "authFactSensitive": {
+    "message": "Las reacciones a publicaciones políticas o religiosas pueden revelar tus opiniones."
+  },
+  "authPersonalOnly": {
+    "message": "No se admiten cuentas del trabajo ni de centros educativos — usa una cuenta personal de Google o Microsoft."
+  },
+  "authSeparateAccounts": {
+    "message": "Iniciar sesión con otro proveedor crea una cuenta distinta, con sus propias reacciones e historial."
+  },
+  "authAgreeTerms": {
+    "message": "Acepto los Términos de uso y confirmo que tengo 16 años o más."
   },
   "authTermsLinkLabel": {
-    "message": "Términos del servicio"
-  },
-  "authAgreeConjunction": {
-    "message": " y la "
+    "message": "Términos de uso"
   },
   "authPrivacyLinkLabel": {
     "message": "Política de privacidad"
   },
-  "authAgreeOutro": {
-    "message": "."
+  "authAgreePublicLog": {
+    "message": "Acepto que cada reacción que haga se publique para cualquiera, para siempre, en el registro público de Emojery con mi seudónimo — incluidas las reacciones que puedan revelar mis opiniones políticas, religiosas o de otro tipo, o mi salud."
+  },
+  "authWhatIsPublicLink": {
+    "message": "Qué es público →"
+  },
+  "authObjectAnyTime": {
+    "message": "Puedes oponerte en cualquier momento a que usemos tus datos para el registro público y la lucha contra el abuso — consulta Política de privacidad › Tus derechos. Eliminar tu cuenta es la vía más rápida."
+  },
+  "authDeletionNote": {
+    "message": "Si eliminas tu cuenta, quitamos tus reacciones de los contadores; las entradas ya publicadas permanecen en el registro con tu seudónimo."
   },
   "authDoneTitle": {
     "message": "Sesión iniciada"
@@ -480,7 +501,7 @@
     "message": "Qué envía Emojery"
   },
   "dataConsentBody": {
-    "message": "Emojery envía la dirección de la página en la que reaccionas, un identificador de instalación aleatorio y un token de inicio de sesión de un solo uso del proveedor que elijas; solo se conserva un hash unidireccional del id de tu cuenta. El contexto opcional permanece desactivado en este navegador."
+    "message": "Emojery envía la dirección de la página en la que reaccionas, tu reacción y un token de inicio de sesión de un solo uso del proveedor que elijas; no se piden tu nombre ni tu correo. Las reacciones se publican para siempre en un registro público con un seudónimo, y el país y la red de cada voto se guardan 30 días para combatir el abuso."
   },
   "dataConsentPolicyLink": {
     "message": "Política de privacidad."
@@ -497,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "El proveedor no completó el inicio de sesión. Vuelve a intentarlo o elige otra cuenta."
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "Las cuentas del trabajo y de centros educativos no pueden iniciar sesión. Usa una cuenta personal."
+  },
+  "authAccountTypeHelpLink": {
+    "message": "Por qué solo cuentas personales"
+  },
   "authErrEnrollFailed": {
     "message": "No se pudo registrar tu cuenta ahora mismo. Vuelve a intentarlo en un minuto."
   },
@@ -510,7 +537,7 @@
     "message": "Actualizar desde la tienda"
   },
   "authErrDeviceLimit": {
-    "message": "Se alcanzó el límite de dispositivos de este mes. Vuelve a intentarlo el mes que viene."
+    "message": "Esta cuenta ya añadió hoy todos los dispositivos nuevos que puede. Vuelve a intentarlo después de la medianoche UTC."
   },
   "deviceLimitHelpLink": {
     "message": "Qué significa esto",

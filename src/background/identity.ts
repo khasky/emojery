@@ -148,7 +148,7 @@ function launchRefusal(error: unknown): SignInRefusal {
 const SESSION_REFUSALS: Record<string, SignInRefusal> = {
   "401 bad_token": "provider_denied",
   "403 token_unsupported": "provider_denied",
-  "403 account_type_unsupported": "provider_denied",
+  "403 account_type_unsupported": "account_type_unsupported",
   "403 account_restricted": "provider_denied",
   "403 provider_paused": "unavailable",
   "429 too_many_keys": "device_limit",

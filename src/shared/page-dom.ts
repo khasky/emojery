@@ -149,10 +149,23 @@ export const AUTH_ERROR_CLASS = "error";
 // The class sits on every error banner the page can raise; the id marks the one
 // the provider list points at through aria-describedby.
 export const AUTH_ERROR_SELECTOR = `.${AUTH_ERROR_CLASS}`;
-// The terms/privacy consent row; its checkbox gates the provider buttons.
+// The two consent rows, the Terms of Use and the public log; the provider buttons
+// stay disabled until both boxes are ticked. `data-consent` tells the rows apart,
+// and the unqualified checkbox selector matches both.
 export const AGREE_CLASS = "agree";
 export const AGREE_SELECTOR = `.${AGREE_CLASS}`;
 export const AGREE_CHECKBOX_SELECTOR = `.${AGREE_CLASS} input[type=checkbox]`;
+export const AGREE_TERMS_CHECKBOX_SELECTOR = `.${AGREE_CLASS}[data-consent="terms"] input[type=checkbox]`;
+export const AGREE_PUBLIC_LOG_CHECKBOX_SELECTOR = `.${AGREE_CLASS}[data-consent="public-log"] input[type=checkbox]`;
+// The links under each consent row (the terms and the policy; what is public).
+export const AGREE_LINKS_CLASS = "agree-links";
+// What the public log shows and does not, listed above the two boxes.
+export const CONSENT_FACTS_CLASS = "consent-facts";
+export const CONSENT_FACTS_SELECTOR = `.${CONSENT_FACTS_CLASS}`;
+// The lines around the boxes: personal accounts only, one account per provider,
+// the right to object, what deletion removes.
+export const CONSENT_NOTE_CLASS = "consent-note";
+export const CONSENT_NOTE_SELECTOR = `.${CONSENT_NOTE_CLASS}`;
 // The return-to-page timer on the done step.
 export const COUNTDOWN_CLASS = "countdown";
 export const COUNTDOWN_SELECTOR = `.${COUNTDOWN_CLASS}`;

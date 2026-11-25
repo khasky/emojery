@@ -208,16 +208,44 @@
   font-size: 12px;
 }
 
-/* Consent row: an inline checkbox + linked text. */
+/* What the public log shows and does not: read before either box, so it is set
+   at the size of the text around it rather than as a footnote. */
+.consent-facts {
+  margin: 16px 0 0;
+  padding: 0 0 0 18px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.consent-facts li + li {
+  margin-top: 4px;
+}
+
+/* The lines around the boxes (personal accounts only, one account per provider,
+   the right to object, deletion): body-size lines of their own, never small print. */
+.consent-note {
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Consent row: a checkbox and its sentence. Full contrast, not muted: these are
+   the agreements the sign-in rests on. */
 .agree {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  margin: 18px 0 0;
-  font-size: 12px;
-  color: var(--khasky-emojery-muted);
+  margin: 16px 0 0;
+  font-size: 13px;
   line-height: 1.45;
   cursor: pointer;
+}
+
+/* The links that belong to the row above, indented to its text. */
+.agree-links {
+  margin: 4px 0 0;
+  padding-left: 21px;
+  font-size: 12px;
 }
 
 /* One button per provider, stacked: a list of equals, so none is the primary. */

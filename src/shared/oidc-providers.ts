@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // The sign-in providers as the auth page names them. WHICH providers exist is this
-// build's sign-in table (background/identity.ts, from @emojery/shared/api); this module
-// only knows how to label one, and a label it lacks falls back to the id itself.
+// build's provider table (@emojery/shared/api, read by background/identity.ts and
+// handed to the page as `auth:providers`); this module only knows how to label one,
+// and a label it lacks falls back to the id itself.
 
-// A provider id as the API spells it: a lowercase slug. Held to a size and a shape
+// A provider id as the provider table spells it: a lowercase slug. Held to a size and a shape
 // by the message guard before it reaches the background.
 export type OidcProvider = string;
 export const PROVIDER_ID_MAX = 32;
@@ -14,9 +15,6 @@ const PROVIDER_LABELS: Readonly<Record<string, string>> = {
   google: "Google",
   apple: "Apple",
   microsoft: "Microsoft",
-  facebook: "Facebook",
-  twitch: "Twitch",
-  slack: "Slack",
 };
 
 export function providerLabel(id: OidcProvider): string {
@@ -24,7 +22,7 @@ export function providerLabel(id: OidcProvider): string {
 }
 
 // Where to send a reader whose provider cannot be asked to reopen its account
-// picker (`chooser` in the background's provider list). Apple is the one today: it
+// picker (`chooser` in the `auth:providers` answer). Apple is the one today: it
 // ignores an OpenID `prompt` rather than refusing it (measured 2026-09-20: the
 // authorization page comes back byte-identical with and without one), so there is
 // no request that makes it ask. The only way to another Apple Account is ending
