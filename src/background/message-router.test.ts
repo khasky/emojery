@@ -43,7 +43,6 @@ vi.mock("./history", () => ({
   getHistoryPage: vi.fn(async () => ({ items: [], cursor: null })),
   getHistoryStats: vi.fn(async () => ({ total: 1, byEmoji: { "👍": 1 }, bySite: { github: 1 } })),
   importHistory: vi.fn(async () => ({ imported: 2, replaced: 1 })),
-  migrateLegacyHistory: vi.fn(async () => {}),
 }));
 vi.mock("./identity", () => ({
   clearAuth: vi.fn(async () => {}),
@@ -72,7 +71,6 @@ vi.mock("./vote-sync", () => ({ broadcastVoteDelta: vi.fn(async () => {}) }));
 vi.mock("../shared/storage", () => ({
   applyOptimisticReaction: vi.fn(async () => {}),
   clearCountsCache: vi.fn(async () => {}),
-  LEGACY_OWN_REACTIONS_KEY: "legacy-own-reactions",
   maybeSweepCountsCache: vi.fn(async () => {}),
   setCachedCounts: vi.fn(async () => {}),
   targetKey: (t: TargetRef) => `${t.site}:${t.targetId}`,
@@ -147,8 +145,7 @@ beforeEach(async () => {
   connected = onConnect[0] as ConnectFn;
   storageChanged = onStorage[0] as Listener;
   expect(route).toBeTypeOf("function");
-  // Wait for the startup chores' terminal signal (scheduleFlush fires in
-  // the finally in migrateLegacyHistory, the longest chain), then count only what
+  // Wait for the startup chores' terminal signal (scheduleFlush), then count only what
   // each test does - a raced setTimeout(0) here depended on scheduler luck.
   await vi.waitFor(() => expect(api.scheduleFlush).toHaveBeenCalled());
   vi.clearAllMocks();

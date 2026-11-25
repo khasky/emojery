@@ -2,14 +2,13 @@
 //
 // History store semantics against REAL IndexedDB (Vitest browser mode: WebKit and
 // Firefox; WebKit is the weakest supported engine for IDB, so this doubles as a
-// Safari-shaped smoke test). Covers dedupe/move/remove, paging, search, the legacy storage.local
-// migration, and a volume run that keeps paging and search honest at scale.
+// Safari-shaped smoke test). Covers dedupe/move/remove, paging, search, and a volume run that keeps paging and search honest at scale.
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { TargetRef } from "../shared/adapter";
 import type { ReactionHistoryItem } from "../shared/messages";
-import { getRecentEmojis, importRecentEmojiStats } from "../shared/recents";
+import { bumpRecentEmoji, getRecentEmojis } from "../shared/recents";
 import { type ChromeShimHandle, installChromeShim } from "../test/chrome-shim";
-import { clearHistory, clearHistoryForUser, exportHistory, getHistoryPage, getHistoryStats, importHistory, importHistoryRows, migrateLegacyHistory, pushHistory, removeHistoryEntry, SEARCH_BATCH } from "./history";
+import { clearHistoryForUser, exportHistory, getHistoryPage, getHistoryStats, importHistory, importHistoryRows, pushHistory, removeHistoryEntry, SEARCH_BATCH } from "./history";
 
 const USER = "user-a";
 const OTHER = "user-b";
@@ -71,7 +70,8 @@ let chromeShim: ChromeShimHandle;
 
 beforeEach(async () => {
   chromeShim = installChromeShim();
-  await clearHistory();
+  // Every account a case writes under; the store outlives a case, the storage shim does not.
+  for (const userId of [USER, OTHER, "old-user", "new-user"]) await clearHistoryForUser(userId);
 });
 afterEach(() => chromeShim.uninstall());
 
@@ -345,7 +345,8 @@ describe("history - account deletion", () => {
   });
 
   it("clearHistoryForUser drops that account's derived recents, keeping the others", async () => {
-    await importRecentEmojiStats({ [USER]: { "🔥": { count: 3, lastUsed: 9 } }, [OTHER]: { "❤️": { count: 1, lastUsed: 5 } } });
+    await bumpRecentEmoji(USER, "🔥", 9);
+    await bumpRecentEmoji(OTHER, "❤️", 5);
 
     await clearHistoryForUser(USER);
 
@@ -396,42 +397,4 @@ describe("history - volume", () => {
     expect(all).toHaveLength(VOLUME);
     expect(new Set(all.map((it) => it.target.targetId)).size).toBe(VOLUME);
   }, 180_000);
-});
-
-describe("history - legacy storage.local migration", () => {
-  it("imports the newest-first array preserving display order, derives recents, and removes the keys", async () => {
-    // The legacy array was newest-first; repo-0 is the newest row.
-    const legacy = Array.from({ length: 30 }, (_, i) => ({ ...row(i), ts: 5_000 - i }));
-    chromeShim.local.set("history", legacy);
-    chromeShim.local.set("frequent_cleared_v1", { [USER]: 4_990 }); // hides ts <= 4990 from recents
-
-    await migrateLegacyHistory();
-
-    const all = await readAll(USER);
-    expect(all).toHaveLength(30);
-    expect(all[0]!.target.url).toContain("repo-0");
-    expect(all[29]!.target.url).toContain("repo-29");
-
-    // Recents derived only from rows newer than the old clear marker
-    // (ts 5000..4991 = repo-0..repo-9: 4x❤️ at i%3==0, 3x🔥, 3x👍).
-    expect(chromeShim.local.get("recents_v1")).toEqual({
-      [USER]: {
-        "❤️": { count: 4, lastUsed: 5_000 },
-        "🔥": { count: 3, lastUsed: 4_999 },
-        "👍": { count: 3, lastUsed: 4_998 },
-      },
-    });
-
-    expect(chromeShim.local.get("history")).toBeUndefined();
-    expect(chromeShim.local.get("frequent_cleared_v1")).toBeUndefined();
-
-    // Re-running is a no-op - no duplicate rows.
-    await migrateLegacyHistory();
-    await expect(readAll(USER)).resolves.toHaveLength(30);
-  });
-
-  it("is a no-op without a legacy array", async () => {
-    await migrateLegacyHistory();
-    await expect(readAll(USER)).resolves.toEqual([]);
-  });
 });

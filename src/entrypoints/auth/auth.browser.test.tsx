@@ -11,7 +11,23 @@ import { userEvent } from "vitest/browser";
 import { accountLabel } from "../../shared/account-label";
 import { ACCOUNTS_SEEN_KEY } from "../../shared/account-names";
 import { AUTH_KEY } from "../../shared/auth-session";
-import { AGREE_CHECKBOX_SELECTOR, AUTH_ERROR_ID, AUTH_ERROR_SELECTOR, COUNTDOWN_SELECTOR, LAST_ACCOUNT_SELECTOR, MORE_PROVIDERS_SELECTOR, otherAccountSelector, PROVIDER_BUTTON_SELECTOR, PROVIDER_LIST_SELECTOR, providerButtonSelector, SPINNER_SELECTOR, TAGLINE_SELECTOR } from "../../shared/page-dom";
+import {
+  AGREE_PUBLIC_LOG_CHECKBOX_SELECTOR,
+  AGREE_TERMS_CHECKBOX_SELECTOR,
+  AUTH_ERROR_ID,
+  AUTH_ERROR_SELECTOR,
+  CONSENT_FACTS_SELECTOR,
+  CONSENT_NOTE_SELECTOR,
+  COUNTDOWN_SELECTOR,
+  LAST_ACCOUNT_SELECTOR,
+  MORE_PROVIDERS_SELECTOR,
+  otherAccountSelector,
+  PROVIDER_BUTTON_SELECTOR,
+  PROVIDER_LIST_SELECTOR,
+  providerButtonSelector,
+  SPINNER_SELECTOR,
+  TAGLINE_SELECTOR,
+} from "../../shared/page-dom";
 import { TERMS_ACCEPTED_KEY, TERMS_REVISION } from "../../shared/terms-consent";
 import { requireEl } from "../../test/browser-harness";
 import { type ChromeShimHandle, installChromeShim, makeLiveAuthSession } from "../../test/chrome-shim";
@@ -20,7 +36,7 @@ import { type ChromeShimHandle, installChromeShim, makeLiveAuthSession } from ".
 // the URL - restored unchanged between tests, because the runner's own query string
 // is what later dynamic imports resolve against.
 const PAGE_URL = location.href;
-const PROVIDERS = { type: "auth:providers", providers: ["google", "apple", "microsoft", "twitch", "test"], chooser: ["google", "microsoft", "twitch", "test"] };
+const PROVIDERS = { type: "auth:providers", providers: ["google", "apple", "microsoft", "test"], chooser: ["google", "microsoft", "test"] };
 const OK_SIGN_IN = { type: "auth:signedIn", ok: true };
 // In production the background closes this tab on an "ok", so nothing repaints
 // after it - here the page stays put, which is what the asserts read.
@@ -58,7 +74,8 @@ async function loadPage(): Promise<void> {
 }
 
 const heading = (): string => requireEl(document, "#app h1").textContent ?? "";
-const termsBox = () => requireEl<HTMLInputElement>(document, AGREE_CHECKBOX_SELECTOR);
+const termsBox = () => requireEl<HTMLInputElement>(document, AGREE_TERMS_CHECKBOX_SELECTOR);
+const publicLogBox = () => requireEl<HTMLInputElement>(document, AGREE_PUBLIC_LOG_CHECKBOX_SELECTOR);
 const providerButtons = () => [...document.querySelectorAll<HTMLButtonElement>(PROVIDER_BUTTON_SELECTOR)];
 const providerButton = (id: string) => requireEl<HTMLButtonElement>(document, providerButtonSelector(id));
 const moreProvidersBtn = () => document.querySelector<HTMLButtonElement>(MORE_PROVIDERS_SELECTOR);
@@ -70,10 +87,16 @@ async function reachProviders(): Promise<void> {
   await vi.waitFor(() => expect(providerButtons().length).toBeGreaterThan(0));
 }
 
-/** Consent ticked, one provider picked. Leaves the page wherever the sign-in took it. */
+/** Both agreements ticked, the way a reader gives them: one box, then the other. */
+async function acceptBoth(): Promise<void> {
+  await userEvent.click(termsBox());
+  await userEvent.click(publicLogBox());
+}
+
+/** Both agreements ticked, one provider picked. Leaves the page wherever the sign-in took it. */
 async function pick(id = "google"): Promise<void> {
   await reachProviders();
-  await userEvent.click(termsBox());
+  await acceptBoth();
   const more = moreProvidersBtn();
   if (more && !document.querySelector(providerButtonSelector(id))) await userEvent.click(more);
   await userEvent.click(providerButton(id));
@@ -97,6 +120,42 @@ afterEach(() => {
 });
 
 describe("auth page - the provider step", () => {
+  it("opens with both agreements unticked, each named by its own sentence, and says what is public first", async () => {
+    install();
+    await loadPage();
+    await reachProviders();
+
+    // Two boxes, neither ticked: the label is the sentence agreed to, so a screen
+    // reader names each box by what it commits the reader to.
+    expect(termsBox().checked).toBe(false);
+    expect(publicLogBox().checked).toBe(false);
+    expect(termsBox().closest("label")?.textContent).toBe("I accept the Terms of Use and confirm I am 16 or older.");
+    expect(publicLogBox().closest("label")?.textContent).toBe("I agree that every reaction I make is published to anyone, permanently, in Emojery's public log under my pseudonym — including reactions that may reveal my political, religious or other views or my health.");
+
+    expect([...document.querySelectorAll(`${CONSENT_FACTS_SELECTOR} li`)].map((li) => li.textContent)).toEqual([
+      "What's public: your reactions, under a pseudonym — permanently; independent archives may keep copies even after we delete ours.",
+      "What's not: your name, email, IP.",
+      "Reactions to political or religious posts can reveal your views.",
+    ]);
+    expect([...document.querySelectorAll(CONSENT_NOTE_SELECTOR)].map((p) => p.textContent)).toEqual([
+      "Work or school accounts aren't supported — use a personal Google or Microsoft account.",
+      "Signing in with a different provider creates a separate account with its own reactions and history.",
+      "You can object at any time to our use of your data for the public log and anti-abuse — see Privacy Policy › Your rights. Deleting your account is the quickest way.",
+      "If you delete your account, we remove your reactions from the counts; entries already published stay in the log under your pseudonym.",
+    ]);
+
+    // The links sit outside the labels, so following one never flips a box.
+    const links = [...document.querySelectorAll<HTMLAnchorElement>("#app a")];
+    expect(links.map((a) => [a.textContent, new URL(a.href).origin + new URL(a.href).pathname, a.target, a.closest("label")])).toEqual([
+      ["Terms of Use", "https://emojery.app/terms", "_blank", null],
+      ["Privacy Policy", "https://emojery.app/privacy", "_blank", null],
+      ["What's public →", "https://emojery.app/help/what-is-public", "_blank", null],
+    ]);
+    // In the focus order both boxes come before every provider button.
+    const focusables = [...document.querySelectorAll<HTMLElement>("#app input, #app a, #app button")];
+    expect(focusables.indexOf(publicLogBox())).toBeLessThan(focusables.indexOf(providerButtons()[0] as HTMLElement));
+  });
+
   it("renders one button per provider the API lists, labelled by name, and hardcodes none", async () => {
     install();
     await loadPage();
@@ -104,10 +163,10 @@ describe("auth page - the provider step", () => {
 
     expect(heading()).toBe("Sign in to react");
     await vi.waitFor(() => expect(document.title).toBe("Emojery — Sign in"));
-    await userEvent.click(termsBox());
+    await acceptBoth();
     await userEvent.click(requireEl<HTMLButtonElement>(document, MORE_PROVIDERS_SELECTOR));
-    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "apple", "microsoft", "twitch", "test"]);
-    expect(providerButtons().map((b) => b.textContent?.trim())).toEqual(["Continue with Google", "Continue with Apple", "Continue with Microsoft", "Continue with Twitch", "Continue with test"]);
+    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "apple", "microsoft", "test"]);
+    expect(providerButtons().map((b) => b.textContent?.trim())).toEqual(["Continue with Google", "Continue with Apple", "Continue with Microsoft", "Continue with test"]);
     expect(sentOfType("auth:providers")).toHaveLength(1);
   });
 
@@ -153,7 +212,7 @@ describe("auth page - the provider step", () => {
     sent = [];
     await loadPage();
     await reachProviders();
-    await userEvent.click(termsBox());
+    await acceptBoth();
 
     const other = await vi.waitFor(() => requireEl<HTMLButtonElement>(document, otherAccountSelector("google")));
     expect(other.textContent).toBe("Use a different Google account");
@@ -183,6 +242,7 @@ describe("auth page - the provider step", () => {
     await reachProviders();
 
     await vi.waitFor(() => expect(termsBox().checked).toBe(true));
+    expect(publicLogBox().checked).toBe(true);
     // And the providers are reachable straight away, which is the point of it.
     expect(providerButton("google").disabled).toBe(false);
   });
@@ -227,17 +287,23 @@ describe("auth page - the provider step", () => {
     await reachProviders();
 
     expect(termsBox().checked).toBe(false);
+    expect(publicLogBox().checked).toBe(false);
     expect(providerButton("google").disabled).toBe(true);
   });
 
-  it("remembers the agreement as it is ticked, and forgets it when it is cleared", async () => {
+  // One record for both: a sign-in needs the two, so half an agreement is not
+  // remembered, and clearing either box forgets the whole of it.
+  it("remembers the agreement once both boxes are ticked, and forgets it when either is cleared", async () => {
     install();
     await loadPage();
     await reachProviders();
 
     await userEvent.click(termsBox());
+    await vi.waitFor(() => expect(sentOfType("auth:providers")).toHaveLength(1));
+    expect(shim.local.has(TERMS_ACCEPTED_KEY)).toBe(false);
+    await userEvent.click(publicLogBox());
     await vi.waitFor(() => expect(shim.local.get(TERMS_ACCEPTED_KEY)).toMatchObject({ revision: TERMS_REVISION }));
-    await userEvent.click(termsBox());
+    await userEvent.click(publicLogBox());
     await vi.waitFor(() => expect(shim.local.has(TERMS_ACCEPTED_KEY)).toBe(false));
   });
 
@@ -259,24 +325,24 @@ describe("auth page - the provider step", () => {
     const more = requireEl<HTMLButtonElement>(document, MORE_PROVIDERS_SELECTOR);
     expect(more.textContent?.trim()).toBe("More sign-in options");
 
-    await userEvent.click(termsBox());
+    await acceptBoth();
     await userEvent.click(more);
 
-    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "apple", "microsoft", "twitch", "test"]);
+    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "apple", "microsoft", "test"]);
     // The button removed itself, so focus has to land on what it opened.
     expect(moreProvidersBtn()).toBeNull();
-    await vi.waitFor(() => expect(document.activeElement).toBe(providerButton("twitch")));
+    await vi.waitFor(() => expect(document.activeElement).toBe(providerButton("test")));
   });
 
   it("offers the featured providers in a fixed order, whatever order the API used", async () => {
-    install({ providersReply: { type: "auth:providers", providers: ["twitch", "microsoft", "google"] } });
+    install({ providersReply: { type: "auth:providers", providers: ["test", "microsoft", "google"] } });
     await loadPage();
     await reachProviders();
 
     expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "microsoft"]);
-    await userEvent.click(termsBox());
+    await acceptBoth();
     await userEvent.click(requireEl<HTMLButtonElement>(document, MORE_PROVIDERS_SELECTOR));
-    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "microsoft", "twitch"]);
+    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "microsoft", "test"]);
   });
 
   it("shows no reveal button when the API lists nothing past the featured three", async () => {
@@ -288,14 +354,29 @@ describe("auth page - the provider step", () => {
     expect(moreProvidersBtn()).toBeNull();
   });
 
-  it("keeps every provider disabled until the terms are ticked", async () => {
+  // Two separate agreements: accepting the terms is not agreeing to publication,
+  // so neither box alone lets a sign-in start.
+  it.each([
+    ["the terms", termsBox],
+    ["the public log", publicLogBox],
+  ])("keeps every provider disabled with only %s ticked", async (_name, box) => {
+    install();
+    await loadPage();
+    await reachProviders();
+
+    await userEvent.click(box());
+    expect(providerButtons().every((b) => b.disabled)).toBe(true);
+    expect(moreProvidersBtn()?.disabled).toBe(true);
+  });
+
+  it("keeps every provider disabled until both boxes are ticked", async () => {
     install();
     await loadPage();
     await reachProviders();
 
     expect(providerButtons().every((b) => b.disabled)).toBe(true);
     expect(moreProvidersBtn()?.disabled).toBe(true);
-    await userEvent.click(termsBox());
+    await acceptBoth();
     expect(providerButtons().every((b) => !b.disabled)).toBe(true);
     expect(moreProvidersBtn()?.disabled).toBe(false);
     expect(sentOfType("auth:signIn")).toHaveLength(0);
@@ -355,9 +436,10 @@ describe("auth page - the provider step", () => {
   it.each([
     ["cancelled", "Sign-in was cancelled. Try again when you're ready."],
     ["provider_denied", "The provider did not complete the sign-in. Try again or choose another account."],
+    ["account_type_unsupported", "Work and school accounts can't sign in. Use a personal account instead."],
     ["enrollment_failed", "Could not register your account right now. Please try again in a minute."],
     ["client_outdated", "This version of Emojery is out of date. Update it to sign in."],
-    ["device_limit", "Device limit for this month is reached. Try again next month."],
+    ["device_limit", "This account has added as many new devices as it can today. Try again after midnight UTC."],
     ["unavailable", "Something went wrong. Please try again."],
   ])("maps %s to its own copy and hands the provider list back", async (refusal, copy) => {
     install({ signInReply: { type: "auth:signedIn", ok: false, refusal } });
@@ -374,6 +456,10 @@ describe("auth page - the provider step", () => {
       expect(help?.textContent).toBe("What this means");
       expect(help?.href.startsWith("https://emojery.app/help/device-limit-reached")).toBe(true);
       expect(help?.target).toBe("_blank");
+    } else if (refusal === "account_type_unsupported") {
+      expect(help?.textContent).toBe("Why personal accounts only");
+      expect(help?.href.startsWith("https://emojery.app/help/signing-in")).toBe(true);
+      expect(help?.target).toBe("_blank");
     } else if (refusal === "client_outdated") {
       expect(help?.textContent).toBe("Update from the store");
       expect(help?.href).toMatch(/^https:\/\/(chromewebstore\.google\.com|microsoftedge\.microsoft\.com|addons\.mozilla\.org)\//);
@@ -389,6 +475,29 @@ describe("auth page - the provider step", () => {
     expect(providerButtons().every((b) => !b.disabled)).toBe(true);
   });
 
+  // The browser most likely still holds the work account, so a plain retry would
+  // hand the same one back: the refusal reopens the provider's account picker.
+  it("offers another account at the same provider after a work-account refusal", async () => {
+    install({ signInReply: { type: "auth:signedIn", ok: false, refusal: "account_type_unsupported" } });
+    await loadPage();
+    await pick("google");
+
+    const other = await vi.waitFor(() => requireEl<HTMLButtonElement>(document, `${AUTH_ERROR_SELECTOR} ${otherAccountSelector("google")}`));
+    expect(other.textContent).toBe("Use a different Google account");
+    await userEvent.click(other);
+    await vi.waitFor(() => expect(sentOfType("auth:signIn")).toHaveLength(2));
+    expect(sentOfType("auth:signIn")[1]).toEqual({ type: "auth:signIn", provider: "google", chooser: true });
+  });
+
+  it("offers no picker after a work-account refusal where the provider has none", async () => {
+    install({ signInReply: { type: "auth:signedIn", ok: false, refusal: "account_type_unsupported" } });
+    await loadPage();
+    await pick("apple");
+
+    await vi.waitFor(() => expect(errorText()).toContain("Work and school accounts can't sign in."));
+    expect(document.querySelector(`${AUTH_ERROR_SELECTOR} button`)).toBeNull();
+  });
+
   it("opens on the update notice when the API has retired this build", async () => {
     install({ statusReply: { type: "auth:status", authed: true, userId: "u1", provider: null, outdated: true } });
     await loadPage();
@@ -400,10 +509,10 @@ describe("auth page - the provider step", () => {
   it("keeps the longer list open after a refusal sends the page back to it", async () => {
     install({ signInReply: { type: "auth:signedIn", ok: false, refusal: "cancelled" } });
     await loadPage();
-    await pick("twitch");
+    await pick("test");
 
     await vi.waitFor(() => expect(errorText()).toBe("Sign-in was cancelled. Try again when you're ready."));
-    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "apple", "microsoft", "twitch", "test"]);
+    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "apple", "microsoft", "test"]);
     expect(moreProvidersBtn()).toBeNull();
   });
 
@@ -525,7 +634,7 @@ describe("auth page - the return to the page the sign-in started from", () => {
     install({ signInReply: { ...OK_SIGN_IN, returnsToPage: true } });
     await loadPage();
     await reachProviders();
-    await userEvent.click(termsBox());
+    await acceptBoth();
     // The clock is faked before the done step mounts: its first tick is set on
     // mount, and a tick set on the real clock keeps counting there.
     vi.useFakeTimers();

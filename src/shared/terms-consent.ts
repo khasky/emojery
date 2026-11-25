@@ -1,21 +1,25 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Whether this device has agreed to the Terms of Service and the Privacy Policy,
-// so the sign-in page stops asking on every sign-in. Device-local, and NOT
-// account-scoped: the reader agreed, not the account, so it outlives a sign-out
-// and an account deletion (background/identity.ts clears only account state).
+// Whether this device has given both agreements the sign-in page asks for - the
+// Terms of Use (with the age line) and the publication of every reaction in the
+// public log - so the page stops asking on every sign-in. One record for the two:
+// a sign-in needs both, so it is written only once both are ticked and dropped as
+// soon as either is cleared. Device-local, and NOT account-scoped: the reader
+// agreed, not the account, so it outlives a sign-out and an account deletion
+// (background/identity.ts clears only account state).
 //
-// Stored with the revision of the documents it was given for. Both pages carry a
-// "Last updated" line, and TERMS_REVISION is the later of the two - raise it when
-// either changes materially, and every device is asked again instead of carrying
-// an agreement forward to text nobody has read.
+// Stored with the revision of the documents it was given for. The terms and the
+// privacy policy carry a "Last updated" line, and TERMS_REVISION is the later of
+// the two - raise it when either changes materially, or the wording of either
+// agreement does, and every device is asked again instead of carrying an
+// agreement forward to text nobody has read.
 
 import { storageLocalGet, storageLocalRemove, storageLocalSet } from "./webext";
 
 export const TERMS_ACCEPTED_KEY = "terms_accepted_v1";
 
 /** emojery.app/terms and /privacy, the later "Last updated" of the two. */
-export const TERMS_REVISION = "2026-09-16";
+export const TERMS_REVISION = "2026-11-24";
 
 interface TermsAcceptance {
   revision: string;
@@ -42,7 +46,7 @@ export async function termsAccepted(): Promise<boolean> {
   }
 }
 
-/** Remember the tick, or forget it when the reader clears the box. */
+/** Remember both ticks, or forget them when the reader clears either box. */
 export async function noteTermsAccepted(accepted: boolean): Promise<void> {
   if (!accepted) {
     await storageLocalRemove([TERMS_ACCEPTED_KEY]);

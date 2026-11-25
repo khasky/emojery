@@ -449,20 +449,41 @@
   "authRetryBtn": {
     "message": "Bandyti dar kartą"
   },
-  "authAgreeIntro": {
-    "message": "Sutinku su "
+  "authFactPublic": {
+    "message": "Kas vieša: jūsų reakcijos, slapyvardžiu — visam laikui; nepriklausomi archyvai gali išsaugoti kopijas net ir mums ištrynus savąsias."
+  },
+  "authFactNotPublic": {
+    "message": "Kas nevieša: jūsų vardas, el. paštas, IP."
+  },
+  "authFactSensitive": {
+    "message": "Reakcijos į politinius ar religinius įrašus gali atskleisti jūsų pažiūras."
+  },
+  "authPersonalOnly": {
+    "message": "Darbo ar mokyklos paskyros nepalaikomos — naudokite asmeninę Google arba Microsoft paskyrą."
+  },
+  "authSeparateAccounts": {
+    "message": "Prisijungus per kitą teikėją sukuriama atskira paskyra su savomis reakcijomis ir istorija."
+  },
+  "authAgreeTerms": {
+    "message": "Sutinku su Naudojimo sąlygomis ir patvirtinu, kad man yra 16 metų ar daugiau."
   },
   "authTermsLinkLabel": {
-    "message": "Paslaugų teikimo sąlygomis"
-  },
-  "authAgreeConjunction": {
-    "message": " ir "
+    "message": "Naudojimo sąlygos"
   },
   "authPrivacyLinkLabel": {
     "message": "Privatumo politika"
   },
-  "authAgreeOutro": {
-    "message": "."
+  "authAgreePublicLog": {
+    "message": "Sutinku, kad kiekviena mano reakcija būtų paskelbta visiems, visam laikui, viešajame Emojery žurnale mano slapyvardžiu — įskaitant reakcijas, kurios gali atskleisti mano politines, religines ar kitas pažiūras arba mano sveikatą."
+  },
+  "authWhatIsPublicLink": {
+    "message": "Kas vieša →"
+  },
+  "authObjectAnyTime": {
+    "message": "Bet kada galite nesutikti, kad jūsų duomenis naudotume viešajam žurnalui ir piktnaudžiavimo prevencijai — žr. Privatumo politika › Jūsų teisės. Greičiausias būdas — ištrinti paskyrą."
+  },
+  "authDeletionNote": {
+    "message": "Ištrynus paskyrą, jūsų reakcijas pašaliname iš skaitiklių; jau paskelbti įrašai lieka žurnale jūsų slapyvardžiu."
   },
   "authDoneTitle": {
     "message": "Esate prisijungę"
@@ -480,7 +501,7 @@
     "message": "Ką siunčia „Emojery“"
   },
   "dataConsentBody": {
-    "message": "Emojery siunčia puslapio, kuriame reaguojate, adresą, atsitiktinį diegimo identifikatorių ir vienkartinį pasirinkto teikėjo prisijungimo žetoną; saugoma tik vienkryptė jūsų paskyros identifikatoriaus maiša. Neprivalomas kontekstas šioje naršyklėje lieka išjungtas."
+    "message": "Emojery siunčia puslapio, kuriame reaguojate, adresą, jūsų reakciją ir vienkartinį prisijungimo žetoną iš jūsų pasirinkto teikėjo; vardo ir el. pašto neprašoma. Reakcijos visam laikui skelbiamos viešajame žurnale slapyvardžiu, o kiekvieno balso šalis ir tinklas saugomi 30 dienų piktnaudžiavimui stabdyti."
   },
   "dataConsentPolicyLink": {
     "message": "Privatumo politika."
@@ -497,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "Teikėjas neužbaigė prisijungimo. Pabandykite dar kartą arba pasirinkite kitą paskyrą."
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "Su darbo ir mokyklos paskyromis prisijungti negalima. Naudokite asmeninę paskyrą."
+  },
+  "authAccountTypeHelpLink": {
+    "message": "Kodėl tik asmeninės paskyros"
+  },
   "authErrEnrollFailed": {
     "message": "Šiuo metu nepavyko užregistruoti jūsų paskyros. Pabandykite dar kartą po minutės."
   },
@@ -510,7 +537,7 @@
     "message": "Atnaujinti parduotuvėje"
   },
   "authErrDeviceLimit": {
-    "message": "Pasiektas šio mėnesio įrenginių limitas. Pabandykite dar kartą kitą mėnesį."
+    "message": "Ši paskyra šiandien jau pridėjo tiek naujų įrenginių, kiek galima. Pabandykite dar kartą po vidurnakčio UTC."
   },
   "deviceLimitHelpLink": {
     "message": "Ką tai reiškia",

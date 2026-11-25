@@ -449,20 +449,41 @@
   "authRetryBtn": {
     "message": "再試行"
   },
-  "authAgreeIntro": {
-    "message": "私は"
+  "authFactPublic": {
+    "message": "公開されるもの：あなたのリアクション（仮名のもとで、永久に）。私たちが自分のコピーを削除した後も、独立したアーカイブがコピーを保持することがあります。"
+  },
+  "authFactNotPublic": {
+    "message": "公開されないもの：あなたの名前、メールアドレス、IP。"
+  },
+  "authFactSensitive": {
+    "message": "政治的・宗教的な投稿へのリアクションから、あなたの考えが分かることがあります。"
+  },
+  "authPersonalOnly": {
+    "message": "職場や学校のアカウントには対応していません。個人の Google または Microsoft アカウントを使ってください。"
+  },
+  "authSeparateAccounts": {
+    "message": "別のプロバイダーでサインインすると、リアクションと履歴が別々の新しいアカウントになります。"
+  },
+  "authAgreeTerms": {
+    "message": "利用規約に同意し、16 歳以上であることを確認します。"
   },
   "authTermsLinkLabel": {
     "message": "利用規約"
   },
-  "authAgreeConjunction": {
-    "message": "と"
-  },
   "authPrivacyLinkLabel": {
     "message": "プライバシーポリシー"
   },
-  "authAgreeOutro": {
-    "message": "に同意します。"
+  "authAgreePublicLog": {
+    "message": "私のすべてのリアクションが、私の仮名のもとで Emojery の公開ログに、誰でも見られる形で永久に公開されることに同意します。私の政治的・宗教的その他の考えや健康状態が分かる可能性のあるリアクションも含みます。"
+  },
+  "authWhatIsPublicLink": {
+    "message": "公開されるもの →"
+  },
+  "authObjectAnyTime": {
+    "message": "公開ログと不正防止のためのデータ利用には、いつでも異議を申し立てられます。プライバシーポリシー › あなたの権利 をご覧ください。最も早い方法はアカウントの削除です。"
+  },
+  "authDeletionNote": {
+    "message": "アカウントを削除すると、あなたのリアクションはカウントから除かれます。すでに公開されたエントリは、あなたの仮名のままログに残ります。"
   },
   "authDoneTitle": {
     "message": "サインインしました"
@@ -480,7 +501,7 @@
     "message": "Emojery が送信する情報"
   },
   "dataConsentBody": {
-    "message": "Emojery は、リアクションしたページのアドレス、ランダムなインストール識別子、選択したプロバイダーの使い捨てサインイントークンを送信します。保存されるのはアカウント ID の一方向ハッシュだけです。任意のコンテキストはこのブラウザーではオフのままです。"
+    "message": "Emojery が送信するのは、リアクションしたページのアドレス、あなたのリアクション、選んだプロバイダーからの一度限りのサインイントークンです。名前やメールアドレスは求めません。リアクションは仮名のもとで公開ログに永久に公開され、不正防止のため各投票の国とネットワークを 30 日間保持します。"
   },
   "dataConsentPolicyLink": {
     "message": "プライバシーポリシー。"
@@ -497,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "プロバイダーがサインインを完了できませんでした。もう一度試すか、別のアカウントを選んでください。"
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "職場や学校のアカウントではサインインできません。個人アカウントを使ってください。"
+  },
+  "authAccountTypeHelpLink": {
+    "message": "個人アカウントのみの理由"
+  },
   "authErrEnrollFailed": {
     "message": "現在アカウントを登録できません。1 分ほど待ってからもう一度お試しください。"
   },
@@ -510,7 +537,7 @@
     "message": "ストアから更新"
   },
   "authErrDeviceLimit": {
-    "message": "今月の端末数の上限に達しました。来月もう一度お試しください。"
+    "message": "このアカウントで今日追加できる新しい端末の数に達しました。UTC の午前 0 時以降にもう一度お試しください。"
   },
   "deviceLimitHelpLink": {
     "message": "これはどういうことか",

@@ -14,7 +14,6 @@ const INDEX_TIMEOUT_MS = 10_000;
 
 /** True when index.json holds a rewind record, signed by the pinned log key, that opens `origin`. */
 export async function originIsSigned(origin: string, fetcher: typeof fetch = fetch): Promise<boolean> {
-  if (!LOG_PUBKEY) return false;
   try {
     const signal = deadlineSignal(INDEX_TIMEOUT_MS);
     const res = await fetcher(`${LOG_BASE_URL}/index.json`, { cache: "no-store", ...(signal ? { signal } : {}) });

@@ -449,20 +449,41 @@
   "authRetryBtn": {
     "message": "Cuba lagi"
   },
-  "authAgreeIntro": {
-    "message": "Saya bersetuju dengan "
+  "authFactPublic": {
+    "message": "Yang awam: reaksi anda, di bawah nama samaran — secara kekal; arkib bebas mungkin menyimpan salinan walaupun selepas kami memadam salinan kami."
+  },
+  "authFactNotPublic": {
+    "message": "Yang tidak: nama, e-mel dan IP anda."
+  },
+  "authFactSensitive": {
+    "message": "Reaksi pada siaran politik atau agama boleh mendedahkan pandangan anda."
+  },
+  "authPersonalOnly": {
+    "message": "Akaun kerja atau sekolah tidak disokong — gunakan akaun Google atau Microsoft peribadi."
+  },
+  "authSeparateAccounts": {
+    "message": "Log masuk dengan penyedia lain mencipta akaun berasingan dengan reaksi dan sejarahnya sendiri."
+  },
+  "authAgreeTerms": {
+    "message": "Saya menerima Syarat Penggunaan dan mengesahkan bahawa saya berumur 16 tahun atau lebih."
   },
   "authTermsLinkLabel": {
-    "message": "Syarat Perkhidmatan"
-  },
-  "authAgreeConjunction": {
-    "message": " dan "
+    "message": "Syarat Penggunaan"
   },
   "authPrivacyLinkLabel": {
     "message": "Dasar Privasi"
   },
-  "authAgreeOutro": {
-    "message": "."
+  "authAgreePublicLog": {
+    "message": "Saya bersetuju bahawa setiap reaksi saya diterbitkan kepada sesiapa sahaja, secara kekal, dalam log awam Emojery di bawah nama samaran saya — termasuk reaksi yang mungkin mendedahkan pandangan politik, agama atau lain-lain saya, atau kesihatan saya."
+  },
+  "authWhatIsPublicLink": {
+    "message": "Apa yang awam →"
+  },
+  "authObjectAnyTime": {
+    "message": "Anda boleh membantah pada bila-bila masa penggunaan data anda untuk log awam dan pencegahan penyalahgunaan — lihat Dasar Privasi › Hak anda. Memadam akaun anda ialah cara paling cepat."
+  },
+  "authDeletionNote": {
+    "message": "Jika anda memadam akaun, kami mengeluarkan reaksi anda daripada kiraan; entri yang sudah diterbitkan kekal dalam log di bawah nama samaran anda."
   },
   "authDoneTitle": {
     "message": "Anda telah log masuk"
@@ -480,7 +501,7 @@
     "message": "Apa yang Emojery hantar"
   },
   "dataConsentBody": {
-    "message": "Emojery menghantar alamat halaman tempat anda bertindak balas, pengecam pemasangan rawak dan token log masuk sekali guna daripada penyedia yang anda pilih; hanya cincangan sehala id akaun anda disimpan. Konteks pilihan kekal dimatikan dalam pelayar ini."
+    "message": "Emojery menghantar alamat halaman tempat anda bertindak balas, reaksi anda dan token log masuk sekali guna daripada penyedia yang anda pilih; nama dan e-mel anda tidak diminta. Reaksi diterbitkan secara kekal dalam log awam di bawah nama samaran, dan negara serta rangkaian setiap undian disimpan selama 30 hari untuk mencegah penyalahgunaan."
   },
   "dataConsentPolicyLink": {
     "message": "Dasar Privasi."
@@ -497,6 +518,12 @@
   "authErrProviderDenied": {
     "message": "Penyedia tidak melengkapkan log masuk. Cuba lagi atau pilih akaun lain."
   },
+  "authErrAccountTypeUnsupported": {
+    "message": "Akaun kerja dan sekolah tidak boleh log masuk. Gunakan akaun peribadi."
+  },
+  "authAccountTypeHelpLink": {
+    "message": "Mengapa akaun peribadi sahaja"
+  },
   "authErrEnrollFailed": {
     "message": "Akaun anda tidak dapat didaftarkan sekarang. Sila cuba lagi seminit lagi."
   },
@@ -510,7 +537,7 @@
     "message": "Kemas kini dari kedai"
   },
   "authErrDeviceLimit": {
-    "message": "Had peranti untuk bulan ini telah dicapai. Sila cuba lagi bulan depan."
+    "message": "Akaun ini telah menambah seberapa banyak peranti baharu yang dibenarkan hari ini. Cuba lagi selepas tengah malam UTC."
   },
   "deviceLimitHelpLink": {
     "message": "Apa maksudnya",

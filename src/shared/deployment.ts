@@ -24,10 +24,10 @@ export const INITIAL_ORIGIN: string = initialOrigin(DEPLOYMENT);
 /** Where the log's files are served; the extension reads only index.json, at an origin switch. */
 export const LOG_BASE_URL: string = `https://${LOG_NAME}`;
 
-// The log's signing key per deployment (base64, 32 bytes): a new origin is taken only from a
-// rewind record in index.json signed by it. Empty: no switch is ever accepted.
-const LOG_PUBKEYS: Readonly<Record<Deployment, string>> = {
-  production: "",
+// The log's signing key per deployment (base64, raw 32-byte Ed25519): a new origin is taken
+// only from a rewind record in index.json signed by it.
+export const LOG_PUBKEYS: Readonly<Record<Deployment, string>> = {
+  production: "z0z5ZBrlz67P2+FD+kz5ayXyFQyCCB2rQzPxPUtery4=",
   staging: "P37N5YTTgfbn4L1oW4lLnQM7BsHQEYgY4QpnkYLNEaM=",
 };
 export const LOG_PUBKEY: string = LOG_PUBKEYS[DEPLOYMENT];
