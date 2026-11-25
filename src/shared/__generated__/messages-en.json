@@ -499,7 +499,7 @@
   "message": "What Emojery sends"
  },
  "dataConsentBody": {
-  "message": "Emojery sends the site and the ID of the post you react on, your reaction, and a one-time sign-in token from the provider you choose; your name and email are not requested. Reactions are published permanently in a public log under a pseudonym, and the country and network of each vote are kept for 30 days to fight abuse."
+  "message": "To show counts, Emojery sends the site and the ID of the posts you see. When you react, it also sends your reaction and a one-time sign-in token from the provider you choose; your name and email are not requested. Reactions are published permanently in a public log under a pseudonym, and the country and network of each vote are kept for 30 days to fight abuse."
  },
  "dataConsentPolicyLink": {
   "message": "Privacy Policy."

@@ -501,7 +501,7 @@
     "message": "Hvad Emojery sender"
   },
   "dataConsentBody": {
-    "message": "Emojery sender webstedet og id'et for det opslag, du reagerer på, din reaktion og et engangs-login-token fra den udbyder, du vælger; dit navn og din e-mail efterspørges ikke. Reaktioner offentliggøres permanent i en offentlig log under et pseudonym, og land og netværk for hver stemme gemmes i 30 dage for at bekæmpe misbrug."
+    "message": "For at vise tællinger sender Emojery webstedet og id'et for de opslag, du ser. Når du reagerer, sender den også din reaktion og et engangs-login-token fra den udbyder, du vælger; dit navn og din e-mail efterspørges ikke. Reaktioner offentliggøres permanent i en offentlig log under et pseudonym, og land og netværk for hver stemme gemmes i 30 dage for at bekæmpe misbrug."
   },
   "dataConsentPolicyLink": {
     "message": "Privatlivspolitik."

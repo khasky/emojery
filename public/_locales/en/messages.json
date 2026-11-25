@@ -636,8 +636,8 @@
     "description": "Heading of the data-collection disclosure shown on first install in browsers without Firefox's built-in consent screen."
   },
   "dataConsentBody": {
-    "message": "Emojery sends the site and the ID of the post you react on, your reaction, and a one-time sign-in token from the provider you choose; your name and email are not requested. Reactions are published permanently in a public log under a pseudonym, and the country and network of each vote are kept for 30 days to fight abuse.",
-    "description": "Body of the data-collection disclosure shown on first install in browsers without Firefox's built-in consent screen: what the extension sends (the site and the ID of the post, not the page address), that reactions are published under a pseudonym, and the country and network kept per vote for 30 days against abuse."
+    "message": "To show counts, Emojery sends the site and the ID of the posts you see. When you react, it also sends your reaction and a one-time sign-in token from the provider you choose; your name and email are not requested. Reactions are published permanently in a public log under a pseudonym, and the country and network of each vote are kept for 30 days to fight abuse.",
+    "description": "Body of the data-collection disclosure shown on first install in browsers without Firefox's built-in consent screen: what the extension sends (the site and the ID of each post in view, to show its counts, plus the reaction and a one-time sign-in token when you react; not the page address), that reactions are published under a pseudonym, and the country and network kept per vote for 30 days against abuse."
   },
   "dataConsentPolicyLink": {
     "message": "Privacy Policy.",

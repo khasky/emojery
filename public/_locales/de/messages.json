@@ -501,7 +501,7 @@
     "message": "Was Emojery sendet"
   },
   "dataConsentBody": {
-    "message": "Emojery sendet die Website und die ID des Beitrags, auf den du reagierst, deine Reaktion und ein einmaliges Anmeldetoken des Anbieters, den du wählst; Name und E-Mail-Adresse werden nicht abgefragt. Reaktionen werden dauerhaft in einem öffentlichen Log unter einem Pseudonym veröffentlicht, und Land und Netzwerk jeder Stimme werden 30 Tage lang zur Missbrauchsabwehr gespeichert."
+    "message": "Um Zählungen anzuzeigen, sendet Emojery die Website und die ID der Beiträge, die du siehst. Wenn du reagierst, sendet es außerdem deine Reaktion und ein einmaliges Anmeldetoken des Anbieters, den du wählst; Name und E-Mail-Adresse werden nicht abgefragt. Reaktionen werden dauerhaft in einem öffentlichen Log unter einem Pseudonym veröffentlicht, und Land und Netzwerk jeder Stimme werden 30 Tage lang zur Missbrauchsabwehr gespeichert."
   },
   "dataConsentPolicyLink": {
     "message": "Datenschutzrichtlinie."

@@ -501,7 +501,7 @@
     "message": "Cosa invia Emojery"
   },
   "dataConsentBody": {
-    "message": "Emojery invia il sito e l'ID del post su cui reagisci, la tua reazione e un token di accesso monouso del provider che scegli; nome ed email non vengono richiesti. Le reazioni sono pubblicate per sempre in un registro pubblico sotto uno pseudonimo, e il paese e la rete di ogni voto sono conservati per 30 giorni contro gli abusi."
+    "message": "Per mostrare i conteggi, Emojery invia il sito e l'ID dei post che vedi. Quando reagisci, invia anche la tua reazione e un token di accesso monouso del provider che scegli; nome ed email non vengono richiesti. Le reazioni sono pubblicate per sempre in un registro pubblico sotto uno pseudonimo, e il paese e la rete di ogni voto sono conservati per 30 giorni contro gli abusi."
   },
   "dataConsentPolicyLink": {
     "message": "Informativa sulla privacy."

@@ -501,7 +501,7 @@
     "message": "O que o Emojery envia"
   },
   "dataConsentBody": {
-    "message": "O Emojery envia o site e o ID da publicação em que você reage, sua reação e um token de login de uso único do provedor que você escolher; seu nome e e-mail não são solicitados. As reações são publicadas para sempre em um registro público sob um pseudônimo, e o país e a rede de cada voto ficam guardados por 30 dias para combater abusos."
+    "message": "Para mostrar as contagens, o Emojery envia o site e o ID das publicações que você vê. Quando você reage, ele também envia sua reação e um token de login de uso único do provedor que você escolher; seu nome e e-mail não são solicitados. As reações são publicadas para sempre em um registro público sob um pseudônimo, e o país e a rede de cada voto ficam guardados por 30 dias para combater abusos."
   },
   "dataConsentPolicyLink": {
     "message": "Política de Privacidade."

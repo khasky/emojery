@@ -501,7 +501,7 @@
     "message": "Mida Emojery saadab"
   },
   "dataConsentBody": {
-    "message": "Emojery saadab saidi ja selle postituse ID, millele reageerid, sinu reaktsiooni ja sinu valitud teenusepakkuja ühekordse sisselogimistõendi; sinu nime ega e-posti ei küsita. Reaktsioonid avaldatakse jäädavalt avalikus logis pseudonüümi all ning iga hääle riiki ja võrku hoitakse kuritarvituste tõkestamiseks 30 päeva."
+    "message": "Loenduste näitamiseks saadab Emojery nähtavate postituste saidi ja ID. Kui reageerid, saadab see ka sinu reaktsiooni ja sinu valitud teenusepakkuja ühekordse sisselogimistõendi; sinu nime ega e-posti ei küsita. Reaktsioonid avaldatakse jäädavalt avalikus logis pseudonüümi all ning iga hääle riiki ja võrku hoitakse kuritarvituste tõkestamiseks 30 päeva."
   },
   "dataConsentPolicyLink": {
     "message": "Privaatsuspoliitika."

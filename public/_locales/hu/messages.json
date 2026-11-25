@@ -501,7 +501,7 @@
     "message": "Mit küld az Emojery"
   },
   "dataConsentBody": {
-    "message": "Az Emojery elküldi a webhelyet és annak a bejegyzésnek az azonosítóját, amelyre reagálsz, a reakciódat és a választott szolgáltató egyszer használható bejelentkezési tokenjét; a nevedet és az e-mail-címedet nem kéri. A reakciók véglegesen megjelennek egy nyilvános naplóban álnév alatt, és minden szavazat országát és hálózatát 30 napig megőrizzük a visszaélések ellen."
+    "message": "A számok megjelenítéséhez az Emojery elküldi a látott bejegyzések webhelyét és azonosítóját. Ha reagálsz, a reakciódat és a választott szolgáltató egyszer használható bejelentkezési tokenjét is elküldi; a nevedet és az e-mail-címedet nem kéri. A reakciók véglegesen megjelennek egy nyilvános naplóban álnév alatt, és minden szavazat országát és hálózatát 30 napig megőrizzük a visszaélések ellen."
   },
   "dataConsentPolicyLink": {
     "message": "Adatvédelmi szabályzat."

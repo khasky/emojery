@@ -501,7 +501,7 @@
     "message": "Wat Emojery verstuurt"
   },
   "dataConsentBody": {
-    "message": "Emojery verstuurt de site en de ID van het bericht waarop je reageert, je reactie en een eenmalig aanmeldtoken van de aanbieder die je kiest; je naam en e-mailadres worden niet gevraagd. Reacties worden permanent gepubliceerd in een openbaar logboek onder een pseudoniem, en het land en netwerk van elke stem worden 30 dagen bewaard om misbruik tegen te gaan."
+    "message": "Om tellingen te tonen verstuurt Emojery de site en de ID van de berichten die je ziet. Als je reageert, verstuurt het ook je reactie en een eenmalig aanmeldtoken van de aanbieder die je kiest; je naam en e-mailadres worden niet gevraagd. Reacties worden permanent gepubliceerd in een openbaar logboek onder een pseudoniem, en het land en netwerk van elke stem worden 30 dagen bewaard om misbruik tegen te gaan."
   },
   "dataConsentPolicyLink": {
     "message": "Privacybeleid."
