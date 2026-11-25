@@ -501,7 +501,7 @@
     "message": "Co wysyła Emojery"
   },
   "dataConsentBody": {
-    "message": "Emojery wysyła adres strony, na której reagujesz, twoją reakcję i jednorazowy token logowania od wybranego dostawcy; nie prosimy o imię ani e-mail. Reakcje są publikowane na zawsze w publicznym dzienniku pod pseudonimem, a kraj i sieć każdego głosu przechowujemy przez 30 dni, aby przeciwdziałać nadużyciom."
+    "message": "Aby pokazać liczniki, Emojery wysyła serwis i identyfikator postów, które widzisz. Gdy reagujesz, wysyła też twoją reakcję i jednorazowy token logowania od wybranego dostawcy; nie prosimy o imię ani e-mail. Reakcje są publikowane na zawsze w publicznym dzienniku pod pseudonimem, a kraj i sieć każdego głosu przechowujemy przez 30 dni, aby przeciwdziałać nadużyciom."
   },
   "dataConsentPolicyLink": {
     "message": "Polityka prywatności."

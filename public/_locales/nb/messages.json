@@ -501,7 +501,7 @@
     "message": "Hva Emojery sender"
   },
   "dataConsentBody": {
-    "message": "Emojery sender adressen til siden du reagerer på, reaksjonen din og et engangs innloggingstoken fra leverandøren du velger; navn og e-post blir ikke spurt om. Reaksjoner publiseres permanent i en offentlig logg under et pseudonym, og land og nettverk for hver stemme lagres i 30 dager for å bekjempe misbruk."
+    "message": "For å vise antall sender Emojery nettstedet og ID-en til innleggene du ser. Når du reagerer, sender den også reaksjonen din og et engangs innloggingstoken fra leverandøren du velger; navn og e-post blir ikke spurt om. Reaksjoner publiseres permanent i en offentlig logg under et pseudonym, og land og nettverk for hver stemme lagres i 30 dager for å bekjempe misbruk."
   },
   "dataConsentPolicyLink": {
     "message": "Personvernerklæring."
