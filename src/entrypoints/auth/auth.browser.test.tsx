@@ -36,7 +36,7 @@ import { type ChromeShimHandle, installChromeShim, makeLiveAuthSession } from ".
 // the URL - restored unchanged between tests, because the runner's own query string
 // is what later dynamic imports resolve against.
 const PAGE_URL = location.href;
-const PROVIDERS = { type: "auth:providers", providers: ["google", "apple", "microsoft", "twitch", "test"], chooser: ["google", "microsoft", "twitch", "test"] };
+const PROVIDERS = { type: "auth:providers", providers: ["google", "apple", "microsoft", "test"], chooser: ["google", "microsoft", "test"] };
 const OK_SIGN_IN = { type: "auth:signedIn", ok: true };
 // In production the background closes this tab on an "ok", so nothing repaints
 // after it - here the page stays put, which is what the asserts read.
@@ -165,8 +165,8 @@ describe("auth page - the provider step", () => {
     await vi.waitFor(() => expect(document.title).toBe("Emojery — Sign in"));
     await acceptBoth();
     await userEvent.click(requireEl<HTMLButtonElement>(document, MORE_PROVIDERS_SELECTOR));
-    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "apple", "microsoft", "twitch", "test"]);
-    expect(providerButtons().map((b) => b.textContent?.trim())).toEqual(["Continue with Google", "Continue with Apple", "Continue with Microsoft", "Continue with Twitch", "Continue with test"]);
+    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "apple", "microsoft", "test"]);
+    expect(providerButtons().map((b) => b.textContent?.trim())).toEqual(["Continue with Google", "Continue with Apple", "Continue with Microsoft", "Continue with test"]);
     expect(sentOfType("auth:providers")).toHaveLength(1);
   });
 
@@ -328,21 +328,21 @@ describe("auth page - the provider step", () => {
     await acceptBoth();
     await userEvent.click(more);
 
-    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "apple", "microsoft", "twitch", "test"]);
+    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "apple", "microsoft", "test"]);
     // The button removed itself, so focus has to land on what it opened.
     expect(moreProvidersBtn()).toBeNull();
-    await vi.waitFor(() => expect(document.activeElement).toBe(providerButton("twitch")));
+    await vi.waitFor(() => expect(document.activeElement).toBe(providerButton("test")));
   });
 
   it("offers the featured providers in a fixed order, whatever order the API used", async () => {
-    install({ providersReply: { type: "auth:providers", providers: ["twitch", "microsoft", "google"] } });
+    install({ providersReply: { type: "auth:providers", providers: ["test", "microsoft", "google"] } });
     await loadPage();
     await reachProviders();
 
     expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "microsoft"]);
     await acceptBoth();
     await userEvent.click(requireEl<HTMLButtonElement>(document, MORE_PROVIDERS_SELECTOR));
-    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "microsoft", "twitch"]);
+    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "microsoft", "test"]);
   });
 
   it("shows no reveal button when the API lists nothing past the featured three", async () => {
@@ -509,10 +509,10 @@ describe("auth page - the provider step", () => {
   it("keeps the longer list open after a refusal sends the page back to it", async () => {
     install({ signInReply: { type: "auth:signedIn", ok: false, refusal: "cancelled" } });
     await loadPage();
-    await pick("twitch");
+    await pick("test");
 
     await vi.waitFor(() => expect(errorText()).toBe("Sign-in was cancelled. Try again when you're ready."));
-    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "apple", "microsoft", "twitch", "test"]);
+    expect(providerButtons().map((b) => b.dataset.provider)).toEqual(["google", "apple", "microsoft", "test"]);
     expect(moreProvidersBtn()).toBeNull();
   });
 

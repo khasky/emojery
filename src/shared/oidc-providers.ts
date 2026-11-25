@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// The sign-in providers as the auth page names them. WHICH providers exist is the
-// API's answer (`GET /auth/oidc/providers`), so a provider added or retired on the
-// backend reaches the page without a release; this module only knows how to label
-// one, and a label it lacks falls back to the id itself.
+// The sign-in providers as the auth page names them. WHICH providers exist is this
+// build's provider table (@emojery/shared/api, read by background/identity.ts and
+// handed to the page as `auth:providers`); this module only knows how to label one,
+// and a label it lacks falls back to the id itself.
 
-// A provider id as the API spells it: a lowercase slug. Held to a size and a shape
+// A provider id as the provider table spells it: a lowercase slug. Held to a size and a shape
 // by the message guard before it reaches the background.
 export type OidcProvider = string;
 export const PROVIDER_ID_MAX = 32;
@@ -15,9 +15,6 @@ const PROVIDER_LABELS: Readonly<Record<string, string>> = {
   google: "Google",
   apple: "Apple",
   microsoft: "Microsoft",
-  facebook: "Facebook",
-  twitch: "Twitch",
-  slack: "Slack",
 };
 
 export function providerLabel(id: OidcProvider): string {
@@ -25,7 +22,7 @@ export function providerLabel(id: OidcProvider): string {
 }
 
 // Where to send a reader whose provider cannot be asked to reopen its account
-// picker (`chooser` in GET /auth/oidc/providers). Apple is the one today: it
+// picker (`chooser` in the `auth:providers` answer). Apple is the one today: it
 // ignores an OpenID `prompt` rather than refusing it (measured 2026-09-20: the
 // authorization page comes back byte-identical with and without one), so there is
 // no request that makes it ask. The only way to another Apple Account is ending
@@ -42,9 +39,8 @@ export function providerAccountUrl(id: OidcProvider): string | null {
 }
 
 // The providers the sign-in page shows straight away, in this order - the accounts
-// most people already carry. Everything else the API offers waits behind "more
-// sign-in options", in the order the API listed it, so a provider added or retired
-// on the backend still needs no release here.
+// most people already carry. Everything else the build offers (the staging test
+// provider) waits behind "more sign-in options", in the order it was listed.
 const FEATURED_PROVIDERS: readonly OidcProvider[] = ["google", "apple", "microsoft"];
 
 export function splitFeaturedProviders(ids: readonly OidcProvider[]): { featured: OidcProvider[]; rest: OidcProvider[] } {
