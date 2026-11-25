@@ -9,8 +9,11 @@ import { allowColdModuleReset } from "../test/cold-module-reset";
 
 allowColdModuleReset();
 
-const PRODUCTION_LOG_KEY = "z0z5ZBrlz67P2+FD+kz5ayXyFQyCCB2rQzPxPUtery4=";
-const STAGING_LOG_KEY = "P37N5YTTgfbn4L1oW4lLnQM7BsHQEYgY4QpnkYLNEaM=";
+// The published log public keys, in the shape LOG_PUBKEYS has.
+const PINNED = {
+  production: "z0z5ZBrlz67P2+FD+kz5ayXyFQyCCB2rQzPxPUtery4=",
+  staging: "P37N5YTTgfbn4L1oW4lLnQM7BsHQEYgY4QpnkYLNEaM=",
+} as const;
 
 // The first two rewind records of the staging log, as published.
 const STAGING_REWINDS = [
@@ -39,7 +42,7 @@ afterEach(() => {
 describe("log pins", () => {
   it("pin a 32-byte Ed25519 key for each deployment", async () => {
     const { LOG_PUBKEYS } = await loadFor("https://api-staging.emojery.app");
-    expect(LOG_PUBKEYS).toEqual({ production: PRODUCTION_LOG_KEY, staging: STAGING_LOG_KEY });
+    expect(LOG_PUBKEYS).toEqual({ production: PINNED.production, staging: PINNED.staging });
     for (const key of Object.values(LOG_PUBKEYS)) {
       const raw = Uint8Array.from(atob(key), (c) => c.charCodeAt(0));
       expect(raw).toHaveLength(32);
@@ -53,7 +56,7 @@ describe("log pins", () => {
     expect(d.LOG_NAME).toBe("log.emojery.app");
     expect(d.LOG_BASE_URL).toBe("https://log.emojery.app");
     expect(d.INITIAL_ORIGIN).toBe("log.emojery.app/g0");
-    expect(d.LOG_PUBKEY).toBe(PRODUCTION_LOG_KEY);
+    expect(d.LOG_PUBKEY).toBe(PINNED.production);
   });
 
   it("give a staging build the staging log's name, host and key", async () => {
@@ -61,7 +64,7 @@ describe("log pins", () => {
     expect(d.DEPLOYMENT).toBe("staging");
     expect(d.LOG_NAME).toBe("log-staging.emojery.app");
     expect(d.LOG_BASE_URL).toBe("https://log-staging.emojery.app");
-    expect(d.LOG_PUBKEY).toBe(STAGING_LOG_KEY);
+    expect(d.LOG_PUBKEY).toBe(PINNED.staging);
   });
 });
 
