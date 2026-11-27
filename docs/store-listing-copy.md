@@ -1,4 +1,4 @@
-# Store Listing Copy (CWS / Edge / AMO)
+# Store Listing Copy (CWS / Edge / AMO / Opera)
 
 ## Extension Name
 
@@ -67,7 +67,7 @@ Emojery is an independent project. All product names, logos and trademarks are t
 ## Single purpose description
 
 ```text
-Emojery adds 600+ emoji reactions beside the Like, Star and vote buttons on supported websites. Go beyond the built-in reaction menu, choose a more specific response and see what other users selected. Reading the counts needs no account. The extension's single purpose is that reaction control, and every permission and host it requests exists to serve it.
+Emojery adds 600+ emoji reactions beside the Like, Star and vote buttons on supported websites. Go beyond the built-in reaction menu, choose a more specific response and see what other users selected. Reading the counts needs no account.
 ```
 
 ## AMO summary (250 characters)
@@ -185,50 +185,106 @@ YOUR RIGHTS
 Delete your account from the extension's Account tab: your reactions are removed from the counts and the data the service holds about you is erased; entries already published stay in the log under your pseudonym. You can object at any time to the use of your data for the public log and anti-abuse; deleting your account is the quickest way. Access, rectification, restriction and portability under GDPR/UK GDPR/CCPA/PIPEDA/PIPA. Contact: hello@emojery.app
 ```
 
+## Release notes (AMO and the Opera changelog, 1.1.0)
+
+Opera takes the same text without the Firefox picker clause in the last line.
+
+```text
+- Sign in with a personal Google, Apple or Microsoft account; the email code is gone. Each reaction is signed on your device and published in the open log under a pseudonym.
+- Reactions on five more sites: Rotten Tomatoes, TMDB, IMDb, Metacritic and OpenCritic.
+- Several accounts on one device, each with its own settings and its own emoji mark.
+- Reactions made offline or during a dropped connection are queued and sent later.
+- An outdated version now asks you to update instead of failing silently.
+- Fixes for Facebook, X, Threads, YouTube Shorts, GitHub and GitLab layouts, and for the picker in Firefox.
+```
+
 ## Notes to reviewer (AMO, 3000 characters)
 
 ```text
 BUILD INSTRUCTIONS
 
-Environment: Node.js 24 or newer. pnpm is pinned by the packageManager field in package.json; corepack provisions that exact version.
-
-From the unzipped source archive:
+Node.js 24 or newer; pnpm is pinned by the packageManager field in package.json and corepack provisions that exact version. From the unzipped source archive:
 
 corepack enable
 pnpm install --frozen-lockfile
 pnpm run zip:production:firefox
 
-This emits .output/firefox-mv2/ (the unpacked extension), .output/emojery-v<version>-firefox-mv2.zip and .output/emojery-v<version>-sources.zip. Compare the rebuilt .output/firefox-mv2/ directory with the contents of the submitted package.
+Compare the rebuilt .output/firefox-mv2/ directory with the submitted package.
 
-Two things in the source are absent from that output, both by a build-time constant in wxt.config.ts: the console debug channels and their redactor (__EM_DEBUG_LOG__), and the English fallback dictionary that exists only for the unit-test environment (__EM_I18N_FALLBACK__). __EM_API_BASE__ is why the API origin appears in the bundle as a literal; it comes from src/shared/api-origins.ts.
+Two things in the source are absent from that output by a build-time constant in wxt.config.ts: the console debug channels and their redactor (__EM_DEBUG_LOG__), and the English fallback dictionary used only by unit tests (__EM_I18N_FALLBACK__). __EM_API_BASE__ is why the API origin appears in the bundle as a literal (src/shared/api-origins.ts).
 
-HOW TO EXERCISE THE ADD-ON
+HOW TO TEST
 
-Emojery adds an emoji reaction control next to the native like/share/star buttons on supported sites and shows per-post reaction counts.
+The reaction button and counts appear without signing in on the 14 supported sites (x.com, facebook.com, reddit.com, instagram.com, youtube.com, github.com, gitlab.com, threads.com, amazon.com, rottentomatoes.com, themoviedb.org, imdb.com, metacritic.com, opencritic.com). github.com/torvalds/linux is a reliable page.
 
-The reaction buttons and counts appear on the supported sites (x.com, facebook.com, reddit.com, instagram.com, youtube.com, github.com, gitlab.com, threads.com, amazon.com, rottentomatoes.com, themoviedb.org, imdb.com, metacritic.com, opencritic.com) without signing in. github.com/torvalds/linux is a reliable page to check.
+To test reacting (desktop Firefox): open the extension, choose Sign in, tick both boxes and pick Google, Apple or Microsoft; sign in with a personal account on the provider's own page in the window that opens. Firefox for Android has no identity.launchWebAuthFlow, so there the add-on shows counts only.
 
-To test voting (optional, desktop Firefox): open the extension, choose Sign in, tick both boxes and pick a provider (Google, Apple or Microsoft). The provider's own login page opens in a browser window; sign in there with a personal account and the extension's page confirms the sign-in. Firefox for Android has no identity.launchWebAuthFlow, so there the add-on shows counts only.
+VALIDATION WARNINGS: 0 errors, 17 warnings, all expected
 
-VALIDATION WARNINGS
+15 x "Unsafe assignment to innerHTML" - one per bundle that carries Preact (the 14 site content scripts and the shared tracking-links chunk). Each hit is Preact's own dangerouslySetInnerHTML branch (f.__html == e.innerHTML || (e.innerHTML = f.__html)), inlined because content scripts are standalone bundles. Nothing reaches it: "grep -rn dangerouslySetInnerHTML src" returns nothing, and the only innerHTML in src is the unit-test DOM reset, which does not ship.
 
-Automated validation reports 0 errors and 17 warnings. All 17 are expected.
-
-15 x UNSAFE_VAR_ASSIGNMENT ("unsafe assignment to innerHTML") - one per bundle that carries Preact: the 14 site content scripts and the shared tracking-links chunk. Every hit is inside Preact's own diff routine, its dangerouslySetInnerHTML branch (f.__html == e.innerHTML || (e.innerHTML = f.__html)), inlined into each content script because content scripts are standalone bundles.
-
-Nothing in this add-on reaches that branch, and the attached source archive shows it: "grep -rn dangerouslySetInnerHTML src" returns nothing, and every "grep -rn innerHTML src" hit is in a test file - the vitest DOM reset and the unit tests, none of which ship in an artifact. The content scripts render through Preact components only.
-
-KEY_FIREFOX_UNSUPPORTED_BY_MIN_VERSION and KEY_FIREFOX_ANDROID_UNSUPPORTED_BY_MIN_VERSION - strict_min_version is 130.0 (the device key needs Ed25519 in WebCrypto), below the 140/142 that introduced data_collection_permissions. Firefox 130 to 139 get the extension's own data-collection disclosure on install instead of Mozilla's prompt.
+2 x "Manifest key not supported by the specified minimum version" - strict_min_version is 130.0 (the device key needs Ed25519 in WebCrypto), below the 140/142 that introduced data_collection_permissions. Firefox 130 to 139 get the extension's own data-collection disclosure on install instead.
 ```
 
-## Test Instructions
+## Test Instructions (CWS, 500 characters)
 
 ```text
-No account is needed for the core features. Install the extension and open any supported page (youtube.com, reddit.com, github.com, gitlab.com, x.com, threads.com, facebook.com, instagram.com, amazon.com, rottentomatoes.com, themoviedb.org, imdb.com, metacritic.com, opencritic.com): the reaction button appears next to the site's own controls and shows the public counts. github.com/torvalds/linux is a reliable page to check without signing in.
+No account is needed to see the reaction button and counts: open a supported page such as github.com/torvalds/linux or any YouTube video.
 
-To test reacting: open the extension popup, choose Sign in, tick both boxes and pick a provider (Google, Apple or Microsoft); sign in with a personal account on the provider's own page in the window that opens.
+To test reacting: open the popup, choose Sign in, tick both boxes and pick Google, Apple or Microsoft; sign in with a personal account in the window that opens.
 
-"Auto-press original buttons" is off by default. Turning it on in the popup makes the emoji you pick also press the site's own control on the page you are looking at, under your own account; removing the reaction releases only what the extension pressed.
+"Auto-press original buttons" is off by default; when on, the picked emoji also presses the site's own button under the user's account.
+```
+
+## Message to moderators (Opera)
+
+```text
+Emojery adds an emoji reaction control next to the native Like, Star and vote buttons on 14 explicitly listed sites and shows the public reaction count for the item. The package is the same Chromium MV3 build submitted to the Chrome Web Store and Edge Add-ons.
+
+BUILD INSTRUCTIONS
+
+The JavaScript is bundled by WXT (Vite); the attached source archive is the input. Environment: Node.js 24 or newer; pnpm is pinned by the packageManager field in package.json and corepack provisions that exact version. From the unzipped source archive:
+
+corepack enable
+pnpm install --frozen-lockfile
+pnpm run zip:production:chrome
+
+This emits .output/chrome-mv3/ (the unpacked extension) and .output/emojery-v<version>-chrome-mv3.zip; compare .output/chrome-mv3/ with the submitted package. The source is also public: https://github.com/khasky/emojery (tag v<version>).
+
+PERMISSIONS
+
+Site access is limited to the listed sites - no <all_urls>. Two further hosts belong to the extension itself: emojery.app for the sign-in hand-off and an installed-version marker, and api.emojery.app, the backend that serves counts, accepts reactions and completes the provider sign-in. identity is used only for sign-in: it opens the provider's own login page in a browser window. No remote code is executed; the content security policy is script-src 'self'.
+
+HOW TO TEST
+
+No account is needed to see the reaction button and the counts. Open any supported page (youtube.com, reddit.com, github.com, gitlab.com, x.com, threads.com, facebook.com, instagram.com, amazon.com, rottentomatoes.com, themoviedb.org, imdb.com, metacritic.com, opencritic.com); github.com/torvalds/linux is a reliable page to check.
+
+To test reacting: open the popup, choose Sign in, tick both boxes and pick a provider (Google, Apple or Microsoft); sign in with a personal account on the provider's own page in the window that opens.
+
+"Auto-press original buttons" is off by default. With it on, the emoji the user picks also presses the site's own control, on the page they are looking at and under their own account; removing the reaction releases only what the extension pressed.
+```
+
+## Opera listing fields
+
+```text
+Extension source code URL (public):          https://github.com/khasky/emojery
+Extension source code URL (for moderators):  https://github.com/khasky/emojery/tree/v<version>
+License URL:                                 https://github.com/khasky/emojery/blob/v<version>/LICENSE
+Privacy policy URL:                          https://emojery.app/privacy
+```
+
+## Build instructions (Opera)
+
+```text
+1. OS: Ubuntu (the release builds run on GitHub Actions ubuntu-latest); Windows 10 also builds it.
+2. Tools: Node.js 24 (24.15.0 tested; .nvmrc says 24). pnpm 11.22.0, pinned by the packageManager field in package.json and provisioned by corepack, which ships with Node.js. No other global tools.
+3. From the unzipped source archive (or a checkout of the tag v<version> of https://github.com/khasky/emojery):
+
+corepack enable
+pnpm install --frozen-lockfile
+pnpm run zip:production:chrome
+
+The unpacked extension is .output/chrome-mv3/ and the package is .output/emojery-v<version>-chrome-mv3.zip; compare .output/chrome-mv3/ with the submitted package.
 ```
 
 ## Category and tags
